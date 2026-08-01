@@ -33,12 +33,12 @@ const EXTENSION_MAP = {
   '.z64': 'n64',
   '.v64': 'n64',
   '.nds': 'nds',
-  '.md': 'genesis',
   '.gen': 'genesis',
   '.iso': 'ps1',
   '.cue': 'ps1',
   '.chd': 'ps1'
 };
+
 
 function cleanStringForMatching(str) {
   return str.toLowerCase()
@@ -160,7 +160,8 @@ function multiConsoleScannerPlugin() {
               scanDirectory(fullPath, currentSubdir);
             } else if (entry.isFile()) {
               const ext = path.extname(entry.name).toLowerCase();
-              const validExts = ['.nes', '.snes', '.smc', '.sfc', '.gba', '.gbc', '.gb', '.n64', '.z64', '.v64', '.nds', '.md', '.gen', '.zip', '.iso', '.cue', '.chd', '.bin'];
+              const validExts = ['.nes', '.snes', '.smc', '.sfc', '.gba', '.gbc', '.gb', '.n64', '.z64', '.v64', '.nds', '.gen', '.zip', '.iso', '.cue', '.chd', '.bin'];
+
               
               if (validExts.includes(ext)) {
                 const nameWithoutExt = path.parse(entry.name).name;
