@@ -1,0 +1,73 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Local build outputs
+dist/
+dist-ssr/
+build/
+*.local
+
+# Environment variables
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Editor / OS files
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Game ROMs, BIOS files, and Save states (Legal & Copyright protection)
+roms/
+**/roms/
+*.zip
+*.7z
+*.rar
+*.iso
+*.bin
+*.nds
+*.gba
+*.gbc
+*.gb
+*.nes
+*.sfc
+*.smc
+*.z64
+*.n64
+*.gcm
+*.rvz
+*.cue
+*.sav
+*.srm
+*.cht
+
+# Game Cover Art and copyrighted media
+cover/
+covers/
+**/cover/
+**/covers/
+public/assets/cover/
+public/cover/
+
+
