@@ -2,9 +2,12 @@
 
 A modern, high-performance web-based retro game launcher and emulator library for classic retro console games. Built with React, Vite, and EmulatorJS, it features an intuitive console UI inspired by modern gaming handhelds with full Gamepad navigation support.
 
+![Retro Player Interface](home.webp)
+
 ---
 
 ## ✨ Features
+
 
 - 🕹️ **Multi-System Emulator Support**:
   - Game Boy (GB)
@@ -72,13 +75,14 @@ retro-player/
 
 ## 📐 System Architecture Documentation (`/architecture`)
 
-The project includes an organized [architecture/](file:///Users/godarayudhvir/Projects/retro-player/architecture/README.md) specifications folder structured by domain scope:
+The project includes an organized [architecture/](architecture/README.md) specifications folder structured by domain scope:
 
-- **[Guidelines & Standards](file:///Users/godarayudhvir/Projects/retro-player/architecture/README.md)**: Rules for writing specs, sub-directory constraints, and feature proposal templates.
-- **[Core Specifications](file:///Users/godarayudhvir/Projects/retro-player/architecture/core/index.md)**: Entry point ([index.md](file:///Users/godarayudhvir/Projects/retro-player/architecture/core/index.md)) and application shell ([app.md](file:///Users/godarayudhvir/Projects/retro-player/architecture/core/app.md)).
-- **[Functional Modules](file:///Users/godarayudhvir/Projects/retro-player/architecture/modules/emulator.md)**: Emulator engine ([emulator.md](file:///Users/godarayudhvir/Projects/retro-player/architecture/modules/emulator.md)), console switcher ([console-switcher.md](file:///Users/godarayudhvir/Projects/retro-player/architecture/modules/console-switcher.md)), game catalog scanner ([game-catalog.md](file:///Users/godarayudhvir/Projects/retro-player/architecture/modules/game-catalog.md)), and gamepad navigation ([gamepad-controls.md](file:///Users/godarayudhvir/Projects/retro-player/architecture/modules/gamepad-controls.md)).
-- **[UI Components](file:///Users/godarayudhvir/Projects/retro-player/architecture/components/emulator-modal.md)**: Modal HUD ([emulator-modal.md](file:///Users/godarayudhvir/Projects/retro-player/architecture/components/emulator-modal.md)), error boundary ([error-boundary.md](file:///Users/godarayudhvir/Projects/retro-player/architecture/components/error-boundary.md)), retro CSS effects ([retro-effects.md](file:///Users/godarayudhvir/Projects/retro-player/architecture/components/retro-effects.md)), and game cards ([game-card.md](file:///Users/godarayudhvir/Projects/retro-player/architecture/components/game-card.md)).
-- **[Mirai Future Features](file:///Users/godarayudhvir/Projects/retro-player/architecture/mirai/multiplayer.md)**: Upcoming specifications for WebRTC P2P Multiplayer ([multiplayer.md](file:///Users/godarayudhvir/Projects/retro-player/architecture/mirai/multiplayer.md)) and Cloud Save Sync ([cloud-saves.md](file:///Users/godarayudhvir/Projects/retro-player/architecture/mirai/cloud-saves.md)).
+- **[Guidelines & Standards](architecture/README.md)**: Rules for writing specs, sub-directory constraints, and feature proposal templates.
+- **[Core Specifications](architecture/core/index.md)**: Entry point ([index.md](architecture/core/index.md)) and application shell ([app.md](architecture/core/app.md)).
+- **[Functional Modules](architecture/modules/emulator.md)**: Emulator engine ([emulator.md](architecture/modules/emulator.md)), console switcher ([console-switcher.md](architecture/modules/console-switcher.md)), game catalog scanner ([game-catalog.md](architecture/modules/game-catalog.md)), and gamepad navigation ([gamepad-controls.md](architecture/modules/gamepad-controls.md)).
+- **[UI Components](architecture/components/emulator-modal.md)**: Modal HUD ([emulator-modal.md](architecture/components/emulator-modal.md)), error boundary ([error-boundary.md](architecture/components/error-boundary.md)), retro CSS effects ([retro-effects.md](architecture/components/retro-effects.md)), and game cards ([game-card.md](architecture/components/game-card.md)).
+- **[Mirai Future Features](architecture/mirai/multiplayer.md)**: Upcoming specifications for WebRTC P2P Multiplayer ([multiplayer.md](architecture/mirai/multiplayer.md)) and Cloud Save Sync ([cloud-saves.md](architecture/mirai/cloud-saves.md)).
+
 
 ---
 
