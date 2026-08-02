@@ -38,8 +38,87 @@ export default function App() {
   const [focusedTarget, setFocusedTarget] = useState({ zone: 'grid', index: 0 });
   const [gamepadConnected, setGamepadConnected] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [time, setTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   const searchInputRef = useRef(null);
+  const customRomInputRef = useRef(null);
+
+  const detectSystemFromExtension = (filename) => {
+    const ext = filename.split('.').pop()?.toLowerCase() || '';
+    switch (ext) {
+      case 'gba': return { key: 'gba', core: 'gba', name: 'Game Boy Advance' };
+      case 'nes': return { key: 'nes', core: 'nes', name: 'Nintendo Entertainment System' };
+      case 'sfc':
+      case 'smc': return { key: 'snes', core: 'snes', name: 'Super Nintendo' };
+      case 'z64':
+      case 'n64':
+      case 'v64': return { key: 'n64', core: 'n64', name: 'Nintendo 64' };
+      case 'nds': return { key: 'nds', core: 'nds', name: 'Nintendo DS' };
+      case 'bin':
+      case 'cue':
+      case 'chd':
+      case 'iso': return { key: 'ps1', core: 'ps1', name: 'PlayStation' };
+      case 'zip': return { key: 'arcade', core: 'mame2003_plus', name: 'Arcade' };
+      case 'md':
+      case 'smd':
+      case 'gen': return { key: 'sega', core: 'segaMD', name: 'Sega Genesis' };
+      default: return { key: 'gba', core: 'gba', name: 'Custom System' };
+    }
+  };
+
+  const processCustomRomFile = (file) => {
+    if (!file) return;
+    console.log(`📁 [CUSTOM ROM LOADED] File: "${file.name}" | Size: ${(file.size / (1024 * 1024)).toFixed(2)} MB`);
+    const sys = detectSystemFromExtension(file.name);
+    const blobUrl = URL.createObjectURL(file);
+    const cleanTitle = file.name.replace(/\.[^/.]+$/, "");
+
+    const customGame = {
+      id: `custom_${Date.now()}_${cleanTitle.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+      title: `${cleanTitle} (Custom)`,
+      rawTitle: cleanTitle,
+      systemKey: sys.key,
+      systemName: sys.name,
+      systemCore: sys.core,
+      romUrl: blobUrl,
+      isCustomBlob: true,
+      coverUrl: '/assets/pokeball.png'
+    };
+
+    setActiveGame(customGame);
+  };
+
+  const handleCustomRomSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processCustomRomFile(file);
+    }
+    e.target.value = '';
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDraggingOver) setIsDraggingOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.currentTarget.contains(e.relatedTarget)) return;
+    setIsDraggingOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      processCustomRomFile(file);
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -578,7 +657,21 @@ export default function App() {
   const selectedSystemInfo = systems.find(s => s.key === activeSystem);
 
   return (
-    <div className="console-container">
+    <div 
+      className={`console-container ${isDraggingOver ? 'drag-over-active' : ''}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {isDraggingOver && (
+        <div className="drag-drop-overlay">
+          <div className="drag-drop-card">
+            <FolderOpen size={64} className="drag-drop-icon" />
+            <h2>DROP CUSTOM ROM TO PLAY</h2>
+            <p>Supports .GBA, .NES, .SMC, .Z64, .NDS, .ISO, .ZIP and more</p>
+          </div>
+        </div>
+      )}
       {/* Console Top Status Bar */}
       <header className="console-topbar">
         <div className="topbar-left">
@@ -650,6 +743,33 @@ export default function App() {
               {typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent || navigator.platform) ? '⌘K' : 'Ctrl+K'}
             </kbd>
           </div>
+
+          <button
+            className={`status-pill info-btn ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'loadRom' ? 'gamepad-focused' : ''}`}
+            onClick={() => customRomInputRef.current && customRomInputRef.current.click()}
+            title="Browse & Launch Custom ROM file"
+            style={{
+              cursor: 'pointer',
+              border: '2px solid #3b82f6',
+              background: 'rgba(59, 130, 246, 0.15)',
+              color: '#60a5fa',
+              fontFamily: 'inherit',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem'
+            }}
+          >
+            <FolderOpen size={16} color="#60a5fa" />
+            <span>LOAD ROM</span>
+          </button>
+          <input
+            ref={customRomInputRef}
+            type="file"
+            accept=".gba,.nes,.sfc,.smc,.z64,.n64,.nds,.bin,.cue,.chd,.iso,.zip,.md,.smd,.gen"
+            onChange={handleCustomRomSelect}
+            style={{ display: 'none' }}
+          />
 
           <button
             className={`status-pill info-btn ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'info' ? 'gamepad-focused' : ''}`}

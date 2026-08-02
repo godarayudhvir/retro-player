@@ -12,8 +12,12 @@ export default function EmulatorModal({ game, onClose }) {
 
     let absoluteRomUrl;
     try {
-      absoluteRomUrl = new URL(game.romUrl, window.location.origin).href;
-      console.log(`🎮 [EMULATOR LAUNCHING] Game: "${game.title}" | System Core: ${game.systemCore} | Absolute ROM URL: ${absoluteRomUrl}`);
+      if (game.romUrl.startsWith('blob:') || game.romUrl.startsWith('data:') || game.romUrl.startsWith('http://') || game.romUrl.startsWith('https://')) {
+        absoluteRomUrl = game.romUrl;
+      } else {
+        absoluteRomUrl = new URL(game.romUrl, window.location.origin).href;
+      }
+      console.log(`🎮 [EMULATOR LAUNCHING] Game: "${game.title}" | System Core: ${game.systemCore} | ROM URL: ${absoluteRomUrl}`);
     } catch (e) {
       console.error(`🚨 [EMULATOR ERROR] Invalid ROM URL construction for game "${game.title}":`, game.romUrl, e);
     }
@@ -90,6 +94,12 @@ export default function EmulatorModal({ game, onClose }) {
 
     return () => {
       console.log(`🧹 [EMULATOR UNMOUNTING] Destroying emulator instance for "${game.title}"`);
+      if (game.isCustomBlob && game.romUrl && game.romUrl.startsWith('blob:')) {
+        try {
+          URL.revokeObjectURL(game.romUrl);
+          console.log(`🧹 [BLOB CLEANUP] Revoked Object URL for custom ROM "${game.title}"`);
+        } catch (e) {}
+      }
       if (iframeRef.current) {
         try {
           const win = iframeRef.current.contentWindow;

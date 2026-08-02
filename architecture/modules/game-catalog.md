@@ -7,6 +7,7 @@ The Game Catalog module indexes local ROM files, matches cover art assets, provi
 
 ## 2. Detailed List of What It Does
 - **ROM Directory Scanning**: Recursively scans `/public/roms` for valid extensions (`.nes`, `.snes`, `.smc`, `.gba`, `.gbc`, `.gb`, `.n64`, `.z64`, `.nds`, `.md`, `.iso`, `.chd`, `.bin`).
+- **Custom Local ROM Drag & Drop Parsing**: Parses custom ROM files selected via file input or dropped directly onto the window viewport. Auto-detects target system cores based on extension (`detectSystemFromExtension`) and constructs memory-backed game objects.
 - **Cover Artwork Matching**: Performs exact, parent folder, and fuzzy regex string matching against local artwork in `public/assets/cover` and `public/cover`.
 - **Game Metadata Lookup**: Provides helper functions (`getGameDescription`, `getReleaseDate`) from [gameDescriptions.js](file:///Users/godarayudhvir/Projects/retro-player/src/gameDescriptions.js) for overview details and sorting.
 

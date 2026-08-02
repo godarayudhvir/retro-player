@@ -6,7 +6,8 @@ The Main Application Shell ([App.jsx](file:///Users/godarayudhvir/Projects/retro
 ---
 
 ## 2. Detailed List of What It Does
-- **System Top Bar**: Displays active player avatar badge, user tag, dynamic clock, search input bar, gamepad connectivity status badge, and system switching controls with shoulder button prompts.
+- **System Top Bar**: Displays active player avatar badge, user tag, dynamic clock, search input bar, gamepad connectivity status badge, system switching controls with shoulder button prompts, and the **LOAD ROM** custom file launcher button.
+- **Drag & Drop Custom ROM Overlay**: Full viewport drop zone overlay allowing users to drag local ROM files directly into the browser to trigger instant game execution.
 - **Game Library Grid**: Renders responsive game cards dynamically filtered by search query and selected console tab.
 - **Game Details Drawer / Modal**: Shows expanded game metadata, release date badge, game description from `gameDescriptions.js`, save data status (`IndexedDB` / `LocalStorage`), and launch button.
 - **Global Input Event Hooks**: Registers keyboard (`Arrow` keys, `WASD`, `Enter`, `Escape`, `Q`, `E`) and Gamepad API polling loops for D-Pad / Stick navigation across the library UI.

@@ -32,7 +32,10 @@ A modern, high-performance web-based retro game launcher and emulator library fo
   - Quick-launch games with `A` button or `Enter`.
 - 📊 **Dynamic Console Sorting**:
   - Topbar navigation ribbon automatically sorts console systems by total game count (most titles first).
-- 🚀 **Zero-Config ROM Drop-in**:
+- 🚀 **Zero-Config ROM Drop-in & Drag-and-Drop**:
+  - Drag and drop custom ROM files anywhere onto the dashboard to play immediately.
+  - Interactive "LOAD ROM" file picker to select local custom ROMs from your device (`.gba`, `.nes`, `.smc`/`.sfc`, `.z64`/`.n64`, `.nds`, `.bin`/`.chd`/`.iso`, `.zip`, `.md`/`.gen`).
+  - Automatic console system core detection based on file extension with automatic Object URL memory cleanup on unmount.
   - Automatically indexes ROMs placed in designated platform folders without requiring manual metadata entry.
 - 📚 **Comprehensive System Architecture Specs**:
   - Complete architecture specifications under `architecture/` detailing core bootstrap, modules, components, and future feature designs ("Mirai").
