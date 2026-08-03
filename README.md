@@ -37,6 +37,8 @@ A modern, high-performance web-based retro game launcher and emulator library fo
   - Interactive "LOAD ROM" file picker to select local custom ROMs from your device (`.gba`, `.nes`, `.smc`/`.sfc`, `.z64`/`.n64`, `.nds`, `.bin`/`.chd`/`.iso`, `.zip`, `.md`/`.gen`).
   - Automatic console system core detection based on file extension with automatic Object URL memory cleanup on unmount.
   - Automatically indexes ROMs placed in designated platform folders without requiring manual metadata entry.
+- 📋 **Roadmap & Future Deliverables**:
+  - Track upcoming features including RetroAchievements, in-game gamepad support, save import/export, Discord Rich Presence, and metadata scrapers in [ROADMAP.md](ROADMAP.md).
 - 📚 **Comprehensive System Architecture Specs**:
   - Complete architecture specifications under `architecture/` detailing core bootstrap, modules, components, and future feature designs ("Mirai").
 

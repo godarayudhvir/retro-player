@@ -74,6 +74,12 @@ Every feature proposal inside `/architecture/mirai/` must include four mandatory
 
 ---
 
+## 📌 Deliverables Roadmap
+
+For tracking planned deliverables (RetroAchievements, In-Game Gamepad, Saves Import/Export, Discord Rich Presence, and Metadata Scrapers), refer to [ROADMAP.md](../ROADMAP.md).
+
+---
+
 ## Writing Rules & Constraints
 
 - **Directory Organization Rule**: All new architecture docs must be placed inside the appropriate subdirectory (`core/`, `modules/`, `components/`, or `mirai/`). Do not create loose documentation files in the `architecture/` root.
