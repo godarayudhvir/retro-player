@@ -344,6 +344,25 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
               opacity: 0 !important;
               pointer-events: none !important;
             }
+
+            /* Hide save state, load state, and external save import/export buttons from footer overlay */
+            .ejs_menu_bar [title*="Save State"],
+            .ejs_menu_bar [title*="Load State"],
+            .ejs_menu_bar [title*="Save file"],
+            .ejs_menu_bar [title*="Load file"],
+            .ejs_menu_bar [title*="Export"],
+            .ejs_menu_bar [title*="Import"],
+            .ejs_menu_bar [aria-label*="Save"],
+            .ejs_menu_bar [aria-label*="Load"],
+            .ejs_menu_bar svg[title*="Save"],
+            .ejs_menu_bar svg[title*="Load"] {
+              display: none !important;
+              visibility: hidden !important;
+              pointer-events: none !important;
+              width: 0 !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
           </style>
         </head>
         <body>
@@ -383,11 +402,25 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
             window.EJS_backgroundColor = '#000000';
             window.EJS_language = 'en-US';
             window.EJS_VirtualGamepad = ${isMobileTouch ? 'true' : 'false'};
-            window.EJS_volume = 1;
-            window.EJS_mute = false;
-            window.EJS_disableDatabases = false;
-            window.EJS_disableLocalStorage = false;
-            window.EJS_exportSaveState = false; // Keep save states directly in browser memory/IndexedDB slot instead of forced file downloads
+            window.EJS_Buttons = {
+              playPause: true,
+              restart: true,
+              mute: true,
+              settings: true,
+              fullscreen: true,
+              saveState: false,
+              loadState: false,
+              saveSav: false,
+              loadSav: false,
+              screenRecord: false,
+              gamepad: true,
+              cheat: true,
+              volume: true,
+              quickSave: false,
+              quickLoad: false,
+              screenshot: true,
+              cacheManager: false
+            };
 
             const isTabletOrAbove = (window.innerWidth >= 768) || (window.parent && window.parent.innerWidth >= 768);
             window.EJS_defaultOptions = {
@@ -668,49 +701,6 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
                 if (el) el.focus();
                 syncAllGamepads();
                 autoBindGamepadsToPlayers();
-
-                // Direct binding: ensure footer toolbar Save/Load state buttons invoke internal quickSave / quickLoad
-                const emu = window.EJS_emulator;
-                if (emu) {
-                  const attachFooterSaveStateHandlers = () => {
-                    const saveBtn = document.querySelector('.ejs_menu_bar [title*="Save State"]') || 
-                                    document.querySelector('.ejs_menu_bar svg[title*="Save"]') ||
-                                    document.querySelector('.ejs_menu_bar [aria-label*="Save"]');
-                    const loadBtn = document.querySelector('.ejs_menu_bar [title*="Load State"]') || 
-                                    document.querySelector('.ejs_menu_bar svg[title*="Load"]') ||
-                                    document.querySelector('.ejs_menu_bar [aria-label*="Load"]');
-                    
-                    if (saveBtn && !saveBtn._customHooked) {
-                      saveBtn._customHooked = true;
-                      saveBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        console.log('💾 [FOOTER OVERLAY] Save State triggered -> Executing internal quickSave()');
-                        if (typeof emu.quickSave === 'function') {
-                          emu.quickSave();
-                        } else if (typeof emu.saveState === 'function') {
-                          emu.saveState();
-                        }
-                      }, true);
-                    }
-
-                    if (loadBtn && !loadBtn._customHooked) {
-                      loadBtn._customHooked = true;
-                      loadBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        console.log('📂 [FOOTER OVERLAY] Load State triggered -> Executing internal quickLoad()');
-                        if (typeof emu.quickLoad === 'function') {
-                          emu.quickLoad();
-                        } else if (typeof emu.loadState === 'function') {
-                          emu.loadState();
-                        }
-                      }, true);
-                    }
-                  };
-                  setTimeout(attachFooterSaveStateHandlers, 500);
-                  setTimeout(attachFooterSaveStateHandlers, 1500);
-                }
               } catch(e) {}
             };
 
