@@ -40,13 +40,6 @@ const EXTENSION_MAP = {
 };
 
 
-function cleanStringForMatching(str) {
-  return str.toLowerCase()
-    .replace(/\(.*?\)/g, '')
-    .replace(/\[.*?\]/g, '')
-    .replace(/[^a-z0-9]/g, '');
-}
-
 function multiConsoleScannerPlugin() {
   return {
     name: 'multi-console-scanner-plugin',
@@ -72,74 +65,10 @@ function multiConsoleScannerPlugin() {
         next();
       });
 
-      // Direct image file handler for /assets/cover/ files
-      server.middlewares.use('/assets/cover', (req, res, next) => {
-        try {
-          const relativePath = decodeURIComponent(req.url.split('?')[0]);
-          const fullCoverPath = path.join(process.cwd(), 'public/assets/cover', relativePath);
-
-          if (fs.existsSync(fullCoverPath) && fs.statSync(fullCoverPath).isFile()) {
-            const ext = path.extname(fullCoverPath).toLowerCase();
-            const mimeTypes = {
-              '.png': 'image/png',
-              '.jpg': 'image/jpeg',
-              '.jpeg': 'image/jpeg',
-              '.webp': 'image/webp',
-              '.svg': 'image/svg+xml'
-            };
-            res.setHeader('Content-Type', mimeTypes[ext] || 'image/png');
-            res.setHeader('Access-Control-Allow-Origin', '*');
-            const stream = fs.createReadStream(fullCoverPath);
-            stream.pipe(res);
-            return;
-          } else {
-            console.warn(`[COVER SERVER WARN] Cover image not found at path: ${fullCoverPath}`);
-          }
-        } catch (e) {
-          console.error('[COVER SERVER ERROR] Failed serving Cover:', e);
-        }
-        next();
-      });
-
-      // Direct image file handler for /cover/ files
-      server.middlewares.use('/cover', (req, res, next) => {
-        try {
-          const relativePath = decodeURIComponent(req.url.split('?')[0]);
-          const fullCoverPath = path.join(process.cwd(), 'public/cover', relativePath);
-
-          if (fs.existsSync(fullCoverPath) && fs.statSync(fullCoverPath).isFile()) {
-            const ext = path.extname(fullCoverPath).toLowerCase();
-            const mimeTypes = {
-              '.png': 'image/png',
-              '.jpg': 'image/jpeg',
-              '.jpeg': 'image/jpeg',
-              '.webp': 'image/webp',
-              '.svg': 'image/svg+xml'
-            };
-            res.setHeader('Content-Type', mimeTypes[ext] || 'image/png');
-            res.setHeader('Access-Control-Allow-Origin', '*');
-            const stream = fs.createReadStream(fullCoverPath);
-            stream.pipe(res);
-            return;
-          } else {
-            console.warn(`[COVER SERVER WARN] Cover image not found at path: ${fullCoverPath}`);
-          }
-        } catch (e) {
-          console.error('[COVER SERVER ERROR] Failed serving Cover:', e);
-        }
-        next();
-      });
-
       // API Endpoint for ROM list
       server.middlewares.use('/api/roms', (req, res) => {
         console.log('[API SCANNER] Running full directory scan on /public/roms...');
         const romsBaseDir = path.resolve(process.cwd(), 'public/roms');
-        
-        const coverBaseDirs = [
-          path.resolve(process.cwd(), 'public/assets/cover'),
-          path.resolve(process.cwd(), 'public/cover')
-        ];
-
         const games = [];
 
         function scanDirectory(dirPath, systemSubdir = '') {
@@ -162,7 +91,6 @@ function multiConsoleScannerPlugin() {
               const ext = path.extname(entry.name).toLowerCase();
               const validExts = ['.nes', '.snes', '.smc', '.sfc', '.gba', '.gbc', '.gb', '.n64', '.z64', '.v64', '.nds', '.gen', '.zip', '.iso', '.cue', '.chd', '.bin'];
 
-              
               if (validExts.includes(ext)) {
                 const nameWithoutExt = path.parse(entry.name).name;
                 
@@ -176,55 +104,6 @@ function multiConsoleScannerPlugin() {
 
                 const pathSegments = currentSubdir.split('/').map(segment => encodeURIComponent(segment));
                 const romUrl = `/roms/${pathSegments.join('/')}`;
-
-                let matchedCoverUrl = null;
-
-                const romClean = cleanStringForMatching(nameWithoutExt);
-                const parentClean = cleanStringForMatching(parentFolderKey);
-
-                // Fuzzy match local cover images
-                for (const coverBaseDir of coverBaseDirs) {
-                  if (matchedCoverUrl) break;
-
-                  const potentialCoverDirs = [
-                    path.join(coverBaseDir, systemSubdir),
-                    path.join(coverBaseDir, topFolderKey, parentFolderKey),
-                    path.join(coverBaseDir, topFolderKey),
-                    coverBaseDir
-                  ];
-
-                  for (const cDir of potentialCoverDirs) {
-                    if (fs.existsSync(cDir)) {
-                      const coverFiles = fs.readdirSync(cDir).filter(f => !f.startsWith('.') && /\.(png|jpg|jpeg|webp|gif|svg)$/i.test(f));
-                      
-                      // Find exact match first, then parent match, then partial match
-                      const exactFound = coverFiles.find(c => cleanStringForMatching(path.parse(c).name) === romClean);
-                      const parentFound = !exactFound && parentClean ? coverFiles.find(c => cleanStringForMatching(path.parse(c).name) === parentClean) : null;
-                      const partialFound = !exactFound && !parentFound ? coverFiles.find(c => {
-                        const coverClean = cleanStringForMatching(path.parse(c).name);
-                        return (romClean.length > 4 && coverClean.includes(romClean)) ||
-                               (romClean.length > 4 && romClean.includes(coverClean));
-                      }) : null;
-
-                      const found = exactFound || parentFound || partialFound;
-
-                      if (found) {
-                        const isAssetsCover = coverBaseDir.includes('assets');
-                        const prefix = isAssetsCover ? '/assets/cover/' : '/cover/';
-                        const relCoverDir = path.relative(coverBaseDir, path.join(cDir, found));
-                        const relCoverSegments = relCoverDir.split('/').map(segment => encodeURIComponent(segment));
-                        matchedCoverUrl = `${prefix}${relCoverSegments.join('/')}`;
-                        break;
-                      }
-                    }
-                  }
-                }
-
-                if (!matchedCoverUrl) {
-                  console.warn(`[COVER MATCH MISS] No local cover artwork found for game: "${entry.name}" (System: ${systemKey})`);
-                } else {
-                  console.log(`[COVER MATCH SUCCESS] Game "${entry.name}" -> ${matchedCoverUrl}`);
-                }
 
                 const rawTitle = (nameWithoutExt.toLowerCase() === 'game' || nameWithoutExt.toLowerCase() === 'rom') && parentFolderKey
                   ? parentFolderKey
@@ -244,7 +123,7 @@ function multiConsoleScannerPlugin() {
                   systemIcon: systemInfo.icon,
                   category: systemInfo.category,
                   romUrl,
-                  coverUrl: matchedCoverUrl,
+                  coverUrl: null, // Scraped dynamically by metadataScraper service
                 });
               }
             }

@@ -1,16 +1,20 @@
-import React from 'react';
-import { X, Play, Save, Cpu, Calendar, CheckCircle2, Star, Clock, History, RotateCcw } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Play, Save, Cpu, Calendar, CheckCircle2, Star, Clock, History, RotateCcw, RefreshCw, Tag, ShieldCheck } from 'lucide-react';
 import { getGameDescription, getReleaseDate } from '../gameDescriptions';
 
 /**
- * Game Detail Drawer Modal presenting rich metadata, release dates, core tags, live save data status, playtime stats, and launch actions.
+ * Game Detail Drawer Modal presenting rich scraped metadata, release dates, developer, publisher, genre tags,
+ * live save data status, playtime stats, and on-demand online scraping actions.
  */
 export default function GameDetailModal({
   game,
+  metadata,
   hasSaveData,
   isFavorite = false,
   onToggleFavorite,
   onResetStats,
+  onScrapeGame,
+  isScraping = false,
   gameStats = { playtimeFormatted: '< 1 min', launchCount: 0, lastPlayedFormatted: 'Never' },
   gamepadConnected = false,
   focusedTarget,
@@ -19,6 +23,27 @@ export default function GameDetailModal({
   sfx
 }) {
   if (!game) return null;
+
+  const [imgError, setImgError] = useState(false);
+  const [isLocalScraping, setIsLocalScraping] = useState(false);
+
+  const meta = metadata || {};
+  const coverSrc = meta.coverUrl || (game.coverUrl && !game.coverUrl.endsWith('.svg') ? game.coverUrl : null);
+  const description = meta.description || getGameDescription(game);
+  const releaseYear = meta.releaseYear || meta.releaseDate?.split('-')[0] || (getReleaseDate(game) !== '2000-01-01' ? getReleaseDate(game).split('-')[0] : 'Classic');
+  const developer = meta.developer || game.systemName || 'Classic';
+  const publisher = meta.publisher || game.systemName || 'Classic';
+  const genre = meta.genre || 'Retro Classic';
+
+  const handleManualScrape = async () => {
+    if (onScrapeGame) {
+      setIsLocalScraping(true);
+      sfx?.playThemeSwitch?.();
+      await onScrapeGame(game, true);
+      setIsLocalScraping(false);
+      setImgError(false);
+    }
+  };
 
   return (
     <div className="info-modal-backdrop" onClick={onClose}>
@@ -33,18 +58,20 @@ export default function GameDetailModal({
 
         <div className="game-card-grid">
           <div className="game-card-cover-wrapper">
-            <img
-              src={game.coverUrl}
-              alt={game.title}
-              className="game-card-cover-img"
-              onError={(e) => {
-                e.target.style.display = 'none';
-                if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
-              }}
-            />
-            <div className="tile-fallback" style={{ display: 'none', width: '100%', height: '100%' }}>
-              <img src={game.systemIcon || "/assets/pokeball.png"} alt="" style={{ width: '60px', height: '60px' }} />
-            </div>
+            {coverSrc && !imgError ? (
+              <img
+                src={coverSrc}
+                alt={game.title}
+                className="game-card-cover-img"
+                onError={() => setImgError(true)}
+              />
+            ) : (
+              <div className="tile-fallback" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', padding: '1.5rem', textAlign: 'center', background: 'var(--panel-bg, #f8fafc)' }}>
+                <span className="fallback-console-pill" style={{ marginBottom: '0.75rem', fontSize: '0.8rem' }}>{game.systemName}</span>
+                <span className="fallback-game-title" style={{ fontSize: '1rem', color: 'var(--text-main, #1e293b)' }}>{game.title}</span>
+              </div>
+            )}
+
             {isFavorite && (
               <div className="drawer-favorite-badge" title="Favorited Game">
                 <Star size={16} fill="#fbbf24" color="#d97706" />
@@ -62,15 +89,38 @@ export default function GameDetailModal({
                 <span>{game.systemName}</span>
               </span>
               <span className="game-card-core-tag">
-                <Calendar size={14} /> {getReleaseDate(game)}
+                <Calendar size={14} /> {releaseYear}
               </span>
               <span className="game-card-core-tag">
                 <Cpu size={14} /> {game.systemCore?.toUpperCase() || 'EMULATORJS'}
               </span>
+              {meta.source && (
+                <span className="game-card-core-tag scraper-verified-tag" title={`Enriched via ${meta.source}`}>
+                  <ShieldCheck size={14} color="#10b981" /> {meta.source}
+                </span>
+              )}
             </div>
 
             <h2 className="game-card-title">{game.title}</h2>
-            <p className="game-card-description">{getGameDescription(game)}</p>
+
+            {/* Extra Metadata Row */}
+            <div className="game-card-meta-row">
+              <span className="meta-pill">
+                <Tag size={12} /> {genre}
+              </span>
+              {developer && (
+                <span className="meta-pill">
+                  <strong>Dev:</strong> {developer}
+                </span>
+              )}
+              {publisher && publisher !== developer && (
+                <span className="meta-pill">
+                  <strong>Pub:</strong> {publisher}
+                </span>
+              )}
+            </div>
+
+            <p className="game-card-description">{description}</p>
 
             {/* Playtime & Session Analytics Card */}
             <div className="game-card-stats-grid">
@@ -157,6 +207,17 @@ export default function GameDetailModal({
                 <kbd className="lr-badge" style={{ marginLeft: 'auto', fontSize: '0.7rem' }}>
                   {gamepadConnected ? 'X' : 'F'}
                 </kbd>
+              </button>
+
+              {/* Scrape Online Metadata Button */}
+              <button
+                className="scraper-refresh-btn"
+                onClick={handleManualScrape}
+                disabled={isLocalScraping || isScraping}
+                title="Re-scrape 3D Box Art & Online Overview"
+              >
+                <RefreshCw size={16} className={isLocalScraping ? 'spin' : ''} />
+                <span>{isLocalScraping ? 'SCRAPING...' : 'RE-SCRAPE ART'}</span>
               </button>
             </div>
           </div>

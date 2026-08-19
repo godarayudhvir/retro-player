@@ -33,7 +33,7 @@ export default function AboutInfoModal({ isOpen, focusedTarget, onClose }) {
             <ul>
               <li><strong>🕹️ Multi-System Emulation:</strong> GB, GBC, GBA, NES, SNES, N64, NDS, Genesis, PS1, & Arcade via EmulatorJS.</li>
               <li><strong>🔊 Synthesized Web Audio SFX:</strong> Zero-latency tactile UI navigation ticks, shoulder swooshes, and cartridge insertion audio.</li>
-              <li><strong>🖼️ Dynamic Cover Scanner:</strong> Auto-pairs ROMs in <code>public/roms/</code> with covers in <code>public/cover/</code>.</li>
+              <li><strong>🖼️ Automated Online Scraper:</strong> Dynamically scrapes authentic 3D box art & metadata without local files.</li>
               <li><strong>🎮 Handheld Gamepad Navigation:</strong> Full DPAD, thumbstick, and shoulder button cycling support.</li>
               <li><strong>📊 Dynamic System Ribbon:</strong> Consoles with the most games appear first automatically.</li>
               <li><strong>🚀 Zero-Config Setup:</strong> Drop ROMs in platform folders to instantly index games.</li>

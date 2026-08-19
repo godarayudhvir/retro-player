@@ -1,14 +1,18 @@
-import React from 'react';
-import { Star } from 'lucide-react';
+import React, { useState } from 'react';
+import { Star, Sparkles } from 'lucide-react';
 import { getCartridgeColor } from '../utils/cartridgeColors';
 
 /**
- * Individual 3D Physical Retro Cartridge Tile component with tactile sheen, grips, and brand stamps.
+ * Individual 3D Physical Retro Cartridge Tile component with tactile sheen, grips, dynamic scraped box art, and brand stamps.
  */
-export default function CartridgeTile({ game, index, isFocused, isFavorite, onClick }) {
+export default function CartridgeTile({ game, metadata, index, isFocused, isFavorite, onClick }) {
   if (!game) return null;
 
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
   const cartColor = getCartridgeColor(game);
+  const coverSrc = metadata?.coverUrl || (game.coverUrl && !game.coverUrl.endsWith('.svg') ? game.coverUrl : null);
 
   return (
     <div
@@ -21,7 +25,7 @@ export default function CartridgeTile({ game, index, isFocused, isFavorite, onCl
       <div className="cartridge-header">
         <div className="cartridge-grips left" />
         <div className="cartridge-recessed-pill">
-          <span className="cartridge-brand-text">{game.systemName || 'GAME BOY'}</span>
+          <span className="cartridge-brand-text">{game.systemName || 'RETRO'}</span>
         </div>
         <div className="cartridge-grips right" />
       </div>
@@ -35,26 +39,32 @@ export default function CartridgeTile({ game, index, isFocused, isFavorite, onCl
 
       {/* Recessed Sticker Label Area */}
       <div className="cartridge-sticker-area">
-        <img
-          src={game.coverUrl}
-          alt={game.title}
-          className="tile-img cartridge-label-img"
-          onError={(e) => {
-            console.warn(`⚠️ [COVER LOAD ERROR] Cover image failed to load for game "${game.title}":`, game.coverUrl);
-            e.target.style.display = 'none';
-            if (e.target.nextSibling) {
-              e.target.nextSibling.style.display = 'flex';
-            }
-          }}
-        />
+        {/* Shimmer Placeholder when loading cover image */}
+        {!imgLoaded && !imgError && coverSrc && (
+          <div className="cartridge-loading-shimmer">
+            <Sparkles size={16} className="shimmer-sparkle" />
+          </div>
+        )}
+
+        {coverSrc && !imgError ? (
+          <img
+            src={coverSrc}
+            alt={game.title}
+            className={`tile-img cartridge-label-img ${imgLoaded ? 'loaded' : 'loading'}`}
+            onLoad={() => setImgLoaded(true)}
+            onError={() => {
+              setImgError(true);
+              setImgLoaded(false);
+            }}
+          />
+        ) : (
+          <div className="tile-fallback-label">
+            <span className="fallback-console-pill">{game.systemName}</span>
+            <span className="fallback-game-title">{game.title}</span>
+          </div>
+        )}
+
         <div className="cartridge-label-sheen" />
-        <div className="tile-fallback" style={{ display: 'none' }}>
-          {game.systemIcon ? (
-            <img src={game.systemIcon} alt="" className="fallback-sys-icon" />
-          ) : (
-            <img src="/assets/pokeball.png" alt="" style={{ width: '40px', height: '40px', opacity: 0.7 }} />
-          )}
-        </div>
       </div>
 
       {/* Bottom Cartridge Notch Arrow */}

@@ -7,6 +7,7 @@ import CartridgeTile from './CartridgeTile';
  */
 export default function CartridgeGrid({
   filteredGames,
+  metadataMap = {},
   focusedTarget,
   setFocusedTarget,
   handleGameSelect,
@@ -22,10 +23,13 @@ export default function CartridgeGrid({
           {filteredGames.map((game, index) => {
             const isFocused = focusedTarget.zone === 'grid' && focusedTarget.index === index;
             const isFav = isFavorite ? isFavorite(game.id || game.title) : false;
+            const meta = metadataMap[game.id] || metadataMap[`${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')];
+
             return (
               <CartridgeTile
                 key={game.id}
                 game={game}
+                metadata={meta}
                 index={index}
                 isFocused={isFocused}
                 isFavorite={isFav}
@@ -44,7 +48,7 @@ export default function CartridgeGrid({
           <p>
             Drop your ROM files into <span className="code-block">public/roms/[system]</span>
             <br />
-            Add custom channel artwork into <span className="code-block">public/assets/cover/[system]</span>
+            Online scraper will automatically fetch authentic 3D box art & metadata!
           </p>
           <button
             className={`system-tab active ${focusedTarget.zone === 'grid' ? 'gamepad-focused' : ''}`}

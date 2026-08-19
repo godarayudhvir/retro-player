@@ -27,7 +27,7 @@ Retro Player bridges the tactile nostalgia of 90s/2000s physical gaming cartridg
 - [x] **Comprehensive Playtime Analytics & Stats**: Persistent tracking of total hours/minutes played, launch session counts, and formatted last played dates stored in `localStorage` (Section 2.3).
 - [x] **Multi-Theme Engine**: 4 distinct switchable UI themes (iiSU Light, Midnight Cyber Dark, Sony XMB Wave, Game Boy DMG Classic) with instant persistence, topbar selector, and keyboard shortcut (`T`) (Section 4.3).
 - [x] **Touch Screen Gamepad Overlay & Mobile Responsiveness**: Elevated on-screen D-Pad and action buttons with glassmorphic styling, dynamic `100dvh` viewport containment, in-game topbar RetroArch Menu integration, and full touch responsiveness across phones, tablets, and TVs (Section 3.1).
-- [ ] **Automated Metadata & Cover Art Scraper**: Online fetching from ScreenScraper, IGDB, or OpenVGDB API for high-res 3D box art, screenshots, developer info, and gameplay previews (Section 2.1).
+- [x] **Automated Metadata & Cover Art Scraper**: Online scraping from Libretro Thumbnails CDN, Open DB & Wikipedia APIs for high-res 3D box art, screenshots, developer, publisher, genre, and synopsis with persistent IndexedDB caching (Section 2.1).
 - [ ] **Ambient Menu BGM Jukebox**: Curated ambient console background music with auto-ducking on launch (Section 4.2).
 - [ ] **RetroAchievements (RA) Full Integration**: RetroAchievements API authentication, in-game badge unlock popups, hardcore points, and leaderboards (Section 5.1).
 - [ ] **WebRTC Peer-to-Peer Netplay**: Zero-server P2P multiplayer room creation, low-latency DataChannels, and input rollback (Section 5.2).
@@ -475,12 +475,12 @@ PHASE 1: Quick Wins & Refactoring (1 - 2 Weeks) [COMPLETED]
 ├── Add Web Audio API synthesized UI sound effects (DONE)
 └── Add Local Core Offline Fallback (/public/emulatorjs/data/) (DONE)
 
-PHASE 2: Library & Control Enhancements (2 - 4 Weeks) [IN PROGRESS]
+PHASE 2: Library & Control Enhancements (2 - 4 Weeks) [COMPLETED]
 ├── Implement Favorites, Recently Played & Custom Tag Collections (DONE)
 ├── Add Playtime Tracking Analytics & Stats Dashboard (DONE)
 ├── Add Multi-Theme Engine (Midnight Cyber, Sony XMB Wave, Game Boy DMG) (DONE)
-├── Implement Responsive Touch Screen Gamepad Overlay for Mobile/iPad
-└── Integrate Automated Online Metadata & Cover Art Scraper
+├── Implement Responsive Touch Screen Gamepad Overlay for Mobile/iPad (DONE)
+└── Integrate Automated Online Metadata & Cover Art Scraper (DONE)
 
 PHASE 3: Connected & Cloud Features (1 - 2 Months)
 ├── Full RetroAchievements (RA) API Integration with In-Game Badge Popups

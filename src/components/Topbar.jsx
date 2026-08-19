@@ -1,8 +1,9 @@
 import React from 'react';
-import { Search, FolderOpen, Wifi, Gamepad2, Volume2, VolumeX } from 'lucide-react';
+import { Search, FolderOpen, Wifi, Gamepad2, Volume2, VolumeX, Sparkles, RefreshCw } from 'lucide-react';
 
 /**
- * Topbar console header with status indicators, shoulder tabs, search input, custom ROM loader, and digital clock.
+ * Topbar console header with status indicators, shoulder tabs, search input, custom ROM loader,
+ * metadata scraper trigger, and digital clock.
  */
 export default function Topbar({
   gamepadConnected,
@@ -18,7 +19,8 @@ export default function Topbar({
   setShowVirtualKeyboard,
   time,
   sfx,
-  themeEngine
+  themeEngine,
+  scraper
 }) {
   const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent || navigator.platform);
 
@@ -75,6 +77,33 @@ export default function Topbar({
           <Wifi size={16} />
           <span className="pill-text">{gamepadConnected ? 'GAMEPAD READY' : 'NO CONTROLLER'}</span>
         </div>
+
+        {/* Metadata Scraper Status / Trigger */}
+        {scraper && (
+          <button
+            className={`status-pill status-scraper ${scraper.isScraping ? 'is-active-scraping' : ''}`}
+            onClick={() => {
+              scraper.scrapeAll(undefined, true);
+              sfx?.playThemeSwitch?.();
+            }}
+            title={scraper.isScraping 
+              ? `Scraping art... (${scraper.scrapeProgress.current}/${scraper.scrapeProgress.total})` 
+              : "Scrape Online Art & Metadata for Library"
+            }
+          >
+            {scraper.isScraping ? (
+              <>
+                <RefreshCw size={14} className="spin" color="#3b82f6" />
+                <span className="pill-text">{scraper.scrapeProgress.current}/{scraper.scrapeProgress.total}</span>
+              </>
+            ) : (
+              <>
+                <Sparkles size={14} color="#f59e0b" />
+                <span className="pill-text">SCRAPE ART</span>
+              </>
+            )}
+          </button>
+        )}
 
         {/* SFX Audio Mute/Unmute Toggle */}
         {sfx && (

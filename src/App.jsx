@@ -17,10 +17,11 @@ import { useRomManifest } from './hooks/useRomManifest';
 import { useGamepadNavigation } from './hooks/useGamepadNavigation';
 import { usePlaytimeAndFavorites } from './hooks/usePlaytimeAndFavorites';
 import { useThemeEngine } from './hooks/useThemeEngine';
+import { useMetadataScraper } from './hooks/useMetadataScraper';
 
 /**
  * Root Application Orchestrator for Retro Player.
- * Coordinates modular UI components, custom hooks, spatial navigation, audio synthesis, themes, and emulation.
+ * Coordinates modular UI components, custom hooks, spatial navigation, audio synthesis, themes, metadata scraper, and emulation.
  */
 export default function App() {
   const [activeGame, setActiveGame] = useState(null);
@@ -91,7 +92,10 @@ export default function App() {
     handleDrop
   } = useRomManifest(handleCustomRomLoaded, { favorites, recentlyPlayed });
 
-  // Hook 7: Unified Spatial Navigation Engine (Keyboard + Gamepad + Audio)
+  // Hook 7: Automated Online Metadata & Cover Art Scraper
+  const scraper = useMetadataScraper(games);
+
+  // Hook 8: Unified Spatial Navigation Engine (Keyboard + Gamepad + Audio)
   useGamepadNavigation({
     focusedTarget,
     setFocusedTarget,
@@ -163,6 +167,10 @@ export default function App() {
     }
   }, [focusedTarget]);
 
+  const selectedGameMetadata = selectedGameCard
+    ? (scraper.metadataMap[selectedGameCard.id] || scraper.metadataMap[`${selectedGameCard.systemKey}-${selectedGameCard.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')])
+    : null;
+
   return (
     <div 
       className={`console-container ${isDraggingOver ? 'drag-over-active' : ''}`}
@@ -190,6 +198,7 @@ export default function App() {
         time={time}
         sfx={sfx}
         themeEngine={themeEngine}
+        scraper={scraper}
       />
 
       {/* System Selection Ribbon */}
@@ -208,6 +217,7 @@ export default function App() {
       {/* 3D Cartridge Grid Viewport */}
       <CartridgeGrid
         filteredGames={filteredGames}
+        metadataMap={scraper.metadataMap}
         focusedTarget={focusedTarget}
         setFocusedTarget={setFocusedTarget}
         handleGameSelect={handleGameSelect}
@@ -249,10 +259,13 @@ export default function App() {
       {/* Game Detail Drawer Modal */}
       <GameDetailModal
         game={selectedGameCard}
+        metadata={selectedGameMetadata}
         hasSaveData={hasSaveData}
         isFavorite={isFavorite(selectedGameCard?.id || selectedGameCard?.title)}
         onToggleFavorite={toggleFavorite}
         onResetStats={resetGameStats}
+        onScrapeGame={scraper.scrapeSingleGame}
+        isScraping={scraper.isScraping}
         gameStats={getGameStats(selectedGameCard?.id || selectedGameCard?.title)}
         gamepadConnected={gamepadConnected}
         focusedTarget={focusedTarget}

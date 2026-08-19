@@ -20,11 +20,12 @@ architecture/
 │
 ├── modules/                # Core Functional Modules & Systems
 │   ├── emulator.md         # Emulator Engine integration, offline core resilience & save state management (`EmulatorModal.jsx`, EmulatorJS)
+│   ├── metadata-scraper.md # Online 3D box art & game metadata scraper with IndexedDB caching (`metadataScraper.js`, `useMetadataScraper.js`)
 │   ├── audio-sfx.md        # Pure Web Audio API UI sound effects synthesizer (`useWebAudioSfx.js`)
 │   ├── theme-engine.md     # Multi-theme engine, CSS custom properties & instant persistence (`useThemeEngine.js`, `index.css`)
 │   ├── playtime-favorites.md # Smart Collections (Favorites & Recents) & Playtime analytics (`usePlaytimeAndFavorites.js`)
 │   ├── console-switcher.md # Console system switching, smart collections filtering & tab ribbon (`SystemRibbon.jsx`)
-│   ├── game-catalog.md     # Game database catalog, ROM path mapping, cover art matching & game descriptions (`gameDescriptions.js`, Vite API middleware)
+│   ├── game-catalog.md     # Game database catalog, ROM path mapping & game descriptions (`gameDescriptions.js`, Vite API middleware)
 │   └── gamepad-controls.md  # Dynamic input controller, keyboard & USB gamepad mapping, hotkeys & shoulder button prompts (L/R vs Q/E)
 │
 ├── components/             # System Controls & UI Components

@@ -1,65 +1,22 @@
-// Official overview descriptions and metadata for retro titles
-export const GAME_DESCRIPTIONS = {
-  // Game Boy Advance
-  'firered': 'Journey through the iconic Kanto region in this enhanced Generation III remake.',
-  'leafgreen': 'Revisit classic adventures across the Kanto region and Sevii Archipelago.',
-  'emerald': 'Experience the expanded storyline featuring legendary dragon battles.',
-  'ruby': 'Explore tropical islands, defeat rival factions, and conquer the region league.',
-  'sapphire': 'Adventure across sea and land to restore balance to the elemental forces.',
+// Universal fallback helpers for metadata when offline or before scraper runs
 
-  // Generic fallback by system or genre
-  'default': 'Classic retro title. Relive nostalgic gameplay on your favorite console.'
-};
-
-// Release Dates (YYYY-MM-DD or Year for sorting)
-export const GAME_RELEASE_DATES = {
-  'default': '2000-01-01'
-};
+export const DEFAULT_DESCRIPTION = 'Classic retro gaming title. Relive authentic gameplay, music, and nostalgia.';
+export const DEFAULT_RELEASE_DATE = '2000-01-01';
 
 /**
- * Returns a clean description based on game title / filename
+ * Returns a fallback description based on game title / filename
  */
 export function getGameDescription(game) {
-  if (!game) return GAME_DESCRIPTIONS.default;
-
-  const titleLower = (game.title || '').toLowerCase();
-  const rawLower = (game.rawTitle || '').toLowerCase();
-  const fileLower = (game.filename || '').toLowerCase();
-
-  const searchStr = `${titleLower} ${rawLower} ${fileLower}`;
-
-  // Find matching key
-  for (const [key, desc] of Object.entries(GAME_DESCRIPTIONS)) {
-    if (key === 'default') continue;
-    if (searchStr.includes(key)) {
-      return desc;
-    }
-  }
-
-  return GAME_DESCRIPTIONS.default;
+  if (!game) return DEFAULT_DESCRIPTION;
+  const cleanTitle = (game.title || '').replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').trim();
+  const sys = game.systemName || 'Retro Console';
+  return `Experience the timeless adventure of ${cleanTitle} on ${sys}.`;
 }
 
 /**
  * Returns the release date for a given game
  */
 export function getReleaseDate(game) {
-  if (!game) return GAME_RELEASE_DATES.default;
-
-  const titleLower = (game.title || '').toLowerCase();
-  const rawLower = (game.rawTitle || '').toLowerCase();
-  const fileLower = (game.filename || '').toLowerCase();
-
-  const searchStr = `${titleLower} ${rawLower} ${fileLower}`;
-
-  // Check specific keys first to avoid false partial matches (e.g., "black 2" before "black")
-  const sortedKeys = Object.keys(GAME_RELEASE_DATES).sort((a, b) => b.length - a.length);
-
-  for (const key of sortedKeys) {
-    if (key === 'default') continue;
-    if (searchStr.includes(key)) {
-      return GAME_RELEASE_DATES[key];
-    }
-  }
-
-  return GAME_RELEASE_DATES.default;
+  if (!game) return DEFAULT_RELEASE_DATE;
+  return game.releaseDate || DEFAULT_RELEASE_DATE;
 }

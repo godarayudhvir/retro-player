@@ -89,10 +89,13 @@ retro-player/
 │   │   ├── EmulatorModal.jsx   # Isolated iframe EmulatorJS sandbox with offline fallback
 │   │   ├── OnScreenKeyboard.jsx # On-screen virtual keyboard for gamepad & touch
 │   │   └── ErrorBoundary.jsx   # Fatal runtime exception fallback component
+│   ├── services/         # Background Services & Scraper Engines
+│   │   └── metadataScraper.js      # Libretro Thumbnails & Open DB metadata scraper
 │   ├── hooks/            # Specialized Custom React Hooks
 │   │   ├── useWebAudioSfx.js       # Synthesized Web Audio UI sound effects
 │   │   ├── useThemeEngine.js       # Multi-theme state and persistence engine
 │   │   ├── usePlaytimeAndFavorites.js # Favorites, recents & playtime analytics
+│   │   ├── useMetadataScraper.js   # Background scraping & IndexedDB caching hook
 │   │   ├── useGamepadStatus.js     # HTML5 Gamepad connection tracking
 │   │   ├── useSaveDataManager.js   # LocalStorage & IndexedDB save detection
 │   │   ├── useRomManifest.js       # Catalog manifest & smart collections filter
@@ -116,7 +119,7 @@ The project includes an organized [architecture/](architecture/README.md) specif
 
 - **[Guidelines & Standards](architecture/README.md)**: Rules for writing specs, sub-directory constraints, and feature proposal templates.
 - **[Core Specifications](architecture/core/index.md)**: Entry point ([index.md](architecture/core/index.md)) and application shell ([app.md](architecture/core/app.md)).
-- **[Functional Modules](architecture/modules/emulator.md)**: Emulator engine ([emulator.md](architecture/modules/emulator.md)), Web Audio SFX ([audio-sfx.md](architecture/modules/audio-sfx.md)), Multi-Theme Engine ([theme-engine.md](architecture/modules/theme-engine.md)), Playtime & Favorites ([playtime-favorites.md](architecture/modules/playtime-favorites.md)), console switcher ([console-switcher.md](architecture/modules/console-switcher.md)), game catalog scanner ([game-catalog.md](architecture/modules/game-catalog.md)), and gamepad navigation ([gamepad-controls.md](architecture/modules/gamepad-controls.md)).
+- **[Functional Modules](architecture/modules/emulator.md)**: Emulator engine ([emulator.md](architecture/modules/emulator.md)), Metadata Scraper ([metadata-scraper.md](architecture/modules/metadata-scraper.md)), Web Audio SFX ([audio-sfx.md](architecture/modules/audio-sfx.md)), Multi-Theme Engine ([theme-engine.md](architecture/modules/theme-engine.md)), Playtime & Favorites ([playtime-favorites.md](architecture/modules/playtime-favorites.md)), console switcher ([console-switcher.md](architecture/modules/console-switcher.md)), game catalog scanner ([game-catalog.md](architecture/modules/game-catalog.md)), and gamepad navigation ([gamepad-controls.md](architecture/modules/gamepad-controls.md)).
 - **[UI Components](architecture/components/topbar.md)**: Topbar ([topbar.md](architecture/components/topbar.md)), System Ribbon ([system-ribbon.md](architecture/components/system-ribbon.md)), Cartridge Tile ([cartridge-tile.md](architecture/components/cartridge-tile.md)), Game Detail Modal ([game-detail-modal.md](architecture/components/game-detail-modal.md)), About Modal ([about-info-modal.md](architecture/components/about-info-modal.md)), Emulator Modal ([emulator-modal.md](architecture/components/emulator-modal.md)), on-screen virtual keyboard ([on-screen-keyboard.md](architecture/components/on-screen-keyboard.md)), error boundary ([error-boundary.md](architecture/components/error-boundary.md)), and retro CSS effects ([retro-effects.md](architecture/components/retro-effects.md)).
 - **[Mirai Future Features](architecture/mirai/multiplayer.md)**: Upcoming specifications for WebRTC P2P Multiplayer ([multiplayer.md](architecture/mirai/multiplayer.md)) and Cloud Save Sync ([cloud-saves.md](architecture/mirai/cloud-saves.md)), alongside the Master Blueprint in [mirai.md](mirai.md).
 
@@ -150,17 +153,16 @@ The project includes an organized [architecture/](architecture/README.md) specif
 
 ---
 
-## 🗂️ Adding ROMs & Cover Art
+## 🗂️ Adding ROMs & Automated Metadata Scraping
 
 ### Adding Games
-Place your ROM files inside `public/roms/[system]/`:
-- Example: `public/roms/gba/Super Mario Advance.zip`
+Place your ROM files inside `public/roms/[system]/` or simply drag and drop them anywhere into the browser:
+- Example: `public/roms/gba/Pokemon - Emerald Version.zip`
 
-### Adding Cover Art
-Place corresponding cover images (`.png`, `.jpg`, `.jpeg`, `.webp`) inside `public/cover/[system]/`:
-- Example: `public/cover/gba/Super Mario Advance.jpeg`
-
-The server scanner will automatically index and link them on page reload or when clicking **Rescan Channels**.
+### Automated Online Box Art & Metadata Scraping
+Retro Player follows the **ES-DE (EmulationStation-DE)** architecture with zero bundled covers or hardcoded metadata in the repository:
+- When games are detected or loaded, the built-in online scraper automatically fetches official 3D box art from the **Libretro Thumbnails CDN** and synopsis/release details from **Wikipedia REST APIs**.
+- All scraped assets are cached locally in your browser's **IndexedDB** for instant subsequent loading.
 
 ---
 
