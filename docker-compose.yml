@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   retro-player:
-    image: retro-player:latest
+    image: ghcr.io/godarayudhvir/retro-player:latest
     build:
       context: .
       dockerfile: Dockerfile

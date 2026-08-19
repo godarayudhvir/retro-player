@@ -129,7 +129,7 @@ The project includes an organized [architecture/](architecture/README.md) specif
 
 ### Option 1: Run with Docker Compose (Recommended - Like Jellyfin)
 
-Run Retro Player as a lightweight container and mount your existing ROM folder directly into the container.
+Run Retro Player via Docker using the GitHub Container Registry (**GHCR**) image:
 
 1. Ensure [Docker](https://docs.docker.com/get-docker/) and Docker Compose are installed.
 2. Edit [docker-compose.yml](file:///Users/godarayudhvir/Github/retro-player/docker-compose.yml) to point to your local ROMs directory:
@@ -138,8 +138,7 @@ Run Retro Player as a lightweight container and mount your existing ROM folder d
 
    services:
      retro-player:
-       image: retro-player:latest
-       build: .
+       image: ghcr.io/godarayudhvir/retro-player:latest
        container_name: retro-player
        restart: unless-stopped
        ports:
@@ -148,14 +147,23 @@ Run Retro Player as a lightweight container and mount your existing ROM folder d
          - PORT=3000
          - ROMS_DIR=/roms
        volumes:
-         # Replace ./public/roms with the absolute path to your ROMs directory
+         # Replace /path/to/your/roms with the path to your ROMs directory
          - /path/to/your/roms:/roms:ro
    ```
-3. Start the container in detached mode:
+3. Start the container:
    ```bash
-   docker compose up -d --build
+   docker compose up -d
    ```
 4. Access the web launcher at `http://localhost:3000`.
+
+#### Or Run Directly via Docker CLI:
+```bash
+docker run -d \
+  --name retro-player \
+  -p 3000:3000 \
+  -v /path/to/your/roms:/roms:ro \
+  ghcr.io/godarayudhvir/retro-player:latest
+```
 
 To view logs or stop the service:
 ```bash
