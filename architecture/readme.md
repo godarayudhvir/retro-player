@@ -35,12 +35,12 @@ architecture/
 ├── components/             # System Controls & UI Components
 │   ├── topbar.md           # Console header HUD, search input, clock, and sound controls (`Topbar.jsx`)
 │   ├── settings-modal.md   # Console settings, library manager & ROM/BGM upload & deletion hub (`SettingsModal.jsx`)
+│   ├── confirm-modal.md    # Universal in-app confirmation dialog replacing native alerts & confirms (`ConfirmModal.jsx`)
 │   ├── load-rom-modal.md   # In-app Load Custom ROM modal with drag-drop and supported formats (`LoadRomModal.jsx`)
 │   ├── system-ribbon.md    # Category tab ribbon with dynamic game count sorting (`SystemRibbon.jsx`)
 │   ├── cartridge-tile.md   # Physical 3D game cartridge component with sheen and color heuristics (`CartridgeTile.jsx`)
 │   ├── game-detail-modal.md # Game drawer modal with metadata & save data detection (`GameDetailModal.jsx`)
 │   ├── about-info-modal.md # Project about dialog and full controls reference table (`AboutInfoModal.jsx`)
-│   ├── confirm-dialog.md   # Themed in-app confirmation modal replacing native browser dialogs (`ConfirmDialog.jsx`)
 │   ├── emulator-modal.md   # Emulator Modal UI dialog, status displays, HUD bar & isolated iframe engine (`EmulatorModal.jsx`)
 │   ├── on-screen-keyboard.md # On-Screen Virtual Keyboard for gamepad/touch search entry (`OnScreenKeyboard.jsx`)
 │   ├── error-boundary.md   # Error Boundary fallback UI & fatal exception handling (`ErrorBoundary.jsx`)

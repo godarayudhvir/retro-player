@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Check, Edit2, Trash2, X, Sparkles, Gamepad2 } from 'lucide-react';
 import MiiAvatar from './MiiAvatar';
-import ConfirmDialog from './ConfirmDialog';
+import ConfirmModal from './ConfirmModal';
 
 /**
  * Netflix / Nintendo Switch style "Who's Playing?" profile selector modal.
@@ -18,7 +18,7 @@ export default function ProfileSelectModal({
   sfx
 }) {
   const [isManaging, setIsManaging] = useState(false);
-  const [profilePendingDelete, setProfilePendingDelete] = useState(null);
+  const [pendingDeleteProfile, setPendingDeleteProfile] = useState(null);
 
   if (!isOpen) return null;
 
@@ -42,29 +42,29 @@ export default function ProfileSelectModal({
             Select your profile to continue your gaming saves, favorites, and playtime progress.
           </p>
 
-          {/* Profiles Grid */}
           <div className="profile-cards-grid">
             {profiles.map((profile) => {
               const isActive = profile.id === activeProfileId;
-
               return (
                 <div
                   key={profile.id}
-                  className={`profile-card ${isActive ? 'is-active-profile' : ''}`}
+                  className={`profile-card ${isActive ? 'active' : ''} ${isManaging ? 'managing' : ''}`}
                   onClick={() => {
                     if (isManaging) {
                       onEditProfile?.(profile);
                     } else {
                       onSelectProfile?.(profile.id);
-                      sfx?.playTabSwitch?.();
-                      onClose?.();
                     }
                   }}
+                  tabIndex={0}
                 >
-                  <div className="profile-avatar-container" style={{ borderColor: profile.favoriteColor || '#ef4444' }}>
-                    <MiiAvatar miiData={profile.miiData || {}} size={96} />
+                  <div
+                    className="profile-avatar-container"
+                    style={{ borderColor: isActive ? (profile.favoriteColor || '#ef4444') : undefined }}
+                  >
+                    <MiiAvatar miiData={profile.miiData || {}} size={110} />
                     {isActive && !isManaging && (
-                      <div className="profile-active-check" title="Active Profile">
+                      <div className="profile-active-check" style={{ background: profile.favoriteColor || '#ef4444' }}>
                         <Check size={16} strokeWidth={3} />
                       </div>
                     )}
@@ -82,8 +82,7 @@ export default function ProfileSelectModal({
                       className="profile-delete-btn"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setProfilePendingDelete(profile);
-                        sfx?.playModalOpen?.();
+                        setPendingDeleteProfile(profile);
                       }}
                       title="Delete Profile"
                     >
@@ -99,49 +98,45 @@ export default function ProfileSelectModal({
               className="profile-card add-profile-card"
               onClick={() => {
                 onCreateNewProfile?.();
-                sfx?.playModalOpen?.();
               }}
+              tabIndex={0}
             >
-              <div className="add-profile-circle">
-                <Plus size={36} color="#64748b" />
+              <div className="add-profile-icon">
+                <Plus size={40} />
               </div>
               <span className="profile-card-name">Add Profile</span>
             </div>
           </div>
 
-          {/* Footer Actions */}
+          {/* Footer Management Actions */}
           <div className="profile-modal-footer">
             <button
-              className={`profile-manage-toggle-btn ${isManaging ? 'active' : ''}`}
+              className={`manage-profiles-btn ${isManaging ? 'active' : ''}`}
               onClick={() => {
-                setIsManaging(prev => !prev);
+                setIsManaging(!isManaging);
                 sfx?.playTileNav?.();
               }}
             >
-              {isManaging ? 'Done Managing' : 'Manage Profiles'}
+              {isManaging ? 'Done Editing' : 'Manage Profiles'}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Themed In-App Confirmation Modal */}
-      <ConfirmDialog
-        isOpen={Boolean(profilePendingDelete)}
+      {/* In-App Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!pendingDeleteProfile}
         title="Delete Profile?"
-        message={`Are you sure you want to permanently delete profile "${profilePendingDelete?.name}"? All saved favorites and playtime stats for this profile will be removed.`}
-        confirmText="Delete Profile"
-        cancelText="Cancel"
-        isDanger={true}
+        message={`Are you sure you want to permanently delete profile "${pendingDeleteProfile?.name}"? All profile favorites, recents, and playtime data will be erased.`}
+        confirmLabel="Delete Profile"
         onConfirm={() => {
-          if (profilePendingDelete) {
-            onDeleteProfile?.(profilePendingDelete.id);
-            setProfilePendingDelete(null);
+          if (pendingDeleteProfile) {
+            onDeleteProfile?.(pendingDeleteProfile.id);
+            setPendingDeleteProfile(null);
             sfx?.playModalClose?.();
           }
         }}
-        onCancel={() => {
-          setProfilePendingDelete(null);
-        }}
+        onCancel={() => setPendingDeleteProfile(null)}
         sfx={sfx}
       />
     </>

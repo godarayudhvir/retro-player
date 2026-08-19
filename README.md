@@ -72,6 +72,9 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 - 🎨 **4 Signature Themes**: **iiSU Light**, **Midnight Cyber**, **Sony XMB Wave**, and **Game Boy DMG**.
 - 🗄️ **Centralized IndexedDB Database Architecture**:
   - Full structured database (`RetroPlayerDB`) storing user profiles, Mii avatars, favorites, recently played lists, and playtime analytics with zero risk of storage quota limits or eviction.
+- 💬 **Universal In-App Modal Dialog System**:
+  - Zero disruptive native browser popups (`alert()`, `confirm()`, `prompt()`).
+  - All confirmations (profile deletion, ROM removal, BGM cleanup) utilize theme-aware, gamepad/keyboard navigable in-app modal dialogs.
 - 💾 **3D Physical Cartridge Engine**: Tactile cartridges with metallic sheens, grip textures, and title color heuristics.
 - 🌐 **Automated ES-DE Online Metadata Scraper**: Official 3D box art from **Libretro** & synopsis info from **Wikipedia**, cached in **IndexedDB**.
 - 🔊 **Synthesized Pure Web Audio UI SFX**: Zero-latency acoustic feedback synthesizer with zero external audio assets.

@@ -248,9 +248,7 @@ export default function EmulatorModal({ game, gamepadConnected, onClose, onSessi
             window.EJS_startOnLoaded = true;
             window.EJS_backgroundColor = '#000000';
             window.EJS_language = 'en-US';
-            window.EJS_VirtualGamepad = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-            window.EJS_volume = 1;
-            window.EJS_mute = false;
+            window.EJS_VirtualGamepad = true;
 
             // Configure Nintendo DS side-by-side screen layout for tablet / desktop viewports (>= 768px)
             const isTabletOrAbove = (window.innerWidth >= 768) || (window.parent && window.parent.innerWidth >= 768);
@@ -370,34 +368,6 @@ export default function EmulatorModal({ game, gamepadConnected, onClose, onSessi
                     const special = [16, 17, 18, 19, 20, 21, 22, 23];
                     for (let i = 0; i < 4; i++) {
                       if (gamepadIndex !== i) continue;
-
-                      // Left Stick to D-Pad auto-fallback for all games (run once per axis event, not 30 times per loop)
-                      if (e.type === "axischanged" && this.gameManager && typeof this.gameManager.simulateInput === 'function') {
-                        if (e.axis === 'LEFT_STICK_X') {
-                          if (e.value > 0.35) {
-                            this.gameManager.simulateInput(i, 7, 1); // D-Pad Right
-                            this.gameManager.simulateInput(i, 6, 0); // D-Pad Left
-                          } else if (e.value < -0.35) {
-                            this.gameManager.simulateInput(i, 6, 1); // D-Pad Left
-                            this.gameManager.simulateInput(i, 7, 0); // D-Pad Right
-                          } else {
-                            this.gameManager.simulateInput(i, 6, 0);
-                            this.gameManager.simulateInput(i, 7, 0);
-                          }
-                        } else if (e.axis === 'LEFT_STICK_Y') {
-                          if (e.value > 0.35) {
-                            this.gameManager.simulateInput(i, 5, 1); // D-Pad Down
-                            this.gameManager.simulateInput(i, 4, 0); // D-Pad Up
-                          } else if (e.value < -0.35) {
-                            this.gameManager.simulateInput(i, 4, 1); // D-Pad Up
-                            this.gameManager.simulateInput(i, 5, 0); // D-Pad Down
-                          } else {
-                            this.gameManager.simulateInput(i, 4, 0);
-                            this.gameManager.simulateInput(i, 5, 0);
-                          }
-                        }
-                      }
-
                       for (let j = 0; j < 30; j++) {
                         if (!this.controls || !this.controls[i] || !this.controls[i][j] || this.controls[i][j].value2 === undefined) {
                           continue;
@@ -409,6 +379,31 @@ export default function EmulatorModal({ game, gamepadConnected, onClose, onSessi
                             this.gameManager.simulateInput(i, j, (e.type === "buttonup" ? 0 : (special.includes(j) ? 0x7fff : 1)));
                           }
                         } else if (e.type === "axischanged") {
+                          // Left Stick to D-Pad auto-fallback for all games
+                          if (e.axis === 'LEFT_STICK_X' && this.gameManager && typeof this.gameManager.simulateInput === 'function') {
+                            if (e.value > 0.35) {
+                              this.gameManager.simulateInput(i, 7, 1); // D-Pad Right
+                              this.gameManager.simulateInput(i, 6, 0); // D-Pad Left
+                            } else if (e.value < -0.35) {
+                              this.gameManager.simulateInput(i, 6, 1); // D-Pad Left
+                              this.gameManager.simulateInput(i, 7, 0); // D-Pad Right
+                            } else {
+                              this.gameManager.simulateInput(i, 6, 0);
+                              this.gameManager.simulateInput(i, 7, 0);
+                            }
+                          } else if (e.axis === 'LEFT_STICK_Y' && this.gameManager && typeof this.gameManager.simulateInput === 'function') {
+                            if (e.value > 0.35) {
+                              this.gameManager.simulateInput(i, 5, 1); // D-Pad Down
+                              this.gameManager.simulateInput(i, 4, 0); // D-Pad Up
+                            } else if (e.value < -0.35) {
+                              this.gameManager.simulateInput(i, 4, 1); // D-Pad Up
+                              this.gameManager.simulateInput(i, 5, 0); // D-Pad Down
+                            } else {
+                              this.gameManager.simulateInput(i, 4, 0);
+                              this.gameManager.simulateInput(i, 5, 0);
+                            }
+                          }
+
                           if (typeof controlValue === "string" && controlValue.split(":")[0] === e.axis && this.gameManager && typeof this.gameManager.simulateInput === 'function') {
                             if (special.includes(j)) {
                               if (j === 16 || j === 17) {
@@ -514,12 +509,10 @@ export default function EmulatorModal({ game, gamepadConnected, onClose, onSessi
               }
             }
 
-            const _connectedGps = new Set();
+            window.autoBindGamepadsToPlayers = autoBindGamepadsToPlayers;
+
             function forwardGamepadConnected(gp) {
               if (!gp) return;
-              const key = (gp.id || 'gp') + '_' + (gp.index !== undefined ? gp.index : 0);
-              if (_connectedGps.has(key)) return;
-              _connectedGps.add(key);
               try {
                 const evt = new GamepadEvent('gamepadconnected', { gamepad: gp });
                 window.dispatchEvent(evt);
@@ -541,17 +534,25 @@ export default function EmulatorModal({ game, gamepadConnected, onClose, onSessi
                     forwardGamepadConnected(gps[i]);
                   }
                 }
+                autoBindGamepadsToPlayers();
               } catch (e) {}
             }
 
             window.addEventListener('gamepadconnected', function(e) {
+              console.log('🎮 [EMULATORJS IFRAME GAMEPAD CONNECTED]:', e.gamepad?.id);
               autoBindGamepadsToPlayers();
             });
 
-            // Single initial sync on window load / user interaction
-            window.addEventListener('focus', syncAllGamepads, { once: false });
-            window.addEventListener('click', syncAllGamepads, { once: true });
-            window.addEventListener('keydown', syncAllGamepads, { once: true });
+            // Sync gamepads across focus, click, and input events
+            window.addEventListener('focus', syncAllGamepads);
+            window.addEventListener('click', syncAllGamepads);
+            window.addEventListener('keydown', syncAllGamepads);
+
+            const syncTimer = setInterval(syncAllGamepads, 300);
+            setTimeout(() => {
+              clearInterval(syncTimer);
+              setInterval(syncAllGamepads, 1200);
+            }, 10000);
 
             // Auto-focus canvas & window on ready / game start
             window.EJS_ready = function() {

@@ -1149,12 +1149,6 @@ body {
   cursor: pointer;
 }
 
-.settings-upload-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
 .settings-upload-btn {
   display: flex;
   align-items: center;
@@ -1171,15 +1165,6 @@ body {
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
   transition: all 0.2s ease;
   white-space: nowrap;
-}
-
-.settings-upload-btn.folder-btn {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
-}
-
-.settings-upload-btn.folder-btn:hover:not(:disabled) {
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
 }
 
 .settings-upload-btn:hover:not(:disabled) {
@@ -1461,158 +1446,151 @@ body {
 }
 
 /* ==========================================================================
-   IN-APP THEMED CONFIRMATION DIALOG MODAL
+   UNIVERSAL IN-APP CONFIRMATION MODAL
    ========================================================================== */
 
-.confirm-dialog-backdrop {
+.confirm-modal-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(10, 15, 29, 0.88);
-  backdrop-filter: blur(20px);
-  z-index: 2000;
+  backdrop-filter: blur(28px);
+  z-index: 2500;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
 }
 
-.confirm-dialog-container {
+.confirm-modal-container {
   background: #ffffff;
   border: 2px solid #e2e8f0;
   border-radius: 28px;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.45);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.5);
   max-width: 440px;
   width: 100%;
-  padding: 1.85rem 2rem;
+  padding: 2rem 2rem 1.75rem;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
   box-sizing: border-box;
 }
 
-.confirm-dialog-header {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  margin-bottom: 0.85rem;
-}
-
-.confirm-icon-wrapper {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
+.confirm-modal-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  margin-bottom: 1.25rem;
 }
 
-.confirm-dialog-header h3 {
-  font-size: 1.25rem;
+.confirm-modal-title {
+  font-size: 1.35rem;
   font-weight: 900;
   color: #0f172a;
-  margin: 0;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.2;
 }
 
-.confirm-dialog-message {
-  font-size: 0.92rem;
+.confirm-modal-message {
+  font-size: 0.9rem;
   font-weight: 600;
-  line-height: 1.5;
   color: #64748b;
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 1.75rem 0;
+  line-height: 1.5;
 }
 
-.confirm-dialog-actions {
+.confirm-modal-actions {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 0.75rem;
+  justify-content: center;
+  gap: 0.85rem;
+  width: 100%;
 }
 
-.confirm-btn-cancel {
-  padding: 0.65rem 1.35rem;
-  border-radius: 14px;
-  border: 1.5px solid #cbd5e1;
-  background: transparent;
+.confirm-modal-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 16px;
   font-family: inherit;
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   font-weight: 800;
-  color: #64748b;
   cursor: pointer;
   transition: all 0.2s ease;
+  outline: none;
 }
 
-.confirm-btn-cancel:hover {
+.confirm-modal-btn.cancel-btn {
   background: #f1f5f9;
+  border: 1.5px solid #cbd5e1;
+  color: #64748b;
+}
+
+.confirm-modal-btn.cancel-btn:hover {
+  background: #e2e8f0;
   color: #0f172a;
 }
 
-.confirm-btn-action {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.65rem 1.45rem;
-  border-radius: 14px;
-  border: none;
-  font-family: inherit;
-  font-size: 0.88rem;
-  font-weight: 800;
-  color: #ffffff;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.confirm-btn-action.danger {
+.confirm-modal-btn.confirm-btn.destructive {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border: none;
+  color: #ffffff;
   box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
 }
 
-.confirm-btn-action.danger:hover {
+.confirm-modal-btn.confirm-btn.destructive:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(239, 68, 68, 0.45);
 }
 
-.confirm-btn-action.primary {
+.confirm-modal-btn.confirm-btn.primary {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+  border: none;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
 }
 
-.confirm-btn-action.primary:hover {
+.confirm-modal-btn.confirm-btn.primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.45);
 }
 
-/* Dark Theme Overrides for ConfirmDialog */
-[data-theme="midnight"] .confirm-dialog-container,
-[data-theme="cyber"] .confirm-dialog-container,
-[data-theme="xmb"] .confirm-dialog-container {
+.confirm-modal-btn:focus-visible {
+  outline: 3px solid #ef4444;
+  outline-offset: 2px;
+}
+
+/* Dark Theme Overrides for Confirm Modal */
+[data-theme="midnight"] .confirm-modal-container,
+[data-theme="cyber"] .confirm-modal-container,
+[data-theme="xmb"] .confirm-modal-container {
   background: #0f172a;
-  border-color: rgba(51, 65, 85, 0.9);
+  border-color: rgba(51, 65, 85, 0.8);
+}
+
+[data-theme="midnight"] .confirm-modal-title,
+[data-theme="cyber"] .confirm-modal-title,
+[data-theme="xmb"] .confirm-modal-title {
   color: #f8fafc;
 }
 
-[data-theme="midnight"] .confirm-dialog-header h3,
-[data-theme="cyber"] .confirm-dialog-header h3,
-[data-theme="xmb"] .confirm-dialog-header h3 {
-  color: #f8fafc;
-}
-
-[data-theme="midnight"] .confirm-dialog-message,
-[data-theme="cyber"] .confirm-dialog-message,
-[data-theme="xmb"] .confirm-dialog-message {
+[data-theme="midnight"] .confirm-modal-message,
+[data-theme="cyber"] .confirm-modal-message,
+[data-theme="xmb"] .confirm-modal-message {
   color: #94a3b8;
 }
 
-[data-theme="midnight"] .confirm-btn-cancel,
-[data-theme="cyber"] .confirm-btn-cancel,
-[data-theme="xmb"] .confirm-btn-cancel {
-  border-color: #334155;
-  color: #94a3b8;
-}
-
-[data-theme="midnight"] .confirm-btn-cancel:hover,
-[data-theme="cyber"] .confirm-btn-cancel:hover,
-[data-theme="xmb"] .confirm-btn-cancel:hover {
+[data-theme="midnight"] .confirm-modal-btn.cancel-btn,
+[data-theme="cyber"] .confirm-modal-btn.cancel-btn,
+[data-theme="xmb"] .confirm-modal-btn.cancel-btn {
   background: #1e293b;
+  border-color: #334155;
   color: #f8fafc;
 }
 
@@ -4496,206 +4474,6 @@ html[data-theme="dmg"] .favorite-toggle-btn {
 
   .load-rom-chip-ext {
     font-size: 0.62rem;
-  }
-
-  /* Settings Modal Mobile */
-  .settings-modal-backdrop {
-    padding: 0.5rem;
-  }
-
-  .settings-modal-container {
-    padding: 1.25rem 1rem;
-    border-radius: 20px;
-    max-height: 94vh;
-  }
-
-  .settings-header {
-    margin-bottom: 0.75rem;
-  }
-
-  .settings-title h2 {
-    font-size: 1.15rem;
-  }
-
-  .settings-subtitle {
-    font-size: 0.72rem;
-  }
-
-  .settings-tabs-bar {
-    gap: 0.4rem;
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.5rem;
-    overflow-x: auto;
-  }
-
-  .settings-tab-btn {
-    padding: 0.45rem 0.75rem;
-    font-size: 0.78rem;
-    border-radius: 12px;
-    white-space: nowrap;
-  }
-
-  .settings-actions-bar {
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .settings-filter-group {
-    min-width: 100%;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  .settings-search-box {
-    width: 100%;
-    padding: 0.4rem 0.65rem;
-  }
-
-  .settings-select {
-    width: 100%;
-    padding: 0.4rem 0.65rem;
-  }
-
-  .settings-upload-wrapper {
-    width: 100%;
-  }
-
-  .settings-upload-btn {
-    width: 100%;
-    justify-content: center;
-    padding: 0.6rem 1rem;
-  }
-
-  .settings-item-row {
-    padding: 0.6rem 0.75rem;
-    border-radius: 14px;
-  }
-
-  .settings-item-title {
-    font-size: 0.82rem;
-  }
-
-  .settings-item-file {
-    font-size: 0.68rem;
-  }
-
-  /* Profile Select Modal Mobile */
-  .profile-select-backdrop {
-    padding: 0.75rem;
-  }
-
-  .profile-select-modal {
-    padding: 1.5rem 1rem;
-    border-radius: 24px;
-    max-height: 92vh;
-  }
-
-  .profile-modal-title h2 {
-    font-size: 1.35rem;
-  }
-
-  .profile-select-subtitle {
-    font-size: 0.8rem;
-    margin-bottom: 1.25rem;
-  }
-
-  .profile-cards-grid {
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 0.85rem;
-    padding: 0.5rem 0;
-  }
-
-  .profile-card {
-    padding: 0.75rem 0.5rem;
-    border-radius: 18px;
-  }
-
-  .profile-avatar-container {
-    width: 72px;
-    height: 72px;
-  }
-
-  .profile-card-name {
-    font-size: 0.85rem;
-  }
-
-  /* Mii Avatar Creator Wizard Mobile */
-  .mii-creator-backdrop {
-    padding: 0.5rem;
-  }
-
-  .mii-creator-modal {
-    padding: 1.25rem 1rem;
-    border-radius: 20px;
-    max-height: 94vh;
-  }
-
-  .mii-creator-header h2 {
-    font-size: 1.2rem;
-  }
-
-  .mii-creator-body {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .mii-preview-pane {
-    padding: 1rem;
-    min-height: auto;
-  }
-
-  .mii-controls-pane {
-    padding: 0;
-    max-height: 48vh;
-  }
-
-  /* In-App Confirm Dialog Mobile */
-  .confirm-dialog-backdrop {
-    padding: 0.75rem;
-  }
-
-  .confirm-dialog-container {
-    padding: 1.25rem 1.15rem;
-    border-radius: 20px;
-  }
-
-  .confirm-dialog-header h3 {
-    font-size: 1.1rem;
-  }
-
-  .confirm-dialog-message {
-    font-size: 0.85rem;
-  }
-
-  .confirm-dialog-actions {
-    flex-direction: column-reverse;
-    gap: 0.5rem;
-  }
-
-  .confirm-btn-cancel,
-  .confirm-btn-action {
-    width: 100%;
-    justify-content: center;
-  }
-
-  /* About Info Modal Mobile */
-  .about-modal-container {
-    padding: 1.25rem 1rem;
-    border-radius: 20px;
-    max-height: 92vh;
-  }
-
-  .about-header h2 {
-    font-size: 1.25rem;
-  }
-
-  .controls-table {
-    font-size: 0.75rem;
-  }
-
-  .controls-table th,
-  .controls-table td {
-    padding: 0.5rem 0.4rem;
   }
 
   /* On-Screen Keyboard Mobile */
