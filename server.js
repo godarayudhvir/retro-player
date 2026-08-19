@@ -208,7 +208,15 @@ app.get('/api/roms', (req, res) => {
   }
 
   scanDirectory(ROMS_DIR);
-  res.json({ count: games.length, games });
+  res.json({
+    count: games.length,
+    games,
+    systems: Object.keys(SYSTEM_MAP).map(key => ({
+      key,
+      ...SYSTEM_MAP[key],
+      gameCount: games.filter(g => g.systemKey === key).length
+    }))
+  });
 });
 
 // Dynamic Local ROM File Upload Endpoint

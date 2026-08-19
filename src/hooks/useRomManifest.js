@@ -21,9 +21,31 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
       const res = await fetch('/api/roms');
       if (res.ok) {
         const data = await res.json();
-        console.log(`✅ [CLIENT FETCH SUCCESS] Indexed ${data.games?.length || 0} games across ${data.systems?.length || 0} systems.`);
-        setGames(data.games || []);
-        setSystems(data.systems || []);
+        console.log(`✅ [CLIENT FETCH SUCCESS] Indexed ${data.games?.length || 0} games.`);
+        const loadedGames = data.games || [];
+        setGames(loadedGames);
+
+        // If backend provided systems array with gameCount, use it, or derive from loadedGames
+        if (data.systems && data.systems.length > 0) {
+          setSystems(data.systems);
+        } else {
+          const sysMap = {};
+          loadedGames.forEach(g => {
+            if (!g.systemKey) return;
+            if (!sysMap[g.systemKey]) {
+              sysMap[g.systemKey] = {
+                key: g.systemKey,
+                name: g.systemName || g.systemKey.toUpperCase(),
+                core: g.systemCore,
+                color: g.systemColor,
+                icon: g.systemIcon,
+                gameCount: 0
+              };
+            }
+            sysMap[g.systemKey].gameCount++;
+          });
+          setSystems(Object.values(sysMap));
+        }
       } else {
         console.error(`🚨 [CLIENT FETCH API ERROR] Server responded with HTTP status ${res.status}: ${res.statusText}`);
       }
