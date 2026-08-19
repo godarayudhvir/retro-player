@@ -10,7 +10,7 @@ const DB_VERSION = 2; // Bumped to 2 to invalidate previous bad cache
 const STORE_NAME = 'game_metadata';
 
 // Map internal system keys to Libretro Thumbnails repository system directory names
-export const LIBRETRO_SYSTEM_MAP = {
+const LIBRETRO_SYSTEM_MAP = {
   nes: 'Nintendo - Nintendo Entertainment System',
   snes: 'Nintendo - Super Nintendo Entertainment System',
   gba: 'Nintendo - Game Boy Advance',
@@ -51,7 +51,7 @@ function openDB() {
 }
 
 // Get cached metadata from IndexedDB
-export async function getCachedMetadata(id) {
+async function getCachedMetadata(id) {
   try {
     const db = await openDB();
     if (!db) {
@@ -108,7 +108,7 @@ export async function getAllCachedMetadata() {
 }
 
 // Save metadata to IndexedDB & localStorage fallback
-export async function saveCachedMetadata(id, data) {
+async function saveCachedMetadata(id, data) {
   try {
     const record = { id, ...data, updatedAt: Date.now() };
     const db = await openDB();
@@ -150,7 +150,7 @@ export async function clearAllCachedMetadata() {
  * Format string for Libretro Thumbnails naming standards
  * (Replaces &, :, /, \, *, ?, ", <, >, | with _)
  */
-export function formatLibretroName(str) {
+function formatLibretroName(str) {
   if (!str) return '';
   return str
     .replace(/[&:/\\*?"<>|]/g, '_')
@@ -161,7 +161,7 @@ export function formatLibretroName(str) {
 /**
  * Generate extensive candidate filenames for thumbnail scraping
  */
-export function generateThumbnailCandidates(game) {
+function generateThumbnailCandidates(game) {
   const candidates = [];
   const raw = game.rawTitle || game.title || '';
   const fileNoExt = (game.filename || '').replace(/\.[^/.]+$/, '');
@@ -219,7 +219,7 @@ function probeImageUrl(url) {
 /**
  * Scrapes Official Box Art from Libretro Thumbnails CDN & GitHub Raw mirrors
  */
-export async function scrapeCoverArt(game) {
+async function scrapeCoverArt(game) {
   const sysDir = LIBRETRO_SYSTEM_MAP[game.systemKey];
   if (!sysDir) return null;
 
@@ -259,7 +259,7 @@ export async function scrapeCoverArt(game) {
  * Scrapes specific game metadata from Wikipedia Open REST APIs
  * Uses title matching to prevent generic franchise/series article false matches.
  */
-export async function scrapeGameDetails(game) {
+async function scrapeGameDetails(game) {
   const cleanTitle = (game.title || '').replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').trim();
   const systemName = game.systemName || '';
 

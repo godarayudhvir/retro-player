@@ -242,7 +242,6 @@ export default function App() {
         onFileLoaded={(file) => {
           processCustomRomFile(file);
         }}
-        sfx={sfx}
       />
 
       {/* About Project Info Dialog */}

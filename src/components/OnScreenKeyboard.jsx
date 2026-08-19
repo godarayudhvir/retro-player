@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Delete, Space, X, Check, Gamepad, Sparkles } from 'lucide-react';
+import { Search, Delete, Space, X, Check } from 'lucide-react';
 
 export const KEYBOARD_ROWS = [
   ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '⌫'],

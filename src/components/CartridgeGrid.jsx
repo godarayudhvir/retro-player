@@ -30,7 +30,6 @@ export default function CartridgeGrid({
                 key={game.id}
                 game={game}
                 metadata={meta}
-                index={index}
                 isFocused={isFocused}
                 isFavorite={isFav}
                 onClick={() => {

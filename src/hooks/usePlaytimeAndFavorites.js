@@ -7,7 +7,7 @@ const PLAYTIME_KEY = 'retro_player_playtime';
 /**
  * Format total seconds into human-readable duration (e.g. "1 hr 45 min", "24 min", or "< 1 min").
  */
-export function formatPlaytime(seconds = 0) {
+function formatPlaytime(seconds = 0) {
   if (!seconds || seconds < 60) return '< 1 min';
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
@@ -21,7 +21,7 @@ export function formatPlaytime(seconds = 0) {
 /**
  * Format timestamp into relative or friendly date string.
  */
-export function formatLastPlayed(timestamp) {
+function formatLastPlayed(timestamp) {
   if (!timestamp) return 'Never';
   const date = new Date(timestamp);
   const now = new Date();

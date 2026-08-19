@@ -1,7 +1,7 @@
 // Universal fallback helpers for metadata when offline or before scraper runs
 
-export const DEFAULT_DESCRIPTION = 'Classic retro gaming title. Relive authentic gameplay, music, and nostalgia.';
-export const DEFAULT_RELEASE_DATE = '2000-01-01';
+const DEFAULT_DESCRIPTION = 'Classic retro gaming title. Relive authentic gameplay, music, and nostalgia.';
+const DEFAULT_RELEASE_DATE = '2000-01-01';
 
 /**
  * Returns a fallback description based on game title / filename

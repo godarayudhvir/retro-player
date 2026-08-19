@@ -9,8 +9,7 @@ export default function LoadRomModal({
   isOpen,
   focusedTarget,
   onClose,
-  onFileLoaded,
-  sfx
+  onFileLoaded
 }) {
   const fileInputRef = useRef(null);
   const [isDragInside, setIsDragInside] = useState(false);

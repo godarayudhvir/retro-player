@@ -35,9 +35,8 @@ The `LoadRomModal` component (`.info-modal-backdrop` + `.load-rom-modal`) provid
 ### Props & Lifecycle
 - `isOpen` (boolean): Controls modal visibility.
 - `focusedTarget` (Object): Active spatial focus coordinate.
-- `onClose` (function): Closes modal and returns focus to topbar.
+- `onClose` (function): Closes modal and returns focus to topbar (triggering modal close SFX at the root level).
 - `onFileLoaded` (function): Processes the selected `File` object through `processCustomRomFile(file)`.
-- `sfx`: Audio synthesizer reference for modal opening and closing chimes.
 
 ### Source Location
 - Component: [src/components/LoadRomModal.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/LoadRomModal.jsx)

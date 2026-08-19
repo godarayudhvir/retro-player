@@ -5,7 +5,7 @@ import { getCartridgeColor } from '../utils/cartridgeColors';
 /**
  * Individual 3D Physical Retro Cartridge Tile component with tactile sheen, grips, dynamic scraped box art, and brand stamps.
  */
-export default function CartridgeTile({ game, metadata, index, isFocused, isFavorite, onClick }) {
+export default function CartridgeTile({ game, metadata, isFocused, isFavorite, onClick }) {
   if (!game) return null;
 
   const [imgLoaded, setImgLoaded] = useState(false);
