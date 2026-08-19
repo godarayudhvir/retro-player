@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Gamepad2, Wifi, WifiOff, Menu, Activity, ShieldCheck, Save, Check } from 'lucide-react';
+import { X, Gamepad2, Wifi, WifiOff, Menu, Activity, ShieldCheck, Save, Check, Download, Upload } from 'lucide-react';
 import { detectSystemFromExtension } from '../utils/systemDetector';
+import { dbGet, dbSet, STORES } from '../services/db';
 
 export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, onSessionEnd }) {
   const stageRef = useRef(null);
@@ -678,12 +679,35 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
               } catch(e) {}
             };
 
+            // Direct DB / Parent window save sync bridge
             window.EJS_onLoadSave = function() {
               console.log('💾 [BATTERY SAVE LOADED] In-game SRAM successfully restored from DB for:', ${JSON.stringify(currentGame.id)});
             };
 
-            window.EJS_onSaveSave = function() {
-              console.log('💾 [BATTERY SAVE SAVED] In-game SRAM flushed and committed to IndexedDB for:', ${JSON.stringify(currentGame.id)});
+            window.EJS_onSaveSave = function(e) {
+              console.log('💾 [BATTERY SAVE FLUSH EVENT] Committing SRAM to RetroPlayerDB for:', ${JSON.stringify(currentGame.id)}, e);
+              try {
+                if (window.parent && window.parent !== window) {
+                  window.parent.postMessage({
+                    type: 'RETRO_PLAYER_SAVE_SYNC',
+                    gameId: ${JSON.stringify(currentGame.id)},
+                    saveData: e
+                  }, '*');
+                }
+              } catch(err) {}
+            };
+
+            window.EJS_onSaveState = function(e) {
+              console.log('💾 [SAVE STATE FLUSH EVENT] Committing snapshot state to RetroPlayerDB for:', ${JSON.stringify(currentGame.id)}, e);
+              try {
+                if (window.parent && window.parent !== window) {
+                  window.parent.postMessage({
+                    type: 'RETRO_PLAYER_STATE_SYNC',
+                    gameId: ${JSON.stringify(currentGame.id)},
+                    stateData: e
+                  }, '*');
+                }
+              } catch(err) {}
             };
 
             window.EJS_onLoadState = function() {
@@ -693,16 +717,34 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
             window.flushSaveToDB = function() {
               try {
                 const emu = window.EJS_emulator;
-                if (!emu) return;
+                if (!emu) return false;
                 console.log('💾 [SAVE FLUSH TRIGGERED] Committing pending in-game saves to IndexedDB...');
+                
+                // 1. Flush in-game Battery RAM (SRAM)
                 if (typeof emu.saveSave === 'function') {
                   emu.saveSave();
+                } else if (emu.gameManager && typeof emu.gameManager.saveSave === 'function') {
+                  emu.gameManager.saveSave();
                 }
+
+                // 2. Flush Save State snapshot
                 if (typeof emu.saveState === 'function') {
-                  // Optional auto quicksave state
+                  emu.saveState();
+                } else if (emu.gameManager && typeof emu.gameManager.saveState === 'function') {
+                  emu.gameManager.saveState();
                 }
+
+                // 3. Fallback: Write directly to parent bridge
+                if (window.parent && window.parent !== window) {
+                  window.parent.postMessage({
+                    type: 'RETRO_PLAYER_MANUAL_SAVE_TRIGGER',
+                    gameId: ${JSON.stringify(currentGame.id)}
+                  }, '*');
+                }
+                return true;
               } catch (e) {
                 console.warn('⚠️ [SAVE FLUSH WARN]:', e);
+                return false;
               }
             };
 
@@ -784,12 +826,53 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
     }
   }, [gamepadConnected]);
 
-  // Listen for Controller Exit triggers posted from within the active emulator iframe
+  // Listen for Controller Exit triggers & Save Sync posted from within the active emulator iframe
   useEffect(() => {
-    const handleFrameMessage = (e) => {
-      if (e.data?.type === 'RETRO_PLAYER_EXIT_GAME') {
+    const handleFrameMessage = async (e) => {
+      if (!e.data) return;
+
+      if (e.data.type === 'RETRO_PLAYER_EXIT_GAME') {
         console.log('🎮 [EMULATOR MODAL] Exit command received from gamepad combo. Closing game.');
         handleClose();
+      }
+
+      // Persist in-game battery RAM directly into RetroPlayerDB
+      if (e.data.type === 'RETRO_PLAYER_SAVE_SYNC' && e.data.gameId) {
+        try {
+          const saveKey = `save_${e.data.gameId}`;
+          const payload = {
+            gameId: e.data.gameId,
+            timestamp: Date.now(),
+            data: e.data.saveData || null
+          };
+          await dbSet(STORES.GAME_SAVES, saveKey, payload);
+          // Also mirror in localStorage for instant synchronous availability
+          try {
+            localStorage.setItem(saveKey, JSON.stringify(payload));
+          } catch(err) {}
+          console.log(`💾 [RetroPlayerDB SAVED] Successfully stored battery RAM for: "${e.data.gameId}"`);
+        } catch (err) {
+          console.warn('⚠️ [DB SAVE ERROR]:', err);
+        }
+      }
+
+      // Persist quick save state snapshot directly into RetroPlayerDB
+      if (e.data.type === 'RETRO_PLAYER_STATE_SYNC' && e.data.gameId) {
+        try {
+          const stateKey = `state_${e.data.gameId}`;
+          const payload = {
+            gameId: e.data.gameId,
+            timestamp: Date.now(),
+            data: e.data.stateData || null
+          };
+          await dbSet(STORES.SAVE_STATES, stateKey, payload);
+          try {
+            localStorage.setItem(stateKey, JSON.stringify(payload));
+          } catch(err) {}
+          console.log(`💾 [RetroPlayerDB SAVED] Successfully stored snapshot state for: "${e.data.gameId}"`);
+        } catch (err) {
+          console.warn('⚠️ [DB STATE ERROR]:', err);
+        }
       }
     };
     window.addEventListener('message', handleFrameMessage);

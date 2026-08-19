@@ -5,12 +5,14 @@
  */
 
 const DB_NAME = 'RetroPlayerDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 const STORES = {
   PROFILES: 'profiles',
   USER_DATA: 'user_data',       // Favorites, Recents, Playtime scoped by profile
-  SETTINGS: 'app_settings'      // Global settings, theme, volume
+  SETTINGS: 'app_settings',     // Global settings, theme, volume
+  GAME_SAVES: 'game_saves',     // In-game battery SRAM (.sav) mapped by game.id
+  SAVE_STATES: 'save_states'    // Real-time snapshot states (.state) mapped by game.id
 };
 
 let dbInstance = null;
@@ -45,6 +47,16 @@ export function getDB() {
       // 3. Settings Store: keyPath: 'key'
       if (!db.objectStoreNames.contains(STORES.SETTINGS)) {
         db.createObjectStore(STORES.SETTINGS, { keyPath: 'key' });
+      }
+
+      // 4. Game Battery Saves (.sav) Store: keyPath: 'key'
+      if (!db.objectStoreNames.contains(STORES.GAME_SAVES)) {
+        db.createObjectStore(STORES.GAME_SAVES, { keyPath: 'key' });
+      }
+
+      // 5. Game Save States (.state) Store: keyPath: 'key'
+      if (!db.objectStoreNames.contains(STORES.SAVE_STATES)) {
+        db.createObjectStore(STORES.SAVE_STATES, { keyPath: 'key' });
       }
     };
 

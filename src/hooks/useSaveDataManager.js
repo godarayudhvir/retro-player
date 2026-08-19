@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { dbGet, STORES } from '../services/db';
 
 /**
  * Hook to inspect and verify existing save states and battery RAM in LocalStorage and IndexedDB.
@@ -19,7 +20,24 @@ export function useSaveDataManager() {
       const rawTitle = (game.rawTitle || '').toLowerCase();
       const filename = (game.filename || '').toLowerCase();
 
-      // 1. Check LocalStorage keys specifically for this game
+      // 1. Check RetroPlayerDB primary stores (Battery Saves and Snapshot States)
+      if (game.id) {
+        const dbSave = await dbGet(STORES.GAME_SAVES, `save_${game.id}`);
+        if (dbSave) {
+          setHasSaveData(true);
+          setIsCheckingSave(false);
+          return true;
+        }
+
+        const dbState = await dbGet(STORES.SAVE_STATES, `state_${game.id}`);
+        if (dbState) {
+          setHasSaveData(true);
+          setIsCheckingSave(false);
+          return true;
+        }
+      }
+
+      // 2. Check LocalStorage keys specifically for this game
       const keys = Object.keys(localStorage);
       const hasLs = keys.some(k => {
         const lowerK = k.toLowerCase();
@@ -34,7 +52,7 @@ export function useSaveDataManager() {
         return true;
       }
 
-      // 2. Check IndexedDB database names specifically for this game
+      // 3. Check IndexedDB database names specifically for this game
       if (typeof window !== 'undefined' && window.indexedDB && indexedDB.databases) {
         const dbs = await indexedDB.databases();
         const hasDb = dbs.some(db => {
