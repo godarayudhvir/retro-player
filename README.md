@@ -1,193 +1,144 @@
-# 🎮 Retro Player
+<div align="center">
 
-A modern, high-performance web-based retro game launcher and emulator library for classic retro console games. Built with React, Vite, and EmulatorJS, it features an intuitive console UI inspired by modern gaming handhelds with full Gamepad navigation support.
+# 🕹️ RETRO PLAYER
 
-![Retro Player Interface](home.webp)
+### *The High-Performance, Zero-Overhead Web Emulation Station*
+
+[![Docker Multi-Arch Build](https://github.com/godarayudhvir/retro-player/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/godarayudhvir/retro-player/actions)
+[![GitHub Container Registry](https://img.shields.io/badge/GHCR.io-retro--player-blue?logo=docker&logoColor=white)](https://github.com/godarayudhvir/retro-player/pkgs/container/retro-player)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![React 18](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Vite 5](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![WASM Powered](https://img.shields.io/badge/Emulation-WebAssembly-654FF0?logo=webassembly&logoColor=white)](https://webassembly.org/)
+
+<br />
+
+**A console-grade retro game launcher and library, delivered straight to any web browser.**  
+Featuring physical 3D cartridge rendering, real-time online metadata scraping, synthesized acoustic SFX, and **pure client-side WebAssembly execution**.
+
+<br />
+
+<img src="home.webp" alt="Retro Player Showcase" width="100%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+
+</div>
 
 ---
 
-## ✨ Featur- 🎨 **Multi-Theme Engine**:
-  - Switch on the fly between 4 distinct console themes:
-    - ☀️ **iiSU Light (Default)**: Crisp porcelain white, subtle dot matrix, Nintendo red & blue accents.
-    - 🌙 **Midnight Cyber (Dark Mode)**: Deep obsidian slate, dark glassmorphism, neon cyan & purple glow.
-    - 🌊 **Sony XMB Wave**: PlayStation-inspired deep navy aesthetic with ambient flowing animated wave gradient.
-    - 📟 **Game Boy DMG Classic**: Monochromatic olive-green retro dot-matrix styling with pixelated typography.
-  - Interactive topbar theme selector and instant keyboard shortcut (`T`).
-- ⭐ **Smart Collections & Playtime Analytics**:
-  - ⭐ **Favorites**: Bookmark favorite titles with a single click or gamepad shortcut (`X` button / `F` key), indicated by golden star badges on cartridges.
-  - 🕒 **Recently Played**: Chronologically sorted history queue of your latest gaming sessions.
-  - ⏱️ **Playtime & Session Metrics**: Tracks total hours/minutes played and launch counts, displayed in the game detail drawer.
-- 🛡️ **Offline Core Resilience & Local Self-Hosting**:
-  - Dual-mode emulator core loader: automatically probes CDN connectivity and falls back to local `/emulatorjs/data/` for 100% air-gapped play during network outages.
-  - Live HUD operational indicator (`ONLINE CDN` vs `LOCAL OFFLINE`).
-- 🕹️ **Multi-System Emulator Support**:
-  - Game Boy (GB)
-  - Game Boy Color (GBC)
-  - Game Boy Advance (GBA)
-  - Nintendo Entertainment System (NES)
-  - Super Nintendo (SNES)
-  - Nintendo 64 (N64)
-  - Nintendo DS (NDS)
-  - Sega Genesis / Mega Drive
-  - PlayStation (PS1 / PSX)
-  - Arcade (MAME)
-- 💾 **Retro Cartridge UI System**:
-  - Realistic 3D-styled physical retro game cartridge tiles with embossed headers, side grips, recessed sticker labels, dynamic sheen overlays, and system brand stamps.
-  - Dynamic cartridge shell color customization based on game titles and platform themes.
-- 🖼️ **Dynamic Cover Art Scanner**:
-  - Automatically scans and pairs ROM files (`public/roms/*`) with local cover art images (`public/cover/*` and `public/assets/cover/*`).
-  - Supports fuzzy title matching for automatic cover detection.
-- 🔊 **Synthesized Web Audio UI Sound Effects**:
-  - Pure Web Audio API acoustic feedback with zero external MP3 assets and zero latency.
-  - Tactile cursor navigation ticks, frequency swooshes on shoulder tab switching (`L1`/`R1`), modal harmonic chimes, sparkling favorite arpeggios, futuristic theme sweeps, and authentic mechanical cartridge insertion "click-clacks" with console boot chimes on game launch.
-  - One-click SFX mute toggle in the top status bar.
+## ⚡ Why Retro Player? The WASM Advantage
+
+Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your server CPU, **Retro Player uses a modern Edge-WASM architecture**:
+
+```
+                               ┌──────────────────────────────────────────────────────────┐
+                               │                     YOUR BROWSER                         │
+                               │                                                          │
+┌────────────────┐  ROM File   │  ┌────────────────────┐   ┌───────────────────────────┐  │
+│  Host Server   │ ──────────> │  │ WebAssembly Core   │──>│  60 FPS Canvas Rendering  │  │
+│ (Railway/NAS)  │  (Few MB)   │  │ (Runs on client)   │   │  0ms Gamepad Polling      │  │
+│ ~0% CPU / RAM  │             │  └────────────────────┘   │  Web Audio SFX Synthesizer│  │
+└────────────────┘             │                           └───────────────────────────┘  │
+                               └──────────────────────────────────────────────────────────┘
+```
+
+- **🔥 Server Resource Usage is ~0%**: The host only serves static files and streams the raw ROM binary once. Even a free-tier container or Raspberry Pi can serve hundreds of concurrent players.
+- **⚡ 0ms Input Lag**: Controllers and keyboards are polled directly in the client browser with zero network latency.
+- **💾 Automatic Auto-Sorting Disk Persistence**: Load any ROM from your browser—it is automatically sorted and saved to your host disk (`/roms/<system>/`) for future sessions.
+- **🛡️ 100% Air-Gapped Offline Support**: Features dual-mode fallback to local core bundles when offline.
+
+---
+
+## ✨ Key Highlights
+
+- 🎨 **4 Signature Themes**:
+  - ☀️ **iiSU Light**: Crisp porcelain white with Nintendo red & cyan accents.
+  - 🌙 **Midnight Cyber**: Deep obsidian glassmorphism with vivid neon glows.
+  - 🌊 **Sony XMB Wave**: Ambient animated PlayStation-inspired wave gradient.
+  - 📟 **Game Boy DMG Classic**: Authentic monochromatic dot-matrix LCD green.
+- 💾 **3D Physical Cartridge Engine**:
+  - Tactile retro game cartridges with dynamic metallic sheens, grip textures, embossed brand stamps, and smart color heuristics matched to game titles.
+- 🌐 **Automated ES-DE Online Metadata Scraper**:
+  - Zero bloated assets in your repo. Scrapes official 3D box art from **Libretro Thumbnails** and synopsis info from **Wikipedia** on the fly, cached in **IndexedDB**.
+- 🔊 **Synthesized Pure Web Audio UI SFX**:
+  - Real-time acoustic sound synthesizer. Zero external MP3 downloads. Authentic mechanical cartridge insertion click-clacks, frequency swooshes, and boot chimes.
 - 🎮 **Full Gamepad & Keyboard Navigation**:
-  - Navigate game tiles using DPAD/Thumbstick or Keyboard Arrow keys.
-  - Cycle through console categories using `L1`/`R1` shoulder buttons (or `Q`/`E` on keyboard).
-  - Quick-launch games with `A` button or `Enter`.
-- 📊 **Dynamic Console Sorting**:
-  - Topbar navigation ribbon automatically sorts console systems by total game count (most titles first).
-- 🚀 **Zero-Config ROM Drop-in & Drag-and-Drop**:
-  - Drag and drop custom ROM files anywhere onto the dashboard to play immediately.
-  - Interactive "LOAD ROM" file picker to select local custom ROMs from your device (`.gba`, `.nes`, `.smc`/`.sfc`, `.z64`/`.n64`, `.nds`, `.bin`/`.chd`/`.iso`, `.zip`, `.md`/`.gen`).
-  - Automatic console system core detection based on file extension with automatic Object URL memory cleanup on unmount.
-  - Automatically indexes ROMs placed in designated platform folders without requiring manual metadata entry.
-- 🔮 **Mirai Grand Vision & Deliverables Blueprint**:
-  - Full codebase audit, architectural gap analysis, live deliverables checklist, and comprehensive feature innovation catalog across 8 domains in [mirai.md](mirai.md).
-- 📚 **Comprehensive System Architecture Specs**:
-  - Complete architecture specifications under `architecture/` detailing core bootstrap, modules, components, and future feature designs ("Mirai").
+  - D-Pad/Stick navigation, shoulder triggers (`L1`/`R1` or `Q`/`E`), on-screen virtual keyboard (`⌘K`), and instant quick-launch (`A` button / `Enter`).
+- ⏱️ **Playtime Analytics & Smart Collections**:
+  - Track session durations, total hours played, bookmark **Favorites ⭐**, and browse your **Recently Played** queue.
 
 ---
 
-## 📁 Directory Structure
+## 🕹️ Supported Systems
 
-```text
-retro-player/
-├── architecture/         # System Architecture & Technical Specifications
-│   ├── README.md         # Guidelines, folder structure rules & doc standards
-│   ├── core/             # Application entry point & React shell specs
-│   ├── modules/          # Emulation engine, audio SFX, theme engine, playtime/favorites & gamepad specs
-│   ├── components/       # Topbar, ribbon, cartridge tile, modals & HUD specs
-│   └── mirai/            # Future roadmap specifications (WebRTC Netplay, Cloud Saves)
-├── mirai.md              # Master Blueprint, codebase audit, deliverables status & future catalog
-├── public/
-│   ├── cover/            # Custom cover art images by platform folder
-│   ├── roms/             # Drop your ROM files here organized by platform
-│   ├── emulatorjs/       # Local offline EmulatorJS assets & loader
-│   └── assets/           # System icons and fallback UI assets
-├── src/
-│   ├── components/       # Modular UI Components
-│   │   ├── Topbar.jsx          # Status HUD, search bar, theme toggle, sound toggle & clock
-│   │   ├── LoadRomModal.jsx    # In-app Load ROM modal with drag-drop & format catalog
-│   │   ├── SystemRibbon.jsx    # Dynamic console ribbon tabs & smart collections
-│   │   ├── CartridgeGrid.jsx   # 3D Cartridge grid viewport
-│   │   ├── CartridgeTile.jsx   # Physical 3D cartridge with sheen, grips & star badges
-│   │   ├── GameDetailModal.jsx # Game drawer with playtime stats, favorites & save detection
-│   │   ├── AboutInfoModal.jsx  # About dialog & controls table
-│   │   ├── DropzoneOverlay.jsx # Drag-and-drop custom ROM backdrop
-│   │   ├── ConsoleHud.jsx      # Bottom controller button hints
-│   │   ├── EmulatorModal.jsx   # Isolated iframe EmulatorJS sandbox with offline fallback
-│   │   ├── OnScreenKeyboard.jsx # On-screen virtual keyboard for gamepad & touch
-│   │   └── ErrorBoundary.jsx   # Fatal runtime exception fallback component
-│   ├── services/         # Background Services & Scraper Engines
-│   │   └── metadataScraper.js      # Libretro Thumbnails & Open DB metadata scraper
-│   ├── hooks/            # Specialized Custom React Hooks
-│   │   ├── useWebAudioSfx.js       # Synthesized Web Audio UI sound effects
-│   │   ├── useThemeEngine.js       # Multi-theme state and persistence engine
-│   │   ├── usePlaytimeAndFavorites.js # Favorites, recents & playtime analytics
-│   │   ├── useMetadataScraper.js   # Background scraping & IndexedDB caching hook
-│   │   ├── useGamepadStatus.js     # HTML5 Gamepad connection tracking
-│   │   ├── useSaveDataManager.js   # LocalStorage & IndexedDB save detection
-│   │   ├── useRomManifest.js       # Catalog manifest & smart collections filter
-│   │   └── useGamepadNavigation.js # 2D spatial navigation & gamepad polling
-│   ├── utils/            # Pure Utility Functions
-│   │   ├── cartridgeColors.js  # Dynamic cartridge shell color heuristics
-│   │   └── systemDetector.js   # ROM extension to emulator core detection
-│   ├── gameDescriptions.js     # Title metadata & release date lookup helper
-│   ├── App.jsx           # Clean Root Orchestrator (< 200 lines)
-│   ├── main.jsx          # React DOM root entry point
-│   └── index.css         # Multi-theme styles, 3D cartridge CSS & design tokens
-├── vite.config.js        # Multi-console scanner plugin & static file middlewares
-└── package.json
+| System | Platform Key | Default Core | Supported File Extensions |
+| :--- | :--- | :--- | :--- |
+| **Game Boy Advance** | `gba` | `gba` (mGBA) | `.gba` |
+| **Game Boy / Color** | `gb`, `gbc` | `gb` (Gambatte) | `.gb`, `.gbc` |
+| **Super Nintendo** | `snes` | `snes` (Snes9x) | `.sfc`, `.smc`, `.snes` |
+| **Nintendo (NES)** | `nes` | `nes` (FCEUmm) | `.nes` |
+| **Nintendo 64** | `n64` | `n64` (Mupen64Plus) | `.z64`, `.n64`, `.v64` |
+| **Nintendo DS** | `nds` | `nds` (MelonDS / DeSmuME) | `.nds` |
+| **Sega Genesis / Mega Drive** | `genesis` | `segaMD` (Genesis Plus GX) | `.gen`, `.md`, `.smd` |
+| **PlayStation (PS1)** | `ps1` | `psx` (Beetle PSX) | `.chd`, `.iso`, `.cue`, `.bin` |
+| **Arcade** | `arcade` | `mame2003_plus` | `.zip` |
+
+---
+
+## 🚀 Deployment Guide
+
+### 1. ☁️ One-Click Deploy to Railway
+
+Deploy your personal retro gaming portal to [Railway](https://railway.app) in under 2 minutes:
+
+1. **Fork or import** this repository to your GitHub account.
+2. Log in to **Railway** $\rightarrow$ Click **New Project** $\rightarrow$ **Deploy from GitHub repo**.
+3. Select your `retro-player` repository.
+4. **Attach a Persistent Volume** *(crucial for saving ROMs)*:
+   - Click on the newly created service $\rightarrow$ Navigate to the **Volumes** tab.
+   - Click **Add Volume** $\rightarrow$ Set Mount Path to: `/roms`.
+5. **Set Environment Variables** in Railway:
+   - `PORT` = `3000`
+   - `ROMS_DIR` = `/roms`
+6. Click **Deploy**. Railway will build the multi-stage Dockerfile and give you a live URL (`https://your-app.up.railway.app`).
+
+---
+
+### 2. 🐳 Deploy with Docker Compose (Self-Hosted / HomeLab / NAS)
+
+Run Retro Player locally or on your home server (Unraid, TrueNAS, Synology, Raspberry Pi, VPS):
+
+```yaml
+version: '3.8'
+
+services:
+  retro-player:
+    image: ghcr.io/godarayudhvir/retro-player:latest
+    container_name: retro-player
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - ROMS_DIR=/roms
+    volumes:
+      # Map host roms folder directly into /roms inside the container
+      - ./roms:/roms
+```
+
+#### Starting the stack:
+```bash
+# 1. Create directory and place your docker-compose.yml
+mkdir retro-player && cd retro-player
+
+# 2. Launch in detached mode
+docker compose up -d
+
+# 3. Access in your browser
+open http://localhost:3000
 ```
 
 ---
 
-## 📐 System Architecture Documentation (`/architecture`)
-
-The project includes an organized [architecture/](architecture/README.md) specifications folder structured by domain scope:
-
-- **[Guidelines & Standards](architecture/README.md)**: Rules for writing specs, sub-directory constraints, and feature proposal templates.
-- **[Core Specifications](architecture/core/index.md)**: Entry point ([index.md](architecture/core/index.md)) and application shell ([app.md](architecture/core/app.md)).
-- **[Functional Modules](architecture/modules/emulator.md)**: Emulator engine ([emulator.md](architecture/modules/emulator.md)), Metadata Scraper ([metadata-scraper.md](architecture/modules/metadata-scraper.md)), Web Audio SFX ([audio-sfx.md](architecture/modules/audio-sfx.md)), Multi-Theme Engine ([theme-engine.md](architecture/modules/theme-engine.md)), Playtime & Favorites ([playtime-favorites.md](architecture/modules/playtime-favorites.md)), console switcher ([console-switcher.md](architecture/modules/console-switcher.md)), game catalog scanner ([game-catalog.md](architecture/modules/game-catalog.md)), and gamepad navigation ([gamepad-controls.md](architecture/modules/gamepad-controls.md)).
-- **[UI Components](architecture/components/topbar.md)**: Topbar ([topbar.md](architecture/components/topbar.md)), System Ribbon ([system-ribbon.md](architecture/components/system-ribbon.md)), Cartridge Tile ([cartridge-tile.md](architecture/components/cartridge-tile.md)), Game Detail Modal ([game-detail-modal.md](architecture/components/game-detail-modal.md)), About Modal ([about-info-modal.md](architecture/components/about-info-modal.md)), Emulator Modal ([emulator-modal.md](architecture/components/emulator-modal.md)), on-screen virtual keyboard ([on-screen-keyboard.md](architecture/components/on-screen-keyboard.md)), error boundary ([error-boundary.md](architecture/components/error-boundary.md)), and retro CSS effects ([retro-effects.md](architecture/components/retro-effects.md)).
-- **[Mirai Future Features](architecture/mirai/multiplayer.md)**: Upcoming specifications for WebRTC P2P Multiplayer ([multiplayer.md](architecture/mirai/multiplayer.md)) and Cloud Save Sync ([cloud-saves.md](architecture/mirai/cloud-saves.md)), alongside the Master Blueprint in [mirai.md](mirai.md).
-
----
-
-## 🚀 Getting Started with Docker (Recommended)
-
-Retro Player can be deployed as a self-hosted container using Docker or Docker Compose, similar to media servers like Jellyfin or RomM.
-
----
-
-### Quick Start: Docker Compose
-
-1. **Create a project folder and `docker-compose.yml`**:
-   ```bash
-   mkdir retro-player && cd retro-player
-   ```
-
-2. **Create `docker-compose.yml`**:
-   ```yaml
-   version: '3.8'
-
-   services:
-     retro-player:
-       image: ghcr.io/godarayudhvir/retro-player:latest
-       container_name: retro-player
-       restart: unless-stopped
-       ports:
-         - "3000:3000"
-       environment:
-         - PORT=3000
-         - ROMS_DIR=/roms
-       volumes:
-         # Maps the ./roms folder on your host into /roms inside the container
-         - ./roms:/roms:ro
-   ```
-
-3. **Organize your ROM files**:
-   Place your games inside `./roms/[system]/`:
-   ```text
-   retro-player/
-   ├── docker-compose.yml
-   └── roms/
-       ├── gba/
-       │   └── Pokemon Emerald.gba
-       ├── snes/
-       │   └── Super Mario World.sfc
-       ├── n64/
-       │   └── Super Mario 64.z64
-       ├── nds/
-       │   └── Pokemon Platinum.nds
-       └── nes/
-           └── Megaman 2.nes
-   ```
-
-4. **Launch the container**:
-   ```bash
-   docker compose up -d
-   ```
-
-5. **Open the App**:
-   Navigate to `http://localhost:3000` (or `http://<your-server-ip>:3000`).
-
----
-
-### Quick Start: Docker Run CLI
-
-If you prefer running a single `docker run` command without Compose:
+### 3. 🖥️ Run with Docker CLI
 
 ```bash
 docker run -d \
@@ -196,151 +147,142 @@ docker run -d \
   -p 3000:3000 \
   -e PORT=3000 \
   -e ROMS_DIR=/roms \
-  -v /path/to/your/roms:/roms:ro \
+  -v $(pwd)/roms:/roms \
   ghcr.io/godarayudhvir/retro-player:latest
 ```
 
 ---
 
-### 🔄 Updating to the Latest Version
+### 4. 💻 Local Development Setup (Node.js)
 
-When a new version is published to GHCR, update your container with:
-
-#### Using Docker Compose:
 ```bash
-# 1. Pull the newest image from GHCR
+# 1. Clone the repository
+git clone https://github.com/godarayudhvir/retro-player.git
+cd retro-player
+
+# 2. Install dependencies
+npm install
+
+# 3. Launch Vite dev server
+npm run dev
+
+# 4. Or build and launch production server
+npm run build
+npm start
+```
+
+---
+
+## 🗂️ Organizing & Adding ROMs
+
+### Method A: In-App Drag & Drop (Auto-Persistent)
+Simply drag and drop any `.gba`, `.nes`, `.sfc`, `.z64`, `.nds` file onto the browser window.  
+The backend will automatically:
+1. Detect the system from the file extension.
+2. Auto-create `./roms/<system>/` if it doesn't exist.
+3. Save the ROM file to disk permanently.
+4. Auto-fetch and cache official 3D box art and synopsis metadata.
+
+### Method B: Direct Folder Placement
+Place your ROM collection on your host machine inside `./roms/[system]/`:
+```text
+retro-player/
+├── docker-compose.yml
+└── roms/
+    ├── gba/
+    │   └── Pokemon Emerald.gba
+    ├── snes/
+    │   └── Super Mario World.sfc
+    ├── n64/
+    │   └── Super Mario 64.z64
+    ├── nds/
+    │   └── Pokemon Platinum.nds
+    └── nes/
+        └── Megaman 2.nes
+```
+
+---
+
+## 🔄 Updating Your Container
+
+#### Docker Compose:
+```bash
+# Pull newest image from GitHub Container Registry
 docker compose pull
 
-# 2. Recreate the container with the updated image
+# Recreate container with zero downtime
 docker compose up -d
 
-# 3. (Optional) Prune old dangling images to reclaim disk space
+# Clean up stale images
 docker image prune -f
 ```
 
-#### Using Docker CLI:
+#### Docker CLI:
 ```bash
-# 1. Stop and remove the running container
 docker stop retro-player && docker rm retro-player
-
-# 2. Pull the latest image
 docker pull ghcr.io/godarayudhvir/retro-player:latest
-
-# 3. Start the new container
-docker run -d \
-  --name retro-player \
-  --restart unless-stopped \
-  -p 3000:3000 \
-  -v /path/to/your/roms:/roms:ro \
-  ghcr.io/godarayudhvir/retro-player:latest
+docker run -d --name retro-player --restart unless-stopped -p 3000:3000 -v $(pwd)/roms:/roms ghcr.io/godarayudhvir/retro-player:latest
 ```
 
 ---
 
-### 🛠️ Troubleshooting & Debugging
+## 🛠️ Troubleshooting & Diagnostics
 
-#### 1. Inspecting Live Container Logs
+<details>
+<summary><b>View Live Container Logs</b></summary>
+
 ```bash
-docker logs -f retro-player
-# Or with Compose:
 docker compose logs -f
+# Or via container name:
+docker logs -f retro-player
 ```
+</details>
 
-#### 2. Verify Directory Mount Inside Container
-Check if the container can see your ROM files:
+<details>
+<summary><b>Verify ROM Mount Permissions</b></summary>
+
+If the container cannot read your ROM directory on Linux:
 ```bash
+# Verify files inside container
 docker exec -it retro-player ls -lah /roms
-```
 
-#### 3. Complete Reset / Clean Re-installation
-If you need to completely remove the container, cache, and old images:
+# Grant read/write permissions on host
+chmod -R a+rwX ./roms
+```
+</details>
+
+<details>
+<summary><b>Complete Factory Reset</b></summary>
+
 ```bash
-# Stop and remove containers and associated networks
+# Stop and remove container & networks
 docker compose down -v --remove-orphans
 
-# Remove retro-player images
+# Remove cached images
 docker rmi ghcr.io/godarayudhvir/retro-player:latest
 
-# Rebuild / re-pull fresh
+# Re-pull and launch clean
 docker compose pull
 docker compose up -d --force-recreate
 ```
-
-#### 4. Permission Denied Errors on Linux Hosts
-If the container cannot read your ROM files, ensure your user has read permissions on the host directory:
-```bash
-chmod -R a+rX /path/to/your/roms
-```
-
-#### 5. Changing the Web Port
-To run on a different host port (e.g., port `8080` instead of `3000`), update the port mapping in `docker-compose.yml`:
-```yaml
-ports:
-  - "8080:3000" # Host 8080 -> Container 3000
-```
+</details>
 
 ---
 
-### Local Development Setup (Node.js)
+## 🎮 Controls Quick Reference
 
-#### Prerequisites
-- **Node.js** (v18+ recommended)
-- **npm** or **yarn**
-
-#### Installation
-
-1. Clone or navigate to the project directory:
-   ```bash
-   cd retro-player
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-4. Or build and run production server locally:
-   ```bash
-   npm run build
-   npm start
-   ```
-
-5. Open your browser at `http://localhost:3000`.
-
----
-
-## 🗂️ Adding ROMs & Automated Metadata Scraping
-
-### Adding Games
-Place your ROM files inside `public/roms/[system]/` or simply drag and drop them anywhere into the browser:
-- Example: `public/roms/gba/Pokemon - Emerald Version.zip`
-
-### Automated Online Box Art & Metadata Scraping
-Retro Player follows the **ES-DE (EmulationStation-DE)** architecture with zero bundled covers or hardcoded metadata in the repository:
-- When games are detected or loaded, the built-in online scraper automatically fetches official 3D box art from the **Libretro Thumbnails CDN** and synopsis/release details from **Wikipedia REST APIs**.
-- All scraped assets are cached locally in your browser's **IndexedDB** for instant subsequent loading.
-
----
-
-## 🎮 Controls
-
-### UI Navigation
+### Dashboard Navigation
 | Action | Keyboard | Gamepad |
 | :--- | :--- | :--- |
-| **Navigate Grid & Menus** | Arrow Keys (`Up`, `Down`, `Left`, `Right`) / `W`, `A`, `S`, `D` | D-Pad / Left Stick |
-| **Switch System / Smart Tab** | `Q` / `E` / `PageUp` / `PageDown` | `L1` / `R1` (Shoulder Buttons) |
+| **Navigate Grid & Menus** | Arrow Keys / `W`, `A`, `S`, `D` | D-Pad / Left Stick |
+| **Switch System / Tab** | `Q` / `E` / `PageUp` / `PageDown` | `L1` / `R1` (Shoulder Buttons) |
 | **Select / Launch Game** | `Enter` / `Space` | `A` Button (Button 0) |
 | **Toggle Favorite ⭐** | `F` Key | `X` Button (Button 2) |
 | **Switch Theme 🎨** | `T` Key | Topbar Theme Button |
 | **Search / Virtual Keyboard** | `⌘K` / `Ctrl+K` | `Y` Button (Button 3) / `Select` |
 | **Back / Close Modals** | `Escape` / `Backspace` | `B` Button (Button 1) |
 
-### In-Game Emulation Controls
+### In-Game Emulation
 | Action | Keyboard | Gamepad |
 | :--- | :--- | :--- |
 | **Directional Movement** | Arrow Keys / `W`, `A`, `S`, `D` | D-Pad / Left Stick |
@@ -350,10 +292,25 @@ Retro Player follows the **ES-DE (EmulationStation-DE)** architecture with zero 
 
 ---
 
-## 🛠️ Built With
+## 📚 Technical Architecture Specifications
 
-- [React 18](https://react.dev/)
-- [Vite 5](https://vitejs.dev/)
-- [EmulatorJS](https://emulatorjs.org/)
-- [Lucide React](https://lucide.dev/)
+Retro Player follows rigorous software engineering standards with full technical design specifications under [`architecture/`](architecture/README.md):
 
+- **[Core Entry & Bootstrap](architecture/core/index.md)**: Entry point, React mounting, Express production server & Docker containerization.
+- **[Application Shell Orchestrator](architecture/core/app.md)**: Hook lifecycle, state coordination, and modal management.
+- **[Emulator Engine](architecture/modules/emulator.md)**: EmulatorJS iframe isolation, core fallback & battery SRAM detection.
+- **[Metadata Scraper](architecture/modules/metadata-scraper.md)**: Libretro & Wikipedia dynamic scraper with IndexedDB caching.
+- **[Synthesized Audio SFX](architecture/modules/audio-sfx.md)**: Pure Web Audio API acoustic synthesis.
+- **[Theme Engine](architecture/modules/theme-engine.md)**: Real-time CSS tokens and instant theme persistence.
+- **[Game Catalog Indexer](architecture/modules/game-catalog.md)**: Zero-config auto-scanning and persistent upload pipeline.
+- **[Mirai Master Vision](mirai.md)**: Deliverables checklist and multi-domain innovation roadmap.
+
+---
+
+## 📄 License
+
+Distributed under the **MIT License**. See `LICENSE` for more information.
+
+<div align="center">
+Made with ❤️ for classic gaming enthusiasts worldwide.
+</div>
