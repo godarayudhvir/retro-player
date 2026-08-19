@@ -20,14 +20,6 @@ Featuring physical 3D cartridge rendering, real-time online metadata scraping, s
 
 <img src="home.webp" alt="Retro Player Showcase" width="100%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
 
-<br /><br />
-
-### 1-Click Instant Deployments
-
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/godarayudhvir/retro-player)
-&nbsp;&nbsp;
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new)
-
 </div>
 
 ---
@@ -103,6 +95,24 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 | **Sega Genesis / Mega Drive** | `genesis` | `segaMD` (Genesis Plus GX) | `.gen`, `.md`, `.smd` |
 | **PlayStation (PS1)** | `ps1` | `psx` (Beetle PSX) | `.chd`, `.iso`, `.cue`, `.bin` |
 | **Arcade** | `arcade` | `mame2003_plus` | `.zip` |
+
+---
+
+## 🌐 Browser & OS Compatibility
+
+| Operating System | Browser | Status | Notes |
+| :--- | :--- | :---: | :--- |
+| **macOS** | **Google Chrome** | 🟢 **Working** | Fully tested & verified (60 FPS, WebAssembly, Web Audio & Gamepad API) |
+| **macOS** | **Safari** | ⚪ *Untested* | Compatibility not yet verified |
+| **macOS** | **Mozilla Firefox** | ⚪ *Untested* | Compatibility not yet verified |
+| **Windows 10 / 11** | **Google Chrome / Microsoft Edge** | ⚪ *Untested* | Compatibility not yet verified |
+| **Windows 10 / 11** | **Mozilla Firefox** | ⚪ *Untested* | Compatibility not yet verified |
+| **Linux (Ubuntu / Arch / SteamOS)** | **Chrome / Chromium** | ⚪ *Untested* | Compatibility not yet verified |
+| **Linux (Ubuntu / Arch / SteamOS)** | **Mozilla Firefox** | ⚪ *Untested* | Compatibility not yet verified |
+| **iOS / iPadOS** | **Safari / Chrome** | ⚪ *Untested* | Compatibility not yet verified |
+| **Android** | **Chrome Mobile** | ⚪ *Untested* | Compatibility not yet verified |
+
+> **Note**: **macOS with Google Chrome** is currently the primary tested and verified environment. All other operating system and browser combinations are currently untested.
 
 ---
 
