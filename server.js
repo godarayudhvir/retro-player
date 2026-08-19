@@ -153,8 +153,8 @@ app.get('/api/roms', (req, res) => {
 // Serve static frontend build
 app.use(express.static(DIST_DIR));
 
-// Fallback to index.html for SPA client routing
-app.get('*', (req, res) => {
+// Fallback to index.html for SPA client routing (Express v5 compatible)
+app.use((req, res) => {
   const indexFile = path.join(DIST_DIR, 'index.html');
   if (fs.existsSync(indexFile)) {
     res.sendFile(indexFile);
