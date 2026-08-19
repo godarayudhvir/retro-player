@@ -87,31 +87,29 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 <div align="center">
 
-### Instant 1-Click Cloud Deployment
+### 1-Click Cloud Deployments
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/godarayudhvir/retro-player)
-&nbsp;&nbsp;
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/godarayudhvir/retro-player)
+&nbsp;&nbsp;
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new)
 
 </div>
 
 ---
 
-### 1. ☁️ Railway (1-Click Deploy)
+### 1. ☁️ Railway
 
-Click the **Deploy on Railway** button above or follow these manual steps:
-
-1. **Fork or Import** this repository into your GitHub account.
-2. Go to **Railway** $\rightarrow$ **New Project** $\rightarrow$ **Deploy from GitHub repo** $\rightarrow$ select `retro-player`.
+1. Click **[Deploy on Railway](https://railway.com/new)** (or log into Railway).
+2. Click **Deploy from GitHub repo** $\rightarrow$ select `godarayudhvir/retro-player` (or your fork).
 3. **Add Persistent Volume** *(crucial for saving ROMs)*:
    - Click your service $\rightarrow$ **Volumes** tab $\rightarrow$ **Add Volume**.
-   - Set **Mount Path**: `/roms` (e.g. 5GB–10GB).
+   - Set **Mount Path**: `/roms`.
 4. **Set Environment Variables**:
    - `PORT` = `3000`
    - `ROMS_DIR` = `/roms`
 5. **Generate Public Domain**:
    - Under service **Settings** $\rightarrow$ **Networking** $\rightarrow$ click **Generate Domain**.
-6. Railway automatically builds the `Dockerfile` and deploys your portal!
+6. Railway automatically builds the multi-stage `Dockerfile` and deploys your live retro gaming portal!
 
 ---
 
