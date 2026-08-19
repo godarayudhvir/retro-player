@@ -345,14 +345,51 @@ app.post('/api/delete-rom', express.json(), (req, res) => {
     let targetPath = null;
 
     if (relativePath) {
-      targetPath = path.join(ROMS_DIR, relativePath);
-    } else if (systemKey && filename) {
-      targetPath = path.join(ROMS_DIR, systemKey, path.basename(filename));
-    } else if (filename) {
-      targetPath = path.join(ROMS_DIR, path.basename(filename));
+      const decodedRel = decodeURIComponent(relativePath);
+      const candidate = path.join(ROMS_DIR, decodedRel);
+      if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+        targetPath = candidate;
+      }
+    }
+
+    if (!targetPath && systemKey && filename) {
+      const decodedName = decodeURIComponent(filename);
+      const candidate = path.join(ROMS_DIR, systemKey, path.basename(decodedName));
+      if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+        targetPath = candidate;
+      }
+    }
+
+    if (!targetPath && filename) {
+      const decodedName = decodeURIComponent(filename);
+      const candidate = path.join(ROMS_DIR, path.basename(decodedName));
+      if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+        targetPath = candidate;
+      }
+    }
+
+    // Fallback: Recursively search for matching filename in ROMS_DIR
+    if (!targetPath && filename) {
+      const safeTargetName = path.basename(decodeURIComponent(filename)).toLowerCase();
+      function findFile(dir) {
+        if (!fs.existsSync(dir)) return null;
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        for (const entry of entries) {
+          const full = path.join(dir, entry.name);
+          if (entry.isDirectory()) {
+            const found = findFile(full);
+            if (found) return found;
+          } else if (entry.isFile() && entry.name.toLowerCase() === safeTargetName) {
+            return full;
+          }
+        }
+        return null;
+      }
+      targetPath = findFile(ROMS_DIR);
     }
 
     if (!targetPath || !fs.existsSync(targetPath)) {
+      console.warn(`[ROM DELETE WARN] File not found: ${filename || relativePath} in ${ROMS_DIR}`);
       return res.status(404).json({ error: 'ROM file not found on disk' });
     }
 
