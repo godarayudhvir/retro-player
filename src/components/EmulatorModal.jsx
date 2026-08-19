@@ -248,7 +248,9 @@ export default function EmulatorModal({ game, gamepadConnected, onClose, onSessi
             window.EJS_startOnLoaded = true;
             window.EJS_backgroundColor = '#000000';
             window.EJS_language = 'en-US';
-            window.EJS_VirtualGamepad = true;
+            window.EJS_VirtualGamepad = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+            window.EJS_volume = 1;
+            window.EJS_mute = false;
 
             // Configure Nintendo DS side-by-side screen layout for tablet / desktop viewports (>= 768px)
             const isTabletOrAbove = (window.innerWidth >= 768) || (window.parent && window.parent.innerWidth >= 768);
@@ -368,6 +370,34 @@ export default function EmulatorModal({ game, gamepadConnected, onClose, onSessi
                     const special = [16, 17, 18, 19, 20, 21, 22, 23];
                     for (let i = 0; i < 4; i++) {
                       if (gamepadIndex !== i) continue;
+
+                      // Left Stick to D-Pad auto-fallback for all games (run once per axis event, not 30 times per loop)
+                      if (e.type === "axischanged" && this.gameManager && typeof this.gameManager.simulateInput === 'function') {
+                        if (e.axis === 'LEFT_STICK_X') {
+                          if (e.value > 0.35) {
+                            this.gameManager.simulateInput(i, 7, 1); // D-Pad Right
+                            this.gameManager.simulateInput(i, 6, 0); // D-Pad Left
+                          } else if (e.value < -0.35) {
+                            this.gameManager.simulateInput(i, 6, 1); // D-Pad Left
+                            this.gameManager.simulateInput(i, 7, 0); // D-Pad Right
+                          } else {
+                            this.gameManager.simulateInput(i, 6, 0);
+                            this.gameManager.simulateInput(i, 7, 0);
+                          }
+                        } else if (e.axis === 'LEFT_STICK_Y') {
+                          if (e.value > 0.35) {
+                            this.gameManager.simulateInput(i, 5, 1); // D-Pad Down
+                            this.gameManager.simulateInput(i, 4, 0); // D-Pad Up
+                          } else if (e.value < -0.35) {
+                            this.gameManager.simulateInput(i, 4, 1); // D-Pad Up
+                            this.gameManager.simulateInput(i, 5, 0); // D-Pad Down
+                          } else {
+                            this.gameManager.simulateInput(i, 4, 0);
+                            this.gameManager.simulateInput(i, 5, 0);
+                          }
+                        }
+                      }
+
                       for (let j = 0; j < 30; j++) {
                         if (!this.controls || !this.controls[i] || !this.controls[i][j] || this.controls[i][j].value2 === undefined) {
                           continue;
@@ -379,31 +409,6 @@ export default function EmulatorModal({ game, gamepadConnected, onClose, onSessi
                             this.gameManager.simulateInput(i, j, (e.type === "buttonup" ? 0 : (special.includes(j) ? 0x7fff : 1)));
                           }
                         } else if (e.type === "axischanged") {
-                          // Left Stick to D-Pad auto-fallback for all games
-                          if (e.axis === 'LEFT_STICK_X' && this.gameManager && typeof this.gameManager.simulateInput === 'function') {
-                            if (e.value > 0.35) {
-                              this.gameManager.simulateInput(i, 7, 1); // D-Pad Right
-                              this.gameManager.simulateInput(i, 6, 0); // D-Pad Left
-                            } else if (e.value < -0.35) {
-                              this.gameManager.simulateInput(i, 6, 1); // D-Pad Left
-                              this.gameManager.simulateInput(i, 7, 0); // D-Pad Right
-                            } else {
-                              this.gameManager.simulateInput(i, 6, 0);
-                              this.gameManager.simulateInput(i, 7, 0);
-                            }
-                          } else if (e.axis === 'LEFT_STICK_Y' && this.gameManager && typeof this.gameManager.simulateInput === 'function') {
-                            if (e.value > 0.35) {
-                              this.gameManager.simulateInput(i, 5, 1); // D-Pad Down
-                              this.gameManager.simulateInput(i, 4, 0); // D-Pad Up
-                            } else if (e.value < -0.35) {
-                              this.gameManager.simulateInput(i, 4, 1); // D-Pad Up
-                              this.gameManager.simulateInput(i, 5, 0); // D-Pad Down
-                            } else {
-                              this.gameManager.simulateInput(i, 4, 0);
-                              this.gameManager.simulateInput(i, 5, 0);
-                            }
-                          }
-
                           if (typeof controlValue === "string" && controlValue.split(":")[0] === e.axis && this.gameManager && typeof this.gameManager.simulateInput === 'function') {
                             if (special.includes(j)) {
                               if (j === 16 || j === 17) {
