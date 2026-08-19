@@ -12,12 +12,13 @@ The `Topbar` component serves as the primary console header and status HUD for R
 - **Shoulder Button Capsule (`.topbar-center-capsule`)**:
   - `L1` (or `Q` / `L` on keyboard): Switches to previous console system.
   - `R1` (or `E` / `R` on keyboard): Switches to next console system.
-- **Controller Connectivity Indicator**: Displays a green `GAMEPAD READY` badge when a physical gamepad is detected, or `NO CONTROLLER` in grey.
+- **Controller Connectivity Indicator**: Displays a green `GAMEPAD READY` badge when a physical gamepad is detected, or `NO CONTROLLER` in grey. Auto-hides on mobile touch devices.
 - **SFX Mute Toggle Button**: Quick toggle between `SFX ON` and `SFX OFF` using `Volume2`/`VolumeX` icons.
+- **Multi-Theme Engine Pill**: Displays the active theme icon (☀️, 🌙, 🌊, 📟) and short name, cycling themes on click or `T` key.
 - **Search Bar & Virtual Keyboard Trigger**: Interactive search input with an adaptive keyboard badge (`⌘K` on Mac, `Ctrl+K` on Windows/Linux, or `Y` when a gamepad is connected).
 - **Custom ROM Modal Trigger (`LOAD ROM`)**: Opens the in-app `LoadRomModal` dialog for selecting or dragging local custom ROMs.
-- **About Info Trigger (`INFO`)**: Opens the `AboutInfoModal` dialog.
 - **Digital Clock**: Displays local time updated every 10 seconds.
+- **Adaptive Mobile Layout**: On screens `<= 640px`, shoulder buttons are hidden, search expands fluidly, and action pill labels gracefully collapse into sleek icon-only touch buttons with 40px touch targets.
 
 ---
 

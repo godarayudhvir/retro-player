@@ -12,6 +12,7 @@ export default function CartridgeGrid({
   handleGameSelect,
   fetchGames,
   loading,
+  isFavorite,
   sfx
 }) {
   return (
@@ -20,12 +21,14 @@ export default function CartridgeGrid({
         <div className="tiles-grid">
           {filteredGames.map((game, index) => {
             const isFocused = focusedTarget.zone === 'grid' && focusedTarget.index === index;
+            const isFav = isFavorite ? isFavorite(game.id || game.title) : false;
             return (
               <CartridgeTile
                 key={game.id}
                 game={game}
                 index={index}
                 isFocused={isFocused}
+                isFavorite={isFav}
                 onClick={() => {
                   setFocusedTarget({ zone: 'grid', index });
                   handleGameSelect(game);

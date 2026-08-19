@@ -1,16 +1,22 @@
 import React from 'react';
-import { X, Play, Save, Cpu, Calendar, CheckCircle2 } from 'lucide-react';
+import { X, Play, Save, Cpu, Calendar, CheckCircle2, Star, Clock, History, RotateCcw } from 'lucide-react';
 import { getGameDescription, getReleaseDate } from '../gameDescriptions';
 
 /**
- * Game Detail Drawer Modal presenting rich metadata, release dates, core tags, live save data status, and launch actions.
+ * Game Detail Drawer Modal presenting rich metadata, release dates, core tags, live save data status, playtime stats, and launch actions.
  */
 export default function GameDetailModal({
   game,
   hasSaveData,
+  isFavorite = false,
+  onToggleFavorite,
+  onResetStats,
+  gameStats = { playtimeFormatted: '< 1 min', launchCount: 0, lastPlayedFormatted: 'Never' },
+  gamepadConnected = false,
   focusedTarget,
   onClose,
-  onPlay
+  onPlay,
+  sfx
 }) {
   if (!game) return null;
 
@@ -39,6 +45,12 @@ export default function GameDetailModal({
             <div className="tile-fallback" style={{ display: 'none', width: '100%', height: '100%' }}>
               <img src={game.systemIcon || "/assets/pokeball.png"} alt="" style={{ width: '60px', height: '60px' }} />
             </div>
+            {isFavorite && (
+              <div className="drawer-favorite-badge" title="Favorited Game">
+                <Star size={16} fill="#fbbf24" color="#d97706" />
+                <span>FAVORITE</span>
+              </div>
+            )}
           </div>
 
           <div className="game-card-details">
@@ -59,6 +71,45 @@ export default function GameDetailModal({
 
             <h2 className="game-card-title">{game.title}</h2>
             <p className="game-card-description">{getGameDescription(game)}</p>
+
+            {/* Playtime & Session Analytics Card */}
+            <div className="game-card-stats-grid">
+              <div className="stat-card">
+                <Clock size={15} color="#3b82f6" />
+                <div className="stat-info">
+                  <div className="stat-label-row">
+                    <span className="stat-label">PLAYTIME</span>
+                    {onResetStats && (gameStats.totalSeconds > 0 || gameStats.launchCount > 0) && (
+                      <button
+                        className="stat-reset-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onResetStats(game.id || game.title);
+                        }}
+                        title="Reset Playtime Stats"
+                      >
+                        <RotateCcw size={10} /> Reset
+                      </button>
+                    )}
+                  </div>
+                  <span className="stat-value">{gameStats.playtimeFormatted}</span>
+                </div>
+              </div>
+              <div className="stat-card">
+                <History size={15} color="#10b981" />
+                <div className="stat-info">
+                  <span className="stat-label">SESSIONS</span>
+                  <span className="stat-value">{gameStats.launchCount}</span>
+                </div>
+              </div>
+              <div className="stat-card">
+                <Calendar size={15} color="#f59e0b" />
+                <div className="stat-info">
+                  <span className="stat-label">LAST PLAYED</span>
+                  <span className="stat-value">{gameStats.lastPlayedFormatted}</span>
+                </div>
+              </div>
+            </div>
 
             {/* Save State Detector Badge */}
             <div className="save-status-container">
@@ -89,6 +140,23 @@ export default function GameDetailModal({
               >
                 <Play size={20} fill="#ffffff" />
                 <span>{hasSaveData ? 'CONTINUE / PLAY NOW' : 'PLAY NOW'}</span>
+              </button>
+
+              <button
+                className={`favorite-toggle-btn ${isFavorite ? 'active' : ''} ${focusedTarget.zone === 'cardModal' && focusedTarget.id === 'fav' ? 'gamepad-focused' : ''}`}
+                onClick={() => {
+                  if (onToggleFavorite) {
+                    const nextState = onToggleFavorite(game);
+                    sfx?.playFavoriteToggle?.(nextState);
+                  }
+                }}
+                title="Toggle Favorite (X on Gamepad / F on Keyboard)"
+              >
+                <Star size={18} fill={isFavorite ? '#fbbf24' : 'none'} color={isFavorite ? '#f59e0b' : 'currentColor'} />
+                <span>{isFavorite ? 'FAVORITED' : 'ADD FAVORITE'}</span>
+                <kbd className="lr-badge" style={{ marginLeft: 'auto', fontSize: '0.7rem' }}>
+                  {gamepadConnected ? 'X' : 'F'}
+                </kbd>
               </button>
             </div>
           </div>

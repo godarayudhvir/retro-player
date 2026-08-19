@@ -8,7 +8,7 @@ const SYSTEM_MAP = {
   nes: { name: 'NES', core: 'nes', color: '#e63946', category: 'Console', icon: '/assets/platforms/nes.svg' },
   snes: { name: 'Super Nintendo', core: 'snes', color: '#8b5cf6', category: 'Console', icon: '/assets/platforms/snes.svg' },
   gba: { name: 'Game Boy Advance', core: 'gba', color: '#3b82f6', category: 'Handheld', icon: '/assets/platforms/gba.svg' },
-  gbc: { name: 'Game Boy Color', core: 'gbc', color: '#10b981', category: 'Handheld', icon: '/assets/platforms/gbc.svg' },
+  gbc: { name: 'Game Boy Color', core: 'gb', color: '#10b981', category: 'Handheld', icon: '/assets/platforms/gbc.svg' },
   gb: { name: 'Game Boy', core: 'gb', color: '#84cc16', category: 'Handheld', icon: '/assets/platforms/gb.svg' },
   n64: { name: 'Nintendo 64', core: 'n64', color: '#f59e0b', category: 'Console', icon: '/assets/platforms/n64.svg' },
   nds: { name: 'Nintendo DS', core: 'nds', color: '#06b6d4', category: 'Handheld', icon: '/assets/platforms/nds.svg' },

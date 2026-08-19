@@ -27,7 +27,7 @@ export function detectSystemFromExtension(filename) {
     case 'cue':
     case 'chd':
     case 'iso': 
-      return { key: 'ps1', core: 'ps1', name: 'PlayStation', color: '#3b82f6', icon: '/assets/platforms/psx.svg' };
+      return { key: 'ps1', core: 'psx', name: 'PlayStation', color: '#3b82f6', icon: '/assets/platforms/psx.svg' };
     case 'zip': 
       return { key: 'arcade', core: 'mame2003_plus', name: 'Arcade', color: '#ec4899', icon: '/assets/platforms/arcade.svg' };
     case 'md':

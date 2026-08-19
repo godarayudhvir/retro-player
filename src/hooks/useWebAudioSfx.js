@@ -285,6 +285,87 @@ export function useWebAudioSfx() {
     }
   }, [isMuted, getAudioContext]);
 
+  /**
+   * Sparkling star arpeggio on favorite toggle (ascending on add, mellow descending on remove).
+   */
+  const playFavoriteToggle = useCallback((isFav = true) => {
+    if (isMuted) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      if (isFav) {
+        // High sparkle arpeggio (E5 -> G#5 -> B5 -> E6)
+        const notes = [659.25, 830.61, 987.77, 1318.51];
+        notes.forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          const start = now + (i * 0.045);
+
+          osc.frequency.setValueAtTime(freq, start);
+          gain.gain.setValueAtTime(0.12, start);
+          gain.gain.exponentialRampToValueAtTime(0.001, start + 0.14);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(start);
+          osc.stop(start + 0.15);
+        });
+      } else {
+        // Soft descending release tone
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.exponentialRampToValueAtTime(260, now + 0.08);
+
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.085);
+      }
+    } catch (e) {
+      console.debug('SFX error:', e);
+    }
+  }, [isMuted, getAudioContext]);
+
+  /**
+   * Futuristic filter sweep for theme switching.
+   */
+  const playThemeSwitch = useCallback(() => {
+    if (isMuted) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(280, now);
+      osc.frequency.exponentialRampToValueAtTime(840, now + 0.09);
+
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.095);
+    } catch (e) {
+      console.debug('SFX error:', e);
+    }
+  }, [isMuted, getAudioContext]);
+
   return {
     isMuted,
     toggleMute,
@@ -294,6 +375,9 @@ export function useWebAudioSfx() {
     playModalOpen,
     playModalClose,
     playKeyTick,
-    playSaveDetected
+    playSaveDetected,
+    playFavoriteToggle,
+    playThemeSwitch
   };
 }
+

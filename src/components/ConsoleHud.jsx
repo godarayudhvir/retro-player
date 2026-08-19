@@ -16,11 +16,19 @@ export default function ConsoleHud({ gamepadConnected }) {
           <span>Navigate</span>
         </div>
         <div className="hud-btn">
-          <div className="button-icon-circle">{gamepadConnected ? 'A BUTTON' : 'ENTER / SPACE'}</div>
-          <span>Launch Game</span>
+          <div className="button-icon-circle">{gamepadConnected ? 'A' : 'ENTER'}</div>
+          <span>Select / Play</span>
         </div>
         <div className="hud-btn">
-          <div className="button-icon-circle">{gamepadConnected ? 'B BUTTON' : 'ESC / BACKSPACE'}</div>
+          <div className="button-icon-circle">{gamepadConnected ? 'X' : 'F'}</div>
+          <span>Favorite ⭐</span>
+        </div>
+        <div className="hud-btn">
+          <div className="button-icon-circle">{gamepadConnected ? 'Y' : '⌘K / T'}</div>
+          <span>Search / Theme</span>
+        </div>
+        <div className="hud-btn">
+          <div className="button-icon-circle">{gamepadConnected ? 'B' : 'ESC'}</div>
           <span>Back</span>
         </div>
       </div>

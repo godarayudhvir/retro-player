@@ -42,47 +42,59 @@ export default function AboutInfoModal({ isOpen, focusedTarget, onClose }) {
 
           <div className="info-section">
             <h3>🎮 Handheld & Keyboard Controls</h3>
-            <table className="info-controls-table">
-              <thead>
-                <tr>
-                  <th>Action</th>
-                  <th>Keyboard</th>
-                  <th>Gamepad</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Navigate Tiles</td>
-                  <td>Arrow Keys / WASD</td>
-                  <td>D-Pad / Left Stick</td>
-                </tr>
-                <tr>
-                  <td>Switch System</td>
-                  <td>Q / E / PageUp / PageDn</td>
-                  <td>L1 / R1 (Shoulder)</td>
-                </tr>
-                <tr>
-                  <td>Launch Game / Select</td>
-                  <td>Enter / Space</td>
-                  <td>A Button (Btn 0)</td>
-                </tr>
-                <tr>
-                  <td>Search / Virtual Keyboard</td>
-                  <td>⌘K / Ctrl+K</td>
-                  <td>Y Button (Btn 3) / Select</td>
-                </tr>
-                <tr>
-                  <td>Back / Close Dialogs</td>
-                  <td>Escape / Backspace</td>
-                  <td>B Button (Btn 1)</td>
-                </tr>
-                <tr>
-                  <td>Exit Game to Launcher</td>
-                  <td>Escape</td>
-                  <td>Select + Start / Guide</td>
-                </tr>
-              </tbody>
-            </table>
+            <div className="info-table-wrapper">
+              <table className="info-controls-table">
+                <thead>
+                  <tr>
+                    <th>Action</th>
+                    <th>Keyboard</th>
+                    <th>Gamepad</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Navigate Tiles</td>
+                    <td>Arrow Keys / WASD</td>
+                    <td>D-Pad / Left Stick</td>
+                  </tr>
+                  <tr>
+                    <td>Switch System</td>
+                    <td>Q / E / PageUp / PageDn</td>
+                    <td>L1 / R1 (Shoulder)</td>
+                  </tr>
+                  <tr>
+                    <td>Launch Game / Select</td>
+                    <td>Enter / Space</td>
+                    <td>A Button (Btn 0)</td>
+                  </tr>
+                  <tr>
+                    <td>Toggle Favorite ⭐</td>
+                    <td>F Key</td>
+                    <td>X Button (Btn 2)</td>
+                  </tr>
+                  <tr>
+                    <td>Switch Theme 🎨</td>
+                    <td>T Key</td>
+                    <td>Topbar Theme Pill</td>
+                  </tr>
+                  <tr>
+                    <td>Search / Keyboard</td>
+                    <td>⌘K / Ctrl+K</td>
+                    <td>Y Button (Btn 3) / Select</td>
+                  </tr>
+                  <tr>
+                    <td>Back / Close Dialogs</td>
+                    <td>Escape / Backspace</td>
+                    <td>B Button (Btn 1)</td>
+                  </tr>
+                  <tr>
+                    <td>Exit Game to Launcher</td>
+                    <td>Escape</td>
+                    <td>Select + Start / Guide</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 

@@ -8,14 +8,19 @@ The `LoadRomModal` component (`.info-modal-backdrop` + `.load-rom-modal`) provid
 
 ## 2. Detailed List of What It Does
 
-- **In-App Modal Shell**: Styled with glassmorphic backdrop (`.info-modal-backdrop`), pop-in animation, and consistent design language with `AboutInfoModal` and `GameDetailModal`.
-- **Interactive Modal Dropzone (`.modal-dropzone`)**:
+- **In-App Modal Shell**: Styled with glassmorphic backdrop (`.modal-backdrop.load-rom-backdrop`), pop-in animation, and dedicated theme-reactive classes (`.load-rom-modal-content`).
+- **Full Theme Engine Fidelity**: Natively styled and overridden across all 4 system themes:
+  - **iiSU Light**: Porcelain glass container with soft blue border and sky blue dropzone.
+  - **Midnight Cyber**: `#0f172a` midnight panel with neon cyan borders, cyan dropzone glow, and cyan action buttons.
+  - **Sony XMB Wave**: Deep indigo/obsidian panel `#0a1124` with translucent blue laser glow and silver accents.
+  - **Game Boy DMG**: Retro olive LCD container `#8bac0f` with dark green `#0f380f` borders and monochrome pixel chip cards.
+- **Interactive Modal Dropzone (`.load-rom-dropzone`)**:
   - Handles drag-over hover glow effects (`.drag-active`).
   - Supports direct file dropping onto the modal.
   - Clicking anywhere in the dropzone or clicking "Choose File" triggers the browser file picker.
-- **Visual Supported Systems Catalog (`.supported-formats-grid`)**:
-  - Renders platform chips (`.platform-chip`) with official SVG icons and supported extensions (GBA, GB, GBC, NES, SNES, N64, NDS, PS1, Sega Genesis, Arcade).
-- **Client-Side Privacy Guarantee**:
+- **Visual Supported Systems Catalog (`.load-rom-platforms-grid`)**:
+  - Renders platform chips (`.load-rom-platform-chip`) with official SVG icons and supported extensions (GBA, GB, GBC, NES, SNES, N64, NDS, PS1, Sega Genesis, Arcade).
+- **Client-Side Privacy Guarantee (`.load-rom-privacy-banner`)**:
   - Explicit notification assuring the user that ROMs run 100% locally in WebAssembly memory and are never uploaded to a remote server.
 - **Gamepad & Keyboard Navigation**:
   - `Escape` or `B` button closes the modal.

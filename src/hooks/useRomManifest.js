@@ -5,7 +5,8 @@ import { detectSystemFromExtension } from '../utils/systemDetector';
 /**
  * Hook to manage ROM catalog manifest, search filtering, system categories, and custom ROM uploads.
  */
-export function useRomManifest(onCustomRomLoaded) {
+export function useRomManifest(onCustomRomLoaded, options = {}) {
+  const { favorites = [], recentlyPlayed = [] } = options;
   const [games, setGames] = useState([]);
   const [systems, setSystems] = useState([]);
   const [activeSystem, setActiveSystem] = useState('all');
@@ -98,19 +99,45 @@ export function useRomManifest(onCustomRomLoaded) {
   }, [processCustomRomFile]);
 
   const filteredGames = useMemo(() => {
-    return games
-      .filter(game => {
-        const matchesSearch = game.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                              (game.systemName && game.systemName.toLowerCase().includes(searchQuery.toLowerCase()));
-        const matchesSystem = activeSystem === 'all' || game.systemKey === activeSystem;
-        return matchesSearch && matchesSystem;
-      })
-      .sort((a, b) => {
+    let result = games;
+
+    // Apply activeSystem category
+    if (activeSystem === 'favorites') {
+      result = result.filter(game => favorites.includes(game.id || game.title));
+    } else if (activeSystem === 'recent') {
+      // Map and order by recentlyPlayed array
+      const recentIds = recentlyPlayed.map(r => r.id || r.title);
+      result = result
+        .filter(game => recentIds.includes(game.id || game.title))
+        .sort((a, b) => {
+          const idxA = recentIds.indexOf(a.id || a.title);
+          const idxB = recentIds.indexOf(b.id || b.title);
+          return idxA - idxB;
+        });
+    } else if (activeSystem !== 'all') {
+      result = result.filter(game => game.systemKey === activeSystem);
+    }
+
+    // Apply search query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(game => {
+        return game.title.toLowerCase().includes(q) ||
+               (game.systemName && game.systemName.toLowerCase().includes(q));
+      });
+    }
+
+    // Default release date sort if not recent tab
+    if (activeSystem !== 'recent') {
+      result = [...result].sort((a, b) => {
         const dateA = getReleaseDate(a);
         const dateB = getReleaseDate(b);
         return dateA.localeCompare(dateB);
       });
-  }, [games, searchQuery, activeSystem]);
+    }
+
+    return result;
+  }, [games, searchQuery, activeSystem, favorites, recentlyPlayed]);
 
   return {
     games,
@@ -130,3 +157,4 @@ export function useRomManifest(onCustomRomLoaded) {
     handleDrop
   };
 }
+

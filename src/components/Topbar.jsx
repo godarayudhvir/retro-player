@@ -1,8 +1,8 @@
 import React from 'react';
-import { Search, FolderOpen, Wifi, Info, Gamepad2, Volume2, VolumeX } from 'lucide-react';
+import { Search, FolderOpen, Wifi, Gamepad2, Volume2, VolumeX } from 'lucide-react';
 
 /**
- * Topbar console header with status indicators, shoulder tabs, search input, custom ROM loader, info modal trigger, and digital clock.
+ * Topbar console header with status indicators, shoulder tabs, search input, custom ROM loader, and digital clock.
  */
 export default function Topbar({
   gamepadConnected,
@@ -15,10 +15,10 @@ export default function Topbar({
   setSearchQuery,
   searchInputRef,
   setShowLoadRomModal,
-  setShowInfoModal,
   setShowVirtualKeyboard,
   time,
-  sfx
+  sfx,
+  themeEngine
 }) {
   const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent || navigator.platform);
 
@@ -71,45 +71,53 @@ export default function Topbar({
 
       <div className="topbar-right">
         {/* Gamepad Connection Status */}
-        <div className="status-pill" style={{ color: gamepadConnected ? '#10b981' : '#64748b' }}>
+        <div className="status-pill status-gamepad" style={{ color: gamepadConnected ? '#10b981' : '#64748b' }}>
           <Wifi size={16} />
-          <span>{gamepadConnected ? 'GAMEPAD READY' : 'NO CONTROLLER'}</span>
+          <span className="pill-text">{gamepadConnected ? 'GAMEPAD READY' : 'NO CONTROLLER'}</span>
         </div>
 
         {/* SFX Audio Mute/Unmute Toggle */}
         {sfx && (
           <button
-            className="status-pill"
+            className="status-pill status-sfx"
             onClick={sfx.toggleMute}
             title={sfx.isMuted ? 'Unmute UI Sound Effects' : 'Mute UI Sound Effects'}
-            style={{
-              cursor: 'pointer',
-              border: 'none',
-              background: 'rgba(255, 255, 255, 0.8)',
-              fontFamily: 'inherit',
-              color: sfx.isMuted ? '#94a3b8' : '#3b82f6'
-            }}
           >
-            {sfx.isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-            <span>{sfx.isMuted ? 'SFX OFF' : 'SFX ON'}</span>
+            {sfx.isMuted ? <VolumeX size={16} color="#94a3b8" /> : <Volume2 size={16} color="#3b82f6" />}
+            <span className="pill-text">{sfx.isMuted ? 'SFX OFF' : 'SFX ON'}</span>
+          </button>
+        )}
+
+        {/* Multi-Theme Selector Pill */}
+        {themeEngine && (
+          <button
+            className="status-pill theme-toggle-btn"
+            onClick={() => {
+              themeEngine.cycleTheme();
+              sfx?.playThemeSwitch?.();
+            }}
+            title={`Current Theme: ${themeEngine.currentThemeMeta.name} (Press 'T' to switch)`}
+          >
+            <span style={{ fontSize: '1rem' }}>{themeEngine.currentThemeMeta.icon}</span>
+            <span className="pill-text">{themeEngine.currentThemeMeta.shortName}</span>
           </button>
         )}
 
         {/* Search Input & Virtual Keyboard Trigger */}
         <div
-          className={`status-pill ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'search' ? 'gamepad-focused' : ''}`}
+          className={`status-pill status-search ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'search' ? 'gamepad-focused' : ''}`}
           onClick={() => {
             setShowVirtualKeyboard(true);
             sfx?.playModalOpen?.();
           }}
-          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
         >
-          <Search size={16} />
+          <Search size={16} color="#64748b" />
           <input
             ref={searchInputRef}
             type="text"
             placeholder="Search..."
             value={searchQuery}
+            className="search-input-field"
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => {
               setFocusedTarget({ zone: 'topbar', id: 'search' });
@@ -125,63 +133,30 @@ export default function Topbar({
               fontFamily: 'inherit',
               fontWeight: 700,
               fontSize: '0.85rem',
-              width: '100px',
               color: 'inherit'
             }}
           />
-          <kbd className="lr-badge" style={{ fontSize: '0.7rem', padding: '2px 6px', pointerEvents: 'none', userSelect: 'none', background: gamepadConnected ? '#f59e0b' : undefined, color: gamepadConnected ? '#ffffff' : undefined }}>
+          <kbd className="lr-badge pill-badge" style={{ fontSize: '0.7rem', padding: '2px 6px', pointerEvents: 'none', userSelect: 'none', background: gamepadConnected ? '#f59e0b' : undefined, color: gamepadConnected ? '#ffffff' : undefined }}>
             {gamepadConnected ? 'Y' : (isMac ? '⌘K' : 'Ctrl+K')}
           </kbd>
         </div>
 
         {/* Load Custom ROM */}
         <button
-          className={`status-pill info-btn ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'loadRom' ? 'gamepad-focused' : ''}`}
+          className={`status-pill status-loadrom ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'loadRom' ? 'gamepad-focused' : ''}`}
           onClick={() => {
             setShowLoadRomModal(true);
             setFocusedTarget({ zone: 'loadRomModal', id: 'browse' });
             sfx?.playModalOpen?.();
           }}
           title="Open Load Custom ROM dialog"
-          style={{
-            cursor: 'pointer',
-            border: '2px solid #3b82f6',
-            background: 'rgba(59, 130, 246, 0.15)',
-            color: '#60a5fa',
-            fontFamily: 'inherit',
-            transition: 'all 0.2s ease',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.4rem'
-          }}
         >
-          <FolderOpen size={16} color="#60a5fa" />
-          <span>LOAD ROM</span>
-        </button>
-
-        {/* About & Info Dialog Trigger */}
-        <button
-          className={`status-pill info-btn ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'info' ? 'gamepad-focused' : ''}`}
-          onClick={() => {
-            setShowInfoModal(true);
-            setFocusedTarget({ zone: 'infoModal', id: 'ack' });
-            sfx?.playModalOpen?.();
-          }}
-          title="About Project"
-          style={{
-            cursor: 'pointer',
-            border: '2px solid #ffffff',
-            background: 'rgba(255, 255, 255, 0.9)',
-            fontFamily: 'inherit',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          <Info size={16} color="#ef4444" />
-          <span>INFO</span>
+          <FolderOpen size={16} color="#3b82f6" />
+          <span className="pill-text">LOAD ROM</span>
         </button>
 
         {/* Real-time Clock */}
-        <div className="status-pill">
+        <div className="status-pill status-clock">
           <span>{time}</span>
         </div>
       </div>

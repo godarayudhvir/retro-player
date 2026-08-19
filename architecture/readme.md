@@ -19,9 +19,11 @@ architecture/
 │   └── app.md              # Main application shell, hook orchestration, and modular layout (`src/App.jsx`)
 │
 ├── modules/                # Core Functional Modules & Systems
-│   ├── emulator.md         # Emulator Engine integration, canvas rendering, save state management & controls (`EmulatorModal.jsx`, EmulatorJS)
+│   ├── emulator.md         # Emulator Engine integration, offline core resilience & save state management (`EmulatorModal.jsx`, EmulatorJS)
 │   ├── audio-sfx.md        # Pure Web Audio API UI sound effects synthesizer (`useWebAudioSfx.js`)
-│   ├── console-switcher.md # Console system switching, filtering & tab navigation logic (GBA, N64, SNES, NES, NDS, PS1, Arcade, Sega)
+│   ├── theme-engine.md     # Multi-theme engine, CSS custom properties & instant persistence (`useThemeEngine.js`, `index.css`)
+│   ├── playtime-favorites.md # Smart Collections (Favorites & Recents) & Playtime analytics (`usePlaytimeAndFavorites.js`)
+│   ├── console-switcher.md # Console system switching, smart collections filtering & tab ribbon (`SystemRibbon.jsx`)
 │   ├── game-catalog.md     # Game database catalog, ROM path mapping, cover art matching & game descriptions (`gameDescriptions.js`, Vite API middleware)
 │   └── gamepad-controls.md  # Dynamic input controller, keyboard & USB gamepad mapping, hotkeys & shoulder button prompts (L/R vs Q/E)
 │

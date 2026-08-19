@@ -21,6 +21,7 @@ The On-Screen Virtual Keyboard UI component ([OnScreenKeyboard.jsx](file:///User
   - Row 2: `A S D F G H J K L ' CLEAR`
   - Row 3: `Z X C V B N M . SPACE DONE`
 - **Spatial Focus Glow & Animations**: Highlights the currently selected key with glowing red gradient and pulsate micro-animations (`.osk-key-focused`).
+- **Fluid Multi-Form-Factor Scaling**: Uses `clamp()` font scaling and flexible key containers (`min-width: 0`) so all 11 key columns fit on narrow mobile screens (`320px` - `400px`) with zero horizontal overflow or clipping.
 
 ---
 
@@ -38,4 +39,4 @@ The On-Screen Virtual Keyboard UI component ([OnScreenKeyboard.jsx](file:///User
    - `CLEAR`: Resets `searchQuery` to `''`.
    - `DONE` / `SEARCH`: Closes virtual keyboard (`showVirtualKeyboard = false`) and focuses the first filtered game tile in the grid.
 4. **Touch & Mouse Fallback**:
-   - Every virtual key contains an `onClick` handler allowing touchscreen and mouse users to tap or click keys directly.
+   - Every virtual key contains an `onClick` handler allowing touchscreen and mouse users to tap or click keys directly with touch-friendly dimensions.

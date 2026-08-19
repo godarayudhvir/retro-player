@@ -31,7 +31,9 @@ export function useGamepadNavigation({
   setGamepadConnected,
   sfx,
   handleGameSelect,
-  fetchGames
+  fetchGames,
+  toggleFavorite,
+  themeEngine
 }) {
   const stateRef = useRef({});
   const lastInputTimeRef = useRef(0);
@@ -52,7 +54,9 @@ export function useGamepadNavigation({
       filteredGames,
       systems,
       searchQuery,
-      gamepadConnected
+      gamepadConnected,
+      toggleFavorite,
+      themeEngine
     };
   }, [
     activeSystem,
@@ -66,7 +70,9 @@ export function useGamepadNavigation({
     filteredGames,
     systems,
     searchQuery,
-    gamepadConnected
+    gamepadConnected,
+    toggleFavorite,
+    themeEngine
   ]);
 
   // Spatial navigation engine
@@ -203,17 +209,38 @@ export function useGamepadNavigation({
         sfx?.playModalClose?.();
         return;
       }
-      if (dir === 'UP' || dir === 'LEFT') {
+      if (dir === 'UP') {
         setFocusedTarget({ zone: 'cardModal', id: 'close' });
         sfx?.playTileNav?.();
-      } else if (dir === 'DOWN' || dir === 'RIGHT') {
+      } else if (dir === 'DOWN') {
         setFocusedTarget({ zone: 'cardModal', id: 'play' });
         sfx?.playTileNav?.();
+      } else if (dir === 'LEFT') {
+        if (curTarget?.id === 'fav') {
+          setFocusedTarget({ zone: 'cardModal', id: 'play' });
+          sfx?.playTileNav?.();
+        } else {
+          setFocusedTarget({ zone: 'cardModal', id: 'close' });
+          sfx?.playTileNav?.();
+        }
+      } else if (dir === 'RIGHT') {
+        if (curTarget?.id === 'play') {
+          setFocusedTarget({ zone: 'cardModal', id: 'fav' });
+          sfx?.playTileNav?.();
+        } else {
+          setFocusedTarget({ zone: 'cardModal', id: 'play' });
+          sfx?.playTileNav?.();
+        }
       } else if (dir === 'SELECT') {
         if (curTarget?.id === 'close') {
           setSelectedGameCard(null);
           setFocusedTarget({ zone: 'grid', index: curTarget?.index || 0 });
           sfx?.playModalClose?.();
+        } else if (curTarget?.id === 'fav') {
+          if (stateRef.current.toggleFavorite) {
+            const nextState = stateRef.current.toggleFavorite(curCard);
+            sfx?.playFavoriteToggle?.(nextState);
+          }
         } else {
           const gameToPlay = curCard;
           setSelectedGameCard(null);
@@ -236,7 +263,7 @@ export function useGamepadNavigation({
     // 5. Main Console Dashboard Navigation
     const activeSysList = curSystems.filter(s => s.gameCount > 0);
     const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
-    const allTabs = [{ key: 'all' }, ...sortedSystems];
+    const allTabs = [{ key: 'all' }, { key: 'favorites' }, { key: 'recent' }, ...sortedSystems];
 
     const curZone = curTarget?.zone || 'grid';
     const curIndex = curTarget?.index || 0;
@@ -293,18 +320,10 @@ export function useGamepadNavigation({
     // Directional Spatial Movements (UP, DOWN, LEFT, RIGHT)
     if (curZone === 'topbar') {
       if (dir === 'LEFT') {
-        if (curId === 'info') {
-          setFocusedTarget({ zone: 'topbar', id: 'loadRom' });
-        } else {
-          setFocusedTarget({ zone: 'topbar', id: 'search' });
-        }
+        setFocusedTarget({ zone: 'topbar', id: 'search' });
         sfx?.playTileNav?.();
       } else if (dir === 'RIGHT') {
-        if (curId === 'search') {
-          setFocusedTarget({ zone: 'topbar', id: 'loadRom' });
-        } else {
-          setFocusedTarget({ zone: 'topbar', id: 'info' });
-        }
+        setFocusedTarget({ zone: 'topbar', id: 'loadRom' });
         sfx?.playTileNav?.();
       } else if (dir === 'DOWN') {
         const sysIdx = allTabs.findIndex(t => t.key === curActiveSys);
@@ -323,7 +342,7 @@ export function useGamepadNavigation({
         setFocusedTarget({ zone: 'ribbon', index: nextIdx });
         sfx?.playTabSwitch?.();
       } else if (dir === 'UP') {
-        setFocusedTarget({ zone: 'topbar', id: curIndex < allTabs.length / 3 ? 'search' : (curIndex < (allTabs.length * 2) / 3 ? 'loadRom' : 'info') });
+        setFocusedTarget({ zone: 'topbar', id: curIndex < allTabs.length / 2 ? 'search' : 'loadRom' });
         sfx?.playTileNav?.();
       } else if (dir === 'DOWN') {
         setFocusedTarget({ zone: 'grid', index: 0 });
@@ -464,6 +483,30 @@ export function useGamepadNavigation({
           e.preventDefault();
           navigateSpatial('BACK');
           break;
+        case 'f':
+        case 'F':
+          e.preventDefault();
+          if (stateRef.current.selectedGameCard) {
+            if (stateRef.current.toggleFavorite) {
+              const nextState = stateRef.current.toggleFavorite(stateRef.current.selectedGameCard);
+              sfx?.playFavoriteToggle?.(nextState);
+            }
+          } else if (stateRef.current.focusedTarget?.zone === 'grid') {
+            const game = stateRef.current.filteredGames[stateRef.current.focusedTarget?.index || 0];
+            if (game && stateRef.current.toggleFavorite) {
+              const nextState = stateRef.current.toggleFavorite(game);
+              sfx?.playFavoriteToggle?.(nextState);
+            }
+          }
+          break;
+        case 't':
+        case 'T':
+          e.preventDefault();
+          if (stateRef.current.themeEngine?.cycleTheme) {
+            stateRef.current.themeEngine.cycleTheme();
+            sfx?.playThemeSwitch?.();
+          }
+          break;
         case 'q':
         case 'Q':
         case 'PageUp':
@@ -471,7 +514,7 @@ export function useGamepadNavigation({
           {
             const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
             const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
-            const allSysKeys = ['all', ...sortedSystems.map(s => s.key)];
+            const allSysKeys = ['all', 'favorites', 'recent', ...sortedSystems.map(s => s.key)];
             const curSysIdx = allSysKeys.indexOf(stateRef.current.activeSystem);
             const nextSysIdx = (curSysIdx - 1 + allSysKeys.length) % allSysKeys.length;
             setActiveSystem(allSysKeys[nextSysIdx]);
@@ -486,7 +529,7 @@ export function useGamepadNavigation({
           {
             const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
             const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
-            const allSysKeys = ['all', ...sortedSystems.map(s => s.key)];
+            const allSysKeys = ['all', 'favorites', 'recent', ...sortedSystems.map(s => s.key)];
             const curSysIdx = allSysKeys.indexOf(stateRef.current.activeSystem);
             const nextSysIdx = (curSysIdx + 1) % allSysKeys.length;
             setActiveSystem(allSysKeys[nextSysIdx]);
@@ -590,6 +633,23 @@ export function useGamepadNavigation({
             setShowVirtualKeyboard(false);
             setFocusedTarget({ zone: 'grid', index: 0 });
             sfx?.playModalClose?.();
+            lastInputTimeRef.current = now;
+          }
+        } else if (!stateRef.current.activeGame && !stateRef.current.showInfoModal && !stateRef.current.showLoadRomModal) {
+          // X button toggles Favorite on focused game in modal or grid
+          if (btnX && !prevButtonsRef.current.btnX) {
+            if (stateRef.current.selectedGameCard) {
+              if (stateRef.current.toggleFavorite) {
+                const nextState = stateRef.current.toggleFavorite(stateRef.current.selectedGameCard);
+                sfx?.playFavoriteToggle?.(nextState);
+              }
+            } else if (stateRef.current.focusedTarget?.zone === 'grid') {
+              const game = stateRef.current.filteredGames[stateRef.current.focusedTarget?.index || 0];
+              if (game && stateRef.current.toggleFavorite) {
+                const nextState = stateRef.current.toggleFavorite(game);
+                sfx?.playFavoriteToggle?.(nextState);
+              }
+            }
             lastInputTimeRef.current = now;
           }
         }

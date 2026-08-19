@@ -1,9 +1,51 @@
-import React, { useEffect, useRef } from 'react';
-import { X, Gamepad2, Download, Upload } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { X, Gamepad2, Wifi, WifiOff, Menu } from 'lucide-react';
 
-export default function EmulatorModal({ game, gamepadConnected, onClose }) {
+export default function EmulatorModal({ game, gamepadConnected, onClose, onSessionEnd }) {
   const stageRef = useRef(null);
   const iframeRef = useRef(null);
+  const [isLocalOffline, setIsLocalOffline] = useState(!navigator.onLine);
+
+  const sessionReportedRef = useRef(false);
+  const activeSecondsRef = useRef(0);
+  const isTabActiveRef = useRef(!document.hidden);
+  const activeTimerRef = useRef(null);
+
+  // Accurate active playtime timer (pauses when browser tab is inactive / backgrounded)
+  useEffect(() => {
+    sessionReportedRef.current = false;
+    activeSecondsRef.current = 0;
+    isTabActiveRef.current = !document.hidden;
+
+    const handleVisibilityChange = () => {
+      isTabActiveRef.current = !document.hidden;
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    activeTimerRef.current = setInterval(() => {
+      if (isTabActiveRef.current) {
+        activeSecondsRef.current += 1;
+      }
+    }, 1000);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (activeTimerRef.current) {
+        clearInterval(activeTimerRef.current);
+      }
+    };
+  }, [game]);
+
+  const reportSessionEnd = useCallback(() => {
+    if (sessionReportedRef.current) return;
+    sessionReportedRef.current = true;
+    const finalSeconds = activeSecondsRef.current;
+    if (finalSeconds >= 3 && onSessionEnd && game) {
+      console.log(`⏱️ [PLAYTIME TRACKER] Recorded active gameplay: ${finalSeconds}s for "${game.title}"`);
+      onSessionEnd(game.id || game.title, finalSeconds);
+    }
+  }, [game, onSessionEnd]);
 
   useEffect(() => {
     if (!stageRef.current) return;
@@ -26,8 +68,18 @@ export default function EmulatorModal({ game, gamepadConnected, onClose }) {
       console.error(`🚨 [EMULATOR ERROR] Invalid ROM URL construction for game "${game.title}":`, game.romUrl, e);
     }
 
+    // Determine initial data path: probe CDN or use local /emulatorjs/data/
     const cdnDataPath = 'https://cdn.emulatorjs.org/stable/data/';
-    const core = game.systemCore || 'nes';
+    const localDataPath = '/emulatorjs/data/';
+    const isOffline = !navigator.onLine;
+    const initialDataPath = isOffline ? localDataPath : cdnDataPath;
+    setIsLocalOffline(isOffline);
+    let core = game.systemCore || 'nes';
+    if (core === 'gbc') core = 'gb';
+    if (core === 'ps1') core = 'psx';
+    if (core === 'sega' || core === 'genesis' || core === 'megadrive') core = 'segaMD';
+    if (core === 'gamegear') core = 'segaGG';
+
 
     const iframe = document.createElement('iframe');
     iframeRef.current = iframe;
@@ -45,18 +97,126 @@ export default function EmulatorModal({ game, gamepadConnected, onClose }) {
       <html>
         <head>
           <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
           <style>
+            *, *::before, *::after {
+              box-sizing: border-box;
+            }
             html, body {
               margin: 0;
               padding: 0;
-              width: 100vw;
-              height: 100vh;
+              width: 100%;
+              height: 100%;
               background: #000000;
               overflow: hidden;
+              position: fixed;
+              inset: 0;
+              touch-action: none;
+              -webkit-touch-callout: none;
+              -webkit-user-select: none;
+              user-select: none;
             }
             #game {
-              width: 100vw;
-              height: 100vh;
+              width: 100%;
+              height: 100%;
+              position: absolute;
+              inset: 0;
+              overflow: hidden;
+            }
+            #game canvas {
+              max-width: 100% !important;
+              max-height: 100% !important;
+              object-fit: contain !important;
+            }
+
+            /* Virtual Touchscreen Gamepad Overrides */
+            .ejs_virtualGamepad_parent {
+              position: absolute !important;
+              bottom: 0 !important;
+              left: 0 !important;
+              right: 0 !important;
+              width: 100% !important;
+              height: 220px !important;
+              max-height: 45vh !important;
+              pointer-events: none !important;
+              z-index: 99999 !important;
+              display: block !important;
+            }
+
+            .ejs_virtualGamepad_left,
+            .ejs_virtualGamepad_right,
+            .ejs_virtualGamepad_bottom,
+            .ejs_virtualGamepad_top,
+            .ejs_virtualGamepad_button,
+            .ejs_dpad_main {
+              pointer-events: auto !important;
+            }
+
+            .ejs_virtualGamepad_left {
+              position: absolute !important;
+              bottom: 24px !important;
+              left: 16px !important;
+              width: 130px !important;
+              height: 130px !important;
+              z-index: 100000 !important;
+            }
+
+            .ejs_virtualGamepad_right {
+              position: absolute !important;
+              bottom: 24px !important;
+              right: 16px !important;
+              width: 135px !important;
+              height: 135px !important;
+              z-index: 100000 !important;
+            }
+
+            .ejs_virtualGamepad_bottom {
+              position: absolute !important;
+              bottom: 16px !important;
+              left: 50% !important;
+              transform: translateX(-50%) !important;
+              margin-left: 0 !important;
+              height: 34px !important;
+              width: 130px !important;
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+              gap: 10px !important;
+              z-index: 100000 !important;
+            }
+
+            .ejs_virtualGamepad_button {
+              background: rgba(255, 255, 255, 0.2) !important;
+              backdrop-filter: blur(8px) !important;
+              -webkit-backdrop-filter: blur(8px) !important;
+              border: 2px solid rgba(255, 255, 255, 0.45) !important;
+              color: #ffffff !important;
+              box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+              touch-action: none !important;
+            }
+
+            .ejs_virtualGamepad_button_down {
+              background: rgba(255, 255, 255, 0.45) !important;
+              transform: scale(0.92) !important;
+            }
+
+            .ejs_dpad_main {
+              opacity: 0.9 !important;
+              filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5)) !important;
+            }
+
+            .ejs_dpad_bar {
+              background: rgba(255, 255, 255, 0.25) !important;
+              border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
+              backdrop-filter: blur(8px) !important;
+              -webkit-backdrop-filter: blur(8px) !important;
+            }
+
+            /* Hide floating on-canvas hamburger button so topbar Menu button is the clean controller */
+            .ejs_virtualGamepad_open {
+              display: none !important;
+              opacity: 0 !important;
+              pointer-events: none !important;
             }
           </style>
         </head>
@@ -74,10 +234,11 @@ export default function EmulatorModal({ game, gamepadConnected, onClose }) {
             window.EJS_gameId = ${JSON.stringify(game.id || 'custom_game')};
             window.EJS_gameName = ${JSON.stringify(game.title || 'Custom Game')};
             window.EJS_core = ${JSON.stringify(core)};
-            window.EJS_pathtodata = ${JSON.stringify(cdnDataPath)};
+            window.EJS_pathtodata = ${JSON.stringify(initialDataPath)};
             window.EJS_startOnLoaded = true;
             window.EJS_backgroundColor = '#000000';
             window.EJS_language = 'en-US';
+            window.EJS_VirtualGamepad = true;
 
             // Configure Nintendo DS side-by-side screen layout for tablet / desktop viewports (>= 768px)
             const isTabletOrAbove = (window.innerWidth >= 768) || (window.parent && window.parent.innerWidth >= 768);
@@ -92,18 +253,33 @@ export default function EmulatorModal({ game, gamepadConnected, onClose }) {
               console.log('🎮 [NDS SCREEN LAYOUT] Side-by-side (Left/Right) configured for tablet / desktop display');
             }
 
-            // Controller Synchronization & Hardware Index Patch for EmulatorJS
+            // Controller Synchronization & Hardware Index Patch for EmulatorJS with Touch Safety
             function patchEmulatorGamepad() {
               try {
                 const emu = window.EJS_emulator;
                 if (!emu) return;
+
+                // Safeguard gameManager.simulateInput from throwing fatal runtime exceptions on touch/button events
+                if (emu.gameManager && !emu.gameManager._safeSimulatePatched) {
+                  emu.gameManager._safeSimulatePatched = true;
+                  const origSimulate = emu.gameManager.simulateInput;
+                  if (typeof origSimulate === 'function') {
+                    emu.gameManager.simulateInput = function(player, btn, val) {
+                      try {
+                        return origSimulate.call(this, player, btn, val);
+                      } catch (err) {
+                        console.warn('⚠️ [CAUGHT EMULATOR INPUT EXCEPTION]:', err);
+                      }
+                    };
+                  }
+                }
 
                 if (!emu._gamepadPatched) {
                   emu._gamepadPatched = true;
                   console.log('🎮 [PATCHING EMULATORJS GAMEPAD ENGINE] Overriding hardware index lookup & button mapper');
 
                   emu.gamepadEvent = function(e) {
-                    if (!this.started) return;
+                    if (!this.started || !this.gameManager) return;
 
                     // Fix: Find connected gamepad by matching .index rather than array position
                     const activeGps = (this.gamepad && this.gamepad.gamepads) ? this.gamepad.gamepads : [];
@@ -160,6 +336,8 @@ export default function EmulatorModal({ game, gamepadConnected, onClose }) {
                       const num = this.controlPopup.getAttribute("button-num");
                       const player = parseInt(this.controlPopup.getAttribute("player-num")) || 0;
                       if (gamepadIndex !== player && gamepadIndex !== -1) return;
+                      if (!this.controls) this.controls = [[], [], [], []];
+                      if (!this.controls[player]) this.controls[player] = [];
                       if (!this.controls[player][num]) {
                         this.controls[player][num] = {};
                       }
@@ -181,16 +359,18 @@ export default function EmulatorModal({ game, gamepadConnected, onClose }) {
                     for (let i = 0; i < 4; i++) {
                       if (gamepadIndex !== i) continue;
                       for (let j = 0; j < 30; j++) {
-                        if (!this.controls[i] || !this.controls[i][j] || this.controls[i][j].value2 === undefined) {
+                        if (!this.controls || !this.controls[i] || !this.controls[i][j] || this.controls[i][j].value2 === undefined) {
                           continue;
                         }
                         const controlValue = this.controls[i][j].value2;
 
                         if (["buttonup", "buttondown"].includes(e.type) && (controlValue === e.label || controlValue === e.index)) {
-                          this.gameManager.simulateInput(i, j, (e.type === "buttonup" ? 0 : (special.includes(j) ? 0x7fff : 1)));
+                          if (this.gameManager && typeof this.gameManager.simulateInput === 'function') {
+                            this.gameManager.simulateInput(i, j, (e.type === "buttonup" ? 0 : (special.includes(j) ? 0x7fff : 1)));
+                          }
                         } else if (e.type === "axischanged") {
                           // Left Stick to D-Pad auto-fallback for all games
-                          if (e.axis === 'LEFT_STICK_X') {
+                          if (e.axis === 'LEFT_STICK_X' && this.gameManager && typeof this.gameManager.simulateInput === 'function') {
                             if (e.value > 0.35) {
                               this.gameManager.simulateInput(i, 7, 1); // D-Pad Right
                               this.gameManager.simulateInput(i, 6, 0); // D-Pad Left
@@ -201,7 +381,7 @@ export default function EmulatorModal({ game, gamepadConnected, onClose }) {
                               this.gameManager.simulateInput(i, 6, 0);
                               this.gameManager.simulateInput(i, 7, 0);
                             }
-                          } else if (e.axis === 'LEFT_STICK_Y') {
+                          } else if (e.axis === 'LEFT_STICK_Y' && this.gameManager && typeof this.gameManager.simulateInput === 'function') {
                             if (e.value > 0.35) {
                               this.gameManager.simulateInput(i, 5, 1); // D-Pad Down
                               this.gameManager.simulateInput(i, 4, 0); // D-Pad Up
@@ -214,7 +394,7 @@ export default function EmulatorModal({ game, gamepadConnected, onClose }) {
                             }
                           }
 
-                          if (typeof controlValue === "string" && controlValue.split(":")[0] === e.axis) {
+                          if (typeof controlValue === "string" && controlValue.split(":")[0] === e.axis && this.gameManager && typeof this.gameManager.simulateInput === 'function') {
                             if (special.includes(j)) {
                               if (j === 16 || j === 17) {
                                 if (e.value > 0) {
@@ -391,8 +571,19 @@ export default function EmulatorModal({ game, gamepadConnected, onClose }) {
             window.EJS_onLoadState = function() {
               console.log('💾 [SAVE SYSTEM READY] Persistent save states bound to IndexedDB key:', ${JSON.stringify(game.id)});
             };
+
+            function handleLoaderFallback() {
+              console.warn('⚠️ [EMULATOR LOADER FALLBACK] Primary path failed. Attempting local /emulatorjs/data/loader.js fallback...');
+              window.EJS_pathtodata = '/emulatorjs/data/';
+              const fallbackScript = document.createElement('script');
+              fallbackScript.src = '/emulatorjs/data/loader.js';
+              fallbackScript.onerror = function() {
+                console.error('🚨 [EMULATOR FATAL ERROR] Both online and local EmulatorJS loader failed to load.');
+              };
+              document.body.appendChild(fallbackScript);
+            }
           </script>
-          <script src="${cdnDataPath}loader.js" onerror="console.error('🚨 [EMULATORJS LOADER ERROR] Failed to load loader.js from CDN')"></script>
+          <script src="${initialDataPath}loader.js" onerror="handleLoaderFallback()"></script>
         </body>
       </html>
     `;
@@ -418,6 +609,7 @@ export default function EmulatorModal({ game, gamepadConnected, onClose }) {
 
     return () => {
       console.log(`🧹 [EMULATOR UNMOUNTING] Destroying emulator instance for "${game.title}"`);
+      reportSessionEnd();
       if (sessionBlobUrl) {
         try {
           URL.revokeObjectURL(sessionBlobUrl);
@@ -441,7 +633,7 @@ export default function EmulatorModal({ game, gamepadConnected, onClose }) {
         stageRef.current.innerHTML = '';
       }
     };
-  }, [game]);
+  }, [game, onSessionEnd]);
 
   // Forward parent gamepad events and continuously sync controller assignments
   useEffect(() => {
@@ -499,6 +691,7 @@ export default function EmulatorModal({ game, gamepadConnected, onClose }) {
   };
 
   const handleClose = () => {
+    reportSessionEnd();
     if (iframeRef.current) {
       try {
         const win = iframeRef.current.contentWindow;
@@ -512,30 +705,49 @@ export default function EmulatorModal({ game, gamepadConnected, onClose }) {
     onClose();
   };
 
-  // Export Save File (.sav) to user's computer
-  const handleExportSave = () => {
-    if (iframeRef.current && iframeRef.current.contentWindow?.EJS_emulator) {
-      try {
-        const emu = iframeRef.current.contentWindow.EJS_emulator;
-        if (typeof emu.saveSaveFiles === 'function') {
-          emu.saveSaveFiles();
-        } else if (typeof emu.exportSave === 'function') {
-          emu.exportSave();
+  const handleToggleEmulatorMenu = (e) => {
+    e.stopPropagation();
+    try {
+      if (iframeRef.current?.contentWindow) {
+        const win = iframeRef.current.contentWindow;
+        const doc = win.document;
+
+        // 1. Try small-screen / virtual gamepad hamburger toggle
+        const openBtn = doc.querySelector('.ejs_virtualGamepad_open') || doc.querySelector('[class*="virtualGamepad_open"]');
+        if (openBtn) {
+          openBtn.click();
+          return;
         }
-        console.log(`💾 [EXPORT SAVE] Downloaded .sav file for ${game.title}`);
-      } catch (e) {
-        console.error('Failed to export save file:', e);
+
+        // 2. Try toggling EmulatorJS menu bar directly
+        const menuBar = doc.querySelector('.ejs_menu_bar');
+        if (menuBar) {
+          menuBar.classList.toggle('ejs_menu_bar_hidden');
+          return;
+        }
+
+        // 3. Try emulator instance methods
+        const emu = win.EJS_emulator;
+        if (emu) {
+          if (typeof emu.toggleMenu === 'function') {
+            emu.toggleMenu();
+          } else if (typeof emu.openSettings === 'function') {
+            emu.openSettings();
+          }
+        }
       }
+    } catch (err) {
+      console.warn('Failed to toggle emulator menu:', err);
     }
   };
 
   return (
     <div className="emulator-backdrop-iisu" onClick={focusEmulator}>
-      <div className="emulator-header-iisu">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#ffffff', fontFamily: 'var(--font-iisu)', fontWeight: 700 }}>
-          <Gamepad2 size={22} style={{ color: game.systemColor || '#00c6ff' }} />
-          <span>{game.title}</span>
-          <span className="tile-sys-badge" style={{ '--sys-color': game.systemColor || '#00c6ff' }}>
+      <header className="emulator-topbar">
+        <div className="emulator-topbar-left">
+          <Gamepad2 size={20} style={{ color: game.systemColor || '#00c6ff', flexShrink: 0 }} />
+          <span className="emulator-game-title" title={game.title}>{game.title}</span>
+          <span className="tile-sys-badge emulator-sys-badge" style={{ '--sys-color': game.systemColor || '#00c6ff' }}>
             {game.systemIcon ? (
               <img src={game.systemIcon} alt="" className="tile-sys-badge-icon" />
             ) : (
@@ -543,43 +755,40 @@ export default function EmulatorModal({ game, gamepadConnected, onClose }) {
             )}
             <span className="tile-sys-name">{game.systemName}</span>
           </span>
-          {gamepadConnected ? (
-            <span style={{ fontSize: '0.72rem', background: 'rgba(16,185,129,0.2)', color: '#34d399', padding: '0.2rem 0.55rem', borderRadius: '4px', border: '1px solid rgba(52,211,153,0.3)', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', letterSpacing: '0.5px' }}>
-              ● GAMEPAD READY
+          {isLocalOffline ? (
+            <span className="emulator-status-tag tag-offline" title="Running with local offline emulator core">
+              <WifiOff size={11} /> <span>OFFLINE</span>
             </span>
           ) : (
-            <span style={{ fontSize: '0.72rem', background: 'rgba(255,255,255,0.08)', color: '#94a3b8', padding: '0.2rem 0.55rem', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.15)', letterSpacing: '0.5px' }}>
-              PRESS CONTROLLER BUTTON
+            <span className="emulator-status-tag tag-cdn" title="Connected to online emulator core">
+              <Wifi size={11} /> <span>CDN</span>
+            </span>
+          )}
+          {gamepadConnected && (
+            <span className="emulator-status-tag tag-gamepad">
+              <span>GAMEPAD</span>
             </span>
           )}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div className="emulator-topbar-right">
           <button
-            onClick={handleExportSave}
-            className="hud-btn"
-            style={{ padding: '0.4rem 0.8rem', background: 'rgba(255,255,255,0.15)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', cursor: 'pointer' }}
-            title="Download Save File (.sav)"
+            className="emulator-menu-btn"
+            onClick={handleToggleEmulatorMenu}
+            title="RetroArch Control Panel & Settings"
           >
-            <Download size={14} />
-            <span>Export Save</span>
+            <Menu size={18} />
+            <span className="btn-label">Menu</span>
           </button>
 
-          <button className="close-btn-iisu" onClick={handleClose} title="Close Game">
-            <X size={22} />
+          <button className="emulator-close-btn" onClick={handleClose} title="Close Game (ESC)">
+            <X size={18} />
           </button>
         </div>
-      </div>
+      </header>
 
       <div className="emulator-stage" ref={stageRef} onClick={focusEmulator}>
         {/* Isolated Engine */}
-      </div>
-
-      <div className="controls-bar">
-        <div><span className="key-badge">Movement</span> D-Pad / Analog / WASD</div>
-        <div><span className="key-badge">Action A / B</span> Buttons A & B / Z & X</div>
-        <div><span className="key-badge">Start / Select</span> Start & Select / Enter & Shift</div>
-        <div><span className="key-badge">Exit Game</span> Select + Start / Esc</div>
       </div>
     </div>
   );

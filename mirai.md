@@ -20,9 +20,12 @@ Retro Player bridges the tactile nostalgia of 90s/2000s physical gaming cartridg
 
 - [x] **In-Game Gamepad Support & Navigation**: Web Gamepad API integration for UI shell navigation (D-Pad, Left Stick, Shoulder buttons), dedicated controller exit shortcuts (`Select + Start`, `Guide/PS`, `L3 + R3`), hardware index lookup patch, live in-game button mapping engine in EmulatorJS, and glassmorphic On-Screen Virtual Keyboard (`Y` / `Select`).
 - [x] **Saves Battery & Export Feature**: Live save data detection (`IndexedDB` & `LocalStorage`) in game drawer, export save states (`.state`) and SRAM/battery save files (`.sav`) via HUD action button.
-- [x] **Modular Architecture & Component Decomposition**: Clean separation of `App.jsx` (< 200 lines) into dedicated subcomponents (`Topbar`, `SystemRibbon`, `CartridgeGrid`, `CartridgeTile`, `GameDetailModal`, `AboutInfoModal`, `DropzoneOverlay`, `ConsoleHud`) and custom hooks (`useWebAudioSfx`, `useGamepadStatus`, `useSaveDataManager`, `useRomManifest`, `useGamepadNavigation`).
-- [x] **Tactile Web Audio UI Sound Effects**: Pure Web Audio API acoustic synthesis with zero external MP3 assets (tactile navigation ticks, shoulder swooshes, modal chimes, and mechanical cartridge insert "click-clacks" with boot chord).
-- [ ] **Offline Core Resilience & Local Self-Hosting**: Offline fallback to `/public/emulatorjs/data/` for 100% air-gapped gameplay without CDN dependencies (Section 1.1).
+- [x] **Modular Architecture & Component Decomposition**: Clean separation of `App.jsx` (< 200 lines) into dedicated subcomponents (`Topbar`, `SystemRibbon`, `CartridgeGrid`, `CartridgeTile`, `GameDetailModal`, `AboutInfoModal`, `DropzoneOverlay`, `ConsoleHud`) and custom hooks (`useWebAudioSfx`, `useGamepadStatus`, `useSaveDataManager`, `useRomManifest`, `useGamepadNavigation`, `useThemeEngine`, `usePlaytimeAndFavorites`).
+- [x] **Tactile Web Audio UI Sound Effects**: Pure Web Audio API acoustic synthesis with zero external MP3 assets (tactile navigation ticks, shoulder swooshes, modal chimes, mechanical cartridge insert "click-clacks" with boot chord, sparkling favorite arpeggios, and theme frequency sweeps).
+- [x] **Offline Core Resilience & Local Self-Hosting**: Dynamic dual-mode loader with CDN connectivity probe and automatic fallback to `/public/emulatorjs/data/` for 100% air-gapped gameplay without CDN dependencies (Section 1.1).
+- [x] **Smart Collections, Favorites & Recently Played**: Instant favorite toggling via controller `X` button, keyboard `F`, or drawer action; golden star badges on cartridges; chronological recently played queue; and dynamic smart ribbon tabs (Section 2.2).
+- [x] **Comprehensive Playtime Analytics & Stats**: Persistent tracking of total hours/minutes played, launch session counts, and formatted last played dates stored in `localStorage` (Section 2.3).
+- [x] **Multi-Theme Engine**: 4 distinct switchable UI themes (iiSU Light, Midnight Cyber Dark, Sony XMB Wave, Game Boy DMG Classic) with instant persistence, topbar selector, and keyboard shortcut (`T`) (Section 4.3).
 - [ ] **Automated Metadata & Cover Art Scraper**: Online fetching from ScreenScraper, IGDB, or OpenVGDB API for high-res 3D box art, screenshots, developer info, and gameplay previews (Section 2.1).
 - [ ] **Touch Screen Gamepad Overlay**: Virtual on-screen D-Pad and action buttons with haptic touch feedback for mobile and tablets (Section 3.1).
 - [ ] **Ambient Menu BGM Jukebox**: Curated ambient console background music with auto-ducking on launch (Section 4.2).
@@ -464,17 +467,17 @@ src/
 ## 📅 Prioritized Implementation Roadmap
 
 ```
-PHASE 1: Quick Wins & Refactoring (1 - 2 Weeks)
-├── Modularize App.jsx into subcomponents and custom hooks
-├── Add Web Audio API synthesized UI sound effects (Clicks, Swooshes, Cartridge insert)
-└── Add Local Core Offline Fallback (/public/emulatorjs/data/)
+PHASE 1: Quick Wins & Refactoring (1 - 2 Weeks) [COMPLETED]
+├── Modularize App.jsx into subcomponents and custom hooks (DONE)
+├── Add Web Audio API synthesized UI sound effects (DONE)
+└── Add Local Core Offline Fallback (/public/emulatorjs/data/) (DONE)
 
-PHASE 2: Library & Control Enhancements (2 - 4 Weeks)
-├── Integrate Automated Online Metadata & Cover Art Scraper
+PHASE 2: Library & Control Enhancements (2 - 4 Weeks) [IN PROGRESS]
+├── Implement Favorites, Recently Played & Custom Tag Collections (DONE)
+├── Add Playtime Tracking Analytics & Stats Dashboard (DONE)
+├── Add Multi-Theme Engine (Midnight Cyber, Sony XMB Wave, Game Boy DMG) (DONE)
 ├── Implement Responsive Touch Screen Gamepad Overlay for Mobile/iPad
-├── Add Multi-Theme Engine (Midnight Cyber Dark Mode & Sony XMB Wave)
-├── Implement Favorites, Recently Played & Custom Tag Collections
-└── Add Playtime Tracking Analytics & Stats Dashboard
+└── Integrate Automated Online Metadata & Cover Art Scraper
 
 PHASE 3: Connected & Cloud Features (1 - 2 Months)
 ├── Full RetroAchievements (RA) API Integration with In-Game Badge Popups

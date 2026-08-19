@@ -1,17 +1,18 @@
 import React from 'react';
+import { Star } from 'lucide-react';
 import { getCartridgeColor } from '../utils/cartridgeColors';
 
 /**
  * Individual 3D Physical Retro Cartridge Tile component with tactile sheen, grips, and brand stamps.
  */
-export default function CartridgeTile({ game, index, isFocused, onClick }) {
+export default function CartridgeTile({ game, index, isFocused, isFavorite, onClick }) {
   if (!game) return null;
 
   const cartColor = getCartridgeColor(game);
 
   return (
     <div
-      className={`game-tile cartridge-shell ${isFocused ? 'gamepad-focused' : ''}`}
+      className={`game-tile cartridge-shell ${isFocused ? 'gamepad-focused' : ''} ${isFavorite ? 'is-favorite' : ''}`}
       onClick={onClick}
       title={game.title}
       style={{ '--cart-color': cartColor }}
@@ -24,6 +25,13 @@ export default function CartridgeTile({ game, index, isFocused, onClick }) {
         </div>
         <div className="cartridge-grips right" />
       </div>
+
+      {/* Favorite Star Indicator */}
+      {isFavorite && (
+        <div className="cartridge-favorite-badge" title="Favorite Game">
+          <Star size={13} fill="#fbbf24" color="#d97706" />
+        </div>
+      )}
 
       {/* Recessed Sticker Label Area */}
       <div className="cartridge-sticker-area">

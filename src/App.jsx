@@ -15,10 +15,12 @@ import { useGamepadStatus } from './hooks/useGamepadStatus';
 import { useSaveDataManager } from './hooks/useSaveDataManager';
 import { useRomManifest } from './hooks/useRomManifest';
 import { useGamepadNavigation } from './hooks/useGamepadNavigation';
+import { usePlaytimeAndFavorites } from './hooks/usePlaytimeAndFavorites';
+import { useThemeEngine } from './hooks/useThemeEngine';
 
 /**
  * Root Application Orchestrator for Retro Player.
- * Coordinates modular UI components, custom hooks, spatial navigation, audio synthesis, and emulation.
+ * Coordinates modular UI components, custom hooks, spatial navigation, audio synthesis, themes, and emulation.
  */
 export default function App() {
   const [activeGame, setActiveGame] = useState(null);
@@ -35,10 +37,25 @@ export default function App() {
   // Hook 1: Web Audio UI Sound Effects Synthesizer
   const sfx = useWebAudioSfx();
 
-  // Hook 2: Gamepad Connection Tracking
+  // Hook 2: Multi-Theme Engine
+  const themeEngine = useThemeEngine();
+
+  // Hook 3: Favorites, Recently Played, and Playtime Analytics
+  const {
+    favorites,
+    recentlyPlayed,
+    isFavorite,
+    toggleFavorite,
+    recordGameLaunch,
+    recordGameSession,
+    resetGameStats,
+    getGameStats
+  } = usePlaytimeAndFavorites();
+
+  // Hook 4: Gamepad Connection Tracking
   const { gamepadConnected, setGamepadConnected } = useGamepadStatus();
 
-  // Hook 3: Save Data & Battery SRAM Inspection
+  // Hook 5: Save Data & Battery SRAM Inspection
   const { hasSaveData, checkSaveData } = useSaveDataManager();
 
   // Selection Handler for opening Game Detail Drawer Modal
@@ -51,7 +68,7 @@ export default function App() {
     }
   }, [checkSaveData, sfx]);
 
-  // Hook 4: ROM Catalog Manifest & Drag-Drop Loading (opens GameDetailModal)
+  // Hook 6: ROM Catalog Manifest & Drag-Drop Loading (opens GameDetailModal)
   const handleCustomRomLoaded = useCallback((customGame) => {
     handleGameSelect(customGame);
     setFocusedTarget({ zone: 'cardModal', id: 'play' });
@@ -72,9 +89,9 @@ export default function App() {
     handleDragOver,
     handleDragLeave,
     handleDrop
-  } = useRomManifest(handleCustomRomLoaded);
+  } = useRomManifest(handleCustomRomLoaded, { favorites, recentlyPlayed });
 
-  // Hook 5: Unified Spatial Navigation Engine (Keyboard + Gamepad + Audio)
+  // Hook 7: Unified Spatial Navigation Engine (Keyboard + Gamepad + Audio)
   useGamepadNavigation({
     focusedTarget,
     setFocusedTarget,
@@ -101,7 +118,9 @@ export default function App() {
     setGamepadConnected,
     sfx,
     handleGameSelect,
-    fetchGames
+    fetchGames,
+    toggleFavorite,
+    themeEngine
   });
 
   // Digital clock tick
@@ -147,6 +166,7 @@ export default function App() {
   return (
     <div 
       className={`console-container ${isDraggingOver ? 'drag-over-active' : ''}`}
+      data-theme={themeEngine.theme}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -166,10 +186,10 @@ export default function App() {
         setSearchQuery={setSearchQuery}
         searchInputRef={searchInputRef}
         setShowLoadRomModal={setShowLoadRomModal}
-        setShowInfoModal={setShowInfoModal}
         setShowVirtualKeyboard={setShowVirtualKeyboard}
         time={time}
         sfx={sfx}
+        themeEngine={themeEngine}
       />
 
       {/* System Selection Ribbon */}
@@ -178,6 +198,8 @@ export default function App() {
         activeSystem={activeSystem}
         setActiveSystem={setActiveSystem}
         totalGamesCount={games.length}
+        favoritesCount={favorites.length}
+        recentCount={recentlyPlayed.length}
         focusedTarget={focusedTarget}
         setFocusedTarget={setFocusedTarget}
         sfx={sfx}
@@ -191,6 +213,7 @@ export default function App() {
         handleGameSelect={handleGameSelect}
         fetchGames={fetchGames}
         loading={loading}
+        isFavorite={isFavorite}
         sfx={sfx}
       />
 
@@ -227,6 +250,11 @@ export default function App() {
       <GameDetailModal
         game={selectedGameCard}
         hasSaveData={hasSaveData}
+        isFavorite={isFavorite(selectedGameCard?.id || selectedGameCard?.title)}
+        onToggleFavorite={toggleFavorite}
+        onResetStats={resetGameStats}
+        gameStats={getGameStats(selectedGameCard?.id || selectedGameCard?.title)}
+        gamepadConnected={gamepadConnected}
         focusedTarget={focusedTarget}
         onClose={() => {
           setSelectedGameCard(null);
@@ -236,9 +264,11 @@ export default function App() {
         onPlay={() => {
           const gameToLaunch = selectedGameCard;
           setSelectedGameCard(null);
+          recordGameLaunch(gameToLaunch);
           sfx.playGameLaunch();
           setActiveGame(gameToLaunch);
         }}
+        sfx={sfx}
       />
 
       {/* On-Screen Virtual Keyboard for Gamepad / Touch */}
@@ -266,6 +296,9 @@ export default function App() {
           game={activeGame}
           gamepadConnected={gamepadConnected}
           onClose={() => setActiveGame(null)}
+          onSessionEnd={(gameId, elapsedSeconds) => {
+            recordGameSession(gameId, elapsedSeconds);
+          }}
         />
       )}
     </div>
