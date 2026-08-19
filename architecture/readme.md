@@ -40,6 +40,7 @@ architecture/
 │   ├── cartridge-tile.md   # Physical 3D game cartridge component with sheen and color heuristics (`CartridgeTile.jsx`)
 │   ├── game-detail-modal.md # Game drawer modal with metadata & save data detection (`GameDetailModal.jsx`)
 │   ├── about-info-modal.md # Project about dialog and full controls reference table (`AboutInfoModal.jsx`)
+│   ├── confirm-dialog.md   # Themed in-app confirmation modal replacing native browser dialogs (`ConfirmDialog.jsx`)
 │   ├── emulator-modal.md   # Emulator Modal UI dialog, status displays, HUD bar & isolated iframe engine (`EmulatorModal.jsx`)
 │   ├── on-screen-keyboard.md # On-Screen Virtual Keyboard for gamepad/touch search entry (`OnScreenKeyboard.jsx`)
 │   ├── error-boundary.md   # Error Boundary fallback UI & fatal exception handling (`ErrorBoundary.jsx`)
