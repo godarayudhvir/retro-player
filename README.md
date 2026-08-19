@@ -132,7 +132,7 @@ The project includes an organized [architecture/](architecture/README.md) specif
 Run Retro Player via Docker using the GitHub Container Registry (**GHCR**) image:
 
 1. Ensure [Docker](https://docs.docker.com/get-docker/) and Docker Compose are installed.
-2. Edit [docker-compose.yml](file:///Users/godarayudhvir/Github/retro-player/docker-compose.yml) to point to your local ROMs directory:
+2. In the folder where you run Docker Compose, place your ROMs in a `roms/` folder (or adjust the path):
    ```yaml
    version: '3.8'
 
@@ -147,8 +147,8 @@ Run Retro Player via Docker using the GitHub Container Registry (**GHCR**) image
          - PORT=3000
          - ROMS_DIR=/roms
        volumes:
-         # Replace /path/to/your/roms with the path to your ROMs directory
-         - /path/to/your/roms:/roms:ro
+         # Looks for a ./roms folder in the same directory by default
+         - ./roms:/roms:ro
    ```
 3. Start the container:
    ```bash
@@ -161,7 +161,7 @@ Run Retro Player via Docker using the GitHub Container Registry (**GHCR**) image
 docker run -d \
   --name retro-player \
   -p 3000:3000 \
-  -v /path/to/your/roms:/roms:ro \
+  -v $(pwd)/roms:/roms:ro \
   ghcr.io/godarayudhvir/retro-player:latest
 ```
 

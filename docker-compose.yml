@@ -14,7 +14,5 @@ services:
       - PORT=3000
       - ROMS_DIR=/roms
     volumes:
-      # Mount your host ROMs directory to /roms inside container (Read-Only recommended)
-      - ./public/roms:/roms:ro
-      # Optional: To persist custom covers or emulator assets
-      # - ./custom-covers:/app/public/cover:ro
+      # Mount your host ROMs directory to /roms inside container (looks for ./roms next to docker-compose.yml by default)
+      - ./roms:/roms:ro
