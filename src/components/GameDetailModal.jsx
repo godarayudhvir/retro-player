@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Play, Save, Cpu, Calendar, CheckCircle2, Star, Clock, History, RotateCcw, RefreshCw, Tag, ShieldCheck } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Play, Save, Cpu, Calendar, CheckCircle2, Star, Clock, History, RotateCcw, RefreshCw, Tag, ShieldCheck, Terminal, ChevronDown, ChevronUp } from 'lucide-react';
 import { getGameDescription, getReleaseDate } from '../gameDescriptions';
 import { resolveAssetPath } from '../utils/assetPath';
 
@@ -16,6 +16,7 @@ export default function GameDetailModal({
   onResetStats,
   onScrapeGame,
   isScraping = false,
+  scraper,
   gameStats = { playtimeFormatted: '< 1 min', launchCount: 0, lastPlayedFormatted: 'Never' },
   gamepadConnected = false,
   focusedTarget,
@@ -27,6 +28,8 @@ export default function GameDetailModal({
 
   const [imgError, setImgError] = useState(false);
   const [isLocalScraping, setIsLocalScraping] = useState(false);
+  const [showLogs, setShowLogs] = useState(false);
+  const logsContainerRef = useRef(null);
 
   const meta = metadata || {};
   const coverSrc = meta.coverUrl || (game.coverUrl && !game.coverUrl.endsWith('.svg') ? game.coverUrl : null);
@@ -36,8 +39,16 @@ export default function GameDetailModal({
   const publisher = meta.publisher || game.systemName || 'Classic';
   const genre = meta.genre || 'Retro Classic';
 
+  // Automatically scroll to logs when opened or when re-scraping
+  useEffect(() => {
+    if (showLogs && logsContainerRef.current) {
+      logsContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [showLogs]);
+
   const handleManualScrape = async () => {
     if (onScrapeGame) {
+      setShowLogs(true);
       setIsLocalScraping(true);
       sfx?.playThemeSwitch?.();
       await onScrapeGame(game, true);
@@ -209,7 +220,7 @@ export default function GameDetailModal({
 
               {/* Scrape Online Metadata Button */}
               <button
-                className="scraper-refresh-btn icon-only"
+                className={`scraper-refresh-btn icon-only ${showLogs ? 'active-logs' : ''}`}
                 onClick={handleManualScrape}
                 disabled={isLocalScraping || isScraping}
                 title="Re-scrape 3D Box Art & Online Overview"
@@ -218,6 +229,58 @@ export default function GameDetailModal({
                 <RefreshCw size={18} className={isLocalScraping ? 'spin' : ''} />
               </button>
             </div>
+
+            {/* Expandable Scraper Activity Logs Section */}
+            {(showLogs || isLocalScraping) && (
+              <div ref={logsContainerRef} className="game-detail-logs-section animate-fade-in">
+                <div className="game-detail-logs-header">
+                  <div className="logs-header-left">
+                    <Terminal size={14} color="#3b82f6" />
+                    <span>Scraper Activity Logs</span>
+                    {isLocalScraping && <span className="logs-live-badge">SCANNING...</span>}
+                  </div>
+                  <button 
+                    className="logs-toggle-btn"
+                    onClick={() => setShowLogs(!showLogs)}
+                    title="Toggle Log View"
+                  >
+                    <span>{showLogs ? 'Hide Logs' : 'Show Logs'}</span>
+                    {showLogs ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </button>
+                </div>
+
+                {showLogs && (
+                  <div className="scraper-terminal-view detail-modal-terminal">
+                    {(() => {
+                      const gameLogs = (scraper?.logs || []).filter(l => 
+                        l.title === game.title || 
+                        l.gameId === game.id || 
+                        (l.message && l.message.includes(`"${game.title}"`))
+                      );
+
+                      if (gameLogs.length === 0) {
+                        return (
+                          <div className="scraper-log-empty">
+                            <span>{isLocalScraping ? `Scraping assets for "${game.title}"...` : `No logs recorded yet for "${game.title}". Click the refresh button to re-scrape.`}</span>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div className="scraper-logs-list">
+                          {gameLogs.map((log) => (
+                            <div key={log.id} className={`scraper-log-row log-${log.type}`}>
+                              <span className="log-time">[{log.time}]</span>
+                              <span className="log-msg">{log.message}</span>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

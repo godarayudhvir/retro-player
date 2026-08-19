@@ -22,7 +22,12 @@ import {
   X,
   Download,
   Smartphone,
-  Zap
+  Zap,
+  Sparkles,
+  Square,
+  Terminal,
+  FileText,
+  ExternalLink
 } from 'lucide-react';
 import { detectSystemFromExtension } from '../utils/systemDetector';
 import ConfirmModal from './ConfirmModal';
@@ -44,6 +49,7 @@ export default function SettingsView({
   sfx,
   themeEngine,
   scraper,
+  onOpenScraperModal,
   focusedTarget,
   setFocusedTarget,
   gamepadConnected
@@ -280,6 +286,7 @@ export default function SettingsView({
 
   const navCategories = [
     { id: 'roms', label: 'ROM Library & Storage', icon: <Disc size={20} />, count: games.length },
+    { id: 'scraper', label: 'Scraper & Box Art', icon: <Sparkles size={20} />, count: Object.keys(scraper?.metadataMap || {}).length },
     { id: 'bgm', label: 'Background Music (BGM)', icon: <Music size={20} />, count: bgm?.tracks?.length || 0 },
     { id: 'theme', label: 'Themes & Visuals', icon: <Palette size={20} /> },
     { id: 'controls', label: 'Controllers & Keys', icon: <Gamepad2 size={20} /> },
@@ -493,6 +500,231 @@ export default function SettingsView({
                     </div>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* Category 2: Scraper & Box Art Management */}
+            {activeCategory === 'scraper' && scraper && (
+              <div className="settings-pane-section animate-fade-in">
+                <div className="settings-section-header">
+                  <div>
+                    <h2>Online Metadata & 3D Box Art Scraper</h2>
+                    <p className="settings-section-desc">
+                      Configure authentic Libretro box art, custom API providers, accounts, and live scraper telemetry.
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {scraper.isScraping ? (
+                      <button
+                        className="settings-action-btn"
+                        style={{ background: '#ef4444', color: '#fff', borderColor: '#dc2626' }}
+                        onClick={() => {
+                          scraper.stopScrape();
+                          sfx?.playModalClose?.();
+                        }}
+                      >
+                        <Square size={14} fill="currentColor" />
+                        <span>Stop Scraper</span>
+                      </button>
+                    ) : (
+                      <button
+                        className="settings-action-btn primary"
+                        onClick={() => {
+                          if (onOpenScraperModal) {
+                            onOpenScraperModal();
+                            sfx?.playModalOpen?.();
+                          } else {
+                            scraper.scrapeAll(undefined, true);
+                            sfx?.playThemeSwitch?.();
+                          }
+                        }}
+                      >
+                        <Sparkles size={16} />
+                        <span>Choose Scrape Targets</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Status & Options Overview Card */}
+                <div className="settings-diag-card" style={{ marginBottom: '1.25rem' }}>
+                  <div className="diag-icon-box" style={{ background: 'rgba(245, 158, 11, 0.15)' }}>
+                    <Sparkles size={24} color="#f59e0b" />
+                  </div>
+                  <div className="diag-info">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                      <div>
+                        <h4>Scraper Engine Status</h4>
+                        <p style={{ margin: '2px 0 0 0' }}>
+                          {scraper.isScraping ? (
+                            <span style={{ color: '#3b82f6', fontWeight: 700 }}>
+                              ● Scanning in progress ({scraper.scrapeProgress.current}/{scraper.scrapeProgress.total} titles)
+                            </span>
+                          ) : (
+                            <span style={{ color: '#10b981', fontWeight: 700 }}>
+                              ● Ready & Indexed ({Object.keys(scraper.metadataMap || {}).length} games cached in IndexedDB)
+                            </span>
+                          )}
+                        </p>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '0.82rem', color: 'var(--text-sub, #64748b)', fontWeight: 600 }}>Auto-Scrape on Boot:</span>
+                        <button
+                          className={`settings-toggle-switch ${scraper.autoScrapeEnabled ? 'active' : ''}`}
+                          style={{ margin: 0, padding: '4px 14px', fontSize: '0.75rem' }}
+                          onClick={() => {
+                            scraper.toggleAutoScrape();
+                            sfx?.playThemeSwitch?.();
+                          }}
+                          title={scraper.autoScrapeEnabled ? "Disable automatic background scraping on startup" : "Enable automatic background scraping on startup"}
+                        >
+                          {scraper.autoScrapeEnabled ? 'ENABLED' : 'DISABLED'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Custom API Keys & Accounts Provider Cards */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
+                  
+                  {/* Provider 1: TheGamesDB.net */}
+                  <div className="settings-diag-card" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div>
+                        <h4 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          TheGamesDB.net
+                          <span style={{ fontSize: '0.68rem', background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', padding: '1px 6px', borderRadius: '6px', fontWeight: 800 }}>API KEY</span>
+                        </h4>
+                        <p style={{ margin: '4px 0 0 0', fontSize: '0.76rem', color: 'var(--text-sub, #64748b)' }}>
+                          Provides official high-res front box arts, publishers, developers, and release dates.
+                        </p>
+                      </div>
+                      <a
+                        href="https://thegamesdb.net/api"
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="settings-action-btn folder-btn"
+                        style={{ padding: '4px 10px', fontSize: '0.72rem', height: 'auto', textDecoration: 'none' }}
+                        title="Get an API key on TheGamesDB.net"
+                      >
+                        <span>Get API Key</span>
+                        <ExternalLink size={12} style={{ marginLeft: '4px' }} />
+                      </a>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-main, #1e293b)', marginBottom: '4px' }}>
+                        Your TheGamesDB API Key:
+                      </label>
+                      <input
+                        type="password"
+                        placeholder="Paste your API key here..."
+                        defaultValue={scraper.getApiKey?.(scraper.SCRAPER_KEYS.THEGAMESDB_API_KEY) || ''}
+                        onChange={(e) => scraper.setApiKey?.(scraper.SCRAPER_KEYS.THEGAMESDB_API_KEY, e.target.value)}
+                        style={{ width: '100%', padding: '7px 10px', fontSize: '0.8rem', borderRadius: '8px', border: '1.5px solid rgba(203, 213, 225, 0.9)', background: 'var(--panel-bg, #ffffff)', color: 'var(--text-main, #0f172a)', outline: 'none' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Provider 2: ScreenScraper.fr */}
+                  <div className="settings-diag-card" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div>
+                        <h4 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          ScreenScraper.fr
+                          <span style={{ fontSize: '0.68rem', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', padding: '1px 6px', borderRadius: '6px', fontWeight: 800 }}>USER ACCOUNT</span>
+                        </h4>
+                        <p style={{ margin: '4px 0 0 0', fontSize: '0.76rem', color: 'var(--text-sub, #64748b)' }}>
+                          Primary scraper database used by ES-DE & RetroPie with 20,000+ daily free quota.
+                        </p>
+                      </div>
+                      <a
+                        href="https://www.screenscraper.fr/"
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="settings-action-btn folder-btn"
+                        style={{ padding: '4px 10px', fontSize: '0.72rem', height: 'auto', textDecoration: 'none' }}
+                        title="Register a free ScreenScraper account"
+                      >
+                        <span>Create Account</span>
+                        <ExternalLink size={12} style={{ marginLeft: '4px' }} />
+                      </a>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-main, #1e293b)', marginBottom: '4px' }}>
+                          Username (SSID):
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="ScreenScraper username..."
+                          defaultValue={scraper.getApiKey?.(scraper.SCRAPER_KEYS.SCREENSCRAPER_USER) || ''}
+                          onChange={(e) => scraper.setApiKey?.(scraper.SCRAPER_KEYS.SCREENSCRAPER_USER, e.target.value)}
+                          style={{ width: '100%', padding: '7px 10px', fontSize: '0.8rem', borderRadius: '8px', border: '1.5px solid rgba(203, 213, 225, 0.9)', background: 'var(--panel-bg, #ffffff)', color: 'var(--text-main, #0f172a)', outline: 'none' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-main, #1e293b)', marginBottom: '4px' }}>
+                          Password:
+                        </label>
+                        <input
+                          type="password"
+                          placeholder="Password..."
+                          defaultValue={scraper.getApiKey?.(scraper.SCRAPER_KEYS.SCREENSCRAPER_PASS) || ''}
+                          onChange={(e) => scraper.setApiKey?.(scraper.SCRAPER_KEYS.SCREENSCRAPER_PASS, e.target.value)}
+                          style={{ width: '100%', padding: '7px 10px', fontSize: '0.8rem', borderRadius: '8px', border: '1.5px solid rgba(203, 213, 225, 0.9)', background: 'var(--panel-bg, #ffffff)', color: 'var(--text-main, #0f172a)', outline: 'none' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Real-Time Live Scraper Activity Log Console */}
+                <div className="scraper-logs-container">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-main, #0f172a)' }}>
+                      <Terminal size={16} color="#3b82f6" />
+                      <span>Live Scraper Activity Logs</span>
+                      <span style={{ fontSize: '0.74rem', color: 'var(--text-sub, #64748b)', fontWeight: 500 }}>({scraper.logs?.length || 0} events)</span>
+                    </div>
+                    {scraper.logs?.length > 0 && (
+                      <button
+                        className="settings-action-btn folder-btn"
+                        style={{ padding: '2px 8px', fontSize: '0.7rem', height: 'auto' }}
+                        onClick={() => {
+                          scraper.clearLogs?.();
+                          sfx?.playTabSwitch?.();
+                        }}
+                        title="Clear log output"
+                      >
+                        <span>Clear Logs</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="scraper-terminal-view">
+                    {(!scraper.logs || scraper.logs.length === 0) ? (
+                      <div className="scraper-log-empty">
+                        <span>No activity yet. Click "Choose Scrape Targets" or re-scrape any single game in its info drawer to stream live telemetry here.</span>
+                      </div>
+                    ) : (
+                      <div className="scraper-logs-list">
+                        {scraper.logs.map((log) => (
+                          <div key={log.id} className={`scraper-log-row log-${log.type}`}>
+                            <span className="log-time">[{log.time}]</span>
+                            <span className="log-msg">{log.message}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
               </div>
             )}
 

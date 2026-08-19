@@ -23,15 +23,40 @@ All scraped assets and metadata records are asynchronously cached in browser **I
 - **Persistent IndexedDB & LocalStorage Caching**:
   - Persists full metadata payloads and verified cover URLs in the `RetroPlayerMetadataDB` IndexedDB database under the `game_metadata` store.
   - Instantly hydrates the UI upon page load before initiating background checks.
-- **Non-Blocking Background Scraper Queue**:
+- **Non-Blocking Background Scraper Queue with Stop / Cancel Support**:
   - Asynchronous batch processing queue with throttling (120ms tick intervals) to avoid network congestion and API rate-limiting.
   - Live progress tracking (`current`/`total`) reflected in the Topbar status pill.
+  - Immediate cancellation capability (`stopScrape()`) via Topbar click or Settings control.
+- **Persistent User Auto-Scrape Configuration**:
+  - Auto-scrape on application boot / reload defaults to disabled or configurable via `localStorage.getItem('retroplayer_autoscrape_enabled')`.
+  - Prevents unwanted background requests across reloads and new sessions until the user explicitly enables it or runs an on-demand scan.
 - **Tactile UI Loading & Shimmer Feedback**:
   - Displays smooth gradient shimmer loading animations on 3D cartridge labels while artwork is downloading.
   - Graceful fallback to styled platform badges and clean typography if a game has no online artwork.
+- **Real-Time Live Activity Logs Console (Dual Viewports)**:
+  - In-memory event ring buffer and reactive subscription mechanism streaming step-by-step telemetry (candidate generation, Libretro CDN probing, Wikipedia querying, database writes).
+  - Available globally in [SettingsView.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/SettingsView.jsx) (System Diagnostics) and directly within [GameDetailModal.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/GameDetailModal.jsx), automatically expanding and scrolling smoothly into view when re-scraping a title.
+- **Dedicated Scraper & Box Art Settings Category**:
+  - Segregated out of System Diagnostics into its own top-level sidebar tab in [SettingsView.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/SettingsView.jsx) (`Scraper & Box Art`).
+  - Direct external link buttons (`Get API Key` on [TheGamesDB.net](https://thegamesdb.net/api) and `Create Account` on [ScreenScraper.fr](https://www.screenscraper.fr/)).
+  - Live activity telemetry terminal and auto-scrape on boot preferences.
+- **Multi-Tier Scraper Fallback Cascade**:
+  - **Tier 1 (Zero Config)**: Libretro Thumbnails CDN & GitHub Raw mirrors.
+  - **Tier 2 (Custom API Key)**: **TheGamesDB.net API** (Front box art, overview, developer, publisher, release date).
+  - **Tier 3 (User Credentials)**: **ScreenScraper.fr API** (Official 2D/3D box art & synopsis by platform/title).
+  - **Tier 4 (Strict Last Resort)**: Wikipedia Open REST API (Lead article image, synopsis, year).
+- **4-Tier Granular Scraper Scope Selection**:
+  - **Single System**: Scrapes missing or all artwork strictly for one chosen console platform (e.g. SNES or GBA).
+  - **Bunch of Systems (Multi-Select)**: Interactive multi-selection matrix with Select All / Clear Selection to batch-scrape multiple selected consoles.
+  - **All Systems**: Full library scan across all mounted ROM platforms.
+  - **Individual Title**: Searchable game picker to target any individual ROM on-demand.
+- **Dedicated Scraper Target Modal (`ScraperModal.jsx`)**:
+  - Console-style target selection hub accessible from the Topbar Sparkles trigger and Settings diagnostics.
+  - Features force-overwrite cache options and an embedded live activity telemetry terminal.
 - **On-Demand & Library Scrape Controls**:
-  - **"Scrape Art"** button in [Topbar.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/Topbar.jsx) for batch scanning.
-  - **"Re-Scrape Art"** action button in [GameDetailModal.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/GameDetailModal.jsx) for single-title re-fetching.
+  - **"Scrape Art / Stop Scraper"** toggle button in [Topbar.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/Topbar.jsx) that opens the target selection dialog or immediately halts an active scan.
+  - **"Re-Scrape Art"** action button in [GameDetailModal.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/GameDetailModal.jsx) for isolated single-title re-fetching with strictly scoped in-drawer live log streaming.
+  - **"Online Metadata & Box Art Scraper"** control panel in [SettingsView.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/SettingsView.jsx) under System & Diagnostics.
 
 ---
 

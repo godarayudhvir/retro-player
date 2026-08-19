@@ -14,6 +14,8 @@ export function useGamepadNavigation({
   setShowLoadRomModal,
   showSettingsModal,
   setShowSettingsModal,
+  showScraperModal,
+  setShowScraperModal,
   showVirtualKeyboard,
   setShowVirtualKeyboard,
   oskPos,
@@ -53,6 +55,7 @@ export function useGamepadNavigation({
       showInfoModal,
       showLoadRomModal,
       showSettingsModal,
+      showScraperModal,
       showVirtualKeyboard,
       oskPos,
       filteredGames,
@@ -71,6 +74,7 @@ export function useGamepadNavigation({
     showInfoModal,
     showLoadRomModal,
     showSettingsModal,
+    showScraperModal,
     showVirtualKeyboard,
     oskPos,
     filteredGames,
@@ -237,6 +241,17 @@ export function useGamepadNavigation({
       if (dir === 'BACK') {
         setShowSettingsModal(false);
         setFocusedTarget({ zone: 'topbar', id: 'settings' });
+        sfx?.playModalClose?.();
+        return;
+      }
+      return;
+    }
+
+    // 2c. Scraper Target Scope Modal Navigation
+    if (stateRef.current.showScraperModal) {
+      if (dir === 'BACK') {
+        setShowScraperModal(false);
+        setFocusedTarget({ zone: 'topbar', id: 'scraper' });
         sfx?.playModalClose?.();
         return;
       }

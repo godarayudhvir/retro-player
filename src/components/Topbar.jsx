@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, FolderOpen, Gamepad2, Volume2, VolumeX, Sparkles, RefreshCw, Music, SkipForward, Settings, Download } from 'lucide-react';
+import { Search, FolderOpen, Gamepad2, Volume2, VolumeX, Sparkles, RefreshCw, Square, Music, SkipForward, Settings, Download } from 'lucide-react';
 import MiiAvatar from './MiiAvatar';
 
 /**
@@ -20,6 +20,7 @@ export default function Topbar({
   setShowLoadRomModal,
   setShowSettingsModal,
   setShowVirtualKeyboard,
+  onOpenScraperModal,
   time,
   sfx,
   themeEngine,
@@ -102,24 +103,33 @@ export default function Topbar({
           <span className="pill-text">{gamepadConnected ? 'GAMEPAD READY' : 'NO CONTROLLER'}</span>
         </div>
 
-        {/* Metadata Scraper Status / Trigger */}
+        {/* Metadata Scraper Status / Trigger / Stop Button */}
         {scraper && (
           <button
-            className={`status-pill status-scraper ${scraper.isScraping ? 'is-active-scraping' : ''}`}
+            className={`status-pill status-scraper ${scraper.isScraping ? 'is-active-scraping is-stoppable' : ''}`}
             onClick={() => {
-              scraper.scrapeAll(undefined, true);
-              sfx?.playThemeSwitch?.();
+              if (scraper.isScraping) {
+                scraper.stopScrape();
+                sfx?.playModalClose?.();
+              } else if (onOpenScraperModal) {
+                onOpenScraperModal();
+                sfx?.playModalOpen?.();
+              } else {
+                scraper.scrapeAll(undefined, true);
+                sfx?.playThemeSwitch?.();
+              }
             }}
             title={scraper.isScraping 
-              ? `Scraping art... (${scraper.scrapeProgress.current}/${scraper.scrapeProgress.total})` 
-              : "Scrape Online Art & Metadata for Library"
+              ? `Scraping art... (${scraper.scrapeProgress.current}/${scraper.scrapeProgress.total}) — Click to STOP` 
+              : "Choose Scraper Target Scope (System / Bunch / All / Single)"
             }
-            aria-label="Scrape Online Art & Metadata"
+            aria-label={scraper.isScraping ? "Stop Metadata Scraper" : "Choose Scraper Target Scope"}
           >
             {scraper.isScraping ? (
               <>
-                <RefreshCw size={18} className="spin" color="#3b82f6" />
+                <Square size={14} className="stop-icon" fill="currentColor" />
                 <span className="pill-text scrape-badge">{scraper.scrapeProgress.current}/{scraper.scrapeProgress.total}</span>
+                <span className="scraper-stop-hover-text">STOP</span>
               </>
             ) : (
               <Sparkles size={18} color="#f59e0b" />

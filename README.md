@@ -83,7 +83,7 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
   - Zero disruptive native browser popups (`alert()`, `confirm()`, `prompt()`).
   - All confirmations (profile deletion, ROM removal, BGM cleanup) utilize theme-aware, gamepad/keyboard navigable in-app modal dialogs.
 - 💾 **3D Physical Cartridge Engine**: Tactile cartridges with metallic sheens, grip textures, and title color heuristics.
-- 🌐 **Automated Dynamic Online Metadata Scraper**: Official 3D box art from **Libretro** & synopsis info from **Wikipedia** with intelligent demo-to-retail matching and multilingual variant resolution, cached in **IndexedDB**.
+- 🌐 **Automated Dynamic Online Metadata Scraper with 4-Tier Scope Selection & Logs**: Official 3D box art from **Libretro** & synopsis info from **Wikipedia** with intelligent demo-to-retail matching, 4-tier scope selection (Single System, Multi-System Bunch, All Systems, or Single Title), scoped title logging, instant cancellation (`Stop Scraper`), and user-configurable startup auto-scrape toggles, cached in **IndexedDB**.
 - 🚀 **60 FPS Hardware-Accelerated Emulation & Diagnostic HUD**:
   - Full-speed 60 FPS VSync rendering with low-latency audio dynamic rate control.
   - Interactive **Diagnostic Performance HUD** (`D` hotkey) displaying real-time FPS, delta frame times (`16.6ms`), audio clock sync, and automated health checks.

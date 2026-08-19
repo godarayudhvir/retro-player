@@ -13,6 +13,7 @@ import ProfileSelectModal from './components/ProfileSelectModal';
 import MiiCreatorModal from './components/MiiCreatorModal';
 import SettingsView from './components/SettingsView';
 import DemoWelcomeModal from './components/DemoWelcomeModal';
+import ScraperModal from './components/ScraperModal';
 
 import { useWebAudioSfx } from './hooks/useWebAudioSfx';
 import { useGamepadStatus } from './hooks/useGamepadStatus';
@@ -37,6 +38,7 @@ export default function App() {
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showLoadRomModal, setShowLoadRomModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showScraperModal, setShowScraperModal] = useState(false);
   const [showVirtualKeyboard, setShowVirtualKeyboard] = useState(false);
   const [showProfileSelectModal, setShowProfileSelectModal] = useState(false);
   const [showMiiCreatorModal, setShowMiiCreatorModal] = useState(false);
@@ -133,6 +135,8 @@ export default function App() {
     setShowLoadRomModal,
     showSettingsModal,
     setShowSettingsModal,
+    showScraperModal,
+    setShowScraperModal,
     showVirtualKeyboard,
     setShowVirtualKeyboard,
     oskPos,
@@ -228,6 +232,7 @@ export default function App() {
         setShowLoadRomModal={setShowLoadRomModal}
         setShowSettingsModal={setShowSettingsModal}
         setShowVirtualKeyboard={setShowVirtualKeyboard}
+        onOpenScraperModal={() => setShowScraperModal(true)}
         time={time}
         sfx={sfx}
         themeEngine={themeEngine}
@@ -310,6 +315,7 @@ export default function App() {
         onResetStats={resetGameStats}
         onScrapeGame={scraper.scrapeSingleGame}
         isScraping={scraper.isScraping}
+        scraper={scraper}
         gameStats={getGameStats(selectedGameCard?.id || selectedGameCard?.title)}
         gamepadConnected={gamepadConnected}
         focusedTarget={focusedTarget}
@@ -408,9 +414,25 @@ export default function App() {
         sfx={sfx}
         themeEngine={themeEngine}
         scraper={scraper}
+        onOpenScraperModal={() => setShowScraperModal(true)}
         focusedTarget={focusedTarget}
         setFocusedTarget={setFocusedTarget}
         gamepadConnected={gamepadConnected}
+      />
+
+      {/* Granular Scraper Scope Selector Modal */}
+      <ScraperModal
+        isOpen={showScraperModal}
+        onClose={() => {
+          setShowScraperModal(false);
+          sfx.playModalClose();
+        }}
+        systems={systems}
+        games={games}
+        scraper={scraper}
+        sfx={sfx}
+        focusedTarget={focusedTarget}
+        setFocusedTarget={setFocusedTarget}
       />
 
       {/* Active Game Emulator Sandbox */}

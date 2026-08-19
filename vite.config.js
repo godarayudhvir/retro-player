@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import fs from 'fs';
 import path from 'path';
+import https from 'https';
 
 // Supported System Mappings with RomM SVG icon references
 const SYSTEM_MAP = {
@@ -665,6 +666,55 @@ function multiConsoleScannerPlugin() {
 
         res.statusCode = 405;
         res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+      });
+
+      // Proxy for TheGamesDB.net (Bypasses Browser CORS restrictions)
+      server.middlewares.use('/api/proxy-thegamesdb', (req, res) => {
+        try {
+          const urlObj = new URL(req.url, 'http://localhost');
+          const targetPath = urlObj.searchParams.get('endpoint');
+          if (!targetPath) {
+            res.statusCode = 400;
+            res.end(JSON.stringify({ error: 'Missing endpoint parameter' }));
+            return;
+          }
+          const targetUrl = `https://api.thegamesdb.net/v1/${targetPath}`;
+          https.get(targetUrl, {
+            headers: { 'User-Agent': 'RetroPlayer/1.0 (Web; Node)' }
+          }, (upstreamRes) => {
+            res.statusCode = upstreamRes.statusCode || 200;
+            res.setHeader('Content-Type', 'application/json');
+            upstreamRes.pipe(res);
+          }).on('error', (e) => {
+            res.statusCode = 502;
+            res.end(JSON.stringify({ error: e.message }));
+          });
+        } catch (err) {
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: err.message }));
+        }
+      });
+
+      // Proxy for ScreenScraper.fr (Bypasses Browser CORS restrictions)
+      server.middlewares.use('/api/proxy-screenscraper', (req, res) => {
+        try {
+          const urlObj = new URL(req.url, 'http://localhost');
+          const query = urlObj.searchParams.get('query') || '';
+          const targetUrl = `https://www.screenscraper.fr/api2/jeuInfos.php?${query}`;
+          https.get(targetUrl, {
+            headers: { 'User-Agent': 'RetroPlayer/1.0 (Web; Node)' }
+          }, (upstreamRes) => {
+            res.statusCode = upstreamRes.statusCode || 200;
+            res.setHeader('Content-Type', 'application/json');
+            upstreamRes.pipe(res);
+          }).on('error', (e) => {
+            res.statusCode = 502;
+            res.end(JSON.stringify({ error: e.message }));
+          });
+        } catch (err) {
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: err.message }));
+        }
       });
     }
   };

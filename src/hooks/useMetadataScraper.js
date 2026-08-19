@@ -2,8 +2,16 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   getAllCachedMetadata,
   scrapeGame,
-  clearAllCachedMetadata
+  clearAllCachedMetadata,
+  subscribeScraperLogs,
+  addScraperLog,
+  clearScraperLogs,
+  SCRAPER_KEYS,
+  getScraperApiKey,
+  setScraperApiKey
 } from '../services/metadataScraper';
+
+const AUTO_SCRAPE_STORAGE_KEY = 'retroplayer_autoscrape_enabled';
 
 /**
  * Custom React hook to coordinate online metadata and cover art scraping,
@@ -13,8 +21,29 @@ export function useMetadataScraper(games = []) {
   const [metadataMap, setMetadataMap] = useState({});
   const [isScraping, setIsScraping] = useState(false);
   const [scrapeProgress, setScrapeProgress] = useState({ current: 0, total: 0 });
+  const [logs, setLogs] = useState([]);
+  const [autoScrapeEnabled, setAutoScrapeEnabledState] = useState(() => {
+    try {
+      const stored = localStorage.getItem(AUTO_SCRAPE_STORAGE_KEY);
+      return stored !== null ? stored === 'true' : false; // Default to false to prevent unsolicited background scraping
+    } catch (_) {
+      return false;
+    }
+  });
+
   const isMountedRef = useRef(true);
   const activeScrapeQueueRef = useRef(false);
+  const cancelRequestedRef = useRef(false);
+
+  // Subscribe to real-time scraper logging
+  useEffect(() => {
+    const unsubscribe = subscribeScraperLogs((newLogs) => {
+      if (isMountedRef.current) {
+        setLogs(newLogs);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -22,6 +51,18 @@ export function useMetadataScraper(games = []) {
       isMountedRef.current = false;
     };
   }, []);
+
+  // Update auto-scrape preference
+  const setAutoScrapeEnabled = useCallback((enabled) => {
+    try {
+      localStorage.setItem(AUTO_SCRAPE_STORAGE_KEY, String(enabled));
+    } catch (_) {}
+    setAutoScrapeEnabledState(enabled);
+  }, []);
+
+  const toggleAutoScrape = useCallback(() => {
+    setAutoScrapeEnabled(!autoScrapeEnabled);
+  }, [autoScrapeEnabled, setAutoScrapeEnabled]);
 
   // Load existing cache on mount
   useEffect(() => {
@@ -33,6 +74,16 @@ export function useMetadataScraper(games = []) {
     }
     loadCache();
   }, []);
+
+  // Stop / Cancel active scraping
+  const stopScrape = useCallback(() => {
+    if (activeScrapeQueueRef.current || isScraping) {
+      console.log('🛑 [SCRAPER] User requested scrape cancellation.');
+      cancelRequestedRef.current = true;
+      activeScrapeQueueRef.current = false;
+      setIsScraping(false);
+    }
+  }, [isScraping]);
 
   // Scrape single game on-demand
   const scrapeSingleGame = useCallback(async (game, force = false) => {
@@ -51,6 +102,7 @@ export function useMetadataScraper(games = []) {
   const scrapeAll = useCallback(async (gameList = games, force = false) => {
     if (!gameList || gameList.length === 0 || activeScrapeQueueRef.current) return;
 
+    cancelRequestedRef.current = false;
     activeScrapeQueueRef.current = true;
     setIsScraping(true);
     setScrapeProgress({ current: 0, total: gameList.length });
@@ -58,12 +110,16 @@ export function useMetadataScraper(games = []) {
     console.log(`🚀 [BATCH SCRAPER] Starting metadata scan for ${gameList.length} titles...`);
 
     for (let i = 0; i < gameList.length; i++) {
-      if (!isMountedRef.current) break;
+      if (!isMountedRef.current || cancelRequestedRef.current) {
+        console.log('🛑 [BATCH SCRAPER] Scan aborted by user or unmount.');
+        break;
+      }
       const game = gameList[i];
       const id = game.id || `${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
 
       if (force || !metadataMap[id]) {
         const meta = await scrapeGame(game, force);
+        if (cancelRequestedRef.current) break;
         if (meta && isMountedRef.current) {
           setMetadataMap(prev => ({
             ...prev,
@@ -72,24 +128,42 @@ export function useMetadataScraper(games = []) {
         }
       }
 
-      if (isMountedRef.current) {
+      if (isMountedRef.current && !cancelRequestedRef.current) {
         setScrapeProgress({ current: i + 1, total: gameList.length });
       }
 
-      // Small delay between queries to respect rate limits
-      await new Promise(r => setTimeout(r, 120));
+      if (cancelRequestedRef.current) break;
+
+      // Fast pacing between titles
+      await new Promise(r => setTimeout(r, 25));
     }
 
     if (isMountedRef.current) {
       setIsScraping(false);
       activeScrapeQueueRef.current = false;
     }
-    console.log(`✅ [BATCH SCRAPER] Completed library scan.`);
+    console.log(`✅ [BATCH SCRAPER] Finished library scan process.`);
   }, [games, metadataMap]);
 
-  // Auto-scrape missing games in the background whenever games list updates
+  // Scrape a specific single console system
+  const scrapeSystem = useCallback(async (systemKey, force = false) => {
+    if (!systemKey || !games) return;
+    const systemGames = games.filter(g => g.systemKey === systemKey);
+    console.log(`🎯 [SCRAPER] Scrape requested for single system: ${systemKey} (${systemGames.length} games)`);
+    await scrapeAll(systemGames, force);
+  }, [games, scrapeAll]);
+
+  // Scrape a bunch / multi-selection of console systems
+  const scrapeSystems = useCallback(async (systemKeys = [], force = false) => {
+    if (!systemKeys || systemKeys.length === 0 || !games) return;
+    const selectedGames = games.filter(g => systemKeys.includes(g.systemKey));
+    console.log(`🎯 [SCRAPER] Scrape requested for ${systemKeys.length} systems (${selectedGames.length} games)`);
+    await scrapeAll(selectedGames, force);
+  }, [games, scrapeAll]);
+
+  // Auto-scrape missing games in the background ONLY if enabled by user
   useEffect(() => {
-    if (games && games.length > 0 && !activeScrapeQueueRef.current) {
+    if (autoScrapeEnabled && games && games.length > 0 && !activeScrapeQueueRef.current && !cancelRequestedRef.current) {
       // Find games that have not been scraped yet
       const unscraped = games.filter(g => {
         const id = g.id || `${g.systemKey}-${g.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
@@ -101,7 +175,7 @@ export function useMetadataScraper(games = []) {
         scrapeAll(unscraped, false);
       }
     }
-  }, [games, metadataMap, scrapeAll]);
+  }, [autoScrapeEnabled, games, metadataMap, scrapeAll]);
 
   // Clear cache and reset
   const clearCache = useCallback(async () => {
@@ -115,8 +189,21 @@ export function useMetadataScraper(games = []) {
     metadataMap,
     isScraping,
     scrapeProgress,
+    logs,
+    clearLogs: clearScraperLogs,
+    autoScrapeEnabled,
+    setAutoScrapeEnabled,
+    toggleAutoScrape,
+    stopScrape,
     scrapeSingleGame,
+    scrapeSystem,
+    scrapeSystems,
     scrapeAll,
-    clearCache
+    clearCache,
+    SCRAPER_KEYS,
+    getApiKey: getScraperApiKey,
+    setApiKey: setScraperApiKey
   };
 }
+
+
