@@ -10,14 +10,15 @@ The **Storage & Database Engine** (`src/services/db.js`, `server.js`, `vite.conf
   - Automatically mounted in Docker (`-v ./data:/data`) and local disks.
   - Exposes REST endpoints (`/api/db/:store`, `/api/db/:store/:key`) for robust CRUD operations.
   - Immune to browser "Clear Site Data", incognito sessions, browser switching, and cache resets.
-- **Client-Side Database (`RetroPlayerDB`)**:
+- **Client-Side Database (`RetroPlayerDB` & `RetroPlayerMetadataDB`)**:
   - `profiles`: User accounts, Nintendo Mii vector configurations, and signature colors (`keyPath: 'id'`).
   - `user_data`: Scoped user activity logs, persistent favorites, recents queue, and playtime sessions (`keyPath: 'key'`).
   - `app_settings`: Global console configuration, active profile ID, volume, and preferences.
   - `game_saves`: Native in-game battery SRAM (.sav) blobs.
   - `save_states`: Real-time quick state snapshot payloads (.state).
+  - `game_metadata`: Server-synchronized game box art URLs, Wikipedia synopses, release years, and publisher info.
 - **Dual-Layer Real-Time Sync**:
-  - Authoritative persistence in **Server Database**.
+  - Authoritative persistence in **Server Database** (`/data/retroplayer_db.json`).
   - Local **IndexedDB** acts as an instant 0ms offline cache.
   - In-memory React state cache guarantees zero UI flickering during navigation.
 

@@ -83,7 +83,7 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
   - Zero disruptive native browser popups (`alert()`, `confirm()`, `prompt()`).
   - All confirmations (profile deletion, ROM removal, BGM cleanup) utilize theme-aware, gamepad/keyboard navigable in-app modal dialogs.
 - 💾 **3D Physical Cartridge Engine**: Tactile cartridges with metallic sheens, grip textures, and title color heuristics.
-- 🌐 **Automated ES-DE Online Metadata Scraper**: Official 3D box art from **Libretro** & synopsis info from **Wikipedia**, cached in **IndexedDB**.
+- 🌐 **Automated Dynamic Online Metadata Scraper**: Official 3D box art from **Libretro** & synopsis info from **Wikipedia** with intelligent demo-to-retail matching and multilingual variant resolution, cached in **IndexedDB**.
 - 🚀 **60 FPS Hardware-Accelerated Emulation & Diagnostic HUD**:
   - Full-speed 60 FPS VSync rendering with low-latency audio dynamic rate control.
   - Interactive **Diagnostic Performance HUD** (`D` hotkey) displaying real-time FPS, delta frame times (`16.6ms`), audio clock sync, and automated health checks.
@@ -98,14 +98,46 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 | System | Platform Key | Default Core | Supported File Extensions |
 | :--- | :--- | :--- | :--- |
 | **Game Boy Advance** | `gba` | `gba` (mGBA) | `.gba` |
-| **Game Boy / Color** | `gb`, `gbc` | `gb` (Gambatte) | `.gb`, `.gbc` |
+| **Game Boy Color** | `gbc` | `gb` (Gambatte) | `.gbc` |
+| **Game Boy (DMG)** | `gb` | `gb` (Gambatte) | `.gb` |
 | **Super Nintendo** | `snes` | `snes` (Snes9x) | `.sfc`, `.smc`, `.snes` |
 | **Nintendo (NES)** | `nes` | `nes` (FCEUmm) | `.nes` |
 | **Nintendo 64** | `n64` | `n64` (Mupen64Plus) | `.z64`, `.n64`, `.v64` |
 | **Nintendo DS** | `nds` | `nds` (MelonDS / DeSmuME) | `.nds` |
-| **Sega Genesis / Mega Drive** | `genesis` | `segaMD` (Genesis Plus GX) | `.gen`, `.md`, `.smd` |
-| **PlayStation (PS1)** | `ps1` | `psx` (Beetle PSX) | `.chd`, `.iso`, `.cue`, `.bin` |
-| **Arcade** | `arcade` | `mame2003_plus` | `.zip` |
+| **Sega Genesis / Mega Drive** | `sega_genesis` | `segaMD` (Genesis Plus GX) | `.gen`, `.md`, `.smd` |
+| **Sega Game Gear** | `game_gear` | `segaGG` (Genesis Plus GX) | `.gg` |
+| **PlayStation (PS1)** | `playstation` | `psx` (Beetle PSX / PCSX-ReArmed) | `.chd`, `.iso`, `.cue`, `.bin`, `.pbp` |
+| **Arcade (MAME)** | `arcade` | `mame2003_plus` (MAME 2003 Plus) | `.zip` |
+| **Atari 2600** | `atari_2600` | `atari2600` (Stella) | `.a26` |
+
+---
+
+## 🎮 Bundled Non-Commercial Demo & Homebrew Showcase
+
+Retro Player features a curated collection of **non-complete demonstration ROMs, promotional samples, Sega Channel trials, aftermarket homebrew, and prototypes**, structured into two tiers to comply with GitHub file size quotas:
+
+- 🟢 **Public Web Demo Tier (279 Titles — 572.6 MB)**: Pre-packaged directly in the repository and available in the live browser demo across **all 12 supported console platforms**, including 6 curated low-size showcase demos for PlayStation (*Dino Crisis*, *Rayman 2*, *Driver*) and Nintendo DS (*Mario Kart DS*, *Super Mario 64 DS*, *Tetris DS*).
+- ⚪ **Local / Self-Hosted Tier (71 Titles — 3.09 GB)**: Heavy disc dumps (`playstation` & `nds`) are gitignored from GitHub pushes to stay within GitHub's 100 MB per-file and 1 GB Pages limits, but remain 100% playable via **"Load Custom ROM"** or local Docker volume mounts (`/roms`).
+- 📑 **Complete ROM Inventory & File Names**: See **[roms.md](roms.md)** for the full file-by-file inventory of all 350 titles and classification tags.
+- 🎯 **Curated as Non-Complete ROMs**: All titles are strictly **non-complete evaluation software** (e.g. *Part One*, *Part A*, *Showdown*, *Trade Show Samples*, *Chapter Zero*, *Homebrew Demos*). **Zero full commercial release games are bundled.**
+- ⚖️ **Creator Compliance & Immediate Removal Policy**: If you are a rights holder, developer, or publisher of any demo or sample and would like it removed, please open an issue or pull request and **we will immediately comply**.
+- 🔒 **100% Private Custom ROM Loading**: To play your own personal game dumps, use **"Load Custom ROM"** or drag & drop—files run purely in local browser memory with zero network uploads.
+
+| Console | Supported Key | Bundled Demos & Samples | Public Web Demo | Sample Highlights |
+| :--- | :--- | :---: | :---: | :--- |
+| **Nintendo Entertainment System (NES)** | `nes` | **72 Titles** | 🟢 72 Public | *Micro Mages Demo*, *Blade Buster*, *Alter Ego*, *Almanac Demo*, *Haradius Zero* |
+| **Sega Genesis / Mega Drive** | `sega_genesis` | **66 Titles** | 🟢 66 Public | *Sonic 3D Blast (Part One)*, *Comix Zone (Sega Channel)*, *Earthworm Jim (Test Drive)*, *Tanglewood Demo* |
+| **Atari 2600** | `atari_2600` | **60 Titles** | 🟢 60 Public | *Space Rocks*, *Princess Rescue*, *Galagon*, *Stay Frosty 2*, *Boulder Dash Demo* |
+| **Sony PlayStation (PS1)** | `playstation` | **52 Titles** | 🟢 3 Public / ⚪ 49 Local | *Dino Crisis Demo*, *Rayman 2 Demo*, *Driver Demo* (+ 49 Local Discs) |
+| **Nintendo DS** | `nds` | **25 Titles** | 🟢 3 Public / ⚪ 22 Local | *Mario Kart DS*, *Super Mario 64 DS*, *Tetris DS* (+ 22 Local Demos) |
+| **Arcade (MAME)** | `arcade` | **18 Titles** | 🟢 18 Public | *Gridlee*, *Robby Roto*, *Poly-Play*, *Car Jamboree* |
+| **Game Boy Color** | `gbc` | **17 Titles** | 🟢 17 Public | *Tobu Tobu Girl Deluxe*, *Dangan GB*, *Black & White*, *Deadeus Demo* |
+| **Game Boy (DMG)** | `gb` | **10 Titles** | 🟢 10 Public | *Sheep It Up!*, *Super JetPak DX*, *Pineapple Kid*, *T-Crisis 100%* |
+| **Super Nintendo (SNES)** | `snes` | **9 Titles** | 🟢 9 Public | *Classic Kong*, *N-Warp Daisakusen*, *Attack of the PETSCII Robots*, *Eyra Crow Maiden* |
+| **Sega Game Gear** | `game_gear` | **9 Titles** | 🟢 9 Public | *Columns*, *Galaga '91*, *Super Columns Demo*, *Pengo Demo* |
+| **Nintendo 64 (N64)** | `n64` | **7 Titles** | 🟢 7 Public | *Dexanoid*, *N64 Space Demo*, *Pang 64*, *VRML Viewer Showcase* |
+| **Game Boy Advance** | `gba` | **5 Titles** | 🟢 5 Public | *Goodboy Galaxy Chapter Zero*, *Anguna: Warriors of Virtue*, *Motocross Challenge* |
+| **Total** | **12 Consoles** | **350 Demos** | **279 Public** | **[View Full 350-File Inventory in roms.md ↗](roms.md)** |
 
 ---
 

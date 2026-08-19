@@ -117,6 +117,17 @@ export default function DemoWelcomeModal({
           </p>
         </div>
 
+        {/* Demo Showcase Non-Complete Disclaimer */}
+        <div className="demo-modal-notice-box" style={{ borderLeftColor: '#3b82f6', background: 'rgba(59, 130, 246, 0.08)' }}>
+          <div className="demo-notice-header">
+            <ShieldCheck size={18} color="#3b82f6" />
+            <strong>Non-Commercial Demo Showcase</strong>
+          </div>
+          <p>
+            All pre-loaded titles in this web demo are strictly <strong>non-complete evaluation slices, promotional samples, homebrew, or prototypes</strong> specifically curated to test WebAssembly emulation performance. No full commercial games are bundled. For full retail titles, use <strong>Load Custom ROM</strong> for 100% private in-memory play. If you are a rights holder wishing for any demo to be removed, please contact us for immediate compliance.
+          </p>
+        </div>
+
         {/* Actions Footer */}
         <div className="demo-modal-footer">
           <a

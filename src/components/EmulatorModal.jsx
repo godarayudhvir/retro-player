@@ -177,7 +177,8 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
         } else if (currentGame.romUrl && (currentGame.romUrl.startsWith('blob:') || currentGame.romUrl.startsWith('data:') || currentGame.romUrl.startsWith('http://') || currentGame.romUrl.startsWith('https://'))) {
           absoluteRomUrl = currentGame.romUrl;
         } else if (currentGame.romUrl) {
-          absoluteRomUrl = new URL(currentGame.romUrl, window.location.origin).href;
+          const resolvedPath = resolveAssetPath(currentGame.romUrl);
+          absoluteRomUrl = new URL(resolvedPath, window.location.href).href;
         }
         console.log(`🎮 [EMULATOR LAUNCHING] Game: "${currentGame.title}" | System Core: ${currentGame.systemCore} | ROM URL: ${absoluteRomUrl}`);
       } catch (e) {
@@ -240,10 +241,11 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
         }
       }
       if (core === 'gbc') core = 'gb';
-      if (core === 'ps1') core = 'psx';
-      if (core === 'sega' || core === 'genesis' || core === 'megadrive') core = 'segaMD';
-      if (core === 'gamegear') core = 'segaGG';
+      if (core === 'ps1' || core === 'playstation') core = 'psx';
+      if (core === 'sega' || core === 'genesis' || core === 'megadrive' || core === 'sega_genesis') core = 'segaMD';
+      if (core === 'gamegear' || core === 'game_gear') core = 'segaGG';
       if (core === 'arcade') core = 'mame2003_plus';
+      if (core === 'atari_2600') core = 'atari2600';
 
       const iframe = document.createElement('iframe');
       iframeRef.current = iframe;

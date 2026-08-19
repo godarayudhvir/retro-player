@@ -1,15 +1,34 @@
 # Game Catalog & ROM Discovery Indexer (`architecture/modules/game-catalog.md`)
 
 ## 1. Description
-The Game Catalog module indexes local ROM files in `/public/roms` and custom drag-and-dropped ROMs, automatically detects emulation cores, maps platforms, and serves the clean ROM dataset to the frontend client without any hardcoded local covers or bundled metadata files (adhering to the ES-DE dynamic launcher architecture).
+The Game Catalog module indexes local ROM files in `/public/roms` (and server `ROMS_DIR`) and handles client-side custom ROM loading, automatically detects emulation cores, maps platforms, and serves the clean ROM dataset to the frontend client without any hardcoded local covers or bundled metadata files (adhering to the ES-DE dynamic launcher architecture).
 
 ---
 
 ## 2. Detailed List of What It Does
-- **ROM Directory Scanning**: Recursively scans `/public/roms` (or `ROMS_DIR`) for valid extensions (`.nes`, `.snes`, `.smc`, `.sfc`, `.gba`, `.gbc`, `.gb`, `.n64`, `.z64`, `.v64`, `.nds`, `.gen`, `.zip`, `.iso`, `.cue`, `.chd`, `.bin`).
-- **Custom Local ROM Drag & Drop Parsing & Permanent Disk Persistence**: Parses custom ROM files selected via file input or dropped directly onto the window viewport. Auto-detects target system cores based on extension (`detectSystemFromExtension`), launches the game immediately in-memory, and asynchronously uploads the binary to `/api/upload-rom` so it is permanently saved in `/roms/<systemKey>/` for future reloads.
+- **12-Console ROM Directory Scanning**: Recursively scans `/public/roms` (or `ROMS_DIR`) for valid extensions across all 12 supported retro systems:
+  - Game Boy Advance (`.gba`)
+  - Game Boy & Game Boy Color (`.gb`, `.gbc`)
+  - Super Nintendo (`.sfc`, `.smc`, `.snes`)
+  - Nintendo Entertainment System (`.nes`)
+  - Nintendo 64 (`.z64`, `.n64`, `.v64`)
+  - Nintendo DS (`.nds`)
+  - Sega Genesis / Mega Drive (`.md`, `.gen`, `.smd`)
+  - Sega Game Gear (`.gg`)
+  - Sony PlayStation 1 (`.cue`, `.chd`, `.iso`, `.pbp`, `.bin`)
+  - Arcade MAME (`.zip`)
+  - Atari 2600 (`.a26`)
+- **Bundled Non-Commercial Demo Showcase (350 Titles Across 12 Consoles)**: Pre-packages an expansive roster of 350 non-complete demonstration ROMs, trade show samples, Sega Channel trials, aftermarket homebrew, and prototypes in `public/roms/` across all 12 supported platforms (documented in detail in [roms.md](../../roms.md)). Titles are specifically non-complete slices curated to evaluate WebAssembly core emulation performance with zero full commercial retail releases.
+- **Two-Tier Distribution Architecture**:
+  - **Public Web Demo Tier (279 Titles — 572.6 MB)**: Whitelisted and tracked in Git across all 12 consoles (`arcade`, `atari_2600`, `game_gear`, `gb`, `gba`, `gbc`, `n64`, `nes`, `sega_genesis`, `snes`, plus 6 curated low-size showcase demos for `playstation` and `nds`), with zero files >50 MB (compliant with GitHub 100 MB push limits and 1 GB Pages quota).
+  - **Local / Self-Hosted Tier (71 Titles — 3.09 GB)**: Heavy disc systems (`playstation` & `nds`) are gitignored from GitHub pushes due to large individual disc sizes (64 MB–586 MB), while remaining 100% supported via in-memory custom ROM loading or local Docker volume mounts (`/roms`).
+- **Creator Compliance & Immediate Removal Policy**: Maintained under strict compliance rules where any copyright holder or creator requesting demo removal will be accommodated immediately without hesitation (see [roms.md](../../roms.md)).
+- **Public Domain & Homebrew Whitelist (`.gitignore`)**: Explicitly whitelists `public/roms/` demo games for the 10 lightweight systems plus the 6 curated PS1/NDS exception demos, alongside `public/bgm/` chiptune audio tracks, while keeping server ROMs (`/roms/`), heavy disc systems (`public/roms/playstation/`, `public/roms/nds/`), battery save files (`.sav`), and persistent storage (`data/`) strictly ignored.
+- **Companion Disc Sheet Deduplication**: Automatically detects `.cue` sheets in PlayStation folders and skips companion `.bin` track dumps to avoid duplicate indexing or direct bin launch failures.
+- **Universal Relative Subpath Resolution**: Resolves all static assets and demo ROM URLs relative to the application's base URL (`import.meta.env.BASE_URL`) via `src/utils/assetPath.js` for 100% portability across GitHub Pages subpaths and custom domain root paths.
+- **Client-Side Private Custom ROM Sandbox**: Custom ROMs opened via "Load Custom ROM" or viewport drag-and-drop execute immediately in browser WebAssembly memory without sending any personal game files to the remote server.
 - **Zero-Config Pure Indexing**: Returns pure game descriptors (`id`, `title`, `filename`, `systemKey`, `systemName`, `systemCore`, `romUrl`) with `coverUrl: null`, leaving all artwork and synopsis enrichment to the dynamic online scraper module.
-- **Sorting & Filtering**: Supplies clean title and extension metadata for category filtering and search queries.
+- **Sorting & Filtering**: Supplies clean title and extension metadata for category filtering, smart collections (Favorites/Recents), and search queries.
 
 ---
 
@@ -20,24 +39,22 @@ The Game Catalog module indexes local ROM files in `/public/roms` and custom dra
 2. Constructs clean game descriptor objects:
    ```javascript
    {
-     id: 'gba-pokemon-emerald-version-usa-europe',
-     title: 'Pokemon - Emerald Version',
-     rawTitle: 'Pokemon - Emerald Version (USA, Europe)',
-     filename: 'Pokemon - Emerald Version (USA, Europe).zip',
+     id: 'gba-goodboy-galaxy-chapter-zero',
+     title: 'Goodboy Galaxy Chapter Zero',
+     rawTitle: 'Goodboy Galaxy - Chapter Zero (World) (En) (v1.0.7) (Demo) (Aftermarket) (Unl)',
+     filename: 'Goodboy Galaxy - Chapter Zero (World) (En) (v1.0.7) (Demo) (Aftermarket) (Unl).gba',
      systemKey: 'gba',
      systemName: 'Game Boy Advance',
      systemCore: 'gba',
      systemColor: '#3b82f6',
-     systemIcon: '/assets/platforms/gba.svg',
+     systemIcon: 'assets/platforms/gba.svg',
      category: 'Handheld',
-     romUrl: '/roms/gba/Pokemon%20-%20Emerald%20Version%20(USA%2C%20Europe).zip',
+     romUrl: '/roms/gba/Goodboy%20Galaxy...gba',
      coverUrl: null // Scraped dynamically on-the-fly by metadataScraper service
    }
    ```
 3. The client receives the catalog and automatically coordinates background scraping through `useMetadataScraper.js` and `metadataScraper.js`.
 
-### ROM Upload & Auto-Organizing Persistence (`/api/upload-rom`)
-1. User drops a ROM or uses the "Load Custom ROM" modal.
-2. `useRomManifest.js` inspects extension (`.gba`, `.sfc`, `.nes`, `.nds`, `.z64`, etc.) and sends a `POST /api/upload-rom` request streaming the binary with an `x-filename` header.
-3. The backend ensures directory `ROMS_DIR/<systemKey>/` exists (e.g. `/roms/gba/`) and streams the file to disk.
-4. On upload completion, the catalog re-indexes automatically so the uploaded game remains permanently in the library across page reloads and container restarts.
+### Client-Side Sandbox vs. Host Library Management
+1. **Live Web Demo / Custom ROMs**: When running on static hosting (GitHub Pages) or loading personal ROMs via the "Load Custom ROM" modal, ROMs run strictly in browser memory via `URL.createObjectURL(file)`.
+2. **Docker Self-Hosted Mode**: When running the Node/Docker server with mounted storage volumes (`-v ./roms:/roms`), administrators can upload and delete library files permanently through the full-screen Settings Manager.

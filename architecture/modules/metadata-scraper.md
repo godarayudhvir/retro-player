@@ -12,8 +12,9 @@ All scraped assets and metadata records are asynchronously cached in browser **I
 
 - **Multi-System Canonical Mapping**: Translates internal console keys (`gba`, `nes`, `snes`, `n64`, `gbc`, `gb`, `nds`, `genesis`, `ps1`, etc.) into Libretro Thumbnails naming standards (e.g. `Nintendo - Game Boy Advance`, `Sony - PlayStation`).
 - **Smart Title Normalization & Multi-Candidate Generation**:
-  - Automatically cleans filenames by stripping ROM tags (`(USA)`, `(Europe)`, `[!]`, `(Rev 1)`) and encoding reserved filename characters (`&`, `:`, `/`, `\`, `*`, `?`, `"`, `<`, `>`, `|`) into standard Libretro underscores (`_`).
-  - Generates multi-tier search candidates covering raw filenames, region-specific variations, and clean display titles.
+  - Automatically cleans filenames by stripping ROM tags (`(USA)`, `(Europe)`, `[!]`, `(Rev 1)`, `(Demo)`, `(Kiosk)`, `(Proto)`, `(Beta)`, `(Aftermarket)`, `(Unl)`, `(Digital)`, `(Kickstarter)`) and encoding reserved filename characters (`&`, `:`, `/`, `\`, `*`, `?`, `"`, `<`, `>`, `|`) into standard Libretro underscores (`_`).
+  - Automatically matches demo, kiosk, beta, and prototype builds against their corresponding official commercial retail box art releases without altering original disk filenames.
+  - Generates multi-tier search candidates covering raw filenames, region-specific variations (`(USA)`, `(USA, Europe)`, `(Europe)`, `(World)`, `(USA, Australia)`), multilingual tags (`(En,Fr,Es)`, `(En,Fr,De,Es,It)`, `(En,Es)`), title inversions (`Legend of Zelda, The` $\leftrightarrow$ `The Legend of Zelda`), diacritics (`Pokemon` $\leftrightarrow$ `Pokémon`), and split multi-game compilations.
 - **Dynamic Asset & Box Art Scraper**:
   - Probes and fetches official 3D box art from `Named_Boxarts`, fallback snaps from `Named_Snaps`, and title screens from `Named_Titles`.
 - **Rich Metadata Enrichment**:

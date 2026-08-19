@@ -51,14 +51,18 @@ export default function LoadRomModal({
   };
 
   const supportedPlatforms = [
-    { name: 'Game Boy Advance', ext: '.gba', icon: resolveAssetPath('assets/platforms/gba.svg') },
-    { name: 'Game Boy / Color', ext: '.gb, .gbc', icon: resolveAssetPath('assets/platforms/gbc.svg') },
-    { name: 'NES & SNES', ext: '.nes, .sfc, .smc', icon: resolveAssetPath('assets/platforms/snes.svg') },
-    { name: 'Nintendo 64', ext: '.z64, .n64', icon: resolveAssetPath('assets/platforms/n64.svg') },
-    { name: 'Nintendo DS', ext: '.nds', icon: resolveAssetPath('assets/platforms/nds.svg') },
-    { name: 'PlayStation', ext: '.bin, .iso, .chd', icon: resolveAssetPath('assets/platforms/psx.svg') },
-    { name: 'Sega Genesis', ext: '.md, .gen', icon: resolveAssetPath('assets/platforms/genesis.svg') },
-    { name: 'Arcade (MAME)', ext: '.zip', icon: resolveAssetPath('assets/platforms/arcade.svg') }
+    { name: 'Game Boy Advance', ext: '.gba',            icon: resolveAssetPath('assets/platforms/gba.svg') },
+    { name: 'Game Boy',         ext: '.gb',             icon: resolveAssetPath('assets/platforms/gb.svg') },
+    { name: 'Game Boy Color',   ext: '.gbc',            icon: resolveAssetPath('assets/platforms/gbc.svg') },
+    { name: 'NES',              ext: '.nes',            icon: resolveAssetPath('assets/platforms/nes.svg') },
+    { name: 'SNES',             ext: '.sfc, .smc',      icon: resolveAssetPath('assets/platforms/snes.svg') },
+    { name: 'Nintendo 64',      ext: '.z64, .n64',      icon: resolveAssetPath('assets/platforms/n64.svg') },
+    { name: 'Nintendo DS',      ext: '.nds',            icon: resolveAssetPath('assets/platforms/nds.svg') },
+    { name: 'PlayStation',      ext: '.bin, .iso, .chd',icon: resolveAssetPath('assets/platforms/psx.svg') },
+    { name: 'Sega Genesis',     ext: '.md, .gen',       icon: resolveAssetPath('assets/platforms/genesis.svg') },
+    { name: 'Game Gear',        ext: '.gg',             icon: resolveAssetPath('assets/platforms/gamegear.svg') },
+    { name: 'Arcade (MAME)',    ext: '.zip',            icon: resolveAssetPath('assets/platforms/arcade.svg') },
+    { name: 'Atari 2600',       ext: '.a26',            icon: resolveAssetPath('assets/platforms/atari2600.svg') }
   ];
 
   return (

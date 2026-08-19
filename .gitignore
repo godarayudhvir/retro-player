@@ -1,87 +1,100 @@
-# Logs
-logs
+# =============================================================================
+# Retro Player — .gitignore
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Dependencies
+# -----------------------------------------------------------------------------
+node_modules/
+jspm_packages/
+
+# -----------------------------------------------------------------------------
+# Build Outputs
+# -----------------------------------------------------------------------------
+dist/
+dist-ssr/
+build/
+*.local
+
+# -----------------------------------------------------------------------------
+# Environment & Secrets
+# -----------------------------------------------------------------------------
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# -----------------------------------------------------------------------------
+# Runtime Data & Persistence
+# -----------------------------------------------------------------------------
+# Exclude all generated app data and save state files from version control.
+data/
+**/data/
+*.sav
+*.srm
+*.cht
+
+# -----------------------------------------------------------------------------
+# ROM Files
+# -----------------------------------------------------------------------------
+# Exclude server-mounted root /roms/ directory
+/roms/
+
+# Exclude heavy multi-gigabyte demo systems (>100MB files, 3.24 GB total)
+# to stay within GitHub 100 MB per-file limits and 1 GB GitHub Pages quota.
+# Note: Full custom ROM loading in-browser and local Docker storage remain 100% supported!
+public/roms/playstation/*
+!public/roms/playstation/.gitkeep
+public/roms/nds/*
+!public/roms/nds/.gitkeep
+
+# Curated Low-Size Public Showcase Exceptions for PlayStation (~105.5 MB)
+!public/roms/playstation/Dino Crisis (USA) (Demo)/
+!public/roms/playstation/Dino Crisis (USA) (Demo)/**
+!public/roms/playstation/Rayman 2 - The Great Escape (USA) (Demo)/
+!public/roms/playstation/Rayman 2 - The Great Escape (USA) (Demo)/**
+!public/roms/playstation/Driver - You Are the Wheelman (USA) (Demo)/
+!public/roms/playstation/Driver - You Are the Wheelman (USA) (Demo)/**
+
+# Curated Low-Size Public Showcase Exceptions for Nintendo DS (48.0 MB)
+!public/roms/nds/Mario Kart DS (USA) (Demo) (Kiosk)/
+!public/roms/nds/Mario Kart DS (USA) (Demo) (Kiosk)/**
+!public/roms/nds/Super Mario 64 DS (USA) (Demo) (Kiosk)/
+!public/roms/nds/Super Mario 64 DS (USA) (Demo) (Kiosk)/**
+!public/roms/nds/Tetris DS (USA) (Demo) (Kiosk)/
+!public/roms/nds/Tetris DS (USA) (Demo) (Kiosk)/**
+
+# -----------------------------------------------------------------------------
+# Background Music (BGM)
+# -----------------------------------------------------------------------------
+# Allow curated audio tracks bundled with the app.
+!public/bgm/
+!public/bgm/*.mp3
+!public/bgm/*.ogg
+!public/bgm/*.wav
+
+# -----------------------------------------------------------------------------
+# Logs & Diagnostic Reports
+# -----------------------------------------------------------------------------
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
-# Diagnostic reports
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
-# Dependency directories
-node_modules/
-jspm_packages/
-
-# Local build outputs
-dist/
-dist-ssr/
-build/
-*.local
-
-# Environment variables
-.env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
-
-# Editor / OS files
+# -----------------------------------------------------------------------------
+# OS & Editor Artifacts
+# -----------------------------------------------------------------------------
 .DS_Store
-.vscode/*
-!.vscode/extensions.json
-.idea
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-
-# Game ROMs, BIOS files, and Save states (Legal & Copyright protection)
-roms/
-**/roms/
-*.zip
-*.7z
-*.rar
-*.iso
-*.bin
-*.nds
-*.gba
-*.gbc
-*.gb
-*.nes
-*.sfc
-*.smc
-*.z64
-*.n64
-*.gcm
-*.rvz
-*.cue
-*.sav
-*.srm
-*.cht
-
-# Game Cover Art and copyrighted media
-cover/
-covers/
-**/cover/
-**/covers/
-public/assets/cover/
-public/cover/
-
-# Background Music & Audio Tracks
-bgm/
-**/bgm/
-public/bgm/
-*.mp3
-*.ogg
-*.flac
-*.wav
-*.m4a
-*.aac
-
-# Persistent Database & Save Data
-data/
-**/data/
-
+.vscode/*
+!.vscode/extensions.json

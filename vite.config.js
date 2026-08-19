@@ -14,11 +14,17 @@ const SYSTEM_MAP = {
   nds: { name: 'Nintendo DS', core: 'nds', color: '#06b6d4', category: 'Handheld', icon: 'assets/platforms/nds.svg' },
   genesis: { name: 'Sega Genesis', core: 'segaMD', color: '#ec4899', category: 'Console', icon: 'assets/platforms/genesis.svg' },
   megadrive: { name: 'Sega Genesis', core: 'segaMD', color: '#ec4899', category: 'Console', icon: 'assets/platforms/genesis.svg' },
+  sega: { name: 'Sega Genesis', core: 'segaMD', color: '#ec4899', category: 'Console', icon: 'assets/platforms/genesis.svg' },
+  md: { name: 'Sega Genesis', core: 'segaMD', color: '#ec4899', category: 'Console', icon: 'assets/platforms/genesis.svg' },
   ps1: { name: 'PlayStation', core: 'psx', color: '#6366f1', category: 'Console', icon: 'assets/platforms/psx.svg' },
   psx: { name: 'PlayStation', core: 'psx', color: '#6366f1', category: 'Console', icon: 'assets/platforms/psx.svg' },
+  ps: { name: 'PlayStation', core: 'psx', color: '#6366f1', category: 'Console', icon: 'assets/platforms/psx.svg' },
   arcade: { name: 'Arcade (MAME)', core: 'arcade', color: '#f43f5e', category: 'Arcade', icon: 'assets/platforms/arcade.svg' },
+  mame: { name: 'Arcade (MAME)', core: 'arcade', color: '#f43f5e', category: 'Arcade', icon: 'assets/platforms/arcade.svg' },
   gamegear: { name: 'Game Gear', core: 'segaGG', color: '#14b8a6', category: 'Handheld', icon: 'assets/platforms/gamegear.svg' },
-  atari2600: { name: 'Atari 2600', core: 'atari2600', color: '#d97706', category: 'Console', icon: 'assets/platforms/atari2600.svg' }
+  gg: { name: 'Game Gear', core: 'segaGG', color: '#14b8a6', category: 'Handheld', icon: 'assets/platforms/gamegear.svg' },
+  atari2600: { name: 'Atari 2600', core: 'atari2600', color: '#d97706', category: 'Console', icon: 'assets/platforms/atari2600.svg' },
+  atari: { name: 'Atari 2600', core: 'atari2600', color: '#d97706', category: 'Console', icon: 'assets/platforms/atari2600.svg' }
 };
 
 const EXTENSION_MAP = {
@@ -34,11 +40,17 @@ const EXTENSION_MAP = {
   '.v64': 'n64',
   '.nds': 'nds',
   '.gen': 'genesis',
+  '.md': 'genesis',
+  '.smd': 'genesis',
+  '.gg': 'gamegear',
   '.iso': 'ps1',
   '.cue': 'ps1',
-  '.chd': 'ps1'
+  '.chd': 'ps1',
+  '.pbp': 'ps1',
+  '.bin': 'ps1',
+  '.a26': 'atari2600',
+  '.zip': 'arcade'
 };
-
 
 function getBgmManifest(bgmBaseDir, validAudioExts) {
   const tracks = [];
@@ -78,6 +90,9 @@ function getRomsManifest(romsBaseDir) {
     if (!fs.existsSync(dirPath)) return;
     const entries = fs.readdirSync(dirPath, { withFileTypes: true });
 
+    // Pre-check for CUE files so we don't index standalone BIN files that belong to a CUE sheet
+    const hasCue = entries.some(e => e.isFile() && path.extname(e.name).toLowerCase() === '.cue');
+
     for (const entry of entries) {
       if (entry.name.startsWith('.')) continue;
 
@@ -88,7 +103,16 @@ function getRomsManifest(romsBaseDir) {
         scanDirectory(fullPath, currentSubdir);
       } else if (entry.isFile()) {
         const ext = path.extname(entry.name).toLowerCase();
-        const validExts = ['.nes', '.snes', '.smc', '.sfc', '.gba', '.gbc', '.gb', '.n64', '.z64', '.v64', '.nds', '.gen', '.zip', '.iso', '.cue', '.chd', '.bin'];
+        const validExts = [
+          '.nes', '.snes', '.smc', '.sfc', '.gba', '.gbc', '.gb',
+          '.n64', '.z64', '.v64', '.nds', '.gen', '.md', '.smd',
+          '.gg', '.zip', '.iso', '.cue', '.chd', '.pbp', '.bin', '.a26'
+        ];
+
+        // Skip .bin file if a .cue sheet exists in the same folder
+        if (ext === '.bin' && hasCue) {
+          continue;
+        }
 
         if (validExts.includes(ext)) {
           const nameWithoutExt = path.parse(entry.name).name;
@@ -100,6 +124,13 @@ function getRomsManifest(romsBaseDir) {
           const systemKey = SYSTEM_MAP[topFolderKey] ? topFolderKey : (extSystemKey || 'nes');
           const systemInfo = SYSTEM_MAP[systemKey] || SYSTEM_MAP['nes'];
 
+          // Normalize canonical system key (e.g. mame -> arcade, ps -> ps1, md -> genesis)
+          const canonicalKey = systemInfo.core === 'arcade' ? 'arcade'
+            : systemInfo.core === 'psx' ? 'ps1'
+            : systemInfo.core === 'segaMD' ? 'genesis'
+            : systemInfo.core === 'segaGG' ? 'gamegear'
+            : systemKey;
+
           const pathSegments = currentSubdir.split('/').map(segment => encodeURIComponent(segment));
           const romUrl = `/roms/${pathSegments.join('/')}`;
 
@@ -107,14 +138,19 @@ function getRomsManifest(romsBaseDir) {
             ? parentFolderKey
             : nameWithoutExt;
 
-          const cleanDisplayTitle = rawTitle.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+          const cleanDisplayTitle = rawTitle
+            .replace(/\(.*?\)/g, '')
+            .replace(/\[.*?\]/g, '')
+            .replace(/_/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
 
           games.push({
-            id: `${systemKey}-${rawTitle}`.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+            id: `${canonicalKey}-${rawTitle}`.toLowerCase().replace(/[^a-z0-9]/g, '-'),
             title: cleanDisplayTitle || rawTitle,
             rawTitle: rawTitle,
             filename: entry.name,
-            systemKey,
+            systemKey: canonicalKey,
             systemName: systemInfo.name,
             systemCore: systemInfo.core,
             systemColor: systemInfo.color,
@@ -130,12 +166,27 @@ function getRomsManifest(romsBaseDir) {
 
   scanDirectory(romsBaseDir);
 
+  // Group unique canonical systems with gameCount
+  const canonicalSystems = [
+    { key: 'nes', name: 'NES', core: 'nes', color: '#e63946', category: 'Console', icon: 'assets/platforms/nes.svg' },
+    { key: 'snes', name: 'Super Nintendo', core: 'snes', color: '#8b5cf6', category: 'Console', icon: 'assets/platforms/snes.svg' },
+    { key: 'gba', name: 'Game Boy Advance', core: 'gba', color: '#3b82f6', category: 'Handheld', icon: 'assets/platforms/gba.svg' },
+    { key: 'gbc', name: 'Game Boy Color', core: 'gb', color: '#10b981', category: 'Handheld', icon: 'assets/platforms/gbc.svg' },
+    { key: 'gb', name: 'Game Boy', core: 'gb', color: '#84cc16', category: 'Handheld', icon: 'assets/platforms/gb.svg' },
+    { key: 'n64', name: 'Nintendo 64', core: 'n64', color: '#f59e0b', category: 'Console', icon: 'assets/platforms/n64.svg' },
+    { key: 'nds', name: 'Nintendo DS', core: 'nds', color: '#06b6d4', category: 'Handheld', icon: 'assets/platforms/nds.svg' },
+    { key: 'genesis', name: 'Sega Genesis', core: 'segaMD', color: '#ec4899', category: 'Console', icon: 'assets/platforms/genesis.svg' },
+    { key: 'ps1', name: 'PlayStation', core: 'psx', color: '#6366f1', category: 'Console', icon: 'assets/platforms/psx.svg' },
+    { key: 'arcade', name: 'Arcade (MAME)', core: 'arcade', color: '#f43f5e', category: 'Arcade', icon: 'assets/platforms/arcade.svg' },
+    { key: 'gamegear', name: 'Game Gear', core: 'segaGG', color: '#14b8a6', category: 'Handheld', icon: 'assets/platforms/gamegear.svg' },
+    { key: 'atari2600', name: 'Atari 2600', core: 'atari2600', color: '#d97706', category: 'Console', icon: 'assets/platforms/atari2600.svg' }
+  ];
+
   return {
     games,
-    systems: Object.keys(SYSTEM_MAP).map(key => ({
-      key,
-      ...SYSTEM_MAP[key],
-      gameCount: games.filter(g => g.systemKey === key).length
+    systems: canonicalSystems.map(sys => ({
+      ...sys,
+      gameCount: games.filter(g => g.systemKey === sys.key).length
     }))
   };
 }
@@ -275,7 +326,12 @@ function multiConsoleScannerPlugin() {
             console.log(`✅ [DEV UPLOADER SUCCESS] Successfully saved "${safeFilename}" to ${targetDir}`);
             const systemInfo = SYSTEM_MAP[systemKey] || SYSTEM_MAP['nes'];
             const rawTitle = path.parse(safeFilename).name;
-            const cleanDisplayTitle = rawTitle.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+            const cleanDisplayTitle = rawTitle
+              .replace(/\(.*?\)/g, '')
+              .replace(/\[.*?\]/g, '')
+              .replace(/_/g, ' ')
+              .replace(/\s+/g, ' ')
+              .trim();
             const romUrl = `/roms/${systemKey}/${encodeURIComponent(safeFilename)}`;
 
             const gameRecord = {

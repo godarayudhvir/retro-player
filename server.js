@@ -18,22 +18,20 @@ if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
-// System definition mapping matching vite.config.js
+// System definition mapping — one canonical key per system
 const SYSTEM_MAP = {
-  nes: { name: 'NES', core: 'nes', color: '#e63946', category: 'Console', icon: 'assets/platforms/nes.svg' },
-  snes: { name: 'Super Nintendo', core: 'snes', color: '#8b5cf6', category: 'Console', icon: 'assets/platforms/snes.svg' },
-  gba: { name: 'Game Boy Advance', core: 'gba', color: '#3b82f6', category: 'Handheld', icon: 'assets/platforms/gba.svg' },
-  gbc: { name: 'Game Boy Color', core: 'gb', color: '#10b981', category: 'Handheld', icon: 'assets/platforms/gbc.svg' },
-  gb: { name: 'Game Boy', core: 'gb', color: '#84cc16', category: 'Handheld', icon: 'assets/platforms/gb.svg' },
-  n64: { name: 'Nintendo 64', core: 'n64', color: '#f59e0b', category: 'Console', icon: 'assets/platforms/n64.svg' },
-  nds: { name: 'Nintendo DS', core: 'nds', color: '#06b6d4', category: 'Handheld', icon: 'assets/platforms/nds.svg' },
-  genesis: { name: 'Sega Genesis', core: 'segaMD', color: '#ec4899', category: 'Console', icon: 'assets/platforms/genesis.svg' },
-  megadrive: { name: 'Sega Genesis', core: 'segaMD', color: '#ec4899', category: 'Console', icon: 'assets/platforms/genesis.svg' },
-  ps1: { name: 'PlayStation', core: 'psx', color: '#6366f1', category: 'Console', icon: 'assets/platforms/psx.svg' },
-  psx: { name: 'PlayStation', core: 'psx', color: '#6366f1', category: 'Console', icon: 'assets/platforms/psx.svg' },
-  arcade: { name: 'Arcade (MAME)', core: 'arcade', color: '#f43f5e', category: 'Arcade', icon: 'assets/platforms/arcade.svg' },
-  gamegear: { name: 'Game Gear', core: 'segaGG', color: '#14b8a6', category: 'Handheld', icon: 'assets/platforms/gamegear.svg' },
-  atari2600: { name: 'Atari 2600', core: 'atari2600', color: '#d97706', category: 'Console', icon: 'assets/platforms/atari2600.svg' }
+  nes:         { name: 'NES',              core: 'nes',          color: '#e63946', category: 'Console',  icon: 'assets/platforms/nes.svg' },
+  snes:        { name: 'Super Nintendo',   core: 'snes',         color: '#8b5cf6', category: 'Console',  icon: 'assets/platforms/snes.svg' },
+  gba:         { name: 'Game Boy Advance', core: 'gba',          color: '#3b82f6', category: 'Handheld', icon: 'assets/platforms/gba.svg' },
+  gbc:         { name: 'Game Boy Color',   core: 'gb',           color: '#10b981', category: 'Handheld', icon: 'assets/platforms/gbc.svg' },
+  gb:          { name: 'Game Boy',         core: 'gb',           color: '#84cc16', category: 'Handheld', icon: 'assets/platforms/gb.svg' },
+  n64:         { name: 'Nintendo 64',      core: 'n64',          color: '#f59e0b', category: 'Console',  icon: 'assets/platforms/n64.svg' },
+  nds:         { name: 'Nintendo DS',      core: 'nds',          color: '#06b6d4', category: 'Handheld', icon: 'assets/platforms/nds.svg' },
+  sega_genesis:{ name: 'Sega Genesis',     core: 'segaMD',       color: '#ec4899', category: 'Console',  icon: 'assets/platforms/genesis.svg' },
+  playstation: { name: 'PlayStation',      core: 'psx',          color: '#6366f1', category: 'Console',  icon: 'assets/platforms/psx.svg' },
+  game_gear:   { name: 'Game Gear',        core: 'segaGG',       color: '#14b8a6', category: 'Handheld', icon: 'assets/platforms/gamegear.svg' },
+  arcade:      { name: 'Arcade (MAME)',    core: 'mame2003_plus',color: '#f43f5e', category: 'Arcade',   icon: 'assets/platforms/arcade.svg' },
+  atari_2600:  { name: 'Atari 2600',       core: 'atari2600',    color: '#d97706', category: 'Console',  icon: 'assets/platforms/atari2600.svg' },
 };
 
 const EXTENSION_MAP = {
@@ -48,13 +46,24 @@ const EXTENSION_MAP = {
   '.z64': 'n64',
   '.v64': 'n64',
   '.nds': 'nds',
-  '.gen': 'genesis',
-  '.iso': 'ps1',
-  '.cue': 'ps1',
-  '.chd': 'ps1'
+  '.gen': 'sega_genesis',
+  '.md':  'sega_genesis',
+  '.smd': 'sega_genesis',
+  '.gg':  'game_gear',
+  '.iso': 'playstation',
+  '.cue': 'playstation',
+  '.chd': 'playstation',
+  '.pbp': 'playstation',
+  '.bin': 'playstation',
+  '.a26': 'atari_2600',
+  '.zip': 'arcade'
 };
 
-const VALID_EXTENSIONS = ['.nes', '.snes', '.smc', '.sfc', '.gba', '.gbc', '.gb', '.n64', '.z64', '.v64', '.nds', '.gen', '.zip', '.iso', '.cue', '.chd', '.bin'];
+const VALID_EXTENSIONS = [
+  '.nes', '.snes', '.smc', '.sfc', '.gba', '.gbc', '.gb',
+  '.n64', '.z64', '.v64', '.nds', '.gen', '.md', '.smd',
+  '.gg', '.zip', '.iso', '.cue', '.chd', '.pbp', '.bin', '.a26'
+];
 const VALID_AUDIO_EXTENSIONS = ['.mp3', '.ogg', '.wav', '.m4a', '.flac', '.aac'];
 
 // Serve raw ROM binaries with CORS & octet-stream headers
@@ -185,7 +194,7 @@ app.get('/api/roms', (req, res) => {
             const cleanDisplayTitle = nameWithoutExt
               .replace(/\(.*?\)/g, '')
               .replace(/\[.*?\]/g, '')
-              .replace(/[-_]/g, ' ')
+              .replace(/_/g, ' ')
               .replace(/\s+/g, ' ')
               .trim();
 
@@ -260,7 +269,12 @@ app.post('/api/upload-rom', express.raw({ type: 'application/octet-stream', limi
       
       const systemInfo = SYSTEM_MAP[systemKey] || SYSTEM_MAP['nes'];
       const rawTitle = path.parse(safeFilename).name;
-      const cleanDisplayTitle = rawTitle.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+      const cleanDisplayTitle = rawTitle
+        .replace(/\(.*?\)/g, '')
+        .replace(/\[.*?\]/g, '')
+        .replace(/_/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
       const romUrl = `/roms/${systemKey}/${encodeURIComponent(safeFilename)}`;
 
       const gameRecord = {

@@ -14,9 +14,12 @@ When the application is self-hosted with Docker Compose, Node.js (`server.js`), 
   - Checks if `window.location.hostname.endsWith('github.io')` or `window.location.search.includes('demo=true')`.
   - Checks `localStorage.getItem('retro_demo_dismissed')` to avoid prompting returning visitors.
 - **Showcase Feature Transparency**:
-  - Highlights full 60 FPS client-side WebAssembly emulation across all 10+ console cores.
+  - Highlights full 60 FPS client-side WebAssembly emulation across all 12 console cores.
   - Informs players about 100% private local custom ROM testing via the topbar **Load Custom ROM** button and drag-and-drop.
   - Explains the 1-click PWA standalone console installation on desktop and mobile.
+- **Non-Commercial Demo Showcase & Compliance Disclaimer**:
+  - Clearly explains that all bundled ROMs in the web demo are strictly non-complete evaluation slices (demos, samples, homebrew, and prototypes) curated for WebAssembly emulation testing without full commercial games.
+  - Informs rights holders that we maintain a 100% compliance removal policy on request (see [roms.md](../../roms.md)).
 - **Static Hosting Limitations Notice**:
   - Clearly explains that server host disk storage operations (`/api/upload-rom` and `/api/delete-rom` in Settings) are disabled on static CDNs, directing self-hosters to the GitHub Docker Compose setup.
 - **Full Theme & Responsive Fidelity**:

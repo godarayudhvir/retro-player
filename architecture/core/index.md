@@ -12,6 +12,8 @@ The Core Bootstrap system is the foundational entry point of the **Retro Player*
   - Intercept requests to `/roms/*` and stream raw binary ROM files with `application/octet-stream` headers.
   - Dynamically scan the designated ROM directory (`ROMS_DIR` environment variable, defaulting to `public/roms` or `/roms` in Docker) at the `/api/roms` endpoint, mapping ROM extensions to system cores and returning indexed game records for client-side dynamic scraping.
 - **Docker Production Containerization**: Packages the application into a multi-stage Docker image ([Dockerfile](file:///Users/godarayudhvir/Github/retro-player/Dockerfile)) utilizing [server.js](file:///Users/godarayudhvir/Github/retro-player/server.js) to serve static frontend bundles and mount external host ROM collections via [docker-compose.yml](file:///Users/godarayudhvir/Github/retro-player/docker-compose.yml).
+- **Universal Subpath Asset Resolution**: Implements `src/utils/assetPath.js` (`resolveAssetPath`), automatically wrapping all static icon, music, and demo ROM paths with `import.meta.env.BASE_URL` to ensure flawless rendering on both root domains and GitHub Pages subpaths (`/retro-player/`).
+- **Static GitHub Pages Bundle Generation**: Configures `generateBundle` hook in `vite.config.js` to emit pre-compiled `/api/roms`, `/api/roms.json`, `/api/bgm`, and `/api/bgm.json` static endpoints during build time for serverless hosting.
 
 ---
 
@@ -22,12 +24,18 @@ The Core Bootstrap system is the foundational entry point of the **Retro Player*
 2. **[main.jsx](file:///Users/godarayudhvir/Github/retro-player/src/main.jsx)** imports `React`, `ReactDOM`, `App`, `ErrorBoundary`, and `index.css`.
 3. `ReactDOM.createRoot(document.getElementById('root'))` mounts `<ErrorBoundary><App /></ErrorBoundary>` into the DOM.
 
+### Universal Asset Path Resolution (`src/utils/assetPath.js`)
+- `resolveAssetPath(path)` intercepts asset URLs:
+  - Preserves external URLs (`http://`, `https://`), Blob URLs (`blob:`), and Base64 Data URIs (`data:`).
+  - Prepends `import.meta.env.BASE_URL` (configured as `./` in Vite) to relative resources (`assets/platforms/*.svg`, `/roms/*`, `/bgm/*`).
+
 ### Server Middleware & API Plugins (`multiConsoleScannerPlugin` & `server.js`)
 Defined in [vite.config.js](file:///Users/godarayudhvir/Github/retro-player/vite.config.js) (development) and [server.js](file:///Users/godarayudhvir/Github/retro-player/server.js) (production/Docker):
 - **ROM Path Resolution**: Resolves target directory using `process.env.ROMS_DIR || path.join(process.cwd(), 'public/roms')`.
-- **System Mapping (`SYSTEM_MAP`)**: Maps console keys (`nes`, `snes`, `gba`, `gbc`, `gb`, `n64`, `nds`, `genesis`, `ps1`, `arcade`) to EmulatorJS core names, color tokens, and SVG icon paths.
-- **Extension Resolver (`EXTENSION_MAP`)**: Maps file extensions (`.gba`, `.z64`, `.smc`, `.nes`, `.nds`) to system keys.
+- **12-System Mapping (`SYSTEM_MAP`)**: Maps console keys (`nes`, `snes`, `gba`, `gbc`, `gb`, `n64`, `nds`, `genesis`, `gamegear`, `ps1`, `arcade`, `atari2600`) to EmulatorJS core names, color tokens, and SVG icon paths.
+- **Extension Resolver (`EXTENSION_MAP`)**: Maps file extensions (`.gba`, `.z64`, `.smc`, `.nes`, `.nds`, `.gg`, `.md`, `.gen`, `.smd`, `.iso`, `.cue`, `.chd`, `.bin`, `.pbp`, `.a26`, `.zip`) to system keys.
 - **`/api/roms` Endpoint Handler**:
   - Recursively scans the resolved ROMs directory.
+  - Automatically filters `.bin` companions when a corresponding `.cue` disc descriptor exists.
   - Cleans title strings using regex.
-  - Returns JSON payload containing `games` array and `systems` metadata array with game counts for dynamic client enrichment.
+  - Returns JSON payload containing `games` array and canonical `systems` metadata array with game counts for dynamic client enrichment.

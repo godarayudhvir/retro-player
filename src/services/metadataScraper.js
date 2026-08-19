@@ -6,7 +6,7 @@
  */
 
 const DB_NAME = 'RetroPlayerMetadataDB';
-const DB_VERSION = 2; // Bumped to 2 to invalidate previous bad cache
+const DB_VERSION = 3; // Bumped to 3 to invalidate old null cover cache
 const STORE_NAME = 'game_metadata';
 
 // Map internal system keys to Libretro Thumbnails repository system directory names
@@ -50,76 +50,151 @@ function openDB() {
   });
 }
 
-// Get cached metadata from IndexedDB
+// Fetch metadata from server database (/api/db/game_metadata)
+async function fetchServerMetadata() {
+  try {
+    const res = await fetch('/api/db/game_metadata');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.success && data.data) {
+        return data.data;
+      }
+    }
+  } catch (_) {}
+  return null;
+}
+
+// Get cached metadata from IndexedDB or server DB fallback
 async function getCachedMetadata(id) {
   try {
+    // 1. Try local IndexedDB
     const db = await openDB();
-    if (!db) {
+    if (db) {
+      const item = await new Promise((resolve) => {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const store = tx.objectStore(STORE_NAME);
+        const req = store.get(id);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => resolve(null);
+      });
+      if (item) {
+        if (item.coverUrl && item.coverUrl.endsWith('.svg')) item.coverUrl = null;
+        return item;
+      }
+    } else {
       const local = localStorage.getItem(`rp_meta_${id}`);
-      return local ? JSON.parse(local) : null;
+      if (local) {
+        const item = JSON.parse(local);
+        if (item.coverUrl && item.coverUrl.endsWith('.svg')) item.coverUrl = null;
+        return item;
+      }
     }
-    return new Promise((resolve) => {
-      const tx = db.transaction(STORE_NAME, 'readonly');
-      const store = tx.objectStore(STORE_NAME);
-      const req = store.get(id);
-      req.onsuccess = () => {
-        const item = req.result;
-        // Invalidate any legacy bad entries that saved console SVGs as coverUrl
-        if (item && item.coverUrl && item.coverUrl.endsWith('.svg')) {
-          item.coverUrl = null;
+
+    // 2. Fallback to server DB
+    try {
+      const res = await fetch(`/api/db/game_metadata/${encodeURIComponent(id)}`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json && json.data) {
+          const item = json.data;
+          if (item.coverUrl && item.coverUrl.endsWith('.svg')) item.coverUrl = null;
+          // Seed local IndexedDB
+          if (db) {
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            tx.objectStore(STORE_NAME).put(item);
+          }
+          return item;
         }
-        resolve(item || null);
-      };
-      req.onerror = () => resolve(null);
-    });
+      }
+    } catch (_) {}
+
+    return null;
   } catch (err) {
     console.warn('⚠️ [METADATA CACHE READ] Error:', err);
     return null;
   }
 }
 
-// Get all cached metadata
+// Get all cached metadata (merges server DB and local IndexedDB)
 export async function getAllCachedMetadata() {
+  const result = {};
+
+  // 1. First load from authoritative server database
+  const serverData = await fetchServerMetadata();
+  if (serverData && typeof serverData === 'object') {
+    Object.keys(serverData).forEach(id => {
+      const item = serverData[id];
+      if (item && item.id) {
+        if (item.coverUrl && item.coverUrl.endsWith('.svg')) item.coverUrl = null;
+        result[item.id] = item;
+      }
+    });
+  }
+
+  // 2. Hydrate from / seed with local IndexedDB
   try {
     const db = await openDB();
-    if (!db) return {};
-    return new Promise((resolve) => {
-      const tx = db.transaction(STORE_NAME, 'readonly');
-      const store = tx.objectStore(STORE_NAME);
-      const req = store.getAll();
-      req.onsuccess = () => {
-        const result = {};
-        (req.result || []).forEach(item => {
-          if (item && item.id) {
-            if (item.coverUrl && item.coverUrl.endsWith('.svg')) {
-              item.coverUrl = null;
-            }
+    if (db) {
+      const localItems = await new Promise((resolve) => {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const store = tx.objectStore(STORE_NAME);
+        const req = store.getAll();
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => resolve([]);
+      });
+
+      localItems.forEach(item => {
+        if (item && item.id) {
+          if (item.coverUrl && item.coverUrl.endsWith('.svg')) item.coverUrl = null;
+          if (!result[item.id]) {
             result[item.id] = item;
           }
+        }
+      });
+
+      // Populate local DB with any server records that were missing locally
+      if (Object.keys(result).length > 0) {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        Object.values(result).forEach(rec => {
+          store.put(rec);
         });
-        resolve(result);
-      };
-      req.onerror = () => resolve({});
-    });
+      }
+    }
   } catch (err) {
-    console.warn('⚠️ [METADATA CACHE GET ALL] Error:', err);
-    return {};
+    console.warn('⚠️ [METADATA CACHE GET ALL] Local DB Error:', err);
   }
+
+  return result;
 }
 
-// Save metadata to IndexedDB & localStorage fallback
+// Save metadata to IndexedDB, localStorage, and persistent Server DB
 async function saveCachedMetadata(id, data) {
   try {
     const record = { id, ...data, updatedAt: Date.now() };
+
+    // 1. Local IndexedDB
     const db = await openDB();
     if (db) {
       const tx = db.transaction(STORE_NAME, 'readwrite');
       const store = tx.objectStore(STORE_NAME);
       store.put(record);
     }
+
+    // 2. LocalStorage
     try {
       localStorage.setItem(`rp_meta_${id}`, JSON.stringify(record));
     } catch (_) {}
+
+    // 3. Persistent Server Database (/api/db/game_metadata)
+    try {
+      fetch('/api/db/game_metadata', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: id, value: record })
+      }).catch(() => {});
+    } catch (_) {}
+
     return record;
   } catch (err) {
     console.warn('⚠️ [METADATA CACHE SAVE] Error:', err);
@@ -160,6 +235,7 @@ function formatLibretroName(str) {
 
 /**
  * Generate extensive candidate filenames for thumbnail scraping
+ * Dynamically resolves demo/kiosk/aftermarket ROMs to their official retail box art.
  */
 function generateThumbnailCandidates(game) {
   const candidates = [];
@@ -167,37 +243,78 @@ function generateThumbnailCandidates(game) {
   const fileNoExt = (game.filename || '').replace(/\.[^/.]+$/, '');
   const cleanDisplay = (game.title || '').replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').trim();
 
-  // 1. Exact raw filename without extension
-  if (fileNoExt) {
-    candidates.push(formatLibretroName(fileNoExt));
-    // Strip (Rev X), (v1.X), (NDSi Enhanced)
-    const strippedRev = fileNoExt.replace(/\(Rev\s*\d+\)/i, '').replace(/\(v\d+.*?\)/i, '').replace(/\(NDSi Enhanced\)/i, '').replace(/\s+/g, ' ').trim();
-    if (strippedRev !== fileNoExt) candidates.push(formatLibretroName(strippedRev));
+  const baseSet = new Set();
+
+  function addBaseVariants(str) {
+    if (!str) return;
+    const clean = str.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!clean) return;
+    baseSet.add(clean);
+
+    // Pokemon <-> Pokémon
+    if (clean.includes('Pokemon')) baseSet.add(clean.replace(/Pokemon/g, 'Pokémon'));
+    if (clean.includes('Pokémon')) baseSet.add(clean.replace(/Pokémon/g, 'Pokemon'));
+
+    // The ... <-> ..., The
+    if (clean.startsWith('The ')) {
+      baseSet.add(clean.replace(/^The (.+)$/, '$1, The'));
+    }
+    if (clean.endsWith(', The')) {
+      baseSet.add('The ' + clean.replace(/, The$/, ''));
+    }
+
+    // Split multi-game kiosk bundles like "Pokemon - Diamond Version + Pokemon - Pearl Version"
+    if (clean.includes(' + ')) {
+      clean.split(' + ').forEach(part => addBaseVariants(part.trim()));
+    }
   }
 
-  // 2. Raw Title
-  if (raw) {
-    candidates.push(formatLibretroName(raw));
-    const rawStripped = raw.replace(/\(Rev\s*\d+\)/i, '').replace(/\(v\d+.*?\)/i, '').replace(/\(NDSi Enhanced\)/i, '').replace(/\s+/g, ' ').trim();
-    if (rawStripped !== raw) candidates.push(formatLibretroName(rawStripped));
-  }
+  // 1. Add clean display title and variants
+  addBaseVariants(cleanDisplay);
 
-  // 3. Clean Display Title with standard regions
-  if (cleanDisplay) {
-    candidates.push(formatLibretroName(cleanDisplay));
-    candidates.push(formatLibretroName(`${cleanDisplay} (USA, Europe)`));
-    candidates.push(formatLibretroName(`${cleanDisplay} (USA)`));
-    candidates.push(formatLibretroName(`${cleanDisplay} (Europe)`));
-    candidates.push(formatLibretroName(`${cleanDisplay} (Japan)`));
-    candidates.push(formatLibretroName(`${cleanDisplay} (World)`));
+  // 2. Add raw title stripped of all tags in parentheses
+  const rawStripped = raw
+    .replace(/\(.*?\)/g, '')
+    .replace(/\[.*?\]/g, '')
+    .trim();
+  addBaseVariants(rawStripped);
 
-    // Also with hyphens / accents (e.g. Pokemon vs Pokémon)
-    if (cleanDisplay.includes('Pokemon')) {
-      const accented = cleanDisplay.replace(/Pokemon/g, 'Pokémon');
-      candidates.push(formatLibretroName(accented));
-      candidates.push(formatLibretroName(`${accented} (USA, Europe)`));
-      candidates.push(formatLibretroName(`${accented} (USA)`));
-      candidates.push(formatLibretroName(`${accented} (Europe)`));
+  // 3. Add filename stripped of all tags in parentheses
+  const fileStripped = fileNoExt
+    .replace(/\(.*?\)/g, '')
+    .replace(/\[.*?\]/g, '')
+    .trim();
+  addBaseVariants(fileStripped);
+
+  // 4. Exact raw strings (if the database happens to have exact demo name)
+  if (fileNoExt) candidates.push(formatLibretroName(fileNoExt));
+  if (raw) candidates.push(formatLibretroName(raw));
+
+  // 5. Region / Language / Flag variants for every base variant
+  const regionTags = [
+    '',
+    ' (USA)',
+    ' (USA, Europe)',
+    ' (Europe)',
+    ' (World)',
+    ' (USA, Australia)',
+    ' (USA) (En,Fr,Es)',
+    ' (USA) (En,Fr,De,Es,It)',
+    ' (USA, Europe) (En,Fr,De,Es,It)',
+    ' (USA) (En,Es)',
+    ' (USA) (Demo) (Kiosk)',
+    ' (USA) (Demo)',
+    ' (USA) (Proto)',
+    ' (USA) (Rev 1)',
+    ' (USA) (Rev A)',
+    ' (USA) (Canceled)',
+    ' (Japan, USA)',
+    ' (Japan)'
+  ];
+
+  for (const base of baseSet) {
+    for (const reg of regionTags) {
+      candidates.push(formatLibretroName(`${base}${reg}`));
     }
   }
 
