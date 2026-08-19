@@ -6,8 +6,8 @@ The Game Catalog module indexes local ROM files in `/public/roms` and custom dra
 ---
 
 ## 2. Detailed List of What It Does
-- **ROM Directory Scanning**: Recursively scans `/public/roms` for valid extensions (`.nes`, `.snes`, `.smc`, `.sfc`, `.gba`, `.gbc`, `.gb`, `.n64`, `.z64`, `.v64`, `.nds`, `.gen`, `.zip`, `.iso`, `.cue`, `.chd`, `.bin`).
-- **Custom Local ROM Drag & Drop Parsing**: Parses custom ROM files selected via file input or dropped directly onto the window viewport. Auto-detects target system cores based on extension (`detectSystemFromExtension`) and constructs memory-backed game objects.
+- **ROM Directory Scanning**: Recursively scans `/public/roms` (or `ROMS_DIR`) for valid extensions (`.nes`, `.snes`, `.smc`, `.sfc`, `.gba`, `.gbc`, `.gb`, `.n64`, `.z64`, `.v64`, `.nds`, `.gen`, `.zip`, `.iso`, `.cue`, `.chd`, `.bin`).
+- **Custom Local ROM Drag & Drop Parsing & Permanent Disk Persistence**: Parses custom ROM files selected via file input or dropped directly onto the window viewport. Auto-detects target system cores based on extension (`detectSystemFromExtension`), launches the game immediately in-memory, and asynchronously uploads the binary to `/api/upload-rom` so it is permanently saved in `/roms/<systemKey>/` for future reloads.
 - **Zero-Config Pure Indexing**: Returns pure game descriptors (`id`, `title`, `filename`, `systemKey`, `systemName`, `systemCore`, `romUrl`) with `coverUrl: null`, leaving all artwork and synopsis enrichment to the dynamic online scraper module.
 - **Sorting & Filtering**: Supplies clean title and extension metadata for category filtering and search queries.
 
@@ -16,7 +16,7 @@ The Game Catalog module indexes local ROM files in `/public/roms` and custom dra
 ## 3. Detailed Logic Behind Everything and How It Works
 
 ### Matching & Indexing Algorithm
-1. `vite.config.js` scans ROM directories and sanitizes title names.
+1. `vite.config.js` and `server.js` scan ROM directories and sanitize title names.
 2. Constructs clean game descriptor objects:
    ```javascript
    {
@@ -35,3 +35,9 @@ The Game Catalog module indexes local ROM files in `/public/roms` and custom dra
    }
    ```
 3. The client receives the catalog and automatically coordinates background scraping through `useMetadataScraper.js` and `metadataScraper.js`.
+
+### ROM Upload & Auto-Organizing Persistence (`/api/upload-rom`)
+1. User drops a ROM or uses the "Load Custom ROM" modal.
+2. `useRomManifest.js` inspects extension (`.gba`, `.sfc`, `.nes`, `.nds`, `.z64`, etc.) and sends a `POST /api/upload-rom` request streaming the binary with an `x-filename` header.
+3. The backend ensures directory `ROMS_DIR/<systemKey>/` exists (e.g. `/roms/gba/`) and streams the file to disk.
+4. On upload completion, the catalog re-indexes automatically so the uploaded game remains permanently in the library across page reloads and container restarts.

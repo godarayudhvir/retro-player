@@ -14,5 +14,5 @@ services:
       - PORT=3000
       - ROMS_DIR=/roms
     volumes:
-      # Mount your host ROMs directory to /roms inside container (looks for ./roms next to docker-compose.yml by default)
-      - ./roms:/roms:ro
+      # Mount your host ROMs directory to /roms inside container (Read/Write allows uploading new games directly from the UI)
+      - ./roms:/roms

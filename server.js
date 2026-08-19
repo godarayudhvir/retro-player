@@ -150,6 +150,67 @@ app.get('/api/roms', (req, res) => {
   });
 });
 
+// Upload ROM API endpoint - Saves file directly to ROMS_DIR/<systemKey>/
+app.post('/api/upload-rom', (req, res) => {
+  const filename = decodeURIComponent(req.headers['x-filename'] || '');
+  if (!filename) {
+    return res.status(400).json({ error: 'Missing x-filename header' });
+  }
+
+  const ext = path.extname(filename).toLowerCase();
+  const systemKey = EXTENSION_MAP[ext] || 'nes';
+  const targetDir = path.join(ROMS_DIR, systemKey);
+
+  try {
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+
+    const safeFilename = path.basename(filename);
+    const targetFilePath = path.join(targetDir, safeFilename);
+
+    console.log(`📥 [API UPLOADER] Receiving ROM "${safeFilename}" -> Saving to: ${targetFilePath}`);
+
+    const writeStream = fs.createWriteStream(targetFilePath);
+
+    req.pipe(writeStream);
+
+    writeStream.on('finish', () => {
+      console.log(`✅ [API UPLOADER SUCCESS] Successfully saved "${safeFilename}" to ${targetDir}`);
+      
+      const systemInfo = SYSTEM_MAP[systemKey] || SYSTEM_MAP['nes'];
+      const rawTitle = path.parse(safeFilename).name;
+      const cleanDisplayTitle = rawTitle.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+      const romUrl = `/roms/${systemKey}/${encodeURIComponent(safeFilename)}`;
+
+      const gameRecord = {
+        id: `${systemKey}-${rawTitle}`.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+        title: cleanDisplayTitle || rawTitle,
+        rawTitle: rawTitle,
+        filename: safeFilename,
+        systemKey,
+        systemName: systemInfo.name,
+        systemCore: systemInfo.core,
+        systemColor: systemInfo.color,
+        systemIcon: systemInfo.icon,
+        category: systemInfo.category,
+        romUrl,
+        coverUrl: null
+      };
+
+      res.status(200).json({ success: true, game: gameRecord });
+    });
+
+    writeStream.on('error', (err) => {
+      console.error(`🚨 [API UPLOADER ERROR] Failed writing ROM file "${safeFilename}":`, err);
+      res.status(500).json({ error: 'Failed to write ROM file to disk' });
+    });
+  } catch (err) {
+    console.error('🚨 [API UPLOADER ERROR] Exception during upload:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Serve static frontend build
 app.use(express.static(DIST_DIR));
 

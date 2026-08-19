@@ -144,6 +144,77 @@ function multiConsoleScannerPlugin() {
           }))
         }));
       });
+
+      // API Endpoint for Uploading ROMs in development
+      server.middlewares.use('/api/upload-rom', (req, res) => {
+        if (req.method !== 'POST') {
+          res.statusCode = 405;
+          res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+          return;
+        }
+
+        const filename = decodeURIComponent(req.headers['x-filename'] || '');
+        if (!filename) {
+          res.statusCode = 400;
+          res.end(JSON.stringify({ error: 'Missing x-filename header' }));
+          return;
+        }
+
+        const ext = path.extname(filename).toLowerCase();
+        const systemKey = EXTENSION_MAP[ext] || 'nes';
+        const targetDir = path.join(romsBaseDir, systemKey);
+
+        try {
+          if (!fs.existsSync(targetDir)) {
+            fs.mkdirSync(targetDir, { recursive: true });
+          }
+
+          const safeFilename = path.basename(filename);
+          const targetFilePath = path.join(targetDir, safeFilename);
+
+          console.log(`📥 [DEV UPLOADER] Receiving ROM "${safeFilename}" -> Saving to: ${targetFilePath}`);
+
+          const writeStream = fs.createWriteStream(targetFilePath);
+
+          req.pipe(writeStream);
+
+          writeStream.on('finish', () => {
+            console.log(`✅ [DEV UPLOADER SUCCESS] Successfully saved "${safeFilename}" to ${targetDir}`);
+            const systemInfo = SYSTEM_MAP[systemKey] || SYSTEM_MAP['nes'];
+            const rawTitle = path.parse(safeFilename).name;
+            const cleanDisplayTitle = rawTitle.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+            const romUrl = `/roms/${systemKey}/${encodeURIComponent(safeFilename)}`;
+
+            const gameRecord = {
+              id: `${systemKey}-${rawTitle}`.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+              title: cleanDisplayTitle || rawTitle,
+              rawTitle: rawTitle,
+              filename: safeFilename,
+              systemKey,
+              systemName: systemInfo.name,
+              systemCore: systemInfo.core,
+              systemColor: systemInfo.color,
+              systemIcon: systemInfo.icon,
+              category: systemInfo.category,
+              romUrl,
+              coverUrl: null
+            };
+
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ success: true, game: gameRecord }));
+          });
+
+          writeStream.on('error', (err) => {
+            console.error(`🚨 [DEV UPLOADER ERROR] Failed writing ROM file "${safeFilename}":`, err);
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: 'Failed to write ROM file to disk' }));
+          });
+        } catch (err) {
+          console.error('🚨 [DEV UPLOADER ERROR] Exception during upload:', err);
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: err.message }));
+        }
+      });
     }
   };
 }
