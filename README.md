@@ -85,26 +85,96 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 ## 🚀 Deployment Guide
 
-### 1. ☁️ One-Click Deploy to Railway
+### 1. ☁️ Railway
 
-Deploy your personal retro gaming portal to [Railway](https://railway.app) in under 2 minutes:
+[Railway](https://railway.app) is one of the easiest ways to host Retro Player with persistent storage:
 
-1. **Fork or import** this repository to your GitHub account.
-2. Log in to **Railway** $\rightarrow$ Click **New Project** $\rightarrow$ **Deploy from GitHub repo**.
-3. Select your `retro-player` repository.
-4. **Attach a Persistent Volume** *(crucial for saving ROMs)*:
-   - Click on the newly created service $\rightarrow$ Navigate to the **Volumes** tab.
-   - Click **Add Volume** $\rightarrow$ Set Mount Path to: `/roms`.
-5. **Set Environment Variables** in Railway:
+1. **Fork or Import** this repository into your GitHub account.
+2. Go to **Railway** $\rightarrow$ **New Project** $\rightarrow$ **Deploy from GitHub repo** $\rightarrow$ select `retro-player`.
+3. **Add Persistent Volume** *(crucial for saving ROMs)*:
+   - Click your service $\rightarrow$ **Volumes** tab $\rightarrow$ **Add Volume**.
+   - Set **Mount Path**: `/roms` (e.g. 5GB–10GB).
+4. **Set Environment Variables**:
    - `PORT` = `3000`
    - `ROMS_DIR` = `/roms`
-6. Click **Deploy**. Railway will build the multi-stage Dockerfile and give you a live URL (`https://your-app.up.railway.app`).
+5. **Generate Public Domain**:
+   - Under service **Settings** $\rightarrow$ **Networking** $\rightarrow$ click **Generate Domain**.
+6. Railway automatically builds the `Dockerfile` and deploys your portal!
 
 ---
 
-### 2. 🐳 Deploy with Docker Compose (Self-Hosted / HomeLab / NAS)
+### 2. ⚡ Render
 
-Run Retro Player locally or on your home server (Unraid, TrueNAS, Synology, Raspberry Pi, VPS):
+1. Log in to **[Render](https://render.com)** $\rightarrow$ click **New +** $\rightarrow$ **Web Service**.
+2. Connect your GitHub repository.
+3. Choose **Docker** as the Environment.
+4. **Attach a Disk**:
+   - Scroll to **Disks** $\rightarrow$ **Add Disk**.
+   - Name: `roms-data`, Mount Path: `/roms`, Size: `10GB`.
+5. Add Environment Variables:
+   - `PORT`: `3000`
+   - `ROMS_DIR`: `/roms`
+6. Click **Create Web Service**.
+
+---
+
+### 3. 🎈 Fly.io
+
+Deploy globally with Fly.io CLI in seconds:
+
+1. Launch app configuration:
+   ```bash
+   fly launch --image ghcr.io/godarayudhvir/retro-player:latest
+   ```
+2. Create a persistent volume:
+   ```bash
+   fly volumes create roms_data --size 10 -r <your-region>
+   ```
+3. In `fly.toml`, ensure the volume and environment variables are mapped:
+   ```toml
+   [env]
+     PORT = "3000"
+     ROMS_DIR = "/roms"
+
+   [mounts]
+     source = "roms_data"
+     destination = "/roms"
+   ```
+4. Deploy:
+   ```bash
+   fly deploy
+   ```
+
+---
+
+### 4. 🔮 Coolify (Self-Hosted PaaS)
+
+1. In your Coolify dashboard, select **Projects** $\rightarrow$ **Add Resource** $\rightarrow$ **Docker Compose** or **GitHub Repository**.
+2. Set the compose configuration to use `image: ghcr.io/godarayudhvir/retro-player:latest`.
+3. Under **Persistent Storage**, add a volume mapping:
+   - Host path: `/data/retro-player/roms`
+   - Mount path: `/roms`
+4. Set Exposed Port to `3000` and deploy.
+
+---
+
+### 5. 🐳 Portainer / Unraid / TrueNAS / Synology
+
+- **Image**: `ghcr.io/godarayudhvir/retro-player:latest`
+- **Port Mapping**: `3000:3000` (or `8080:3000`)
+- **Volume / Path Mapping**:
+  - Host Path: `/mnt/user/appdata/retro-player/roms` (Unraid) or `/docker/retro-player/roms` (Synology)
+  - Container Path: `/roms`
+  - Mode: `Read/Write (rw)`
+- **Environment Variables**:
+  - `PORT=3000`
+  - `ROMS_DIR=/roms`
+
+---
+
+### 6. 🐳 Docker Compose (Standard Linux VPS / HomeLab)
+
+Run Retro Player locally or on your home server (Ubuntu, Debian, Raspberry Pi):
 
 ```yaml
 version: '3.8'
@@ -138,7 +208,7 @@ open http://localhost:3000
 
 ---
 
-### 3. 🖥️ Run with Docker CLI
+### 7. 🖥️ Run with Docker CLI
 
 ```bash
 docker run -d \
@@ -153,7 +223,7 @@ docker run -d \
 
 ---
 
-### 4. 💻 Local Development Setup (Node.js)
+### 8. 💻 Local Development Setup (Node.js)
 
 ```bash
 # 1. Clone the repository
