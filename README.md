@@ -127,12 +127,51 @@ The project includes an organized [architecture/](architecture/README.md) specif
 
 ## 🚀 Getting Started
 
-### Prerequisites
+### Option 1: Run with Docker Compose (Recommended - Like Jellyfin)
 
-- **Node.js** (v16+ recommended)
+Run Retro Player as a lightweight container and mount your existing ROM folder directly into the container.
+
+1. Ensure [Docker](https://docs.docker.com/get-docker/) and Docker Compose are installed.
+2. Edit [docker-compose.yml](file:///Users/godarayudhvir/Github/retro-player/docker-compose.yml) to point to your local ROMs directory:
+   ```yaml
+   version: '3.8'
+
+   services:
+     retro-player:
+       image: retro-player:latest
+       build: .
+       container_name: retro-player
+       restart: unless-stopped
+       ports:
+         - "3000:3000"
+       environment:
+         - PORT=3000
+         - ROMS_DIR=/roms
+       volumes:
+         # Replace ./public/roms with the absolute path to your ROMs directory
+         - /path/to/your/roms:/roms:ro
+   ```
+3. Start the container in detached mode:
+   ```bash
+   docker compose up -d --build
+   ```
+4. Access the web launcher at `http://localhost:3000`.
+
+To view logs or stop the service:
+```bash
+docker compose logs -f
+docker compose down
+```
+
+---
+
+### Option 2: Local Development Setup (Node.js)
+
+#### Prerequisites
+- **Node.js** (v18+ recommended)
 - **npm** or **yarn**
 
-### Installation
+#### Installation
 
 1. Clone or navigate to the project directory:
    ```bash
@@ -149,7 +188,13 @@ The project includes an organized [architecture/](architecture/README.md) specif
    npm run dev
    ```
 
-4. Open your browser at `http://localhost:3000`.
+4. Or run the production build & server:
+   ```bash
+   npm run build
+   npm start
+   ```
+
+5. Open your browser at `http://localhost:3000`.
 
 ---
 

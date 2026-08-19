@@ -41,6 +41,8 @@ const EXTENSION_MAP = {
 
 
 function multiConsoleScannerPlugin() {
+  const romsBaseDir = process.env.ROMS_DIR ? path.resolve(process.env.ROMS_DIR) : path.resolve(process.cwd(), 'public/roms');
+
   return {
     name: 'multi-console-scanner-plugin',
     configureServer(server) {
@@ -48,7 +50,7 @@ function multiConsoleScannerPlugin() {
       server.middlewares.use('/roms', (req, res, next) => {
         try {
           const relativePath = decodeURIComponent(req.url.split('?')[0]);
-          const fullRomPath = path.join(process.cwd(), 'public/roms', relativePath);
+          const fullRomPath = path.join(romsBaseDir, relativePath);
 
           if (fs.existsSync(fullRomPath) && fs.statSync(fullRomPath).isFile()) {
             res.setHeader('Content-Type', 'application/octet-stream');
@@ -67,8 +69,7 @@ function multiConsoleScannerPlugin() {
 
       // API Endpoint for ROM list
       server.middlewares.use('/api/roms', (req, res) => {
-        console.log('[API SCANNER] Running full directory scan on /public/roms...');
-        const romsBaseDir = path.resolve(process.cwd(), 'public/roms');
+        console.log(`[API SCANNER] Running full directory scan on ${romsBaseDir}...`);
         const games = [];
 
         function scanDirectory(dirPath, systemSubdir = '') {

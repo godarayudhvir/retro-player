@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  retro-player:
+    image: retro-player:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: retro-player
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - ROMS_DIR=/roms
+    volumes:
+      # Mount your host ROMs directory to /roms inside container (Read-Only recommended)
+      - ./public/roms:/roms:ro
+      # Optional: To persist custom covers or emulator assets
+      # - ./custom-covers:/app/public/cover:ro
