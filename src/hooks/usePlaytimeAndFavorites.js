@@ -94,28 +94,83 @@ export function usePlaytimeAndFavorites(activeProfileId = 'default') {
     }
   });
 
-  // Authoritative load from IndexedDB on activeProfileId change
+  // Authoritative load from IndexedDB or LocalStorage cache whenever activeProfileId changes
   useEffect(() => {
     let isMounted = true;
+
+    // Immediately reset in-memory state to the current profile's cache to avoid cross-profile leakage
+    try {
+      const cachedFavs = localStorage.getItem(favKey);
+      if (cachedFavs) {
+        setFavorites(JSON.parse(cachedFavs));
+      } else if (activeProfileId === 'prof_default' || activeProfileId === 'default') {
+        const legacy = localStorage.getItem(FAVORITES_KEY);
+        setFavorites(legacy ? JSON.parse(legacy) : []);
+      } else {
+        setFavorites([]);
+      }
+
+      const cachedRecents = localStorage.getItem(recentsKey);
+      if (cachedRecents) {
+        setRecentlyPlayed(JSON.parse(cachedRecents));
+      } else if (activeProfileId === 'prof_default' || activeProfileId === 'default') {
+        const legacy = localStorage.getItem(RECENTS_KEY);
+        setRecentlyPlayed(legacy ? JSON.parse(legacy) : []);
+      } else {
+        setRecentlyPlayed([]);
+      }
+
+      const cachedPlaytime = localStorage.getItem(playtimeKey);
+      if (cachedPlaytime) {
+        setPlaytimeStats(JSON.parse(cachedPlaytime));
+      } else if (activeProfileId === 'prof_default' || activeProfileId === 'default') {
+        const legacy = localStorage.getItem(PLAYTIME_KEY);
+        setPlaytimeStats(legacy ? JSON.parse(legacy) : {});
+      } else {
+        setPlaytimeStats({});
+      }
+    } catch (e) {
+      setFavorites([]);
+      setRecentlyPlayed([]);
+      setPlaytimeStats({});
+    }
 
     async function loadData() {
       try {
         const dbFavs = await dbGet(STORES.USER_DATA, `favs_${activeProfileId}`);
-        if (isMounted && Array.isArray(dbFavs)) {
-          setFavorites(dbFavs);
-          try { localStorage.setItem(favKey, JSON.stringify(dbFavs)); } catch {}
+        if (isMounted) {
+          if (Array.isArray(dbFavs)) {
+            setFavorites(dbFavs);
+            try { localStorage.setItem(favKey, JSON.stringify(dbFavs)); } catch {}
+          } else if (activeProfileId !== 'prof_default' && activeProfileId !== 'default') {
+            // If new user profile has no favs in DB, ensure empty array
+            setFavorites([]);
+            try { localStorage.setItem(favKey, JSON.stringify([])); } catch {}
+          }
         }
 
         const dbRecents = await dbGet(STORES.USER_DATA, `recents_${activeProfileId}`);
-        if (isMounted && Array.isArray(dbRecents)) {
-          setRecentlyPlayed(dbRecents);
-          try { localStorage.setItem(recentsKey, JSON.stringify(dbRecents)); } catch {}
+        if (isMounted) {
+          if (Array.isArray(dbRecents)) {
+            setRecentlyPlayed(dbRecents);
+            try { localStorage.setItem(recentsKey, JSON.stringify(dbRecents)); } catch {}
+          } else if (activeProfileId !== 'prof_default' && activeProfileId !== 'default') {
+            // If new user profile has no recents in DB, ensure empty array
+            setRecentlyPlayed([]);
+            try { localStorage.setItem(recentsKey, JSON.stringify([])); } catch {}
+          }
         }
 
         const dbPlaytime = await dbGet(STORES.USER_DATA, `playtime_${activeProfileId}`);
-        if (isMounted && dbPlaytime && typeof dbPlaytime === 'object') {
-          setPlaytimeStats(dbPlaytime);
-          try { localStorage.setItem(playtimeKey, JSON.stringify(dbPlaytime)); } catch {}
+        if (isMounted) {
+          if (dbPlaytime && typeof dbPlaytime === 'object') {
+            setPlaytimeStats(dbPlaytime);
+            try { localStorage.setItem(playtimeKey, JSON.stringify(dbPlaytime)); } catch {}
+          } else if (activeProfileId !== 'prof_default' && activeProfileId !== 'default') {
+            // If new user profile has no playtime in DB, ensure empty object
+            setPlaytimeStats({});
+            try { localStorage.setItem(playtimeKey, JSON.stringify({})); } catch {}
+          }
         }
       } catch (e) {
         console.error('Failed loading profile data from IndexedDB:', e);

@@ -45,6 +45,7 @@ export default function SettingsModal({
   const [pendingConfirm, setPendingConfirm] = useState(null); // { title, message, onConfirm }
 
   const fileInputRef = useRef(null);
+  const folderInputRef = useRef(null);
   const bgmInputRef = useRef(null);
 
   if (!isOpen) return null;
@@ -58,18 +59,44 @@ export default function SettingsModal({
     return matchesSearch && matchesSystem;
   });
 
-  // Handle ROM Upload
+  // Supported ROM extensions filter
+  const SUPPORTED_ROM_EXTS = new Set([
+    'nes', 'snes', 'smc', 'sfc', 'gba', 'gbc', 'gb', 
+    'n64', 'z64', 'v64', 'nds', 'gen', 'smd', 'md', 
+    'zip', 'iso', 'cue', 'chd', 'bin'
+  ]);
+
+  // Handle ROM Upload (supports multi-file selection and recursive folder selection)
   const handleRomUpload = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
+    const rawFiles = Array.from(e.target.files || []);
+    if (rawFiles.length === 0) return;
+
+    // Filter to only supported ROM file extensions (ignoring hidden files, ._ resource forks, DS_Store, etc.)
+    const files = rawFiles.filter(file => {
+      const fileName = file.name || '';
+      // Ignore hidden files and macOS AppleDouble resource fork dot-underscore files
+      if (fileName.startsWith('.') || fileName.startsWith('._')) return false;
+      const ext = fileName.split('.').pop()?.toLowerCase();
+      return ext && SUPPORTED_ROM_EXTS.has(ext);
+    });
+
+    if (files.length === 0) {
+      setUploadStatus({ type: 'error', message: 'No supported ROM files found in selection.' });
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      if (folderInputRef.current) folderInputRef.current.value = '';
+      setTimeout(() => setUploadStatus(null), 4000);
+      return;
+    }
 
     setIsUploading(true);
-    setUploadStatus({ type: 'info', message: `Uploading ${files.length} ROM(s)...` });
+    setUploadStatus({ type: 'info', message: `Uploading 1 of ${files.length} ROM(s)...` });
 
     let successCount = 0;
     let failCount = 0;
 
-    for (const file of files) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      setUploadStatus({ type: 'info', message: `Uploading ${i + 1} of ${files.length}: ${file.name}...` });
       try {
         const sys = detectSystemFromExtension(file.name);
         const response = await fetch('/api/upload-rom', {
@@ -95,7 +122,12 @@ export default function SettingsModal({
 
     setIsUploading(false);
     if (successCount > 0) {
-      setUploadStatus({ type: 'success', message: `Successfully uploaded ${successCount} ROM(s)!` });
+      setUploadStatus({ 
+        type: 'success', 
+        message: failCount > 0 
+          ? `Uploaded ${successCount} of ${files.length} ROM(s) (${failCount} failed).`
+          : `Successfully uploaded all ${successCount} ROM(s)!` 
+      });
       sfx?.playSaveDetected?.();
       fetchGames?.();
     } else {
@@ -103,6 +135,7 @@ export default function SettingsModal({
     }
 
     if (fileInputRef.current) fileInputRef.current.value = '';
+    if (folderInputRef.current) folderInputRef.current.value = '';
     setTimeout(() => setUploadStatus(null), 4000);
   };
 
@@ -310,23 +343,47 @@ export default function SettingsModal({
                 </select>
               </div>
 
-              {/* Upload Button */}
+              {/* Bulk Upload Actions (Multi-files & Whole Folders) */}
               <div className="settings-upload-wrapper">
+                {/* Multi-file input */}
                 <input
                   ref={fileInputRef}
                   type="file"
                   multiple
-                  accept=".nes,.snes,.smc,.sfc,.gba,.gbc,.gb,.n64,.z64,.v64,.nds,.gen,.zip,.iso,.cue,.chd,.bin"
+                  accept=".nes,.snes,.smc,.sfc,.gba,.gbc,.gb,.n64,.z64,.v64,.nds,.gen,.smd,.md,.zip,.iso,.cue,.chd,.bin"
                   onChange={handleRomUpload}
                   style={{ display: 'none' }}
                 />
+
+                {/* Recursive directory / folder input */}
+                <input
+                  ref={folderInputRef}
+                  type="file"
+                  multiple
+                  webkitdirectory="true"
+                  directory="true"
+                  onChange={handleRomUpload}
+                  style={{ display: 'none' }}
+                />
+
                 <button
                   className="settings-upload-btn"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
+                  title="Select multiple ROM files"
                 >
                   {isUploading ? <RefreshCw size={16} className="spin" /> : <Upload size={16} />}
                   <span>Upload ROMs</span>
+                </button>
+
+                <button
+                  className="settings-upload-btn folder-btn"
+                  onClick={() => folderInputRef.current?.click()}
+                  disabled={isUploading}
+                  title="Select a whole folder/directory with ROMs & subfolders"
+                >
+                  <FolderPlus size={16} />
+                  <span>Upload Folder</span>
                 </button>
               </div>
             </div>

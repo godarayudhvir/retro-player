@@ -57,18 +57,19 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 ## ✨ Key Highlights
 
-- 👤 **Multi-User Profiles & Nintendo Mii Avatar Creator**:
-  - Netflix / Nintendo Switch style **"Who's Playing?"** profile selection modal.
-  - Interactive **Nintendo Mii Studio Wizard** with custom face shapes, skin tones, hairstyles, expressive eyes, glasses, mustaches, and shirt colors.
-  - **Per-Profile State Isolation**: Each player maintains independent Favorites, Recently Played history, and Playtime Analytics.
+- 👤 **Multi-User Profiles & Nintendo Mii Avatar Creator**: Create personalized Mii-style vector avatars with customizable hairstyles, expressions, and accessories; isolated game saves, playtime logs, and favorites.
+- 📱 **Multi-Device Responsive Matrix**: Fully responsive and tailored experience on Mobile Phones (<=640px), Tablets/Handhelds (Steam Deck, Nintendo Switch, iPad), Desktop PCs, and 10-Foot UI mode for Large 4K TVs.
+- 🎨 **Unified Theme Engine**: Seamless support for Classic, Midnight OLED, Cyber Neon, and PlayStation XMB dark themes across every modal, drawer, component, and button.
 - 🎵 **Background Music (BGM) Engine & Docker Management**:
   - Auto-scanning and loop streaming of background music tracks with topbar controls and auto-track progression.
   - **Smart In-Game Auto-Pause**: Automatically pauses background music when entering a game and resumes upon exit.
   - Full Docker volume management (`/bgm`) and copyright gitignore protection.
-- ⚙️ **Console Settings & Library Manager**:
-  - Centralized management hub to upload and delete ROMs across all platforms.
+- ⚙️ **Nintendo Switch Style Full-Screen System Settings Menu**:
+  - 2-column console management hub with category sidebar navigation and rich detail panes.
+  - Dual bulk ROM file batch and recursive folder directory uploader (`webkitdirectory`).
   - Background Music (BGM) manager with direct audio upload, live playback preview, and file deletion.
-  - Volume mount status inspection and live search filters.
+  - Interactive Theme Switcher with realistic mini-console UI preview mockups.
+  - Gamepad mapping references, input status indicators, and Docker storage diagnostics.
 - 🎨 **4 Signature Themes**: **iiSU Light**, **Midnight Cyber**, **Sony XMB Wave**, and **Game Boy DMG**.
 - 🗄️ **Centralized IndexedDB Database Architecture**:
   - Full structured database (`RetroPlayerDB`) storing user profiles, Mii avatars, favorites, recently played lists, and playtime analytics with zero risk of storage quota limits or eviction.

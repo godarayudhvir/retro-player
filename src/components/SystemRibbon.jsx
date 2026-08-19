@@ -52,10 +52,7 @@ export default function SystemRibbon({
           aria-label={`${tab.name} (${tab.count} games)`}
         >
           {tab.isSpecialIcon ? (
-            <>
-              {tab.iconNode}
-              {tab.count > 0 && <span className="tab-count-badge">{tab.count}</span>}
-            </>
+            tab.iconNode
           ) : (
             <>
               {tab.icon && <img src={tab.icon} alt="" className="tab-icon" />}

@@ -101,8 +101,8 @@ export default function ProfileSelectModal({
               }}
               tabIndex={0}
             >
-              <div className="add-profile-icon">
-                <Plus size={40} />
+              <div className="add-profile-circle">
+                <Plus size={36} />
               </div>
               <span className="profile-card-name">Add Profile</span>
             </div>
@@ -111,7 +111,7 @@ export default function ProfileSelectModal({
           {/* Footer Management Actions */}
           <div className="profile-modal-footer">
             <button
-              className={`manage-profiles-btn ${isManaging ? 'active' : ''}`}
+              className={`profile-manage-toggle-btn ${isManaging ? 'active' : ''}`}
               onClick={() => {
                 setIsManaging(!isManaging);
                 sfx?.playTileNav?.();

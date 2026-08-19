@@ -8,8 +8,9 @@ The **User Profiles & Nintendo Mii Avatar System** introduces multi-user profile
 ## 2. Detailed List of What It Does
 - **Netflix / Nintendo Switch Style "Who's Playing?" Selector (`ProfileSelectModal.jsx`)**:
   - Fullscreen profile selection modal displaying large animated Mii avatars, profile names, and active status indicators.
-  - "Add Profile" card with glowing `+` button triggering the interactive creator.
-  - "Manage Profiles" mode allowing players to edit existing avatars or delete unused profiles.
+  - "Add Profile" card with styled dashed circular button triggering the interactive creator.
+  - Console-grade "Manage Profiles" / "Done Editing" action pill button supporting all color themes (Classic, Midnight, Cyber, XMB).
+  - 100% responsive layout across mobile phones (<=640px), tablets (641px - 1024px), desktop PCs, and large TVs (1601px+).
 - **Nintendo Mii Avatar Studio Wizard (`MiiCreatorModal.jsx`)**:
   - Live vector avatar rendering stage that reacts immediately to customizer controls.
   - Head & Face customization (Face shapes: Round, Oval, Square, Soft/Cute; 8+ Skin tones).

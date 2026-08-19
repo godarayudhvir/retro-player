@@ -1,26 +1,25 @@
-# Settings & Library Manager (`architecture/components/settings-modal.md`)
+# System Settings & Library Manager Menu (`architecture/components/settings-modal.md`)
 
 ## 1. Description
-The **Settings & Library Manager** (`SettingsModal.jsx`) is a centralized console management hub that allows players and host administrators to manage ROMs across all emulated platforms and manage the Background Music (BGM) collection directly from the UI with full upload and deletion support.
+The **System Settings & Library Manager Menu** (`SettingsView.jsx`) is a full-screen Nintendo Switch-inspired console settings page with a 2-column layout (left category sidebar navigation and right interactive detail settings pane). It allows players to manage ROM files, background music playlists, visual themes, gamepad mappings, and inspect host Docker volume storage diagnostics.
 
 ---
 
 ## 2. Detailed List of What It Does
-- **ROM Management Tab**:
-  - Live search and platform dropdown filters (NES, SNES, GBA, N64, PS1, Arcade, etc.).
-  - Batch upload ROM files (`.nes`, `.snes`, `.gba`, `.n64`, `.nds`, `.iso`, `.cue`, `.chd`, `.zip`, etc.) to the host server disk.
-  - Interactive deletion: Delete any game from host disk (`/api/delete-rom`) with confirmation guard and instant UI refresh.
-  - Displays system badges, display titles, and exact disk filenames.
-- **Background Music (BGM) Management Tab**:
-  - Direct upload of audio tracks (`.mp3`, `.ogg`, `.wav`, `.flac`, `.m4a`, `.aac`) to the host BGM directory (`/api/upload-bgm`).
-  - Interactive playback preview: Play/pause any track directly from the manager table.
-  - Audio deletion: Delete any track from disk (`/api/delete-bgm`) with instant playlist refresh.
-- **Topbar Integration**:
-  - Compact icon button with a settings gear (`Settings`) in the topbar status group.
+- **Switch-Style 2-Column Split View**:
+  - **Left Category Sidebar**:
+    1. 📦 **ROM Library & Storage**: Live title search, system dropdown filter, and dual bulk upload actions (`Upload ROMs` multi-file batch & `Upload Folder` recursive subfolder directory picker).
+    2. 🎵 **Background Music (BGM)**: Audio track list, audio upload, live playback preview with play/pause buttons, and track deletion.
+    3. 🎨 **Themes & Visuals**: Live theme switcher cards for **iiSU Light**, **Midnight OLED**, **Cyber Neon**, and **Sony XMB Wave**, plus real-time Web Audio SFX mute/unmute toggle.
+    4. 🎮 **Controllers & Keys**: Gamepad connection indicator and full controller & keyboard shortcut mapping reference.
+    5. ℹ️ **System & Diagnostics**: Real-time status of `./roms` and `./bgm` Docker volume mounts, total indexed games, and IndexedDB permanent storage state.
+- **Top Header & Bottom HUD Guide**:
+  - Top header with return button (`Back` / `Esc` / `B` button) and Station badge.
+  - Bottom controller HUD with key prompts (`[B] Back to Games`, `[A] Select Option`, `[D-Pad] Navigation`).
 - **100% Gamepad & Keyboard Spatial Navigation**:
-  - Full keyboard shortcuts (`Enter`, `Esc`, `Tab`, `Arrow keys`, `WASD`) and Gamepad support (D-Pad, A to select, B to close).
-- **Theme Support**:
-  - Styled with custom contrast overrides for all 4 themes (**iiSU Light**, **Midnight Cyber**, **Sony XMB**, and **DMG**).
+  - Smooth 2D directional navigation, hotkey support (`Esc`, `B` button to return, `Enter`, `A` button to select).
+- **Theme Support & Mobile Responsiveness**:
+  - Full dark mode & dynamic theme compatibility with mobile-responsive horizontal scrolling tabs for phones and tablets.
 
 ---
 
@@ -34,7 +33,7 @@ The **Settings & Library Manager** (`SettingsModal.jsx`) is a centralized consol
 - Supported in both development mode (`vite.config.js` middlewares) and production Docker environment (`server.js`).
 
 ### Source Locations
-- Component: [src/components/SettingsModal.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/SettingsModal.jsx)
+- Component: [src/components/SettingsView.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/SettingsView.jsx)
 - Topbar: [src/components/Topbar.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/Topbar.jsx)
 - Spatial Engine: [src/hooks/useGamepadNavigation.js](file:///Users/godarayudhvir/Github/retro-player/src/hooks/useGamepadNavigation.js)
 - Server Endpoints: [server.js](file:///Users/godarayudhvir/Github/retro-player/server.js) & [vite.config.js](file:///Users/godarayudhvir/Github/retro-player/vite.config.js)

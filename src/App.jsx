@@ -11,7 +11,7 @@ import OnScreenKeyboard from './components/OnScreenKeyboard';
 import EmulatorModal from './components/EmulatorModal';
 import ProfileSelectModal from './components/ProfileSelectModal';
 import MiiCreatorModal from './components/MiiCreatorModal';
-import SettingsModal from './components/SettingsModal';
+import SettingsView from './components/SettingsView';
 
 import { useWebAudioSfx } from './hooks/useWebAudioSfx';
 import { useGamepadStatus } from './hooks/useGamepadStatus';
@@ -385,8 +385,8 @@ export default function App() {
         sfx={sfx}
       />
 
-      {/* Console Settings & Library Manager Modal */}
-      <SettingsModal
+      {/* Full-Screen Nintendo Switch Style System Settings Menu Page */}
+      <SettingsView
         isOpen={showSettingsModal}
         onClose={() => {
           setShowSettingsModal(false);
@@ -398,6 +398,8 @@ export default function App() {
         fetchGames={fetchGames}
         bgm={bgm}
         sfx={sfx}
+        themeEngine={themeEngine}
+        scraper={scraper}
         focusedTarget={focusedTarget}
         setFocusedTarget={setFocusedTarget}
         gamepadConnected={gamepadConnected}
