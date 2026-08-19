@@ -19,6 +19,7 @@ architecture/
 │   └── app.md              # Main application shell, hook orchestration, and modular layout (`src/App.jsx`)
 │
 ├── modules/                # Core Functional Modules & Systems
+│   ├── api-specifications.md # Internal REST endpoints, external CDNs & Web APIs contracts (`server.js`, `vite.config.js`)
 │   ├── indexeddb-storage.md # Centralized IndexedDB permanent storage engine (`services/db.js`)
 │   ├── emulator.md         # Emulator Engine integration, offline core resilience & save state management (`EmulatorModal.jsx`, EmulatorJS)
 │   ├── metadata-scraper.md # Online 3D box art & game metadata scraper with IndexedDB caching (`metadataScraper.js`, `useMetadataScraper.js`)
