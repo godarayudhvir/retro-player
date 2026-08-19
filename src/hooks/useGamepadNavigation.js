@@ -593,7 +593,8 @@ export function useGamepadNavigation({
         }
 
         // When a game is active in the emulator, yield gamepad inputs to EmulatorJS!
-        // Dedicated exit combo: Select (button 8) + Start (button 9) OR Guide/Home (button 16)
+        // The iframe handles in-game inputs and posts RETRO_PLAYER_EXIT_GAME on exit combo.
+        // Throttle parent poll to 250ms to yield 100% of thread & GPU to WebAssembly core.
         if (stateRef.current.activeGame) {
           const b = gp.buttons;
           const selectBtn = b[8]?.pressed;
@@ -607,7 +608,9 @@ export function useGamepadNavigation({
             setFocusedTarget({ zone: 'grid', index: stateRef.current.focusedTarget?.index || 0 });
           }
           prevButtonsRef.current = { exitCombo: isExitCombo };
-          animId = requestAnimationFrame(pollGamepad);
+          setTimeout(() => {
+            animId = requestAnimationFrame(pollGamepad);
+          }, 250);
           return;
         }
 

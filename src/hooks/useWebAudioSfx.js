@@ -366,9 +366,23 @@ export function useWebAudioSfx() {
     }
   }, [isMuted, getAudioContext]);
 
+  const suspendAudio = useCallback(() => {
+    if (audioCtxRef.current && audioCtxRef.current.state === 'running') {
+      audioCtxRef.current.suspend().catch(() => {});
+    }
+  }, []);
+
+  const resumeAudio = useCallback(() => {
+    if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+      audioCtxRef.current.resume().catch(() => {});
+    }
+  }, []);
+
   return {
     isMuted,
     toggleMute,
+    suspendAudio,
+    resumeAudio,
     playTileNav,
     playTabSwitch,
     playGameLaunch,

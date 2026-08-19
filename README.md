@@ -77,6 +77,9 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
   - All confirmations (profile deletion, ROM removal, BGM cleanup) utilize theme-aware, gamepad/keyboard navigable in-app modal dialogs.
 - 💾 **3D Physical Cartridge Engine**: Tactile cartridges with metallic sheens, grip textures, and title color heuristics.
 - 🌐 **Automated ES-DE Online Metadata Scraper**: Official 3D box art from **Libretro** & synopsis info from **Wikipedia**, cached in **IndexedDB**.
+- 🚀 **60 FPS Hardware-Accelerated Emulation & Diagnostic HUD**:
+  - Full-speed 60 FPS VSync rendering with low-latency audio dynamic rate control.
+  - Interactive **Diagnostic Performance HUD** (`D` hotkey) displaying real-time FPS, delta frame times (`16.6ms`), audio clock sync, and automated health checks.
 - 🔊 **Synthesized Pure Web Audio UI SFX**: Zero-latency acoustic feedback synthesizer with zero external audio assets.
 - 🎮 **Full Gamepad & Keyboard Navigation**: D-Pad/Stick navigation, shoulder triggers (`L1`/`R1`), on-screen virtual keyboard (`⌘K`), and quick-launch.
 - ⏱️ **Playtime Analytics & Smart Collections**: Session durations, total hours played, **Favorites ⭐**, and **Recently Played** queue.

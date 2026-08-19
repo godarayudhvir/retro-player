@@ -2222,19 +2222,20 @@ button.status-pill:active {
   line-height: 1.6;
 }
 
-/* Emulator Stage Modal */
+/* Emulator Stage Modal - 60 FPS Hardware-Accelerated Layout */
 .emulator-backdrop-iisu {
   position: fixed;
   inset: 0;
   width: 100vw;
   height: 100vh;
   height: 100dvh;
-  background: rgba(10, 12, 16, 0.98);
-  backdrop-filter: blur(20px);
+  background: #090b10;
   z-index: 1000;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  contain: layout style paint;
+  transform: translateZ(0);
 }
 
 .emulator-topbar {
@@ -2243,13 +2244,12 @@ button.status-pill:active {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(15, 23, 42, 0.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: #0f172a;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   gap: 0.75rem;
   z-index: 20;
   flex-shrink: 0;
+  transform: translateZ(0);
 }
 
 .emulator-topbar-left {
@@ -2308,6 +2308,13 @@ button.status-pill:active {
   border: 1px solid rgba(52, 211, 153, 0.35);
 }
 
+.emulator-status-tag.tag-fps {
+  border-width: 1px;
+  border-style: solid;
+  font-family: monospace;
+  font-size: 0.72rem;
+}
+
 .emulator-topbar-right {
   display: flex;
   align-items: center;
@@ -2316,7 +2323,8 @@ button.status-pill:active {
 }
 
 .emulator-action-btn,
-.emulator-menu-btn {
+.emulator-menu-btn,
+.emulator-diag-btn {
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ffffff;
@@ -2332,8 +2340,15 @@ button.status-pill:active {
   transition: all 0.2s ease;
 }
 
+.emulator-diag-btn.active {
+  background: rgba(56, 189, 248, 0.25);
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
 .emulator-action-btn:hover,
-.emulator-menu-btn:hover {
+.emulator-menu-btn:hover,
+.emulator-diag-btn:hover {
   background: rgba(255, 255, 255, 0.25);
   border-color: rgba(255, 255, 255, 0.4);
   transform: translateY(-1px);
@@ -2358,6 +2373,164 @@ button.status-pill:active {
   color: #ffffff;
   border-color: #ef4444;
   transform: scale(1.1);
+}
+
+/* Diagnostic Performance HUD Overlay */
+.emulator-diag-panel {
+  position: absolute;
+  top: 68px;
+  right: 20px;
+  width: 340px;
+  background: #0f172a;
+  border: 1.5px solid rgba(56, 189, 248, 0.4);
+  border-radius: 14px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.85);
+  padding: 1.1rem;
+  z-index: 100010;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  color: #ffffff;
+  animation: diagSlideDown 0.2s ease-out;
+  transform: translateZ(0);
+}
+
+@keyframes diagSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.diag-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.6rem;
+}
+
+.diag-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #38bdf8;
+}
+
+.diag-close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #94a3b8;
+  border-radius: 6px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.diag-close-btn:hover {
+  background: rgba(239, 68, 68, 0.3);
+  color: #ffffff;
+}
+
+.diag-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.diag-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.diag-card-label {
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.4px;
+}
+
+.diag-card-val {
+  font-size: 1.15rem;
+  font-weight: 900;
+  font-family: monospace;
+  color: #ffffff;
+}
+
+.diag-card-val.audio-val,
+.diag-card-val.input-val {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #38bdf8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.diag-unit {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.diag-card-sub {
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
+.diag-health-banner {
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 3px solid #10b981;
+  border-radius: 0 8px 8px 0;
+  padding: 0.65rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.diag-health-status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.diag-health-desc {
+  font-size: 0.7rem;
+  line-height: 1.4;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.diag-shortcuts-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.66rem;
+  color: #64748b;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 0.55rem;
+}
+
+.diag-shortcuts-footer strong {
+  color: #94a3b8;
 }
 
 .emulator-stage {
