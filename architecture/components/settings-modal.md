@@ -8,8 +8,10 @@ The **Settings & Library Manager** (`SettingsModal.jsx`) is a centralized consol
 ## 2. Detailed List of What It Does
 - **ROM Management Tab**:
   - Live search and platform dropdown filters (NES, SNES, GBA, N64, PS1, Arcade, etc.).
-  - Batch upload ROM files (`.nes`, `.snes`, `.gba`, `.n64`, `.nds`, `.iso`, `.cue`, `.chd`, `.zip`, etc.) to the host server disk.
-  - Interactive deletion: Delete any game from host disk (`/api/delete-rom`) with confirmation guard and instant UI refresh.
+  - **Bulk Files & Directory Folder Upload**:
+    - **Upload Files**: Multi-select individual ROM cartridges (`.nes`, `.snes`, `.gba`, `.n64`, `.nds`, `.iso`, `.cue`, `.chd`, `.zip`, etc.).
+    - **Upload Folder**: Select an entire folder or root directory containing nested game subfolders (e.g. `roms/pokemon-emerald/game.gba`). The system automatically traverses the directory tree, extracts valid ROM binaries, filters non-game junk, and routes each file into its console storage partition on disk.
+  - Interactive deletion: Delete any game from host disk (`/api/delete-rom`) with themed confirmation guard and instant UI refresh.
   - Displays system badges, display titles, and exact disk filenames.
 - **Background Music (BGM) Management Tab**:
   - Direct upload of audio tracks (`.mp3`, `.ogg`, `.wav`, `.flac`, `.m4a`, `.aac`) to the host BGM directory (`/api/upload-bgm`).

@@ -1149,6 +1149,12 @@ body {
   cursor: pointer;
 }
 
+.settings-upload-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .settings-upload-btn {
   display: flex;
   align-items: center;
@@ -1165,6 +1171,15 @@ body {
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
   transition: all 0.2s ease;
   white-space: nowrap;
+}
+
+.settings-upload-btn.folder-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.settings-upload-btn.folder-btn:hover:not(:disabled) {
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
 }
 
 .settings-upload-btn:hover:not(:disabled) {

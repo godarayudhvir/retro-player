@@ -8,6 +8,7 @@ import {
   Trash2, 
   Search, 
   FolderPlus, 
+  Folder,
   Gamepad2, 
   HardDrive, 
   Check, 
@@ -42,6 +43,7 @@ export default function SettingsModal({
   const [pendingDeleteBgm, setPendingDeleteBgm] = useState(null);
 
   const fileInputRef = useRef(null);
+  const folderInputRef = useRef(null);
   const bgmInputRef = useRef(null);
 
   // Filter ROMs based on search and system
@@ -58,13 +60,28 @@ export default function SettingsModal({
 
   if (!isOpen) return null;
 
-  // Handle ROM Upload
+  // Supported ROM extensions filter
+  const VALID_EXTS = ['.nes', '.snes', '.smc', '.sfc', '.gba', '.gbc', '.gb', '.n64', '.z64', '.v64', '.nds', '.gen', '.zip', '.iso', '.cue', '.chd', '.bin'];
+
+  // Handle ROM Upload (supports both multiple files and full directory folder trees)
   const handleRomUpload = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
+    const rawFiles = Array.from(e.target.files || []);
+    if (rawFiles.length === 0) return;
+
+    // Filter to valid ROM files (skipping non-rom files like desktop.ini, .DS_Store, subfolder metadata)
+    const files = rawFiles.filter(f => {
+      const ext = '.' + (f.name.split('.').pop() || '').toLowerCase();
+      return VALID_EXTS.includes(ext) && !f.name.startsWith('.');
+    });
+
+    if (files.length === 0) {
+      setUploadStatus({ type: 'error', message: `No supported ROM files found in selection.` });
+      setTimeout(() => setUploadStatus(null), 4000);
+      return;
+    }
 
     setIsUploading(true);
-    setUploadStatus({ type: 'info', message: `Uploading ${files.length} ROM(s)...` });
+    setUploadStatus({ type: 'info', message: `Uploading ${files.length} ROM file(s)...` });
 
     let successCount = 0;
     let failCount = 0;
@@ -103,6 +120,7 @@ export default function SettingsModal({
     }
 
     if (fileInputRef.current) fileInputRef.current.value = '';
+    if (folderInputRef.current) folderInputRef.current.value = '';
     setTimeout(() => setUploadStatus(null), 4000);
   };
 
@@ -297,8 +315,9 @@ export default function SettingsModal({
                   </select>
                 </div>
 
-                {/* Upload Button */}
+                {/* Upload Buttons (Bulk Files & Full Directory Folders) */}
                 <div className="settings-upload-wrapper">
+                  {/* Bulk Files Input */}
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -307,13 +326,35 @@ export default function SettingsModal({
                     onChange={handleRomUpload}
                     style={{ display: 'none' }}
                   />
+
+                  {/* Bulk Folder Directory Input */}
+                  <input
+                    ref={folderInputRef}
+                    type="file"
+                    webkitdirectory=""
+                    directory=""
+                    onChange={handleRomUpload}
+                    style={{ display: 'none' }}
+                  />
+
                   <button
                     className="settings-upload-btn"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
+                    title="Upload individual ROM files or multi-select files"
                   >
                     <FolderPlus size={18} />
-                    <span>{isUploading ? 'Uploading...' : 'Upload ROMs'}</span>
+                    <span>{isUploading ? 'Uploading...' : 'Upload Files'}</span>
+                  </button>
+
+                  <button
+                    className="settings-upload-btn folder-btn"
+                    onClick={() => folderInputRef.current?.click()}
+                    disabled={isUploading}
+                    title="Select a whole folder containing ROMs and subfolders"
+                  >
+                    <Folder size={18} />
+                    <span>{isUploading ? 'Scanning...' : 'Upload Folder'}</span>
                   </button>
                 </div>
               </div>
