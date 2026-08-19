@@ -161,62 +161,105 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
   useEffect(() => {
     if (!stageRef.current) return;
 
-    stageRef.current.innerHTML = '';
-
+    let isCancelled = false;
     let sessionBlobUrl = null;
-    let absoluteRomUrl = '';
-    const currentGame = gameRef.current || game;
-    try {
-      if (currentGame.file) {
-        sessionBlobUrl = URL.createObjectURL(currentGame.file);
-        absoluteRomUrl = sessionBlobUrl;
-      } else if (currentGame.romUrl && (currentGame.romUrl.startsWith('blob:') || currentGame.romUrl.startsWith('data:') || currentGame.romUrl.startsWith('http://') || currentGame.romUrl.startsWith('https://'))) {
-        absoluteRomUrl = currentGame.romUrl;
-      } else if (currentGame.romUrl) {
-        absoluteRomUrl = new URL(currentGame.romUrl, window.location.origin).href;
+
+    const setupEmulator = async () => {
+      stageRef.current.innerHTML = '';
+
+      let absoluteRomUrl = '';
+      const currentGame = gameRef.current || game;
+      try {
+        if (currentGame.file) {
+          sessionBlobUrl = URL.createObjectURL(currentGame.file);
+          absoluteRomUrl = sessionBlobUrl;
+        } else if (currentGame.romUrl && (currentGame.romUrl.startsWith('blob:') || currentGame.romUrl.startsWith('data:') || currentGame.romUrl.startsWith('http://') || currentGame.romUrl.startsWith('https://'))) {
+          absoluteRomUrl = currentGame.romUrl;
+        } else if (currentGame.romUrl) {
+          absoluteRomUrl = new URL(currentGame.romUrl, window.location.origin).href;
+        }
+        console.log(`🎮 [EMULATOR LAUNCHING] Game: "${currentGame.title}" | System Core: ${currentGame.systemCore} | ROM URL: ${absoluteRomUrl}`);
+      } catch (e) {
+        console.error(`🚨 [EMULATOR ERROR] Invalid ROM URL construction for game "${currentGame.title}":`, currentGame.romUrl, e);
       }
-      console.log(`🎮 [EMULATOR LAUNCHING] Game: "${currentGame.title}" | System Core: ${currentGame.systemCore} | ROM URL: ${absoluteRomUrl}`);
-    } catch (e) {
-      console.error(`🚨 [EMULATOR ERROR] Invalid ROM URL construction for game "${currentGame.title}":`, currentGame.romUrl, e);
-    }
 
-    const cdnDataPath = 'https://cdn.emulatorjs.org/stable/data/';
-    const localDataPath = '/emulatorjs/data/';
-    const isOffline = !navigator.onLine;
-    const initialDataPath = isOffline ? localDataPath : cdnDataPath;
-    setIsLocalOffline(isOffline);
+      // Pre-load existing in-game battery RAM and snapshot states from RetroPlayerDB / localStorage
+      let initialSaveBase64 = null;
+      let initialStateBase64 = null;
+      try {
+        const dbSave = await dbGet(STORES.GAME_SAVES, `save_${currentGame.id}`);
+        if (dbSave && dbSave.data) {
+          initialSaveBase64 = typeof dbSave.data === 'string' ? dbSave.data : (dbSave.data.save || null);
+        }
+        if (!initialSaveBase64) {
+          const lsSave = localStorage.getItem(`save_${currentGame.id}`);
+          if (lsSave) {
+            const parsed = JSON.parse(lsSave);
+            if (parsed && parsed.data) {
+              initialSaveBase64 = typeof parsed.data === 'string' ? parsed.data : (parsed.data.save || null);
+            }
+          }
+        }
 
-    let core = currentGame.systemCore;
-    if (!core || core === 'custom' || core === 'nes') {
-      const detected = detectSystemFromExtension(currentGame.filename || currentGame.title || '');
-      if (detected && detected.core && detected.core !== 'custom') {
-        core = detected.core;
-      } else {
-        core = core || 'nes';
+        const dbState = await dbGet(STORES.SAVE_STATES, `state_${currentGame.id}`);
+        if (dbState && dbState.data) {
+          initialStateBase64 = typeof dbState.data === 'string' ? dbState.data : (dbState.data.state || null);
+        }
+        if (!initialStateBase64) {
+          const lsState = localStorage.getItem(`state_${currentGame.id}`);
+          if (lsState) {
+            const parsed = JSON.parse(lsState);
+            if (parsed && parsed.data) {
+              initialStateBase64 = typeof parsed.data === 'string' ? parsed.data : (parsed.data.state || null);
+            }
+          }
+        }
+        if (initialSaveBase64) {
+          console.log(`💾 [SAVE DATA PRELOADED] Found saved battery RAM for "${currentGame.title}" (${initialSaveBase64.length} chars base64)`);
+        }
+      } catch (err) {
+        console.warn('⚠️ [SAVE PRELOAD WARN]:', err);
       }
-    }
-    if (core === 'gbc') core = 'gb';
-    if (core === 'ps1') core = 'psx';
-    if (core === 'sega' || core === 'genesis' || core === 'megadrive') core = 'segaMD';
-    if (core === 'gamegear') core = 'segaGG';
-    if (core === 'arcade') core = 'mame2003_plus';
 
-    const iframe = document.createElement('iframe');
-    iframeRef.current = iframe;
-    iframe.style.width = '100%';
-    iframe.style.height = '100%';
-    iframe.style.border = 'none';
-    iframe.style.background = '#000000';
-    iframe.tabIndex = 0;
-    iframe.allow = 'autoplay *; gamepad *; fullscreen *; cross-origin-isolated; accelerometer; gyroscope';
+      if (isCancelled || !stageRef.current) return;
 
-    stageRef.current.appendChild(iframe);
+      const cdnDataPath = 'https://cdn.emulatorjs.org/stable/data/';
+      const localDataPath = '/emulatorjs/data/';
+      const isOffline = !navigator.onLine;
+      const initialDataPath = isOffline ? localDataPath : cdnDataPath;
+      setIsLocalOffline(isOffline);
 
-    const isMobileTouch = ('ontouchstart' in window) && (navigator.maxTouchPoints > 0) && (window.innerWidth <= 1024);
+      let core = currentGame.systemCore;
+      if (!core || core === 'custom' || core === 'nes') {
+        const detected = detectSystemFromExtension(currentGame.filename || currentGame.title || '');
+        if (detected && detected.core && detected.core !== 'custom') {
+          core = detected.core;
+        } else {
+          core = core || 'nes';
+        }
+      }
+      if (core === 'gbc') core = 'gb';
+      if (core === 'ps1') core = 'psx';
+      if (core === 'sega' || core === 'genesis' || core === 'megadrive') core = 'segaMD';
+      if (core === 'gamegear') core = 'segaGG';
+      if (core === 'arcade') core = 'mame2003_plus';
 
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
+      const iframe = document.createElement('iframe');
+      iframeRef.current = iframe;
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      iframe.style.border = 'none';
+      iframe.style.background = '#000000';
+      iframe.tabIndex = 0;
+      iframe.allow = 'autoplay *; gamepad *; fullscreen *; cross-origin-isolated; accelerometer; gyroscope';
+
+      stageRef.current.appendChild(iframe);
+
+      const isMobileTouch = ('ontouchstart' in window) && (navigator.maxTouchPoints > 0) && (window.innerWidth <= 1024);
+
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -344,41 +387,6 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
               opacity: 0 !important;
               pointer-events: none !important;
             }
-
-            /* Hide save state, load state, and external save import/export buttons from footer overlay */
-            .ejs_menu_bar [title*="Save" i],
-            .ejs_menu_bar [title*="Load" i],
-            .ejs_menu_bar [title*="Export" i],
-            .ejs_menu_bar [title*="Import" i],
-            .ejs_menu_bar [title*="State" i],
-            .ejs_menu_bar [title*="sav" i],
-            .ejs_menu_bar [aria-label*="Save" i],
-            .ejs_menu_bar [aria-label*="Load" i],
-            .ejs_menu_bar [aria-label*="Export" i],
-            .ejs_menu_bar [aria-label*="Import" i],
-            .ejs_menu_bar [aria-label*="State" i],
-            .ejs_menu_bar svg[title*="Save" i],
-            .ejs_menu_bar svg[title*="Load" i],
-            .ejs_menu_bar svg[title*="Export" i],
-            .ejs_menu_bar svg[title*="Import" i],
-            .ejs_menu_bar .ejs_button[title*="Save" i],
-            .ejs_menu_bar .ejs_button[title*="Load" i],
-            .ejs_menu_bar .ejs_button[title*="Export" i],
-            .ejs_menu_bar .ejs_button[title*="Import" i],
-            .ejs_menu_bar .ejs_button:has(svg path[d*="M19"]),
-            .ejs_menu_bar .ejs_button:has([title*="Save" i]),
-            .ejs_menu_bar .ejs_button:has([title*="Load" i]),
-            .ejs_menu_bar .ejs_button:has([title*="Export" i]),
-            .ejs_menu_bar .ejs_button:has([title*="Import" i]) {
-              display: none !important;
-              visibility: hidden !important;
-              pointer-events: none !important;
-              width: 0 !important;
-              height: 0 !important;
-              margin: 0 !important;
-              padding: 0 !important;
-              opacity: 0 !important;
-            }
           </style>
         </head>
         <body>
@@ -418,6 +426,8 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
             window.EJS_backgroundColor = '#000000';
             window.EJS_language = 'en-US';
             window.EJS_VirtualGamepad = ${isMobileTouch ? 'true' : 'false'};
+            window.__INITIAL_SAVE_BASE64__ = ${JSON.stringify(initialSaveBase64)};
+            window.__INITIAL_STATE_BASE64__ = ${JSON.stringify(initialStateBase64)};
             window.EJS_Buttons = {
               playPause: true,
               restart: true,
@@ -426,14 +436,14 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
               fullscreen: true,
               saveState: false,
               loadState: false,
-              saveSav: false,
-              loadSav: false,
-              screenRecord: false,
+              saveSavFiles: false,
+              loadSavFiles: false,
+              screenRecord: true,
               gamepad: true,
               cheat: true,
-              volume: true,
-              quickSave: false,
-              quickLoad: false,
+              volumeSlider: true,
+              quickSave: true,
+              quickLoad: true,
               screenshot: true,
               cacheManager: false
             };
@@ -709,43 +719,86 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
             window.addEventListener('click', syncAllGamepads, { once: true });
             window.addEventListener('keydown', syncAllGamepads, { once: true });
 
-            function purgeObsoleteSaveButtons() {
+            function injectSaveData(base64Data) {
+              if (!base64Data) return false;
               try {
-                const selectors = [
-                  '[title*="Save" i]',
-                  '[title*="Load" i]',
-                  '[title*="Export" i]',
-                  '[title*="Import" i]',
-                  '[title*="State" i]',
-                  '[title*="sav" i]',
-                  '[aria-label*="Save" i]',
-                  '[aria-label*="Load" i]',
-                  '[aria-label*="Export" i]',
-                  '[aria-label*="Import" i]',
-                  '[aria-label*="State" i]',
-                  'svg[title*="Save" i]',
-                  'svg[title*="Load" i]',
-                  'svg[title*="Export" i]',
-                  'svg[title*="Import" i]'
-                ];
-                selectors.forEach(sel => {
-                  document.querySelectorAll('.ejs_menu_bar ' + sel).forEach(el => {
-                    const btn = el.closest('button') || el.closest('.ejs_button') || el;
-                    if (btn && btn.parentNode) {
-                      btn.parentNode.removeChild(btn);
+                const emu = window.EJS_emulator;
+                if (!emu || !emu.gameManager || !emu.gameManager.FS) return false;
+                const savePath = typeof emu.gameManager.getSaveFilePath === 'function' ? emu.gameManager.getSaveFilePath() : null;
+                if (!savePath) return false;
+
+                let uint8 = null;
+                if (typeof base64Data === 'string') {
+                  const binary = atob(base64Data);
+                  uint8 = new Uint8Array(binary.length);
+                  for (let i = 0; i < binary.length; i++) {
+                    uint8[i] = binary.charCodeAt(i);
+                  }
+                } else if (Array.isArray(base64Data)) {
+                  uint8 = new Uint8Array(base64Data);
+                } else if (typeof base64Data === 'object') {
+                  if (base64Data.save) {
+                    return injectSaveData(base64Data.save);
+                  }
+                  const vals = Object.values(base64Data);
+                  if (vals.length > 0) uint8 = new Uint8Array(vals);
+                }
+
+                if (!uint8 || uint8.byteLength === 0) return false;
+
+                // Ensure parent directory exists in Emscripten FS
+                const parts = savePath.split('/');
+                let current = '';
+                for (let i = 0; i < parts.length - 1; i++) {
+                  if (parts[i] !== '') {
+                    current += '/' + parts[i];
+                    if (!emu.gameManager.FS.analyzePath(current).exists) {
+                      emu.gameManager.FS.mkdir(current);
                     }
-                  });
-                });
-              } catch(e) {}
+                  }
+                }
+
+                // Write SRAM file into Emscripten Virtual FileSystem
+                if (emu.gameManager.FS.analyzePath(savePath).exists) {
+                  emu.gameManager.FS.unlink(savePath);
+                }
+                emu.gameManager.FS.writeFile(savePath, uint8);
+                if (typeof emu.gameManager.loadSaveFiles === 'function') {
+                  emu.gameManager.loadSaveFiles();
+                }
+                console.log('💾 [BATTERY SAVE RESTORED] Successfully injected', uint8.byteLength, 'bytes into Emscripten FS at', savePath);
+                return true;
+              } catch (err) {
+                console.warn('⚠️ [SAVE INJECTION EXCEPTION]:', err);
+                return false;
+              }
             }
 
-            // MutationObserver to immediately catch and remove any save/load buttons when menu bar renders
-            try {
-              const observer = new MutationObserver(() => {
-                purgeObsoleteSaveButtons();
-              });
-              observer.observe(document.documentElement, { childList: true, subtree: true });
-            } catch(e) {}
+            function extractCurrentSaveBase64() {
+              try {
+                const emu = window.EJS_emulator;
+                if (!emu || !emu.gameManager) return null;
+                let uint8 = null;
+                if (typeof emu.gameManager.getSaveFile === 'function') {
+                  uint8 = emu.gameManager.getSaveFile(false);
+                }
+                if (!uint8 && emu.gameManager.FS && typeof emu.gameManager.getSaveFilePath === 'function') {
+                  const p = emu.gameManager.getSaveFilePath();
+                  if (p && emu.gameManager.FS.analyzePath(p).exists) {
+                    uint8 = emu.gameManager.FS.readFile(p);
+                  }
+                }
+                if (!uint8 || uint8.byteLength === 0) return null;
+                let binary = '';
+                const len = uint8.byteLength;
+                for (let i = 0; i < len; i++) {
+                  binary += String.fromCharCode(uint8[i]);
+                }
+                return btoa(binary);
+              } catch (e) {
+                return null;
+              }
+            }
 
             window.EJS_ready = function() {
               console.log('🎮 [EMULATORJS READY] 60 FPS Emulation Ready');
@@ -755,7 +808,9 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
                 if (el) el.focus();
                 syncAllGamepads();
                 autoBindGamepadsToPlayers();
-                purgeObsoleteSaveButtons();
+                if (window.__INITIAL_SAVE_BASE64__) {
+                  injectSaveData(window.__INITIAL_SAVE_BASE64__);
+                }
               } catch(e) {}
             };
 
@@ -767,7 +822,9 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
                 if (el) el.focus();
                 syncAllGamepads();
                 autoBindGamepadsToPlayers();
-                purgeObsoleteSaveButtons();
+                if (window.__INITIAL_SAVE_BASE64__) {
+                  injectSaveData(window.__INITIAL_SAVE_BASE64__);
+                }
               } catch(e) {}
             };
 
@@ -779,12 +836,31 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
             window.EJS_onSaveSave = function(e) {
               console.log('💾 [BATTERY SAVE FLUSH EVENT] Committing SRAM to RetroPlayerDB for:', ${JSON.stringify(currentGame.id)}, e);
               try {
-                if (window.parent && window.parent !== window) {
-                  window.parent.postMessage({
-                    type: 'RETRO_PLAYER_SAVE_SYNC',
-                    gameId: ${JSON.stringify(currentGame.id)},
-                    saveData: e
-                  }, '*');
+                let uint8 = e && e.save ? e.save : null;
+                if (!uint8) {
+                  const b64 = extractCurrentSaveBase64();
+                  if (b64 && window.parent && window.parent !== window) {
+                    window.parent.postMessage({
+                      type: 'RETRO_PLAYER_SAVE_SYNC',
+                      gameId: ${JSON.stringify(currentGame.id)},
+                      saveData: b64
+                    }, '*');
+                  }
+                  return;
+                }
+                if (uint8 && uint8.byteLength > 0) {
+                  let binary = '';
+                  for (let i = 0; i < uint8.byteLength; i++) {
+                    binary += String.fromCharCode(uint8[i]);
+                  }
+                  const b64 = btoa(binary);
+                  if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({
+                      type: 'RETRO_PLAYER_SAVE_SYNC',
+                      gameId: ${JSON.stringify(currentGame.id)},
+                      saveData: b64
+                    }, '*');
+                  }
                 }
               } catch(err) {}
             };
@@ -792,12 +868,20 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
             window.EJS_onSaveState = function(e) {
               console.log('💾 [SAVE STATE FLUSH EVENT] Committing snapshot state to RetroPlayerDB for:', ${JSON.stringify(currentGame.id)}, e);
               try {
-                if (window.parent && window.parent !== window) {
-                  window.parent.postMessage({
-                    type: 'RETRO_PLAYER_STATE_SYNC',
-                    gameId: ${JSON.stringify(currentGame.id)},
-                    stateData: e
-                  }, '*');
+                let uint8 = e && e.state ? e.state : null;
+                if (uint8 && uint8.byteLength > 0) {
+                  let binary = '';
+                  for (let i = 0; i < uint8.byteLength; i++) {
+                    binary += String.fromCharCode(uint8[i]);
+                  }
+                  const b64 = btoa(binary);
+                  if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({
+                      type: 'RETRO_PLAYER_STATE_SYNC',
+                      gameId: ${JSON.stringify(currentGame.id)},
+                      stateData: b64
+                    }, '*');
+                  }
                 }
               } catch(err) {}
             };
@@ -810,27 +894,21 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
               try {
                 const emu = window.EJS_emulator;
                 if (!emu) return false;
-                console.log('💾 [SAVE FLUSH TRIGGERED] Committing pending in-game saves to IndexedDB...');
                 
-                // 1. Flush in-game Battery RAM (SRAM)
-                if (typeof emu.saveSave === 'function') {
+                // 1. Flush in-game Battery RAM (SRAM) to Emscripten FS
+                if (emu.gameManager && typeof emu.gameManager.saveSaveFiles === 'function') {
+                  emu.gameManager.saveSaveFiles();
+                } else if (typeof emu.saveSave === 'function') {
                   emu.saveSave();
-                } else if (emu.gameManager && typeof emu.gameManager.saveSave === 'function') {
-                  emu.gameManager.saveSave();
                 }
 
-                // 2. Flush Save State snapshot
-                if (typeof emu.saveState === 'function') {
-                  emu.saveState();
-                } else if (emu.gameManager && typeof emu.gameManager.saveState === 'function') {
-                  emu.gameManager.saveState();
-                }
-
-                // 3. Fallback: Write directly to parent bridge
-                if (window.parent && window.parent !== window) {
+                // 2. Extract and send base64 to parent window
+                const b64 = extractCurrentSaveBase64();
+                if (b64 && window.parent && window.parent !== window) {
                   window.parent.postMessage({
-                    type: 'RETRO_PLAYER_MANUAL_SAVE_TRIGGER',
-                    gameId: ${JSON.stringify(currentGame.id)}
+                    type: 'RETRO_PLAYER_SAVE_SYNC',
+                    gameId: ${JSON.stringify(currentGame.id)},
+                    saveData: b64
                   }, '*');
                 }
                 return true;
@@ -840,12 +918,12 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
               }
             };
 
-            // Auto-flush in-game battery saves every 15 seconds to ensure zero lost progress
+            // Auto-flush in-game battery saves every 10 seconds to ensure continuous persistence
             setInterval(function() {
               if (window.flushSaveToDB) {
                 window.flushSaveToDB();
               }
-            }, 15000);
+            }, 10000);
 
             function handleLoaderFallback() {
               console.warn('⚠️ [EMULATOR LOADER FALLBACK] Primary path failed. Attempting local /emulatorjs/data/loader.js fallback...');
@@ -880,34 +958,41 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
     } catch (err) {
       console.error(`🚨 [EMULATOR IFRAME WRITE ERROR] Failed writing iframe doc for "${currentGame.title}":`, err);
     }
+  };
 
-    return () => {
-      console.log(`🧹 [EMULATOR UNMOUNTING] Destroying emulator instance for "${currentGame.title}"`);
-      reportSessionEnd();
-      if (sessionBlobUrl) {
-        try {
-          URL.revokeObjectURL(sessionBlobUrl);
-          console.log(`🧹 [BLOB CLEANUP] Revoked session Object URL for custom ROM "${currentGame.title}"`);
-        } catch (e) {}
-      }
-      if (iframeRef.current) {
-        try {
-          const win = iframeRef.current.contentWindow;
-          if (win) {
-            if (win.EJS_emulator && typeof win.EJS_emulator.destroy === 'function') {
-              win.EJS_emulator.destroy();
-            }
-            win.location.href = 'about:blank';
+  setupEmulator();
+
+  return () => {
+    isCancelled = true;
+    console.log(`🧹 [EMULATOR UNMOUNTING] Destroying emulator instance for "${gameRef.current?.title || game?.title}"`);
+    reportSessionEnd();
+    if (sessionBlobUrl) {
+      try {
+        URL.revokeObjectURL(sessionBlobUrl);
+        console.log(`🧹 [BLOB CLEANUP] Revoked session Object URL for custom ROM "${gameRef.current?.title || game?.title}"`);
+      } catch (e) {}
+    }
+    if (iframeRef.current) {
+      try {
+        const win = iframeRef.current.contentWindow;
+        if (win) {
+          if (typeof win.flushSaveToDB === 'function') {
+            win.flushSaveToDB();
           }
-        } catch (e) {}
-        iframeRef.current.remove();
-        iframeRef.current = null;
-      }
-      if (stageRef.current) {
-        stageRef.current.innerHTML = '';
-      }
-    };
-  }, [game?.id, game?.romUrl]);
+          if (win.EJS_emulator && typeof win.EJS_emulator.destroy === 'function') {
+            win.EJS_emulator.destroy();
+          }
+          win.location.href = 'about:blank';
+        }
+      } catch (e) {}
+      iframeRef.current.remove();
+      iframeRef.current = null;
+    }
+    if (stageRef.current) {
+      stageRef.current.innerHTML = '';
+    }
+  };
+}, [game?.id, game?.romUrl]);
 
   // Sync gamepad when physical hardware connection state changes (Event-driven, no interval poll)
   useEffect(() => {

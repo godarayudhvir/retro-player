@@ -16,8 +16,8 @@ The Emulator Engine integration handles running retro game ROMs directly in the 
 - **Session Duration Tracking**: Tracks active gameplay session duration and reports elapsed playtime seconds on modal close/unmount to persist total playtime metrics.
 - **Cross-Console Core Mapping**: Dynamically injects the correct emulation core (`nes`, `snes`, `gba`, `gb` for GB/GBC, `n64`, `nds`, `segaMD`, `psx`, `arcade`) with automatic core name normalization in `EmulatorModal.jsx`.
 - **Custom ROM Blob URL Support**: Accepts local uploaded files as `blob:` URLs without throwing origin resolution errors.
-- **Persistent Save Battery & IndexedDB Bindings**: Automatically persists game saves and battery RAM states to browser storage keyed by unique `game.id`.
-- **Save File Exporter**: Provides an HUD action button (`Export Save`) allowing users to extract `.sav` files directly from `EJS_emulator.saveSaveFiles()` or `EJS_emulator.exportSave()`.
+- **Persistent In-Game Battery SRAM & Emscripten FS Auto-Injection**: Automatically extracts, Base64-serializes, and persists in-game battery RAM (`.sav`) and snapshot states directly to RetroPlayerDB (Server Persistent DB + IndexedDB offline cache). On every session boot, existing `.sav` bytes are preloaded and injected directly into Emscripten's virtual filesystem (`gameManager.FS.writeFile`) before execution so in-game menus immediately display **CONTINUE** without lost progress.
+- **Background SRAM Auto-Flush Engine**: Executes periodic in-game battery RAM extraction every 10 seconds and upon modal exit / window beforeunload, ensuring zero gameplay progress is lost.
 - **Clean Unmounting & Memory Teardown**: Destroys active emulator instances on close using `win.EJS_emulator.destroy()`, revokes Object URLs for custom blobs via `URL.revokeObjectURL(game.romUrl)`, and resets iframe URL to `about:blank`.
 
 ---

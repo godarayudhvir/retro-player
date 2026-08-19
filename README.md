@@ -71,8 +71,11 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
   - Interactive Theme Switcher with realistic mini-console UI preview mockups.
   - Gamepad mapping references, input status indicators, and Docker storage diagnostics.
 - 🎨 **4 Signature Themes**: **iiSU Light**, **Midnight Cyber**, **Sony XMB Wave**, and **Game Boy DMG**.
-- 🗄️ **Centralized IndexedDB Database Architecture**:
-  - Full structured database (`RetroPlayerDB`) storing user profiles, Mii avatars, favorites, recently played lists, and playtime analytics with zero risk of storage quota limits or eviction.
+- 🗄️ **Server-Backed Persistent Database & In-Game Save Injection**:
+  - Authoritative server-side persistence in `/data/retroplayer_db.json` (auto-mounted via Docker volume `-v ./data:/data`).
+  - Seamless REST API (`/api/db`) for persistent user profiles, Mii avatars, favorites, recents, in-game battery SRAM (`.sav`), and playtime analytics.
+  - Automatic preloading and injection of saved battery RAM directly into Emscripten Virtual FileSystem (`gameManager.FS`) upon game boot so in-game menus immediately display **CONTINUE** across browser sessions.
+  - Immune to browser "Clear Site Data" or device changes, with local **IndexedDB** (`RetroPlayerDB`) providing instantaneous 0ms offline fallback.
 - 💬 **Universal In-App Modal Dialog System**:
   - Zero disruptive native browser popups (`alert()`, `confirm()`, `prompt()`).
   - All confirmations (profile deletion, ROM removal, BGM cleanup) utilize theme-aware, gamepad/keyboard navigable in-app modal dialogs.

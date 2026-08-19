@@ -74,8 +74,35 @@ export function getDB() {
 
 /**
  * Generic Get item by key from specific store.
+ * First checks Server DB API, caches to IndexedDB. Falls back to IndexedDB if offline.
  */
 export async function dbGet(storeName, key) {
+  // 1. Attempt to fetch authoritative record from Server DB API
+  try {
+    const res = await fetch(`/api/db/${encodeURIComponent(storeName)}/${encodeURIComponent(key)}`);
+    if (res.ok) {
+      const json = await res.json();
+      if (json.success && json.data !== null && json.data !== undefined) {
+        // Cache to IndexedDB for offline access
+        try {
+          const db = await getDB();
+          if (db) {
+            const tx = db.transaction([storeName], 'readwrite');
+            const store = tx.objectStore(storeName);
+            const record = typeof json.data === 'object' && json.data !== null && store.keyPath === 'id'
+              ? { ...json.data, id: key }
+              : { key, value: json.data };
+            store.put(record);
+          }
+        } catch (e) {}
+        return json.data;
+      }
+    }
+  } catch (err) {
+    // Network offline, proceed to fallback
+  }
+
+  // 2. Offline / Local IndexedDB Fallback
   try {
     const db = await getDB();
     if (!db) return null;
@@ -96,8 +123,19 @@ export async function dbGet(storeName, key) {
 
 /**
  * Generic Set / Put item in specific store.
+ * Commits to Server DB API and updates IndexedDB simultaneously.
  */
 export async function dbSet(storeName, key, value) {
+  // 1. Commit to Server DB API
+  try {
+    fetch(`/api/db/${encodeURIComponent(storeName)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, id: key, value })
+    }).catch(err => console.warn(`⚠️ [SERVER DB POST WARN] Failed syncing to server:`, err));
+  } catch (e) {}
+
+  // 2. Commit to local IndexedDB
   try {
     const db = await getDB();
     if (!db) return false;
@@ -106,7 +144,6 @@ export async function dbSet(storeName, key, value) {
       const transaction = db.transaction([storeName], 'readwrite');
       const store = transaction.objectStore(storeName);
 
-      // If object has id as primary key
       const record = typeof value === 'object' && value !== null && store.keyPath === 'id'
         ? { ...value, id: key }
         : { key, value };
@@ -123,8 +160,17 @@ export async function dbSet(storeName, key, value) {
 
 /**
  * Generic Delete item from specific store.
+ * Deletes from Server DB API and IndexedDB.
  */
 export async function dbDelete(storeName, key) {
+  // 1. Delete on Server DB API
+  try {
+    fetch(`/api/db/${encodeURIComponent(storeName)}/${encodeURIComponent(key)}`, {
+      method: 'DELETE'
+    }).catch(err => console.warn(`⚠️ [SERVER DB DELETE WARN] Failed syncing to server:`, err));
+  } catch (e) {}
+
+  // 2. Delete in local IndexedDB
   try {
     const db = await getDB();
     if (!db) return false;
@@ -144,8 +190,39 @@ export async function dbDelete(storeName, key) {
 
 /**
  * Get all items from a store.
+ * Fetches authoritative dataset from Server DB API, syncing local IndexedDB cache.
  */
 export async function dbGetAll(storeName) {
+  // 1. Attempt to fetch complete collection from Server DB API
+  try {
+    const res = await fetch(`/api/db/${encodeURIComponent(storeName)}`);
+    if (res.ok) {
+      const json = await res.json();
+      if (json.success && json.data) {
+        const serverItems = Array.isArray(json.data) ? json.data : Object.values(json.data);
+        if (serverItems.length > 0) {
+          // Sync server items to IndexedDB
+          try {
+            const db = await getDB();
+            if (db) {
+              const tx = db.transaction([storeName], 'readwrite');
+              const store = tx.objectStore(storeName);
+              for (const item of serverItems) {
+                const key = item.id || item.key;
+                const record = store.keyPath === 'id' ? item : { key, value: item };
+                store.put(record);
+              }
+            }
+          } catch (e) {}
+          return serverItems;
+        }
+      }
+    }
+  } catch (err) {
+    // Network offline, proceed to fallback
+  }
+
+  // 2. Offline / Local IndexedDB Fallback
   try {
     const db = await getDB();
     if (!db) return [];
@@ -160,7 +237,7 @@ export async function dbGetAll(storeName) {
         if (store.keyPath === 'id') {
           resolve(results);
         } else {
-          resolve(results.map(r => r.value));
+          resolve(results.map(r => r.value !== undefined ? r.value : r));
         }
       };
       request.onerror = () => resolve([]);

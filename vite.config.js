@@ -454,6 +454,134 @@ function multiConsoleScannerPlugin() {
           }
         });
       });
+
+      // API Database Persistence Engine in Development
+      const dataBaseDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.resolve(process.cwd(), 'data');
+      const dbFilePath = path.join(dataBaseDir, 'retroplayer_db.json');
+      if (!fs.existsSync(dataBaseDir)) {
+        fs.mkdirSync(dataBaseDir, { recursive: true });
+      }
+
+      function readDevDB() {
+        try {
+          if (fs.existsSync(dbFilePath)) {
+            const data = fs.readFileSync(dbFilePath, 'utf-8');
+            return JSON.parse(data || '{}');
+          }
+        } catch (err) {
+          console.error('🚨 [DEV DB READ ERROR]:', err);
+        }
+        return { profiles: [], user_data: {}, app_settings: {}, game_saves: {}, save_states: {} };
+      }
+
+      function writeDevDB(db) {
+        try {
+          fs.writeFileSync(dbFilePath, JSON.stringify(db, null, 2), 'utf-8');
+          return true;
+        } catch (err) {
+          console.error('🚨 [DEV DB WRITE ERROR]:', err);
+          return false;
+        }
+      }
+
+      server.middlewares.use('/api/db', (req, res) => {
+        const urlParts = req.url.split('?')[0].split('/').filter(Boolean);
+        const store = urlParts[0];
+        const key = urlParts[1];
+
+        if (!store) {
+          res.statusCode = 400;
+          res.end(JSON.stringify({ error: 'Missing store name' }));
+          return;
+        }
+
+        res.setHeader('Content-Type', 'application/json');
+
+        if (req.method === 'GET') {
+          const db = readDevDB();
+          const storeData = db[store] || (store === 'profiles' ? [] : {});
+          if (key) {
+            let result = null;
+            if (Array.isArray(storeData)) {
+              result = storeData.find(item => item.id === key) || null;
+            } else {
+              result = storeData[key] || null;
+            }
+            res.end(JSON.stringify({ success: true, store, key, data: result }));
+          } else {
+            res.end(JSON.stringify({ success: true, store, data: storeData }));
+          }
+          return;
+        }
+
+        if (req.method === 'POST' || req.method === 'PUT') {
+          let body = '';
+          req.on('data', chunk => { body += chunk; });
+          req.on('end', () => {
+            try {
+              const payload = JSON.parse(body || '{}');
+              const { key: reqKey, id: reqId, value } = payload;
+              const effectiveKey = key || reqKey || reqId;
+
+              if (!effectiveKey) {
+                res.statusCode = 400;
+                res.end(JSON.stringify({ error: 'Missing key or id' }));
+                return;
+              }
+
+              const db = readDevDB();
+              if (!db[store]) {
+                db[store] = (store === 'profiles' ? [] : {});
+              }
+
+              const recordValue = value !== undefined ? value : payload;
+
+              if (Array.isArray(db[store])) {
+                const idx = db[store].findIndex(item => item.id === effectiveKey);
+                const itemToSave = typeof recordValue === 'object' && recordValue !== null ? { ...recordValue, id: effectiveKey } : { id: effectiveKey, value: recordValue };
+                if (idx >= 0) {
+                  db[store][idx] = itemToSave;
+                } else {
+                  db[store].push(itemToSave);
+                }
+              } else {
+                db[store][effectiveKey] = recordValue;
+              }
+
+              writeDevDB(db);
+              console.log(`💾 [DEV DB SAVED] Store: "${store}" | Key: "${effectiveKey}"`);
+              res.end(JSON.stringify({ success: true, store, key: effectiveKey }));
+            } catch (err) {
+              res.statusCode = 500;
+              res.end(JSON.stringify({ error: err.message }));
+            }
+          });
+          return;
+        }
+
+        if (req.method === 'DELETE') {
+          if (!key) {
+            res.statusCode = 400;
+            res.end(JSON.stringify({ error: 'Missing key to delete' }));
+            return;
+          }
+          const db = readDevDB();
+          if (db[store]) {
+            if (Array.isArray(db[store])) {
+              db[store] = db[store].filter(item => item.id !== key);
+            } else {
+              delete db[store][key];
+            }
+            writeDevDB(db);
+            console.log(`🗑️ [DEV DB DELETED] Store: "${store}" | Key: "${key}"`);
+          }
+          res.end(JSON.stringify({ success: true, store, key }));
+          return;
+        }
+
+        res.statusCode = 405;
+        res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+      });
     }
   };
 }

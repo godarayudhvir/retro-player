@@ -10,7 +10,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const ROMS_DIR = process.env.ROMS_DIR || path.join(__dirname, 'public/roms');
 const BGM_DIR = process.env.BGM_DIR || path.join(__dirname, 'public/bgm');
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
+const DB_FILE = path.join(DATA_DIR, 'retroplayer_db.json');
 const DIST_DIR = path.join(__dirname, 'dist');
+
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
 
 // System definition mapping matching vite.config.js
 const SYSTEM_MAP = {
@@ -424,6 +430,105 @@ app.post('/api/delete-bgm', express.json(), (req, res) => {
     console.error('🚨 [API BGM DELETE ERROR]:', err);
     res.status(500).json({ error: err.message });
   }
+});
+
+// Database Persistence Engine (JSON Document Store on Server Disk)
+function readServerDB() {
+  try {
+    if (fs.existsSync(DB_FILE)) {
+      const data = fs.readFileSync(DB_FILE, 'utf-8');
+      return JSON.parse(data || '{}');
+    }
+  } catch (err) {
+    console.error('🚨 [SERVER DB READ ERROR]:', err);
+  }
+  return { profiles: [], user_data: {}, app_settings: {}, game_saves: {}, save_states: {} };
+}
+
+function writeServerDB(db) {
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf-8');
+    return true;
+  } catch (err) {
+    console.error('🚨 [SERVER DB WRITE ERROR]:', err);
+    return false;
+  }
+}
+
+// 1. GET all records in a store
+app.get('/api/db/:store', (req, res) => {
+  const store = req.params.store;
+  const db = readServerDB();
+  const storeData = db[store] || (store === 'profiles' ? [] : {});
+  res.json({ success: true, store, data: storeData });
+});
+
+// 2. GET single record in a store
+app.get('/api/db/:store/:key', (req, res) => {
+  const { store, key } = req.params;
+  const db = readServerDB();
+  const storeData = db[store] || (store === 'profiles' ? [] : {});
+
+  let result = null;
+  if (Array.isArray(storeData)) {
+    result = storeData.find(item => item.id === key) || null;
+  } else {
+    result = storeData[key] || null;
+  }
+
+  res.json({ success: true, store, key, data: result });
+});
+
+// 3. POST / PUT single record in a store
+app.post('/api/db/:store', express.json({ limit: '50mb' }), (req, res) => {
+  const store = req.params.store;
+  const { key, id, value } = req.body || {};
+  const effectiveKey = key || id;
+
+  if (!effectiveKey) {
+    return res.status(400).json({ error: 'Missing required key or id field in body' });
+  }
+
+  const db = readServerDB();
+  if (!db[store]) {
+    db[store] = (store === 'profiles' ? [] : {});
+  }
+
+  const recordValue = value !== undefined ? value : req.body;
+
+  if (Array.isArray(db[store])) {
+    const idx = db[store].findIndex(item => item.id === effectiveKey);
+    const itemToSave = typeof recordValue === 'object' && recordValue !== null ? { ...recordValue, id: effectiveKey } : { id: effectiveKey, value: recordValue };
+    if (idx >= 0) {
+      db[store][idx] = itemToSave;
+    } else {
+      db[store].push(itemToSave);
+    }
+  } else {
+    db[store][effectiveKey] = recordValue;
+  }
+
+  writeServerDB(db);
+  console.log(`💾 [SERVER DB SAVED] Store: "${store}" | Key: "${effectiveKey}"`);
+  res.json({ success: true, store, key: effectiveKey });
+});
+
+// 4. DELETE record in a store
+app.delete('/api/db/:store/:key', (req, res) => {
+  const { store, key } = req.params;
+  const db = readServerDB();
+
+  if (db[store]) {
+    if (Array.isArray(db[store])) {
+      db[store] = db[store].filter(item => item.id !== key);
+    } else {
+      delete db[store][key];
+    }
+    writeServerDB(db);
+    console.log(`🗑️ [SERVER DB DELETED] Store: "${store}" | Key: "${key}"`);
+  }
+
+  res.json({ success: true, store, key });
 });
 
 // Serve static frontend build

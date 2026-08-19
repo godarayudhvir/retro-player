@@ -80,3 +80,8 @@ public/bgm/
 *.wav
 *.m4a
 *.aac
+
+# Persistent Database & Save Data
+data/
+**/data/
+

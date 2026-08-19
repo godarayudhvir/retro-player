@@ -23,50 +23,41 @@ export function useSaveDataManager() {
       // 1. Check RetroPlayerDB primary stores (Battery Saves and Snapshot States)
       if (game.id) {
         const dbSave = await dbGet(STORES.GAME_SAVES, `save_${game.id}`);
-        if (dbSave) {
+        if (dbSave && dbSave.data && (typeof dbSave.data === 'string' ? dbSave.data.length > 0 : Object.keys(dbSave.data).length > 0)) {
           setHasSaveData(true);
           setIsCheckingSave(false);
           return true;
         }
 
         const dbState = await dbGet(STORES.SAVE_STATES, `state_${game.id}`);
-        if (dbState) {
+        if (dbState && dbState.data && (typeof dbState.data === 'string' ? dbState.data.length > 0 : Object.keys(dbState.data).length > 0)) {
           setHasSaveData(true);
           setIsCheckingSave(false);
           return true;
         }
-      }
 
-      // 2. Check LocalStorage keys specifically for this game
-      const keys = Object.keys(localStorage);
-      const hasLs = keys.some(k => {
-        const lowerK = k.toLowerCase();
-        return (gameId && lowerK.includes(gameId)) ||
-               (rawTitle && lowerK.includes(rawTitle)) ||
-               (filename && lowerK.includes(filename));
-      });
+        // 2. Strict LocalStorage fallback check for this exact game save/state key
+        try {
+          const lsSave = localStorage.getItem(`save_${game.id}`);
+          if (lsSave) {
+            const parsed = JSON.parse(lsSave);
+            if (parsed && parsed.data && (typeof parsed.data === 'string' ? parsed.data.length > 0 : Object.keys(parsed.data).length > 0)) {
+              setHasSaveData(true);
+              setIsCheckingSave(false);
+              return true;
+            }
+          }
 
-      if (hasLs) {
-        setHasSaveData(true);
-        setIsCheckingSave(false);
-        return true;
-      }
-
-      // 3. Check IndexedDB database names specifically for this game
-      if (typeof window !== 'undefined' && window.indexedDB && indexedDB.databases) {
-        const dbs = await indexedDB.databases();
-        const hasDb = dbs.some(db => {
-          if (!db.name) return false;
-          const dbName = db.name.toLowerCase();
-          return (gameId && dbName.includes(gameId)) ||
-                 (rawTitle && dbName.includes(rawTitle));
-        });
-
-        if (hasDb) {
-          setHasSaveData(true);
-          setIsCheckingSave(false);
-          return true;
-        }
+          const lsState = localStorage.getItem(`state_${game.id}`);
+          if (lsState) {
+            const parsed = JSON.parse(lsState);
+            if (parsed && parsed.data && (typeof parsed.data === 'string' ? parsed.data.length > 0 : Object.keys(parsed.data).length > 0)) {
+              setHasSaveData(true);
+              setIsCheckingSave(false);
+              return true;
+            }
+          }
+        } catch (e) {}
       }
     } catch (err) {
       console.warn('⚠️ [SAVE CHECK WARN] Failed inspecting save storage:', err);
