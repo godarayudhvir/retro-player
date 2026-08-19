@@ -4,9 +4,14 @@
 
 ### *The High-Performance, Zero-Overhead Web Emulation Station*
 
+[![Live Web Demo](https://img.shields.io/badge/Live%20Demo-godarayudhvir.github.io%2Fretro--player-emerald?style=for-the-badge&logo=githubpages&logoColor=white)](https://godarayudhvir.github.io/retro-player/)
+
+<br />
+
 [![GitHub Pages](https://github.com/godarayudhvir/retro-player/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/godarayudhvir/retro-player/actions/workflows/deploy-pages.yml)
 [![Docker Multi-Arch Build](https://github.com/godarayudhvir/retro-player/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/godarayudhvir/retro-player/actions)
 [![GitHub Container Registry](https://img.shields.io/badge/GHCR.io-retro--player-blue?logo=docker&logoColor=white)](https://github.com/godarayudhvir/retro-player/pkgs/container/retro-player)
+[![PWABuilder Compliant](https://img.shields.io/badge/PWA-100%25%20PWABuilder-success?logo=pwa&logoColor=white)](https://www.pwabuilder.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![React 18](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Vite 5](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -16,6 +21,10 @@
 
 **A console-grade retro game launcher and library, delivered straight to any web browser.**  
 Featuring physical 3D cartridge rendering, real-time online metadata scraping, synthesized acoustic SFX, and **pure client-side WebAssembly execution**.
+
+<br />
+
+🎮 **[▶ PLAY LIVE DEMO IN BROWSER (NO INSTALL REQUIRED)](https://godarayudhvir.github.io/retro-player/)**
 
 <br />
 
@@ -194,11 +203,13 @@ Retro Player follows rigorous software engineering standards with full technical
 
 - **[Core Entry & Bootstrap](architecture/core/index.md)**: Entry point, React mounting, Express production server & Docker containerization.
 - **[Application Shell Orchestrator](architecture/core/app.md)**: Hook lifecycle, state coordination, and modal management.
+- **[PWA & Offline Service Worker](architecture/modules/pwa-service-worker.md)**: Progressive Web App, PWABuilder compliance, standalone OS install & air-gapped caching.
 - **[Emulator Engine](architecture/modules/emulator.md)**: EmulatorJS iframe isolation, core fallback & battery SRAM detection.
 - **[Metadata Scraper](architecture/modules/metadata-scraper.md)**: Libretro & Wikipedia dynamic scraper with IndexedDB caching.
 - **[Synthesized Audio SFX](architecture/modules/audio-sfx.md)**: Pure Web Audio API acoustic synthesis.
 - **[Theme Engine](architecture/modules/theme-engine.md)**: Real-time CSS tokens and instant theme persistence.
 - **[Game Catalog Indexer](architecture/modules/game-catalog.md)**: Zero-config auto-scanning and persistent upload pipeline.
+- **[Live Demo Welcome Modal](architecture/components/demo-welcome-modal.md)**: Environment-aware GitHub Pages demo dialog and static showcase handler.
 - **[Mirai Master Vision](mirai.md)**: Deliverables checklist and multi-domain innovation roadmap.
 
 ---

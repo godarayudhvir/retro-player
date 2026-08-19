@@ -3,8 +3,8 @@
   "name": "Retro Player - High-Performance Web Emulation Station",
   "short_name": "Retro Player",
   "description": "Console-grade retro game launcher and emulator station with physical 3D cartridges, Web Audio SFX, and offline WebAssembly cores.",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "display_override": [
     "window-controls-overlay",
@@ -32,25 +32,25 @@
   "handle_links": "preferred",
   "icons": [
     {
-      "src": "/icons/icon-192.png",
+      "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-maskable-512.png",
+      "src": "icons/icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/favicon.svg",
+      "src": "favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
@@ -61,10 +61,10 @@
       "name": "Console Settings",
       "short_name": "Settings",
       "description": "Manage ROMs, BGM audio, and console preferences",
-      "url": "/?open=settings",
+      "url": "./?open=settings",
       "icons": [
         {
-          "src": "/icons/icon-192.png",
+          "src": "icons/icon-192.png",
           "sizes": "192x192",
           "type": "image/png"
         }
@@ -74,10 +74,10 @@
       "name": "Load Custom ROM",
       "short_name": "Load ROM",
       "description": "Play custom ROM from disk",
-      "url": "/?open=loadRom",
+      "url": "./?open=loadRom",
       "icons": [
         {
-          "src": "/icons/icon-192.png",
+          "src": "icons/icon-192.png",
           "sizes": "192x192",
           "type": "image/png"
         }
@@ -86,14 +86,14 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshots/desktop-1.png",
+      "src": "screenshots/desktop-1.png",
       "sizes": "1280x870",
       "type": "image/png",
       "form_factor": "wide",
       "label": "Retro Player 3D Cartridge Library on Desktop"
     },
     {
-      "src": "/screenshots/mobile-1.png",
+      "src": "screenshots/mobile-1.png",
       "sizes": "450x800",
       "type": "image/png",
       "form_factor": "narrow",
@@ -102,11 +102,11 @@
   ],
   "file_handlers": [
     {
-      "action": "/",
+      "action": "./",
       "name": "Retro Game ROM",
       "icons": [
         {
-          "src": "/icons/icon-192.png",
+          "src": "icons/icon-192.png",
           "sizes": "192x192"
         }
       ],
@@ -124,11 +124,11 @@
   "protocol_handlers": [
     {
       "protocol": "web+retro",
-      "url": "/?rom=%s"
+      "url": "./?rom=%s"
     }
   ],
   "share_target": {
-    "action": "/",
+    "action": "./",
     "method": "GET",
     "params": {
       "title": "title",

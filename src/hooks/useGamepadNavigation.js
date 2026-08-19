@@ -208,6 +208,30 @@ export function useGamepadNavigation({
       return;
     }
 
+    // 2.5 Demo Welcome Modal Navigation
+    if (curTarget?.zone === 'demoModal') {
+      if (dir === 'BACK') {
+        const dismissBtn = document.querySelector('.demo-modal-btn-primary');
+        if (dismissBtn) dismissBtn.click();
+        return;
+      }
+      if (dir === 'LEFT' || dir === 'UP') {
+        setFocusedTarget({ zone: 'demoModal', id: 'github' });
+        sfx?.playTileNav?.();
+      } else if (dir === 'RIGHT' || dir === 'DOWN') {
+        setFocusedTarget({ zone: 'demoModal', id: 'dismiss' });
+        sfx?.playTileNav?.();
+      } else if (dir === 'SELECT') {
+        if (curTarget?.id === 'github') {
+          window.open('https://github.com/godarayudhvir/retro-player', '_blank');
+        } else {
+          const dismissBtn = document.querySelector('.demo-modal-btn-primary');
+          if (dismissBtn) dismissBtn.click();
+        }
+      }
+      return;
+    }
+
     // 2b. Settings & Library Manager Modal Navigation
     if (stateRef.current.showSettingsModal) {
       if (dir === 'BACK') {

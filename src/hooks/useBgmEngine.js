@@ -42,7 +42,8 @@ export function useBgmEngine({ activeGame = null } = {}) {
   // Fetch available BGM tracks from backend API
   const fetchTracks = useCallback(async () => {
     try {
-      const res = await fetch('/api/bgm');
+      const apiUrl = (import.meta.env.BASE_URL || './') + 'api/bgm';
+      const res = await fetch(apiUrl);
       if (res.ok) {
         const data = await res.json();
         if (data.tracks && data.tracks.length > 0) {

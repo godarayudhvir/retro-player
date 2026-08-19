@@ -59,7 +59,8 @@ export function usePwaInstall() {
 
     // 4. Register Service Worker in production/local environment
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
+      const swUrl = (import.meta.env.BASE_URL || './') + 'sw.js';
+      navigator.serviceWorker.register(swUrl)
         .then((registration) => {
           setSwRegistered(true);
           console.log('⚡ [PWA] ServiceWorker registered successfully with scope:', registration.scope);

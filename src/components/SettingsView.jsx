@@ -56,6 +56,11 @@ export default function SettingsView({
   const [deletingId, setDeletingId] = useState(null);
   const [pendingConfirm, setPendingConfirm] = useState(null);
 
+  const isGitHubPagesDemo = typeof window !== 'undefined' && (
+    window.location.hostname.endsWith('github.io') ||
+    window.location.search.includes('demo=true')
+  );
+
   const fileInputRef = useRef(null);
   const folderInputRef = useRef(null);
   const bgmInputRef = useRef(null);
@@ -405,6 +410,18 @@ export default function SettingsView({
                     </button>
                   </div>
                 </div>
+
+                {isGitHubPagesDemo && (
+                  <div className="demo-modal-notice-box" style={{ marginBottom: '1.25rem' }}>
+                    <div className="demo-notice-header">
+                      <HardDrive size={18} color="#f59e0b" />
+                      <strong>Static Demo Mode Notice</strong>
+                    </div>
+                    <p>
+                      Server disk file uploads are disabled on GitHub Pages static hosting. To test personal ROMs on this demo, use <strong>"Load Custom ROM"</strong> in the topbar or drag & drop games onto the screen to run them in your browser memory.
+                    </p>
+                  </div>
+                )}
 
                 {/* Filter Toolbar */}
                 <div className="settings-filter-bar">

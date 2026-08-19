@@ -45,6 +45,7 @@ architecture/
 │   ├── emulator-modal.md   # Emulator Modal UI dialog, status displays, HUD bar & isolated iframe engine (`EmulatorModal.jsx`)
 │   ├── on-screen-keyboard.md # On-Screen Virtual Keyboard for gamepad/touch search entry (`OnScreenKeyboard.jsx`)
 │   ├── error-boundary.md   # Error Boundary fallback UI & fatal exception handling (`ErrorBoundary.jsx`)
+│   ├── demo-welcome-modal.md # GitHub Pages live demo showcase welcome dialog (`DemoWelcomeModal.jsx`)
 │   └── retro-effects.md    # Custom Retro CSS effects, CRT scanlines, glassmorphism, background dots & UI animations (`index.css`)
 │
 └── mirai/                  # Future features and upcoming roadmap specifications ("Mirai" - 未来)

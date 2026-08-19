@@ -12,6 +12,7 @@ import EmulatorModal from './components/EmulatorModal';
 import ProfileSelectModal from './components/ProfileSelectModal';
 import MiiCreatorModal from './components/MiiCreatorModal';
 import SettingsView from './components/SettingsView';
+import DemoWelcomeModal from './components/DemoWelcomeModal';
 
 import { useWebAudioSfx } from './hooks/useWebAudioSfx';
 import { useGamepadStatus } from './hooks/useGamepadStatus';
@@ -424,6 +425,13 @@ export default function App() {
           }}
         />
       )}
+
+      {/* GitHub Pages Live Demo Showcase Welcome & Notice Dialog */}
+      <DemoWelcomeModal
+        sfx={sfx}
+        focusedTarget={focusedTarget}
+        setFocusedTarget={setFocusedTarget}
+      />
     </div>
   );
 }

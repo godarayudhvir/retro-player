@@ -16,9 +16,10 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
 
   const fetchGames = useCallback(async () => {
     setLoading(true);
-    console.log('📡 [CLIENT FETCH] Requesting ROM manifest from /api/roms...');
+    const apiUrl = (import.meta.env.BASE_URL || './') + 'api/roms';
+    console.log(`📡 [CLIENT FETCH] Requesting ROM manifest from ${apiUrl}...`);
     try {
-      const res = await fetch('/api/roms');
+      const res = await fetch(apiUrl);
       if (res.ok) {
         const data = await res.json();
         console.log(`✅ [CLIENT FETCH SUCCESS] Indexed ${data.games?.length || 0} games.`);

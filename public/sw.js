@@ -7,18 +7,18 @@ const CACHE_NAME = 'retro-player-v1';
 
 // Critical core assets to pre-cache on service worker installation
 const PRECACHE_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.webmanifest',
-  '/favicon.svg',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-  '/icons/icon-maskable-512.png',
-  '/icons/apple-touch-icon.png',
-  '/icons/favicon-32x32.png',
-  '/icons/favicon-16x16.png',
-  '/screenshots/desktop-1.png',
-  '/screenshots/mobile-1.png'
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './favicon.svg',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-maskable-512.png',
+  './icons/apple-touch-icon.png',
+  './icons/favicon-32x32.png',
+  './icons/favicon-16x16.png',
+  './screenshots/desktop-1.png',
+  './screenshots/mobile-1.png'
 ];
 
 // Install Event: Pre-cache core shell assets and immediately activate
@@ -129,8 +129,8 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         })
         .catch(() => {
-          return caches.match('/index.html').then((cachedIndex) => {
-            return cachedIndex || caches.match('/');
+          return caches.match('./index.html').then((cachedIndex) => {
+            return cachedIndex || caches.match('./') || caches.match('/index.html') || caches.match('/');
           });
         })
     );
