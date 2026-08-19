@@ -385,6 +385,9 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
             window.EJS_VirtualGamepad = ${isMobileTouch ? 'true' : 'false'};
             window.EJS_volume = 1;
             window.EJS_mute = false;
+            window.EJS_disableDatabases = false;
+            window.EJS_disableLocalStorage = false;
+            window.EJS_exportSaveState = false; // Keep save states directly in browser memory/IndexedDB slot instead of forced file downloads
 
             const isTabletOrAbove = (window.innerWidth >= 768) || (window.parent && window.parent.innerWidth >= 768);
             window.EJS_defaultOptions = {
