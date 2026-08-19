@@ -98,21 +98,42 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 ---
 
-## 🌐 Browser & OS Compatibility
+## 🌐 Platform & Hardware Compatibility
 
-| Operating System | Browser | Status | Notes |
+### 🖥️ Desktop & Laptops
+| Platform / OS | Browser | Status | Specifications & Notes |
 | :--- | :--- | :---: | :--- |
-| **macOS** | **Google Chrome** | 🟢 **Working** | Fully tested & verified (60 FPS, WebAssembly, Web Audio & Gamepad API) |
-| **macOS** | **Safari** | ⚪ *Untested* | Compatibility not yet verified |
-| **macOS** | **Mozilla Firefox** | ⚪ *Untested* | Compatibility not yet verified |
-| **Windows 10 / 11** | **Google Chrome / Microsoft Edge** | ⚪ *Untested* | Compatibility not yet verified |
-| **Windows 10 / 11** | **Mozilla Firefox** | ⚪ *Untested* | Compatibility not yet verified |
-| **Linux (Ubuntu / Arch / SteamOS)** | **Chrome / Chromium** | ⚪ *Untested* | Compatibility not yet verified |
-| **Linux (Ubuntu / Arch / SteamOS)** | **Mozilla Firefox** | ⚪ *Untested* | Compatibility not yet verified |
-| **iOS / iPadOS** | **Safari / Chrome** | ⚪ *Untested* | Compatibility not yet verified |
-| **Android** | **Chrome Mobile** | ⚪ *Untested* | Compatibility not yet verified |
+| **macOS** | **Google Chrome** | 🟢 **Working** | Tested & verified (60 FPS, WebAssembly, Web Audio & Gamepad API) |
+| **macOS** | **Safari / Firefox / Arc** | ⚪ *Untested* | Apple WebKit / Mozilla Gecko engines |
+| **Windows 10 / 11** | **Google Chrome / Microsoft Edge** | ⚪ *Untested* | Chromium V8 engine |
+| **Windows 10 / 11** | **Mozilla Firefox** | ⚪ *Untested* | Mozilla Gecko engine |
+| **Linux (Ubuntu / Arch / Debian)** | **Chrome / Chromium / Firefox** | ⚪ *Untested* | Native WebAssembly & Gamepad API support |
 
-> **Note**: **macOS with Google Chrome** is currently the primary tested and verified environment. All other operating system and browser combinations are currently untested.
+### 📱 Mobile & Handhelds
+| Platform / OS | Target Devices | Browser | Status | Specifications & Notes |
+| :--- | :--- | :--- | :---: | :--- |
+| **iOS / iPadOS** | iPhone, iPad | **Safari / Chrome** | ⚪ *Untested* | WebKit engine, Touch & Bluetooth Gamepad controls |
+| **Android** | Android Phones & Tablets | **Google Chrome Mobile** | ⚪ *Untested* | Chromium engine, Touch & Bluetooth Gamepad controls |
+| **SteamOS (Linux)** | Valve Steam Deck, Legion Go | **Google Chrome / Chromium** | ⚪ *Untested* | Desktop / Gamepad mode with native controller mapping |
+
+### 📺 Smart TVs & Streaming Devices (10-Foot UI)
+| Platform / OS | Target Devices | Browser / Engine | Status | Specifications & Notes |
+| :--- | :--- | :--- | :---: | :--- |
+| **LG webOS** | LG OLED / QNED / NanoCell Smart TVs | **LG Web Browser** (Chromium WebEngine) | ⚪ *Untested* | Magic Remote pointer / Bluetooth Gamepad navigation |
+| **Samsung Tizen OS** | Samsung QLED / Neo QLED / Smart TVs | **Samsung Internet for TV** (Chromium) | ⚪ *Untested* | Tizen Web Runtime & Bluetooth Gamepad support |
+| **Amazon Fire OS** | Fire TV Stick (4K / Max / Lite), Fire TV Cube | **Amazon Silk Browser** (Chromium-based) | ⚪ *Untested* | Fire TV Remote / Bluetooth Gamepad navigation |
+| **Google TV / Android TV** | Chromecast with Google TV, Nvidia Shield, Sony/TCL | **Google Chrome / TV Bro / Puffin TV** | ⚪ *Untested* | Chromium / Android WebView engine |
+| **Roku OS** | Roku Streaming Sticks & Roku TVs | *No Native Web Browser* | 🔴 *Unsupported* | Roku OS lacks a WebAssembly browser runtime (requires Screen Mirroring) |
+| **Apple tvOS** | Apple TV 4K / HD | *No Native Web Browser* | 🔴 *Unsupported* | tvOS lacks WebKit browser runtime (requires AirPlay Screen Mirroring) |
+
+### 🎮 Gaming Consoles
+| Platform / OS | Console | Browser | Status | Specifications & Notes |
+| :--- | :--- | :--- | :---: | :--- |
+| **Xbox OS** | Xbox Series X\|S / Xbox One | **Microsoft Edge for Xbox** (Chromium) | ⚪ *Untested* | Full Xbox controller support via Gamepad API |
+| **PlayStation OS** | PlayStation 5 / PlayStation 4 | *Integrated WebKit Viewer* | ⚪ *Untested* | System web viewer |
+| **Horizon OS** | Nintendo Switch | *Hidden NetFront Browser* | ⚪ *Untested* | Restricted system captive browser |
+
+> **Note**: **macOS with Google Chrome** is currently the primary tested and verified environment. All other operating system, TV, and browser combinations are currently untested or community-contributed.
 
 ---
 
