@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Gamepad2, Wifi, WifiOff, Menu, Activity, ShieldCheck } from 'lucide-react';
 import { detectSystemFromExtension } from '../utils/systemDetector';
 import { dbGet, dbSet, STORES } from '../services/db';
+import { resolveAssetPath } from '../utils/assetPath';
 
 export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, onSessionEnd }) {
   const stageRef = useRef(null);
@@ -1144,7 +1145,7 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
           <span className="emulator-game-title" title={game.title}>{game.title}</span>
           <span className="tile-sys-badge emulator-sys-badge" style={{ '--sys-color': game.systemColor || '#00c6ff' }}>
             {game.systemIcon ? (
-              <img src={game.systemIcon} alt="" className="tile-sys-badge-icon" />
+              <img src={resolveAssetPath(game.systemIcon)} alt="" className="tile-sys-badge-icon" />
             ) : (
               <span className="tile-sys-dot" />
             )}

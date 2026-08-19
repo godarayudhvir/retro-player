@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { getReleaseDate } from '../gameDescriptions';
 import { detectSystemFromExtension } from '../utils/systemDetector';
+import { resolveAssetPath } from '../utils/assetPath';
 
 /**
  * Hook to manage ROM catalog manifest, search filtering, system categories, and custom ROM uploads.
@@ -81,7 +82,7 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
       systemColor: sys.color,
       romUrl: blobUrl,
       isCustomBlob: true,
-      coverUrl: sys.icon || '/assets/pokeball.png'
+      coverUrl: sys.icon || resolveAssetPath('assets/pokeball.png')
     };
 
     if (onCustomRomLoaded) {

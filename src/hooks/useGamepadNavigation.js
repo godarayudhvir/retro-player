@@ -223,7 +223,7 @@ export function useGamepadNavigation({
         sfx?.playTileNav?.();
       } else if (dir === 'SELECT') {
         if (curTarget?.id === 'github') {
-          window.open('https://github.com/godarayudhvir/retro-player', '_blank');
+          window.open('https://github.com/godarayudhvir/retro-player/blob/main/guides/docker.md', '_blank');
         } else {
           const dismissBtn = document.querySelector('.demo-modal-btn-primary');
           if (dismissBtn) dismissBtn.click();

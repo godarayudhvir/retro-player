@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { X, FolderOpen, Upload, ShieldCheck, Sparkles } from 'lucide-react';
+import { resolveAssetPath } from '../utils/assetPath';
 
 /**
  * LoadRomModal - In-app modal dialog for loading local custom ROMs via browse or drag-and-drop.
@@ -50,14 +51,14 @@ export default function LoadRomModal({
   };
 
   const supportedPlatforms = [
-    { name: 'Game Boy Advance', ext: '.gba', icon: '/assets/platforms/gba.svg' },
-    { name: 'Game Boy / Color', ext: '.gb, .gbc', icon: '/assets/platforms/gbc.svg' },
-    { name: 'NES & SNES', ext: '.nes, .sfc, .smc', icon: '/assets/platforms/snes.svg' },
-    { name: 'Nintendo 64', ext: '.z64, .n64', icon: '/assets/platforms/n64.svg' },
-    { name: 'Nintendo DS', ext: '.nds', icon: '/assets/platforms/nds.svg' },
-    { name: 'PlayStation', ext: '.bin, .iso, .chd', icon: '/assets/platforms/psx.svg' },
-    { name: 'Sega Genesis', ext: '.md, .gen', icon: '/assets/platforms/genesis.svg' },
-    { name: 'Arcade (MAME)', ext: '.zip', icon: '/assets/platforms/arcade.svg' }
+    { name: 'Game Boy Advance', ext: '.gba', icon: resolveAssetPath('assets/platforms/gba.svg') },
+    { name: 'Game Boy / Color', ext: '.gb, .gbc', icon: resolveAssetPath('assets/platforms/gbc.svg') },
+    { name: 'NES & SNES', ext: '.nes, .sfc, .smc', icon: resolveAssetPath('assets/platforms/snes.svg') },
+    { name: 'Nintendo 64', ext: '.z64, .n64', icon: resolveAssetPath('assets/platforms/n64.svg') },
+    { name: 'Nintendo DS', ext: '.nds', icon: resolveAssetPath('assets/platforms/nds.svg') },
+    { name: 'PlayStation', ext: '.bin, .iso, .chd', icon: resolveAssetPath('assets/platforms/psx.svg') },
+    { name: 'Sega Genesis', ext: '.md, .gen', icon: resolveAssetPath('assets/platforms/genesis.svg') },
+    { name: 'Arcade (MAME)', ext: '.zip', icon: resolveAssetPath('assets/platforms/arcade.svg') }
   ];
 
   return (

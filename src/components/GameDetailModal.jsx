@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Play, Save, Cpu, Calendar, CheckCircle2, Star, Clock, History, RotateCcw, RefreshCw, Tag, ShieldCheck } from 'lucide-react';
 import { getGameDescription, getReleaseDate } from '../gameDescriptions';
+import { resolveAssetPath } from '../utils/assetPath';
 
 /**
  * Game Detail Drawer Modal presenting rich scraped metadata, release dates, developer, publisher, genre tags,
@@ -84,7 +85,7 @@ export default function GameDetailModal({
             <div className="game-card-header-badge">
               <span className="game-card-sys-tag" style={{ '--sys-color': game.systemColor || '#ef4444' }}>
                 {game.systemIcon && (
-                  <img src={game.systemIcon} alt="" className="tile-sys-badge-icon" />
+                  <img src={resolveAssetPath(game.systemIcon)} alt="" className="tile-sys-badge-icon" />
                 )}
                 <span>{game.systemName}</span>
               </span>

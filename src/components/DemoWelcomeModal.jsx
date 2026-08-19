@@ -120,7 +120,7 @@ export default function DemoWelcomeModal({
         {/* Actions Footer */}
         <div className="demo-modal-footer">
           <a
-            href="https://github.com/godarayudhvir/retro-player"
+            href="https://github.com/godarayudhvir/retro-player/blob/main/guides/docker.md"
             target="_blank"
             rel="noopener noreferrer"
             className={`demo-modal-btn-secondary ${focusedTarget?.zone === 'demoModal' && focusedTarget?.id === 'github' ? 'gamepad-focused' : ''}`}

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Star, Clock } from 'lucide-react';
+import { resolveAssetPath } from '../utils/assetPath';
 
 /**
  * Horizontal System Selection Ribbon with dynamic game count sorting, smart collections, and smooth auto-scrolling.
@@ -55,7 +56,7 @@ export default function SystemRibbon({
             tab.iconNode
           ) : (
             <>
-              {tab.icon && <img src={tab.icon} alt="" className="tab-icon" />}
+              {tab.icon && <img src={resolveAssetPath(tab.icon)} alt="" className="tab-icon" />}
               <span>{tab.name}</span>
               <span className="tab-count">({tab.count})</span>
             </>
