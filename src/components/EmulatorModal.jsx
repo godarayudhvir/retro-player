@@ -346,22 +346,38 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
             }
 
             /* Hide save state, load state, and external save import/export buttons from footer overlay */
-            .ejs_menu_bar [title*="Save State"],
-            .ejs_menu_bar [title*="Load State"],
-            .ejs_menu_bar [title*="Save file"],
-            .ejs_menu_bar [title*="Load file"],
-            .ejs_menu_bar [title*="Export"],
-            .ejs_menu_bar [title*="Import"],
-            .ejs_menu_bar [aria-label*="Save"],
-            .ejs_menu_bar [aria-label*="Load"],
-            .ejs_menu_bar svg[title*="Save"],
-            .ejs_menu_bar svg[title*="Load"] {
+            .ejs_menu_bar [title*="Save" i],
+            .ejs_menu_bar [title*="Load" i],
+            .ejs_menu_bar [title*="Export" i],
+            .ejs_menu_bar [title*="Import" i],
+            .ejs_menu_bar [title*="State" i],
+            .ejs_menu_bar [title*="sav" i],
+            .ejs_menu_bar [aria-label*="Save" i],
+            .ejs_menu_bar [aria-label*="Load" i],
+            .ejs_menu_bar [aria-label*="Export" i],
+            .ejs_menu_bar [aria-label*="Import" i],
+            .ejs_menu_bar [aria-label*="State" i],
+            .ejs_menu_bar svg[title*="Save" i],
+            .ejs_menu_bar svg[title*="Load" i],
+            .ejs_menu_bar svg[title*="Export" i],
+            .ejs_menu_bar svg[title*="Import" i],
+            .ejs_menu_bar .ejs_button[title*="Save" i],
+            .ejs_menu_bar .ejs_button[title*="Load" i],
+            .ejs_menu_bar .ejs_button[title*="Export" i],
+            .ejs_menu_bar .ejs_button[title*="Import" i],
+            .ejs_menu_bar .ejs_button:has(svg path[d*="M19"]),
+            .ejs_menu_bar .ejs_button:has([title*="Save" i]),
+            .ejs_menu_bar .ejs_button:has([title*="Load" i]),
+            .ejs_menu_bar .ejs_button:has([title*="Export" i]),
+            .ejs_menu_bar .ejs_button:has([title*="Import" i]) {
               display: none !important;
               visibility: hidden !important;
               pointer-events: none !important;
               width: 0 !important;
+              height: 0 !important;
               margin: 0 !important;
               padding: 0 !important;
+              opacity: 0 !important;
             }
           </style>
         </head>
@@ -696,23 +712,24 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
             function purgeObsoleteSaveButtons() {
               try {
                 const selectors = [
-                  '.ejs_menu_bar [title*="Save State"]',
-                  '.ejs_menu_bar [title*="Load State"]',
-                  '.ejs_menu_bar [title*="Save file"]',
-                  '.ejs_menu_bar [title*="Load file"]',
-                  '.ejs_menu_bar [title*="Export"]',
-                  '.ejs_menu_bar [title*="Import"]',
-                  '.ejs_menu_bar [aria-label*="Save"]',
-                  '.ejs_menu_bar [aria-label*="Load"]',
-                  '.ejs_menu_bar [aria-label*="Export"]',
-                  '.ejs_menu_bar [aria-label*="Import"]',
-                  '.ejs_menu_bar svg[title*="Save"]',
-                  '.ejs_menu_bar svg[title*="Load"]',
-                  '.ejs_menu_bar svg[title*="Export"]',
-                  '.ejs_menu_bar svg[title*="Import"]'
+                  '[title*="Save" i]',
+                  '[title*="Load" i]',
+                  '[title*="Export" i]',
+                  '[title*="Import" i]',
+                  '[title*="State" i]',
+                  '[title*="sav" i]',
+                  '[aria-label*="Save" i]',
+                  '[aria-label*="Load" i]',
+                  '[aria-label*="Export" i]',
+                  '[aria-label*="Import" i]',
+                  '[aria-label*="State" i]',
+                  'svg[title*="Save" i]',
+                  'svg[title*="Load" i]',
+                  'svg[title*="Export" i]',
+                  'svg[title*="Import" i]'
                 ];
                 selectors.forEach(sel => {
-                  document.querySelectorAll(sel).forEach(el => {
+                  document.querySelectorAll('.ejs_menu_bar ' + sel).forEach(el => {
                     const btn = el.closest('button') || el.closest('.ejs_button') || el;
                     if (btn && btn.parentNode) {
                       btn.parentNode.removeChild(btn);
@@ -721,6 +738,14 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
                 });
               } catch(e) {}
             }
+
+            // MutationObserver to immediately catch and remove any save/load buttons when menu bar renders
+            try {
+              const observer = new MutationObserver(() => {
+                purgeObsoleteSaveButtons();
+              });
+              observer.observe(document.documentElement, { childList: true, subtree: true });
+            } catch(e) {}
 
             window.EJS_ready = function() {
               console.log('🎮 [EMULATORJS READY] 60 FPS Emulation Ready');
@@ -731,9 +756,6 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
                 syncAllGamepads();
                 autoBindGamepadsToPlayers();
                 purgeObsoleteSaveButtons();
-                setTimeout(purgeObsoleteSaveButtons, 300);
-                setTimeout(purgeObsoleteSaveButtons, 1000);
-                setTimeout(purgeObsoleteSaveButtons, 2500);
               } catch(e) {}
             };
 
