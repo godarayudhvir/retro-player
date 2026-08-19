@@ -693,6 +693,35 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
             window.addEventListener('click', syncAllGamepads, { once: true });
             window.addEventListener('keydown', syncAllGamepads, { once: true });
 
+            function purgeObsoleteSaveButtons() {
+              try {
+                const selectors = [
+                  '.ejs_menu_bar [title*="Save State"]',
+                  '.ejs_menu_bar [title*="Load State"]',
+                  '.ejs_menu_bar [title*="Save file"]',
+                  '.ejs_menu_bar [title*="Load file"]',
+                  '.ejs_menu_bar [title*="Export"]',
+                  '.ejs_menu_bar [title*="Import"]',
+                  '.ejs_menu_bar [aria-label*="Save"]',
+                  '.ejs_menu_bar [aria-label*="Load"]',
+                  '.ejs_menu_bar [aria-label*="Export"]',
+                  '.ejs_menu_bar [aria-label*="Import"]',
+                  '.ejs_menu_bar svg[title*="Save"]',
+                  '.ejs_menu_bar svg[title*="Load"]',
+                  '.ejs_menu_bar svg[title*="Export"]',
+                  '.ejs_menu_bar svg[title*="Import"]'
+                ];
+                selectors.forEach(sel => {
+                  document.querySelectorAll(sel).forEach(el => {
+                    const btn = el.closest('button') || el.closest('.ejs_button') || el;
+                    if (btn && btn.parentNode) {
+                      btn.parentNode.removeChild(btn);
+                    }
+                  });
+                });
+              } catch(e) {}
+            }
+
             window.EJS_ready = function() {
               console.log('🎮 [EMULATORJS READY] 60 FPS Emulation Ready');
               try {
@@ -701,6 +730,10 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
                 if (el) el.focus();
                 syncAllGamepads();
                 autoBindGamepadsToPlayers();
+                purgeObsoleteSaveButtons();
+                setTimeout(purgeObsoleteSaveButtons, 300);
+                setTimeout(purgeObsoleteSaveButtons, 1000);
+                setTimeout(purgeObsoleteSaveButtons, 2500);
               } catch(e) {}
             };
 
@@ -712,6 +745,7 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
                 if (el) el.focus();
                 syncAllGamepads();
                 autoBindGamepadsToPlayers();
+                purgeObsoleteSaveButtons();
               } catch(e) {}
             };
 
