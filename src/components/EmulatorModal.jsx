@@ -668,6 +668,49 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
                 if (el) el.focus();
                 syncAllGamepads();
                 autoBindGamepadsToPlayers();
+
+                // Direct binding: ensure footer toolbar Save/Load state buttons invoke internal quickSave / quickLoad
+                const emu = window.EJS_emulator;
+                if (emu) {
+                  const attachFooterSaveStateHandlers = () => {
+                    const saveBtn = document.querySelector('.ejs_menu_bar [title*="Save State"]') || 
+                                    document.querySelector('.ejs_menu_bar svg[title*="Save"]') ||
+                                    document.querySelector('.ejs_menu_bar [aria-label*="Save"]');
+                    const loadBtn = document.querySelector('.ejs_menu_bar [title*="Load State"]') || 
+                                    document.querySelector('.ejs_menu_bar svg[title*="Load"]') ||
+                                    document.querySelector('.ejs_menu_bar [aria-label*="Load"]');
+                    
+                    if (saveBtn && !saveBtn._customHooked) {
+                      saveBtn._customHooked = true;
+                      saveBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        console.log('💾 [FOOTER OVERLAY] Save State triggered -> Executing internal quickSave()');
+                        if (typeof emu.quickSave === 'function') {
+                          emu.quickSave();
+                        } else if (typeof emu.saveState === 'function') {
+                          emu.saveState();
+                        }
+                      }, true);
+                    }
+
+                    if (loadBtn && !loadBtn._customHooked) {
+                      loadBtn._customHooked = true;
+                      loadBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        console.log('📂 [FOOTER OVERLAY] Load State triggered -> Executing internal quickLoad()');
+                        if (typeof emu.quickLoad === 'function') {
+                          emu.quickLoad();
+                        } else if (typeof emu.loadState === 'function') {
+                          emu.loadState();
+                        }
+                      }, true);
+                    }
+                  };
+                  setTimeout(attachFooterSaveStateHandlers, 500);
+                  setTimeout(attachFooterSaveStateHandlers, 1500);
+                }
               } catch(e) {}
             };
 
