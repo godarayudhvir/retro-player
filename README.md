@@ -125,14 +125,20 @@ The project includes an organized [architecture/](architecture/README.md) specif
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Getting Started with Docker (Recommended)
 
-### Option 1: Run with Docker Compose (Recommended - Like Jellyfin)
+Retro Player can be deployed as a self-hosted container using Docker or Docker Compose, similar to media servers like Jellyfin or RomM.
 
-Run Retro Player via Docker using the GitHub Container Registry (**GHCR**) image:
+---
 
-1. Ensure [Docker](https://docs.docker.com/get-docker/) and Docker Compose are installed.
-2. In the folder where you run Docker Compose, place your ROMs in a `roms/` folder (or adjust the path):
+### Quick Start: Docker Compose
+
+1. **Create a project folder and `docker-compose.yml`**:
+   ```bash
+   mkdir retro-player && cd retro-player
+   ```
+
+2. **Create `docker-compose.yml`**:
    ```yaml
    version: '3.8'
 
@@ -147,33 +153,131 @@ Run Retro Player via Docker using the GitHub Container Registry (**GHCR**) image
          - PORT=3000
          - ROMS_DIR=/roms
        volumes:
-         # Looks for a ./roms folder in the same directory by default
+         # Maps the ./roms folder on your host into /roms inside the container
          - ./roms:/roms:ro
    ```
-3. Start the container:
+
+3. **Organize your ROM files**:
+   Place your games inside `./roms/[system]/`:
+   ```text
+   retro-player/
+   ├── docker-compose.yml
+   └── roms/
+       ├── gba/
+       │   └── Pokemon Emerald.zip
+       ├── snes/
+       │   └── Super Mario World.sfc
+       └── nes/
+           └── Megaman 2.nes
+   ```
+
+4. **Launch the container**:
    ```bash
    docker compose up -d
    ```
-4. Access the web launcher at `http://localhost:3000`.
 
-#### Or Run Directly via Docker CLI:
+5. **Open the App**:
+   Navigate to `http://localhost:3000` (or `http://<your-server-ip>:3000`).
+
+---
+
+### Quick Start: Docker Run CLI
+
+If you prefer running a single `docker run` command without Compose:
+
 ```bash
 docker run -d \
   --name retro-player \
+  --restart unless-stopped \
   -p 3000:3000 \
-  -v $(pwd)/roms:/roms:ro \
+  -e PORT=3000 \
+  -e ROMS_DIR=/roms \
+  -v /path/to/your/roms:/roms:ro \
   ghcr.io/godarayudhvir/retro-player:latest
-```
-
-To view logs or stop the service:
-```bash
-docker compose logs -f
-docker compose down
 ```
 
 ---
 
-### Option 2: Local Development Setup (Node.js)
+### 🔄 Updating to the Latest Version
+
+When a new version is published to GHCR, update your container with:
+
+#### Using Docker Compose:
+```bash
+# 1. Pull the newest image from GHCR
+docker compose pull
+
+# 2. Recreate the container with the updated image
+docker compose up -d
+
+# 3. (Optional) Prune old dangling images to reclaim disk space
+docker image prune -f
+```
+
+#### Using Docker CLI:
+```bash
+# 1. Stop and remove the running container
+docker stop retro-player && docker rm retro-player
+
+# 2. Pull the latest image
+docker pull ghcr.io/godarayudhvir/retro-player:latest
+
+# 3. Start the new container
+docker run -d \
+  --name retro-player \
+  --restart unless-stopped \
+  -p 3000:3000 \
+  -v /path/to/your/roms:/roms:ro \
+  ghcr.io/godarayudhvir/retro-player:latest
+```
+
+---
+
+### 🛠️ Troubleshooting & Debugging
+
+#### 1. Inspecting Live Container Logs
+```bash
+docker logs -f retro-player
+# Or with Compose:
+docker compose logs -f
+```
+
+#### 2. Verify Directory Mount Inside Container
+Check if the container can see your ROM files:
+```bash
+docker exec -it retro-player ls -lah /roms
+```
+
+#### 3. Complete Reset / Clean Re-installation
+If you need to completely remove the container, cache, and old images:
+```bash
+# Stop and remove containers and associated networks
+docker compose down -v --remove-orphans
+
+# Remove retro-player images
+docker rmi ghcr.io/godarayudhvir/retro-player:latest
+
+# Rebuild / re-pull fresh
+docker compose pull
+docker compose up -d --force-recreate
+```
+
+#### 4. Permission Denied Errors on Linux Hosts
+If the container cannot read your ROM files, ensure your user has read permissions on the host directory:
+```bash
+chmod -R a+rX /path/to/your/roms
+```
+
+#### 5. Changing the Web Port
+To run on a different host port (e.g., port `8080` instead of `3000`), update the port mapping in `docker-compose.yml`:
+```yaml
+ports:
+  - "8080:3000" # Host 8080 -> Container 3000
+```
+
+---
+
+### Local Development Setup (Node.js)
 
 #### Prerequisites
 - **Node.js** (v18+ recommended)
@@ -196,7 +300,7 @@ docker compose down
    npm run dev
    ```
 
-4. Or run the production build & server:
+4. Or build and run production server locally:
    ```bash
    npm run build
    npm start
