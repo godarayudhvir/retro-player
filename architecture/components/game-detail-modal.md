@@ -29,6 +29,7 @@ The `GameDetailModal` component (`.info-modal-backdrop` + `.game-card-modal-cont
 - `hasSaveData` (boolean): Flag from `useSaveDataManager` indicating whether prior save data exists.
 - `isFavorite` (boolean): Whether the game is marked as a favorite.
 - `onToggleFavorite` (function): Handler for toggling favorite state.
+- `onResetStats` (function): Handler for resetting playtime and launch stats for the inspected game.
 - `gameStats` (Object): Playtime metrics (`playtimeFormatted`, `launchCount`, `lastPlayedFormatted`).
 - `gamepadConnected` (boolean): Whether a USB/Bluetooth controller is active.
 - `focusedTarget` (Object): Target focus zone and ID.

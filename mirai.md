@@ -26,8 +26,8 @@ Retro Player bridges the tactile nostalgia of 90s/2000s physical gaming cartridg
 - [x] **Smart Collections, Favorites & Recently Played**: Instant favorite toggling via controller `X` button, keyboard `F`, or drawer action; golden star badges on cartridges; chronological recently played queue; and dynamic smart ribbon tabs (Section 2.2).
 - [x] **Comprehensive Playtime Analytics & Stats**: Persistent tracking of total hours/minutes played, launch session counts, and formatted last played dates stored in `localStorage` (Section 2.3).
 - [x] **Multi-Theme Engine**: 4 distinct switchable UI themes (iiSU Light, Midnight Cyber Dark, Sony XMB Wave, Game Boy DMG Classic) with instant persistence, topbar selector, and keyboard shortcut (`T`) (Section 4.3).
+- [x] **Touch Screen Gamepad Overlay & Mobile Responsiveness**: Elevated on-screen D-Pad and action buttons with glassmorphic styling, dynamic `100dvh` viewport containment, in-game topbar RetroArch Menu integration, and full touch responsiveness across phones, tablets, and TVs (Section 3.1).
 - [ ] **Automated Metadata & Cover Art Scraper**: Online fetching from ScreenScraper, IGDB, or OpenVGDB API for high-res 3D box art, screenshots, developer info, and gameplay previews (Section 2.1).
-- [ ] **Touch Screen Gamepad Overlay**: Virtual on-screen D-Pad and action buttons with haptic touch feedback for mobile and tablets (Section 3.1).
 - [ ] **Ambient Menu BGM Jukebox**: Curated ambient console background music with auto-ducking on launch (Section 4.2).
 - [ ] **RetroAchievements (RA) Full Integration**: RetroAchievements API authentication, in-game badge unlock popups, hardcore points, and leaderboards (Section 5.1).
 - [ ] **WebRTC Peer-to-Peer Netplay**: Zero-server P2P multiplayer room creation, low-latency DataChannels, and input rollback (Section 5.2).
@@ -46,18 +46,21 @@ Current Codebase Surface:
 ├── src/App.jsx                     # 168 lines (Clean Root Orchestrator)
 ├── src/components/
 │   ├── Topbar.jsx                  # Status HUD, search bar, sound toggle & clock
-│   ├── SystemRibbon.jsx            # Dynamic console category ribbon
+│   ├── LoadRomModal.jsx            # Multi-theme Load ROM modal with drag-drop
+│   ├── SystemRibbon.jsx            # Dynamic console category ribbon & smart collections
 │   ├── CartridgeGrid.jsx           # 3D Cartridge grid viewport
-│   ├── CartridgeTile.jsx           # Physical 3D cartridge with sheen & grips
-│   ├── GameDetailModal.jsx         # Game drawer with save data detection
+│   ├── CartridgeTile.jsx           # Physical 3D cartridge with sheen, grips & star badges
+│   ├── GameDetailModal.jsx         # Game drawer with playtime analytics & save detection
 │   ├── AboutInfoModal.jsx          # About dialog & controls reference
 │   ├── DropzoneOverlay.jsx         # Drag-and-drop custom ROM backdrop
 │   ├── ConsoleHud.jsx              # Bottom controller button hints
-│   ├── EmulatorModal.jsx           # Isolated Iframe & EmulatorJS Glue
+│   ├── EmulatorModal.jsx           # Isolated Iframe, topbar Menu & elevated touch gamepad
 │   ├── OnScreenKeyboard.jsx        # Spatial OSK for Search
 │   └── ErrorBoundary.jsx           # Fatal Error Catching
 ├── src/hooks/
 │   ├── useWebAudioSfx.js           # Web Audio API sound synthesizer
+│   ├── useThemeEngine.js           # Multi-theme state and persistence engine
+│   ├── usePlaytimeAndFavorites.js  # Favorites, recents & active playtime analytics
 │   ├── useGamepadStatus.js         # HTML5 Gamepad connection tracking
 │   ├── useSaveDataManager.js       # LocalStorage & IndexedDB save detection
 │   ├── useRomManifest.js           # Manifest fetching & ROM drop-in loader
@@ -66,7 +69,7 @@ Current Codebase Surface:
 │   ├── cartridgeColors.js          # Cartridge shell color heuristics
 │   └── systemDetector.js           # ROM extension to emulator core detection
 ├── src/gameDescriptions.js         # Static Metadata Fallback
-├── src/index.css                   # Design Tokens & Cartridge 3D CSS
+├── src/index.css                   # Design Tokens, 4 Themes, Responsive & Cartridge 3D CSS
 ├── vite.config.js                  # Multi-Console Scanner Middleware
 └── public/emulatorjs/data/         # Local emulator assets
 ```
@@ -75,13 +78,13 @@ Current Codebase Surface:
 
 | Component / Subsystem | Current State & Strength | Bottleneck / Technical Debt | Mirai Transformation Goal |
 | :--- | :--- | :--- | :--- |
-| **`App.jsx`** | Modular root orchestrator with dedicated subcomponents & hooks | Fully decomposed into clean subcomponents and hooks | Maintain modularity for upcoming features (P2P, cloud saves, themes) |
-| **Emulator Engine** | Isolated iframe sandbox preventing DOM/event collisions | Hardcoded external CDN path (`cdn.emulatorjs.org`); no offline fallback | Support local `/emulatorjs/data/` fallback, offline PWA cache, and shader toggles |
-| **Metadata & Covers** | Fuzzy local cover art scanner (`public/cover/*`) | Falls back to static Pokeball if no local art exists; manual metadata entries | Automated online metadata scraper (ScreenScraper / IGDB / Libretro Thumbnails API) |
-| **Save Management** | Basic `.sav` file export button and IndexedDB detection | No multi-slot save state UI, no visual snapshot previews, no cloud backup | 5-slot Save State Manager with screenshot thumbnails and cloud auto-sync |
-| **Input Engine** | Spatial D-Pad navigation, exit combos (`Select+Start`) | No virtual touch controls for mobile/tablet; no haptic rumble API integration | On-screen touch D-Pad/action overlay, rumble haptics, and custom controller remapping |
-| **Sound & Audio** | Browser default audio in emulator | Completely silent UI navigation shell; no ambient menu music or tactile clicks | Web Audio API UI sound synthesizer (clicks, swooshes, cartridge load) & ambient BGM |
-| **Visual Immersion** | Realistic 3D cartridge tiles with sheen and colors | Single default light theme; no in-game CRT/LCD shader presets HUD | Multi-theme system (Switch Dark, PS5 XMB, Cyberpunk) + In-game CRT/Scanline HUD |
+| **`App.jsx`** | Modular root orchestrator with dedicated subcomponents & hooks | Fully decomposed into clean subcomponents and hooks | Maintain modularity for upcoming features (P2P, cloud saves, metadata) |
+| **Emulator Engine** | Isolated iframe sandbox with offline fallback & topbar Menu button | Hardcoded CDN path with local fallback; basic shader controls | Add in-game CRT/LCD shader presets HUD and 5-slot visual save state picker |
+| **Metadata & Covers** | Fuzzy local cover art scanner (`public/cover/*`) | Falls back to system icon if no local art exists; manual metadata entries | Automated online metadata scraper (ScreenScraper / IGDB / Libretro Thumbnails API) |
+| **Save Management** | Save data detection and `.sav` export via native RetroArch menu | Single battery save persistence without visual snapshot slots or cloud backup | 5-slot Save State Manager with screenshot thumbnails and cloud auto-sync |
+| **Input Engine** | Full Gamepad navigation, elevated on-screen touch D-Pad/buttons, exit combos | Web Gamepad and virtual touch complete; lacks haptic rumble API | Haptic vibration feedback on touch/controller rumble |
+| **Sound & Audio** | Synthesized Web Audio UI sound effects (ticks, swooshes, cartridge click) | Completely silent in main menu background; no ambient BGM | Curated ambient console background music (Jukebox) with auto-ducking on launch |
+| **Visual Immersion** | 4 switchable UI themes (iiSU Light, Midnight Cyber, XMB Wave, Game Boy DMG) | Complete 4-theme system active; custom CRT overlays in CSS | Custom per-system CRT overlays and animated dynamic backgrounds |
 | **Multiplayer** | Single-player local focus | No peer-to-peer online play or lobby matchmaking | WebRTC P2P Netplay with zero-server rollback input synchronization |
 
 ---

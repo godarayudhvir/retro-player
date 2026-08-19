@@ -12,7 +12,8 @@ The `CartridgeTile` component renders an authentic 3D physical retro game cartri
 - **Dynamic Color Mapping (`--cart-color`)**: Heuristic color assignment via `getCartridgeColor(game)` matching game titles (e.g. *Pokémon Emerald* -> `#059669`, *Ruby* -> `#e11d48`, *FireRed* -> `#dc2626`, *Sapphire* -> `#1d4ed8`, *Gold* -> `#d97706`) and system themes.
 - **Embossed Header & Grip Ribs (`.cartridge-header`)**: Dual side grip ribs (`.cartridge-grips.left` / `.right`) and recessed stadium pill with embossed platform branding text.
 - **Recessed Sticker Label (`.cartridge-sticker-area`)**: Renders high-res box art, an animated gloss sheen gradient (`.cartridge-label-sheen`), and fallback system icon in case of missing art.
-- **Focus Indicator (`.gamepad-focused`)**: Prominent glowing focus ring for controller and keyboard navigation.
+- **Favorite Star Badge (`.cartridge-favorite-badge`)**: Displays a golden star badge (`⭐`) on favorited cartridges.
+- **Focus Indicator (`.gamepad-focused`)**: Prominent glowing focus ring for controller, touchscreen, and keyboard navigation.
 
 ---
 
@@ -21,6 +22,7 @@ The `CartridgeTile` component renders an authentic 3D physical retro game cartri
 ### Props & Structure
 - `game` (Object): Metadata object containing `id`, `title`, `coverUrl`, `systemName`, `systemColor`, `systemIcon`.
 - `isFocused` (boolean): Applies `.gamepad-focused` CSS class when active.
+- `isFavorite` (boolean): Conditionally renders `.cartridge-favorite-badge`.
 - `onClick` (function): Selects the cartridge and opens the game detail drawer.
 
 ### Source Location
