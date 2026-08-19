@@ -509,10 +509,12 @@ export default function EmulatorModal({ game, gamepadConnected, onClose, onSessi
               }
             }
 
-            window.autoBindGamepadsToPlayers = autoBindGamepadsToPlayers;
-
+            const _connectedGps = new Set();
             function forwardGamepadConnected(gp) {
               if (!gp) return;
+              const key = (gp.id || 'gp') + '_' + (gp.index !== undefined ? gp.index : 0);
+              if (_connectedGps.has(key)) return;
+              _connectedGps.add(key);
               try {
                 const evt = new GamepadEvent('gamepadconnected', { gamepad: gp });
                 window.dispatchEvent(evt);
@@ -534,25 +536,17 @@ export default function EmulatorModal({ game, gamepadConnected, onClose, onSessi
                     forwardGamepadConnected(gps[i]);
                   }
                 }
-                autoBindGamepadsToPlayers();
               } catch (e) {}
             }
 
             window.addEventListener('gamepadconnected', function(e) {
-              console.log('🎮 [EMULATORJS IFRAME GAMEPAD CONNECTED]:', e.gamepad?.id);
               autoBindGamepadsToPlayers();
             });
 
-            // Sync gamepads across focus, click, and input events
-            window.addEventListener('focus', syncAllGamepads);
-            window.addEventListener('click', syncAllGamepads);
-            window.addEventListener('keydown', syncAllGamepads);
-
-            const syncTimer = setInterval(syncAllGamepads, 300);
-            setTimeout(() => {
-              clearInterval(syncTimer);
-              setInterval(syncAllGamepads, 1200);
-            }, 10000);
+            // Single initial sync on window load / user interaction
+            window.addEventListener('focus', syncAllGamepads, { once: false });
+            window.addEventListener('click', syncAllGamepads, { once: true });
+            window.addEventListener('keydown', syncAllGamepads, { once: true });
 
             // Auto-focus canvas & window on ready / game start
             window.EJS_ready = function() {
