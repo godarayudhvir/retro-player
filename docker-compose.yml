@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   retro-player:
     image: ghcr.io/godarayudhvir/retro-player:latest

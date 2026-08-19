@@ -98,11 +98,18 @@ docker logs -f retro-player
 ### Check Files Inside Container
 ```bash
 docker exec -it retro-player ls -lah /roms
+docker exec -it retro-player ls -lah /bgm
 ```
 
-### Fix Host Permissions (Linux)
+### Fix Linux Permissions (If Docker needs root or volume access)
+If running on Linux without rootless Docker setup, ensure permissions:
 ```bash
-chmod -R a+rwX ./roms
+# Allow running Docker without sudo
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Fix host directory permissions for uploads
+chmod -R a+rwX ./roms ./bgm
 ```
 
 ### Clean Factory Reset
