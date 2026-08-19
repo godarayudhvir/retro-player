@@ -248,6 +248,69 @@ npm start
 
 ---
 
+## 🌐 Remote Access & Anywhere Play (Tailscale & Cloudflare Tunnel)
+
+Because Retro Player runs on WebAssembly, playing remotely over a VPN or tunnel requires **almost no bandwidth** (just a single ~5MB ROM download per session), resulting in buttery smooth 60 FPS gameplay on phones, tablets, and laptops from anywhere in the world.
+
+### Option A: Tailscale (Private, Zero-Config WireGuard Mesh VPN)
+
+The simplest and most secure way to access your HomeLab Retro Player instance from your iPhone, Android, or laptop outside your home network:
+
+1. **Install Tailscale** on your host server (Ubuntu/Debian/NAS):
+   ```bash
+   curl -fsSL https://tailscale.com/install.sh | sh
+   sudo tailscale up
+   ```
+2. **Install Tailscale on your mobile phone / client device** and sign into the same account.
+3. **Open the browser on your phone** and navigate to your server's MagicDNS or Tailscale IP:
+   ```text
+   http://100.x.y.z:3000
+   # Or using Tailscale hostname:
+   http://my-ubuntu-server:3000
+   ```
+4. Pair a Bluetooth controller (Xbox, PS5, 8BitDo) or use the touch controls to play seamlessly on the go!
+
+---
+
+### Option B: Cloudflare Tunnel (Public HTTPS URL with Zero Open Ports)
+
+Expose your container securely to the internet behind Cloudflare's global edge without opening any router firewall ports:
+
+1. **Create a Tunnel in Cloudflare Zero Trust Dashboard**:
+   - Go to **Networks** $\rightarrow$ **Tunnels** $\rightarrow$ **Create a Tunnel** (name it `retro-player`).
+2. **Add Cloudflared service to your `docker-compose.yml`**:
+   ```yaml
+   version: '3.8'
+
+   services:
+     retro-player:
+       image: ghcr.io/godarayudhvir/retro-player:latest
+       container_name: retro-player
+       restart: unless-stopped
+       ports:
+         - "3000:3000"
+       environment:
+         - PORT=3000
+         - ROMS_DIR=/roms
+       volumes:
+         - ./roms:/roms
+
+     cloudflared:
+       image: cloudflare/cloudflared:latest
+       container_name: cloudflared-retro
+       restart: unless-stopped
+       command: tunnel run
+       environment:
+         - TUNNEL_TOKEN=eyJh... # Paste your Cloudflare Tunnel token here
+   ```
+3. **Configure Public Hostname in Cloudflare**:
+   - Subdomain: `games.yourdomain.com`
+   - Service Type: `HTTP`
+   - URL: `retro-player:3000` (or `localhost:3000`)
+4. Access `https://games.yourdomain.com` with automated SSL and DDoS protection!
+
+---
+
 ## 🗂️ Organizing & Adding ROMs
 
 ### Method A: In-App Drag & Drop (Auto-Persistent)
