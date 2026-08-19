@@ -68,14 +68,19 @@ export default function SettingsModal({
     const rawFiles = Array.from(e.target.files || []);
     if (rawFiles.length === 0) return;
 
-    // Filter to valid ROM files (skipping non-rom files like desktop.ini, .DS_Store, subfolder metadata)
+    // Filter strictly to valid ROM files (skipping directory root entries, zero-byte folder placeholders, .DS_Store, ._ AppleDouble files, and non-rom files)
     const files = rawFiles.filter(f => {
-      const ext = '.' + (f.name.split('.').pop() || '').toLowerCase();
-      return VALID_EXTS.includes(ext) && !f.name.startsWith('.');
+      if (!f || !f.name || f.size === 0) return false;
+      const baseName = f.name.split('/').pop()?.split('\\').pop() || f.name;
+      if (baseName.startsWith('.') || baseName.startsWith('._')) return false;
+      const ext = '.' + (baseName.split('.').pop() || '').toLowerCase();
+      return VALID_EXTS.includes(ext);
     });
 
     if (files.length === 0) {
       setUploadStatus({ type: 'error', message: `No supported ROM files found in selection.` });
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      if (folderInputRef.current) folderInputRef.current.value = '';
       setTimeout(() => setUploadStatus(null), 4000);
       return;
     }
@@ -88,12 +93,13 @@ export default function SettingsModal({
 
     for (const file of files) {
       try {
-        const sys = detectSystemFromExtension(file.name);
+        const baseName = file.name.split('/').pop()?.split('\\').pop() || file.name;
+        const sys = detectSystemFromExtension(baseName);
         const response = await fetch('/api/upload-rom', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/octet-stream',
-            'x-filename': encodeURIComponent(file.name),
+            'x-filename': encodeURIComponent(baseName),
             'x-system-key': sys.key
           },
           body: file
