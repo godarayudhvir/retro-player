@@ -13,6 +13,9 @@ services:
     environment:
       - PORT=3000
       - ROMS_DIR=/roms
+      - BGM_DIR=/bgm
     volumes:
       # Mount your host ROMs directory to /roms inside container (Read/Write allows uploading new games directly from the UI)
       - ./roms:/roms
+      # Mount your host BGM tracks directory to /bgm inside container
+      - ./bgm:/bgm

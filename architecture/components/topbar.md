@@ -2,33 +2,32 @@
 
 ## 1. Description
 
-The `Topbar` component serves as the primary console header and status HUD for Retro Player. Situated at the top of the viewport (`header.console-topbar`), it provides visual identity, shoulder button triggers for console switching, gamepad connectivity status, sound effect mute toggles, interactive search filtering, custom ROM import actions, the project info trigger, and a digital clock.
+The `Topbar` component serves as the primary console header and status HUD for Retro Player. Situated at the top of the viewport (`header.console-topbar`), it provides visual identity, gamepad connectivity status, sound effect mute toggles, theme cycling, interactive search filtering, custom ROM import actions, and a digital clock.
 
 ---
 
 ## 2. Detailed List of What It Does
 
 - **Console Identity Badge**: Renders the user tag and red gamepad icon (`.avatar-badge`).
-- **Shoulder Button Capsule (`.topbar-center-capsule`)**:
-  - `L1` (or `Q` / `L` on keyboard): Switches to previous console system.
-  - `R1` (or `E` / `R` on keyboard): Switches to next console system.
 - **Controller Connectivity Indicator**: Displays a green `GAMEPAD READY` badge when a physical gamepad is detected, or `NO CONTROLLER` in grey. Auto-hides on mobile touch devices.
-- **SFX Mute Toggle Button**: Quick toggle between `SFX ON` and `SFX OFF` using `Volume2`/`VolumeX` icons.
-- **Multi-Theme Engine Pill**: Displays the active theme icon (☀️, 🌙, 🌊, 📟) and short name, cycling themes on click or `T` key.
+- **Automated Metadata Scraper Button**: Icon-only action button (`Sparkles` / `RefreshCw`) triggering library-wide metadata & box art scraping.
+- **SFX Mute Toggle Button**: Compact icon-only button toggle between active audio and muted sound using `Volume2`/`VolumeX` icons with tooltips.
+- **Multi-Theme Engine Button**: Compact icon-only button displaying the active theme icon (☀️, 🌙, 🌊, 📟), cycling themes on click or `T` key.
 - **Search Bar & Virtual Keyboard Trigger**: Interactive search input with an adaptive keyboard badge (`⌘K` on Mac, `Ctrl+K` on Windows/Linux, or `Y` when a gamepad is connected).
-- **Custom ROM Modal Trigger (`LOAD ROM`)**: Opens the in-app `LoadRomModal` dialog for selecting or dragging local custom ROMs.
+- **Custom ROM Modal Trigger (`FolderOpen`)**: Icon-only button that opens the in-app `LoadRomModal` dialog for selecting or dragging local custom ROMs.
 - **Digital Clock**: Displays local time updated every 10 seconds.
-- **Adaptive Mobile Layout**: On screens `<= 640px`, shoulder buttons are hidden, search expands fluidly, and action pill labels gracefully collapse into sleek icon-only touch buttons with 40px touch targets.
+- **Adaptive Layout**: Sleek, circular icon-only buttons provide a streamlined, distraction-free console topbar across desktop, tablet, and mobile views.
 
 ---
 
 ## 3. Detailed Logic Behind Everything and How It Works
 
 ### Props & Data Flow
-- `gamepadConnected` (boolean): Controls shoulder button labels (`L1/R1` vs `Q/E`) and gamepad status badge color.
-- `activeSystem` & `systems`: Calculates next and previous system keys upon clicking shoulder buttons.
+- `gamepadConnected` (boolean): Controls gamepad status badge color and search hotkey badge (`Y` vs `⌘K`).
 - `searchQuery` & `setSearchQuery`: Binds directly to the search input field.
-- `sfx`: Invokes `sfx.playTabSwitch()`, `sfx.playModalOpen()`, and `sfx.toggleMute()`.
+- `sfx`: Invokes `sfx.playModalOpen()`, and `sfx.toggleMute()`.
+- `themeEngine`: Calls `themeEngine.cycleTheme()` and displays active theme icon.
+- `scraper`: Triggers `scraper.scrapeAll()` and renders active scraping progress.
 
 ### Source Location
 - Component: [src/components/Topbar.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/Topbar.jsx)

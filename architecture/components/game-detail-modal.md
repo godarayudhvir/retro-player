@@ -11,8 +11,8 @@ The `GameDetailModal` component (`.info-modal-backdrop` + `.game-card-modal-cont
 - **Rich Artwork & Details Presentation**: Displays game title, platform badge, release year, active EmulatorJS core, and summary description from `gameDescriptions.js`.
 - **Spacious & Balanced 2-Column Layout**: 820px max-width container with 260px box art showcase, glossy borders, and ample horizontal breathing room.
 - **Playtime & Session Stats Grid**: 3-column stats card showcasing total playtime duration (e.g. `1 hr 24 min`), launch session counts, and formatted last played dates.
-- **⭐ Favorite Action & Badge**: Floating favorite star badge and direct **Favorite ⭐** toggle button with controller `X` and keyboard `F` hotkey indicators.
-- **Dual-Action Side-by-Side Button Bar**: Balanced horizontal layout pairing the high-emphasis **PLAY NOW** button with the **FAVORITE** toggle button.
+- **⭐ Favorite Action & Badge**: Direct **Favorite ⭐** icon-only toggle button with active star fill and tooltip indicators.
+- **Action Button Bar**: Balanced horizontal layout pairing the prominent **PLAY NOW** launcher button with circular icon-only buttons for **FAVORITE** and **RE-SCRAPE ART**.
 - **Live Save Data Detection**:
   - Displays green `SAVE DATA DETECTED` badge if existing battery SRAM or state saves are discovered in `localStorage` or `IndexedDB`.
   - Displays neutral `NO SAVE DATA FOUND` badge for fresh game sessions.

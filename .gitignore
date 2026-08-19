@@ -70,4 +70,13 @@ covers/
 public/assets/cover/
 public/cover/
 
-
+# Background Music & Audio Tracks
+bgm/
+**/bgm/
+public/bgm/
+*.mp3
+*.ogg
+*.flac
+*.wav
+*.m4a
+*.aac

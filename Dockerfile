@@ -17,6 +17,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV ROMS_DIR=/roms
+ENV BGM_DIR=/bgm
 
 # Install only production dependencies
 COPY package*.json ./
@@ -27,8 +28,8 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/server.js ./server.js
 COPY --from=builder /app/public ./public
 
-# Default volume mount point for ROMs
-VOLUME ["/roms"]
+# Default volume mount points for ROMs and BGM
+VOLUME ["/roms", "/bgm"]
 
 EXPOSE 3000
 

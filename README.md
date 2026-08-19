@@ -57,6 +57,14 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 ## ✨ Key Highlights
 
+- 👤 **Multi-User Profiles & Nintendo Mii Avatar Creator**:
+  - Netflix / Nintendo Switch style **"Who's Playing?"** profile selection modal.
+  - Interactive **Nintendo Mii Studio Wizard** with custom face shapes, skin tones, hairstyles, expressive eyes, glasses, mustaches, and shirt colors.
+  - **Per-Profile State Isolation**: Each player maintains independent Favorites, Recently Played history, and Playtime Analytics.
+- 🎵 **Background Music (BGM) Engine & Docker Management**:
+  - Auto-scanning and loop streaming of background music tracks with topbar controls and auto-track progression.
+  - **Smart In-Game Auto-Pause**: Automatically pauses background music when entering a game and resumes upon exit.
+  - Full Docker volume management (`/bgm`) and copyright gitignore protection.
 - 🎨 **4 Signature Themes**: **iiSU Light**, **Midnight Cyber**, **Sony XMB Wave**, and **Game Boy DMG**.
 - 💾 **3D Physical Cartridge Engine**: Tactile cartridges with metallic sheens, grip textures, and title color heuristics.
 - 🌐 **Automated ES-DE Online Metadata Scraper**: Official 3D box art from **Libretro** & synopsis info from **Wikipedia**, cached in **IndexedDB**.

@@ -10,6 +10,7 @@ The `SystemRibbon` component (`nav.system-ribbon`) provides a horizontal categor
 
 - **Dynamic Game Count Sorting**: Filters console categories to those with at least 1 registered ROM, and sorts tabs in descending order of total game count (most titles first).
 - **All Games Tab**: Always displayed first with the total library count.
+- **Minimized Smart Collections Tabs**: Minimized icon-only tabs for **⭐ Favorites** (`Star`) and **🕒 Recent** (`Clock`) with compact count badges and tooltips.
 - **Active Tab Highlighting**: Highlights active system tab with `.active` and `.gamepad-focused` classes.
 - **Smooth Auto-Scrolling**: Automatically scrolls the active console category into the center of the ribbon using `.scrollIntoView({ inline: 'center' })`.
 - **Audio Feedback**: Triggers `sfx.playTabSwitch()` on tab selection.

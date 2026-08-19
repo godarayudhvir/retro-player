@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { Star, Clock } from 'lucide-react';
 
 /**
  * Horizontal System Selection Ribbon with dynamic game count sorting, smart collections, and smooth auto-scrolling.
@@ -30,10 +31,10 @@ export default function SystemRibbon({
 
   // Unified list of all selectable tabs
   const allTabs = [
-    { key: 'all', name: 'All Games', count: totalGamesCount, icon: null },
-    { key: 'favorites', name: '⭐ Favorites', count: favoritesCount, icon: null },
-    { key: 'recent', name: '🕒 Recent', count: recentCount, icon: null },
-    ...activeSysList.map(s => ({ key: s.key, name: s.name, count: s.gameCount, icon: s.icon }))
+    { key: 'all', name: 'All Games', count: totalGamesCount, icon: null, isSpecialIcon: false },
+    { key: 'favorites', name: 'Favorites', count: favoritesCount, iconNode: <Star size={18} fill="currentColor" />, isSpecialIcon: true },
+    { key: 'recent', name: 'Recent', count: recentCount, iconNode: <Clock size={18} />, isSpecialIcon: true },
+    ...activeSysList.map(s => ({ key: s.key, name: s.name, count: s.gameCount, icon: s.icon, isSpecialIcon: false }))
   ];
 
   return (
@@ -41,16 +42,27 @@ export default function SystemRibbon({
       {allTabs.map((tab, idx) => (
         <button
           key={tab.key}
-          className={`system-tab ${activeSystem === tab.key ? 'active' : ''} ${focusedTarget.zone === 'ribbon' && focusedTarget.index === idx ? 'gamepad-focused' : ''} ${tab.key === 'favorites' ? 'tab-favorites' : ''} ${tab.key === 'recent' ? 'tab-recent' : ''}`}
+          className={`system-tab ${activeSystem === tab.key ? 'active' : ''} ${focusedTarget.zone === 'ribbon' && focusedTarget.index === idx ? 'gamepad-focused' : ''} ${tab.key === 'favorites' ? 'tab-favorites tab-icon-only' : ''} ${tab.key === 'recent' ? 'tab-recent tab-icon-only' : ''}`}
           onClick={() => {
             setActiveSystem(tab.key);
             setFocusedTarget({ zone: 'ribbon', index: idx });
             sfx?.playTabSwitch?.();
           }}
+          title={`${tab.name} (${tab.count} games)`}
+          aria-label={`${tab.name} (${tab.count} games)`}
         >
-          {tab.icon && <img src={tab.icon} alt="" className="tab-icon" />}
-          <span>{tab.name}</span>
-          <span className="tab-count">({tab.count})</span>
+          {tab.isSpecialIcon ? (
+            <>
+              {tab.iconNode}
+              {tab.count > 0 && <span className="tab-count-badge">{tab.count}</span>}
+            </>
+          ) : (
+            <>
+              {tab.icon && <img src={tab.icon} alt="" className="tab-icon" />}
+              <span>{tab.name}</span>
+              <span className="tab-count">({tab.count})</span>
+            </>
+          )}
         </button>
       ))}
     </nav>

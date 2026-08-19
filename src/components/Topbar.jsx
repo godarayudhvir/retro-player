@@ -1,15 +1,16 @@
 import React from 'react';
-import { Search, FolderOpen, Wifi, Gamepad2, Volume2, VolumeX, Sparkles, RefreshCw } from 'lucide-react';
+import { Search, FolderOpen, Gamepad2, Volume2, VolumeX, Sparkles, RefreshCw, Music, SkipForward } from 'lucide-react';
+import MiiAvatar from './MiiAvatar';
 
 /**
- * Topbar console header with status indicators, shoulder tabs, search input, custom ROM loader,
- * metadata scraper trigger, and digital clock.
+ * Topbar console header with active Mii profile avatar, BGM music player, status indicators,
+ * search input, custom ROM loader, and digital clock.
  */
 export default function Topbar({
   gamepadConnected,
-  activeSystem,
-  systems,
-  setActiveSystem,
+  activeProfile,
+  onOpenProfileSelect,
+  bgm,
   focusedTarget,
   setFocusedTarget,
   searchQuery,
@@ -24,57 +25,78 @@ export default function Topbar({
 }) {
   const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent || navigator.platform);
 
-  const handlePrevSystem = () => {
-    const availableKeys = ['all', ...systems.filter(s => s.gameCount > 0).sort((a, b) => b.gameCount - a.gameCount).map(s => s.key)];
-    const prevIdx = (availableKeys.indexOf(activeSystem) - 1 + availableKeys.length) % availableKeys.length;
-    setActiveSystem(availableKeys[prevIdx]);
-    setFocusedTarget({ zone: 'ribbon', index: prevIdx });
-    sfx?.playTabSwitch?.();
-  };
-
-  const handleNextSystem = () => {
-    const availableKeys = ['all', ...systems.filter(s => s.gameCount > 0).sort((a, b) => b.gameCount - a.gameCount).map(s => s.key)];
-    const nextIdx = (availableKeys.indexOf(activeSystem) + 1) % availableKeys.length;
-    setActiveSystem(availableKeys[nextIdx]);
-    setFocusedTarget({ zone: 'ribbon', index: nextIdx });
-    sfx?.playTabSwitch?.();
-  };
-
   return (
     <header className="console-topbar">
       <div className="topbar-left">
-        <div className="avatar-badge">
-          <Gamepad2 size={24} color="#ef4444" />
+        <div 
+          className="avatar-badge profile-avatar-trigger"
+          onClick={() => {
+            onOpenProfileSelect?.();
+            sfx?.playModalOpen?.();
+          }}
+          title={`Profile: ${activeProfile?.name || 'Player 1'} (Click to switch)`}
+          aria-label="Switch User Profile"
+        >
+          {activeProfile?.miiData ? (
+            <MiiAvatar miiData={activeProfile.miiData} size={36} />
+          ) : (
+            <Gamepad2 size={24} color="#ef4444" />
+          )}
         </div>
-        <span className="user-tag">RETRO PLAYER</span>
-      </div>
-
-      <div className="topbar-center-capsule">
-        <button 
-          className="shoulder-btn left-shoulder" 
-          onClick={handlePrevSystem}
-          title="Previous System (L / Q)"
+        <span 
+          className="user-tag profile-name-tag"
+          onClick={() => {
+            onOpenProfileSelect?.();
+            sfx?.playModalOpen?.();
+          }}
+          title="Switch User Profile"
         >
-          <span className="shoulder-trigger">L1</span>
-          <span className="shoulder-key-tag">{gamepadConnected ? 'L' : 'Q'}</span>
-        </button>
-
-        <div className="shoulder-divider" />
-
-        <button 
-          className="shoulder-btn right-shoulder" 
-          onClick={handleNextSystem}
-          title="Next System (R / E)"
-        >
-          <span className="shoulder-key-tag">{gamepadConnected ? 'R' : 'E'}</span>
-          <span className="shoulder-trigger">R1</span>
-        </button>
+          {activeProfile?.name || 'RETRO PLAYER'}
+        </span>
       </div>
 
       <div className="topbar-right">
+        {/* Background Music (BGM) Player */}
+        {bgm && bgm.tracks && bgm.tracks.length > 0 && (
+          <div className="bgm-control-group">
+            <button
+              className={`status-pill status-bgm ${bgm.isPlaying ? 'is-bgm-playing' : ''}`}
+              onClick={() => {
+                bgm.togglePlay();
+                sfx?.playTileNav?.();
+              }}
+              title={bgm.currentTrack 
+                ? `BGM: ${bgm.currentTrack.title} (${bgm.isPlaying ? 'Playing - Click to Pause' : 'Paused - Click to Play'})`
+                : "Toggle Background Music"
+              }
+              aria-label="Toggle Background Music"
+            >
+              <Music size={18} color={bgm.isPlaying ? '#10b981' : '#64748b'} className={bgm.isPlaying ? 'pulse-icon' : ''} />
+            </button>
+
+            {bgm.isPlaying && (
+              <button
+                className="status-pill status-bgm-skip"
+                onClick={() => {
+                  bgm.nextTrack();
+                  sfx?.playTabSwitch?.();
+                }}
+                title="Next BGM Track"
+                aria-label="Next BGM Track"
+              >
+                <SkipForward size={14} color="#94a3b8" />
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Gamepad Connection Status */}
-        <div className="status-pill status-gamepad" style={{ color: gamepadConnected ? '#10b981' : '#64748b' }}>
-          <Wifi size={16} />
+        <div 
+          className="status-pill status-gamepad" 
+          style={{ color: gamepadConnected ? '#10b981' : '#64748b' }}
+          title={gamepadConnected ? "Gamepad Connected & Ready" : "No Gamepad Detected (Plug in USB or pair Bluetooth controller)"}
+        >
+          <Gamepad2 size={18} />
           <span className="pill-text">{gamepadConnected ? 'GAMEPAD READY' : 'NO CONTROLLER'}</span>
         </div>
 
@@ -90,17 +112,15 @@ export default function Topbar({
               ? `Scraping art... (${scraper.scrapeProgress.current}/${scraper.scrapeProgress.total})` 
               : "Scrape Online Art & Metadata for Library"
             }
+            aria-label="Scrape Online Art & Metadata"
           >
             {scraper.isScraping ? (
               <>
-                <RefreshCw size={14} className="spin" color="#3b82f6" />
-                <span className="pill-text">{scraper.scrapeProgress.current}/{scraper.scrapeProgress.total}</span>
+                <RefreshCw size={18} className="spin" color="#3b82f6" />
+                <span className="pill-text scrape-badge">{scraper.scrapeProgress.current}/{scraper.scrapeProgress.total}</span>
               </>
             ) : (
-              <>
-                <Sparkles size={14} color="#f59e0b" />
-                <span className="pill-text">SCRAPE ART</span>
-              </>
+              <Sparkles size={18} color="#f59e0b" />
             )}
           </button>
         )}
@@ -111,9 +131,9 @@ export default function Topbar({
             className="status-pill status-sfx"
             onClick={sfx.toggleMute}
             title={sfx.isMuted ? 'Unmute UI Sound Effects' : 'Mute UI Sound Effects'}
+            aria-label={sfx.isMuted ? 'Unmute UI Sound Effects' : 'Mute UI Sound Effects'}
           >
-            {sfx.isMuted ? <VolumeX size={16} color="#94a3b8" /> : <Volume2 size={16} color="#3b82f6" />}
-            <span className="pill-text">{sfx.isMuted ? 'SFX OFF' : 'SFX ON'}</span>
+            {sfx.isMuted ? <VolumeX size={18} color="#94a3b8" /> : <Volume2 size={18} color="#3b82f6" />}
           </button>
         )}
 
@@ -126,9 +146,9 @@ export default function Topbar({
               sfx?.playThemeSwitch?.();
             }}
             title={`Current Theme: ${themeEngine.currentThemeMeta.name} (Press 'T' to switch)`}
+            aria-label={`Switch Theme. Current: ${themeEngine.currentThemeMeta.name}`}
           >
-            <span style={{ fontSize: '1rem' }}>{themeEngine.currentThemeMeta.icon}</span>
-            <span className="pill-text">{themeEngine.currentThemeMeta.shortName}</span>
+            <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>{themeEngine.currentThemeMeta.icon}</span>
           </button>
         )}
 
@@ -179,9 +199,9 @@ export default function Topbar({
             sfx?.playModalOpen?.();
           }}
           title="Open Load Custom ROM dialog"
+          aria-label="Load Custom ROM"
         >
-          <FolderOpen size={16} color="#3b82f6" />
-          <span className="pill-text">LOAD ROM</span>
+          <FolderOpen size={18} color="#3b82f6" />
         </button>
 
         {/* Real-time Clock */}

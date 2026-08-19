@@ -9,6 +9,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 const ROMS_DIR = process.env.ROMS_DIR || path.join(__dirname, 'public/roms');
+const BGM_DIR = process.env.BGM_DIR || path.join(__dirname, 'public/bgm');
 const DIST_DIR = path.join(__dirname, 'dist');
 
 // System definition mapping matching vite.config.js
@@ -48,6 +49,7 @@ const EXTENSION_MAP = {
 };
 
 const VALID_EXTENSIONS = ['.nes', '.snes', '.smc', '.sfc', '.gba', '.gbc', '.gb', '.n64', '.z64', '.v64', '.nds', '.gen', '.zip', '.iso', '.cue', '.chd', '.bin'];
+const VALID_AUDIO_EXTENSIONS = ['.mp3', '.ogg', '.wav', '.m4a', '.flac', '.aac'];
 
 // Serve raw ROM binaries with CORS & octet-stream headers
 app.use('/roms', (req, res, next) => {
@@ -68,6 +70,74 @@ app.use('/roms', (req, res, next) => {
     console.error('[ROM SERVER ERROR] Error serving ROM:', e);
   }
   next();
+});
+
+// Serve Background Music (BGM) audio files
+app.use('/bgm', (req, res, next) => {
+  try {
+    const relativePath = decodeURIComponent(req.url.split('?')[0]);
+    const fullBgmPath = path.join(BGM_DIR, relativePath);
+
+    if (fs.existsSync(fullBgmPath) && fs.statSync(fullBgmPath).isFile()) {
+      const ext = path.extname(fullBgmPath).toLowerCase();
+      const mimeMap = {
+        '.mp3': 'audio/mpeg',
+        '.ogg': 'audio/ogg',
+        '.wav': 'audio/wav',
+        '.m4a': 'audio/mp4',
+        '.flac': 'audio/flac',
+        '.aac': 'audio/aac'
+      };
+      res.setHeader('Content-Type', mimeMap[ext] || 'audio/mpeg');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Accept-Ranges', 'bytes');
+      const stream = fs.createReadStream(fullBgmPath);
+      stream.pipe(res);
+      return;
+    }
+  } catch (e) {
+    console.error('[BGM SERVER ERROR] Error serving BGM track:', e);
+  }
+  next();
+});
+
+// Dynamic BGM Scanning API endpoint
+app.get('/api/bgm', (req, res) => {
+  console.log(`[API BGM SCANNER] Scanning audio tracks in: ${BGM_DIR}`);
+  const tracks = [];
+
+  if (fs.existsSync(BGM_DIR)) {
+    try {
+      const entries = fs.readdirSync(BGM_DIR, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.name.startsWith('.')) continue;
+        if (entry.isFile()) {
+          const ext = path.extname(entry.name).toLowerCase();
+          if (VALID_AUDIO_EXTENSIONS.includes(ext)) {
+            const rawTitle = path.parse(entry.name).name;
+            const cleanTitle = rawTitle
+              .replace(/[-_]/g, ' ')
+              .replace(/\s+/g, ' ')
+              .trim();
+
+            tracks.push({
+              id: `bgm-${rawTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+              title: cleanTitle.toUpperCase() || rawTitle,
+              filename: entry.name,
+              url: `/bgm/${encodeURIComponent(entry.name)}`
+            });
+          }
+        }
+      }
+    } catch (e) {
+      console.error('[API BGM ERROR] Failed reading BGM directory:', e);
+    }
+  }
+
+  res.json({
+    count: tracks.length,
+    tracks: tracks.sort((a, b) => a.title.localeCompare(b.title))
+  });
 });
 
 // Dynamic ROM Scanning API endpoint
@@ -98,26 +168,27 @@ app.get('/api/roms', (req, res) => {
           if (VALID_EXTENSIONS.includes(ext)) {
             const nameWithoutExt = path.parse(entry.name).name;
             const pathParts = systemSubdir.split('/');
-            const topFolderKey = pathParts[0].toLowerCase();
-            const parentFolderKey = pathParts.length > 1 ? pathParts[pathParts.length - 1] : '';
+            let systemKey = null;
 
-            const extSystemKey = EXTENSION_MAP[ext];
-            const systemKey = SYSTEM_MAP[topFolderKey] ? topFolderKey : (extSystemKey || 'nes');
+            if (pathParts.length > 0 && SYSTEM_MAP[pathParts[0].toLowerCase()]) {
+              systemKey = pathParts[0].toLowerCase();
+            } else {
+              systemKey = EXTENSION_MAP[ext] || 'nes';
+            }
+
+            const cleanDisplayTitle = nameWithoutExt
+              .replace(/\(.*?\)/g, '')
+              .replace(/\[.*?\]/g, '')
+              .replace(/[-_]/g, ' ')
+              .replace(/\s+/g, ' ')
+              .trim();
+
             const systemInfo = SYSTEM_MAP[systemKey] || SYSTEM_MAP['nes'];
 
-            const pathSegments = currentSubdir.split('/').map(segment => encodeURIComponent(segment));
-            const romUrl = `/roms/${pathSegments.join('/')}`;
-
-            const rawTitle = (nameWithoutExt.toLowerCase() === 'game' || nameWithoutExt.toLowerCase() === 'rom') && parentFolderKey
-              ? parentFolderKey
-              : nameWithoutExt;
-
-            const cleanDisplayTitle = rawTitle.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
-
             games.push({
-              id: `${systemKey}-${rawTitle}`.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-              title: cleanDisplayTitle || rawTitle,
-              rawTitle: rawTitle,
+              id: `${systemKey}-${nameWithoutExt}`.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+              title: cleanDisplayTitle || nameWithoutExt,
+              rawTitle: nameWithoutExt,
               filename: entry.name,
               systemKey,
               systemName: systemInfo.name,
@@ -125,58 +196,53 @@ app.get('/api/roms', (req, res) => {
               systemColor: systemInfo.color,
               systemIcon: systemInfo.icon,
               category: systemInfo.category,
-              romUrl,
+              romUrl: `/roms/${systemSubdir ? `${systemSubdir}` : `${encodeURIComponent(entry.name)}`}`,
               coverUrl: null
             });
           }
         }
       }
     } catch (err) {
-      console.error(`[API SCANNER ERROR] Error reading directory ${dirPath}:`, err);
+      console.error(`[API SCANNER ERROR] Error scanning ${dirPath}:`, err);
     }
   }
 
   scanDirectory(ROMS_DIR);
-  console.log(`[API SCANNER COMPLETED] Total games indexed: ${games.length}`);
-
-  res.setHeader('Content-Type', 'application/json');
-  res.json({
-    games,
-    systems: Object.keys(SYSTEM_MAP).map(key => ({
-      key,
-      ...SYSTEM_MAP[key],
-      gameCount: games.filter(g => g.systemKey === key).length
-    }))
-  });
+  res.json({ count: games.length, games });
 });
 
-// Upload ROM API endpoint - Saves file directly to ROMS_DIR/<systemKey>/
-app.post('/api/upload-rom', (req, res) => {
-  const filename = decodeURIComponent(req.headers['x-filename'] || '');
-  if (!filename) {
-    return res.status(400).json({ error: 'Missing x-filename header' });
-  }
-
-  const ext = path.extname(filename).toLowerCase();
-  const systemKey = EXTENSION_MAP[ext] || 'nes';
-  const targetDir = path.join(ROMS_DIR, systemKey);
-
+// Dynamic Local ROM File Upload Endpoint
+app.post('/api/upload-rom', express.raw({ type: 'application/octet-stream', limit: '250mb' }), (req, res) => {
   try {
-    if (!fs.existsSync(targetDir)) {
-      fs.mkdirSync(targetDir, { recursive: true });
+    const filenameHeader = req.headers['x-filename'];
+    const systemKeyHeader = req.headers['x-system-key'];
+
+    if (!filenameHeader || !req.body || req.body.length === 0) {
+      return res.status(400).json({ error: 'Missing required file data or x-filename header' });
     }
 
-    const safeFilename = path.basename(filename);
-    const targetFilePath = path.join(targetDir, safeFilename);
+    const safeFilename = path.basename(decodeURIComponent(filenameHeader));
+    const ext = path.extname(safeFilename).toLowerCase();
 
-    console.log(`📥 [API UPLOADER] Receiving ROM "${safeFilename}" -> Saving to: ${targetFilePath}`);
+    let systemKey = (systemKeyHeader || '').toLowerCase();
+    if (!systemKey || !SYSTEM_MAP[systemKey]) {
+      systemKey = EXTENSION_MAP[ext] || 'nes';
+    }
+
+    const targetSystemDir = path.join(ROMS_DIR, systemKey);
+    if (!fs.existsSync(targetSystemDir)) {
+      fs.mkdirSync(targetSystemDir, { recursive: true });
+    }
+
+    const targetFilePath = path.join(targetSystemDir, safeFilename);
+    console.log(`📥 [API UPLOADER] Saving ROM: ${safeFilename} to ${targetFilePath} (${req.body.length} bytes)`);
 
     const writeStream = fs.createWriteStream(targetFilePath);
-
-    req.pipe(writeStream);
+    writeStream.write(req.body);
+    writeStream.end();
 
     writeStream.on('finish', () => {
-      console.log(`✅ [API UPLOADER SUCCESS] Successfully saved "${safeFilename}" to ${targetDir}`);
+      console.log(`✅ [API UPLOADER SUCCESS] Successfully wrote: ${safeFilename}`);
       
       const systemInfo = SYSTEM_MAP[systemKey] || SYSTEM_MAP['nes'];
       const rawTitle = path.parse(safeFilename).name;
@@ -227,4 +293,5 @@ app.use((req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 [RETRO PLAYER SERVER] Running at http://0.0.0.0:${PORT}`);
   console.log(`📂 [ROMS DIRECTORY] ${ROMS_DIR}`);
+  console.log(`🎵 [BGM DIRECTORY] ${BGM_DIR}`);
 });

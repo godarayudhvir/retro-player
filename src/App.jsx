@@ -9,6 +9,8 @@ import DropzoneOverlay from './components/DropzoneOverlay';
 import ConsoleHud from './components/ConsoleHud';
 import OnScreenKeyboard from './components/OnScreenKeyboard';
 import EmulatorModal from './components/EmulatorModal';
+import ProfileSelectModal from './components/ProfileSelectModal';
+import MiiCreatorModal from './components/MiiCreatorModal';
 
 import { useWebAudioSfx } from './hooks/useWebAudioSfx';
 import { useGamepadStatus } from './hooks/useGamepadStatus';
@@ -18,10 +20,12 @@ import { useGamepadNavigation } from './hooks/useGamepadNavigation';
 import { usePlaytimeAndFavorites } from './hooks/usePlaytimeAndFavorites';
 import { useThemeEngine } from './hooks/useThemeEngine';
 import { useMetadataScraper } from './hooks/useMetadataScraper';
+import { useProfileManager } from './hooks/useProfileManager';
+import { useBgmEngine } from './hooks/useBgmEngine';
 
 /**
  * Root Application Orchestrator for Retro Player.
- * Coordinates modular UI components, custom hooks, spatial navigation, audio synthesis, themes, metadata scraper, and emulation.
+ * Coordinates modular UI components, profiles, Mii avatars, BGM audio, themes, and emulation.
  */
 export default function App() {
   const [activeGame, setActiveGame] = useState(null);
@@ -30,18 +34,35 @@ export default function App() {
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showLoadRomModal, setShowLoadRomModal] = useState(false);
   const [showVirtualKeyboard, setShowVirtualKeyboard] = useState(false);
+  const [showProfileSelectModal, setShowProfileSelectModal] = useState(false);
+  const [showMiiCreatorModal, setShowMiiCreatorModal] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(null);
   const [oskPos, setOskPos] = useState({ row: 1, col: 0 });
   const [time, setTime] = useState(() => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
 
   const searchInputRef = useRef(null);
 
-  // Hook 1: Web Audio UI Sound Effects Synthesizer
+  // Hook 1: Profile Manager & Mii Avatars
+  const {
+    profiles,
+    activeProfile,
+    activeProfileId,
+    createProfile,
+    updateProfile,
+    deleteProfile,
+    switchProfile
+  } = useProfileManager();
+
+  // Hook 2: Web Audio UI Sound Effects Synthesizer
   const sfx = useWebAudioSfx();
 
-  // Hook 2: Multi-Theme Engine
+  // Hook 3: Multi-Theme Engine
   const themeEngine = useThemeEngine();
 
-  // Hook 3: Favorites, Recently Played, and Playtime Analytics
+  // Hook 4: Background Music (BGM) Engine with smart in-game pause
+  const bgm = useBgmEngine({ activeGame });
+
+  // Hook 5: Favorites, Recently Played, and Playtime Analytics (Scoped per Active Profile)
   const {
     favorites,
     recentlyPlayed,
@@ -51,12 +72,12 @@ export default function App() {
     recordGameSession,
     resetGameStats,
     getGameStats
-  } = usePlaytimeAndFavorites();
+  } = usePlaytimeAndFavorites(activeProfileId);
 
-  // Hook 4: Gamepad Connection Tracking
+  // Hook 6: Gamepad Connection Tracking
   const { gamepadConnected, setGamepadConnected } = useGamepadStatus();
 
-  // Hook 5: Save Data & Battery SRAM Inspection
+  // Hook 7: Save Data & Battery SRAM Inspection
   const { hasSaveData, checkSaveData } = useSaveDataManager();
 
   // Selection Handler for opening Game Detail Drawer Modal
@@ -185,9 +206,9 @@ export default function App() {
       {/* Top Console Status Bar */}
       <Topbar
         gamepadConnected={gamepadConnected}
-        activeSystem={activeSystem}
-        systems={systems}
-        setActiveSystem={setActiveSystem}
+        activeProfile={activeProfile}
+        onOpenProfileSelect={() => setShowProfileSelectModal(true)}
+        bgm={bgm}
         focusedTarget={focusedTarget}
         setFocusedTarget={setFocusedTarget}
         searchQuery={searchQuery}
@@ -224,11 +245,23 @@ export default function App() {
         fetchGames={fetchGames}
         loading={loading}
         isFavorite={isFavorite}
+        activeSystem={activeSystem}
+        searchQuery={searchQuery}
+        setActiveSystem={setActiveSystem}
+        setSearchQuery={setSearchQuery}
         sfx={sfx}
       />
 
       {/* Bottom Controller HUD */}
-      <ConsoleHud gamepadConnected={gamepadConnected} />
+      <ConsoleHud
+        gamepadConnected={gamepadConnected}
+        activeSystem={activeSystem}
+        systems={systems}
+        setActiveSystem={setActiveSystem}
+        focusedTarget={focusedTarget}
+        setFocusedTarget={setFocusedTarget}
+        sfx={sfx}
+      />
 
       {/* Load Custom ROM In-App Modal Dialog */}
       <LoadRomModal
@@ -300,6 +333,51 @@ export default function App() {
         }}
         resultsCount={filteredGames.length}
         gamepadConnected={gamepadConnected}
+      />
+
+      {/* User Profile Selector Modal */}
+      <ProfileSelectModal
+        isOpen={showProfileSelectModal}
+        profiles={profiles}
+        activeProfileId={activeProfileId}
+        onSelectProfile={(id) => {
+          switchProfile(id);
+          setShowProfileSelectModal(false);
+        }}
+        onCreateNewProfile={() => {
+          setEditingProfile(null);
+          setShowProfileSelectModal(false);
+          setShowMiiCreatorModal(true);
+        }}
+        onEditProfile={(profile) => {
+          setEditingProfile(profile);
+          setShowProfileSelectModal(false);
+          setShowMiiCreatorModal(true);
+        }}
+        onDeleteProfile={(id) => {
+          deleteProfile(id);
+        }}
+        onClose={() => setShowProfileSelectModal(false)}
+        sfx={sfx}
+      />
+
+      {/* Nintendo Mii Profile & Avatar Studio Wizard Modal */}
+      <MiiCreatorModal
+        isOpen={showMiiCreatorModal}
+        initialProfile={editingProfile}
+        onSave={(data) => {
+          if (editingProfile) {
+            updateProfile(editingProfile.id, data);
+          } else {
+            createProfile(data.name, data.miiData, data.favoriteColor);
+          }
+          setShowMiiCreatorModal(false);
+        }}
+        onClose={() => {
+          setShowMiiCreatorModal(false);
+          setEditingProfile(null);
+        }}
+        sfx={sfx}
       />
 
       {/* Active Game Emulator Sandbox */}

@@ -193,31 +193,28 @@ export default function GameDetailModal({
               </button>
 
               <button
-                className={`favorite-toggle-btn ${isFavorite ? 'active' : ''} ${focusedTarget.zone === 'cardModal' && focusedTarget.id === 'fav' ? 'gamepad-focused' : ''}`}
+                className={`favorite-toggle-btn icon-only ${isFavorite ? 'active' : ''} ${focusedTarget.zone === 'cardModal' && focusedTarget.id === 'fav' ? 'gamepad-focused' : ''}`}
                 onClick={() => {
                   if (onToggleFavorite) {
                     const nextState = onToggleFavorite(game);
                     sfx?.playFavoriteToggle?.(nextState);
                   }
                 }}
-                title="Toggle Favorite (X on Gamepad / F on Keyboard)"
+                title={isFavorite ? "Remove from Favorites (X on Gamepad / F on Keyboard)" : "Add to Favorites (X on Gamepad / F on Keyboard)"}
+                aria-label={isFavorite ? "Favorited" : "Add Favorite"}
               >
-                <Star size={18} fill={isFavorite ? '#fbbf24' : 'none'} color={isFavorite ? '#f59e0b' : 'currentColor'} />
-                <span>{isFavorite ? 'FAVORITED' : 'ADD FAVORITE'}</span>
-                <kbd className="lr-badge" style={{ marginLeft: 'auto', fontSize: '0.7rem' }}>
-                  {gamepadConnected ? 'X' : 'F'}
-                </kbd>
+                <Star size={20} fill={isFavorite ? '#fbbf24' : 'none'} color={isFavorite ? '#f59e0b' : 'currentColor'} />
               </button>
 
               {/* Scrape Online Metadata Button */}
               <button
-                className="scraper-refresh-btn"
+                className="scraper-refresh-btn icon-only"
                 onClick={handleManualScrape}
                 disabled={isLocalScraping || isScraping}
                 title="Re-scrape 3D Box Art & Online Overview"
+                aria-label="Re-scrape Art & Metadata"
               >
-                <RefreshCw size={16} className={isLocalScraping ? 'spin' : ''} />
-                <span>{isLocalScraping ? 'SCRAPING...' : 'RE-SCRAPE ART'}</span>
+                <RefreshCw size={18} className={isLocalScraping ? 'spin' : ''} />
               </button>
             </div>
           </div>

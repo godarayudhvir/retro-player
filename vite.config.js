@@ -42,6 +42,8 @@ const EXTENSION_MAP = {
 
 function multiConsoleScannerPlugin() {
   const romsBaseDir = process.env.ROMS_DIR ? path.resolve(process.env.ROMS_DIR) : path.resolve(process.cwd(), 'public/roms');
+  const bgmBaseDir = process.env.BGM_DIR ? path.resolve(process.env.BGM_DIR) : path.resolve(process.cwd(), 'public/bgm');
+  const validAudioExts = ['.mp3', '.ogg', '.wav', '.m4a', '.flac', '.aac'];
 
   return {
     name: 'multi-console-scanner-plugin',
@@ -65,6 +67,69 @@ function multiConsoleScannerPlugin() {
           console.error('[ROM SERVER ERROR] Failed serving ROM:', e);
         }
         next();
+      });
+
+      // Direct static file handler for /bgm/ files
+      server.middlewares.use('/bgm', (req, res, next) => {
+        try {
+          const relativePath = decodeURIComponent(req.url.split('?')[0]);
+          const fullBgmPath = path.join(bgmBaseDir, relativePath);
+
+          if (fs.existsSync(fullBgmPath) && fs.statSync(fullBgmPath).isFile()) {
+            const ext = path.extname(fullBgmPath).toLowerCase();
+            const mimeMap = {
+              '.mp3': 'audio/mpeg',
+              '.ogg': 'audio/ogg',
+              '.wav': 'audio/wav',
+              '.m4a': 'audio/mp4',
+              '.flac': 'audio/flac',
+              '.aac': 'audio/aac'
+            };
+            res.setHeader('Content-Type', mimeMap[ext] || 'audio/mpeg');
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Accept-Ranges', 'bytes');
+            const stream = fs.createReadStream(fullBgmPath);
+            stream.pipe(res);
+            return;
+          }
+        } catch (e) {
+          console.error('[BGM SERVER ERROR] Failed serving BGM track:', e);
+        }
+        next();
+      });
+
+      // API Endpoint for BGM list
+      server.middlewares.use('/api/bgm', (req, res) => {
+        const tracks = [];
+        if (fs.existsSync(bgmBaseDir)) {
+          try {
+            const entries = fs.readdirSync(bgmBaseDir, { withFileTypes: true });
+            for (const entry of entries) {
+              if (entry.name.startsWith('.')) continue;
+              if (entry.isFile()) {
+                const ext = path.extname(entry.name).toLowerCase();
+                if (validAudioExts.includes(ext)) {
+                  const rawTitle = path.parse(entry.name).name;
+                  const cleanTitle = rawTitle.replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+                  tracks.push({
+                    id: `bgm-${rawTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+                    title: cleanTitle.toUpperCase() || rawTitle,
+                    filename: entry.name,
+                    url: `/bgm/${encodeURIComponent(entry.name)}`
+                  });
+                }
+              }
+            }
+          } catch (e) {
+            console.error('[API BGM ERROR] Failed reading BGM directory:', e);
+          }
+        }
+
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({
+          count: tracks.length,
+          tracks: tracks.sort((a, b) => a.title.localeCompare(b.title))
+        }));
       });
 
       // API Endpoint for ROM list
