@@ -124,6 +124,12 @@ mindmap
       PWA Standalone App
       Native File System Access
       Zip & 7z Auto-Extraction
+    Console Settings & System Hub
+      ROM & BGM Content Manager
+      Core & Shader Video Presets
+      Controller Deadzones & Haptics
+      RetroAchievements Integration
+      IndexedDB Backup & Diagnostics
 ```
 
 ---
@@ -416,7 +422,65 @@ mindmap
 
 ---
 
-## 8. 🏗️ Codebase Architecture & Technical Refactorings
+## 8. ⚙️ Console Settings & System Preferences Hub
+
+```
++-------------------------------------------------------------------------------+
+| CONSOLE SETTINGS & PREFERENCES MATRIX (MIRAI EXPANSION)                       |
+|                                                                               |
+|  [SETTINGS MODAL]                                                             |
+|   ├── 1. ROM & Content Manager (Upload, Delete, Path Remap, Hash Check)       |
+|   ├── 2. Background Audio & Jukebox (Upload, Gain, Crossfade, Loop Mode)      |
+|   ├── 3. Emulation Core Tuning (Default core overrides, Rewind, Fast Forward) |
+|   ├── 4. Shaders & Visual Filters (CRT Scanlines, LCD Grid, Color Correction) |
+|   ├── 5. Input Calibration & Remap (Deadzone, Turbo frequency, Haptic level)  |
+|   ├── 6. RetroAchievements Account (API key, Hardcore mode, Sound alerts)     |
+|   ├── 7. Cloud Save Integrations (Google Drive, WebDAV, Auto-backup intervals)|
+|   ├── 8. Theme & Sound FX Studio (Sound packs, Custom fonts, Accent hues)     |
+|   └── 9. Storage & Database Doctor (Export DB backup, Clear cache, Re-index)  |
++-------------------------------------------------------------------------------+
+```
+
+### 8.1 ROM & Content Management Hub
+- **File Management**: Batch upload, multi-select deletion, and disk space usage meter.
+- **Folder Mapping**: Custom ROM directory path assignment and direct rescan trigger.
+- **Header Checksum & Integrity Tool**: Verify ROM dumps against No-Intro / Redump SHA-1 databases.
+
+### 8.2 Background Audio & Jukebox Controls
+- **Audio Tuning**: Crossfade durations (1s - 5s), volume normalization, and menu music ducking sensitivity.
+- **Custom BGM Playlists**: Per-system ambient music (e.g. play SNES themes when browsing SNES tab).
+
+### 8.3 Core Emulation & Video Engine Settings
+- **Core Overrides**: Select specific emulator cores per system (e.g., mGBA vs VBA-M for GBA, Snes9x vs bsnes for SNES).
+- **Video Shaders**: Global or per-system default CRT scanlines, LCD subpixel grids, bilinear filtering, and integer scaling toggle.
+- **Performance Tweaks**: Fast-forward multiplier (2x, 4x, 8x), Rewind buffer duration, and latency reduction run-ahead modes.
+
+### 8.4 Controller Remapping & Haptic Calibration
+- **Deadzone & Stick Curves**: Fine-tune analog stick sensitivity and deadzones for drifting sticks.
+- **Turbo Frequency Engine**: Adjust turbo repeat rates (5Hz, 10Hz, 20Hz, 30Hz).
+- **Haptic Vibration Strength**: 0% - 100% slider for controller rumble and mobile vibration.
+
+### 8.5 RetroAchievements & Online Services
+- **User Authentication**: Connect RetroAchievements username and API token.
+- **Hardcore Mode Toggle**: Disable save states and rewind for official leaderboards.
+- **Achievement Notifications**: Toast banner positioning, duration, and custom sound chime.
+
+### 8.6 Cloud Storage & Automatic Backups
+- **Cloud Provider Linker**: 1-click connect with Google Drive, Dropbox, WebDAV, or self-hosted S3/MinIO.
+- **Auto-Sync Interval**: Choose sync triggers (on exit, hourly, or manual sync).
+
+### 8.7 Theme & Acoustic Sound Pack Customizer
+- **Custom Sound Packs**: Switch UI audio feedback between Nintendo Switch, Wii U, PS5, Steam Deck, or silent.
+- **Custom Theme Colors**: Color picker for signature UI accent hues and custom background wallpapers.
+
+### 8.8 Storage Doctor & Database Diagnostics
+- **IndexedDB Backup & Restore**: Export all profiles, saves, playtime stats, and favorites into a single `.json` or `.db` backup file.
+- **Cache Cleaner**: Purge stale scraped box art or repair broken thumbnail cache without losing playtime or profiles.
+- **System Info & Diagnostic Logs**: Live WebAssembly engine status, controller latency monitor, and storage quota gauge.
+
+---
+
+## 9. 🏗️ Codebase Architecture & Technical Refactorings
 
 ### 8.1 Component Decomposition Plan for `App.jsx`
 
