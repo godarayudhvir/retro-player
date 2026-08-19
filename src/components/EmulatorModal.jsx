@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Gamepad2, Wifi, WifiOff, Menu, Activity, ShieldCheck } from 'lucide-react';
+import { X, Gamepad2, Wifi, WifiOff, Menu, Activity, ShieldCheck, Save, Check } from 'lucide-react';
 import { detectSystemFromExtension } from '../utils/systemDetector';
 
 export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, onSessionEnd }) {
@@ -678,9 +678,40 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
               } catch(e) {}
             };
 
+            window.EJS_onLoadSave = function() {
+              console.log('💾 [BATTERY SAVE LOADED] In-game SRAM successfully restored from DB for:', ${JSON.stringify(currentGame.id)});
+            };
+
+            window.EJS_onSaveSave = function() {
+              console.log('💾 [BATTERY SAVE SAVED] In-game SRAM flushed and committed to IndexedDB for:', ${JSON.stringify(currentGame.id)});
+            };
+
             window.EJS_onLoadState = function() {
               console.log('💾 [SAVE SYSTEM READY] Persistent save states bound to IndexedDB key:', ${JSON.stringify(currentGame.id)});
             };
+
+            window.flushSaveToDB = function() {
+              try {
+                const emu = window.EJS_emulator;
+                if (!emu) return;
+                console.log('💾 [SAVE FLUSH TRIGGERED] Committing pending in-game saves to IndexedDB...');
+                if (typeof emu.saveSave === 'function') {
+                  emu.saveSave();
+                }
+                if (typeof emu.saveState === 'function') {
+                  // Optional auto quicksave state
+                }
+              } catch (e) {
+                console.warn('⚠️ [SAVE FLUSH WARN]:', e);
+              }
+            };
+
+            // Auto-flush in-game battery saves every 15 seconds to ensure zero lost progress
+            setInterval(function() {
+              if (window.flushSaveToDB) {
+                window.flushSaveToDB();
+              }
+            }, 15000);
 
             function handleLoaderFallback() {
               console.warn('⚠️ [EMULATOR LOADER FALLBACK] Primary path failed. Attempting local /emulatorjs/data/loader.js fallback...');
@@ -780,13 +811,57 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
       try {
         const win = iframeRef.current.contentWindow;
         if (win) {
-          win.location.href = 'about:blank';
+          if (typeof win.flushSaveToDB === 'function') {
+            win.flushSaveToDB();
+          } else if (win.EJS_emulator && typeof win.EJS_emulator.saveSave === 'function') {
+            win.EJS_emulator.saveSave();
+          }
         }
-      } catch (e) {}
-      iframeRef.current.remove();
-      iframeRef.current = null;
+      } catch (e) {
+        console.warn('⚠️ [SAVE FLUSH ON CLOSE WARN]:', e);
+      }
+
+      // Small 150ms buffer to allow IndexedDB async transaction to finalize
+      setTimeout(() => {
+        if (iframeRef.current) {
+          try {
+            const win = iframeRef.current.contentWindow;
+            if (win) {
+              if (win.EJS_emulator && typeof win.EJS_emulator.destroy === 'function') {
+                win.EJS_emulator.destroy();
+              }
+              win.location.href = 'about:blank';
+            }
+          } catch (e) {}
+          iframeRef.current.remove();
+          iframeRef.current = null;
+        }
+        onClose();
+      }, 150);
+      return;
     }
     onClose();
+  };
+
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const handleSaveNow = (e) => {
+    e.stopPropagation();
+    try {
+      const win = iframeRef.current?.contentWindow;
+      if (win) {
+        if (typeof win.flushSaveToDB === 'function') {
+          win.flushSaveToDB();
+        } else if (win.EJS_emulator && typeof win.EJS_emulator.saveSave === 'function') {
+          win.EJS_emulator.saveSave();
+        }
+        setSaveSuccess(true);
+        sfx?.playSaveDetected?.();
+        setTimeout(() => setSaveSuccess(false), 2500);
+      }
+    } catch (err) {
+      console.warn('Manual save failed:', err);
+    }
   };
 
   const handleToggleEmulatorMenu = (e) => {
@@ -865,6 +940,18 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
         </div>
 
         <div className="emulator-topbar-right">
+          {/* Manual Instant Save Button */}
+          <button
+            className={`emulator-save-btn ${saveSuccess ? 'success' : ''}`}
+            onClick={handleSaveNow}
+            title="Flush and save battery RAM to IndexedDB now"
+          >
+            {saveSuccess ? <Check size={16} color="#10b981" /> : <Save size={16} color="#38bdf8" />}
+            <span className="btn-label" style={{ color: saveSuccess ? '#10b981' : undefined }}>
+              {saveSuccess ? 'SAVED!' : 'Save'}
+            </span>
+          </button>
+
           {/* Diagnostic Monitor Toggle Button */}
           <button
             className={`emulator-diag-btn ${showDiagnostics ? 'active' : ''}`}

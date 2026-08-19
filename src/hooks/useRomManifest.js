@@ -68,7 +68,7 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
     const cleanTitle = file.name.replace(/\.[^/.]+$/, "");
 
     let customGame = {
-      id: `custom_${Date.now()}_${cleanTitle.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+      id: `custom_${sys.key}_${cleanTitle.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
       title: `${cleanTitle} (Custom)`,
       rawTitle: cleanTitle,
       filename: file.name,
