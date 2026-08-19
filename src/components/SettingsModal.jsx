@@ -16,6 +16,7 @@ import {
   Play,
   Volume2
 } from 'lucide-react';
+import { detectSystemFromExtension } from '../utils/systemDetector';
 
 /**
  * Console Settings & Library Manager Modal
@@ -68,11 +69,13 @@ export default function SettingsModal({
 
     for (const file of files) {
       try {
+        const sys = detectSystemFromExtension(file.name);
         const response = await fetch('/api/upload-rom', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/octet-stream',
-            'x-filename': encodeURIComponent(file.name)
+            'x-filename': encodeURIComponent(file.name),
+            'x-system-key': sys.key
           },
           body: file
         });

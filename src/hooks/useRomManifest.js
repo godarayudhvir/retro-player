@@ -94,6 +94,7 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
         method: 'POST',
         headers: {
           'x-filename': encodeURIComponent(file.name),
+          'x-system-key': sys.key,
           'Content-Type': 'application/octet-stream'
         },
         body: file

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Gamepad2, Wifi, WifiOff, Menu } from 'lucide-react';
+import { detectSystemFromExtension } from '../utils/systemDetector';
 
 export default function EmulatorModal({ game, gamepadConnected, onClose, onSessionEnd }) {
   const stageRef = useRef(null);
@@ -74,11 +75,20 @@ export default function EmulatorModal({ game, gamepadConnected, onClose, onSessi
     const isOffline = !navigator.onLine;
     const initialDataPath = isOffline ? localDataPath : cdnDataPath;
     setIsLocalOffline(isOffline);
-    let core = game.systemCore || 'nes';
+    let core = game.systemCore;
+    if (!core || core === 'custom' || core === 'nes') {
+      const detected = detectSystemFromExtension(game.filename || game.title || '');
+      if (detected && detected.core && detected.core !== 'custom') {
+        core = detected.core;
+      } else {
+        core = core || 'nes';
+      }
+    }
     if (core === 'gbc') core = 'gb';
     if (core === 'ps1') core = 'psx';
     if (core === 'sega' || core === 'genesis' || core === 'megadrive') core = 'segaMD';
     if (core === 'gamegear') core = 'segaGG';
+    if (core === 'arcade') core = 'mame2003_plus';
 
 
     const iframe = document.createElement('iframe');
