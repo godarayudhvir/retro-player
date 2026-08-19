@@ -20,8 +20,8 @@ The `LoadRomModal` component (`.info-modal-backdrop` + `.load-rom-modal`) provid
   - Clicking anywhere in the dropzone or clicking "Choose File" triggers the browser file picker.
 - **Visual Supported Systems Catalog (`.load-rom-platforms-grid`)**:
   - Renders platform chips (`.load-rom-platform-chip`) with official SVG icons and supported extensions (GBA, GB, GBC, NES, SNES, N64, NDS, PS1, Sega Genesis, Arcade).
-- **Client-Side Privacy Guarantee (`.load-rom-privacy-banner`)**:
-  - Explicit notification assuring the user that ROMs run 100% locally in WebAssembly memory and are never uploaded to a remote server.
+- **Self-Hosted Library Sync Guarantee (`.load-rom-privacy-banner`)**:
+  - Informs the user that loaded ROMs are automatically organized into the host server's persistent storage (`/roms/<systemKey>/`) and synchronized across all connected client devices while emulation runs locally in client WebAssembly memory.
 - **Gamepad & Keyboard Navigation**:
   - `Escape` or `B` button closes the modal.
   - Arrow keys / D-pad navigate between Cancel and Browse buttons.

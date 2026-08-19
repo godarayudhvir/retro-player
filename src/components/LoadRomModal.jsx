@@ -136,10 +136,10 @@ export default function LoadRomModal({
             </div>
           </div>
 
-          {/* Privacy Note */}
+          {/* Self-Hosted Library Sync Note */}
           <div className="load-rom-privacy-banner">
             <ShieldCheck size={18} className="load-rom-privacy-icon" />
-            <span><strong>100% Client-Side Privacy:</strong> ROMs run directly in browser memory and are never uploaded to any server.</span>
+            <span><strong>Self-Hosted Library Sync:</strong> Loaded ROMs are automatically organized and saved to your host server's library for instant access across all your devices.</span>
           </div>
         </div>
 
