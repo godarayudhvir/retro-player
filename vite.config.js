@@ -50,6 +50,7 @@ const EXTENSION_MAP = {
   '.pbp': 'ps1',
   '.bin': 'ps1',
   '.a26': 'atari2600',
+  '.7z': 'atari2600',
   '.zip': 'arcade'
 };
 

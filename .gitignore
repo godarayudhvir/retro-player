@@ -41,29 +41,10 @@ data/
 # Exclude server-mounted root /roms/ directory
 /roms/
 
-# Exclude heavy multi-gigabyte demo systems (>100MB files, 3.24 GB total)
-# to stay within GitHub 100 MB per-file limits and 1 GB GitHub Pages quota.
-# Note: Full custom ROM loading in-browser and local Docker storage remain 100% supported!
-public/roms/playstation/*
-!public/roms/playstation/.gitkeep
-public/roms/nds/*
-!public/roms/nds/.gitkeep
-
-# Curated Low-Size Public Showcase Exceptions for PlayStation (~105.5 MB)
-!public/roms/playstation/Dino Crisis (USA) (Demo)/
-!public/roms/playstation/Dino Crisis (USA) (Demo)/**
-!public/roms/playstation/Rayman 2 - The Great Escape (USA) (Demo)/
-!public/roms/playstation/Rayman 2 - The Great Escape (USA) (Demo)/**
-!public/roms/playstation/Driver - You Are the Wheelman (USA) (Demo)/
-!public/roms/playstation/Driver - You Are the Wheelman (USA) (Demo)/**
-
-# Curated Low-Size Public Showcase Exceptions for Nintendo DS (48.0 MB)
-!public/roms/nds/Mario Kart DS (USA) (Demo) (Kiosk)/
-!public/roms/nds/Mario Kart DS (USA) (Demo) (Kiosk)/**
-!public/roms/nds/Super Mario 64 DS (USA) (Demo) (Kiosk)/
-!public/roms/nds/Super Mario 64 DS (USA) (Demo) (Kiosk)/**
-!public/roms/nds/Tetris DS (USA) (Demo) (Kiosk)/
-!public/roms/nds/Tetris DS (USA) (Demo) (Kiosk)/**
+# All bundled public showcase ROMs (3-5 curated titles per system across all 12 systems)
+# are fully included and tracked in Git without large-file exceptions.
+!public/roms/
+!public/roms/**
 
 # -----------------------------------------------------------------------------
 # Background Music (BGM)

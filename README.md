@@ -114,30 +114,29 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 ## 🎮 Bundled Non-Commercial Demo & Homebrew Showcase
 
-Retro Player features a curated collection of **non-complete demonstration ROMs, promotional samples, Sega Channel trials, aftermarket homebrew, and prototypes**, structured into two tiers to comply with GitHub file size quotas:
+Retro Player features a curated collection of **non-complete demonstration ROMs, promotional samples, Sega Channel trials, aftermarket homebrew, and prototypes**, pruned to the top 3–5 best titles per console platform:
 
-- 🟢 **Public Web Demo Tier (279 Titles — 572.6 MB)**: Pre-packaged directly in the repository and available in the live browser demo across **all 12 supported console platforms**, including 6 curated low-size showcase demos for PlayStation (*Dino Crisis*, *Rayman 2*, *Driver*) and Nintendo DS (*Mario Kart DS*, *Super Mario 64 DS*, *Tetris DS*).
-- ⚪ **Local / Self-Hosted Tier (71 Titles — 3.09 GB)**: Heavy disc dumps (`playstation` & `nds`) are gitignored from GitHub pushes to stay within GitHub's 100 MB per-file and 1 GB Pages limits, but remain 100% playable via **"Load Custom ROM"** or local Docker volume mounts (`/roms`).
-- 📑 **Complete ROM Inventory & File Names**: See **[roms.md](roms.md)** for the full file-by-file inventory of all 350 titles and classification tags.
+- 🟢 **Curated Web Showcase (52 Titles Across 12 Platforms — 510 MB)**: Pre-packaged directly in the repository and instantly available in the browser across **all 12 supported console platforms**, featuring lightweight, fast-loading, high-quality non-commercial titles.
+- 📑 **Complete ROM Inventory & File Names**: See **[roms.md](roms.md)** for the full file-by-file inventory of all 52 titles and classification tags.
 - 🎯 **Curated as Non-Complete ROMs**: All titles are strictly **non-complete evaluation software** (e.g. *Part One*, *Part A*, *Showdown*, *Trade Show Samples*, *Chapter Zero*, *Homebrew Demos*). **Zero full commercial release games are bundled.**
 - ⚖️ **Creator Compliance & Immediate Removal Policy**: If you are a rights holder, developer, or publisher of any demo or sample and would like it removed, please open an issue or pull request and **we will immediately comply**.
 - 🔒 **100% Private Custom ROM Loading**: To play your own personal game dumps, use **"Load Custom ROM"** or drag & drop—files run purely in local browser memory with zero network uploads.
 
 | Console | Supported Key | Bundled Demos & Samples | Public Web Demo | Sample Highlights |
 | :--- | :--- | :---: | :---: | :--- |
-| **Nintendo Entertainment System (NES)** | `nes` | **72 Titles** | 🟢 72 Public | *Micro Mages Demo*, *Blade Buster*, *Alter Ego*, *Almanac Demo*, *Haradius Zero* |
-| **Sega Genesis / Mega Drive** | `sega_genesis` | **66 Titles** | 🟢 66 Public | *Sonic 3D Blast (Part One)*, *Comix Zone (Sega Channel)*, *Earthworm Jim (Test Drive)*, *Tanglewood Demo* |
-| **Atari 2600** | `atari_2600` | **60 Titles** | 🟢 60 Public | *Space Rocks*, *Princess Rescue*, *Galagon*, *Stay Frosty 2*, *Boulder Dash Demo* |
-| **Sony PlayStation (PS1)** | `playstation` | **52 Titles** | 🟢 3 Public / ⚪ 49 Local | *Dino Crisis Demo*, *Rayman 2 Demo*, *Driver Demo* (+ 49 Local Discs) |
-| **Nintendo DS** | `nds` | **25 Titles** | 🟢 3 Public / ⚪ 22 Local | *Mario Kart DS*, *Super Mario 64 DS*, *Tetris DS* (+ 22 Local Demos) |
-| **Arcade (MAME)** | `arcade` | **18 Titles** | 🟢 18 Public | *Gridlee*, *Robby Roto*, *Poly-Play*, *Car Jamboree* |
-| **Game Boy Color** | `gbc` | **17 Titles** | 🟢 17 Public | *Tobu Tobu Girl Deluxe*, *Dangan GB*, *Black & White*, *Deadeus Demo* |
-| **Game Boy (DMG)** | `gb` | **10 Titles** | 🟢 10 Public | *Sheep It Up!*, *Super JetPak DX*, *Pineapple Kid*, *T-Crisis 100%* |
-| **Super Nintendo (SNES)** | `snes` | **9 Titles** | 🟢 9 Public | *Classic Kong*, *N-Warp Daisakusen*, *Attack of the PETSCII Robots*, *Eyra Crow Maiden* |
-| **Sega Game Gear** | `game_gear` | **9 Titles** | 🟢 9 Public | *Columns*, *Galaga '91*, *Super Columns Demo*, *Pengo Demo* |
-| **Nintendo 64 (N64)** | `n64` | **7 Titles** | 🟢 7 Public | *Dexanoid*, *N64 Space Demo*, *Pang 64*, *VRML Viewer Showcase* |
-| **Game Boy Advance** | `gba` | **5 Titles** | 🟢 5 Public | *Goodboy Galaxy Chapter Zero*, *Anguna: Warriors of Virtue*, *Motocross Challenge* |
-| **Total** | **12 Consoles** | **350 Demos** | **279 Public** | **[View Full 350-File Inventory in roms.md ↗](roms.md)** |
+| **Nintendo Entertainment System (NES)** | `nes` | **3 Titles** | 🟢 3 Public | *Micro Mages Demo*, *Super Tilt Bro.*, *Project Blue* |
+| **Sega Genesis / Mega Drive** | `sega_genesis` | **5 Titles** | 🟢 5 Public | *Sonic 3D Blast (Part One)*, *Comix Zone*, *Mortal Kombat 3*, *Super Street Fighter II*, *Earthworm Jim* |
+| **Atari 2600** | `atari_2600` | **5 Titles** | 🟢 5 Public | *Pitfall!*, *Space Invaders*, *River Raid*, *Pac-Man*, *Asteroids* |
+| **Sony PlayStation (PS1)** | `playstation` | **5 Titles** | 🟢 5 Public | *Crash Bandicoot - Warped*, *Dino Crisis*, *Driver*, *Rayman 2*, *Tony Hawk's Pro Skater 2* |
+| **Nintendo DS** | `nds` | **5 Titles** | 🟢 5 Public | *New Super Mario Bros.*, *Mario Kart DS*, *Super Mario 64 DS*, *Tetris DS*, *WarioWare - Touched!* |
+| **Arcade (MAME)** | `arcade` | **4 Titles** | 🟢 4 Public | *Gridlee*, *Looping*, *Star Fire*, *Targ* |
+| **Game Boy Color** | `gbc` | **4 Titles** | 🟢 4 Public | *Donkey Kong Country*, *Resident Evil*, *Silent Hill 2*, *Dragonborne DX* |
+| **Game Boy (DMG)** | `gb` | **4 Titles** | 🟢 4 Public | *Zelda - Majora's Mask*, *Gargoyle's Quest II*, *Gunman Clive*, *Dragonborne* |
+| **Super Nintendo (SNES)** | `snes` | **4 Titles** | 🟢 4 Public | *Gunman Clive*, *Eyra Crow Maiden*, *Lizard*, *Nova the Squirrel 2* |
+| **Sega Game Gear** | `game_gear` | **4 Titles** | 🟢 4 Public | *Sonic Drift*, *GG Turrican*, *Dangerous Demolition*, *Quest* |
+| **Nintendo 64 (N64)** | `n64` | **4 Titles** | 🟢 4 Public | *Legend of Zelda - Majora's Mask*, *Donkey Kong 64*, *Excitebike 64*, *Turok* |
+| **Game Boy Advance** | `gba` | **5 Titles** | 🟢 5 Public | *The Legend of Zelda: The Minish Cap*, *Mario & Luigi: Superstar Saga*, *Super Mario Advance*, *DK King of Swing*, *Pokemon Mystery Dungeon* |
+| **Total** | **12 Consoles** | **52 Demos** | **52 Public** | **[View Full 52-File Inventory in roms.md ↗](roms.md)** |
 
 ---
 
