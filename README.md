@@ -85,9 +85,21 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 ## 🚀 Deployment Guide
 
-### 1. ☁️ Railway
+<div align="center">
 
-[Railway](https://railway.app) is one of the easiest ways to host Retro Player with persistent storage:
+### Instant 1-Click Cloud Deployment
+
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/new?template=https%3A%2F%2Fgithub.com%2Fgodarayudhvir%2Fretro-player)
+&nbsp;&nbsp;
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/godarayudhvir/retro-player)
+
+</div>
+
+---
+
+### 1. ☁️ Railway (1-Click Deploy)
+
+Click the **Deploy on Railway** button above or follow these manual steps:
 
 1. **Fork or Import** this repository into your GitHub account.
 2. Go to **Railway** $\rightarrow$ **New Project** $\rightarrow$ **Deploy from GitHub repo** $\rightarrow$ select `retro-player`.
@@ -103,18 +115,13 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 ---
 
-### 2. ⚡ Render
+### 2. ⚡ Render (1-Click Blueprint)
 
-1. Log in to **[Render](https://render.com)** $\rightarrow$ click **New +** $\rightarrow$ **Web Service**.
-2. Connect your GitHub repository.
-3. Choose **Docker** as the Environment.
-4. **Attach a Disk**:
-   - Scroll to **Disks** $\rightarrow$ **Add Disk**.
-   - Name: `roms-data`, Mount Path: `/roms`, Size: `10GB`.
-5. Add Environment Variables:
-   - `PORT`: `3000`
-   - `ROMS_DIR`: `/roms`
-6. Click **Create Web Service**.
+Click the **Deploy to Render** button above, which automatically reads [`render.yaml`](render.yaml) to configure the Docker runtime, environment variables, and persistent 10GB ROM disk:
+
+1. Click the **Deploy to Render** badge or connect your GitHub repository.
+2. Render provisions the Docker Web Service and attaches the `/roms` persistent disk automatically.
+3. Your portal goes live instantly with zero manual configuration!
 
 ---
 

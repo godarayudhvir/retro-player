@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: retro-player
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    disk:
+      name: roms-data
+      mountPath: /roms
+      sizeGB: 10
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: ROMS_DIR
+        value: /roms
