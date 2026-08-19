@@ -1507,3 +1507,132 @@ body {
   align-items: center;
   gap: 0.35rem;
 }
+
+/* ==========================================================================
+   Load ROM Modal & Interactive Drop Zone
+   ========================================================================== */
+
+.load-rom-modal {
+  max-width: 680px;
+}
+
+.modal-dropzone {
+  background: linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.9) 100%);
+  border: 3px dashed #93c5fd;
+  border-radius: 24px;
+  padding: 2.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-dropzone:hover,
+.modal-dropzone.drag-active {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.95) 0%, rgba(219, 234, 254, 0.9) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(59, 130, 246, 0.2);
+}
+
+.modal-dropzone-icon {
+  color: #3b82f6;
+  transition: transform 0.2s ease;
+}
+
+.modal-dropzone:hover .modal-dropzone-icon {
+  transform: translateY(-4px) scale(1.1);
+}
+
+.modal-dropzone-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.modal-dropzone-text strong {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.modal-dropzone-text span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.modal-browse-btn {
+  background: #ffffff;
+  border: 2px solid #93c5fd;
+  color: #2563eb;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.45rem 1.2rem;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.12);
+  transition: all 0.2s ease;
+}
+
+.modal-browse-btn:hover {
+  background: #3b82f6;
+  color: #ffffff;
+  border-color: #3b82f6;
+  transform: scale(1.05);
+}
+
+.supported-formats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+  gap: 0.5rem;
+}
+
+.platform-chip {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1.5px solid #e2e8f0;
+  padding: 0.5rem 0.65rem;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 6px rgba(160, 175, 205, 0.08);
+}
+
+.chip-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.chip-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chip-name {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--text-main);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.chip-ext {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #64748b;
+  font-family: monospace;
+}
+

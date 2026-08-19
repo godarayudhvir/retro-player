@@ -1,0 +1,299 @@
+import { useState, useEffect, useRef, useCallback } from 'react';
+
+/**
+ * Pure Web Audio API Synthesizer Hook for Retro Console UI Sound Effects.
+ * Generates zero-latency tactile audio feedback without external audio assets.
+ */
+export function useWebAudioSfx() {
+  const [isMuted, setIsMuted] = useState(() => {
+    try {
+      return localStorage.getItem('retro_sfx_muted') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const audioCtxRef = useRef(null);
+
+  // Initialize / resume AudioContext on user interaction
+  const getAudioContext = useCallback(() => {
+    if (typeof window === 'undefined') return null;
+
+    if (!audioCtxRef.current) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        audioCtxRef.current = new AudioCtx();
+      }
+    }
+
+    if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+      audioCtxRef.current.resume().catch(() => {});
+    }
+
+    return audioCtxRef.current;
+  }, []);
+
+  const toggleMute = useCallback(() => {
+    setIsMuted(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem('retro_sfx_muted', String(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
+  /**
+   * Soft tactile tick for D-pad / tile cursor navigation.
+   */
+  const playTileNav = useCallback(() => {
+    if (isMuted) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(480, now);
+      osc.frequency.exponentialRampToValueAtTime(240, now + 0.04);
+
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.045);
+    } catch (e) {
+      console.debug('SFX error:', e);
+    }
+  }, [isMuted, getAudioContext]);
+
+  /**
+   * Frequency swoosh for L1 / R1 console system tab switching.
+   */
+  const playTabSwitch = useCallback(() => {
+    if (isMuted) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(320, now);
+      osc.frequency.exponentialRampToValueAtTime(680, now + 0.07);
+
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.075);
+    } catch (e) {
+      console.debug('SFX error:', e);
+    }
+  }, [isMuted, getAudioContext]);
+
+  /**
+   * Authentic cartridge insert "click-clack" insertion sound followed by a cheerful console boot chime.
+   */
+  const playGameLaunch = useCallback(() => {
+    if (isMuted) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+
+      // 1. Mechanical Cartridge Insert Clack (Percussive double click)
+      const playClick = (time, freq) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(freq, time);
+        osc.frequency.exponentialRampToValueAtTime(80, time + 0.025);
+
+        gain.gain.setValueAtTime(0.18, time);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.025);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(time);
+        osc.stop(time + 0.03);
+      };
+
+      playClick(now, 260);        // First mechanical latch
+      playClick(now + 0.065, 420); // Second cartridge lock click
+
+      // 2. Cheerful Boot Chime (Ascending arpeggio: G4 -> C5 -> E5 -> G5)
+      const notes = [
+        { freq: 392.00, delay: 0.14, dur: 0.12 }, // G4
+        { freq: 523.25, delay: 0.22, dur: 0.12 }, // C5
+        { freq: 659.25, delay: 0.30, dur: 0.14 }, // E5
+        { freq: 783.99, delay: 0.38, dur: 0.35 }  // G5
+      ];
+
+      notes.forEach(({ freq, delay, dur }) => {
+        const noteTime = now + delay;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, noteTime);
+
+        gain.gain.setValueAtTime(0.14, noteTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, noteTime + dur);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(noteTime);
+        osc.stop(noteTime + dur + 0.01);
+      });
+    } catch (e) {
+      console.debug('SFX error:', e);
+    }
+  }, [isMuted, getAudioContext]);
+
+  /**
+   * Harmonic crystal chime for opening modal dialogs / drawers.
+   */
+  const playModalOpen = useCallback(() => {
+    if (isMuted) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      [523.25, 659.25, 1046.50].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + (i * 0.025));
+
+        gain.gain.setValueAtTime(0.08, now + (i * 0.025));
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now + (i * 0.025));
+        osc.stop(now + 0.13);
+      });
+    } catch (e) {
+      console.debug('SFX error:', e);
+    }
+  }, [isMuted, getAudioContext]);
+
+  /**
+   * Soft descending resonance for dismissing modals.
+   */
+  const playModalClose = useCallback(() => {
+    if (isMuted) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.exponentialRampToValueAtTime(220, now + 0.07);
+
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.075);
+    } catch (e) {
+      console.debug('SFX error:', e);
+    }
+  }, [isMuted, getAudioContext]);
+
+  /**
+   * Light click for virtual keyboard typing.
+   */
+  const playKeyTick = useCallback(() => {
+    if (isMuted) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, now);
+      osc.frequency.exponentialRampToValueAtTime(600, now + 0.02);
+
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.025);
+    } catch (e) {
+      console.debug('SFX error:', e);
+    }
+  }, [isMuted, getAudioContext]);
+
+  /**
+   * Confirmation tone when save data is detected.
+   */
+  const playSaveDetected = useCallback(() => {
+    if (isMuted) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      [587.33, 880.00].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        const start = now + (i * 0.06);
+
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(0.09, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.12);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(start);
+        osc.stop(start + 0.13);
+      });
+    } catch (e) {
+      console.debug('SFX error:', e);
+    }
+  }, [isMuted, getAudioContext]);
+
+  return {
+    isMuted,
+    toggleMute,
+    playTileNav,
+    playTabSwitch,
+    playGameLaunch,
+    playModalOpen,
+    playModalClose,
+    playKeyTick,
+    playSaveDetected
+  };
+}

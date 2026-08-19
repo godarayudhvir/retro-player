@@ -16,25 +16,33 @@ architecture/
 │
 ├── core/                   # Core Application & Bootstrap
 │   ├── index.md            # Entry point, React root mounting, and Vite configuration (`main.jsx`, `index.html`, `vite.config.js`)
-│   └── app.md              # Main application shell, view routing, layout, and state orchestration (`src/App.jsx`)
+│   └── app.md              # Main application shell, hook orchestration, and modular layout (`src/App.jsx`)
 │
 ├── modules/                # Core Functional Modules & Systems
 │   ├── emulator.md         # Emulator Engine integration, canvas rendering, save state management & controls (`EmulatorModal.jsx`, EmulatorJS)
+│   ├── audio-sfx.md        # Pure Web Audio API UI sound effects synthesizer (`useWebAudioSfx.js`)
 │   ├── console-switcher.md # Console system switching, filtering & tab navigation logic (GBA, N64, SNES, NES, NDS, PS1, Arcade, Sega)
 │   ├── game-catalog.md     # Game database catalog, ROM path mapping, cover art matching & game descriptions (`gameDescriptions.js`, Vite API middleware)
 │   └── gamepad-controls.md  # Dynamic input controller, keyboard & USB gamepad mapping, hotkeys & shoulder button prompts (L/R vs Q/E)
 │
 ├── components/             # System Controls & UI Components
+│   ├── topbar.md           # Console header HUD, search input, clock, and sound controls (`Topbar.jsx`)
+│   ├── load-rom-modal.md   # In-app Load Custom ROM modal with drag-drop and supported formats (`LoadRomModal.jsx`)
+│   ├── system-ribbon.md    # Category tab ribbon with dynamic game count sorting (`SystemRibbon.jsx`)
+│   ├── cartridge-tile.md   # Physical 3D game cartridge component with sheen and color heuristics (`CartridgeTile.jsx`)
+│   ├── game-detail-modal.md # Game drawer modal with metadata & save data detection (`GameDetailModal.jsx`)
+│   ├── about-info-modal.md # Project about dialog and full controls reference table (`AboutInfoModal.jsx`)
 │   ├── emulator-modal.md   # Emulator Modal UI dialog, status displays, HUD bar & isolated iframe engine (`EmulatorModal.jsx`)
 │   ├── on-screen-keyboard.md # On-Screen Virtual Keyboard for gamepad/touch search entry (`OnScreenKeyboard.jsx`)
 │   ├── error-boundary.md   # Error Boundary fallback UI & fatal exception handling (`ErrorBoundary.jsx`)
-│   ├── retro-effects.md    # Custom Retro CSS effects, CRT scanlines, glassmorphism, background dots & UI animations (`index.css`)
-│   └── game-card.md        # Game Card UI grid component, cover art hover effects, cartridge color dynamics & quick-launch triggers (`src/App.jsx`)
+│   └── retro-effects.md    # Custom Retro CSS effects, CRT scanlines, glassmorphism, background dots & UI animations (`index.css`)
 │
 └── mirai/                  # Future features and upcoming roadmap specifications ("Mirai" - 未来)
     ├── multiplayer.md      # WebRTC Peer-to-Peer Netplay & local multiplayer emulation architecture
     └── cloud-saves.md      # Cloud save state synchronization & cross-device backup architecture
 ```
+
+> **Note**: For the overarching future vision, in-depth codebase audit, refactoring matrix, and master innovation catalog across 8 domains, see [mirai.md](../mirai.md) in the project root.
 
 ---
 
@@ -75,9 +83,9 @@ Every feature proposal inside `/architecture/mirai/` must include four mandatory
 
 ---
 
-## 📌 Deliverables Roadmap
+## 📌 Deliverables Roadmap & Master Vision
 
-For tracking planned deliverables (RetroAchievements, In-Game Gamepad, Saves Import/Export, Discord Rich Presence, and Metadata Scrapers), refer to [ROADMAP.md](../ROADMAP.md).
+For tracking deliverables, completed milestones, architectural audits, and the grand vision, refer to the master blueprint in [mirai.md](../mirai.md).
 
 ---
 

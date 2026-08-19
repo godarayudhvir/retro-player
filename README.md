@@ -26,6 +26,10 @@ A modern, high-performance web-based retro game launcher and emulator library fo
 - 🖼️ **Dynamic Cover Art Scanner**:
   - Automatically scans and pairs ROM files (`public/roms/*`) with local cover art images (`public/cover/*` and `public/assets/cover/*`).
   - Supports fuzzy title matching for automatic cover detection.
+- 🔊 **Synthesized Web Audio UI Sound Effects**:
+  - Pure Web Audio API acoustic feedback with zero external MP3 assets and zero latency.
+  - Tactile cursor navigation ticks, frequency swooshes on shoulder tab switching (`L1`/`R1`), modal harmonic chimes, and authentic mechanical cartridge insertion "click-clacks" with console boot chimes on game launch.
+  - One-click SFX mute toggle in the top status bar.
 - 🎮 **Full Gamepad & Keyboard Navigation**:
   - Navigate game tiles using DPAD/Thumbstick or Keyboard Arrow keys.
   - Cycle through console categories using `L1`/`R1` shoulder buttons (or `Q`/`E` on keyboard).
@@ -37,8 +41,8 @@ A modern, high-performance web-based retro game launcher and emulator library fo
   - Interactive "LOAD ROM" file picker to select local custom ROMs from your device (`.gba`, `.nes`, `.smc`/`.sfc`, `.z64`/`.n64`, `.nds`, `.bin`/`.chd`/`.iso`, `.zip`, `.md`/`.gen`).
   - Automatic console system core detection based on file extension with automatic Object URL memory cleanup on unmount.
   - Automatically indexes ROMs placed in designated platform folders without requiring manual metadata entry.
-- 📋 **Roadmap & Future Deliverables**:
-  - Track upcoming features including RetroAchievements, in-game gamepad support, save import/export, Discord Rich Presence, and metadata scrapers in [ROADMAP.md](ROADMAP.md).
+- 🔮 **Mirai Grand Vision & Deliverables Blueprint**:
+  - Full codebase audit, architectural gap analysis, live deliverables checklist, and comprehensive feature innovation catalog across 8 domains in [mirai.md](mirai.md).
 - 📚 **Comprehensive System Architecture Specs**:
   - Complete architecture specifications under `architecture/` detailing core bootstrap, modules, components, and future feature designs ("Mirai").
 
@@ -51,28 +55,42 @@ retro-player/
 ├── architecture/         # System Architecture & Technical Specifications
 │   ├── README.md         # Guidelines, folder structure rules & doc standards
 │   ├── core/             # Application entry point & React shell specs
-│   ├── modules/          # Emulation engine, gamepad, catalog & console switcher specs
-│   ├── components/       # UI modal, error boundary, CSS effects & game card specs
+│   ├── modules/          # Emulation engine, audio SFX, catalog & gamepad specs
+│   ├── components/       # Topbar, ribbon, cartridge tile, modals & HUD specs
 │   └── mirai/            # Future roadmap specifications (WebRTC Netplay, Cloud Saves)
+├── mirai.md              # Master Blueprint, codebase audit, deliverables status & future catalog
 ├── public/
 │   ├── cover/            # Custom cover art images by platform folder
-│   │   ├── gb/
-│   │   ├── gbc/
-│   │   └── gba/
 │   ├── roms/             # Drop your ROM files here organized by platform
-│   │   ├── gb/
-│   │   ├── gbc/
-│   │   └── gba/
+│   ├── emulatorjs/       # Local offline EmulatorJS assets & loader
 │   └── assets/           # System icons and fallback UI assets
 ├── src/
-│   ├── components/
-│   │   ├── EmulatorModal.jsx   # EmulatorJS integration & full-screen modal
+│   ├── components/       # Modular UI Components
+│   │   ├── Topbar.jsx          # Status HUD, search bar, sound toggle & clock
+│   │   ├── LoadRomModal.jsx    # In-app Load ROM modal with drag-drop & format catalog
+│   │   ├── SystemRibbon.jsx    # Dynamic console ribbon tabs
+│   │   ├── CartridgeGrid.jsx   # 3D Cartridge grid viewport
+│   │   ├── CartridgeTile.jsx   # Physical 3D cartridge with sheen & grips
+│   │   ├── GameDetailModal.jsx # Game drawer with save data detection
+│   │   ├── AboutInfoModal.jsx  # About dialog & controls table
+│   │   ├── DropzoneOverlay.jsx # Drag-and-drop custom ROM backdrop
+│   │   ├── ConsoleHud.jsx      # Bottom controller button hints
+│   │   ├── EmulatorModal.jsx   # Isolated iframe EmulatorJS sandbox
 │   │   ├── OnScreenKeyboard.jsx # On-screen virtual keyboard for gamepad & touch
 │   │   └── ErrorBoundary.jsx   # Fatal runtime exception fallback component
+│   ├── hooks/            # Specialized Custom React Hooks
+│   │   ├── useWebAudioSfx.js       # Synthesized Web Audio UI sound effects
+│   │   ├── useGamepadStatus.js     # HTML5 Gamepad connection tracking
+│   │   ├── useSaveDataManager.js   # LocalStorage & IndexedDB save detection
+│   │   ├── useRomManifest.js       # Catalog manifest & ROM drop-in loader
+│   │   └── useGamepadNavigation.js # 2D spatial navigation & gamepad polling
+│   ├── utils/            # Pure Utility Functions
+│   │   ├── cartridgeColors.js  # Dynamic cartridge shell color heuristics
+│   │   └── systemDetector.js   # ROM extension to emulator core detection
 │   ├── gameDescriptions.js     # Title metadata & release date lookup helper
-│   ├── App.jsx           # Main Console Grid UI & Gamepad controls
+│   ├── App.jsx           # Clean Root Orchestrator (< 200 lines)
 │   ├── main.jsx          # React DOM root entry point
-│   └── index.css         # Theme styles & grid design tokens
+│   └── index.css         # Theme styles, 3D cartridge CSS & design tokens
 ├── vite.config.js        # Multi-console scanner plugin & static file middlewares
 └── package.json
 ```
@@ -85,9 +103,10 @@ The project includes an organized [architecture/](architecture/README.md) specif
 
 - **[Guidelines & Standards](architecture/README.md)**: Rules for writing specs, sub-directory constraints, and feature proposal templates.
 - **[Core Specifications](architecture/core/index.md)**: Entry point ([index.md](architecture/core/index.md)) and application shell ([app.md](architecture/core/app.md)).
-- **[Functional Modules](architecture/modules/emulator.md)**: Emulator engine ([emulator.md](architecture/modules/emulator.md)), console switcher ([console-switcher.md](architecture/modules/console-switcher.md)), game catalog scanner ([game-catalog.md](architecture/modules/game-catalog.md)), and gamepad navigation ([gamepad-controls.md](architecture/modules/gamepad-controls.md)).
-- **[UI Components](architecture/components/emulator-modal.md)**: Modal HUD ([emulator-modal.md](architecture/components/emulator-modal.md)), on-screen virtual keyboard ([on-screen-keyboard.md](architecture/components/on-screen-keyboard.md)), error boundary ([error-boundary.md](architecture/components/error-boundary.md)), retro CSS effects ([retro-effects.md](architecture/components/retro-effects.md)), and game cards ([game-card.md](architecture/components/game-card.md)).
-- **[Mirai Future Features](architecture/mirai/multiplayer.md)**: Upcoming specifications for WebRTC P2P Multiplayer ([multiplayer.md](architecture/mirai/multiplayer.md)) and Cloud Save Sync ([cloud-saves.md](architecture/mirai/cloud-saves.md)).
+- **[Functional Modules](architecture/modules/emulator.md)**: Emulator engine ([emulator.md](architecture/modules/emulator.md)), Web Audio SFX ([audio-sfx.md](architecture/modules/audio-sfx.md)), console switcher ([console-switcher.md](architecture/modules/console-switcher.md)), game catalog scanner ([game-catalog.md](architecture/modules/game-catalog.md)), and gamepad navigation ([gamepad-controls.md](architecture/modules/gamepad-controls.md)).
+- **[UI Components](architecture/components/topbar.md)**: Topbar ([topbar.md](architecture/components/topbar.md)), System Ribbon ([system-ribbon.md](architecture/components/system-ribbon.md)), Cartridge Tile ([cartridge-tile.md](architecture/components/cartridge-tile.md)), Game Detail Modal ([game-detail-modal.md](architecture/components/game-detail-modal.md)), About Modal ([about-info-modal.md](architecture/components/about-info-modal.md)), Emulator Modal ([emulator-modal.md](architecture/components/emulator-modal.md)), on-screen virtual keyboard ([on-screen-keyboard.md](architecture/components/on-screen-keyboard.md)), error boundary ([error-boundary.md](architecture/components/error-boundary.md)), and retro CSS effects ([retro-effects.md](architecture/components/retro-effects.md)).
+- **[Mirai Future Features](architecture/mirai/multiplayer.md)**: Upcoming specifications for WebRTC P2P Multiplayer ([multiplayer.md](architecture/mirai/multiplayer.md)) and Cloud Save Sync ([cloud-saves.md](architecture/mirai/cloud-saves.md)), alongside the Master Blueprint in [mirai.md](mirai.md).
+
 
 
 ---

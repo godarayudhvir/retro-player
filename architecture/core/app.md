@@ -1,33 +1,41 @@
 # Main Application Shell & Orchestration (`architecture/core/app.md`)
 
 ## 1. Description
-The Main Application Shell ([App.jsx](file:///Users/godarayudhvir/Projects/retro-player/src/App.jsx)) serves as the central hub of **Retro Player**. It manages global application state, ROM catalog fetching, active system filtering, search state, gamepad navigation focus, game modal toggles, and dynamic cartridge color styling.
+The Main Application Shell ([App.jsx](file:///Users/godarayudhvir/Github/retro-player/src/App.jsx)) serves as the central root orchestrator of **Retro Player**. Following the Phase 1 Mirai architectural decomposition, `App.jsx` coordinates specialized custom React hooks (`useWebAudioSfx`, `useGamepadStatus`, `useSaveDataManager`, `useRomManifest`, `useGamepadNavigation`) and renders modular subcomponents (`Topbar`, `SystemRibbon`, `CartridgeGrid`, `GameDetailModal`, `AboutInfoModal`, `DropzoneOverlay`, `ConsoleHud`, `OnScreenKeyboard`, `EmulatorModal`).
 
 ---
 
 ## 2. Detailed List of What It Does
-- **System Top Bar**: Displays active player avatar badge, user tag, dynamic clock, search input bar, gamepad connectivity status badge, system switching controls with shoulder button prompts, and the **LOAD ROM** custom file launcher button.
-- **Drag & Drop Custom ROM Overlay**: Full viewport drop zone overlay allowing users to drag local ROM files directly into the browser to trigger instant game execution.
-- **Game Library Grid**: Renders responsive game cards dynamically filtered by search query and selected console tab.
-- **Game Details Drawer / Modal**: Shows expanded game metadata, release date badge, game description from `gameDescriptions.js`, save data status (`IndexedDB` / `LocalStorage`), and launch button.
-- **Global Input Event Hooks**: Registers keyboard (`Arrow` keys, `WASD`, `Enter`, `Escape`, `Q`, `E`) and Gamepad API polling loops for D-Pad / Stick navigation across the library UI.
+- **Modular Component Orchestration**: Composes dedicated subcomponents for topbar status HUD, system category ribbon, 3D cartridge grid, game drawer modal, info dialog, and gamepad HUD.
+- **Audio Synthesizer Coordination (`useWebAudioSfx`)**: Injects zero-latency synthesized tactile clicks, swooshes, modal chimes, and cartridge insertion audio throughout the UI.
+- **Dynamic Controller Connection Management (`useGamepadStatus`)**: Tracks active gamepad connectivity and controller hardware ID.
+- **Save Data Verification (`useSaveDataManager`)**: Detects existing save states and battery RAM in `localStorage` and `IndexedDB` for inspected games.
+- **Catalog Manifest & Drop-in ROM Engine (`useRomManifest`)**: Manages library indexing from `/api/roms`, search filtering, chronological release sorting, and drag-and-drop custom ROM imports.
+- **Spatial 2D Navigation Engine (`useGamepadNavigation`)**: Manages seamless spatial navigation across topbar, ribbon, grid, and modals via keyboard and HTML5 Gamepad polling.
 
 ---
 
 ## 3. Detailed Logic Behind Everything and How It Works
 
-### Core Component State Hooks
-- `games`: Array of indexed ROM objects fetched from `/api/roms`.
-- `systems`: System metadata array including console names, cores, and counts.
-- `activeSystem`: Currently selected system filter key (`'all'` or specific system key like `'gba'`, `'n64'`).
-- `searchQuery`: Live search string filter.
-- `showVirtualKeyboard`: Boolean flag indicating whether the glassmorphic on-screen virtual keyboard modal is active.
-- `oskPos`: `{ row: number, col: number }` coordinates tracking focused virtual keyboard key for spatial gamepad navigation.
-- `activeGame`: Game object passed to `<EmulatorModal>` when emulator is running.
-- `selectedGameCard`: Currently selected game card for detail inspection modal.
-- `focusedTarget`: `{ zone: 'grid' | 'ribbon' | 'topbar' | 'cardModal' | 'infoModal', index?: number, id?: string }` for keyboard/gamepad focus navigation.
+### Hook Composition
+```
+                         ┌───────────────────────┐
+                         │        App.jsx        │
+                         └───────────┬───────────┘
+                                     │
+     ┌──────────────┬────────────────┼────────────────┬──────────────┐
+     ▼              ▼                ▼                ▼              ▼
+[useWebAudioSfx] [useGamepadStatus] [useSaveData] [useRomManifest] [useGamepadNav]
+```
 
-### Data Fetching & Filter Logic
-- **`fetchGames()`**: Asynchronously calls `/api/roms` on mount, setting `games` and `systems`.
-- **`filteredGames`**: Filters `games` where `title` or `systemName` matches `searchQuery` AND `systemKey` matches `activeSystem`, sorted chronologically by `getReleaseDate(game)`.
-- **`getCartridgeColor(game)`**: Computes dynamic visual accent color based on title keywords (e.g., `#dc2626` for Red/FireRed, `#2563eb` for Blue, `#059669` for Emerald).
+### Component Hierarchy
+- `<DropzoneOverlay />`: Full-viewport drag-and-drop backdrop for custom ROM loading.
+- `<Topbar />`: System header, avatar, L1/R1 shoulder buttons, SFX mute toggle, search bar, and digital clock.
+- `<SystemRibbon />`: Horizontal category navigation dynamically sorted by game count.
+- `<CartridgeGrid />`: 3D physical cartridge tiles viewport with smooth scrolling.
+- `<ConsoleHud />`: Bottom controller button hints.
+- `<AboutInfoModal />`: Project overview and keyboard/gamepad controls reference table.
+- `<GameDetailModal />`: Selected game drawer modal with metadata and save status.
+- `<OnScreenKeyboard />`: Spatial virtual keyboard for gamepad & touchscreen search.
+- `<EmulatorModal />`: Isolated iframe sandbox for EmulatorJS emulation.
+

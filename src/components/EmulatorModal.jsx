@@ -10,11 +10,15 @@ export default function EmulatorModal({ game, gamepadConnected, onClose }) {
 
     stageRef.current.innerHTML = '';
 
-    let absoluteRomUrl;
+    let sessionBlobUrl = null;
+    let absoluteRomUrl = '';
     try {
-      if (game.romUrl.startsWith('blob:') || game.romUrl.startsWith('data:') || game.romUrl.startsWith('http://') || game.romUrl.startsWith('https://')) {
+      if (game.file) {
+        sessionBlobUrl = URL.createObjectURL(game.file);
+        absoluteRomUrl = sessionBlobUrl;
+      } else if (game.romUrl && (game.romUrl.startsWith('blob:') || game.romUrl.startsWith('data:') || game.romUrl.startsWith('http://') || game.romUrl.startsWith('https://'))) {
         absoluteRomUrl = game.romUrl;
-      } else {
+      } else if (game.romUrl) {
         absoluteRomUrl = new URL(game.romUrl, window.location.origin).href;
       }
       console.log(`🎮 [EMULATOR LAUNCHING] Game: "${game.title}" | System Core: ${game.systemCore} | ROM URL: ${absoluteRomUrl}`);
@@ -66,8 +70,10 @@ export default function EmulatorModal({ game, gamepadConnected, onClose }) {
 
             window.EJS_player = '#game';
             window.EJS_gameUrl = ${JSON.stringify(absoluteRomUrl)};
+            window.EJS_gameID = ${JSON.stringify(game.id || 'custom_game')};
+            window.EJS_gameId = ${JSON.stringify(game.id || 'custom_game')};
+            window.EJS_gameName = ${JSON.stringify(game.title || 'Custom Game')};
             window.EJS_core = ${JSON.stringify(core)};
-            window.EJS_gameID = ${JSON.stringify(game.id)};
             window.EJS_pathtodata = ${JSON.stringify(cdnDataPath)};
             window.EJS_startOnLoaded = true;
             window.EJS_backgroundColor = '#000000';
@@ -282,7 +288,7 @@ export default function EmulatorModal({ game, gamepadConnected, onClose }) {
                     emu.gamepad.updateGamepadState();
                   }
 
-                  const activeGps = emu.gamepad.gamepads || [];
+                  const activeGps = (emu.gamepad.gamepads || []).filter(g => g && g.id);
                   if (!Array.isArray(emu.gamepadSelection) || emu.gamepadSelection.length === 0) {
                     emu.gamepadSelection = ['', '', '', ''];
                   }
@@ -290,8 +296,8 @@ export default function EmulatorModal({ game, gamepadConnected, onClose }) {
                   let assignedAny = false;
                   for (let i = 0; i < activeGps.length; i++) {
                     const gp = activeGps[i];
-                    if (!gp) continue;
-                    const gpKey = gp.id + '_' + gp.index;
+                    if (!gp || !gp.id) continue;
+                    const gpKey = gp.id + '_' + (gp.index !== undefined ? gp.index : i);
                     if (!emu.gamepadSelection.includes(gpKey)) {
                       const targetSlot = (i < 4 && (!emu.gamepadSelection[i] || emu.gamepadSelection[i] === 'notconnected'))
                         ? i
@@ -412,10 +418,10 @@ export default function EmulatorModal({ game, gamepadConnected, onClose }) {
 
     return () => {
       console.log(`🧹 [EMULATOR UNMOUNTING] Destroying emulator instance for "${game.title}"`);
-      if (game.isCustomBlob && game.romUrl && game.romUrl.startsWith('blob:')) {
+      if (sessionBlobUrl) {
         try {
-          URL.revokeObjectURL(game.romUrl);
-          console.log(`🧹 [BLOB CLEANUP] Revoked Object URL for custom ROM "${game.title}"`);
+          URL.revokeObjectURL(sessionBlobUrl);
+          console.log(`🧹 [BLOB CLEANUP] Revoked session Object URL for custom ROM "${game.title}"`);
         } catch (e) {}
       }
       if (iframeRef.current) {
