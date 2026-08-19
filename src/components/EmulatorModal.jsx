@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Gamepad2, Wifi, WifiOff, Menu, Activity, ShieldCheck, Save, Check, Download, Upload } from 'lucide-react';
+import { X, Gamepad2, Wifi, WifiOff, Menu, Activity, ShieldCheck } from 'lucide-react';
 import { detectSystemFromExtension } from '../utils/systemDetector';
 import { dbGet, dbSet, STORES } from '../services/db';
 
@@ -926,27 +926,6 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
     onClose();
   };
 
-  const [saveSuccess, setSaveSuccess] = useState(false);
-
-  const handleSaveNow = (e) => {
-    e.stopPropagation();
-    try {
-      const win = iframeRef.current?.contentWindow;
-      if (win) {
-        if (typeof win.flushSaveToDB === 'function') {
-          win.flushSaveToDB();
-        } else if (win.EJS_emulator && typeof win.EJS_emulator.saveSave === 'function') {
-          win.EJS_emulator.saveSave();
-        }
-        setSaveSuccess(true);
-        sfx?.playSaveDetected?.();
-        setTimeout(() => setSaveSuccess(false), 2500);
-      }
-    } catch (err) {
-      console.warn('Manual save failed:', err);
-    }
-  };
-
   const handleToggleEmulatorMenu = (e) => {
     e.stopPropagation();
     try {
@@ -1023,18 +1002,6 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
         </div>
 
         <div className="emulator-topbar-right">
-          {/* Manual Instant Save Button */}
-          <button
-            className={`emulator-save-btn ${saveSuccess ? 'success' : ''}`}
-            onClick={handleSaveNow}
-            title="Flush and save battery RAM to IndexedDB now"
-          >
-            {saveSuccess ? <Check size={16} color="#10b981" /> : <Save size={16} color="#38bdf8" />}
-            <span className="btn-label" style={{ color: saveSuccess ? '#10b981' : undefined }}>
-              {saveSuccess ? 'SAVED!' : 'Save'}
-            </span>
-          </button>
-
           {/* Diagnostic Monitor Toggle Button */}
           <button
             className={`emulator-diag-btn ${showDiagnostics ? 'active' : ''}`}

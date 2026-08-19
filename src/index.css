@@ -2715,8 +2715,7 @@ button.status-pill:active {
 
 .emulator-action-btn,
 .emulator-menu-btn,
-.emulator-diag-btn,
-.emulator-save-btn {
+.emulator-diag-btn {
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ffffff;
@@ -2732,21 +2731,10 @@ button.status-pill:active {
   transition: all 0.2s ease;
 }
 
-.emulator-save-btn.success {
-  background: rgba(16, 185, 129, 0.25);
-  border-color: #10b981;
-  color: #10b981;
-}
-
 .emulator-diag-btn.active {
   background: rgba(56, 189, 248, 0.25);
   border-color: #38bdf8;
   color: #38bdf8;
-}
-
-.emulator-save-btn:hover {
-  background: rgba(56, 189, 248, 0.2);
-  border-color: #38bdf8;
 }
 
 .emulator-action-btn:hover,
