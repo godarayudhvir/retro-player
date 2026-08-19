@@ -1,10 +1,10 @@
 import React from 'react';
-import { Search, FolderOpen, Gamepad2, Volume2, VolumeX, Sparkles, RefreshCw, Music, SkipForward } from 'lucide-react';
+import { Search, FolderOpen, Gamepad2, Volume2, VolumeX, Sparkles, RefreshCw, Music, SkipForward, Settings } from 'lucide-react';
 import MiiAvatar from './MiiAvatar';
 
 /**
  * Topbar console header with active Mii profile avatar, BGM music player, status indicators,
- * search input, custom ROM loader, and digital clock.
+ * settings trigger, search input, custom ROM loader, and digital clock.
  */
 export default function Topbar({
   gamepadConnected,
@@ -17,6 +17,7 @@ export default function Topbar({
   setSearchQuery,
   searchInputRef,
   setShowLoadRomModal,
+  setShowSettingsModal,
   setShowVirtualKeyboard,
   time,
   sfx,
@@ -202,6 +203,20 @@ export default function Topbar({
           aria-label="Load Custom ROM"
         >
           <FolderOpen size={18} color="#3b82f6" />
+        </button>
+
+        {/* Console Settings & Library Manager Trigger */}
+        <button
+          className={`status-pill status-settings ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'settings' ? 'gamepad-focused' : ''}`}
+          onClick={() => {
+            setShowSettingsModal?.(true);
+            setFocusedTarget?.({ zone: 'settingsModal', id: 'tab' });
+            sfx?.playModalOpen?.();
+          }}
+          title="Console Settings & Library Manager (Manage ROMs & BGM)"
+          aria-label="Console Settings"
+        >
+          <Settings size={18} color="#64748b" />
         </button>
 
         {/* Real-time Clock */}

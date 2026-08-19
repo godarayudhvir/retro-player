@@ -277,6 +277,110 @@ app.post('/api/upload-rom', express.raw({ type: 'application/octet-stream', limi
   }
 });
 
+// Dynamic Local BGM Track Upload Endpoint
+app.post('/api/upload-bgm', express.raw({ type: 'application/octet-stream', limit: '100mb' }), (req, res) => {
+  try {
+    const filenameHeader = req.headers['x-filename'];
+
+    if (!filenameHeader || !req.body || req.body.length === 0) {
+      return res.status(400).json({ error: 'Missing required audio data or x-filename header' });
+    }
+
+    const safeFilename = path.basename(decodeURIComponent(filenameHeader));
+    const ext = path.extname(safeFilename).toLowerCase();
+
+    if (!VALID_AUDIO_EXTENSIONS.includes(ext)) {
+      return res.status(400).json({ error: `Unsupported audio format. Supported: ${VALID_AUDIO_EXTENSIONS.join(', ')}` });
+    }
+
+    if (!fs.existsSync(BGM_DIR)) {
+      fs.mkdirSync(BGM_DIR, { recursive: true });
+    }
+
+    const targetFilePath = path.join(BGM_DIR, safeFilename);
+    console.log(`🎵 [API BGM UPLOADER] Saving audio: ${safeFilename} to ${targetFilePath} (${req.body.length} bytes)`);
+
+    const writeStream = fs.createWriteStream(targetFilePath);
+    writeStream.write(req.body);
+    writeStream.end();
+
+    writeStream.on('finish', () => {
+      console.log(`✅ [API BGM UPLOADER SUCCESS] Successfully saved track: ${safeFilename}`);
+      const rawTitle = path.parse(safeFilename).name;
+      const cleanTitle = rawTitle.replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+
+      res.status(200).json({
+        success: true,
+        track: {
+          id: `bgm-${rawTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+          title: cleanTitle.toUpperCase() || rawTitle,
+          filename: safeFilename,
+          url: `/bgm/${encodeURIComponent(safeFilename)}`
+        }
+      });
+    });
+
+    writeStream.on('error', (err) => {
+      console.error(`🚨 [API BGM UPLOADER ERROR] Failed writing audio file "${safeFilename}":`, err);
+      res.status(500).json({ error: 'Failed to write audio track to disk' });
+    });
+  } catch (err) {
+    console.error('🚨 [API BGM UPLOADER ERROR] Exception during upload:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete ROM endpoint
+app.post('/api/delete-rom', express.json(), (req, res) => {
+  try {
+    const { systemKey, filename, relativePath } = req.body || {};
+    let targetPath = null;
+
+    if (relativePath) {
+      targetPath = path.join(ROMS_DIR, relativePath);
+    } else if (systemKey && filename) {
+      targetPath = path.join(ROMS_DIR, systemKey, path.basename(filename));
+    } else if (filename) {
+      targetPath = path.join(ROMS_DIR, path.basename(filename));
+    }
+
+    if (!targetPath || !fs.existsSync(targetPath)) {
+      return res.status(404).json({ error: 'ROM file not found on disk' });
+    }
+
+    fs.unlinkSync(targetPath);
+    console.log(`🗑️ [API ROM DELETE] Successfully deleted ROM: ${targetPath}`);
+    res.json({ success: true, message: 'ROM deleted successfully' });
+  } catch (err) {
+    console.error('🚨 [API ROM DELETE ERROR]:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete BGM track endpoint
+app.post('/api/delete-bgm', express.json(), (req, res) => {
+  try {
+    const { filename } = req.body || {};
+    if (!filename) {
+      return res.status(400).json({ error: 'Missing filename parameter' });
+    }
+
+    const safeFilename = path.basename(filename);
+    const targetPath = path.join(BGM_DIR, safeFilename);
+
+    if (!fs.existsSync(targetPath)) {
+      return res.status(404).json({ error: 'Audio track not found on disk' });
+    }
+
+    fs.unlinkSync(targetPath);
+    console.log(`🗑️ [API BGM DELETE] Successfully deleted track: ${targetPath}`);
+    res.json({ success: true, message: 'Audio track deleted successfully' });
+  } catch (err) {
+    console.error('🚨 [API BGM DELETE ERROR]:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Serve static frontend build
 app.use(express.static(DIST_DIR));
 

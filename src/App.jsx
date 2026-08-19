@@ -11,6 +11,7 @@ import OnScreenKeyboard from './components/OnScreenKeyboard';
 import EmulatorModal from './components/EmulatorModal';
 import ProfileSelectModal from './components/ProfileSelectModal';
 import MiiCreatorModal from './components/MiiCreatorModal';
+import SettingsModal from './components/SettingsModal';
 
 import { useWebAudioSfx } from './hooks/useWebAudioSfx';
 import { useGamepadStatus } from './hooks/useGamepadStatus';
@@ -25,7 +26,7 @@ import { useBgmEngine } from './hooks/useBgmEngine';
 
 /**
  * Root Application Orchestrator for Retro Player.
- * Coordinates modular UI components, profiles, Mii avatars, BGM audio, themes, and emulation.
+ * Coordinates modular UI components, profiles, Mii avatars, BGM audio, themes, settings, and emulation.
  */
 export default function App() {
   const [activeGame, setActiveGame] = useState(null);
@@ -33,6 +34,7 @@ export default function App() {
   const [focusedTarget, setFocusedTarget] = useState({ zone: 'grid', index: 0 });
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showLoadRomModal, setShowLoadRomModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showVirtualKeyboard, setShowVirtualKeyboard] = useState(false);
   const [showProfileSelectModal, setShowProfileSelectModal] = useState(false);
   const [showMiiCreatorModal, setShowMiiCreatorModal] = useState(false);
@@ -124,6 +126,8 @@ export default function App() {
     setShowInfoModal,
     showLoadRomModal,
     setShowLoadRomModal,
+    showSettingsModal,
+    setShowSettingsModal,
     showVirtualKeyboard,
     setShowVirtualKeyboard,
     oskPos,
@@ -215,6 +219,7 @@ export default function App() {
         setSearchQuery={setSearchQuery}
         searchInputRef={searchInputRef}
         setShowLoadRomModal={setShowLoadRomModal}
+        setShowSettingsModal={setShowSettingsModal}
         setShowVirtualKeyboard={setShowVirtualKeyboard}
         time={time}
         sfx={sfx}
@@ -378,6 +383,24 @@ export default function App() {
           setEditingProfile(null);
         }}
         sfx={sfx}
+      />
+
+      {/* Console Settings & Library Manager Modal */}
+      <SettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => {
+          setShowSettingsModal(false);
+          setFocusedTarget({ zone: 'topbar', id: 'settings' });
+          sfx.playModalClose();
+        }}
+        games={games}
+        systems={systems}
+        fetchGames={fetchGames}
+        bgm={bgm}
+        sfx={sfx}
+        focusedTarget={focusedTarget}
+        setFocusedTarget={setFocusedTarget}
+        gamepadConnected={gamepadConnected}
       />
 
       {/* Active Game Emulator Sandbox */}

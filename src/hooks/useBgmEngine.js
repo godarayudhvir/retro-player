@@ -170,6 +170,17 @@ export function useBgmEngine({ activeGame = null } = {}) {
     });
   }, [tracks]);
 
+  // Play specific track by index
+  const playTrack = useCallback((index) => {
+    if (tracks.length === 0) return;
+    const safeIdx = Math.max(0, Math.min(tracks.length - 1, index));
+    setCurrentTrackIndex(safeIdx);
+    setIsPlaying(true);
+    try {
+      localStorage.setItem(BGM_TRACK_INDEX_KEY, String(safeIdx));
+    } catch {}
+  }, [tracks]);
+
   // Change volume
   const setBgmVolume = useCallback((val) => {
     const clamped = Math.max(0, Math.min(1, val));
@@ -189,8 +200,10 @@ export function useBgmEngine({ activeGame = null } = {}) {
     isMuted,
     volume,
     togglePlay,
+    playTrack,
     nextTrack,
     prevTrack,
+    refreshTracks: fetchTracks,
     setBgmVolume,
     setIsMuted: (muted) => {
       setIsMuted(muted);

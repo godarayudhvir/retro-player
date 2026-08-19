@@ -19,6 +19,7 @@ architecture/
 │   └── app.md              # Main application shell, hook orchestration, and modular layout (`src/App.jsx`)
 │
 ├── modules/                # Core Functional Modules & Systems
+│   ├── indexeddb-storage.md # Centralized IndexedDB permanent storage engine (`services/db.js`)
 │   ├── emulator.md         # Emulator Engine integration, offline core resilience & save state management (`EmulatorModal.jsx`, EmulatorJS)
 │   ├── metadata-scraper.md # Online 3D box art & game metadata scraper with IndexedDB caching (`metadataScraper.js`, `useMetadataScraper.js`)
 │   ├── audio-sfx.md        # Pure Web Audio API UI sound effects synthesizer (`useWebAudioSfx.js`)
@@ -32,6 +33,7 @@ architecture/
 │
 ├── components/             # System Controls & UI Components
 │   ├── topbar.md           # Console header HUD, search input, clock, and sound controls (`Topbar.jsx`)
+│   ├── settings-modal.md   # Console settings, library manager & ROM/BGM upload & deletion hub (`SettingsModal.jsx`)
 │   ├── load-rom-modal.md   # In-app Load Custom ROM modal with drag-drop and supported formats (`LoadRomModal.jsx`)
 │   ├── system-ribbon.md    # Category tab ribbon with dynamic game count sorting (`SystemRibbon.jsx`)
 │   ├── cartridge-tile.md   # Physical 3D game cartridge component with sheen and color heuristics (`CartridgeTile.jsx`)

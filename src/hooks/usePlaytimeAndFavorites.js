@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { dbGet, dbSet, STORES } from '../services/db';
 
 const FAVORITES_KEY = 'retro_player_favorites';
 const RECENTS_KEY = 'retro_player_recents';
@@ -40,7 +41,7 @@ function formatLastPlayed(timestamp) {
 }
 
 /**
- * Hook to manage persistent Favorites, Recently Played queue, and Playtime analytics.
+ * Hook to manage persistent Favorites, Recently Played queue, and Playtime analytics in IndexedDB.
  * Supports isolated storage keys scoped per user profile.
  */
 export function usePlaytimeAndFavorites(activeProfileId = 'default') {
@@ -53,14 +54,12 @@ export function usePlaytimeAndFavorites(activeProfileId = 'default') {
     try {
       const stored = localStorage.getItem(favKey);
       if (stored) return JSON.parse(stored);
-      // For initial default master profile, check legacy key
       if (activeProfileId === 'prof_default' || activeProfileId === 'default') {
         const legacy = localStorage.getItem(FAVORITES_KEY);
         return legacy ? JSON.parse(legacy) : [];
       }
       return [];
-    } catch (e) {
-      console.error('Failed to load favorites from localStorage:', e);
+    } catch {
       return [];
     }
   });
@@ -75,13 +74,12 @@ export function usePlaytimeAndFavorites(activeProfileId = 'default') {
         return legacy ? JSON.parse(legacy) : [];
       }
       return [];
-    } catch (e) {
-      console.error('Failed to load recents from localStorage:', e);
+    } catch {
       return [];
     }
   });
 
-  // Playtime analytics map ({ [gameId]: { totalSeconds, launchCount, lastPlayed, lastSessionSeconds } })
+  // Playtime analytics map
   const [playtimeStats, setPlaytimeStats] = useState(() => {
     try {
       const stored = localStorage.getItem(playtimeKey);
@@ -91,54 +89,60 @@ export function usePlaytimeAndFavorites(activeProfileId = 'default') {
         return legacy ? JSON.parse(legacy) : {};
       }
       return {};
-    } catch (e) {
-      console.error('Failed to load playtime stats from localStorage:', e);
+    } catch {
       return {};
     }
   });
 
-  // Synchronize state when switching profiles
+  // Authoritative load from IndexedDB on activeProfileId change
   useEffect(() => {
-    try {
-      const storedFavs = localStorage.getItem(favKey);
-      setFavorites(storedFavs ? JSON.parse(storedFavs) : []);
+    let isMounted = true;
 
-      const storedRecents = localStorage.getItem(recentsKey);
-      setRecentlyPlayed(storedRecents ? JSON.parse(storedRecents) : []);
+    async function loadData() {
+      try {
+        const dbFavs = await dbGet(STORES.USER_DATA, `favs_${activeProfileId}`);
+        if (isMounted && Array.isArray(dbFavs)) {
+          setFavorites(dbFavs);
+          try { localStorage.setItem(favKey, JSON.stringify(dbFavs)); } catch {}
+        }
 
-      const storedPlaytime = localStorage.getItem(playtimeKey);
-      setPlaytimeStats(storedPlaytime ? JSON.parse(storedPlaytime) : {});
-    } catch (e) {
-      console.error('Failed to sync profile data:', e);
+        const dbRecents = await dbGet(STORES.USER_DATA, `recents_${activeProfileId}`);
+        if (isMounted && Array.isArray(dbRecents)) {
+          setRecentlyPlayed(dbRecents);
+          try { localStorage.setItem(recentsKey, JSON.stringify(dbRecents)); } catch {}
+        }
+
+        const dbPlaytime = await dbGet(STORES.USER_DATA, `playtime_${activeProfileId}`);
+        if (isMounted && dbPlaytime && typeof dbPlaytime === 'object') {
+          setPlaytimeStats(dbPlaytime);
+          try { localStorage.setItem(playtimeKey, JSON.stringify(dbPlaytime)); } catch {}
+        }
+      } catch (e) {
+        console.error('Failed loading profile data from IndexedDB:', e);
+      }
     }
+
+    loadData();
+    return () => { isMounted = false; };
   }, [activeProfileId, favKey, recentsKey, playtimeKey]);
 
-  // Persist Favorites for active profile
+  // Persist Favorites for active profile into IndexedDB & Cache
   useEffect(() => {
-    try {
-      localStorage.setItem(favKey, JSON.stringify(favorites));
-    } catch (e) {
-      console.error('Failed to persist favorites:', e);
-    }
-  }, [favorites, favKey]);
+    try { localStorage.setItem(favKey, JSON.stringify(favorites)); } catch {}
+    dbSet(STORES.USER_DATA, `favs_${activeProfileId}`, favorites);
+  }, [favorites, favKey, activeProfileId]);
 
-  // Persist Recently Played for active profile
+  // Persist Recently Played for active profile into IndexedDB & Cache
   useEffect(() => {
-    try {
-      localStorage.setItem(recentsKey, JSON.stringify(recentlyPlayed));
-    } catch (e) {
-      console.error('Failed to persist recents:', e);
-    }
-  }, [recentlyPlayed, recentsKey]);
+    try { localStorage.setItem(recentsKey, JSON.stringify(recentlyPlayed)); } catch {}
+    dbSet(STORES.USER_DATA, `recents_${activeProfileId}`, recentlyPlayed);
+  }, [recentlyPlayed, recentsKey, activeProfileId]);
 
-  // Persist Playtime Stats for active profile
+  // Persist Playtime Stats for active profile into IndexedDB & Cache
   useEffect(() => {
-    try {
-      localStorage.setItem(playtimeKey, JSON.stringify(playtimeStats));
-    } catch (e) {
-      console.error('Failed to persist playtime stats:', e);
-    }
-  }, [playtimeStats, playtimeKey]);
+    try { localStorage.setItem(playtimeKey, JSON.stringify(playtimeStats)); } catch {}
+    dbSet(STORES.USER_DATA, `playtime_${activeProfileId}`, playtimeStats);
+  }, [playtimeStats, playtimeKey, activeProfileId]);
 
   /**
    * Check if a game is favorited.

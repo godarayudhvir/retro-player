@@ -280,6 +280,144 @@ function multiConsoleScannerPlugin() {
           res.end(JSON.stringify({ error: err.message }));
         }
       });
+
+      // API Endpoint for Uploading BGM Audio in development
+      server.middlewares.use('/api/upload-bgm', (req, res) => {
+        if (req.method !== 'POST') {
+          res.statusCode = 405;
+          res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+          return;
+        }
+
+        const filename = decodeURIComponent(req.headers['x-filename'] || '');
+        if (!filename) {
+          res.statusCode = 400;
+          res.end(JSON.stringify({ error: 'Missing x-filename header' }));
+          return;
+        }
+
+        try {
+          if (!fs.existsSync(bgmBaseDir)) {
+            fs.mkdirSync(bgmBaseDir, { recursive: true });
+          }
+
+          const safeFilename = path.basename(filename);
+          const targetFilePath = path.join(bgmBaseDir, safeFilename);
+
+          console.log(`🎵 [DEV BGM UPLOADER] Receiving audio "${safeFilename}" -> Saving to: ${targetFilePath}`);
+
+          const writeStream = fs.createWriteStream(targetFilePath);
+          req.pipe(writeStream);
+
+          writeStream.on('finish', () => {
+            console.log(`✅ [DEV BGM UPLOADER SUCCESS] Successfully saved "${safeFilename}"`);
+            const rawTitle = path.parse(safeFilename).name;
+            const cleanTitle = rawTitle.replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({
+              success: true,
+              track: {
+                id: `bgm-${rawTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+                title: cleanTitle.toUpperCase() || rawTitle,
+                filename: safeFilename,
+                url: `/bgm/${encodeURIComponent(safeFilename)}`
+              }
+            }));
+          });
+
+          writeStream.on('error', (err) => {
+            console.error(`🚨 [DEV BGM UPLOADER ERROR] Failed writing audio file "${safeFilename}":`, err);
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: 'Failed to write audio file to disk' }));
+          });
+        } catch (err) {
+          console.error('🚨 [DEV BGM UPLOADER ERROR] Exception during upload:', err);
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: err.message }));
+        }
+      });
+
+      // API Endpoint for Deleting ROMs in development
+      server.middlewares.use('/api/delete-rom', (req, res) => {
+        if (req.method !== 'POST') {
+          res.statusCode = 405;
+          res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+          return;
+        }
+
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', () => {
+          try {
+            const data = JSON.parse(body || '{}');
+            const { systemKey, filename, relativePath } = data;
+            let targetPath = null;
+
+            if (relativePath) {
+              targetPath = path.join(romsBaseDir, relativePath);
+            } else if (systemKey && filename) {
+              targetPath = path.join(romsBaseDir, systemKey, path.basename(filename));
+            } else if (filename) {
+              targetPath = path.join(romsBaseDir, path.basename(filename));
+            }
+
+            if (!targetPath || !fs.existsSync(targetPath)) {
+              res.statusCode = 404;
+              res.end(JSON.stringify({ error: 'ROM file not found on disk' }));
+              return;
+            }
+
+            fs.unlinkSync(targetPath);
+            console.log(`🗑️ [DEV ROM DELETE] Deleted ROM: ${targetPath}`);
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ success: true, message: 'ROM deleted successfully' }));
+          } catch (e) {
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: e.message }));
+          }
+        });
+      });
+
+      // API Endpoint for Deleting BGM in development
+      server.middlewares.use('/api/delete-bgm', (req, res) => {
+        if (req.method !== 'POST') {
+          res.statusCode = 405;
+          res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+          return;
+        }
+
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', () => {
+          try {
+            const data = JSON.parse(body || '{}');
+            const { filename } = data;
+
+            if (!filename) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Missing filename' }));
+              return;
+            }
+
+            const targetPath = path.join(bgmBaseDir, path.basename(filename));
+
+            if (!fs.existsSync(targetPath)) {
+              res.statusCode = 404;
+              res.end(JSON.stringify({ error: 'Audio track not found on disk' }));
+              return;
+            }
+
+            fs.unlinkSync(targetPath);
+            console.log(`🗑️ [DEV BGM DELETE] Deleted track: ${targetPath}`);
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ success: true, message: 'Audio track deleted successfully' }));
+          } catch (e) {
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: e.message }));
+          }
+        });
+      });
     }
   };
 }

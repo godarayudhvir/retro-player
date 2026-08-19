@@ -12,6 +12,8 @@ export function useGamepadNavigation({
   setShowInfoModal,
   showLoadRomModal,
   setShowLoadRomModal,
+  showSettingsModal,
+  setShowSettingsModal,
   showVirtualKeyboard,
   setShowVirtualKeyboard,
   oskPos,
@@ -49,6 +51,7 @@ export function useGamepadNavigation({
       selectedGameCard,
       showInfoModal,
       showLoadRomModal,
+      showSettingsModal,
       showVirtualKeyboard,
       oskPos,
       filteredGames,
@@ -201,6 +204,17 @@ export function useGamepadNavigation({
       return;
     }
 
+    // 2b. Settings & Library Manager Modal Navigation
+    if (stateRef.current.showSettingsModal) {
+      if (dir === 'BACK') {
+        setShowSettingsModal(false);
+        setFocusedTarget({ zone: 'topbar', id: 'settings' });
+        sfx?.playModalClose?.();
+        return;
+      }
+      return;
+    }
+
     // 3. Selected Game Card Drawer Navigation
     if (curCard) {
       if (dir === 'BACK') {
@@ -291,6 +305,10 @@ export function useGamepadNavigation({
           setShowLoadRomModal(true);
           setFocusedTarget({ zone: 'loadRomModal', id: 'browse' });
           sfx?.playModalOpen?.();
+        } else if (curId === 'settings') {
+          setShowSettingsModal?.(true);
+          setFocusedTarget?.({ zone: 'settingsModal', id: 'tab' });
+          sfx?.playModalOpen?.();
         } else if (curId === 'info') {
           setShowInfoModal(true);
           setFocusedTarget({ zone: 'infoModal', id: 'ack' });
@@ -320,10 +338,18 @@ export function useGamepadNavigation({
     // Directional Spatial Movements (UP, DOWN, LEFT, RIGHT)
     if (curZone === 'topbar') {
       if (dir === 'LEFT') {
-        setFocusedTarget({ zone: 'topbar', id: 'search' });
+        if (curTarget?.id === 'settings') {
+          setFocusedTarget({ zone: 'topbar', id: 'loadRom' });
+        } else {
+          setFocusedTarget({ zone: 'topbar', id: 'search' });
+        }
         sfx?.playTileNav?.();
       } else if (dir === 'RIGHT') {
-        setFocusedTarget({ zone: 'topbar', id: 'loadRom' });
+        if (curTarget?.id === 'search') {
+          setFocusedTarget({ zone: 'topbar', id: 'loadRom' });
+        } else {
+          setFocusedTarget({ zone: 'topbar', id: 'settings' });
+        }
         sfx?.playTileNav?.();
       } else if (dir === 'DOWN') {
         const sysIdx = allTabs.findIndex(t => t.key === curActiveSys);
