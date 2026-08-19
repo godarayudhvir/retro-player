@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, RefreshCw, FolderOpen, Wifi, Info, X, Play, Save, Cpu, Sparkles, CheckCircle2, Calendar, Gamepad2 } from 'lucide-react';
 import EmulatorModal from './components/EmulatorModal';
+import OnScreenKeyboard, { KEYBOARD_ROWS } from './components/OnScreenKeyboard';
 import { getGameDescription, getReleaseDate } from './gameDescriptions';
 
 function getCartridgeColor(game) {
@@ -38,6 +39,8 @@ export default function App() {
   const [focusedTarget, setFocusedTarget] = useState({ zone: 'grid', index: 0 });
   const [gamepadConnected, setGamepadConnected] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showVirtualKeyboard, setShowVirtualKeyboard] = useState(false);
+  const [oskPos, setOskPos] = useState({ row: 1, col: 0 });
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [time, setTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   const searchInputRef = useRef(null);
@@ -205,10 +208,12 @@ export default function App() {
       activeGame,
       selectedGameCard,
       showInfoModal,
+      showVirtualKeyboard,
+      oskPos,
       filteredGames,
       systems
     };
-  }, [activeSystem, focusedTarget, activeGame, selectedGameCard, showInfoModal, filteredGames, systems]);
+  }, [activeSystem, focusedTarget, activeGame, selectedGameCard, showInfoModal, showVirtualKeyboard, oskPos, filteredGames, systems]);
 
   useEffect(() => {
     const activeTab = document.querySelector('.system-tab.active');
@@ -259,7 +264,56 @@ export default function App() {
 
   // Unified Spatial Navigation Engine across topbar, ribbon, grid, HUD, & modals
   const navigateSpatial = (dir) => {
-    const { showInfoModal, selectedGameCard, activeGame, filteredGames, systems, activeSystem, focusedTarget } = stateRef.current;
+    const { showInfoModal, showVirtualKeyboard, selectedGameCard, activeGame, filteredGames, systems, activeSystem, focusedTarget, oskPos: curOskPos } = stateRef.current;
+
+    // 0. On-Screen Virtual Keyboard Navigation
+    if (showVirtualKeyboard) {
+      if (dir === 'BACK') {
+        setShowVirtualKeyboard(false);
+        setFocusedTarget({ zone: 'grid', index: 0 });
+        return;
+      }
+      if (dir === 'UP') {
+        setOskPos(prev => {
+          const newRow = Math.max(0, prev.row - 1);
+          const maxCols = KEYBOARD_ROWS[newRow].length;
+          return { row: newRow, col: Math.min(prev.col, maxCols - 1) };
+        });
+      } else if (dir === 'DOWN') {
+        setOskPos(prev => {
+          const newRow = Math.min(KEYBOARD_ROWS.length - 1, prev.row + 1);
+          const maxCols = KEYBOARD_ROWS[newRow].length;
+          return { row: newRow, col: Math.min(prev.col, maxCols - 1) };
+        });
+      } else if (dir === 'LEFT') {
+        setOskPos(prev => {
+          const maxCols = KEYBOARD_ROWS[prev.row].length;
+          const newCol = (prev.col - 1 + maxCols) % maxCols;
+          return { row: prev.row, col: newCol };
+        });
+      } else if (dir === 'RIGHT') {
+        setOskPos(prev => {
+          const maxCols = KEYBOARD_ROWS[prev.row].length;
+          const newCol = (prev.col + 1) % maxCols;
+          return { row: prev.row, col: newCol };
+        });
+      } else if (dir === 'SELECT') {
+        const key = KEYBOARD_ROWS[curOskPos.row]?.[curOskPos.col];
+        if (key === '⌫') {
+          setSearchQuery(q => q.slice(0, -1));
+        } else if (key === 'SPACE') {
+          setSearchQuery(q => q + ' ');
+        } else if (key === 'CLEAR') {
+          setSearchQuery('');
+        } else if (key === 'DONE') {
+          setShowVirtualKeyboard(false);
+          setFocusedTarget({ zone: 'grid', index: 0 });
+        } else if (key) {
+          setSearchQuery(q => q + key);
+        }
+      }
+      return;
+    }
 
     // 1. Info Modal Navigation
     if (showInfoModal) {
@@ -331,6 +385,8 @@ export default function App() {
     if (dir === 'SELECT') {
       if (curZone === 'topbar') {
         if (curId === 'search') {
+          setShowVirtualKeyboard(true);
+          setOskPos({ row: 1, col: 0 });
           if (searchInputRef.current) {
             searchInputRef.current.focus();
             searchInputRef.current.select();
@@ -445,7 +501,17 @@ export default function App() {
         return;
       }
 
-      if (document.activeElement.tagName === 'INPUT') return;
+      if (document.activeElement?.tagName === 'INPUT') return;
+
+      // When playing in emulator, do not intercept gameplay keys (WASD, Arrows, Space, Enter, etc.)
+      if (stateRef.current.activeGame) {
+        if (e.key === 'Escape' || e.key === 'Esc') {
+          e.preventDefault();
+          setActiveGame(null);
+          setFocusedTarget({ zone: 'grid', index: stateRef.current.focusedTarget?.index || 0 });
+        }
+        return;
+      }
 
       switch (e.key) {
         case 'ArrowRight':
@@ -556,6 +622,26 @@ export default function App() {
           setGamepadConnected(true);
         }
 
+        // When a game is active in the emulator, yield gamepad inputs to the game canvas!
+        // Do NOT intercept B button, A button, D-pad, or Shoulder triggers for UI navigation.
+        // Dedicated controller exit combo: Select (button 8) + Start (button 9) OR Guide/Home (button 16)
+        if (stateRef.current.activeGame) {
+          const b = gp.buttons;
+          const selectBtn = b[8]?.pressed;
+          const startBtn = b[9]?.pressed;
+          const guideBtn = b[16]?.pressed;
+          const isExitCombo = (selectBtn && startBtn) || guideBtn;
+
+          if (isExitCombo && !prevButtonsRef.current.exitCombo) {
+            console.log('🎮 [GAMEPAD] Controller exit combo triggered. Exiting active game to library.');
+            setActiveGame(null);
+            setFocusedTarget({ zone: 'grid', index: stateRef.current.focusedTarget?.index || 0 });
+          }
+          prevButtonsRef.current = { exitCombo: isExitCombo };
+          animId = requestAnimationFrame(pollGamepad);
+          return;
+        }
+
         const now = Date.now();
         const COOLDOWN = 200;
 
@@ -569,9 +655,37 @@ export default function App() {
         
         const btnA = b[0]?.pressed;
         const btnB = b[1]?.pressed;
+        const btnX = b[2]?.pressed;
+        const btnY = b[3]?.pressed;
+        const btnSelect = b[8]?.pressed;
+        const btnStart = b[9]?.pressed;
         
         const shoulderL = b[4]?.pressed || b[6]?.pressed || b[4]?.value > 0.5;
         const shoulderR = b[5]?.pressed || b[7]?.pressed || b[5]?.value > 0.5;
+
+        // Controller Hotkey: Y / Triangle or Select toggles Search / On-Screen Keyboard
+        if (!stateRef.current.activeGame && !stateRef.current.selectedGameCard && !stateRef.current.showInfoModal) {
+          if ((btnY && !prevButtonsRef.current.btnY) || (btnSelect && !prevButtonsRef.current.btnSelect)) {
+            setShowVirtualKeyboard(prev => !prev);
+            setOskPos({ row: 1, col: 0 });
+            lastInputTimeRef.current = now;
+            prevButtonsRef.current = { ...prevButtonsRef.current, btnY, btnSelect, btnA, btnB, btnX, btnStart, shoulderL, shoulderR };
+            animId = requestAnimationFrame(pollGamepad);
+            return;
+          }
+        }
+
+        // When On-Screen Keyboard is active:
+        if (stateRef.current.showVirtualKeyboard) {
+          if (btnX && !prevButtonsRef.current.btnX) { // X button -> Space
+            setSearchQuery(q => q + ' ');
+            lastInputTimeRef.current = now;
+          } else if (btnStart && !prevButtonsRef.current.btnStart) { // Start button -> Done / Submit
+            setShowVirtualKeyboard(false);
+            setFocusedTarget({ zone: 'grid', index: 0 });
+            lastInputTimeRef.current = now;
+          }
+        }
 
         if (now - lastInputTimeRef.current > COOLDOWN) {
           let moved = false;
@@ -719,7 +833,11 @@ export default function App() {
             <span>{gamepadConnected ? 'GAMEPAD READY' : 'NO CONTROLLER'}</span>
           </div>
 
-          <div className={`status-pill ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'search' ? 'gamepad-focused' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div
+            className={`status-pill ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'search' ? 'gamepad-focused' : ''}`}
+            onClick={() => setShowVirtualKeyboard(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+          >
             <Search size={16} />
             <input
               ref={searchInputRef}
@@ -727,7 +845,12 @@ export default function App() {
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setFocusedTarget({ zone: 'topbar', id: 'search' })}
+              onFocus={() => {
+                setFocusedTarget({ zone: 'topbar', id: 'search' });
+                if (gamepadConnected) {
+                  setShowVirtualKeyboard(true);
+                }
+              }}
               style={{
                 border: 'none',
                 outline: 'none',
@@ -739,8 +862,8 @@ export default function App() {
                 color: 'inherit'
               }}
             />
-            <kbd className="lr-badge" style={{ fontSize: '0.7rem', padding: '2px 6px', pointerEvents: 'none', userSelect: 'none' }}>
-              {typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent || navigator.platform) ? '⌘K' : 'Ctrl+K'}
+            <kbd className="lr-badge" style={{ fontSize: '0.7rem', padding: '2px 6px', pointerEvents: 'none', userSelect: 'none', background: gamepadConnected ? '#f59e0b' : undefined, color: gamepadConnected ? '#ffffff' : undefined }}>
+              {gamepadConnected ? 'Y' : (typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent || navigator.platform) ? '⌘K' : 'Ctrl+K')}
             </kbd>
           </div>
 
@@ -1084,10 +1207,26 @@ export default function App() {
         </div>
       )}
 
+      {/* On-Screen Virtual Keyboard */}
+      <OnScreenKeyboard
+        isOpen={showVirtualKeyboard}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onClose={() => {
+          setShowVirtualKeyboard(false);
+          setFocusedTarget({ zone: 'grid', index: 0 });
+        }}
+        focusedPos={oskPos}
+        onKeyClick={(r, c) => setOskPos({ row: r, col: c })}
+        resultsCount={filteredGames.length}
+        gamepadConnected={gamepadConnected}
+      />
+
       {/* Emulator Modal */}
       {activeGame && (
         <EmulatorModal
           game={activeGame}
+          gamepadConnected={gamepadConnected}
           onClose={() => setActiveGame(null)}
         />
       )}

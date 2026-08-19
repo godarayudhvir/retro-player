@@ -21,9 +21,11 @@ The Main Application Shell ([App.jsx](file:///Users/godarayudhvir/Projects/retro
 - `systems`: System metadata array including console names, cores, and counts.
 - `activeSystem`: Currently selected system filter key (`'all'` or specific system key like `'gba'`, `'n64'`).
 - `searchQuery`: Live search string filter.
+- `showVirtualKeyboard`: Boolean flag indicating whether the glassmorphic on-screen virtual keyboard modal is active.
+- `oskPos`: `{ row: number, col: number }` coordinates tracking focused virtual keyboard key for spatial gamepad navigation.
 - `activeGame`: Game object passed to `<EmulatorModal>` when emulator is running.
 - `selectedGameCard`: Currently selected game card for detail inspection modal.
-- `focusedTarget`: `{ zone: 'grid' | 'tabs', index: number }` for keyboard/gamepad focus navigation.
+- `focusedTarget`: `{ zone: 'grid' | 'ribbon' | 'topbar' | 'cardModal' | 'infoModal', index?: number, id?: string }` for keyboard/gamepad focus navigation.
 
 ### Data Fetching & Filter Logic
 - **`fetchGames()`**: Asynchronously calls `/api/roms` on mount, setting `games` and `systems`.

@@ -9,16 +9,32 @@ The Gamepad Controls engine provides seamless navigation using standard USB/Blue
 - **Gamepad API Polling Loop**: Listens for `gamepadconnected` and `gamepaddisconnected` events and polls connected gamepads using `navigator.getGamepads()`.
 - **Keyboard Navigation Mapping**: Supports `WASD`, `Arrow Keys`, `Enter` (select), `Escape` (back/close), and `Q`/`E` (tab switching).
 - **Dynamic Input Prompts**: Toggles top bar prompts between keyboard (`Q` / `E`) and gamepad (`L` / `R` or `L1` / `R1`).
+- **In-Game Input Yielding**: Automatically yields all standard controller buttons and axes to the active EmulatorJS canvas/iframe when a game is running, preventing UI navigation cross-talk.
+- **Dedicated Gamepad Exit Shortcut**: Provides a universal combo (`Select` [Button 8] + `Start` [Button 9] or `Guide/Home` [Button 16]) to safely return from the emulator to the game library.
+- **Gamepad Search Hotkey & On-Screen Virtual Keyboard**: Allows gamepad users to trigger search instantly with `Button 3 (Y / Triangle)` or `Button 8 (Select/Share)` and type queries via a glassmorphic on-screen virtual keyboard with spatial D-Pad grid navigation, `A` (select), `X` (space), `Y` (backspace), `B` (close), and `Start` (search/done).
 
 ---
 
 ## 3. Detailed Logic Behind Everything and How It Works
 
 ### Gamepad Polling & Focus Routing
-- Polling runs inside a `requestAnimationFrame` loop in [App.jsx](file:///Users/godarayudhvir/Projects/retro-player/src/App.jsx).
-- Implements debounce logic using `lastInputTimeRef` (threshold: 180ms) to prevent accidental fast scrolling.
-- Updates `focusedTarget`:
-  - `D-Pad Left / Right`: Navigates grid columns or system tabs.
-  - `D-Pad Up / Down`: Navigates grid rows or switches zone between `tabs` and `grid`.
-  - `Button 0 (A / Cross)`: Triggers game card selection or system tab activation.
-  - `Button 1 (B / Circle)`: Closes game detail drawer or modal.
+- Polling runs inside a `requestAnimationFrame` loop in [App.jsx](file:///Users/godarayudhvir/Github/retro-player/src/App.jsx).
+- Implements debounce logic using `lastInputTimeRef` (threshold: 200ms) to prevent accidental fast scrolling.
+- **Active Gameplay Detection**:
+  - When `activeGame` is truthy, UI spatial navigation is bypassed. Standard buttons (A, B, D-Pad, Shoulder) are not consumed by the main window, allowing EmulatorJS to directly handle gameplay input inside its focused iframe.
+  - If `Select` + `Start` or `Guide/Home` is detected simultaneously, `setActiveGame(null)` is executed, safely unmounting the emulator.
+- **UI Shell Navigation** (when `activeGame` is null):
+  - `D-Pad Left / Right`: Navigates grid columns or system tabs in the ribbon.
+  - `D-Pad Up / Down`: Navigates grid rows, ribbon tabs, or HUD actions.
+  - `Button 0 (A / Cross)`: Triggers game card selection or action modal confirmation.
+  - `Button 1 (B / Circle)`: Closes game detail drawer, info modal, or returns to grid.
+  - `Button 3 (Y / Triangle)` / `Button 8 (Select)`: Opens Search bar and launches On-Screen Virtual Keyboard.
+  - `Button 4 / 5 (L1 / R1)`: Cycles active console system tabs left/right.
+- **On-Screen Virtual Keyboard (OSK)**:
+  - Accessible via `Button 3 (Y / Triangle)`, `Select`, or clicking the topbar search pill.
+  - `D-Pad / Left Stick`: Navigates across the 4-row virtual key matrix (`KEYBOARD_ROWS`).
+  - `Button 0 (A)`: Enters the selected virtual character.
+  - `Button 2 (X)`: Inserts a space.
+  - `Button 3 (Y)`: Backspaces one character.
+  - `Button 1 (B)`: Closes the virtual keyboard and focuses results.
+  - `Button 9 (Start)`: Confirms search and focuses the first matching game tile.

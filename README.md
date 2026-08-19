@@ -67,6 +67,7 @@ retro-player/
 ├── src/
 │   ├── components/
 │   │   ├── EmulatorModal.jsx   # EmulatorJS integration & full-screen modal
+│   │   ├── OnScreenKeyboard.jsx # On-screen virtual keyboard for gamepad & touch
 │   │   └── ErrorBoundary.jsx   # Fatal runtime exception fallback component
 │   ├── gameDescriptions.js     # Title metadata & release date lookup helper
 │   ├── App.jsx           # Main Console Grid UI & Gamepad controls
@@ -85,7 +86,7 @@ The project includes an organized [architecture/](architecture/README.md) specif
 - **[Guidelines & Standards](architecture/README.md)**: Rules for writing specs, sub-directory constraints, and feature proposal templates.
 - **[Core Specifications](architecture/core/index.md)**: Entry point ([index.md](architecture/core/index.md)) and application shell ([app.md](architecture/core/app.md)).
 - **[Functional Modules](architecture/modules/emulator.md)**: Emulator engine ([emulator.md](architecture/modules/emulator.md)), console switcher ([console-switcher.md](architecture/modules/console-switcher.md)), game catalog scanner ([game-catalog.md](architecture/modules/game-catalog.md)), and gamepad navigation ([gamepad-controls.md](architecture/modules/gamepad-controls.md)).
-- **[UI Components](architecture/components/emulator-modal.md)**: Modal HUD ([emulator-modal.md](architecture/components/emulator-modal.md)), error boundary ([error-boundary.md](architecture/components/error-boundary.md)), retro CSS effects ([retro-effects.md](architecture/components/retro-effects.md)), and game cards ([game-card.md](architecture/components/game-card.md)).
+- **[UI Components](architecture/components/emulator-modal.md)**: Modal HUD ([emulator-modal.md](architecture/components/emulator-modal.md)), on-screen virtual keyboard ([on-screen-keyboard.md](architecture/components/on-screen-keyboard.md)), error boundary ([error-boundary.md](architecture/components/error-boundary.md)), retro CSS effects ([retro-effects.md](architecture/components/retro-effects.md)), and game cards ([game-card.md](architecture/components/game-card.md)).
 - **[Mirai Future Features](architecture/mirai/multiplayer.md)**: Upcoming specifications for WebRTC P2P Multiplayer ([multiplayer.md](architecture/mirai/multiplayer.md)) and Cloud Save Sync ([cloud-saves.md](architecture/mirai/cloud-saves.md)).
 
 
@@ -135,12 +136,22 @@ The server scanner will automatically index and link them on page reload or when
 
 ## 🎮 Controls
 
+### UI Navigation
 | Action | Keyboard | Gamepad |
 | :--- | :--- | :--- |
-| **Navigate Tiles** | Arrow Keys (`Up`, `Down`, `Left`, `Right`) | D-Pad / Left Stick |
-| **Switch System Tab** | `Q` / `E` | `L1` / `R1` |
-| **Launch Game** | `Enter` | `A` Button |
-| **Close Emulator** | `Escape` | `B` Button |
+| **Navigate Grid & Menus** | Arrow Keys (`Up`, `Down`, `Left`, `Right`) / `W`, `A`, `S`, `D` | D-Pad / Left Stick |
+| **Switch System Tab** | `Q` / `E` / `PageUp` / `PageDown` | `L1` / `R1` (Shoulder Buttons) |
+| **Select / Launch Game** | `Enter` / `Space` | `A` Button (Button 0) |
+| **Search / Virtual Keyboard** | `⌘K` / `Ctrl+K` | `Y` Button (Button 3) / `Select` |
+| **Back / Close Modals** | `Escape` / `Backspace` | `B` Button (Button 1) |
+
+### In-Game Emulation Controls
+| Action | Keyboard | Gamepad |
+| :--- | :--- | :--- |
+| **Directional Movement** | Arrow Keys / `W`, `A`, `S`, `D` | D-Pad / Left Stick |
+| **Primary Actions (A / B)** | `Z` / `X` | `A` / `B` Buttons |
+| **Start / Select** | `Enter` / `Shift` | `Start` / `Select` |
+| **Exit Game to Launcher** | `Escape` | `Select` + `Start` (or Guide Button) |
 
 ---
 

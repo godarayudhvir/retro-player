@@ -26,6 +26,7 @@ architecture/
 │
 ├── components/             # System Controls & UI Components
 │   ├── emulator-modal.md   # Emulator Modal UI dialog, status displays, HUD bar & isolated iframe engine (`EmulatorModal.jsx`)
+│   ├── on-screen-keyboard.md # On-Screen Virtual Keyboard for gamepad/touch search entry (`OnScreenKeyboard.jsx`)
 │   ├── error-boundary.md   # Error Boundary fallback UI & fatal exception handling (`ErrorBoundary.jsx`)
 │   ├── retro-effects.md    # Custom Retro CSS effects, CRT scanlines, glassmorphism, background dots & UI animations (`index.css`)
 │   └── game-card.md        # Game Card UI grid component, cover art hover effects, cartridge color dynamics & quick-launch triggers (`src/App.jsx`)
