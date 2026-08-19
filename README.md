@@ -20,6 +20,14 @@ Featuring physical 3D cartridge rendering, real-time online metadata scraping, s
 
 <img src="home.webp" alt="Retro Player Showcase" width="100%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
 
+<br /><br />
+
+### 1-Click Instant Deployments
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/godarayudhvir/retro-player)
+&nbsp;&nbsp;
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new)
+
 </div>
 
 ---
@@ -49,21 +57,12 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 ## ✨ Key Highlights
 
-- 🎨 **4 Signature Themes**:
-  - ☀️ **iiSU Light**: Crisp porcelain white with Nintendo red & cyan accents.
-  - 🌙 **Midnight Cyber**: Deep obsidian glassmorphism with vivid neon glows.
-  - 🌊 **Sony XMB Wave**: Ambient animated PlayStation-inspired wave gradient.
-  - 📟 **Game Boy DMG Classic**: Authentic monochromatic dot-matrix LCD green.
-- 💾 **3D Physical Cartridge Engine**:
-  - Tactile retro game cartridges with dynamic metallic sheens, grip textures, embossed brand stamps, and smart color heuristics matched to game titles.
-- 🌐 **Automated ES-DE Online Metadata Scraper**:
-  - Zero bloated assets in your repo. Scrapes official 3D box art from **Libretro Thumbnails** and synopsis info from **Wikipedia** on the fly, cached in **IndexedDB**.
-- 🔊 **Synthesized Pure Web Audio UI SFX**:
-  - Real-time acoustic sound synthesizer. Zero external MP3 downloads. Authentic mechanical cartridge insertion click-clacks, frequency swooshes, and boot chimes.
-- 🎮 **Full Gamepad & Keyboard Navigation**:
-  - D-Pad/Stick navigation, shoulder triggers (`L1`/`R1` or `Q`/`E`), on-screen virtual keyboard (`⌘K`), and instant quick-launch (`A` button / `Enter`).
-- ⏱️ **Playtime Analytics & Smart Collections**:
-  - Track session durations, total hours played, bookmark **Favorites ⭐**, and browse your **Recently Played** queue.
+- 🎨 **4 Signature Themes**: **iiSU Light**, **Midnight Cyber**, **Sony XMB Wave**, and **Game Boy DMG**.
+- 💾 **3D Physical Cartridge Engine**: Tactile cartridges with metallic sheens, grip textures, and title color heuristics.
+- 🌐 **Automated ES-DE Online Metadata Scraper**: Official 3D box art from **Libretro** & synopsis info from **Wikipedia**, cached in **IndexedDB**.
+- 🔊 **Synthesized Pure Web Audio UI SFX**: Zero-latency acoustic feedback synthesizer with zero external audio assets.
+- 🎮 **Full Gamepad & Keyboard Navigation**: D-Pad/Stick navigation, shoulder triggers (`L1`/`R1`), on-screen virtual keyboard (`⌘K`), and quick-launch.
+- ⏱️ **Playtime Analytics & Smart Collections**: Session durations, total hours played, **Favorites ⭐**, and **Recently Played** queue.
 
 ---
 
@@ -83,327 +82,29 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 ---
 
-## 🚀 Deployment Guide
+## 🚀 Quick Start: Docker Compose
 
-<div align="center">
+Deploy Retro Player in seconds with [`docker-compose.yml`](docker-compose.yml):
 
-### 1-Click Cloud Deployments
-
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/godarayudhvir/retro-player)
-&nbsp;&nbsp;
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new)
-
-</div>
-
----
-
-### 1. ☁️ Railway
-
-1. Click **[Deploy on Railway](https://railway.com/new)** (or log into Railway).
-2. Click **Deploy from GitHub repo** $\rightarrow$ select `godarayudhvir/retro-player` (or your fork).
-3. **Add Persistent Volume** *(crucial for saving ROMs)*:
-   - Click your service $\rightarrow$ **Volumes** tab $\rightarrow$ **Add Volume**.
-   - Set **Mount Path**: `/roms`.
-4. **Set Environment Variables**:
-   - `PORT` = `3000`
-   - `ROMS_DIR` = `/roms`
-5. **Generate Public Domain**:
-   - Under service **Settings** $\rightarrow$ **Networking** $\rightarrow$ click **Generate Domain**.
-6. Railway automatically builds the multi-stage `Dockerfile` and deploys your live retro gaming portal!
-
----
-
-### 2. ⚡ Render (1-Click Blueprint)
-
-Click the **Deploy to Render** button above, which automatically reads [`render.yaml`](render.yaml) to configure the Docker runtime, environment variables, and persistent 10GB ROM disk:
-
-1. Click the **Deploy to Render** badge or connect your GitHub repository.
-2. Render provisions the Docker Web Service and attaches the `/roms` persistent disk automatically.
-3. Your portal goes live instantly with zero manual configuration!
-
----
-
-### 3. 🎈 Fly.io
-
-Deploy globally with Fly.io CLI in seconds:
-
-1. Launch app configuration:
-   ```bash
-   fly launch --image ghcr.io/godarayudhvir/retro-player:latest
-   ```
-2. Create a persistent volume:
-   ```bash
-   fly volumes create roms_data --size 10 -r <your-region>
-   ```
-3. In `fly.toml`, ensure the volume and environment variables are mapped:
-   ```toml
-   [env]
-     PORT = "3000"
-     ROMS_DIR = "/roms"
-
-   [mounts]
-     source = "roms_data"
-     destination = "/roms"
-   ```
-4. Deploy:
-   ```bash
-   fly deploy
-   ```
-
----
-
-### 4. 🔮 Coolify (Self-Hosted PaaS)
-
-1. In your Coolify dashboard, select **Projects** $\rightarrow$ **Add Resource** $\rightarrow$ **Docker Compose** or **GitHub Repository**.
-2. Set the compose configuration to use `image: ghcr.io/godarayudhvir/retro-player:latest`.
-3. Under **Persistent Storage**, add a volume mapping:
-   - Host path: `/data/retro-player/roms`
-   - Mount path: `/roms`
-4. Set Exposed Port to `3000` and deploy.
-
----
-
-### 5. 🐳 Portainer / Unraid / TrueNAS / Synology
-
-- **Image**: `ghcr.io/godarayudhvir/retro-player:latest`
-- **Port Mapping**: `3000:3000` (or `8080:3000`)
-- **Volume / Path Mapping**:
-  - Host Path: `/mnt/user/appdata/retro-player/roms` (Unraid) or `/docker/retro-player/roms` (Synology)
-  - Container Path: `/roms`
-  - Mode: `Read/Write (rw)`
-- **Environment Variables**:
-  - `PORT=3000`
-  - `ROMS_DIR=/roms`
-
----
-
-### 6. 🐳 Docker Compose (Standard Linux VPS / HomeLab)
-
-Run Retro Player locally or on your home server (Ubuntu, Debian, Raspberry Pi):
-
-```yaml
-version: '3.8'
-
-services:
-  retro-player:
-    image: ghcr.io/godarayudhvir/retro-player:latest
-    container_name: retro-player
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      - PORT=3000
-      - ROMS_DIR=/roms
-    volumes:
-      # Map host roms folder directly into /roms inside the container
-      - ./roms:/roms
-```
-
-#### Starting the stack:
 ```bash
-# 1. Create directory and place your docker-compose.yml
 mkdir retro-player && cd retro-player
-
-# 2. Launch in detached mode
+curl -O https://raw.githubusercontent.com/godarayudhvir/retro-player/main/docker-compose.yml
 docker compose up -d
-
-# 3. Access in your browser
-open http://localhost:3000
 ```
+
+Open `http://localhost:3000` in your browser!
 
 ---
 
-### 7. 🖥️ Run with Docker CLI
+## 📖 Guides & Documentation
 
-```bash
-docker run -d \
-  --name retro-player \
-  --restart unless-stopped \
-  -p 3000:3000 \
-  -e PORT=3000 \
-  -e ROMS_DIR=/roms \
-  -v $(pwd)/roms:/roms \
-  ghcr.io/godarayudhvir/retro-player:latest
-```
+Explore dedicated, step-by-step guides located in the [`guides/`](guides/README.md) directory:
 
----
-
-### 8. 💻 Local Development Setup (Node.js)
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/godarayudhvir/retro-player.git
-cd retro-player
-
-# 2. Install dependencies
-npm install
-
-# 3. Launch Vite dev server
-npm run dev
-
-# 4. Or build and launch production server
-npm run build
-npm start
-```
-
----
-
-## 🌐 Remote Access & Anywhere Play (Tailscale & Cloudflare Tunnel)
-
-Because Retro Player runs on WebAssembly, playing remotely over a VPN or tunnel requires **almost no bandwidth** (just a single ~5MB ROM download per session), resulting in buttery smooth 60 FPS gameplay on phones, tablets, and laptops from anywhere in the world.
-
-### Option A: Tailscale (Private, Zero-Config WireGuard Mesh VPN)
-
-The simplest and most secure way to access your HomeLab Retro Player instance from your iPhone, Android, or laptop outside your home network:
-
-1. **Install Tailscale** on your host server (Ubuntu/Debian/NAS):
-   ```bash
-   curl -fsSL https://tailscale.com/install.sh | sh
-   sudo tailscale up
-   ```
-2. **Install Tailscale on your mobile phone / client device** and sign into the same account.
-3. **Open the browser on your phone** and navigate to your server's MagicDNS or Tailscale IP:
-   ```text
-   http://100.x.y.z:3000
-   # Or using Tailscale hostname:
-   http://my-ubuntu-server:3000
-   ```
-4. Pair a Bluetooth controller (Xbox, PS5, 8BitDo) or use the touch controls to play seamlessly on the go!
-
----
-
-### Option B: Cloudflare Tunnel (Public HTTPS URL with Zero Open Ports)
-
-Expose your container securely to the internet behind Cloudflare's global edge without opening any router firewall ports:
-
-1. **Create a Tunnel in Cloudflare Zero Trust Dashboard**:
-   - Go to **Networks** $\rightarrow$ **Tunnels** $\rightarrow$ **Create a Tunnel** (name it `retro-player`).
-2. **Add Cloudflared service to your `docker-compose.yml`**:
-   ```yaml
-   version: '3.8'
-
-   services:
-     retro-player:
-       image: ghcr.io/godarayudhvir/retro-player:latest
-       container_name: retro-player
-       restart: unless-stopped
-       ports:
-         - "3000:3000"
-       environment:
-         - PORT=3000
-         - ROMS_DIR=/roms
-       volumes:
-         - ./roms:/roms
-
-     cloudflared:
-       image: cloudflare/cloudflared:latest
-       container_name: cloudflared-retro
-       restart: unless-stopped
-       command: tunnel run
-       environment:
-         - TUNNEL_TOKEN=eyJh... # Paste your Cloudflare Tunnel token here
-   ```
-3. **Configure Public Hostname in Cloudflare**:
-   - Subdomain: `games.yourdomain.com`
-   - Service Type: `HTTP`
-   - URL: `retro-player:3000` (or `localhost:3000`)
-4. Access `https://games.yourdomain.com` with automated SSL and DDoS protection!
-
----
-
-## 🗂️ Organizing & Adding ROMs
-
-### Method A: In-App Drag & Drop (Auto-Persistent)
-Simply drag and drop any `.gba`, `.nes`, `.sfc`, `.z64`, `.nds` file onto the browser window.  
-The backend will automatically:
-1. Detect the system from the file extension.
-2. Auto-create `./roms/<system>/` if it doesn't exist.
-3. Save the ROM file to disk permanently.
-4. Auto-fetch and cache official 3D box art and synopsis metadata.
-
-### Method B: Direct Folder Placement
-Place your ROM collection on your host machine inside `./roms/[system]/`:
-```text
-retro-player/
-├── docker-compose.yml
-└── roms/
-    ├── gba/
-    │   └── Pokemon Emerald.gba
-    ├── snes/
-    │   └── Super Mario World.sfc
-    ├── n64/
-    │   └── Super Mario 64.z64
-    ├── nds/
-    │   └── Pokemon Platinum.nds
-    └── nes/
-        └── Megaman 2.nes
-```
-
----
-
-## 🔄 Updating Your Container
-
-#### Docker Compose:
-```bash
-# Pull newest image from GitHub Container Registry
-docker compose pull
-
-# Recreate container with zero downtime
-docker compose up -d
-
-# Clean up stale images
-docker image prune -f
-```
-
-#### Docker CLI:
-```bash
-docker stop retro-player && docker rm retro-player
-docker pull ghcr.io/godarayudhvir/retro-player:latest
-docker run -d --name retro-player --restart unless-stopped -p 3000:3000 -v $(pwd)/roms:/roms ghcr.io/godarayudhvir/retro-player:latest
-```
-
----
-
-## 🛠️ Troubleshooting & Diagnostics
-
-<details>
-<summary><b>View Live Container Logs</b></summary>
-
-```bash
-docker compose logs -f
-# Or via container name:
-docker logs -f retro-player
-```
-</details>
-
-<details>
-<summary><b>Verify ROM Mount Permissions</b></summary>
-
-If the container cannot read your ROM directory on Linux:
-```bash
-# Verify files inside container
-docker exec -it retro-player ls -lah /roms
-
-# Grant read/write permissions on host
-chmod -R a+rwX ./roms
-```
-</details>
-
-<details>
-<summary><b>Complete Factory Reset</b></summary>
-
-```bash
-# Stop and remove container & networks
-docker compose down -v --remove-orphans
-
-# Remove cached images
-docker rmi ghcr.io/godarayudhvir/retro-player:latest
-
-# Re-pull and launch clean
-docker compose pull
-docker compose up -d --force-recreate
-```
-</details>
+| Guide | Description |
+| :--- | :--- |
+| **[🐳 Docker Deployment Guide](guides/docker.md)** | Full Docker & Docker Compose setup, CLI commands, updates, and troubleshooting. |
+| **[☁️ Cloud & Self-Hosting Guide](guides/hosting.md)** | Detailed setup for Railway, Render, Fly.io, Coolify, Portainer, and NAS (Unraid/TrueNAS). |
+| **[🌐 Remote Access & Anywhere Play](guides/remote-access.md)** | Access your home instance from phones/tablets via **Tailscale Mesh VPN** or **Cloudflare Tunnels**. |
 
 ---
 
