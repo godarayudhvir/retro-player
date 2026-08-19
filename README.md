@@ -164,9 +164,13 @@ Retro Player can be deployed as a self-hosted container using Docker or Docker C
    ├── docker-compose.yml
    └── roms/
        ├── gba/
-       │   └── Pokemon Emerald.zip
+       │   └── Pokemon Emerald.gba
        ├── snes/
        │   └── Super Mario World.sfc
+       ├── n64/
+       │   └── Super Mario 64.z64
+       ├── nds/
+       │   └── Pokemon Platinum.nds
        └── nes/
            └── Megaman 2.nes
    ```

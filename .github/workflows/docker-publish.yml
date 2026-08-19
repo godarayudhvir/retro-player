@@ -6,6 +6,12 @@ on:
       - main
     tags:
       - 'v*'
+    paths-ignore:
+      - '**.md'
+      - 'architecture/**'
+      - '.agents/**'
+      - 'home.webp'
+      - '.gitignore'
   workflow_dispatch:
 
 env:
