@@ -30,7 +30,8 @@ architecture/
 │   ├── playtime-favorites.md # Smart Collections (Favorites & Recents) & Playtime analytics (`usePlaytimeAndFavorites.js`)
 │   ├── console-switcher.md # Console system switching, smart collections filtering & tab ribbon (`SystemRibbon.jsx`)
 │   ├── game-catalog.md     # Game database catalog, ROM path mapping & game descriptions (`gameDescriptions.js`, Vite API middleware)
-│   └── gamepad-controls.md  # Dynamic input controller, keyboard & USB gamepad mapping, hotkeys & shoulder button prompts (L/R vs Q/E)
+│   ├── gamepad-controls.md  # Dynamic input controller, keyboard & USB gamepad mapping, hotkeys & shoulder button prompts (L/R vs Q/E)
+│   └── pwa-service-worker.md # Progressive Web App (PWA), standalone installation & offline caching engine (`public/sw.js`, `usePwaInstall.js`)
 │
 ├── components/             # System Controls & UI Components
 │   ├── topbar.md           # Console header HUD, search input, clock, and sound controls (`Topbar.jsx`)

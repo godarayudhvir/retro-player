@@ -86,32 +86,7 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
     if (onCustomRomLoaded) {
       onCustomRomLoaded(customGame);
     }
-
-    // Persist to backend /roms/<systemKey>/ directory
-    try {
-      console.log(`📤 [PERSISTENCE UPLOAD] Saving "${file.name}" to server disk...`);
-      const uploadRes = await fetch('/api/upload-rom', {
-        method: 'POST',
-        headers: {
-          'x-filename': encodeURIComponent(file.name),
-          'x-system-key': sys.key,
-          'Content-Type': 'application/octet-stream'
-        },
-        body: file
-      });
-
-      if (uploadRes.ok) {
-        const uploadData = await uploadRes.json();
-        console.log(`✅ [PERSISTENCE UPLOAD SUCCESS] Game permanently saved:`, uploadData.game);
-        // Refresh catalog manifest from server
-        fetchGames();
-      } else {
-        console.warn(`⚠️ [PERSISTENCE UPLOAD WARN] Server upload returned HTTP ${uploadRes.status}`);
-      }
-    } catch (err) {
-      console.error('🚨 [PERSISTENCE UPLOAD ERROR] Failed to save ROM to disk:', err);
-    }
-  }, [onCustomRomLoaded, fetchGames]);
+  }, [onCustomRomLoaded]);
 
   const handleCustomRomSelect = useCallback((e) => {
     const file = e.target.files?.[0];

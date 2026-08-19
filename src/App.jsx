@@ -23,10 +23,11 @@ import { useThemeEngine } from './hooks/useThemeEngine';
 import { useMetadataScraper } from './hooks/useMetadataScraper';
 import { useProfileManager } from './hooks/useProfileManager';
 import { useBgmEngine } from './hooks/useBgmEngine';
+import { usePwaInstall } from './hooks/usePwaInstall';
 
 /**
  * Root Application Orchestrator for Retro Player.
- * Coordinates modular UI components, profiles, Mii avatars, BGM audio, themes, settings, and emulation.
+ * Coordinates modular UI components, profiles, Mii avatars, BGM audio, themes, settings, PWA, and emulation.
  */
 export default function App() {
   const [activeGame, setActiveGame] = useState(null);
@@ -118,7 +119,10 @@ export default function App() {
   // Hook 7: Automated Online Metadata & Cover Art Scraper
   const scraper = useMetadataScraper(games);
 
-  // Hook 8: Unified Spatial Navigation Engine (Keyboard + Gamepad + Audio)
+  // Hook 8: Progressive Web App (PWA) & Service Worker Cache Engine
+  const pwa = usePwaInstall();
+
+  // Hook 9: Unified Spatial Navigation Engine (Keyboard + Gamepad + Audio)
   useGamepadNavigation({
     focusedTarget,
     setFocusedTarget,
@@ -149,7 +153,8 @@ export default function App() {
     handleGameSelect,
     fetchGames,
     toggleFavorite,
-    themeEngine
+    themeEngine,
+    pwa
   });
 
   // Digital clock tick
@@ -213,6 +218,7 @@ export default function App() {
         activeProfile={activeProfile}
         onOpenProfileSelect={() => setShowProfileSelectModal(true)}
         bgm={bgm}
+        pwa={pwa}
         focusedTarget={focusedTarget}
         setFocusedTarget={setFocusedTarget}
         searchQuery={searchQuery}
@@ -397,6 +403,7 @@ export default function App() {
         systems={systems}
         fetchGames={fetchGames}
         bgm={bgm}
+        pwa={pwa}
         sfx={sfx}
         themeEngine={themeEngine}
         scraper={scraper}

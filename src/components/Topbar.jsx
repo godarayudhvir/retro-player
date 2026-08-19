@@ -1,16 +1,17 @@
 import React from 'react';
-import { Search, FolderOpen, Gamepad2, Volume2, VolumeX, Sparkles, RefreshCw, Music, SkipForward, Settings } from 'lucide-react';
+import { Search, FolderOpen, Gamepad2, Volume2, VolumeX, Sparkles, RefreshCw, Music, SkipForward, Settings, Download } from 'lucide-react';
 import MiiAvatar from './MiiAvatar';
 
 /**
  * Topbar console header with active Mii profile avatar, BGM music player, status indicators,
- * settings trigger, search input, custom ROM loader, and digital clock.
+ * settings trigger, PWA install button, search input, custom ROM loader, and digital clock.
  */
 export default function Topbar({
   gamepadConnected,
   activeProfile,
   onOpenProfileSelect,
   bgm,
+  pwa,
   focusedTarget,
   setFocusedTarget,
   searchQuery,
@@ -190,6 +191,22 @@ export default function Topbar({
             {gamepadConnected ? 'Y' : (isMac ? '⌘K' : 'Ctrl+K')}
           </kbd>
         </div>
+
+        {/* PWA Standalone App Install Button */}
+        {pwa?.canInstall && (
+          <button
+            className={`status-pill status-install-pwa ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'install' ? 'gamepad-focused' : ''}`}
+            onClick={() => {
+              pwa.promptInstall();
+              sfx?.playThemeSwitch?.();
+            }}
+            title="Install Retro Player as a Standalone Desktop / Handheld App"
+            aria-label="Install Retro Player App"
+          >
+            <Download size={16} />
+            <span className="pill-text">INSTALL APP</span>
+          </button>
+        )}
 
         {/* Load Custom ROM */}
         <button

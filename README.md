@@ -4,6 +4,7 @@
 
 ### *The High-Performance, Zero-Overhead Web Emulation Station*
 
+[![GitHub Pages](https://github.com/godarayudhvir/retro-player/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/godarayudhvir/retro-player/actions/workflows/deploy-pages.yml)
 [![Docker Multi-Arch Build](https://github.com/godarayudhvir/retro-player/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/godarayudhvir/retro-player/actions)
 [![GitHub Container Registry](https://img.shields.io/badge/GHCR.io-retro--player-blue?logo=docker&logoColor=white)](https://github.com/godarayudhvir/retro-player/pkgs/container/retro-player)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -50,6 +51,7 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 ## ✨ Key Highlights
 
 - 👤 **Multi-User Profiles & Nintendo Mii Avatar Creator**: Create personalized Mii-style vector avatars with customizable hairstyles, expressions, and accessories; isolated game saves, playtime logs, and favorites.
+- 📱 **Progressive Web App (PWA) & Offline Standalone Installation**: Install Retro Player as a native desktop/handheld app across macOS, Windows, Linux, Steam Deck, Android, and iOS with landscape gaming display mode and Service Worker caching for 100% air-gapped offline gameplay.
 - 📱 **Multi-Device Responsive Matrix**: Fully responsive and tailored experience on Mobile Phones (<=640px), Tablets/Handhelds (Steam Deck, Nintendo Switch, iPad), Desktop PCs, and 10-Foot UI mode for Large 4K TVs.
 - 🎨 **Unified Theme Engine**: Seamless support for Classic, Midnight OLED, Cyber Neon, and PlayStation XMB dark themes across every modal, drawer, component, and button.
 - 🎵 **Background Music (BGM) Engine & Docker Management**:

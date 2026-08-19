@@ -40,6 +40,106 @@ const EXTENSION_MAP = {
 };
 
 
+function getBgmManifest(bgmBaseDir, validAudioExts) {
+  const tracks = [];
+  if (fs.existsSync(bgmBaseDir)) {
+    try {
+      const entries = fs.readdirSync(bgmBaseDir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.name.startsWith('.')) continue;
+        if (entry.isFile()) {
+          const ext = path.extname(entry.name).toLowerCase();
+          if (validAudioExts.includes(ext)) {
+            const rawTitle = path.parse(entry.name).name;
+            const cleanTitle = rawTitle.replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+            tracks.push({
+              id: `bgm-${rawTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+              title: cleanTitle.toUpperCase() || rawTitle,
+              filename: entry.name,
+              url: `/bgm/${encodeURIComponent(entry.name)}`
+            });
+          }
+        }
+      }
+    } catch (e) {
+      console.error('[API BGM ERROR] Failed reading BGM directory:', e);
+    }
+  }
+  return {
+    count: tracks.length,
+    tracks: tracks.sort((a, b) => a.title.localeCompare(b.title))
+  };
+}
+
+function getRomsManifest(romsBaseDir) {
+  const games = [];
+
+  function scanDirectory(dirPath, systemSubdir = '') {
+    if (!fs.existsSync(dirPath)) return;
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+
+    for (const entry of entries) {
+      if (entry.name.startsWith('.')) continue;
+
+      const fullPath = path.join(dirPath, entry.name);
+      const currentSubdir = systemSubdir ? `${systemSubdir}/${entry.name}` : entry.name;
+
+      if (entry.isDirectory()) {
+        scanDirectory(fullPath, currentSubdir);
+      } else if (entry.isFile()) {
+        const ext = path.extname(entry.name).toLowerCase();
+        const validExts = ['.nes', '.snes', '.smc', '.sfc', '.gba', '.gbc', '.gb', '.n64', '.z64', '.v64', '.nds', '.gen', '.zip', '.iso', '.cue', '.chd', '.bin'];
+
+        if (validExts.includes(ext)) {
+          const nameWithoutExt = path.parse(entry.name).name;
+          const pathParts = systemSubdir.split('/');
+          const topFolderKey = pathParts[0].toLowerCase();
+          const parentFolderKey = pathParts.length > 1 ? pathParts[pathParts.length - 1] : '';
+
+          const extSystemKey = EXTENSION_MAP[ext];
+          const systemKey = SYSTEM_MAP[topFolderKey] ? topFolderKey : (extSystemKey || 'nes');
+          const systemInfo = SYSTEM_MAP[systemKey] || SYSTEM_MAP['nes'];
+
+          const pathSegments = currentSubdir.split('/').map(segment => encodeURIComponent(segment));
+          const romUrl = `/roms/${pathSegments.join('/')}`;
+
+          const rawTitle = (nameWithoutExt.toLowerCase() === 'game' || nameWithoutExt.toLowerCase() === 'rom') && parentFolderKey
+            ? parentFolderKey
+            : nameWithoutExt;
+
+          const cleanDisplayTitle = rawTitle.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+
+          games.push({
+            id: `${systemKey}-${rawTitle}`.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+            title: cleanDisplayTitle || rawTitle,
+            rawTitle: rawTitle,
+            filename: entry.name,
+            systemKey,
+            systemName: systemInfo.name,
+            systemCore: systemInfo.core,
+            systemColor: systemInfo.color,
+            systemIcon: systemInfo.icon,
+            category: systemInfo.category,
+            romUrl,
+            coverUrl: null,
+          });
+        }
+      }
+    }
+  }
+
+  scanDirectory(romsBaseDir);
+
+  return {
+    games,
+    systems: Object.keys(SYSTEM_MAP).map(key => ({
+      key,
+      ...SYSTEM_MAP[key],
+      gameCount: games.filter(g => g.systemKey === key).length
+    }))
+  };
+}
+
 function multiConsoleScannerPlugin() {
   const romsBaseDir = process.env.ROMS_DIR ? path.resolve(process.env.ROMS_DIR) : path.resolve(process.cwd(), 'public/roms');
   const bgmBaseDir = process.env.BGM_DIR ? path.resolve(process.env.BGM_DIR) : path.resolve(process.cwd(), 'public/bgm');
@@ -47,6 +147,32 @@ function multiConsoleScannerPlugin() {
 
   return {
     name: 'multi-console-scanner-plugin',
+    generateBundle() {
+      // Emit static JSON files for /api/roms and /api/bgm so static hosts (GitHub Pages) serve catalog seamlessly
+      const romsData = getRomsManifest(romsBaseDir);
+      this.emitFile({
+        type: 'asset',
+        fileName: 'api/roms',
+        source: JSON.stringify(romsData)
+      });
+      this.emitFile({
+        type: 'asset',
+        fileName: 'api/roms.json',
+        source: JSON.stringify(romsData)
+      });
+
+      const bgmData = getBgmManifest(bgmBaseDir, validAudioExts);
+      this.emitFile({
+        type: 'asset',
+        fileName: 'api/bgm',
+        source: JSON.stringify(bgmData)
+      });
+      this.emitFile({
+        type: 'asset',
+        fileName: 'api/bgm.json',
+        source: JSON.stringify(bgmData)
+      });
+    },
     configureServer(server) {
       // Direct raw binary static file handler for /roms/ files
       server.middlewares.use('/roms', (req, res, next) => {
@@ -100,114 +226,16 @@ function multiConsoleScannerPlugin() {
 
       // API Endpoint for BGM list
       server.middlewares.use('/api/bgm', (req, res) => {
-        const tracks = [];
-        if (fs.existsSync(bgmBaseDir)) {
-          try {
-            const entries = fs.readdirSync(bgmBaseDir, { withFileTypes: true });
-            for (const entry of entries) {
-              if (entry.name.startsWith('.')) continue;
-              if (entry.isFile()) {
-                const ext = path.extname(entry.name).toLowerCase();
-                if (validAudioExts.includes(ext)) {
-                  const rawTitle = path.parse(entry.name).name;
-                  const cleanTitle = rawTitle.replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
-                  tracks.push({
-                    id: `bgm-${rawTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
-                    title: cleanTitle.toUpperCase() || rawTitle,
-                    filename: entry.name,
-                    url: `/bgm/${encodeURIComponent(entry.name)}`
-                  });
-                }
-              }
-            }
-          } catch (e) {
-            console.error('[API BGM ERROR] Failed reading BGM directory:', e);
-          }
-        }
-
+        const bgmData = getBgmManifest(bgmBaseDir, validAudioExts);
         res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({
-          count: tracks.length,
-          tracks: tracks.sort((a, b) => a.title.localeCompare(b.title))
-        }));
+        res.end(JSON.stringify(bgmData));
       });
 
       // API Endpoint for ROM list
       server.middlewares.use('/api/roms', (req, res) => {
-        console.log(`[API SCANNER] Running full directory scan on ${romsBaseDir}...`);
-        const games = [];
-
-        function scanDirectory(dirPath, systemSubdir = '') {
-          if (!fs.existsSync(dirPath)) {
-            console.warn(`[API SCANNER WARN] ROM directory does not exist: ${dirPath}`);
-            return;
-          }
-
-          const entries = fs.readdirSync(dirPath, { withFileTypes: true });
-
-          for (const entry of entries) {
-            if (entry.name.startsWith('.')) continue;
-
-            const fullPath = path.join(dirPath, entry.name);
-            const currentSubdir = systemSubdir ? `${systemSubdir}/${entry.name}` : entry.name;
-
-            if (entry.isDirectory()) {
-              scanDirectory(fullPath, currentSubdir);
-            } else if (entry.isFile()) {
-              const ext = path.extname(entry.name).toLowerCase();
-              const validExts = ['.nes', '.snes', '.smc', '.sfc', '.gba', '.gbc', '.gb', '.n64', '.z64', '.v64', '.nds', '.gen', '.zip', '.iso', '.cue', '.chd', '.bin'];
-
-              if (validExts.includes(ext)) {
-                const nameWithoutExt = path.parse(entry.name).name;
-                
-                const pathParts = systemSubdir.split('/');
-                const topFolderKey = pathParts[0].toLowerCase();
-                const parentFolderKey = pathParts.length > 1 ? pathParts[pathParts.length - 1] : '';
-
-                const extSystemKey = EXTENSION_MAP[ext];
-                const systemKey = SYSTEM_MAP[topFolderKey] ? topFolderKey : (extSystemKey || 'nes');
-                const systemInfo = SYSTEM_MAP[systemKey] || SYSTEM_MAP['nes'];
-
-                const pathSegments = currentSubdir.split('/').map(segment => encodeURIComponent(segment));
-                const romUrl = `/roms/${pathSegments.join('/')}`;
-
-                const rawTitle = (nameWithoutExt.toLowerCase() === 'game' || nameWithoutExt.toLowerCase() === 'rom') && parentFolderKey
-                  ? parentFolderKey
-                  : nameWithoutExt;
-
-                const cleanDisplayTitle = rawTitle.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
-
-                games.push({
-                  id: `${systemKey}-${rawTitle}`.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-                  title: cleanDisplayTitle || rawTitle,
-                  rawTitle: rawTitle,
-                  filename: entry.name,
-                  systemKey,
-                  systemName: systemInfo.name,
-                  systemCore: systemInfo.core,
-                  systemColor: systemInfo.color,
-                  systemIcon: systemInfo.icon,
-                  category: systemInfo.category,
-                  romUrl,
-                  coverUrl: null, // Scraped dynamically by metadataScraper service
-                });
-              }
-            }
-          }
-        }
-
-        scanDirectory(romsBaseDir);
-        console.log(`[API SCANNER COMPLETED] Total games indexed: ${games.length}`);
-
+        const romsData = getRomsManifest(romsBaseDir);
         res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({
-          games,
-          systems: Object.keys(SYSTEM_MAP).map(key => ({
-            key,
-            ...SYSTEM_MAP[key],
-            gameCount: games.filter(g => g.systemKey === key).length
-          }))
-        }));
+        res.end(JSON.stringify(romsData));
       });
 
       // API Endpoint for Uploading ROMs in development
@@ -587,6 +615,7 @@ function multiConsoleScannerPlugin() {
 }
 
 export default defineConfig({
+  base: './',
   plugins: [react(), multiConsoleScannerPlugin()],
   server: {
     port: 3000,

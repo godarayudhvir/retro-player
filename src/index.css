@@ -1599,6 +1599,26 @@ body {
   font-weight: 900;
 }
 
+.diag-status.info {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 12px;
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.diag-status.warn {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 12px;
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
 /* Bottom HUD Guide */
 .settings-page-footer {
   display: flex;
@@ -2108,6 +2128,59 @@ button.status-pill.is-active-scraping {
   width: auto;
   border-radius: 30px;
   padding: 0.45rem 0.85rem;
+}
+
+button.status-pill.status-install-pwa {
+  width: auto;
+  border-radius: 30px;
+  padding: 0.45rem 1rem;
+  background: #ffffff;
+  border: 2px solid #10b981;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+  color: #059669;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 800;
+  animation: pulse-glow-emerald 2.5s infinite ease-in-out;
+}
+
+@keyframes pulse-glow-emerald {
+  0%, 100% {
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+    border-color: #10b981;
+  }
+  50% {
+    box-shadow: 0 4px 22px rgba(16, 185, 129, 0.5);
+    border-color: #34d399;
+  }
+}
+
+button.status-pill.status-install-pwa:hover {
+  transform: translateY(-2px) scale(1.05);
+  background: #f0fdf4;
+  border-color: #059669;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+}
+
+html[data-theme="midnight"] button.status-pill.status-install-pwa,
+html[data-theme="xmb"] button.status-pill.status-install-pwa {
+  background: #0f172a;
+  border: 2px solid #10b981;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
+  color: #34d399;
+}
+
+html[data-theme="midnight"] button.status-pill.status-install-pwa:hover,
+html[data-theme="xmb"] button.status-pill.status-install-pwa:hover {
+  background: #1e293b;
+  border-color: #34d399;
+}
+
+html[data-theme="dmg"] button.status-pill.status-install-pwa {
+  background: #8b956d;
+  border: 2px solid #0f380f;
+  color: #0f380f;
 }
 
 button.status-pill:hover {

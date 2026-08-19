@@ -35,7 +35,8 @@ export function useGamepadNavigation({
   handleGameSelect,
   fetchGames,
   toggleFavorite,
-  themeEngine
+  themeEngine,
+  pwa
 }) {
   const stateRef = useRef({});
   const lastInputTimeRef = useRef(0);
@@ -59,7 +60,8 @@ export function useGamepadNavigation({
       searchQuery,
       gamepadConnected,
       toggleFavorite,
-      themeEngine
+      themeEngine,
+      pwa
     };
   }, [
     activeSystem,
@@ -68,6 +70,7 @@ export function useGamepadNavigation({
     selectedGameCard,
     showInfoModal,
     showLoadRomModal,
+    showSettingsModal,
     showVirtualKeyboard,
     oskPos,
     filteredGames,
@@ -75,7 +78,8 @@ export function useGamepadNavigation({
     searchQuery,
     gamepadConnected,
     toggleFavorite,
-    themeEngine
+    themeEngine,
+    pwa
   ]);
 
   // Spatial navigation engine
@@ -301,6 +305,11 @@ export function useGamepadNavigation({
             searchInputRef.current.focus();
             searchInputRef.current.select();
           }
+        } else if (curId === 'install') {
+          if (stateRef.current.pwa?.promptInstall) {
+            stateRef.current.pwa.promptInstall();
+            sfx?.playThemeSwitch?.();
+          }
         } else if (curId === 'loadRom') {
           setShowLoadRomModal(true);
           setFocusedTarget({ zone: 'loadRomModal', id: 'browse' });
@@ -337,19 +346,21 @@ export function useGamepadNavigation({
 
     // Directional Spatial Movements (UP, DOWN, LEFT, RIGHT)
     if (curZone === 'topbar') {
+      const topbarItems = ['search'];
+      if (stateRef.current.pwa?.canInstall) {
+        topbarItems.push('install');
+      }
+      topbarItems.push('loadRom', 'settings');
+
       if (dir === 'LEFT') {
-        if (curTarget?.id === 'settings') {
-          setFocusedTarget({ zone: 'topbar', id: 'loadRom' });
-        } else {
-          setFocusedTarget({ zone: 'topbar', id: 'search' });
-        }
+        const curIdx = topbarItems.indexOf(curTarget?.id || 'search');
+        const prevIdx = Math.max(0, curIdx - 1);
+        setFocusedTarget({ zone: 'topbar', id: topbarItems[prevIdx] });
         sfx?.playTileNav?.();
       } else if (dir === 'RIGHT') {
-        if (curTarget?.id === 'search') {
-          setFocusedTarget({ zone: 'topbar', id: 'loadRom' });
-        } else {
-          setFocusedTarget({ zone: 'topbar', id: 'settings' });
-        }
+        const curIdx = topbarItems.indexOf(curTarget?.id || 'search');
+        const nextIdx = Math.min(topbarItems.length - 1, curIdx + 1);
+        setFocusedTarget({ zone: 'topbar', id: topbarItems[nextIdx] });
         sfx?.playTileNav?.();
       } else if (dir === 'DOWN') {
         const sysIdx = allTabs.findIndex(t => t.key === curActiveSys);

@@ -19,7 +19,10 @@ import {
   ArrowLeft,
   ShieldCheck,
   Monitor,
-  X
+  X,
+  Download,
+  Smartphone,
+  Zap
 } from 'lucide-react';
 import { detectSystemFromExtension } from '../utils/systemDetector';
 import ConfirmModal from './ConfirmModal';
@@ -28,7 +31,7 @@ import ConfirmModal from './ConfirmModal';
  * Nintendo Switch Style Full-Screen System Settings Menu Page.
  * Features a clean 2-column layout with left category sidebar navigation,
  * and comprehensive detail settings panes for ROM management, Audio, Themes,
- * Gamepad mappings, and Docker volume storage diagnostics.
+ * Gamepad mappings, PWA & offline status, and Docker volume storage diagnostics.
  */
 export default function SettingsView({
   isOpen,
@@ -37,6 +40,7 @@ export default function SettingsView({
   systems = [],
   fetchGames,
   bgm,
+  pwa,
   sfx,
   themeEngine,
   scraper,
@@ -799,6 +803,64 @@ export default function SettingsView({
                       <h4>Installed Games</h4>
                       <p>{games.length} total ROMs indexed</p>
                       <span className="diag-status ok">{systems.filter(s => s.gameCount > 0).length} Active Systems</span>
+                    </div>
+                  </div>
+
+                  <div className="settings-diag-card">
+                    <div className="diag-icon-box">
+                      <Smartphone size={24} color="#10b981" />
+                    </div>
+                    <div className="diag-info">
+                      <h4>PWA Application Mode</h4>
+                      <p>{pwa?.isStandalone ? 'Installed Standalone Native App' : 'Browser Web Tab Mode'}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px', flexWrap: 'wrap' }}>
+                        <span className={`diag-status ${pwa?.isStandalone ? 'ok' : 'info'}`}>
+                          {pwa?.isStandalone ? 'Standalone Active' : (pwa?.canInstall ? 'Ready to Install' : 'Browser Mode')}
+                        </span>
+                        {pwa?.canInstall && (
+                          <button
+                            className="settings-action-btn primary"
+                            style={{ padding: '4px 10px', fontSize: '0.75rem', height: 'auto' }}
+                            onClick={() => {
+                              pwa.promptInstall();
+                              sfx?.playThemeSwitch?.();
+                            }}
+                          >
+                            <Download size={13} />
+                            <span>Install App</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="settings-diag-card">
+                    <div className="diag-icon-box">
+                      <Zap size={24} color="#06b6d4" />
+                    </div>
+                    <div className="diag-info">
+                      <h4>Offline Service Worker</h4>
+                      <p>{pwa?.swRegistered ? 'Active Service Worker (retro-player-v1)' : 'Service Worker Initializing...'}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px', flexWrap: 'wrap' }}>
+                        <span className={`diag-status ${pwa?.swRegistered ? 'ok' : 'warn'}`}>
+                          {pwa?.swRegistered ? 'Offline Cores Ready' : 'Registering...'}
+                        </span>
+                        <button
+                          className="settings-action-btn folder-btn"
+                          style={{ padding: '4px 10px', fontSize: '0.75rem', height: 'auto' }}
+                          disabled={pwa?.cacheStatus === 'updating'}
+                          onClick={async () => {
+                            const ok = await pwa?.refreshCache?.();
+                            if (ok) {
+                              sfx?.playSaveDetected?.();
+                            }
+                          }}
+                          title="Purge and re-cache all offline shell assets"
+                        >
+                          <RefreshCw size={13} className={pwa?.cacheStatus === 'updating' ? 'spin' : ''} />
+                          <span>{pwa?.cacheStatus === 'updating' ? 'Updating...' : (pwa?.cacheStatus === 'updated' ? 'Cache Updated!' : 'Refresh Cache')}</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

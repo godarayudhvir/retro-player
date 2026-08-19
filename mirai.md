@@ -28,12 +28,13 @@ Retro Player bridges the tactile nostalgia of 90s/2000s physical gaming cartridg
 - [x] **Multi-Theme Engine**: 4 distinct switchable UI themes (iiSU Light, Midnight Cyber Dark, Sony XMB Wave, Game Boy DMG Classic) with instant persistence, topbar selector, and keyboard shortcut (`T`) (Section 4.3).
 - [x] **Touch Screen Gamepad Overlay & Mobile Responsiveness**: Elevated on-screen D-Pad and action buttons with glassmorphic styling, dynamic `100dvh` viewport containment, in-game topbar RetroArch Menu integration, and full touch responsiveness across phones, tablets, and TVs (Section 3.1).
 - [x] **Automated Metadata & Cover Art Scraper**: Online scraping from Libretro Thumbnails CDN, Open DB & Wikipedia APIs for high-res 3D box art, screenshots, developer, publisher, genre, and synopsis with persistent IndexedDB caching (Section 2.1).
-- [ ] **Ambient Menu BGM Jukebox**: Curated ambient console background music with auto-ducking on launch (Section 4.2).
+- [x] **Ambient Menu BGM Jukebox & Music Manager**: Curated ambient console background music with smart in-game auto-ducking/pause, host music upload, track skip, and persistent playback (Section 4.2 & 8.2).
+- [x] **Multi-User Profiles & Nintendo Mii Avatar Studio**: Personalized user profiles with full 7-parameter Mii avatar creator and per-profile playtime/favorite isolation.
+- [x] **Progressive Web App (PWA) & Offline Desktop/Handheld Installation**: Standalone installable application with Web App Manifest, landscape gaming display mode, and Service Worker caching for 100% offline shell and WebAssembly cores (Section 6.2).
 - [ ] **RetroAchievements (RA) Full Integration**: RetroAchievements API authentication, in-game badge unlock popups, hardcore points, and leaderboards (Section 5.1).
 - [ ] **WebRTC Peer-to-Peer Netplay**: Zero-server P2P multiplayer room creation, low-latency DataChannels, and input rollback (Section 5.2).
 - [ ] **Discord Rich Presence (DRP)**: Real-time Discord status broadcasting for current retro game title, platform, and playtime (Section 5.3).
 - [ ] **Cross-Device Cloud Save Synchronization**: Bi-directional save state & battery RAM backup to Google Drive, Dropbox, or WebDAV (Section 6.1).
-- [ ] **Progressive Web App (PWA)**: Standalone installable application with offline service worker caching (Section 6.2).
 
 ---
 
@@ -547,9 +548,9 @@ PHASE 2: Library & Control Enhancements (2 - 4 Weeks) [COMPLETED]
 └── Integrate Automated Online Metadata & Cover Art Scraper (DONE)
 
 PHASE 3: Connected & Cloud Features (1 - 2 Months)
+├── Progressive Web App (PWA) Service Worker & Desktop Installation (DONE)
 ├── Full RetroAchievements (RA) API Integration with In-Game Badge Popups
 ├── Cross-Device Cloud Save Synchronization (Google Drive / WebDAV)
-├── Progressive Web App (PWA) Service Worker & Desktop Installation
 ├── Discord Rich Presence (DRP) Bridge
 └── In-Browser Archive Auto-Extraction (.zip, .7z)
 
