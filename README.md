@@ -89,7 +89,7 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 ### Instant 1-Click Cloud Deployment
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/new?template=https%3A%2F%2Fgithub.com%2Fgodarayudhvir%2Fretro-player)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/godarayudhvir/retro-player)
 &nbsp;&nbsp;
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/godarayudhvir/retro-player)
 
