@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="controller-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#ef4444" />
+      <stop offset="100%" stopColor="#b91c1c" />
+    </linearGradient>
+    <linearGradient id="body-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stopColor="#1e293b" />
+      <stop offset="100%" stopColor="#0f172a" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#ef4444" floodOpacity="0.4" />
+    </filter>
+  </defs>
+
+  <!-- Background Base Badge -->
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#body-grad)" stroke="#334155" strokeWidth="2" filter="url(#glow)" />
+
+  <!-- D-Pad Base -->
+  <g fill="#94a3b8">
+    <rect x="14" y="27" width="16" height="6" rx="2" />
+    <rect x="19" y="22" width="6" height="16" rx="2" />
+    <circle cx="22" cy="30" r="1.5" fill="#0f172a" />
+  </g>
+
+  <!-- Action Buttons (ABXY) -->
+  <circle cx="42" cy="25" r="3" fill="#ef4444" />
+  <circle cx="48" cy="30" r="3" fill="#3b82f6" />
+  <circle cx="36" cy="30" r="3" fill="#10b981" />
+  <circle cx="42" cy="35" r="3" fill="#f59e0b" />
+
+  <!-- Center Select/Start Pills -->
+  <rect x="27" y="44" width="4" height="2.5" rx="1" fill="#64748b" transform="rotate(-25 29 45)" />
+  <rect x="33" y="44" width="4" height="2.5" rx="1" fill="#64748b" transform="rotate(-25 35 45)" />
+</svg>
