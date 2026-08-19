@@ -4483,6 +4483,206 @@ html[data-theme="dmg"] .favorite-toggle-btn {
     font-size: 0.62rem;
   }
 
+  /* Settings Modal Mobile */
+  .settings-modal-backdrop {
+    padding: 0.5rem;
+  }
+
+  .settings-modal-container {
+    padding: 1.25rem 1rem;
+    border-radius: 20px;
+    max-height: 94vh;
+  }
+
+  .settings-header {
+    margin-bottom: 0.75rem;
+  }
+
+  .settings-title h2 {
+    font-size: 1.15rem;
+  }
+
+  .settings-subtitle {
+    font-size: 0.72rem;
+  }
+
+  .settings-tabs-bar {
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    overflow-x: auto;
+  }
+
+  .settings-tab-btn {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.78rem;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+
+  .settings-actions-bar {
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .settings-filter-group {
+    min-width: 100%;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .settings-search-box {
+    width: 100%;
+    padding: 0.4rem 0.65rem;
+  }
+
+  .settings-select {
+    width: 100%;
+    padding: 0.4rem 0.65rem;
+  }
+
+  .settings-upload-wrapper {
+    width: 100%;
+  }
+
+  .settings-upload-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.6rem 1rem;
+  }
+
+  .settings-item-row {
+    padding: 0.6rem 0.75rem;
+    border-radius: 14px;
+  }
+
+  .settings-item-title {
+    font-size: 0.82rem;
+  }
+
+  .settings-item-file {
+    font-size: 0.68rem;
+  }
+
+  /* Profile Select Modal Mobile */
+  .profile-select-backdrop {
+    padding: 0.75rem;
+  }
+
+  .profile-select-modal {
+    padding: 1.5rem 1rem;
+    border-radius: 24px;
+    max-height: 92vh;
+  }
+
+  .profile-modal-title h2 {
+    font-size: 1.35rem;
+  }
+
+  .profile-select-subtitle {
+    font-size: 0.8rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .profile-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 0.85rem;
+    padding: 0.5rem 0;
+  }
+
+  .profile-card {
+    padding: 0.75rem 0.5rem;
+    border-radius: 18px;
+  }
+
+  .profile-avatar-container {
+    width: 72px;
+    height: 72px;
+  }
+
+  .profile-card-name {
+    font-size: 0.85rem;
+  }
+
+  /* Mii Avatar Creator Wizard Mobile */
+  .mii-creator-backdrop {
+    padding: 0.5rem;
+  }
+
+  .mii-creator-modal {
+    padding: 1.25rem 1rem;
+    border-radius: 20px;
+    max-height: 94vh;
+  }
+
+  .mii-creator-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .mii-creator-body {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .mii-preview-pane {
+    padding: 1rem;
+    min-height: auto;
+  }
+
+  .mii-controls-pane {
+    padding: 0;
+    max-height: 48vh;
+  }
+
+  /* In-App Confirm Dialog Mobile */
+  .confirm-dialog-backdrop {
+    padding: 0.75rem;
+  }
+
+  .confirm-dialog-container {
+    padding: 1.25rem 1.15rem;
+    border-radius: 20px;
+  }
+
+  .confirm-dialog-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .confirm-dialog-message {
+    font-size: 0.85rem;
+  }
+
+  .confirm-dialog-actions {
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+  }
+
+  .confirm-btn-cancel,
+  .confirm-btn-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* About Info Modal Mobile */
+  .about-modal-container {
+    padding: 1.25rem 1rem;
+    border-radius: 20px;
+    max-height: 92vh;
+  }
+
+  .about-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .controls-table {
+    font-size: 0.75rem;
+  }
+
+  .controls-table th,
+  .controls-table td {
+    padding: 0.5rem 0.4rem;
+  }
+
   /* On-Screen Keyboard Mobile */
   .osk-modal {
     padding: 1.15rem 0.75rem;
