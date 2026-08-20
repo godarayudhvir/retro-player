@@ -3060,6 +3060,209 @@ button.status-pill:active {
   color: #94a3b8;
 }
 
+/* In-Game Retro Settings Modal & CRT Shaders */
+.emulator-settings-panel {
+  position: absolute;
+  top: 68px;
+  right: 20px;
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
+  background: #0f172a !important;
+  background-color: #0f172a !important;
+  border: 1.5px solid rgba(139, 92, 246, 0.45) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9) !important;
+  padding: 1.1rem !important;
+  z-index: 100010 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1rem !important;
+  color: #ffffff !important;
+  animation: diagSlideDown 0.2s ease-out;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
+  box-sizing: border-box;
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding-bottom: 0.6rem;
+}
+
+.settings-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #a78bfa;
+}
+
+.emulator-settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.emulator-settings-sec-title {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #e2e8f0 !important;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.emulator-vol-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+  color: #ffffff;
+}
+
+.emulator-vol-slider {
+  flex: 1;
+  accent-color: #a78bfa;
+  cursor: pointer;
+}
+
+.emulator-filter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.emulator-filter-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.4rem !important;
+  padding: 0.55rem 0.6rem !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 8px !important;
+  color: #f1f5f9 !important;
+  font-family: inherit !important;
+  font-size: 0.74rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.emulator-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  background-color: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  color: #ffffff !important;
+}
+
+.emulator-filter-btn.active {
+  background: rgba(139, 92, 246, 0.35) !important;
+  background-color: rgba(139, 92, 246, 0.35) !important;
+  border-color: #a78bfa !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.35) !important;
+}
+
+.emulator-state-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.emulator-state-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.4rem !important;
+  padding: 0.55rem 0.65rem !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 8px !important;
+  color: #f1f5f9 !important;
+  font-family: inherit !important;
+  font-size: 0.74rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.emulator-state-btn:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  background-color: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+}
+
+.emulator-state-btn:active {
+  transform: translateY(0);
+}
+
+.emulator-toast-banner {
+  position: absolute;
+  top: 68px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(56, 189, 248, 0.5);
+  color: #38bdf8;
+  border-radius: 20px;
+  padding: 0.45rem 1.1rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  z-index: 100020;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: diagSlideDown 0.2s ease-out;
+  pointer-events: none;
+}
+
+/* CRT & Display Shaders */
+.emulator-stage.filter-crt::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.03));
+  z-index: 20;
+  background-size: 100% 3px, 6px 100%;
+  pointer-events: none;
+}
+
+.emulator-stage.filter-crt iframe {
+  filter: contrast(1.1) brightness(1.06) saturate(1.18);
+}
+
+.emulator-stage.filter-smooth iframe {
+  image-rendering: auto;
+  filter: blur(0.3px);
+}
+
+.emulator-stage.filter-vibrant iframe {
+  filter: saturate(1.35) contrast(1.12);
+}
+
 .emulator-stage {
   flex: 1;
   position: relative;

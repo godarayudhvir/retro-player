@@ -16,7 +16,9 @@ import {
   Save, 
   Download, 
   Camera, 
-  Sliders 
+  Sliders,
+  Tv,
+  Sparkles
 } from 'lucide-react';
 import { detectSystemFromExtension } from '../utils/systemDetector';
 import { dbGet, dbSet, STORES } from '../services/db';
@@ -28,8 +30,21 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
   const [isLocalOffline, setIsLocalOffline] = useState(!navigator.onLine);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [showSubToolbar, setShowSubToolbar] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [isGamePaused, setIsGamePaused] = useState(false);
   const [isGameMuted, setIsGameMuted] = useState(false);
+  const [activeShader, setActiveShader] = useState('none');
+  const [volume, setVolumeState] = useState(1.0);
+  const [toastMessage, setToastMessage] = useState('');
+  const toastTimeoutRef = useRef(null);
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    toastTimeoutRef.current = setTimeout(() => {
+      setToastMessage('');
+    }, 2500);
+  };
 
   // Keep references to prevent re-renders in parent from destroying the running emulator
   const onSessionEndRef = useRef(onSessionEnd);
@@ -162,13 +177,19 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
     return () => clearInterval(interval);
   }, [gamepadConnected]);
 
-  // Keyboard shortcut handler: Press 'D' for Diagnostics, 'ESC' to Exit
+  // Keyboard shortcut handler: Press 'D' for Diagnostics, 'M' for Menu, 'S' for Settings, 'ESC' to Exit
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (e.key === 'd' || e.key === 'D') {
         e.preventDefault();
         setShowDiagnostics(prev => !prev);
+      } else if (e.key === 'm' || e.key === 'M') {
+        e.preventDefault();
+        setShowSubToolbar(prev => !prev);
+      } else if (e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        setShowSettingsModal(prev => !prev);
       } else if (e.key === 'Escape' || e.key === 'Esc') {
         e.preventDefault();
         handleClose();
@@ -1169,69 +1190,252 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
     setShowSubToolbar(prev => !prev);
   };
 
-  const handleEmulatorAction = (action) => {
+  const handleDownloadSave = async () => {
     try {
       const win = iframeRef.current?.contentWindow;
       const emu = win?.EJS_emulator;
-      if (!win) return;
+      if (typeof emu?.gameManager?.saveSaveFiles === 'function') {
+        emu.gameManager.saveSaveFiles();
+      }
+      const key = `save_${game.id || game.title}`;
+      const dbSave = await dbGet(STORES.GAME_SAVES, key);
+      let base64Data = dbSave?.data || null;
+      if (!base64Data) {
+        const lsSave = localStorage.getItem(key);
+        if (lsSave) {
+          const parsed = JSON.parse(lsSave);
+          base64Data = parsed?.data || null;
+        }
+      }
+      if (base64Data) {
+        const rawBase64 = typeof base64Data === 'string' ? base64Data : (base64Data.save || '');
+        const binary = atob(rawBase64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const safeTitle = (game.title || 'retro_game').replace(/[^a-zA-Z0-9_-]/g, '_');
+        a.href = url;
+        a.download = `${safeTitle}.sav`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showToast('Battery save (.sav) downloaded!');
+      } else {
+        showToast('No battery save RAM file available yet');
+      }
+    } catch (err) {
+      console.warn('Save file export error:', err);
+      showToast('Save file export failed');
+    }
+  };
+
+  const handleEmulatorAction = async (action) => {
+    try {
+      const win = iframeRef.current?.contentWindow;
+      const emu = win?.EJS_emulator;
 
       switch (action) {
-        case 'restart':
+        case 'restart': {
+          let restarted = false;
           if (typeof emu?.restart === 'function') {
             emu.restart();
-          } else if (win.gameManager && typeof win.gameManager.restart === 'function') {
-            win.gameManager.restart();
+            restarted = true;
+          } else if (typeof emu?.gameManager?.restart === 'function') {
+            emu.gameManager.restart();
+            restarted = true;
+          } else if (typeof emu?.gameManager?.functions?.restart === 'function') {
+            emu.gameManager.functions.restart();
+            restarted = true;
           }
+          if (!restarted) {
+            try {
+              if (iframeRef.current?.contentWindow) {
+                iframeRef.current.contentWindow.location.reload();
+              }
+            } catch (e) {}
+          }
+          showToast('Game Restarted');
+          sfx?.play?.('click');
           break;
-        case 'pause':
-          if (typeof emu?.togglePlay === 'function') {
+        }
+
+        case 'pause': {
+          const nextPaused = !isGamePaused;
+          setIsGamePaused(nextPaused);
+          if (typeof emu?.togglePlaying === 'function') {
+            emu.togglePlaying();
+          } else if (typeof emu?.togglePlay === 'function') {
             emu.togglePlay();
-            setIsGamePaused(prev => !prev);
-          } else if (typeof emu?.pause === 'function') {
-            if (isGamePaused) {
-              emu.play?.();
-            } else {
-              emu.pause();
+          } else if (nextPaused && typeof emu?.pause === 'function') {
+            emu.pause();
+          } else if (!nextPaused && typeof emu?.play === 'function') {
+            emu.play();
+          } else if (emu?.gameManager?.functions?.toggleMainLoop) {
+            emu.gameManager.functions.toggleMainLoop(nextPaused ? 0 : 1);
+          }
+          showToast(nextPaused ? 'Emulation Paused' : 'Emulation Resumed');
+          sfx?.play?.('click');
+          break;
+        }
+
+        case 'mute': {
+          const nextMuted = !isGameMuted;
+          setIsGameMuted(nextMuted);
+          if (typeof emu?.setVolume === 'function') {
+            emu.setVolume(nextMuted ? 0 : (volume || 1.0));
+          }
+          if (emu) {
+            emu.muted = nextMuted;
+          }
+          const audioCtx = emu?.Module?.AL?.currentCtx || emu?.audioContext || win?.AudioContext;
+          if (audioCtx) {
+            if (nextMuted && audioCtx.state === 'running') {
+              audioCtx.suspend?.();
+            } else if (!nextMuted && audioCtx.state === 'suspended') {
+              audioCtx.resume?.();
             }
-            setIsGamePaused(prev => !prev);
           }
+          showToast(nextMuted ? 'Audio Muted' : 'Audio Unmuted');
+          sfx?.play?.('click');
           break;
-        case 'mute':
-          if (typeof emu?.toggleMute === 'function') {
-            emu.toggleMute();
-            setIsGameMuted(prev => !prev);
-          } else if (emu?.audioContext) {
-            if (emu.audioContext.state === 'running') {
-              emu.audioContext.suspend();
-              setIsGameMuted(true);
-            } else {
-              emu.audioContext.resume();
-              setIsGameMuted(false);
+        }
+
+        case 'screenshot': {
+          let captured = false;
+          const safeTitle = (game.title || 'retro_game').replace(/[^a-zA-Z0-9_-]/g, '_');
+          
+          // Strategy 1: Direct in-core RetroArch framebuffer extraction (Never blank on WebGL)
+          if (typeof emu?.gameManager?.screenshot === 'function') {
+            try {
+              const pngBytes = await emu.gameManager.screenshot();
+              if (pngBytes && pngBytes.length > 0) {
+                const blob = new Blob([pngBytes], { type: 'image/png' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${safeTitle}_screenshot_${Date.now()}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                captured = true;
+                showToast('Lossless Screenshot Saved!');
+              }
+            } catch (err) {
+              console.warn('GameManager screenshot error:', err);
             }
           }
-          break;
-        case 'saveState':
-          if (typeof emu?.saveState === 'function') {
-            emu.saveState();
+
+          // Strategy 2: EmulatorJS takeScreenshot API
+          if (!captured && typeof emu?.takeScreenshot === 'function') {
+            try {
+              const res = await emu.takeScreenshot();
+              if (res && res.blob) {
+                const url = URL.createObjectURL(res.blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${safeTitle}_screenshot_${Date.now()}.${res.format || 'png'}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                captured = true;
+                showToast('Screenshot Saved!');
+              }
+            } catch (err) {
+              console.warn('takeScreenshot error:', err);
+            }
           }
-          break;
-        case 'loadState':
-          if (typeof emu?.loadState === 'function') {
-            emu.loadState();
+
+          // Strategy 3: Canvas toDataURL fallback
+          if (!captured) {
+            try {
+              const doc = iframeRef.current?.contentDocument || iframeRef.current?.contentWindow?.document;
+              const canvas = doc?.querySelector('canvas') || stageRef.current?.querySelector('canvas');
+              if (canvas) {
+                const dataUrl = canvas.toDataURL('image/png');
+                const a = document.createElement('a');
+                a.href = dataUrl;
+                a.download = `${safeTitle}_screenshot_${Date.now()}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                captured = true;
+                showToast('Canvas Screenshot Saved!');
+              }
+            } catch (e) {
+              console.warn('Canvas capture fallback failed:', e);
+            }
           }
+          sfx?.play?.('click');
           break;
-        case 'screenshot':
-          if (typeof emu?.screenshot === 'function') {
-            emu.screenshot();
-          }
-          break;
+        }
+
         case 'settings':
-          if (typeof emu?.openSettings === 'function') {
-            emu.openSettings();
-          } else if (typeof emu?.toggleMenu === 'function') {
-            emu.toggleMenu();
+          setShowSettingsModal(prev => !prev);
+          sfx?.play?.('click');
+          break;
+
+        case 'saveState':
+          try {
+            let stateBytes = null;
+            if (typeof emu?.gameManager?.getState === 'function') {
+              stateBytes = emu.gameManager.getState();
+            }
+            if (stateBytes) {
+              let binary = '';
+              for (let i = 0; i < stateBytes.byteLength; i++) {
+                binary += String.fromCharCode(stateBytes[i]);
+              }
+              const base64 = btoa(binary);
+              const key = `state_${game.id || game.title}`;
+              await dbSet(STORES.SAVE_STATES, key, { id: key, gameId: game.id, title: game.title, data: base64, timestamp: Date.now() });
+              localStorage.setItem(key, JSON.stringify({ data: base64, timestamp: Date.now() }));
+              showToast('Quick Save snapshot created!');
+            } else {
+              showToast('Core does not support save states');
+            }
+          } catch (err) {
+            console.warn('Save state error:', err);
+            showToast('Failed to create save state');
           }
           break;
+
+        case 'loadState':
+          try {
+            const key = `state_${game.id || game.title}`;
+            const dbState = await dbGet(STORES.SAVE_STATES, key);
+            let base64 = dbState?.data || null;
+            if (!base64) {
+              const lsState = localStorage.getItem(key);
+              if (lsState) {
+                const parsed = JSON.parse(lsState);
+                base64 = parsed?.data || null;
+              }
+            }
+            if (base64 && typeof emu?.gameManager?.loadState === 'function') {
+              const rawBase64 = typeof base64 === 'string' ? base64 : (base64.state || '');
+              const binary = atob(rawBase64);
+              const bytes = new Uint8Array(binary.length);
+              for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+              }
+              emu.gameManager.loadState(bytes);
+              showToast('Quick Save snapshot loaded!');
+            } else {
+              showToast('No saved state snapshot found');
+            }
+          } catch (err) {
+            console.warn('Load state error:', err);
+            showToast('Failed to load save state');
+          }
+          break;
+
         case 'fullscreen':
           if (typeof emu?.fullscreen === 'function') {
             emu.fullscreen();
@@ -1240,12 +1444,30 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
             if (el?.requestFullscreen) el.requestFullscreen();
           }
           break;
+
         default:
           break;
       }
     } catch (err) {
       console.warn('Action dispatch error:', err);
     }
+  };
+
+  const handleVolumeChange = (newVal) => {
+    const val = parseFloat(newVal);
+    setVolumeState(val);
+    try {
+      const win = iframeRef.current?.contentWindow;
+      const emu = win?.EJS_emulator;
+      if (typeof emu?.setVolume === 'function') {
+        emu.setVolume(val);
+      }
+      if (val === 0) {
+        setIsGameMuted(true);
+      } else if (isGameMuted) {
+        setIsGameMuted(false);
+      }
+    } catch (e) {}
   };
 
   return (
@@ -1334,7 +1556,7 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
           <button 
             className="sub-toolbar-btn" 
             onClick={() => handleEmulatorAction('pause')} 
-            title={isGamePaused ? "Resume Game" : "Pause Game"}
+            title={isGamePaused ? "Resume Game (P)" : "Pause Game (P)"}
           >
             {isGamePaused ? <Play size={16} color="#10b981" /> : <Pause size={16} />}
             <span>{isGamePaused ? "Resume" : "Pause"}</span>
@@ -1352,21 +1574,156 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
           <button 
             className="sub-toolbar-btn" 
             onClick={() => handleEmulatorAction('screenshot')} 
-            title="Take Screenshot"
+            title="Take Lossless In-Core Screenshot (PNG)"
           >
             <Camera size={16} />
             <span>Capture</span>
           </button>
 
           <button 
-            className="sub-toolbar-btn" 
+            className={`sub-toolbar-btn ${showSettingsModal ? 'active' : ''}`}
             onClick={() => handleEmulatorAction('settings')} 
-            title="Open RetroArch Control Settings"
+            title="Open In-Game Settings & Display Shaders (S)"
           >
             <Sliders size={16} />
             <span>Settings</span>
           </button>
         </div>
+      )}
+
+      {/* In-App Toast Notification */}
+      {toastMessage && (
+        <div className="emulator-toast-banner animate-fade-in">
+          <Sparkles size={14} />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* In-Game Quick Settings Modal */}
+      {showSettingsModal && (
+        <aside className="emulator-settings-panel" onClick={(e) => e.stopPropagation()}>
+          <div className="settings-header">
+            <div className="settings-title">
+              <Sliders size={16} color="#a78bfa" />
+              <span>IN-GAME RETRO SETTINGS</span>
+            </div>
+            <button
+              className="diag-close-btn"
+              onClick={() => setShowSettingsModal(false)}
+              title="Close Settings (S)"
+            >
+              <X size={14} />
+            </button>
+          </div>
+
+          {/* Section 1: Audio Volume */}
+          <div className="emulator-settings-section">
+            <div className="emulator-settings-sec-title">
+              <Volume2 size={13} color="#38bdf8" />
+              <span>Audio & Volume</span>
+            </div>
+            <div className="emulator-vol-slider-row">
+              <button
+                className="sub-toolbar-btn"
+                style={{ padding: '0.3rem 0.5rem' }}
+                onClick={() => handleEmulatorAction('mute')}
+              >
+                {isGameMuted ? <VolumeX size={15} color="#f87171" /> : <Volume2 size={15} color="#38bdf8" />}
+              </button>
+              <input
+                type="range"
+                className="emulator-vol-slider"
+                min="0"
+                max="1"
+                step="0.05"
+                value={isGameMuted ? 0 : volume}
+                onChange={(e) => handleVolumeChange(e.target.value)}
+              />
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, minWidth: '35px', textAlign: 'right' }}>
+                {isGameMuted ? '0%' : `${Math.round(volume * 100)}%`}
+              </span>
+            </div>
+          </div>
+
+          {/* Section 2: Display Filters & CRT Shaders */}
+          <div className="emulator-settings-section">
+            <div className="emulator-settings-sec-title">
+              <Tv size={13} color="#a78bfa" />
+              <span>Display Shaders & Filters</span>
+            </div>
+            <div className="emulator-filter-grid">
+              <button
+                type="button"
+                className={`emulator-filter-btn ${activeShader === 'none' ? 'active' : ''}`}
+                onClick={() => setActiveShader('none')}
+              >
+                Pixel Perfect
+              </button>
+              <button
+                type="button"
+                className={`emulator-filter-btn ${activeShader === 'crt' ? 'active' : ''}`}
+                onClick={() => setActiveShader('crt')}
+              >
+                CRT Phosphor
+              </button>
+              <button
+                type="button"
+                className={`emulator-filter-btn ${activeShader === 'smooth' ? 'active' : ''}`}
+                onClick={() => setActiveShader('smooth')}
+              >
+                Bilinear Smooth
+              </button>
+              <button
+                type="button"
+                className={`emulator-filter-btn ${activeShader === 'vibrant' ? 'active' : ''}`}
+                onClick={() => setActiveShader('vibrant')}
+              >
+                Vibrant CRT
+              </button>
+            </div>
+          </div>
+
+          {/* Section 3: Save States & Battery SRAM */}
+          <div className="emulator-settings-section">
+            <div className="emulator-settings-sec-title">
+              <Save size={13} color="#10b981" />
+              <span>Snapshot States & Battery SRAM</span>
+            </div>
+            <div className="emulator-state-actions">
+              <button type="button" className="emulator-state-btn" onClick={() => handleEmulatorAction('saveState')}>
+                <Save size={14} color="#10b981" />
+                <span>Quick Save</span>
+              </button>
+              <button type="button" className="emulator-state-btn" onClick={() => handleEmulatorAction('loadState')}>
+                <RotateCcw size={14} color="#38bdf8" />
+                <span>Quick Load</span>
+              </button>
+            </div>
+            <button
+              type="button"
+              className="emulator-state-btn"
+              style={{ width: '100%', marginTop: '0.2rem' }}
+              onClick={handleDownloadSave}
+            >
+              <Download size={14} color="#fbbf24" />
+              <span>Download Battery Save (.sav)</span>
+            </button>
+          </div>
+
+          {/* Section 4: Controls & Shortcuts Reference */}
+          <div className="emulator-settings-section">
+            <div className="emulator-settings-sec-title">
+              <Gamepad2 size={13} color="#f59e0b" />
+              <span>Controls & Shortcuts</span>
+            </div>
+            <div style={{ fontSize: '0.72rem', background: 'rgba(255, 255, 255, 0.04)', padding: '0.6rem', borderRadius: '8px', lineHeight: 1.6, color: '#94a3b8' }}>
+              <div>🎮 <strong>Gamepad:</strong> D-Pad, Left Stick, A/B/X/Y, L1/R1</div>
+              <div>⌨️ <strong>D-Pad:</strong> Arrow Keys | <strong>A / B:</strong> X / Z</div>
+              <div>⌨️ <strong>Start / Select:</strong> Enter / Shift</div>
+              <div>⚡ <strong>Quick Hotkeys:</strong> D (Diag) • M (Menu) • S (Settings) • ESC (Exit)</div>
+            </div>
+          </div>
+        </aside>
       )}
 
       {/* Real-Time Performance & Diagnostic Health HUD */}
@@ -1429,14 +1786,15 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
           </div>
 
           <div className="diag-shortcuts-footer">
-            <span><strong>D</strong> Toggle Diagnostics</span>
-            <span><strong>M</strong> RetroArch Menu</span>
-            <span><strong>ESC</strong> Exit Game</span>
+            <span><strong>D</strong> Diagnostics</span>
+            <span><strong>M</strong> Menu</span>
+            <span><strong>S</strong> Settings</span>
+            <span><strong>ESC</strong> Exit</span>
           </div>
         </aside>
       )}
 
-      <div className="emulator-stage" ref={stageRef} onClick={focusEmulator}>
+      <div className={`emulator-stage filter-${activeShader}`} ref={stageRef} onClick={focusEmulator}>
         {/* Isolated Engine */}
       </div>
     </div>
