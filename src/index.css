@@ -8750,3 +8750,94 @@ html[data-theme="dmg"] .gamepad-battery-alert-toast {
   }
 }
 
+/* Glassmorphic Core & ROM Download Loading Overlay */
+.emulator-loading-overlay {
+  position: absolute;
+  top: 36%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10005;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  width: 90%;
+  max-width: 420px;
+}
+
+.emulator-loading-card {
+  background: rgba(15, 23, 42, 0.88);
+  border: 1.5px solid rgba(59, 130, 246, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7), 0 0 24px rgba(59, 130, 246, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.emulator-loading-spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid rgba(59, 130, 246, 0.25);
+  border-top-color: #3b82f6;
+  animation: spin 0.8s linear infinite;
+}
+
+.emulator-loading-meta strong {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 0.2rem;
+}
+
+.emulator-loading-meta span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.emulator-loading-bar-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+  margin-top: 0.35rem;
+}
+
+.emulator-loading-bar-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 40%;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa, #38bdf8);
+  border-radius: 3px;
+  animation: emuLoadingProgress 1.4s ease-in-out infinite;
+}
+
+@keyframes emuLoadingProgress {
+  0% {
+    left: -40%;
+    width: 30%;
+  }
+  50% {
+    left: 30%;
+    width: 60%;
+  }
+  100% {
+    left: 100%;
+    width: 30%;
+  }
+}
+
+

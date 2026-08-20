@@ -19,19 +19,19 @@ We deeply respect intellectual property rights and the work of all game develope
 >
 > Your request will be processed immediately upon receipt.
 ---
-## 📊 Summary of Included ROMs by System (36 Curated Titles)
+## 📊 Summary of Included ROMs by System
 | System Key | Console Name | Curated Demos | System Size |
 | :--- | :--- | :---: | :---: |
-| `arcade` | **Arcade (MAME)** | **3** | 0.09 MB |
-| `atari_2600` | **Atari 2600** | **3** | 0.01 MB |
+| `arcade` | **Arcade (MAME)** | **1** | 0.02 MB |
+| `atari_2600` | **Atari 2600** | **2** | 0.01 MB |
 | `game_gear` | **Sega Game Gear** | **3** | 1.03 MB |
 | `gb` | **Game Boy (DMG)** | **3** | 2.56 MB |
 | `gba` | **Game Boy Advance** | **3** | 40.00 MB |
 | `gbc` | **Game Boy Color** | **3** | 8.50 MB |
-| `n64` | **Nintendo 64** | **3** | 73.56 MB |
+| `n64` | **Nintendo 64** | **1** | 32.00 MB |
 | `nds` | **Nintendo DS** | **3** | 64.00 MB |
 | `nes` | **Nintendo (NES)** | **3** | 1.04 MB |
-| `playstation` | **Sony PlayStation (PS1)** | **3** | 180.52 MB |
+| `playstation` | **Sony PlayStation (PS1)** | **1** | 67.69 MB |
 | `sega_genesis` | **Sega Genesis / Mega Drive** | **3** | 8.00 MB |
 | `snes` | **Super Nintendo (SNES)** | **3** | 2.65 MB |
 
@@ -39,21 +39,18 @@ We deeply respect intellectual property rights and the work of all game develope
 
 ## 🕹️ Complete File-by-File Inventory
 
-### `arcade` — Arcade (MAME) (3 titles, 0.09 MB)
+### `arcade` — Arcade (MAME) (1 title, 0.02 MB)
 
 | # | Filename | Size | Classification |
 |---|---|---|---|
 | 1 | `gridlee.zip` | 0.02 MB | Curated Showcase Demo |
-| 2 | `looping.zip` | 0.04 MB | Curated Showcase Demo |
-| 3 | `starfire.zip` | 0.03 MB | Curated Showcase Demo |
 
-### `atari_2600` — Atari 2600 (3 titles, 0.01 MB)
+### `atari_2600` — Atari 2600 (2 titles, 0.01 MB)
 
 | # | Filename | Size | Classification |
 |---|---|---|---|
 | 1 | `Pac-Man (USA)` | 0.00 MB | Curated Showcase Demo |
 | 2 | `Pitfall! - Pitfall Harry's Jungle Adventure (USA)` | 0.00 MB | Curated Showcase Demo |
-| 3 | `Space Invaders (USA)` | 0.00 MB | Curated Showcase Demo |
 
 ### `game_gear` — Sega Game Gear (3 titles, 1.03 MB)
 
@@ -87,13 +84,11 @@ We deeply respect intellectual property rights and the work of all game develope
 | 2 | `Dragonborne DX (World) (v1.0.2) (Demo) (GB Compatible) (Aftermarket) (Unl)` | 4.00 MB | Curated Showcase Demo |
 | 3 | `Resident Evil (Unknown) (Demo) (Climax Entertainment)` | 0.50 MB | Curated Showcase Demo |
 
-### `n64` — Nintendo 64 (3 titles, 73.56 MB)
+### `n64` — Nintendo 64 (1 title, 32.00 MB)
 
 | # | Filename | Size | Classification |
 |---|---|---|---|
 | 1 | `Donkey Kong 64 (USA) (Demo) (Kiosk)` | 32.00 MB | Curated Showcase Demo |
-| 2 | `Legend of Zelda, The - Majora's Mask (USA) (Demo) (Kiosk)` | 32.00 MB | Curated Showcase Demo |
-| 3 | `Turok - Dinosaur Hunter (USA) (Demo) (Kiosk, E3 1997)` | 9.56 MB | Curated Showcase Demo |
 
 ### `nds` — Nintendo DS (3 titles, 64.00 MB)
 
@@ -111,13 +106,11 @@ We deeply respect intellectual property rights and the work of all game develope
 | 2 | `Project Blue (World) (Demo) (2019-10-22) (Kickstarter) (Aftermarket) (Unl)` | 0.50 MB | Curated Showcase Demo |
 | 3 | `Super Tilt Bro. (World) (Demo) (Kickstarter) (Aftermarket) (Unl)` | 0.50 MB | Curated Showcase Demo |
 
-### `playstation` — Sony PlayStation (PS1) (3 titles, 180.52 MB)
+### `playstation` — Sony PlayStation (PS1) (1 title, 67.69 MB)
 
 | # | Filename | Size | Classification |
 |---|---|---|---|
-| 1 | `Crash Bandicoot - Warped (USA) (Demo).iso` | 67.55 MB | Curated Showcase Demo |
-| 2 | `Driver - You Are the Wheelman (USA) (Demo).iso` | 45.28 MB | Curated Showcase Demo |
-| 3 | `Tony Hawk's Pro Skater 2 (USA) (Demo).iso` | 67.69 MB | Curated Showcase Demo |
+| 1 | `Tony Hawk's Pro Skater 2 (USA) (Demo).iso` | 67.69 MB | Curated Showcase Demo |
 
 ### `sega_genesis` — Sega Genesis / Mega Drive (3 titles, 8.00 MB)
 

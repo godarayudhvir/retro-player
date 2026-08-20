@@ -535,6 +535,7 @@ export default function App() {
         <EmulatorModal
           game={activeGame}
           gamepadConnected={gamepadConnected}
+          activeProfileId={activeProfileId}
           sfx={sfx}
           onClose={() => setActiveGame(null)}
           onSessionEnd={(gameId, elapsedSeconds) => {

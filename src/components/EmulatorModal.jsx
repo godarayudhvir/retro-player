@@ -24,10 +24,11 @@ import { detectSystemFromExtension } from '../utils/systemDetector';
 import { dbGet, dbSet, STORES } from '../services/db';
 import { resolveAssetPath } from '../utils/assetPath';
 
-export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, onSessionEnd }) {
+export default function EmulatorModal({ game, gamepadConnected, activeProfileId = 'prof_default', sfx, onClose, onSessionEnd }) {
   const stageRef = useRef(null);
   const iframeRef = useRef(null);
   const [isLocalOffline, setIsLocalOffline] = useState(!navigator.onLine);
+  const [isLoadingGame, setIsLoadingGame] = useState(true);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [showSubToolbar, setShowSubToolbar] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -231,12 +232,16 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
       let initialSaveBase64 = null;
       let initialStateBase64 = null;
       try {
-        const dbSave = await dbGet(STORES.GAME_SAVES, `save_${currentGame.id}`);
+        const scopedSaveKey = `save_${activeProfileId}_${currentGame.id}`;
+        const legacySaveKey = `save_${currentGame.id}`;
+        let dbSave = await dbGet(STORES.GAME_SAVES, scopedSaveKey);
+        if (!dbSave) dbSave = await dbGet(STORES.GAME_SAVES, legacySaveKey);
+
         if (dbSave && dbSave.data) {
           initialSaveBase64 = typeof dbSave.data === 'string' ? dbSave.data : (dbSave.data.save || null);
         }
         if (!initialSaveBase64) {
-          const lsSave = localStorage.getItem(`save_${currentGame.id}`);
+          const lsSave = localStorage.getItem(scopedSaveKey) || localStorage.getItem(legacySaveKey);
           if (lsSave) {
             const parsed = JSON.parse(lsSave);
             if (parsed && parsed.data) {
@@ -245,12 +250,16 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
           }
         }
 
-        const dbState = await dbGet(STORES.SAVE_STATES, `state_${currentGame.id}`);
+        const scopedStateKey = `state_${activeProfileId}_${currentGame.id}`;
+        const legacyStateKey = `state_${currentGame.id}`;
+        let dbState = await dbGet(STORES.SAVE_STATES, scopedStateKey);
+        if (!dbState) dbState = await dbGet(STORES.SAVE_STATES, legacyStateKey);
+
         if (dbState && dbState.data) {
           initialStateBase64 = typeof dbState.data === 'string' ? dbState.data : (dbState.data.state || null);
         }
         if (!initialStateBase64) {
-          const lsState = localStorage.getItem(`state_${currentGame.id}`);
+          const lsState = localStorage.getItem(scopedStateKey) || localStorage.getItem(legacyStateKey);
           if (lsState) {
             const parsed = JSON.parse(lsState);
             if (parsed && parsed.data) {
@@ -259,7 +268,7 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
           }
         }
         if (initialSaveBase64) {
-          console.log(`💾 [SAVE DATA PRELOADED] Found saved battery RAM for "${currentGame.title}" (${initialSaveBase64.length} chars base64)`);
+          console.log(`💾 [SAVE DATA PRELOADED] Found saved battery RAM for "${currentGame.title}" (Profile: ${activeProfileId})`);
         }
       } catch (err) {
         console.warn('⚠️ [SAVE PRELOAD WARN]:', err);
@@ -462,6 +471,30 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
               position: absolute !important;
               top: -9999px !important;
               left: -9999px !important;
+            }
+
+            /* Perfectly centered Core & ROM download loading bar above gamepad */
+            #ejs_loading,
+            .ejs_loading,
+            [class*="loading_progress"],
+            [class*="load_progress"],
+            .ejs_load_progress {
+              position: absolute !important;
+              top: 36% !important;
+              left: 50% !important;
+              transform: translate(-50%, -50%) !important;
+              z-index: 100005 !important;
+              display: flex !important;
+              flex-direction: column !important;
+              align-items: center !important;
+              justify-content: center !important;
+              gap: 10px !important;
+              background: rgba(15, 23, 42, 0.9) !important;
+              border: 1.5px solid rgba(59, 130, 246, 0.6) !important;
+              border-radius: 20px !important;
+              padding: 16px 24px !important;
+              box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7) !important;
+              color: #ffffff !important;
             }
 
             .ejs_virtualGamepad_open {
@@ -1134,18 +1167,18 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
       // Persist in-game battery RAM directly into RetroPlayerDB
       if (e.data.type === 'RETRO_PLAYER_SAVE_SYNC' && e.data.gameId) {
         try {
-          const saveKey = `save_${e.data.gameId}`;
+          const saveKey = `save_${activeProfileId}_${e.data.gameId}`;
           const payload = {
             gameId: e.data.gameId,
+            profileId: activeProfileId,
             timestamp: Date.now(),
             data: e.data.saveData || null
           };
           await dbSet(STORES.GAME_SAVES, saveKey, payload);
-          // Also mirror in localStorage for instant synchronous availability
           try {
             localStorage.setItem(saveKey, JSON.stringify(payload));
           } catch(err) {}
-          console.log(`💾 [RetroPlayerDB SAVED] Successfully stored battery RAM for: "${e.data.gameId}"`);
+          console.log(`💾 [RetroPlayerDB SAVED] Stored battery RAM for "${e.data.gameId}" (Profile: ${activeProfileId})`);
         } catch (err) {
           console.warn('⚠️ [DB SAVE ERROR]:', err);
         }
@@ -1154,9 +1187,10 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
       // Persist quick save state snapshot directly into RetroPlayerDB
       if (e.data.type === 'RETRO_PLAYER_STATE_SYNC' && e.data.gameId) {
         try {
-          const stateKey = `state_${e.data.gameId}`;
+          const stateKey = `state_${activeProfileId}_${e.data.gameId}`;
           const payload = {
             gameId: e.data.gameId,
+            profileId: activeProfileId,
             timestamp: Date.now(),
             data: e.data.stateData || null
           };
@@ -1164,7 +1198,7 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
           try {
             localStorage.setItem(stateKey, JSON.stringify(payload));
           } catch(err) {}
-          console.log(`💾 [RetroPlayerDB SAVED] Successfully stored snapshot state for: "${e.data.gameId}"`);
+          console.log(`💾 [RetroPlayerDB SAVED] Stored snapshot state for "${e.data.gameId}" (Profile: ${activeProfileId})`);
         } catch (err) {
           console.warn('⚠️ [DB STATE ERROR]:', err);
         }
@@ -1172,7 +1206,7 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
     };
     window.addEventListener('message', handleFrameMessage);
     return () => window.removeEventListener('message', handleFrameMessage);
-  }, [onClose]);
+  }, [onClose, activeProfileId]);
 
   const focusEmulator = () => {
     try {
@@ -1233,11 +1267,13 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
       if (typeof emu?.gameManager?.saveSaveFiles === 'function') {
         emu.gameManager.saveSaveFiles();
       }
-      const key = `save_${game.id || game.title}`;
-      const dbSave = await dbGet(STORES.GAME_SAVES, key);
+      const scopedKey = `save_${activeProfileId}_${game.id || game.title}`;
+      const legacyKey = `save_${game.id || game.title}`;
+      let dbSave = await dbGet(STORES.GAME_SAVES, scopedKey);
+      if (!dbSave) dbSave = await dbGet(STORES.GAME_SAVES, legacyKey);
       let base64Data = dbSave?.data || null;
       if (!base64Data) {
-        const lsSave = localStorage.getItem(key);
+        const lsSave = localStorage.getItem(scopedKey) || localStorage.getItem(legacyKey);
         if (lsSave) {
           const parsed = JSON.parse(lsSave);
           base64Data = parsed?.data || null;
@@ -1422,19 +1458,26 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
             let stateBytes = null;
             if (typeof emu?.gameManager?.getState === 'function') {
               stateBytes = emu.gameManager.getState();
+            } else if (typeof emu?.saveState === 'function') {
+              stateBytes = emu.saveState();
+            } else if (typeof emu?.gameManager?.functions?.saveState === 'function') {
+              stateBytes = emu.gameManager.functions.saveState();
             }
-            if (stateBytes) {
+
+            if (stateBytes && (stateBytes instanceof Uint8Array || stateBytes.byteLength)) {
               let binary = '';
               for (let i = 0; i < stateBytes.byteLength; i++) {
                 binary += String.fromCharCode(stateBytes[i]);
               }
               const base64 = btoa(binary);
-              const key = `state_${game.id || game.title}`;
-              await dbSet(STORES.SAVE_STATES, key, { id: key, gameId: game.id, title: game.title, data: base64, timestamp: Date.now() });
-              localStorage.setItem(key, JSON.stringify({ data: base64, timestamp: Date.now() }));
+              const key = `state_${activeProfileId}_${game.id || game.title}`;
+              await dbSet(STORES.SAVE_STATES, key, { id: key, profileId: activeProfileId, gameId: game.id, title: game.title, data: base64, timestamp: Date.now() });
+              try {
+                localStorage.setItem(key, JSON.stringify({ data: base64, timestamp: Date.now() }));
+              } catch(e) {}
               showToast('Quick Save snapshot created!');
             } else {
-              showToast('Core does not support save states');
+              showToast('This core uses Battery (.sav) saves');
             }
           } catch (err) {
             console.warn('Save state error:', err);
@@ -1444,24 +1487,33 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
 
         case 'loadState':
           try {
-            const key = `state_${game.id || game.title}`;
-            const dbState = await dbGet(STORES.SAVE_STATES, key);
+            const scopedKey = `state_${activeProfileId}_${game.id || game.title}`;
+            const legacyKey = `state_${game.id || game.title}`;
+            let dbState = await dbGet(STORES.SAVE_STATES, scopedKey);
+            if (!dbState) dbState = await dbGet(STORES.SAVE_STATES, legacyKey);
+
             let base64 = dbState?.data || null;
             if (!base64) {
-              const lsState = localStorage.getItem(key);
+              const lsState = localStorage.getItem(scopedKey) || localStorage.getItem(legacyKey);
               if (lsState) {
                 const parsed = JSON.parse(lsState);
                 base64 = parsed?.data || null;
               }
             }
-            if (base64 && typeof emu?.gameManager?.loadState === 'function') {
+            if (base64) {
               const rawBase64 = typeof base64 === 'string' ? base64 : (base64.state || '');
               const binary = atob(rawBase64);
               const bytes = new Uint8Array(binary.length);
               for (let i = 0; i < binary.length; i++) {
                 bytes[i] = binary.charCodeAt(i);
               }
-              emu.gameManager.loadState(bytes);
+              if (typeof emu?.gameManager?.loadState === 'function') {
+                emu.gameManager.loadState(bytes);
+              } else if (typeof emu?.loadState === 'function') {
+                emu.loadState(bytes);
+              } else if (typeof emu?.gameManager?.functions?.loadState === 'function') {
+                emu.gameManager.functions.loadState(bytes);
+              }
               showToast('Quick Save snapshot loaded!');
             } else {
               showToast('No saved state snapshot found');
@@ -1745,20 +1797,6 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
               <span>Download Battery Save (.sav)</span>
             </button>
           </div>
-
-          {/* Section 4: Controls & Shortcuts Reference */}
-          <div className="emulator-settings-section">
-            <div className="emulator-settings-sec-title">
-              <Gamepad2 size={13} color="#f59e0b" />
-              <span>Controls & Shortcuts</span>
-            </div>
-            <div style={{ fontSize: '0.72rem', background: 'rgba(255, 255, 255, 0.04)', padding: '0.6rem', borderRadius: '8px', lineHeight: 1.6, color: '#94a3b8' }}>
-              <div>🎮 <strong>Gamepad:</strong> D-Pad, Left Stick, A/B/X/Y, L1/R1</div>
-              <div>⌨️ <strong>D-Pad:</strong> Arrow Keys | <strong>A / B:</strong> X / Z</div>
-              <div>⌨️ <strong>Start / Select:</strong> Enter / Shift</div>
-              <div>⚡ <strong>Quick Hotkeys:</strong> D (Diag) • M (Menu) • S (Settings) • ESC (Exit)</div>
-            </div>
-          </div>
         </aside>
       )}
 
@@ -1828,6 +1866,22 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
             <span><strong>ESC</strong> Exit</span>
           </div>
         </aside>
+      )}
+
+      {/* Centered WebAssembly Core & ROM Download Loading Overlay */}
+      {isLoadingGame && (
+        <div className="emulator-loading-overlay animate-fade-in" onClick={(e) => e.stopPropagation()}>
+          <div className="emulator-loading-card">
+            <div className="emulator-loading-spinner" />
+            <div className="emulator-loading-meta">
+              <strong>Loading {game.systemName || 'Retro Core'}...</strong>
+              <span>Downloading WebAssembly binary & game assets</span>
+            </div>
+            <div className="emulator-loading-bar-track">
+              <div className="emulator-loading-bar-fill" />
+            </div>
+          </div>
+        </div>
       )}
 
       <div className={`emulator-stage filter-${activeShader}`} ref={stageRef} onClick={focusEmulator}>
