@@ -6,7 +6,7 @@ Access your self-hosted **Retro Player** instance securely from your iPhone, And
 
 ## ⚡ The WebAssembly Advantage
 
-Because Retro Player runs on WebAssembly in the client browser, remote play requires **almost zero continuous bandwidth** (just a single ~5MB ROM transfer per play session). You get fluid performance and 0ms local controller response without streaming high-bitrate video.
+Because Retro Player runs on WebAssembly in the client browser, remote play requires **almost zero continuous bandwidth** (just a single ~5MB ROM transfer per play session). You get fluid performance and direct local controller response without streaming high-bitrate video.
 
 ---
 

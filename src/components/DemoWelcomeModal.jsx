@@ -81,7 +81,7 @@ export default function DemoWelcomeModal({
             </div>
             <div className="demo-feature-text">
               <strong>Hardware-Accelerated WASM Emulation</strong>
-              <span>Zero-install retro gaming across 10+ legendary consoles.</span>
+              <span>Zero-install retro gaming across 12 supported consoles.</span>
             </div>
           </div>
 

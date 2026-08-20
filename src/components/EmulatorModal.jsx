@@ -1847,7 +1847,7 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
               <span className="diag-card-val input-val">
                 {perfStats.inputLatency}
               </span>
-              <span className="diag-card-sub">{gamepadConnected ? 'Direct Gamepad Hook' : 'Zero-Lag Keyboard'}</span>
+              <span className="diag-card-sub">{gamepadConnected ? 'Direct Gamepad Hook' : 'Direct Keyboard Hook'}</span>
             </div>
           </div>
 

@@ -44,16 +44,16 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
                                │                                                          │
 ┌────────────────┐  ROM File   │  ┌────────────────────┐   ┌───────────────────────────┐  │
 │  Host Server   │ ──────────> │  │ WebAssembly Core   │──>│ Hardware Canvas Rendering │  │
-│ (Railway/NAS)  │  (Few MB)   │  │ (Runs on client)   │   │  0ms Gamepad Polling      │  │
-│ ~0% CPU / RAM  │             │  └────────────────────┘   │  Web Audio SFX Synthesizer│  │
+│ (Railway/NAS)  │  (Few MB)   │  │ (Runs on client)   │   │  Direct Gamepad Polling   │  │
+│ ~0% CPU / RAM  │             │  └────────────────────┘   │  Web Audio Synthesizer    │  │
 └────────────────┘             │                           └───────────────────────────┘  │
                                └──────────────────────────────────────────────────────────┘
 ```
 
 - **🔥 Server Resource Usage is ~0%**: The host only serves static files and streams the raw ROM binary once. Even a free-tier container or Raspberry Pi can serve hundreds of concurrent players.
-- **⚡ 0ms Input Lag**: Controllers and keyboards are polled directly in the client browser with zero network latency.
+- **⚡ Low-Latency Local Input**: Controllers and keyboards are polled directly in the client browser with zero network streaming delay.
 - **💾 Automatic Auto-Sorting Disk Persistence**: Load any ROM from your browser—it is automatically sorted and saved to your host disk (`/roms/<system>/`) for future sessions.
-- **🛡️ 100% Air-Gapped Offline Support**: Features dual-mode fallback to local core bundles when offline.
+- **🛡️ Air-Gapped Offline Support**: Features dual-mode fallback to local core bundles when offline.
 
 ---
 
@@ -67,12 +67,12 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 - 🎨 **4 Signature Themes**: **iiSU Light**, **Midnight Cyber**, **Sony XMB Wave**, and **Game Boy DMG** with instant live switching across all components.
 - 🎵 **Background Music (BGM) Engine**: Auto-scanning and looping of BGM tracks with topbar controls, custom audio file manager, and **smart in-game auto-pause**.
 - ⚙️ **Nintendo Switch Style System Settings Hub**: Full-screen 2-column console management hub with dual bulk ROM batch uploader, recursive folder directory uploader (`webkitdirectory`), BGM manager, theme previewer, and storage diagnostics.
-- 🗄️ **Server-Backed Persistent Database & SRAM Injection**: Authoritative persistence in `/data/retroplayer_db.json` via REST API (`/api/db`) with auto-injection of saved battery RAM (`.sav`) into Emscripten VFS on game launch. Local **IndexedDB** (`RetroPlayerDB`) provides instantaneous 0ms offline fallback.
+- 🗄️ **Server-Backed Persistent Database & SRAM Injection**: Authoritative persistence in `/data/retroplayer_db.json` via REST API (`/api/db`) with auto-injection of saved battery RAM (`.sav`) into Emscripten VFS on game launch. Local **IndexedDB** (`RetroPlayerDB`) provides instant offline local caching.
 - 💬 **Universal In-App Modal Dialog System**: Zero native browser popups (`alert()`, `confirm()`, `prompt()`). All confirmations utilize theme-aware, gamepad/keyboard navigable in-app modal dialogs.
 - 💾 **3D Physical Cartridge Engine**: Tactile cartridges with metallic sheens, grip textures, dynamic shadows, and title color heuristics.
 - 🌐 **Automated Online Metadata Scraper**: Official 3D box art from **Libretro** & synopsis info from **Wikipedia** with intelligent demo-to-retail matching, 4-tier scope selection, and IndexedDB caching.
 - 🚀 **Hardware-Accelerated Web Emulation & Diagnostic HUD**: Low-latency dynamic audio sync and interactive **Diagnostic Performance HUD** (`D` hotkey).
-- 🔊 **Synthesized Pure Web Audio UI SFX**: Zero-latency acoustic feedback synthesizer with zero external audio assets.
+- 🔊 **Synthesized Pure Web Audio UI SFX**: Low-latency acoustic feedback synthesizer with zero external audio assets.
 - 🎮 **100% Gamepad & Keyboard Navigation**: Controller-first spatial navigation across desktop & mobile feeds, dynamic emulator touch control auto-hiding on controller detection, shoulder triggers (`L1`/`R1`), on-screen virtual keyboard (`⌘K`), live **Gamepad Battery % / Charging Telemetry Widget**, and **Low-Battery In-App Notification Alerts**. *(See [Controls & Keybindings Guide](guides/controls.md))*.
 - ⏱️ **Playtime Analytics & Smart Collections**: Session durations, total hours played, **Favorites ⭐**, and **Recently Played** queue.
 
@@ -92,9 +92,9 @@ Retro Player supports **12 classic retro gaming platforms** out of the box:
 
 ## 🎮 Bundled Demo Showcase & Compliance
 
-Retro Player includes a lightweight collection of **36 non-commercial demonstration ROMs and homebrew titles** (exactly 3 per console platform) to immediately verify core performance in your browser:
+Retro Player includes a lightweight collection of **29 non-commercial demonstration ROMs and homebrew titles** across 12 console platforms to immediately verify core performance in your browser:
 
-- 📑 **Full 36-ROM Catalog & Inventory**: See **[guides/roms.md](guides/roms.md)** for the complete file-by-file inventory, system file sizes, and homebrew developer credits.
+- 📑 **Full Demo Catalog & Inventory**: See **[guides/roms.md](guides/roms.md)** for the complete file-by-file inventory, system file sizes, and homebrew developer credits.
 - 🎯 **Strictly Non-Complete Software**: All pre-installed software consists of non-commercial prototypes, trade show trials, and aftermarket homebrew demos. **Zero full retail commercial games are bundled.**
 - ⚖️ **Compliance & Immediate Removal Policy**: If you are a rights holder or creator and would like any sample removed, open an issue/PR and **we will immediately comply**.
 - 🔒 **100% Private Custom ROM Loading**: To play personal game dumps, use **"Load Custom ROM"** or drag-and-drop—files run 100% in local browser memory with zero network uploads.

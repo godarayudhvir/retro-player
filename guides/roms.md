@@ -3,7 +3,7 @@ This document provides a complete inventory of all pre-packaged demonstration RO
 ---
 ## 📜 Curatorial Statement: Non-Complete & Demo ROMs Only
 Retro Player is engineered specifically as an educational, high-performance WebAssembly retro emulation showcase. In accordance with this principle:
-1. **Strictly Non-Complete Titles**: All ROMs in this repository were **specifically curated to be non-complete evaluation software** (exactly 3 top titles per system, 36 total).
+1. **Strictly Non-Complete Titles**: All ROMs in this repository were **specifically curated to be non-complete evaluation software** (29 titles across 12 platforms).
 2. **Zero Commercial Full-Release Games**: No full, retail commercial video games are bundled with this application. The pre-installed titles exist exclusively to demonstrate that the WebAssembly emulator cores initialize, render smoothly, and accept gamepad/keyboard inputs within modern web browsers.
 3. **Private Personal ROM Loading**: Users who own full retail game cartridges are encouraged to use the built-in **"Load Custom ROM"** button or viewport drag-and-drop. Personal files run strictly in browser RAM and are never transmitted to any external server.
 ---

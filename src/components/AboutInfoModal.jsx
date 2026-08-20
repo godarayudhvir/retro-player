@@ -31,8 +31,8 @@ export default function AboutInfoModal({ isOpen, focusedTarget, onClose }) {
           <div className="info-section">
             <h3>✨ Key Features</h3>
             <ul>
-              <li><strong>🕹️ Multi-System Emulation:</strong> GB, GBC, GBA, NES, SNES, N64, NDS, Genesis, PS1, & Arcade via EmulatorJS.</li>
-              <li><strong>🔊 Synthesized Web Audio SFX:</strong> Zero-latency tactile UI navigation ticks, shoulder swooshes, and cartridge insertion audio.</li>
+              <li><strong>🕹️ Multi-System Emulation:</strong> GB, GBC, GBA, NES, SNES, N64, NDS, Genesis, Game Gear, PS1, Atari 2600 & Arcade via EmulatorJS.</li>
+              <li><strong>🔊 Synthesized Web Audio SFX:</strong> Synthesized tactile UI navigation audio, shoulder swooshes, and cartridge insertion sound effects.</li>
               <li><strong>🖼️ Automated Online Scraper:</strong> Dynamically scrapes authentic 3D box art & metadata without local files.</li>
               <li><strong>🎮 Handheld Gamepad Navigation:</strong> Full DPAD, thumbstick, and shoulder button cycling support.</li>
               <li><strong>📊 Dynamic System Ribbon:</strong> Consoles with the most games appear first automatically.</li>
@@ -90,7 +90,7 @@ export default function AboutInfoModal({ isOpen, focusedTarget, onClose }) {
                   <tr>
                     <td>Exit Game to Launcher</td>
                     <td>Escape</td>
-                    <td>Select + Start / Guide</td>
+                    <td>L3 + R3 / Select + Start / Guide</td>
                   </tr>
                 </tbody>
               </table>

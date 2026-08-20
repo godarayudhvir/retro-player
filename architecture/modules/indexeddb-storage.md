@@ -19,7 +19,7 @@ The **Storage & Database Engine** (`src/services/db.js`, `server.js`, `vite.conf
   - `game_metadata`: Server-synchronized game box art URLs, Wikipedia synopses, release years, and publisher info.
 - **Dual-Layer Real-Time Sync**:
   - Authoritative persistence in **Server Database** (`/data/retroplayer_db.json`).
-  - Local **IndexedDB** acts as an instant 0ms offline cache.
+  - Local **IndexedDB** acts as an instant client-side offline cache.
   - In-memory React state cache guarantees zero UI flickering during navigation.
 
 ---

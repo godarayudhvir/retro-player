@@ -56,7 +56,7 @@ architecture/
     └── cloud-saves.md      # Cloud save state synchronization & cross-device backup architecture
 ```
 
-> **Note**: For the overarching future vision, in-depth codebase audit, refactoring matrix, and master innovation catalog across 8 domains, see [mirai/README.md](mirai/README.md). For the complete 36-game non-commercial curated demo catalog, file paths, and creator compliance policy, see [guides/roms.md](../guides/roms.md).
+> **Note**: For the overarching future vision, in-depth codebase audit, refactoring matrix, and master innovation catalog across 8 domains, see [mirai/README.md](mirai/README.md). For the curated non-commercial demo catalog, file paths, and creator compliance policy, see [guides/roms.md](../guides/roms.md).
 
 ---
 

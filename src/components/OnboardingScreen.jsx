@@ -135,12 +135,12 @@ export default function OnboardingScreen({
             </div>
 
             <h1 className="onboarding-slide-title">
-              Zero Install. Zero Lag. <br />
+              Zero Install. Instant Play. <br />
               <span className="onboarding-text-gradient">Pure Retro Gaming in Your Browser.</span>
             </h1>
 
             <p className="onboarding-slide-desc">
-              Experience authentic console emulation running 100% locally on your device via WebAssembly with fluid hardware-accelerated rendering and ultra-low controller input lag.
+              Experience authentic console emulation running 100% locally on your device via WebAssembly with fluid hardware-accelerated rendering and low controller input latency.
             </p>
 
             <div className="onboarding-features-grid">
@@ -149,7 +149,7 @@ export default function OnboardingScreen({
                   <Gamepad2 size={20} />
                 </div>
                 <div className="onboarding-feat-text">
-                  <strong>10+ Legendary Platforms</strong>
+                  <strong>12 Supported Platforms</strong>
                   <span>Game Boy, SNES, N64, PS1, Sega, NDS & more.</span>
                 </div>
               </div>
