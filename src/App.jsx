@@ -307,6 +307,7 @@ export default function App() {
           setSelectedSystem={setSelectedMobileSystem}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          bgm={bgm}
         />
       ) : (
         <>

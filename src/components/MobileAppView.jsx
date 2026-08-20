@@ -13,7 +13,9 @@ import {
   Calendar, 
   Cpu,
   Edit3,
-  Trash2
+  Trash2,
+  Music,
+  SkipForward
 } from 'lucide-react';
 import MiiAvatar from './MiiAvatar';
 import { getReleaseDate, getGameDescription } from '../gameDescriptions';
@@ -53,7 +55,8 @@ export default function MobileAppView({
   selectedSystem,
   setSelectedSystem,
   searchQuery = '',
-  setSearchQuery
+  setSearchQuery,
+  bgm
 }) {
   const fileInputRef = useRef(null);
 
@@ -321,6 +324,21 @@ export default function MobileAppView({
             </button>
           )}
         </div>
+
+        {/* BGM Toggle Button (Right) */}
+        {bgm && (
+          <button 
+            className={`mobile-topbar-bgm-btn ${bgm.isPlaying ? 'is-playing' : ''} ${focusedTarget?.zone === 'mobileTopbar' && focusedTarget?.id === 'bgm' ? 'gamepad-focused' : ''}`}
+            onClick={() => {
+              bgm.togglePlay();
+              sfx?.playTileNav?.();
+            }}
+            title={bgm.currentTrack ? `BGM: ${bgm.currentTrack.title} (${bgm.isPlaying ? 'Playing' : 'Paused'})` : "Toggle BGM"}
+            aria-label="Toggle Background Music"
+          >
+            <Music size={17} color={bgm.isPlaying ? '#10b981' : '#64748b'} className={bgm.isPlaying ? 'pulse-icon' : ''} />
+          </button>
+        )}
 
         {/* Load Custom ROM Button (Right) */}
         <button 

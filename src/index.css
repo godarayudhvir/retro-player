@@ -8164,6 +8164,31 @@ html[data-theme="dmg"] .favorite-toggle-btn {
   padding: 0;
 }
 
+.mobile-topbar-bgm-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.mobile-topbar-bgm-btn.is-playing {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.35);
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.2);
+}
+
+.mobile-topbar-bgm-btn:active {
+  transform: scale(0.92);
+}
+
 .mobile-topbar-load-btn {
   flex-shrink: 0;
   display: inline-flex;
