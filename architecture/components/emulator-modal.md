@@ -14,7 +14,6 @@ The Emulator Modal UI component ([EmulatorModal.jsx](file:///Users/godarayudhvir
 - **Instant Lossless PNG Screenshot Capture**: Dual-pipeline capture exporting direct WebGL/2D `<canvas>` buffers as timestamped PNG files with zero frame drops.
 - **Distraction-Free Fullscreen Stage**: Full-screen isolated canvas stage without distracting on-canvas floating buttons, supporting CSS-based CRT scanlines and display filters.
 - **Mobile Touchscreen Gamepad Viewport Optimization**: The iframe injects viewport-fit metadata and activates touch controls conditionally on mobile touchscreens (`<= 1024px`), avoiding touch DOM overhead on desktop.
-- **iOS Safari & WebKit Compatibility Layer**: Uses `iframe.srcdoc` with injected `<base href>` and `resolveAssetPath` to ensure Web Workers, WebAssembly streaming, and fallback loaders execute under proper origin privileges on iOS devices. Includes first-interaction WebAudio context resumption (`AudioContext.resume()`) on touch/pointer events.
 
 ---
 

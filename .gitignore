@@ -31,8 +31,6 @@ build/
 # Exclude all generated app data and save state files from version control.
 data/
 **/data/
-!public/emulatorjs/data/
-!public/emulatorjs/data/**
 *.sav
 *.srm
 *.cht

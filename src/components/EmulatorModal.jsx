@@ -276,8 +276,7 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
       if (isCancelled || !stageRef.current) return;
 
       const cdnDataPath = 'https://cdn.emulatorjs.org/stable/data/';
-      const localDataPath = new URL(resolveAssetPath('emulatorjs/data/'), window.location.href).href;
-      const baseHref = new URL(resolveAssetPath('./'), window.location.href).href;
+      const localDataPath = '/emulatorjs/data/';
       const isOffline = !navigator.onLine;
       const initialDataPath = isOffline ? localDataPath : cdnDataPath;
       setIsLocalOffline(isOffline);
@@ -321,7 +320,6 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
         <html>
         <head>
           <meta charset="utf-8">
-          <base href="${baseHref}">
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
           <style>
             *, *::before, *::after {
@@ -550,74 +548,6 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
               border-radius: 4px !important;
             }
 
-            .ejs_start_button {
-              position: fixed !important;
-              top: 50% !important;
-              left: 50% !important;
-              bottom: auto !important;
-              right: auto !important;
-              transform: translate(-50%, -50%) !important;
-              background: radial-gradient(circle at center, rgba(30, 58, 138, 0.95), rgba(15, 23, 42, 0.98)) !important;
-              border: 2px solid rgba(59, 130, 246, 0.75) !important;
-              box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(59, 130, 246, 0.5), inset 0 0 20px rgba(59, 130, 246, 0.25) !important;
-              backdrop-filter: blur(24px) !important;
-              -webkit-backdrop-filter: blur(24px) !important;
-              border-radius: 28px !important;
-              padding: 24px 36px !important;
-              display: flex !important;
-              flex-direction: column !important;
-              align-items: center !important;
-              justify-content: center !important;
-              gap: 12px !important;
-              color: #ffffff !important;
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-              font-size: 0.95rem !important;
-              font-weight: 800 !important;
-              letter-spacing: 1.5px !important;
-              text-transform: uppercase !important;
-              cursor: pointer !important;
-              z-index: 100010 !important;
-              animation: retroPulse 2s ease-in-out infinite alternate !important;
-              -webkit-tap-highlight-color: transparent !important;
-              touch-action: manipulation !important;
-              user-select: none !important;
-              width: auto !important;
-              height: auto !important;
-              min-width: 180px !important;
-              transition: transform 0.15s ease, box-shadow 0.15s ease !important;
-            }
-
-            .ejs_start_button .retro-play-circle {
-              width: 64px !important;
-              height: 64px !important;
-              border-radius: 50% !important;
-              background: linear-gradient(135deg, #3b82f6, #60a5fa) !important;
-              box-shadow: 0 0 24px rgba(59, 130, 246, 0.8) !important;
-              display: flex !important;
-              align-items: center !important;
-              justify-content: center !important;
-              color: #ffffff !important;
-              margin-bottom: 2px !important;
-            }
-
-            .ejs_start_button .retro-play-circle svg {
-              margin-left: 4px !important;
-              fill: #ffffff !important;
-            }
-
-            .ejs_start_button .retro-play-text {
-              font-size: 0.95rem !important;
-              color: #93c5fd !important;
-              font-weight: 800 !important;
-              letter-spacing: 1.5px !important;
-              text-align: center !important;
-            }
-
-            .ejs_start_button:active {
-              transform: translate(-50%, -50%) scale(0.94) !important;
-              box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(59, 130, 246, 0.7) !important;
-            }
-
             .ejs_virtualGamepad_open {
               display: none !important;
               opacity: 0 !important;
@@ -663,26 +593,6 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
               }
             }, 80);
 
-            // Dynamically decorate start button with console-grade circular play badge & TAP TO PLAY
-            const _startBtnDecorator = setInterval(function() {
-              const btn = document.querySelector('.ejs_start_button');
-              if (btn) {
-                if (!btn.querySelector('.retro-play-circle')) {
-                  btn.innerHTML = '<div class="retro-play-circle"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div class="retro-play-text">TAP TO PLAY</div>';
-                }
-              }
-            }, 30);
-
-            function triggerPendingStart() {
-              const btn = document.querySelector('.ejs_start_button');
-              if (btn) {
-                btn.click();
-              }
-            }
-            window.addEventListener('touchstart', triggerPendingStart, { passive: true });
-            window.addEventListener('pointerdown', triggerPendingStart, { passive: true });
-            window.addEventListener('click', triggerPendingStart, { passive: true });
-
             window.EJS_player = '#game';
             window.EJS_gameUrl = ${JSON.stringify(absoluteRomUrl)};
             window.EJS_gameID = ${JSON.stringify(currentGame.id || 'custom_game')};
@@ -691,24 +601,8 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
             window.EJS_core = ${JSON.stringify(core)};
             window.EJS_pathtodata = ${JSON.stringify(initialDataPath)};
             window.EJS_startOnLoaded = true;
-            window.EJS_startButtonName = 'Start Game';
-            window.EJS_alignStartButton = 'center';
             window.EJS_backgroundColor = '#000000';
-            window.EJS_disableAutoLang = true;
             window.EJS_language = 'en-US';
-            window.EJS_langJson = {
-              "Loading...": "Loading...",
-              "Start Game": "Start Game",
-              "Decompress Game Core": "Decompress Game Core",
-              "Download Game Core": "Download Game Core",
-              "Download Game Data": "Download Game Data",
-              "Download Game State": "Download Game State",
-              "Outdated graphics driver": "Outdated graphics driver",
-              "Error downloading core": "Error downloading core",
-              "Network Error": "Network Error",
-              "Error for site owner": "Notice",
-              "Check console": "Check console for details"
-            };
             window.EJS_VirtualGamepad = ${isMobileTouch ? 'true' : 'false'};
             window.__INITIAL_SAVE_BASE64__ = ${JSON.stringify(initialSaveBase64)};
             window.__INITIAL_STATE_BASE64__ = ${JSON.stringify(initialStateBase64)};
@@ -1269,25 +1163,11 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
               }
             }, 10000);
 
-            // Mobile & iOS Safari WebAudio unlock on first user interaction inside iframe
-            function unlockWebAudio() {
-              try {
-                const emu = window.EJS_emulator;
-                if (emu && emu.audioContext && emu.audioContext.state === 'suspended') {
-                  emu.audioContext.resume();
-                }
-              } catch (e) {}
-            }
-            window.addEventListener('touchstart', unlockWebAudio, { passive: true });
-            window.addEventListener('touchend', unlockWebAudio, { passive: true });
-            window.addEventListener('pointerdown', unlockWebAudio, { passive: true });
-            window.addEventListener('click', unlockWebAudio, { passive: true });
-
             function handleLoaderFallback() {
-              console.warn('⚠️ [EMULATOR LOADER FALLBACK] Primary path failed. Attempting local fallback...');
-              window.EJS_pathtodata = ${JSON.stringify(localDataPath)};
+              console.warn('⚠️ [EMULATOR LOADER FALLBACK] Primary path failed. Attempting local /emulatorjs/data/loader.js fallback...');
+              window.EJS_pathtodata = '/emulatorjs/data/';
               const fallbackScript = document.createElement('script');
-              fallbackScript.src = ${JSON.stringify(localDataPath + 'loader.js')};
+              fallbackScript.src = '/emulatorjs/data/loader.js';
               fallbackScript.onerror = function() {
                 console.error('🚨 [EMULATOR FATAL ERROR] Both online and local EmulatorJS loader failed to load.');
               };
@@ -1300,23 +1180,10 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
     `;
 
     try {
-      if ('srcdoc' in iframe) {
-        iframe.srcdoc = htmlContent;
-      } else {
-        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-        iframeDoc.open();
-        iframeDoc.write(htmlContent);
-        iframeDoc.close();
-      }
-
-      iframe.onload = () => {
-        try {
-          if (iframeRef.current) {
-            iframeRef.current.focus();
-            iframeRef.current.contentWindow?.focus();
-          }
-        } catch (e) {}
-      };
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      iframeDoc.open();
+      iframeDoc.write(htmlContent);
+      iframeDoc.close();
 
       setTimeout(() => {
         try {
