@@ -60,11 +60,15 @@ body {
 .console-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  padding: 1.25rem 2rem 2rem;
+  height: 100vh;
+  max-height: 100vh;
+  padding: 1rem 1.75rem 1.25rem;
   max-width: 1440px;
   margin: 0 auto;
-  gap: 1.25rem;
+  gap: 0.65rem;
+  box-sizing: border-box;
+  overflow: hidden;
+  justify-content: space-between;
 }
 
 /* Pokémon Trainer Top Status Bar */
@@ -2259,31 +2263,127 @@ button.status-pill:active {
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.6));
 }
 
-/* iiSU Pokédex Console Grid Panel */
+/* ==========================================================================
+   FLAGSHIP AMBIENT FULL-BLEED GAMEPLAY VIEWPORT (Apple Arcade Style)
+   ========================================================================== */
+
 .console-viewport {
-  background: var(--panel-bg);
-  backdrop-filter: blur(16px);
-  border: 3px solid var(--panel-border);
-  box-shadow: var(--panel-shadow);
-  border-radius: 36px;
-  padding: 1.25rem 1.75rem;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0.25rem 0.5rem 0.5rem !important;
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  overflow: hidden;
+  justify-content: flex-start;
+  overflow: visible;
+  position: relative;
+  min-height: 0;
 }
 
+.console-viewport-inner {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  gap: 0.5rem;
+}
+
+/* Ambient Channel Showcase Header */
+.channel-spotlight-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 1.25rem;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 18px;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  margin-bottom: 0.25rem;
+  transition: all 0.3s ease;
+}
+
+[data-theme="cyber"] .channel-spotlight-bar {
+  background: rgba(18, 18, 26, 0.55);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.channel-meta-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.channel-title-text {
+  font-family: var(--font-iisu);
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+.channel-count-pill {
+  font-family: var(--font-iisu);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+}
+
+[data-theme="cyber"] .channel-count-pill {
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+}
+
+.channel-random-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #ffffff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-family: var(--font-iisu);
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.channel-random-btn:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.5);
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+}
+
+.channel-random-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Full-Bleed Single-Row Centered Carousel Shelf (Nintendo Switch / Apple Arcade Style) */
 .tiles-grid {
-  display: grid;
-  grid-template-rows: repeat(2, auto);
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(185px, 210px);
-  gap: 1.85rem 1.85rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2rem;
   overflow-x: auto;
-  overflow-y: hidden;
-  padding: 1rem 0.5rem;
-  align-content: center;
+  overflow-y: visible;
+  padding: 1.25rem 1.5rem 2rem;
+  width: 100%;
+  flex: 1;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
   will-change: scroll-position;
@@ -2291,8 +2391,189 @@ button.status-pill:active {
   -webkit-overflow-scrolling: touch;
 }
 
+@media (min-width: 640px) {
+  .tiles-grid {
+    justify-content: center;
+  }
+  .tiles-grid:has(.game-tile:nth-child(5)) {
+    justify-content: flex-start;
+  }
+}
+
 .tiles-grid::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
+}
+
+/* Base Game Tile Sizing in Single-Row Shelf */
+.game-tile {
+  width: 185px;
+  min-width: 185px;
+  max-width: 215px;
+  flex-shrink: 0;
+}
+
+.game-tile.cartridge-shell-snes {
+  width: 235px;
+  min-width: 235px;
+  aspect-ratio: 1.3 / 1;
+}
+
+.game-tile.cartridge-shell-gba {
+  width: 210px;
+  min-width: 210px;
+  aspect-ratio: 1.25 / 1;
+}
+
+.game-tile.cartridge-shell-nds {
+  width: 170px;
+  min-width: 170px;
+  aspect-ratio: 1 / 1.08;
+}
+
+.game-tile.cartridge-shell-psx {
+  width: 195px;
+  min-width: 195px;
+  aspect-ratio: 1 / 1.02;
+}
+
+.game-tile.cartridge-shell-atari {
+  width: 185px;
+  min-width: 185px;
+  aspect-ratio: 1 / 1.25;
+}
+
+/* ==========================================================================
+   PURE COVER POSTER TILE (Used for "All Games" overview view)
+   ========================================================================== */
+
+.cover-poster-tile {
+  background: #0f172a;
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  box-shadow: 
+    0 10px 25px -5px rgba(0, 0, 0, 0.4),
+    0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+  aspect-ratio: 1 / 1.15;
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s ease, border-color 0.25s ease;
+  user-select: none;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.cover-poster-tile:hover,
+.cover-poster-tile.gamepad-focused {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 
+    0 0 32px rgba(59, 130, 246, 0.7),
+    0 16px 36px rgba(15, 23, 42, 0.45);
+  border-color: #3b82f6 !important;
+  outline: 4px solid rgba(59, 130, 246, 0.5) !important;
+  z-index: 10;
+}
+
+/* Dedicated Arcade Marquee Poster Tile */
+.cover-poster-tile.arcade-poster-tile {
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+.cover-poster-tile.arcade-poster-tile:hover,
+.cover-poster-tile.arcade-poster-tile.gamepad-focused {
+  box-shadow: 
+    0 0 32px rgba(245, 158, 11, 0.7),
+    0 16px 36px rgba(15, 23, 42, 0.5);
+  border-color: #f59e0b !important;
+  outline: 4px solid rgba(245, 158, 11, 0.5) !important;
+}
+
+.cover-platform-pill {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-family: var(--font-iisu);
+  font-size: 0.55rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  padding: 2px 7px;
+  border-radius: 6px;
+  z-index: 5;
+  text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+.cover-fav-badge {
+  top: 8px !important;
+  right: 8px !important;
+  z-index: 6 !important;
+}
+
+.cover-poster-frame {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #090d16;
+}
+
+.cover-poster-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.cover-poster-tile:hover .cover-poster-img,
+.cover-poster-tile.gamepad-focused .cover-poster-img {
+  transform: scale(1.06);
+}
+
+/* Fallback Poster when cover image is missing */
+.cover-fallback-poster {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem 0.75rem 0.75rem;
+  text-align: center;
+  gap: 0.4rem;
+}
+
+.cover-fallback-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.cover-fallback-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #f8fafc;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.cover-fallback-system {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* Authentic Retro Game Cartridge Shell */
@@ -2329,91 +2610,425 @@ button.status-pill:active {
   z-index: 10;
 }
 
-/* Top Cartridge Embossed Header */
-.cartridge-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.15rem 0.25rem 0.35rem;
-  min-height: 28px;
-  gap: 4px;
+.cartridge-label-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(0, 0, 0, 0) 100%);
+  pointer-events: none;
 }
 
-.cartridge-grips {
+/* ==========================================================================
+   AUTHENTIC NINTENDO ENTERTAINMENT SYSTEM (NES) CARTRIDGE SHELL
+   ========================================================================== */
+
+.cartridge-shell.cartridge-shell-nes {
+  background-color: #8c8c91 !important;
+  background-image: 
+    linear-gradient(180deg, #9a9aa0 0%, #87878c 50%, #76767b 100%),
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.25) 0%, transparent 70%) !important;
+  border: 2px solid #a8a8af !important;
+  border-bottom: 2.5px solid #5a5a5e !important;
+  border-right: 2.5px solid #66666b !important;
+  border-radius: 6px 6px 4px 4px;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 2.5px;
-  width: 12px;
+  box-shadow: 
+    inset 1px 1px 2px rgba(255, 255, 255, 0.45),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.4),
+    0 10px 25px rgba(0, 0, 0, 0.25);
+  position: relative;
+  overflow: hidden;
 }
 
-.cartridge-grips::before,
-.cartridge-grips::after {
-  content: '';
+[data-theme="cyber"] .cartridge-shell.cartridge-shell-nes {
+  background-color: #69696f !important;
+  background-image: 
+    linear-gradient(180deg, #78787f 0%, #636368 50%, #525257 100%) !important;
+  border-color: #8a8a92 !important;
+}
+
+/* NES Top Edge Lip */
+.nes-cart-top-lip {
+  height: 6px;
+  width: 100%;
+  background: linear-gradient(180deg, #a4a4ab 0%, #7d7d82 100%);
+  border-bottom: 1px solid #5a5a5f;
+}
+
+/* NES Body Grid: Left Ribs + Right Sticker Area */
+.nes-cart-body {
+  display: grid;
+  grid-template-columns: 28% 72%;
+  flex: 1;
+  width: 100%;
+  padding: 0.35rem 0.45rem 0.2rem 0.35rem;
+  gap: 0.35rem;
+  min-height: 0;
+}
+
+/* Left Vertical Rib Column */
+.nes-rib-column {
+  display: flex;
+  flex-direction: column;
+  background: #77777d;
+  border-radius: 3px 3px 2px 2px;
+  box-shadow: 
+    inset 1px 1px 2px rgba(0, 0, 0, 0.4),
+    inset -1px -1px 1px rgba(255, 255, 255, 0.2),
+    0 0 0 1px rgba(0, 0, 0, 0.15);
+  padding: 3px 2px;
+  gap: 3px;
+  overflow: hidden;
+}
+
+/* Top Stepped Notch in Rib Column */
+.nes-rib-top-step {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5px;
+  background: #6a6a70;
+  padding: 2px 1.5px;
+  border-radius: 2px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  margin-bottom: 2px;
+}
+
+.nes-mini-groove {
   height: 2px;
-  background: rgba(0, 0, 0, 0.35);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: #505055;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
   border-radius: 1px;
 }
 
-/* Recessed Stadium Oval Capsule (Matching Reference Image) */
-.cartridge-recessed-pill {
-  flex: 1;
-  background: rgba(0, 0, 0, 0.22);
-  box-shadow: 
-    inset 0 2px 4px rgba(0, 0, 0, 0.45),
-    inset 0 -1px 2px rgba(255, 255, 255, 0.3);
-  border-radius: 20px;
-  padding: 2.5px 8px;
+/* Main Track of Horizontal Rib Grooves */
+.nes-rib-main-track {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  max-width: 135px;
-  margin: 0 auto;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  justify-content: space-between;
 }
 
-.cartridge-pill-icon {
-  width: 13px;
-  height: 13px;
-  object-fit: contain;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
+.nes-rib-groove {
+  height: 2.5px;
+  background: #505055;
+  box-shadow: 
+    inset 0 1px 1px rgba(0, 0, 0, 0.6),
+    0 1px 0 rgba(255, 255, 255, 0.3);
+  border-radius: 1px;
 }
 
-.cartridge-brand-text {
-  font-family: var(--font-iisu);
-  font-weight: 900;
-  font-size: 0.65rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1;
+/* Bottom Pocket in Rib Column */
+.nes-rib-bottom-pocket {
+  height: 8px;
+  background: #636368;
+  border-radius: 2px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+  margin-top: 2px;
 }
 
-/* Sticker Label Recessed Inset */
-.cartridge-sticker-area {
+/* Right Section: Sticker + Arrow */
+.nes-right-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-height: 0;
+}
+
+/* Recessed Sticker Area */
+.nes-sticker-area {
   flex: 1;
   width: 100%;
-  aspect-ratio: 1 / 1;
-  background: transparent;
-  border-radius: 6px;
+  aspect-ratio: 1 / 1.15;
+  background: #000000;
+  border-radius: 2px 2px 6px 6px;
   position: relative;
   overflow: hidden;
   box-shadow: 
-    inset 0 3px 6px rgba(0, 0, 0, 0.45),
-    inset 0 -1px 2px rgba(255, 255, 255, 0.6),
-    0 1px 3px rgba(0, 0, 0, 0.2);
-  border: 1.5px solid rgba(0, 0, 0, 0.35);
+    inset 0 2px 4px rgba(0, 0, 0, 0.8),
+    0 1px 2px rgba(0, 0, 0, 0.3);
+  border: 1.5px solid #3a3a3e;
+}
+
+.nes-label-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.cartridge-shell.cartridge-shell-nes:hover .nes-label-img,
+.cartridge-shell.cartridge-shell-nes.gamepad-focused .nes-label-img {
+  transform: scale(1.04);
+}
+
+/* NES Fallback Sticker Label */
+.nes-fallback-label {
+  width: 100%;
+  height: 100%;
+  background: #0f172a;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.4rem 0.35rem;
+  color: #ffffff;
+  position: relative;
+}
+
+.nes-fallback-top-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1.5px solid #ef4444;
+  padding-bottom: 2px;
+}
+
+.nes-fallback-sys-pill {
+  font-size: 0.55rem;
+  font-weight: 900;
+  color: #ffffff;
+  background: #ef4444;
+  padding: 1px 4px;
+  border-radius: 3px;
+  letter-spacing: 0.05em;
+}
+
+.nes-fallback-series {
+  font-size: 0.45rem;
+  font-weight: 800;
+  color: #fbbf24;
+  letter-spacing: 0.04em;
+}
+
+.nes-fallback-title-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.2rem;
+}
+
+.nes-fallback-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: #f8fafc;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.nes-fallback-seal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, #fef08a 0%, #ca8a04 100%);
+  color: #713f12;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  margin: 0 auto;
+  font-size: 0.35rem;
+  font-weight: 900;
+  line-height: 0.9;
+  border: 1px dashed #854d0e;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.seal-nintendo {
+  font-size: 0.38rem;
+  text-transform: uppercase;
+  font-weight: 900;
+}
+
+/* Molded Downward Insertion Arrow */
+.nes-arrow-wrapper {
+  height: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.cartridge-label-img {
+.nes-molded-arrow {
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid #5a5a60;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.35));
+  opacity: 0.85;
+}
+
+/* Stepped Bottom Connector */
+.nes-bottom-connector-steps {
+  height: 8px;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.nes-notch-corner {
+  width: 10%;
+  height: 100%;
+  background: transparent;
+}
+
+.nes-connector-center {
+  width: 80%;
+  height: 100%;
+  background: linear-gradient(180deg, #707076 0%, #4a4a4e 100%);
+  border-radius: 0 0 3px 3px;
+  box-shadow: inset 0 2px 2px rgba(0, 0, 0, 0.6);
+}
+
+.nes-fav-badge {
+  top: 8px !important;
+  right: 8px !important;
+}
+
+/* ==========================================================================
+   AUTHENTIC SUPER NINTENDO (SNES) CARTRIDGE SHELL
+   ========================================================================== */
+
+.cartridge-shell.cartridge-shell-snes {
+  background-color: #94909c !important;
+  background-image: 
+    linear-gradient(180deg, #a4a0ac 0%, #908c98 35%, #7a7682 100%),
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.28) 0%, transparent 60%) !important;
+  border: 2px solid #b2aeb8 !important;
+  border-bottom: 2.5px solid #5a5660 !important;
+  border-right: 2.5px solid #66626c !important;
+  border-radius: 8px 8px 10px 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 
+    inset 1px 1px 2px rgba(255, 255, 255, 0.5),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.4),
+    0 10px 24px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="cyber"] .cartridge-shell.cartridge-shell-snes {
+  background-color: #64606c !important;
+  background-image: 
+    linear-gradient(180deg, #74707c 0%, #585460 50%, #44404c 100%) !important;
+  border-color: #827e8a !important;
+}
+
+/* SNES Main Body Grid with Flanking Wings and Raised Center */
+.snes-cart-body {
+  display: grid;
+  grid-template-columns: 22px 1fr 22px;
+  flex: 1;
+  width: 100%;
+  padding: 0.25rem 0.2rem 0.2rem;
+  gap: 0.25rem;
+  min-height: 0;
+  align-items: stretch;
+}
+
+/* Flanking Side Wings with 5 Horizontal Ribs */
+.snes-side-wing {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #86828e;
+  border-radius: 3px;
+  padding: 3px 2px;
+  box-shadow: 
+    inset 1px 0 1px rgba(0, 0, 0, 0.4),
+    inset -1px 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.snes-wing-rib {
+  height: 2px;
+  background: #6a6672;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
+  border-radius: 1px;
+}
+
+.snes-screw-hole {
+  width: 6px;
+  height: 6px;
+  background: #2a2830;
+  border-radius: 50%;
+  margin: 2px auto 1px;
+  box-shadow: 
+    inset 0 1px 1px rgba(0, 0, 0, 0.9),
+    0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Center Section */
+.snes-center-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-height: 0;
+}
+
+/* Recessed Sticker Area */
+.snes-sticker-area {
+  flex: 1;
+  background: #000000;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 28px 1fr 34px;
+  box-shadow: 
+    inset 0 2px 5px rgba(0, 0, 0, 0.8),
+    0 1px 2px rgba(255, 255, 255, 0.2);
+  border: 1.5px solid #282630;
+  min-height: 0;
+}
+
+/* Left License Band */
+.snes-label-left-col {
+  background: #0f172a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 1px;
+  border-right: 1px solid #334155;
+}
+
+.snes-license-text {
+  font-size: 0.35rem;
+  font-weight: 700;
+  color: #94a3b8;
+  line-height: 1;
+  text-align: center;
+}
+
+.snes-nintendo-text {
+  font-family: var(--font-iisu);
+  font-size: 0.42rem;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.snes-seal-dot {
+  font-size: 0.45rem;
+  color: #fbbf24;
+}
+
+/* Main Center Artwork */
+.snes-art-frame {
+  flex: 1;
+  height: 100%;
+  background: #000000;
+  position: relative;
+  overflow: hidden;
+}
+
+.snes-label-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -2422,35 +3037,1929 @@ button.status-pill:active {
   transition: transform 0.3s ease;
 }
 
-.cartridge-shell:hover .cartridge-label-img,
-.cartridge-shell.gamepad-focused .cartridge-label-img {
-  transform: scale(1.06);
+.cartridge-shell.cartridge-shell-snes:hover .snes-label-img,
+.cartridge-shell.cartridge-shell-snes.gamepad-focused .snes-label-img {
+  transform: scale(1.05);
 }
 
-.cartridge-label-sheen {
+.snes-fallback-art {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem;
+  text-align: center;
+}
+
+.snes-fallback-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.15;
+}
+
+/* Right Red Banner */
+.snes-label-right-col {
+  background: #0f172a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 1px;
+  border-left: 1px solid #334155;
+  text-align: center;
+}
+
+.snes-red-banner {
+  font-family: var(--font-iisu);
+  font-size: 0.42rem;
+  font-weight: 900;
+  color: #ef4444;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.snes-sub-banner {
+  display: none;
+}
+
+/* Bottom Recessed Thumb Pocket with Center Ramp */
+.snes-lower-grip-pocket {
+  height: 20px;
+  background: #76727e;
+  border-radius: 4px;
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.6),
+    0 1px 0 rgba(255, 255, 255, 0.2);
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr;
+  overflow: hidden;
+}
+
+.snes-pocket-left-cut,
+.snes-pocket-right-cut {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.snes-pocket-center-ramp {
+  background: linear-gradient(180deg, #625e6a 0%, #827e8a 100%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.snes-fav-badge {
+  top: 7px !important;
+  right: 7px !important;
+}
+
+/* ==========================================================================
+   AUTHENTIC NINTENDO 64 (N64) CARTRIDGE SHELL
+   ========================================================================== */
+
+.cartridge-shell.cartridge-shell-n64 {
+  background-color: var(--cart-color, #8e92a2) !important;
+  background-image: 
+    linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.12) 30%, rgba(0, 0, 0, 0.25) 100%),
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.35) 0%, transparent 65%) !important;
+  border: 2px solid rgba(255, 255, 255, 0.55) !important;
+  border-bottom: 3px solid rgba(0, 0, 0, 0.45) !important;
+  border-right: 2.5px solid rgba(0, 0, 0, 0.35) !important;
+  border-radius: 24px 24px 8px 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 
+    inset 1px 1px 2px rgba(255, 255, 255, 0.65),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.4),
+    0 10px 26px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="cyber"] .cartridge-shell.cartridge-shell-n64 {
+  background-color: #5c5866 !important;
+  background-image: 
+    linear-gradient(180deg, #706c7a 0%, #504c5a 50%, #3a3644 100%) !important;
+  border-color: #7e7a88 !important;
+}
+
+/* Outer Shell Arch Crest */
+.n64-top-crest-bevel {
+  height: 12px;
+  width: 100%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(0, 0, 0, 0.05) 100%);
+  border-bottom: 1.5px solid rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.n64-crest-arch-line {
+  width: 85%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* N64 Cartridge Main Body with Flanking Grip Wings */
+.n64-main-body {
+  display: grid;
+  grid-template-columns: 18px 1fr 18px;
+  flex: 1;
+  width: 100%;
+  padding: 0.15rem 0.25rem 0.15rem;
+  gap: 0.25rem;
+  min-height: 0;
+  align-items: stretch;
+}
+
+/* Left & Right Grip Wings */
+.n64-grip-wing {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 4px;
+  padding: 2px 1px;
+  position: relative;
+}
+
+.n64-grip-wing.left {
+  box-shadow: inset 1px 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.n64-grip-wing.right {
+  box-shadow: inset -1px 0 1px rgba(0, 0, 0, 0.3);
+}
+
+/* Vertical Parting Seam on Wing (top 70%) */
+.n64-wing-seam {
+  flex: 1;
+  width: 1.5px;
+  background: rgba(0, 0, 0, 0.45);
+  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.35);
+  margin: 0 auto;
+  border-radius: 1px;
+}
+
+/* Stepped Notch Cut-in on Lower 30% */
+.n64-wing-step-notch {
+  height: 14px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 3px 0 0 3px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+  margin-top: 2px;
+}
+
+.n64-grip-wing.right .n64-wing-step-notch {
+  border-radius: 0 3px 3px 0;
+}
+
+/* Center Recessed Sticker Well */
+.n64-center-well {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+/* Arched Recessed Sticker Area */
+.n64-sticker-area {
+  flex: 1;
+  background: #000000;
+  border-radius: 16px 16px 4px 4px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 
+    inset 0 2px 5px rgba(0, 0, 0, 0.85),
+    0 1px 2px rgba(255, 255, 255, 0.25);
+  border: 1.5px solid rgba(0, 0, 0, 0.4);
+  min-height: 0;
+  justify-content: space-between;
+}
+
+.n64-label-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.cartridge-shell.cartridge-shell-n64:hover .n64-label-img,
+.cartridge-shell.cartridge-shell-n64.gamepad-focused .n64-label-img {
+  transform: scale(1.04);
+}
+
+.n64-fallback-label {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0.4rem;
+  color: #ffffff;
+}
+
+.n64-fallback-title-wrap {
+  text-align: center;
+}
+
+.n64-fallback-title {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.15;
+}
+
+/* Authentic N64 Label Footer Strip */
+.n64-label-footer-strip {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(0, 0, 0, 0) 100%);
-  pointer-events: none;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.75) 0%, rgba(15, 23, 42, 0.95) 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  display: grid;
+  grid-template-columns: 24px 1fr 24px;
+  align-items: center;
+  padding: 2px 4px;
+  z-index: 5;
+  backdrop-filter: blur(2px);
 }
 
-/* Bottom Indented Notch */
-.cartridge-footer {
+/* Gold Official Seal */
+.n64-seal-gold-badge {
+  background: radial-gradient(circle, #fef08a 0%, #ca8a04 100%);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #713f12;
+  border: 0.5px dashed #854d0e;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  margin: 0 auto;
+}
+
+.n64-seal-gold-badge .seal-text {
+  font-size: 0.25rem;
+  font-weight: 800;
+  line-height: 0.9;
+}
+
+.n64-seal-gold-badge .seal-sub {
+  font-size: 0.22rem;
+  font-weight: 900;
+  line-height: 0.9;
+}
+
+/* Center Red Oval Brand & Serial */
+.n64-center-brand-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+
+.n64-nintendo-oval {
+  border: 1px solid #ef4444;
+  border-radius: 10px;
+  padding: 0 4px;
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.n64-nintendo-text {
+  font-family: var(--font-iisu);
+  font-size: 0.38rem;
+  font-weight: 900;
+  color: #ef4444;
+  line-height: 1;
+}
+
+.n64-model-code {
+  font-family: monospace;
+  font-size: 0.34rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+/* 3D N64 Logo Card on Right */
+.n64-3d-logo-card {
+  background: #ffffff;
+  border-radius: 3px;
+  padding: 1px 3px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  margin: 0 auto;
+}
+
+.n64-cube-icon {
+  font-family: var(--font-iisu);
+  font-size: 0.52rem;
+  font-weight: 900;
+  color: #2563eb;
+  line-height: 1;
+  text-shadow: 1px 1px 0 #dc2626;
+}
+
+.n64-64-sub {
+  font-family: var(--font-iisu);
+  font-size: 0.28rem;
+  font-weight: 900;
+  color: #0f172a;
+  line-height: 1;
+}
+
+/* Bottom Cartridge Bezel */
+.n64-bottom-chin {
+  height: 5px;
+  width: 100%;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.3) 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.n64-fav-badge {
+  top: 7px !important;
+  right: 7px !important;
+}
+
+/* ==========================================================================
+   AUTHENTIC PLAYSTATION 1 (PS1) CD JEWEL CASE
+   ========================================================================== */
+
+.cartridge-shell.cartridge-shell-psx {
+  background: #09090d !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-shadow: 
+    0 12px 28px rgba(0, 0, 0, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.4) !important;
+  position: relative !important;
+  overflow: visible !important;
+  aspect-ratio: 1 / 1.02 !important;
+}
+
+/* Authentic Dark Obsidian PS1 Jewel Case Frame */
+.psx-jewel-case-frame {
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #18181e 0%, #0d0d12 40%, #08080a 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-left: 6px solid #1a1a22;
+  border-bottom: 2px solid #040406;
+  border-right: 2px solid #0f0f14;
+  box-shadow: 
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 2px 0 3px rgba(0, 0, 0, 0.8),
+    0 4px 12px rgba(0, 0, 0, 0.4);
+  padding: 3px 4px 4px 6px;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Left Dark Ribbed Hinge Slots */
+.psx-hinge-slot {
+  position: absolute;
+  left: 1px;
+  width: 4px;
+  height: 14px;
+  background: #0d0d12;
+  border-radius: 2px;
+  box-shadow: 
+    inset 0 1px 1px rgba(0, 0, 0, 0.9),
+    0 1px 0 rgba(255, 255, 255, 0.15);
+  border: 0.5px solid rgba(255, 255, 255, 0.1);
+}
+
+.psx-hinge-slot.top {
+  top: 6px;
+}
+
+.psx-hinge-slot.bottom {
+  bottom: 6px;
+}
+
+/* Jewel Case Paper Booklet Insert */
+.psx-booklet-insert {
+  flex: 1;
+  border-radius: 3px;
+  background: #000000;
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.6);
+}
+
+/* Iconic Left Black Spine Stripe */
+.psx-vertical-spine {
+  background: #000000;
+  border-right: 1.5px solid #1e293b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 1px;
+  z-index: 2;
+}
+
+/* Top PlayStation Logo Box */
+.psx-spine-logo-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.psx-color-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-iisu);
+  font-size: 0.58rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.psx-p-red {
+  color: #ef4444;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.8);
+}
+
+.psx-s-cyan {
+  color: #06b6d4;
+  margin-left: -1px;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.8);
+}
+
+.psx-region-tag {
+  font-size: 0.28rem;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+/* Vertical "PlayStation" Wordmark */
+.psx-spine-wordmark {
+  font-family: var(--font-iisu);
+  font-size: 0.58rem;
+  font-weight: 900;
+  color: #ffffff;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Spine Footer with Mini ESRB and SLUS Serial */
+.psx-spine-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.psx-esrb-mini {
+  font-family: sans-serif;
+  font-size: 0.45rem;
+  font-weight: 900;
+  color: #ffffff;
+  background: #000000;
+  border: 1px solid #ffffff;
+  border-radius: 2px;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.psx-slus-code {
+  font-family: monospace;
+  font-size: 0.26rem;
+  font-weight: 700;
+  color: #94a3b8;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+}
+
+/* Main Cover Artwork Frame */
+.psx-art-frame {
+  height: 100%;
+  background: #000000;
+  position: relative;
+  overflow: hidden;
+}
+
+.psx-label-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.cartridge-shell.cartridge-shell-psx:hover .psx-label-img,
+.cartridge-shell.cartridge-shell-psx.gamepad-focused .psx-label-img {
+  transform: scale(1.05);
+}
+
+.psx-fallback-art {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem;
+  text-align: center;
+}
+
+.psx-fallback-title {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.15;
+}
+
+/* Acrylic Glass Sheen & Diagonal Glare */
+.psx-jewel-glass-glare {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(255, 255, 255, 0.15) 25%,
+    rgba(255, 255, 255, 0) 50%,
+    rgba(255, 255, 255, 0.25) 85%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  pointer-events: none;
+  z-index: 6;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.cartridge-shell.cartridge-shell-psx:hover .psx-jewel-glass-glare,
+.cartridge-shell.cartridge-shell-psx.gamepad-focused .psx-jewel-glass-glare {
+  opacity: 1;
+}
+
+.psx-fav-badge {
+  top: 6px !important;
+  right: 6px !important;
+  z-index: 10 !important;
+}
+
+/* ==========================================================================
+   AUTHENTIC GAME BOY ADVANCE (GBA) CARTRIDGE SHELL
+   ========================================================================== */
+
+.cartridge-shell.cartridge-shell-gba {
+  background-color: var(--cart-color, #10b981) !important;
+  background-image: 
+    linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.08) 35%, rgba(0, 0, 0, 0.25) 100%) !important;
+  border: 2px solid rgba(255, 255, 255, 0.45) !important;
+  border-bottom: 2.5px solid rgba(0, 0, 0, 0.4) !important;
+  border-right: 2.5px solid rgba(0, 0, 0, 0.35) !important;
+  border-radius: 8px 8px 12px 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 
+    inset 1px 1px 2px rgba(255, 255, 255, 0.5),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.4),
+    0 10px 24px rgba(0, 0, 0, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+/* GBA Top Lip with Shoulder Ears & Concave Thumb Arch */
+.gba-top-shoulder {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 22px;
+  width: 100%;
+  padding: 0 4px;
+  background: rgba(0, 0, 0, 0.12);
+  border-bottom: 1.5px solid rgba(0, 0, 0, 0.25);
+}
+
+.gba-shoulder-ear {
+  width: 10px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px 4px 0 0;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+.gba-thumb-ridge {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 4px;
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 12px;
+  padding: 2px 6px;
+  box-shadow: 
+    inset 0 1px 2px rgba(0, 0, 0, 0.4),
+    0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.gba-embossed-brand {
+  font-family: var(--font-iisu);
+  font-size: 0.52rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+/* GBA Main Cart Body */
+.gba-cart-body {
+  flex: 1;
+  padding: 0.35rem 0.5rem 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+/* GBA Recessed Wide Sticker Area */
+.gba-sticker-area {
+  width: 100%;
+  aspect-ratio: 1.45 / 1;
+  background: #000000;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    inset 0 2px 5px rgba(0, 0, 0, 0.75),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.4),
+    0 1px 2px rgba(0, 0, 0, 0.3);
+  border: 1.5px solid rgba(0, 0, 0, 0.4);
+}
+
+.gba-label-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.cartridge-shell.cartridge-shell-gba:hover .gba-label-img,
+.cartridge-shell.cartridge-shell-gba.gamepad-focused .gba-label-img {
+  transform: scale(1.05);
+}
+
+/* GBA Fallback Label */
+.gba-fallback-label {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.35rem 0.45rem;
+  color: #ffffff;
+}
+
+.gba-fallback-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gba-fallback-pill {
+  font-size: 0.55rem;
+  font-weight: 900;
+  color: #ffffff;
+  background: #3b82f6;
+  padding: 1px 4px;
+  border-radius: 3px;
+  letter-spacing: 0.05em;
+}
+
+.gba-fallback-code {
+  font-size: 0.48rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+}
+
+.gba-fallback-title-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.15rem;
+}
+
+.gba-fallback-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: #f8fafc;
+}
+
+.gba-fallback-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.gba-fallback-seal {
+  font-size: 0.42rem;
+  font-weight: 800;
+  color: #fbbf24;
+  letter-spacing: 0.03em;
+}
+
+/* GBA Bottom Edge */
+.gba-bottom-edge {
+  height: 6px;
+  width: 100%;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.3) 100%);
+}
+
+.gba-fav-badge {
+  top: 6px !important;
+  right: 6px !important;
+}
+
+/* ==========================================================================
+   AUTHENTIC NINTENDO DS (NDS) CARTRIDGE / CARD SHELL
+   ========================================================================== */
+
+.cartridge-shell.cartridge-shell-nds {
+  background-color: #38383e !important;
+  background-image: 
+    linear-gradient(180deg, #484850 0%, #35353b 40%, #29292e 100%),
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.18) 0%, transparent 65%) !important;
+  border: 2px solid #5a5a64 !important;
+  border-bottom: 2.5px solid #1c1c20 !important;
+  border-right: 2.5px solid #222226 !important;
+  border-radius: 6px 6px 7px 7px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 
+    inset 1px 1px 2px rgba(255, 255, 255, 0.35),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.5),
+    0 10px 24px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="cyber"] .cartridge-shell.cartridge-shell-nds {
+  background-color: #24242a !important;
+  background-image: 
+    linear-gradient(180deg, #32323a 0%, #202025 50%, #151518 100%) !important;
+  border-color: #444450 !important;
+}
+
+/* NDS Top Edge Lip */
+.nds-top-edge {
+  height: 5px;
+  width: 100%;
+  background: linear-gradient(180deg, #585862 0%, #3a3a40 100%);
+  border-bottom: 1px solid #202024;
+}
+
+/* NDS Body with Side Grip Notches */
+.nds-cart-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  width: 100%;
+  padding: 0.25rem 0.2rem 0.15rem;
+  position: relative;
+  min-height: 0;
+}
+
+/* Side Grip Notches on Left & Right Edges */
+.nds-side-notch {
+  width: 5px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 0 4px 4px 0;
+  box-shadow: inset 1px 0 2px rgba(0, 0, 0, 0.6);
+}
+
+.nds-side-notch.right {
+  border-radius: 4px 0 0 4px;
+  box-shadow: inset -1px 0 2px rgba(0, 0, 0, 0.6);
+}
+
+/* NDS Recessed Sticker Area */
+.nds-sticker-area {
+  flex: 1;
+  margin: 0 3px;
+  height: 100%;
+  background: #ffffff;
+  border-radius: 4px 4px 6px 6px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 
+    inset 0 1px 3px rgba(0, 0, 0, 0.6),
+    0 1px 2px rgba(0, 0, 0, 0.25);
+  border: 1.5px solid #1a1a1e;
+}
+
+/* Official NDS Header Banner */
+.nds-label-top-banner {
+  height: 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 60%, #e2e8f0 100%);
+  border-bottom: 1px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 0 4px;
+}
+
+.nds-brand-title {
+  font-family: var(--font-iisu);
+  font-size: 0.55rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: #334155;
+  line-height: 1;
+}
+
+.nds-dual-screen-icon {
+  font-family: var(--font-iisu);
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+.nds-tm {
+  font-size: 0.38rem;
+  font-weight: 700;
+  color: #64748b;
+  vertical-align: super;
+}
+
+/* Game Artwork Frame */
+.nds-label-art-frame {
+  flex: 1;
+  width: 100%;
+  background: #000000;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.nds-label-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.cartridge-shell.cartridge-shell-nds:hover .nds-label-img,
+.cartridge-shell.cartridge-shell-nds.gamepad-focused .nds-label-img {
+  transform: scale(1.04);
+}
+
+/* NDS Fallback Art */
+.nds-fallback-art {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  text-align: center;
+}
+
+.nds-fallback-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  line-height: 1.2;
+}
+
+/* NDS Footer Band & NTR Code */
+.nds-label-footer {
+  height: 14px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 4px;
+}
+
+.nds-ntr-code {
+  font-family: monospace;
+  font-size: 0.48rem;
+  font-weight: 700;
+  color: #475569;
+  letter-spacing: 0.05em;
+}
+
+/* NDS Bottom Shelf with Left Chamfer Key Notch */
+.nds-bottom-shelf {
+  height: 9px;
+  width: 100%;
+  background: linear-gradient(180deg, #2e2e34 0%, #1e1e22 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.nds-key-notch-left {
+  width: 12px;
+  height: 100%;
+  background: #222226;
+  border-radius: 0 4px 0 0;
+  box-shadow: inset 1px 0 1px rgba(0, 0, 0, 0.5);
+}
+
+.nds-shelf-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.nds-fav-badge {
+  top: 7px !important;
+  right: 7px !important;
+}
+
+/* ==========================================================================
+   AUTHENTIC SEGA GENESIS / MEGA DRIVE CARTRIDGE SHELL
+   ========================================================================== */
+
+.cartridge-shell.cartridge-shell-genesis {
+  background-color: #1a1a1d !important;
+  background-image: 
+    linear-gradient(180deg, #2a2a30 0%, #1a1a1e 35%, #101012 100%),
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.2) 0%, transparent 60%) !important;
+  border: 2px solid #3c3c44 !important;
+  border-bottom: 2.5px solid #0a0a0c !important;
+  border-right: 2.5px solid #141416 !important;
+  border-radius: 12px 12px 4px 4px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 
+    inset 1px 1px 2px rgba(255, 255, 255, 0.4),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.6),
+    0 10px 25px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="cyber"] .cartridge-shell.cartridge-shell-genesis {
+  background-color: #0f0f12 !important;
+  background-image: 
+    linear-gradient(180deg, #202026 0%, #121215 50%, #0a0a0d 100%) !important;
+  border-color: #2e2e38 !important;
+}
+
+/* Genesis Rounded Top Crest */
+.genesis-top-crest {
+  height: 8px;
+  width: 100%;
+  background: linear-gradient(180deg, #383842 0%, #1e1e24 100%);
+  border-bottom: 1px solid #121216;
+}
+
+/* Genesis Cart Body with Dual Side Pillars */
+.genesis-cart-body {
+  display: grid;
+  grid-template-columns: 12px 1fr 12px;
+  flex: 1;
+  width: 100%;
+  padding: 0.2rem 0.25rem 0.15rem;
+  gap: 0.3rem;
+  min-height: 0;
+  align-items: stretch;
+}
+
+/* Side Grip Pillars with Fine Horizontal Ridges */
+.genesis-side-pillar {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #141418;
+  border-radius: 3px;
+  padding: 2px 1px;
+  box-shadow: 
+    inset 1px 0 1px rgba(0, 0, 0, 0.6),
+    inset -1px 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.genesis-pillar-groove {
+  height: 2px;
+  background: #2a2a30;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.8);
+  border-radius: 1px;
+}
+
+/* Recessed Genesis Sticker Area */
+.genesis-sticker-area {
+  flex: 1;
+  background: #000000;
+  border-radius: 4px 4px 6px 6px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 
+    inset 0 2px 5px rgba(0, 0, 0, 0.8),
+    0 1px 2px rgba(255, 255, 255, 0.15);
+  border: 1.5px solid #282830;
+}
+
+.genesis-art-container {
+  flex: 1;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.genesis-label-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.cartridge-shell.cartridge-shell-genesis:hover .genesis-label-img,
+.cartridge-shell.cartridge-shell-genesis.gamepad-focused .genesis-label-img {
+  transform: scale(1.05);
+}
+
+/* Genesis Fallback Label */
+.genesis-fallback-label {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.35rem;
+  color: #ffffff;
+}
+
+.genesis-fallback-top-grid {
+  border-bottom: 1.5px solid #e11d48;
+  padding-bottom: 2px;
+  text-align: center;
+}
+
+.genesis-grid-text {
+  font-size: 0.45rem;
+  font-weight: 900;
+  color: #fbbf24;
+  letter-spacing: 0.08em;
+}
+
+.genesis-fallback-title-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.2rem;
+}
+
+.genesis-fallback-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.15;
+}
+
+/* Iconic Sega Genesis Stadium Banner at bottom of sticker */
+.genesis-sticker-bottom-banner {
+  background: #0f172a;
+  border-top: 1px solid #1e293b;
+  padding: 2px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sega-genesis-stadium-badge {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1px 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.sega-wordmark {
+  font-family: var(--font-iisu);
+  font-size: 0.55rem;
+  font-weight: 900;
+  color: #1d4ed8;
+  letter-spacing: -0.02em;
+}
+
+.genesis-wordmark {
+  font-family: var(--font-iisu);
+  font-size: 0.58rem;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: 0.05em;
+}
+
+/* Genesis Bottom Lip */
+.genesis-bottom-lip {
+  height: 6px;
+  width: 100%;
+  background: linear-gradient(180deg, #18181c 0%, #0d0d10 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.genesis-fav-badge {
+  top: 8px !important;
+  right: 8px !important;
+}
+
+/* ==========================================================================
+   AUTHENTIC GAME BOY (GB) & GAME BOY COLOR (GBC) CARTRIDGE SHELL
+   ========================================================================== */
+
+.cartridge-shell.cartridge-shell-gb {
+  background-color: var(--cart-color, #9ca3af) !important;
+  background-image: 
+    linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.08) 35%, rgba(0, 0, 0, 0.25) 100%) !important;
+  border: 2px solid rgba(255, 255, 255, 0.45) !important;
+  border-bottom: 2.5px solid rgba(0, 0, 0, 0.4) !important;
+  border-right: 2.5px solid rgba(0, 0, 0, 0.35) !important;
+  border-radius: 8px 8px 14px 14px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 
+    inset 1px 1px 2px rgba(255, 255, 255, 0.5),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.4),
+    0 10px 24px rgba(0, 0, 0, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+/* GBC Clear / Color variant enhancements */
+.cartridge-shell.cartridge-shell-gb.cartridge-shell-gbc {
+  border-radius: 8px 8px 16px 16px;
+}
+
+/* Top Header with Shoulder Grip Ribs & Recessed Stadium Oval Capsule */
+.gb-top-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 5px 3px;
+  background: rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.18);
+  position: relative;
+}
+
+.gb-shoulder-grips {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5px;
+  width: 12px;
+}
+
+.gb-mini-rib {
+  height: 1.5px;
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+  border-radius: 1px;
+}
+
+/* Top Right Interlock Step (Original DMG Cartridge Power Switch Notch) */
+.gb-notch-step {
+  height: 3px;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 1px 1px 0 0;
+  margin-bottom: 1px;
+}
+
+/* Outer Concentric Stadium Groove */
+.gb-concentric-oval-ring {
+  flex: 1;
+  padding: 1.5px;
+  border-radius: 24px;
+  background: rgba(0, 0, 0, 0.12);
+  box-shadow: 
+    inset 0 1px 2px rgba(0, 0, 0, 0.5),
+    0 1px 0 rgba(255, 255, 255, 0.3);
+  margin: 0 3px;
+  display: flex;
+}
+
+/* Recessed Oval Stadium Capsule */
+.gb-recessed-pill {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.22);
+  box-shadow: 
+    inset 0 2px 3px rgba(0, 0, 0, 0.55),
+    0 1px 0 rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
+  padding: 2px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.gb-brand-prefix {
+  font-family: var(--font-iisu);
+  font-size: 0.52rem;
+  font-style: italic;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+  line-height: 1;
+}
+
+.gb-brand-bold {
+  font-family: var(--font-iisu);
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  line-height: 1;
+}
+
+.gb-tm {
+  font-size: 0.35rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  vertical-align: super;
+}
+
+/* Main Cart Body */
+.gb-cart-body {
+  flex: 1;
+  padding: 0.35rem 0.55rem 0.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 0;
+}
+
+/* Recessed Square Sticker Area */
+.gb-sticker-area {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #ffffff;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 14px 1fr 14px;
+  box-shadow: 
+    inset 0 2px 5px rgba(0, 0, 0, 0.75),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.35),
+    0 1px 2px rgba(0, 0, 0, 0.25);
+  border: 1.5px solid rgba(0, 0, 0, 0.4);
+}
+
+.gb-sticker-spine {
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.gb-sticker-spine.left {
+  border-right: 1px solid #cbd5e1;
+}
+
+.gb-sticker-spine.right {
+  border-left: 1px solid #cbd5e1;
+}
+
+.gb-spine-dmg-code {
+  font-family: monospace;
+  font-size: 0.36rem;
+  font-weight: 700;
+  color: #334155;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.gb-spine-side-out {
+  font-family: sans-serif;
+  font-size: 0.36rem;
+  font-weight: 800;
+  color: #334155;
+  writing-mode: vertical-rl;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.gb-art-frame {
+  height: 100%;
+  background: #000000;
+  position: relative;
+  overflow: hidden;
+}
+
+.gb-label-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.cartridge-shell.cartridge-shell-gb:hover .gb-label-img,
+.cartridge-shell.cartridge-shell-gb.gamepad-focused .gb-label-img {
+  transform: scale(1.05);
+}
+
+/* GB Fallback Label */
+.gb-fallback-label {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #475569 0%, #1e293b 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.35rem;
+  color: #ffffff;
+}
+
+.gb-fallback-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gb-fallback-pill {
+  font-size: 0.55rem;
+  font-weight: 900;
+  color: #ffffff;
+  background: #10b981;
+  padding: 1px 4px;
+  border-radius: 3px;
+  letter-spacing: 0.05em;
+}
+
+.gb-fallback-code {
+  font-size: 0.45rem;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.gb-fallback-title-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.15rem;
+}
+
+.gb-fallback-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.15;
+}
+
+.gb-fallback-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.gb-fallback-seal {
+  font-size: 0.4rem;
+  font-weight: 800;
+  color: #fbbf24;
+}
+
+/* Molded Downward Direction Arrow */
+.gb-arrow-wrapper {
   height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 0.15rem;
 }
 
-.cartridge-arrow-down {
+.gb-molded-arrow {
   width: 0;
   height: 0;
-  border-left: 7px solid transparent;
-  border-right: 7px solid transparent;
-  border-top: 6px solid #64748b;
-  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.8));
-  opacity: 0.75;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-top: 8px solid rgba(0, 0, 0, 0.45);
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.35));
+}
+
+.gb-fav-badge {
+  top: 7px !important;
+  right: 7px !important;
+}
+
+/* ==========================================================================
+   AUTHENTIC SEGA GAME GEAR CARTRIDGE SHELL
+   ========================================================================== */
+
+.cartridge-shell.cartridge-shell-gamegear {
+  background-color: #202026 !important;
+  background-image: 
+    linear-gradient(180deg, #32323c 0%, #202026 35%, #141418 100%),
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.22) 0%, transparent 60%) !important;
+  border: 2px solid #444450 !important;
+  border-bottom: 2.5px solid #0c0c10 !important;
+  border-right: 2.5px solid #16161c !important;
+  border-radius: 12px 12px 6px 6px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 
+    inset 1px 1px 2px rgba(255, 255, 255, 0.4),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.6),
+    0 10px 25px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="cyber"] .cartridge-shell.cartridge-shell-gamegear {
+  background-color: #121216 !important;
+  background-image: 
+    linear-gradient(180deg, #22222a 0%, #121216 50%, #0a0a0e 100%) !important;
+  border-color: #30303c !important;
+}
+
+/* Game Gear Top Brow with Tactile Grip Dots and Side Guide Wings */
+.gg-top-section {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  height: 24px;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1.5px solid rgba(0, 0, 0, 0.4);
+}
+
+.gg-side-rail {
+  width: 12px;
+  background: linear-gradient(180deg, #3a3a46 0%, #1e1e26 100%);
+  border-radius: 6px 0 0 0;
+  box-shadow: inset 1px 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.gg-side-rail.right {
+  border-radius: 0 6px 0 0;
+  box-shadow: inset -1px 0 1px rgba(0, 0, 0, 0.5);
+}
+
+.gg-top-center-crest {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 2px 4px;
+}
+
+.gg-grip-dots-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.gg-grip-dot {
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 50%;
+  background: #141418;
+  box-shadow: 
+    inset 0 1px 1px rgba(0, 0, 0, 0.8),
+    0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.gg-horizontal-grooves {
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gg-groove-line {
+  height: 1.5px;
+  background: #141418;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
+  border-radius: 1px;
+}
+
+/* Main Body */
+.gg-cart-body {
+  flex: 1;
+  padding: 0.3rem 0.5rem 0.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 0;
+}
+
+/* Recessed Game Gear Sticker Area */
+.gg-sticker-area {
+  width: 100%;
+  aspect-ratio: 1.15 / 1;
+  background: #ffffff;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  box-shadow: 
+    inset 0 2px 5px rgba(0, 0, 0, 0.75),
+    0 1px 2px rgba(255, 255, 255, 0.15);
+  border: 1.5px solid #282830;
+}
+
+/* Left Red Spine Banner */
+.gg-vertical-spine {
+  width: 22px;
+  background: #e11d48;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 1px;
+  border-right: 1.5px solid #0f172a;
+}
+
+.gg-spine-text {
+  font-family: var(--font-iisu);
+  font-size: 0.46rem;
+  font-weight: 900;
+  color: #ffffff;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  letter-spacing: 0.1em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+}
+
+.gg-spine-tm {
+  font-size: 0.32rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 2px;
+}
+
+/* Center Artwork Frame */
+.gg-art-frame {
+  flex: 1;
+  height: 100%;
+  background: #000000;
+  position: relative;
+  overflow: hidden;
+}
+
+.gg-label-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.cartridge-shell.cartridge-shell-gamegear:hover .gg-label-img,
+.cartridge-shell.cartridge-shell-gamegear.gamepad-focused .gg-label-img {
+  transform: scale(1.05);
+}
+
+.gg-fallback-art {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem;
+  text-align: center;
+}
+
+.gg-fallback-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.15;
+}
+
+.gg-fallback-code {
+  font-size: 0.45rem;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+/* Embossed Sega Logo Pill on Lower Chin */
+.gg-lower-chin {
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.gg-sega-embossed-pill {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+  padding: 1.5px 12px;
+  box-shadow: 
+    inset 0 1px 2px rgba(0, 0, 0, 0.7),
+    0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.gg-sega-embossed-text {
+  font-family: var(--font-iisu);
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  line-height: 1;
+}
+
+.gg-fav-badge {
+  top: 7px !important;
+  right: 7px !important;
+}
+
+/* ==========================================================================
+   AUTHENTIC ATARI 2600 CARTRIDGE SHELL
+   ========================================================================== */
+
+.cartridge-shell.cartridge-shell-atari {
+  background-color: #141417 !important;
+  background-image: 
+    linear-gradient(180deg, #24242a 0%, #161619 40%, #0d0d0f 100%),
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.15) 0%, transparent 60%) !important;
+  border: 2.5px solid #33333c !important;
+  border-bottom: 3px solid #050507 !important;
+  border-right: 3px solid #0a0a0d !important;
+  border-radius: 6px 6px 4px 4px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 
+    inset 1px 1px 2px rgba(255, 255, 255, 0.35),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.7),
+    0 10px 26px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="cyber"] .cartridge-shell.cartridge-shell-atari {
+  background-color: #0c0c0e !important;
+  background-image: 
+    linear-gradient(180deg, #1a1a20 0%, #0e0e11 50%, #050507 100%) !important;
+  border-color: #24242e !important;
+}
+
+/* Thick Outer Frame */
+.atari-outer-frame {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  padding: 0.35rem 0.45rem;
+  gap: 0.35rem;
+  min-height: 0;
+  position: relative;
+}
+
+/* Left Spine Slot */
+.atari-side-spine-slot {
+  width: 14px;
+  background: #0a0a0c;
+  border-radius: 2px;
+  box-shadow: inset 1px 0 2px rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 4px 1px;
+}
+
+.atari-spine-title {
+  font-family: var(--font-iisu);
+  font-size: 0.42rem;
+  font-weight: 900;
+  color: #f59e0b;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+/* Main Recessed Sticker Area */
+.atari-sticker-area {
+  flex: 1;
+  background: #000000;
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 
+    inset 0 2px 5px rgba(0, 0, 0, 0.8),
+    0 1px 2px rgba(255, 255, 255, 0.15);
+  border: 1.5px solid #202028;
+  padding: 0.3rem 0.35rem;
+  justify-content: space-between;
+}
+
+/* Header */
+.atari-label-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1px;
+  margin-bottom: 2px;
+}
+
+.atari-game-program-text {
+  font-family: sans-serif;
+  font-size: 0.45rem;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 0.03em;
+  line-height: 1;
+}
+
+.atari-label-title {
+  font-family: var(--font-iisu);
+  font-size: 0.76rem;
+  font-weight: 900;
+  color: #f59e0b;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.atari-controller-text {
+  font-size: 0.4rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  opacity: 0.9;
+}
+
+/* Artwork Frame */
+.atari-art-frame {
+  flex: 1;
+  width: 100%;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+  background: #000000;
+  min-height: 0;
+  margin: 2px 0;
+}
+
+.atari-label-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.cartridge-shell.cartridge-shell-atari:hover .atari-label-img,
+.cartridge-shell.cartridge-shell-atari.gamepad-focused .atari-label-img {
+  transform: scale(1.05);
+}
+
+.atari-fallback-art {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #d97706 0%, #78350f 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.atari-fallback-fuji {
+  font-size: 1.2rem;
+  color: #ffffff;
+}
+
+/* Footer with Fuji Logo and CX Serial */
+.atari-label-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 2px;
+  border-top: 1px solid #1e293b;
+}
+
+.atari-fuji-brand {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.atari-fuji-icon {
+  font-size: 0.52rem;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.atari-wordmark {
+  font-family: var(--font-iisu);
+  font-size: 0.52rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.atari-cx-code {
+  font-family: monospace;
+  font-size: 0.46rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+.atari-fav-badge {
+  top: 7px !important;
+  right: 7px !important;
 }
 
 /* Universal Directional & Gamepad Focus Glow (Modern Console Highlight) */
@@ -8749,6 +11258,486 @@ html[data-theme="dmg"] .gamepad-battery-alert-toast {
     gap: 1.25rem;
   }
 }
+
+/* ==========================================================================
+   METADATA EDIT MODAL & SIDECAR STYLING (JELLYFIN STYLE)
+   ========================================================================== */
+
+.edit-metadata-btn {
+  background: var(--card-bg, #ffffff);
+  border: 1.5px solid var(--border-color, #e2e8f0);
+  color: var(--text-main, #334155);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.edit-metadata-btn:hover {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+}
+
+.edit-metadata-btn:active {
+  transform: scale(0.95);
+}
+
+.edit-metadata-btn.gamepad-focused {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Modal Backdrop */
+.meta-edit-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 1.25rem;
+}
+
+/* Modal Content Card */
+.meta-edit-modal-content {
+  background: var(--panel-bg, #ffffff);
+  border: 1.5px solid var(--border-color, #e2e8f0);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 780px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  padding: 1.75rem;
+  color: var(--text-main, #0f172a);
+}
+
+[data-theme="cyber"] .meta-edit-modal-content {
+  background: #0f172a;
+  border-color: #1e293b;
+  color: #f8fafc;
+}
+
+/* Header */
+.meta-edit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color, #f1f5f9);
+}
+
+[data-theme="cyber"] .meta-edit-header {
+  border-bottom-color: #1e293b;
+}
+
+.meta-edit-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.meta-edit-title-group h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.meta-edit-title-group p {
+  font-size: 0.8rem;
+  color: var(--text-muted, #64748b);
+  margin: 0.15rem 0 0 0;
+}
+
+.meta-edit-close-btn {
+  background: var(--card-bg, #f1f5f9);
+  border: none;
+  color: var(--text-muted, #64748b);
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.meta-edit-close-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+[data-theme="cyber"] .meta-edit-close-btn {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+[data-theme="cyber"] .meta-edit-close-btn:hover {
+  background: #334155;
+  color: #ffffff;
+}
+
+/* Status Banner */
+.meta-edit-status-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+}
+
+.meta-edit-status-banner.success {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.meta-edit-status-banner.error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+/* Form Layout */
+.meta-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.meta-edit-body-grid {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 1.75rem;
+}
+
+/* Cover Column */
+.meta-edit-cover-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.meta-edit-cover-preview-wrapper {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--card-bg, #f8fafc);
+  border: 2px dashed var(--border-color, #cbd5e1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+[data-theme="cyber"] .meta-edit-cover-preview-wrapper {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.meta-edit-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.meta-edit-cover-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted, #94a3b8);
+  text-align: center;
+  padding: 1rem;
+}
+
+.meta-edit-cover-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.meta-edit-upload-btn {
+  background: var(--card-bg, #f1f5f9);
+  border: 1px solid var(--border-color, #cbd5e1);
+  color: var(--text-main, #334155);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.meta-edit-upload-btn:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+[data-theme="cyber"] .meta-edit-upload-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+[data-theme="cyber"] .meta-edit-upload-btn:hover {
+  background: #334155;
+}
+
+/* Fields Column */
+.meta-edit-fields-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.meta-edit-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.meta-edit-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted, #64748b);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.meta-edit-input,
+.meta-edit-textarea {
+  width: 100%;
+  background: var(--card-bg, #f8fafc);
+  border: 1.5px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.9rem;
+  color: var(--text-main, #0f172a);
+  outline: none;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.meta-edit-input:focus,
+.meta-edit-textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+[data-theme="cyber"] .meta-edit-input,
+[data-theme="cyber"] .meta-edit-textarea {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+[data-theme="cyber"] .meta-edit-input:focus,
+[data-theme="cyber"] .meta-edit-textarea:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+.cover-url-input {
+  font-size: 0.78rem;
+  padding: 0.5rem 0.7rem;
+}
+
+.meta-edit-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+
+.meta-edit-textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+/* Footer */
+.meta-edit-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-color, #f1f5f9);
+  gap: 1rem;
+}
+
+[data-theme="cyber"] .meta-edit-footer {
+  border-top-color: #1e293b;
+}
+
+.meta-edit-footer-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.meta-edit-cancel-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #64748b);
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.65rem 1.15rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.meta-edit-cancel-btn:hover {
+  background: var(--card-bg, #f1f5f9);
+  color: var(--text-main, #0f172a);
+}
+
+[data-theme="cyber"] .meta-edit-cancel-btn:hover {
+  background: #1e293b;
+  color: #ffffff;
+}
+
+.meta-edit-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.meta-edit-revert-btn {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.6rem 0.9rem;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.meta-edit-revert-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.meta-edit-export-btn {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  color: #3b82f6;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.6rem 0.9rem;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.meta-edit-export-btn:hover {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.meta-edit-save-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: none;
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 800;
+  padding: 0.7rem 1.4rem;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+  transition: all 0.15s ease;
+}
+
+.meta-edit-save-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.45);
+}
+
+.meta-edit-save-btn:active {
+  transform: scale(0.98);
+}
+
+.meta-edit-save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive Breakdown for Metadata Edit Modal */
+@media (max-width: 680px) {
+  .meta-edit-modal-content {
+    padding: 1.25rem;
+    max-height: 94vh;
+  }
+
+  .meta-edit-body-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .meta-edit-cover-preview-wrapper {
+    max-width: 180px;
+    margin: 0 auto;
+  }
+
+  .meta-edit-row-2col {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .meta-edit-footer {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+
+  .meta-edit-footer-right {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .meta-edit-revert-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 
 
 

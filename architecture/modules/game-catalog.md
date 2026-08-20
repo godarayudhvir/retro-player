@@ -26,7 +26,8 @@ The Game Catalog module indexes local ROM files in `/public/roms` (and server `R
 - **Single-File Disc Format & Streaming Architecture**: Packages PlayStation games as clean single-file `.iso` disc images (or `.chd` / `.pbp`) served with `Content-Length` and `Accept-Ranges` byte-streaming headers, eliminating loose CUE/BIN multi-file loading stalls and guaranteeing instantaneous boot in the WebAssembly core.
 - **Universal Relative Subpath Resolution**: Resolves all static assets and demo ROM URLs relative to the application's base URL (`import.meta.env.BASE_URL`) via `src/utils/assetPath.js` for 100% portability across GitHub Pages subpaths and custom domain root paths.
 - **Client-Side Private Custom ROM Sandbox**: Custom ROMs opened via "Load Custom ROM" or viewport drag-and-drop execute immediately in browser WebAssembly memory without sending any personal game files to the remote server.
-- **Zero-Config Pure Indexing**: Returns pure game descriptors (`id`, `title`, `filename`, `systemKey`, `systemName`, `systemCore`, `romUrl`) with `coverUrl: null`, leaving all artwork and synopsis enrichment to the dynamic online scraper module.
+- **Local Sidecar Metadata & Companion Artwork Discovery**: Detects adjacent companion artwork (`<romname>.webp`, `<romname>.png`, `<romname>.jpg`, `cover.*`) and companion metadata sidecars (`<romname>.nfo`, `<romname>.json`, `game.nfo`) to support custom ROM hacks and indie homebrew without relying on online scrapers.
+- **Zero-Config Pure Indexing with Sidecar Enrichment**: Returns pure game descriptors with optional pre-parsed sidecar metadata and cover URLs attached, falling back cleanly to the dynamic online scraper module when sidecars are absent.
 - **Sorting & Filtering**: Supplies clean title and extension metadata for category filtering, smart collections (Favorites/Recents), and search queries.
 
 ---

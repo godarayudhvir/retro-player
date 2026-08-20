@@ -28,6 +28,7 @@ Retro Player bridges the tactile nostalgia of 90s/2000s physical gaming cartridg
 - [x] **Multi-Theme Engine**: 4 distinct switchable UI themes (iiSU Light, Midnight Cyber Dark, Sony XMB Wave, Game Boy DMG Classic) with instant persistence, topbar selector, and keyboard shortcut (`T`) (Section 4.3).
 - [x] **Touch Screen Gamepad Overlay & Mobile Responsiveness**: Elevated on-screen D-Pad and action buttons with glassmorphic styling, dynamic `100dvh` viewport containment, in-game topbar RetroArch Menu integration, and full touch responsiveness across phones, tablets, and TVs (Section 3.1).
 - [x] **Automated Metadata & Cover Art Scraper**: Online scraping from Libretro Thumbnails CDN, Open DB & Wikipedia APIs for high-res 3D box art, screenshots, developer, publisher, genre, and synopsis with persistent IndexedDB caching (Section 2.1).
+- [x] **Local ROM Sidecars & In-App Manual Metadata Editor**: Support for companion `.nfo` (Kodi/Jellyfin XML / NFO), `.json`, and `cover.webp`/`.png`/`.jpg` sidecars across Docker, Localhost, and GitHub Pages + Jellyfin-style in-app metadata editor for ROM hacks and custom titles ([spec](local-sidecars-and-metadata-editor.md), Section 2.5).
 - [x] **Ambient Menu BGM Jukebox & Music Manager**: Curated ambient console background music with smart in-game auto-ducking/pause, host music upload, track skip, and persistent playback (Section 4.2 & 8.2).
 - [x] **Multi-User Profiles & Nintendo Mii Avatar Studio**: Personalized user profiles with full 7-parameter Mii avatar creator and per-profile playtime/favorite isolation.
 - [x] **Progressive Web App (PWA) & Offline Desktop/Handheld Installation**: Standalone installable application with Web App Manifest, landscape gaming display mode, and Service Worker caching for 100% offline shell and WebAssembly cores (Section 6.2).
@@ -197,6 +198,14 @@ mindmap
   - Built-in PDF and high-res image flipbook viewer inside the Game Detail Modal.
   - Automatically pair with community manual archives (e.g., *ReplacementDocs*, *Vimm's Lair Manual Archive*).
   - Full gamepad navigation: Shoulder buttons (`L1`/`R1`) flip pages, stick zooms and pans.
+
+### 2.5 Local ROM Sidecars & In-App Manual Metadata Editor (Jellyfin Style)
+- **Current Limitation**: Romhacks, homebrew, translation patches, and unindexed titles have no matches on online scrapers, causing missing box art and placeholder descriptions.
+- **Mirai Solution** ([Full Specification](local-sidecars-and-metadata-editor.md)):
+  - **Local Companion Sidecars**: Automatically discover `<romname>.webp`, `<romname>.png`, `<romname>.jpg`, `<romname>-cover.*`, and `cover.*` in the ROM folder alongside `.nfo` (Kodi/Jellyfin XML format) or `.json` metadata sidecars.
+  - **Universal Support**: Seamlessly works on Docker self-hosted servers, Localhost Node instances, and static GitHub Pages builds (pre-indexed during `npm run build`).
+  - **Jellyfin-Style In-App Editor**: Desktop & Handheld modal allowing players to edit game title, synopsis, release year, developer, publisher, genre tags, and upload custom cover art directly in the app.
+  - **Lightweight Mobile Model**: Eliminates heavy administrative bloat on mobile phones ($\le$640px) to keep touch gameplay fast and seamless (see [guides/device-experience-matrix.md](../../guides/device-experience-matrix.md)).
 
 ---
 
@@ -420,6 +429,13 @@ mindmap
 - **Mirai Solution**:
   - Monitor `navigator.getBattery()`.
   - Automatically throttle UI animation frame rates and disable background blur effects when battery falls below 20% to maximize handheld battery life.
+
+### 7.3 Cross-Device Experience Architecture & Platform Tiers
+- **Philosophy**: Differentiate feature exposure and UX density across device tiers (see detailed [Cross-Device Experience Matrix](../../guides/device-experience-matrix.md)):
+  - **Mobile Phones ($\le$640px)**: Streamlined, zero admin overhead, touch haptic controller, spring bottom sheets, instant play.
+  - **Tablets & Handhelds (641px–1024px)**: Steam Deck / Switch / iPad hybrid layout, medium-density cartridge grid, quick edit modal.
+  - **Desktop PCs (1025px–1600px)**: Comprehensive settings manager, Jellyfin-style metadata editor, batch upload, live scraper terminal.
+  - **10-Foot Living Room TVs (1601px+)**: 100% spatial gamepad navigation, high-contrast large fonts, ambient console soundtrack.
 
 ---
 

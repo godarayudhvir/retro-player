@@ -119,3 +119,48 @@ We deeply respect intellectual property rights and the work of all game develope
 | # | Filename | Size | Classification |
 |---|---|---|---|
 | 1 | `Eyra - The Crow Maiden (World) (Demo) (2022-06-07) (Aftermarket) (Unl)` | 2.00 MB | Curated Showcase Demo |
+
+---
+
+## 🎨 ROM Hacks, Homebrew & Local Sidecar Metadata (`.nfo` / `.json` / `cover.*`)
+
+Many popular ROM hacks (such as *Pokémon Unbound*, *Super Mario World - Kaizo*, *Chrono Trigger - Flames of Eternity*), homebrew titles, translation patches, and indie releases are not indexed in public online databases like TheGamesDB or Libretro CDN.
+
+Retro Player supports **Universal Local Sidecars** across Docker, Localhost, and Static GitHub Pages deployments.
+
+### 1. Companion Cover Artwork
+Simply place an image with a matching filename or standard name in the ROM's folder:
+- **Same base name**: `Pokemon Unbound.gba` $\rightarrow$ `Pokemon Unbound.webp` (or `.png`, `.jpg`)
+- **Cover suffix**: `Pokemon Unbound-cover.webp` or `Pokemon Unbound_cover.png`
+- **Subfolder default**: If a ROM is organized in its own subfolder (e.g. `public/roms/gba/Pokemon Unbound/game.gba`), you can name the cover `cover.webp`, `cover.png`, `cover.jpg`, or `boxart.png`.
+
+### 2. Companion Metadata Sidecar (`.nfo` or `.json`)
+Place a `.nfo` or `.json` file alongside the ROM to define custom title, plot summary, release year, developer, publisher, and genres.
+
+#### XML NFO Format (`[romname].nfo` or `game.nfo` - Kodi & Jellyfin standard):
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<game>
+  <title>Pokémon Unbound</title>
+  <plot>An expansive custom Pokémon adventure set in the Borrius region featuring Pokémon from Gens 1-8, custom difficulty modes, and dynamic missions.</plot>
+  <year>2020</year>
+  <developer>Skeli &amp; Unbound Team</developer>
+  <publisher>Homebrew Community</publisher>
+  <genre>RPG / Romhack</genre>
+</game>
+```
+
+#### JSON Format (`[romname].json` or `game.json`):
+```json
+{
+  "title": "Pokémon Unbound",
+  "description": "An expansive custom Pokémon adventure set in the Borrius region.",
+  "releaseYear": "2020",
+  "developer": "Skeli & Unbound Team",
+  "publisher": "Homebrew Community",
+  "genre": "RPG / Romhack"
+}
+```
+
+### 3. In-App Manual Metadata Editor (Desktop & Handheld)
+On Desktop PCs and Handheld devices, open any game's detail drawer and click the **Pencil icon (Edit Metadata)** to edit metadata directly in the app or upload a custom cover image without editing files. Overrides persist to your browser's IndexedDB and sync to the server's `data/retroplayer_db.json`.

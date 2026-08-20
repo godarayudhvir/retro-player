@@ -85,6 +85,113 @@ function getBgmManifest(bgmBaseDir, validAudioExts) {
   };
 }
 
+function parseCompanionMetadata(dirPath, baseName, entries) {
+  const nfoCandidates = [
+    `${baseName}.nfo`,
+    `${baseName}.xml`,
+    'game.nfo',
+    'metadata.nfo'
+  ];
+  const jsonCandidates = [
+    `${baseName}.json`,
+    'game.json',
+    'metadata.json'
+  ];
+
+  const entryNames = new Set(entries.map(e => e.name));
+
+  for (const nfoName of nfoCandidates) {
+    if (entryNames.has(nfoName)) {
+      try {
+        const content = fs.readFileSync(path.join(dirPath, nfoName), 'utf-8');
+        const getTag = (tag) => {
+          const match = content.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i'));
+          return match ? match[1].trim() : null;
+        };
+        const title = getTag('title') || getTag('name');
+        const description = getTag('plot') || getTag('description') || getTag('overview') || getTag('synopsis');
+        const year = getTag('year') || (getTag('releasedate') ? getTag('releasedate').split('-')[0] : null);
+        const developer = getTag('developer') || getTag('dev');
+        const publisher = getTag('publisher') || getTag('pub');
+        const genre = getTag('genre') || getTag('category');
+        const cover = getTag('cover') || getTag('image') || getTag('boxart');
+
+        if (title || description || year || developer || publisher || genre || cover) {
+          return {
+            title: title || null,
+            description: description || null,
+            releaseYear: year || null,
+            developer: developer || null,
+            publisher: publisher || null,
+            genre: genre || null,
+            cover: cover || null,
+            source: 'Local Sidecar (NFO)'
+          };
+        }
+      } catch (err) {
+        console.warn(`[SIDECAR WARN] Failed parsing NFO ${nfoName}:`, err.message);
+      }
+    }
+  }
+
+  for (const jsonName of jsonCandidates) {
+    if (entryNames.has(jsonName)) {
+      try {
+        const content = fs.readFileSync(path.join(dirPath, jsonName), 'utf-8');
+        const data = JSON.parse(content);
+        if (data && typeof data === 'object') {
+          return {
+            title: data.title || data.name || null,
+            description: data.description || data.plot || data.overview || data.synopsis || null,
+            releaseYear: data.releaseYear || (data.year ? String(data.year) : null) || (data.releaseDate ? String(data.releaseDate).split('-')[0] : null) || null,
+            developer: data.developer || data.dev || null,
+            publisher: data.publisher || data.pub || null,
+            genre: data.genre || data.category || null,
+            cover: data.cover || data.image || data.boxart || null,
+            source: 'Local Sidecar (JSON)'
+          };
+        }
+      } catch (err) {
+        console.warn(`[SIDECAR WARN] Failed parsing JSON ${jsonName}:`, err.message);
+      }
+    }
+  }
+
+  return null;
+}
+
+function findCompanionCover(baseName, currentSubdir, entries, sidecarMeta) {
+  const entryNames = new Set(entries.map(e => e.name));
+  const exts = ['.webp', '.png', '.jpg', '.jpeg'];
+  const candidates = [];
+
+  if (sidecarMeta && sidecarMeta.cover) {
+    candidates.push(sidecarMeta.cover);
+  }
+
+  for (const ext of exts) {
+    candidates.push(`${baseName}${ext}`);
+    candidates.push(`${baseName}-cover${ext}`);
+    candidates.push(`${baseName}_cover${ext}`);
+    candidates.push(`${baseName}.boxart${ext}`);
+    candidates.push(`cover${ext}`);
+    candidates.push(`boxart${ext}`);
+    candidates.push(`folder${ext}`);
+  }
+
+  for (const c of candidates) {
+    if (entryNames.has(c)) {
+      const parts = currentSubdir ? currentSubdir.split('/') : [];
+      parts.pop(); // Remove filename
+      parts.push(c);
+      const encodedSegments = parts.map(seg => encodeURIComponent(seg));
+      return `/roms/${encodedSegments.join('/')}`;
+    }
+  }
+
+  return null;
+}
+
 function getRomsManifest(romsBaseDir) {
   const games = [];
 
@@ -147,9 +254,12 @@ function getRomsManifest(romsBaseDir) {
             .replace(/\s+/g, ' ')
             .trim();
 
+          const sidecarMeta = parseCompanionMetadata(dirPath, nameWithoutExt, entries);
+          const companionCover = findCompanionCover(nameWithoutExt, currentSubdir, entries, sidecarMeta);
+
           games.push({
             id: `${canonicalKey}-${rawTitle}`.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-            title: cleanDisplayTitle || rawTitle,
+            title: sidecarMeta?.title || cleanDisplayTitle || rawTitle,
             rawTitle: rawTitle,
             filename: entry.name,
             systemKey: canonicalKey,
@@ -159,7 +269,9 @@ function getRomsManifest(romsBaseDir) {
             systemIcon: systemInfo.icon,
             category: systemInfo.category,
             romUrl,
-            coverUrl: null,
+            coverUrl: companionCover || null,
+            sidecarMetadata: sidecarMeta || null,
+            hasSidecar: !!(sidecarMeta || companionCover)
           });
         }
       }
@@ -235,7 +347,19 @@ function multiConsoleScannerPlugin() {
 
           if (fs.existsSync(fullRomPath) && fs.statSync(fullRomPath).isFile()) {
             const stat = fs.statSync(fullRomPath);
-            res.setHeader('Content-Type', 'application/octet-stream');
+            const ext = path.extname(fullRomPath).toLowerCase();
+            const mimeMap = {
+              '.webp': 'image/webp',
+              '.png': 'image/png',
+              '.jpg': 'image/jpeg',
+              '.jpeg': 'image/jpeg',
+              '.svg': 'image/svg+xml',
+              '.gif': 'image/gif',
+              '.json': 'application/json',
+              '.nfo': 'text/plain',
+              '.xml': 'application/xml'
+            };
+            res.setHeader('Content-Type', mimeMap[ext] || 'application/octet-stream');
             res.setHeader('Content-Length', stat.size);
             res.setHeader('Accept-Ranges', 'bytes');
             res.setHeader('Access-Control-Allow-Origin', '*');
@@ -670,6 +794,89 @@ function multiConsoleScannerPlugin() {
 
         res.statusCode = 405;
         res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+      });
+
+      // Save companion sidecar metadata & cover image directly to disk
+      server.middlewares.use('/api/metadata/save-sidecar', (req, res) => {
+        if (req.method !== 'POST') {
+          res.statusCode = 405;
+          res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+          return;
+        }
+
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', async () => {
+          try {
+            const data = JSON.parse(body || '{}');
+            const { gameId, systemKey, romPath, title, description, developer, publisher, year, genre, players, coverDataUrl } = data;
+
+            let targetDir = path.resolve(process.cwd(), 'public/roms', systemKey || '');
+            let baseFileName = 'game';
+
+            if (romPath) {
+              const decodedPath = decodeURIComponent(romPath).replace(/^\/roms\//, '');
+              const fullRomPath = path.resolve(process.cwd(), 'public/roms', decodedPath);
+              if (fs.existsSync(fullRomPath)) {
+                targetDir = path.dirname(fullRomPath);
+                baseFileName = path.parse(fullRomPath).name;
+              } else {
+                baseFileName = path.parse(decodedPath).name || (title ? title.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'game');
+              }
+            } else if (title) {
+              baseFileName = title.toLowerCase().replace(/[^a-z0-9]/g, '-');
+            }
+
+            if (!fs.existsSync(targetDir)) {
+              fs.mkdirSync(targetDir, { recursive: true });
+            }
+
+            let savedCoverRelativeUrl = null;
+
+            if (coverDataUrl && coverDataUrl.startsWith('data:image/')) {
+              const mimeMatch = coverDataUrl.match(/^data:image\/([a-zA-Z0-9+]+);base64,/);
+              const ext = mimeMatch ? (mimeMatch[1] === 'jpeg' ? 'jpg' : mimeMatch[1]) : 'webp';
+              const base64Data = coverDataUrl.replace(/^data:image\/[a-zA-Z0-9+]+;base64,/, '');
+              const imageBuffer = Buffer.from(base64Data, 'base64');
+              const coverFileName = `${baseFileName}.${ext}`;
+              const coverFilePath = path.join(targetDir, coverFileName);
+
+              fs.writeFileSync(coverFilePath, imageBuffer);
+              const relToPublic = path.relative(path.resolve(process.cwd(), 'public'), coverFilePath);
+              savedCoverRelativeUrl = `/${relToPublic.split(path.sep).join('/')}`;
+              console.log(`💾 [SIDECAR COVER SAVED] -> ${coverFilePath}`);
+            }
+
+            const sidecarJson = {
+              title: title || baseFileName,
+              description: description || '',
+              developer: developer || '',
+              publisher: publisher || '',
+              year: year || '',
+              genre: genre || '',
+              players: players || 1,
+              systemKey: systemKey || '',
+              cover: savedCoverRelativeUrl || data.coverUrl || '',
+              updatedAt: new Date().toISOString()
+            };
+
+            const sidecarPath = path.join(targetDir, `${baseFileName}.json`);
+            fs.writeFileSync(sidecarPath, JSON.stringify(sidecarJson, null, 2), 'utf-8');
+            console.log(`💾 [SIDECAR JSON SAVED] -> ${sidecarPath}`);
+
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({
+              success: true,
+              savedCoverUrl: savedCoverRelativeUrl,
+              sidecarPath: sidecarPath,
+              sidecarJson
+            }));
+          } catch (err) {
+            console.error('[SIDE CAR SAVE ERROR]', err);
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: err.message }));
+          }
+        });
       });
 
       // Proxy for TheGamesDB.net (Bypasses Browser CORS restrictions)

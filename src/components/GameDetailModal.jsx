@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Play, Save, Cpu, Calendar, CheckCircle2, Star, Clock, History, RotateCcw, RefreshCw, Tag, ShieldCheck, Terminal, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, Play, Save, Cpu, Calendar, CheckCircle2, Star, Clock, History, RotateCcw, RefreshCw, Tag, ShieldCheck, Terminal, ChevronDown, ChevronUp, Pencil } from 'lucide-react';
 import { getGameDescription, getReleaseDate } from '../gameDescriptions';
 import { resolveAssetPath } from '../utils/assetPath';
 
@@ -15,6 +15,7 @@ export default function GameDetailModal({
   onToggleFavorite,
   onResetStats,
   onScrapeGame,
+  onEditMetadata,
   isScraping = false,
   scraper,
   gameStats = { playtimeFormatted: '< 1 min', launchCount: 0, lastPlayedFormatted: 'Never' },
@@ -217,6 +218,19 @@ export default function GameDetailModal({
                 aria-label={isFavorite ? "Favorited" : "Add Favorite"}
               >
                 <Star size={20} fill={isFavorite ? '#fbbf24' : 'none'} color={isFavorite ? '#f59e0b' : 'currentColor'} />
+              </button>
+
+              {/* Edit Metadata Button (Jellyfin Style) */}
+              <button
+                className={`edit-metadata-btn icon-only ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'editMeta' ? 'gamepad-focused' : ''}`}
+                onClick={() => {
+                  sfx?.playThemeSwitch?.();
+                  if (onEditMetadata) onEditMetadata(game, meta);
+                }}
+                title="Edit Game Metadata & Cover Art (Jellyfin Style)"
+                aria-label="Edit Metadata"
+              >
+                <Pencil size={18} />
               </button>
 
               {/* Scrape Online Metadata Button */}

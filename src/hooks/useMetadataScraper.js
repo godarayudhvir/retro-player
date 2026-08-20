@@ -65,16 +65,46 @@ export function useMetadataScraper(games = [], options = {}) {
     setAutoScrapeEnabled(!autoScrapeEnabled);
   }, [autoScrapeEnabled, setAutoScrapeEnabled]);
 
-  // Load existing cache on mount
+  // Load existing cache on mount and merge local sidecar files
   useEffect(() => {
     async function loadCache() {
-      const cached = await getAllCachedMetadata();
+      const cached = (await getAllCachedMetadata()) || {};
+      const merged = { ...cached };
+
+      if (games && games.length > 0) {
+        games.forEach(g => {
+          const id = g.id || `${g.systemKey}-${g.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
+          const hasLocalSidecar = g.hasSidecar || g.sidecarMetadata || (g.coverUrl && !g.coverUrl.endsWith('.svg'));
+          // Local sidecar takes precedence unless user created an explicit manual override
+          if (hasLocalSidecar && (!merged[id] || (!merged[id].isManualOverride && merged[id].source !== 'Manual Override'))) {
+            const sidecar = g.sidecarMetadata || {};
+            const sidecarCover = (g.coverUrl && !g.coverUrl.endsWith('.svg')) ? g.coverUrl : null;
+            merged[id] = {
+              id,
+              title: sidecar.title || g.title,
+              systemKey: g.systemKey,
+              coverUrl: sidecarCover || null,
+              hasCustomCover: !!sidecarCover,
+              description: sidecar.description || `Experience ${g.title} on ${g.systemName}.`,
+              releaseDate: sidecar.releaseYear ? `${sidecar.releaseYear}-01-01` : '2000-01-01',
+              releaseYear: sidecar.releaseYear || 'Classic',
+              developer: sidecar.developer || g.systemName || 'Classic',
+              publisher: sidecar.publisher || g.systemName || 'Classic',
+              genre: sidecar.genre || 'Retro Classic',
+              source: sidecar.source || 'Local Sidecar',
+              hasSidecar: true,
+              scrapedAt: new Date().toISOString()
+            };
+          }
+        });
+      }
+
       if (isMountedRef.current) {
-        setMetadataMap(cached || {});
+        setMetadataMap(merged);
       }
     }
     loadCache();
-  }, []);
+  }, [games]);
 
   // Stop / Cancel active scraping
   const stopScrape = useCallback(() => {
@@ -168,14 +198,15 @@ export function useMetadataScraper(games = [], options = {}) {
     if (isPlaying) return; // Never auto-scrape during active gameplay
     const shouldAutoScrape = autoScrapeEnabled || isMobile;
     if (shouldAutoScrape && games && games.length > 0 && !activeScrapeQueueRef.current && !cancelRequestedRef.current) {
-      // Find games that have not been scraped yet
+      // Find games that have not been scraped yet and do NOT have local sidecars
       const unscraped = games.filter(g => {
         const id = g.id || `${g.systemKey}-${g.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
-        return !metadataMap[id];
+        const hasLocalSidecar = g.hasSidecar || g.sidecarMetadata || (g.coverUrl && !g.coverUrl.endsWith('.svg'));
+        return !metadataMap[id] && !hasLocalSidecar;
       });
 
       if (unscraped.length > 0) {
-        // Run background batch scrape
+        // Run background batch scrape only for titles needing online discovery
         scrapeAll(unscraped, false);
       }
     }
@@ -186,6 +217,23 @@ export function useMetadataScraper(games = [], options = {}) {
     await clearAllCachedMetadata();
     if (isMountedRef.current) {
       setMetadataMap({});
+    }
+  }, []);
+
+  // Direct update local metadata map
+  const updateLocalMetadata = useCallback((id, data) => {
+    if (!id || !isMountedRef.current) return;
+    setMetadataMap(prev => ({
+      ...prev,
+      [id]: data
+    }));
+  }, []);
+
+  // Reload cache from storage
+  const refreshCache = useCallback(async () => {
+    const cached = await getAllCachedMetadata();
+    if (isMountedRef.current) {
+      setMetadataMap(cached || {});
     }
   }, []);
 
@@ -204,6 +252,8 @@ export function useMetadataScraper(games = [], options = {}) {
     scrapeSystems,
     scrapeAll,
     clearCache,
+    updateLocalMetadata,
+    refreshCache,
     SCRAPER_KEYS,
     getApiKey: getScraperApiKey,
     setApiKey: setScraperApiKey

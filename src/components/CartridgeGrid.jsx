@@ -4,6 +4,7 @@ import CartridgeTile from './CartridgeTile';
 
 /**
  * Viewport rendering the 3D cartridge tiles grid or tailored, professional empty state prompts.
+ * Designed with a full-bleed ambient canvas layout inspired by Apple Arcade and modern console showcases.
  */
 export default function CartridgeGrid({
   filteredGames,
@@ -20,6 +21,23 @@ export default function CartridgeGrid({
   setSearchQuery,
   sfx
 }) {
+  const currentSystemName =
+    activeSystem === 'all'
+      ? 'All Games'
+      : activeSystem === 'favorites'
+      ? 'Favorites'
+      : activeSystem === 'recent'
+      ? 'Recently Played'
+      : filteredGames[0]?.systemName || activeSystem.toUpperCase();
+
+  const handleRandomPick = () => {
+    if (!filteredGames || filteredGames.length === 0) return;
+    const randomIndex = Math.floor(Math.random() * filteredGames.length);
+    setFocusedTarget({ zone: 'grid', index: randomIndex });
+    sfx?.playTileNav?.();
+    handleGameSelect(filteredGames[randomIndex]);
+  };
+
   const renderEmptyState = () => {
     if (searchQuery && searchQuery.trim().length > 0) {
       return (
@@ -129,26 +147,53 @@ export default function CartridgeGrid({
   return (
     <main className="console-viewport">
       {filteredGames.length > 0 ? (
-        <div className="tiles-grid">
-          {filteredGames.map((game, index) => {
-            const isFocused = focusedTarget.zone === 'grid' && focusedTarget.index === index;
-            const isFav = isFavorite ? isFavorite(game.id || game.title) : false;
-            const meta = metadataMap[game.id] || metadataMap[`${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')];
+        <div className="console-viewport-inner">
+          {/* Ambient Channel Showcase Header */}
+          <div className="channel-spotlight-bar">
+            <div className="channel-meta-badge">
+              <span className="channel-title-text">{currentSystemName}</span>
+              <span className="channel-count-pill">
+                {filteredGames.length} {filteredGames.length === 1 ? 'Title' : 'Titles'}
+              </span>
+            </div>
 
-            return (
-              <CartridgeTile
-                key={game.id}
-                game={game}
-                metadata={meta}
-                isFocused={isFocused}
-                isFavorite={isFav}
-                onClick={() => {
-                  setFocusedTarget({ zone: 'grid', index });
-                  handleGameSelect(game);
-                }}
-              />
-            );
-          })}
+            {filteredGames.length > 1 && (
+              <button
+                className="channel-random-btn"
+                title="Pick a random game from this collection"
+                onClick={handleRandomPick}
+              >
+                <Sparkles size={14} className="sparkle-anim" />
+                <span>Surprise Me</span>
+              </button>
+            )}
+          </div>
+
+          {/* Full-Bleed Ambient Tiles Grid */}
+          <div className="tiles-grid">
+            {filteredGames.map((game, index) => {
+              const isFocused = focusedTarget.zone === 'grid' && focusedTarget.index === index;
+              const isFav = isFavorite ? isFavorite(game.id || game.title) : false;
+              const meta =
+                metadataMap[game.id] ||
+                metadataMap[`${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')];
+
+              return (
+                <CartridgeTile
+                  key={game.id}
+                  game={game}
+                  metadata={meta}
+                  isFocused={isFocused}
+                  isFavorite={isFav}
+                  coverOnly={activeSystem === 'all'}
+                  onClick={() => {
+                    setFocusedTarget({ zone: 'grid', index });
+                    handleGameSelect(game);
+                  }}
+                />
+              );
+            })}
+          </div>
         </div>
       ) : (
         renderEmptyState()

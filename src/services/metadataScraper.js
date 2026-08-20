@@ -276,7 +276,7 @@ export async function getAllCachedMetadata() {
 }
 
 // Save metadata to IndexedDB, localStorage, and persistent Server DB
-async function saveCachedMetadata(id, data) {
+export async function saveCachedMetadata(id, data) {
   try {
     const record = { id, ...data, updatedAt: Date.now() };
 
@@ -311,6 +311,50 @@ async function saveCachedMetadata(id, data) {
     return record;
   } catch (err) {
     console.warn('⚠️ [METADATA CACHE SAVE] Error:', err);
+  }
+}
+
+// Save user manual metadata override (Jellyfin Style)
+export async function saveManualMetadata(id, customData) {
+  const existing = (await getCachedMetadata(id)) || {};
+  const record = {
+    ...existing,
+    ...customData,
+    id,
+    isManualOverride: true,
+    source: 'Manual Override',
+    updatedAt: Date.now()
+  };
+  await saveCachedMetadata(id, record);
+  addScraperLog(`✏️ Saved manual metadata override for "${record.title || id}"`, 'success', {
+    gameId: id,
+    title: record.title,
+    systemKey: record.systemKey
+  });
+  return record;
+}
+
+// Revert manual override
+export async function deleteManualMetadata(id) {
+  try {
+    const db = await openDB();
+    if (db) {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      tx.objectStore(STORE_NAME).delete(id);
+    }
+    try {
+      localStorage.removeItem(`rp_meta_${id}`);
+    } catch (_) {}
+    if (isServerDbAvailable) {
+      try {
+        fetch(`/api/db/game_metadata/${encodeURIComponent(id)}`, { method: 'DELETE' }).catch(() => {});
+      } catch (_) {}
+    }
+    addScraperLog(`🔄 Reverted custom metadata for game ID "${id}"`, 'info', { gameId: id });
+    return true;
+  } catch (err) {
+    console.warn('⚠️ [METADATA REVERT ERROR]:', err);
+    return false;
   }
 }
 
@@ -778,14 +822,46 @@ export async function scrapeGame(game, force = false) {
   if (!game) return null;
   const id = game.id || `${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
 
-  if (!force) {
-    const cached = await getCachedMetadata(id);
-    if (cached) {
+  const cached = await getCachedMetadata(id);
+  if (cached) {
+    // 1. If user has manually edited metadata, preserve it unless force re-scrape is explicitly requested
+    if (cached.isManualOverride && !force) {
+      addScraperLog(`✏️ Loaded "${cached.title || game.title}" from manual override`, 'info', { gameId: id, title: game.title, systemKey: game.systemKey });
+      return cached;
+    }
+    if (!force) {
       addScraperLog(`📦 Loaded "${game.title}" from IndexedDB cache`, 'info', { gameId: id, title: game.title, systemKey: game.systemKey });
       return cached;
     }
   }
 
+  // 2. Local Sidecar Priority: If local files / sidecar exist, local files ALWAYS override online scrapers and ZERO online network calls are made.
+  const hasLocalSidecar = game.hasSidecar || game.sidecarMetadata || (game.coverUrl && !game.coverUrl.endsWith('.svg'));
+  if (hasLocalSidecar && (!cached || !cached.isManualOverride || !force)) {
+    const sidecar = game.sidecarMetadata || {};
+    const sidecarCover = (game.coverUrl && !game.coverUrl.endsWith('.svg')) ? game.coverUrl : null;
+    const metadata = {
+      id,
+      title: sidecar.title || game.title,
+      systemKey: game.systemKey,
+      coverUrl: sidecarCover || null,
+      hasCustomCover: !!sidecarCover,
+      description: sidecar.description || `Experience ${game.title} on ${game.systemName}.`,
+      releaseDate: sidecar.releaseYear ? `${sidecar.releaseYear}-01-01` : '2000-01-01',
+      releaseYear: sidecar.releaseYear || 'Classic',
+      developer: sidecar.developer || game.systemName || 'Classic',
+      publisher: sidecar.publisher || game.systemName || 'Classic',
+      genre: sidecar.genre || 'Retro Classic',
+      source: sidecar.source || 'Local Sidecar',
+      hasSidecar: true,
+      scrapedAt: new Date().toISOString()
+    };
+    await saveCachedMetadata(id, metadata);
+    addScraperLog(`📁 [LOCAL SIDECAR] Used local companion sidecar for "${game.title}" (Skipped online scraping)`, 'success', { gameId: id, title: game.title, systemKey: game.systemKey });
+    return metadata;
+  }
+
+  // 3. Online Scraping (Only performed when NO local sidecar is available)
   addScraperLog(`🔍 Scraping assets for "${game.title}" [${game.systemName || game.systemKey}]...`, 'scan', { gameId: id, title: game.title, systemKey: game.systemKey });
   console.log(`🔍 [ONLINE SCRAPER] Querying assets for "${game.title}" (${game.systemName})...`);
 

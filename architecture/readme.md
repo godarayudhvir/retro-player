@@ -52,11 +52,12 @@ architecture/
 │
 └── mirai/                  # Future features and upcoming roadmap specifications ("Mirai" - 未来)
     ├── README.md           # Master Vision, codebase audit, refactoring matrix & innovation catalog
+    ├── local-sidecars-and-metadata-editor.md # Local companion sidecars (.nfo/.json/cover.webp) & in-app metadata editor
     ├── multiplayer.md      # WebRTC Peer-to-Peer Netplay & local multiplayer emulation architecture
     └── cloud-saves.md      # Cloud save state synchronization & cross-device backup architecture
 ```
 
-> **Note**: For the overarching future vision, in-depth codebase audit, refactoring matrix, and master innovation catalog across 8 domains, see [mirai/README.md](mirai/README.md). For the curated non-commercial demo catalog, file paths, and creator compliance policy, see [guides/roms.md](../guides/roms.md).
+> **Note**: For the overarching future vision, in-depth codebase audit, refactoring matrix, and master innovation catalog across 8 domains, see [mirai/README.md](mirai/README.md). For device tier variations (Mobile vs Handheld vs Desktop vs TV), see [guides/device-experience-matrix.md](../guides/device-experience-matrix.md). For the curated non-commercial demo catalog, file paths, and creator compliance policy, see [guides/roms.md](../guides/roms.md).
 
 ---
 

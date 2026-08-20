@@ -16,6 +16,7 @@ import DemoWelcomeModal from './components/DemoWelcomeModal';
 import OnboardingScreen from './components/OnboardingScreen';
 import ScraperModal from './components/ScraperModal';
 import MobileAppView from './components/MobileAppView';
+import MetadataEditModal from './components/MetadataEditModal';
 
 import { useWebAudioSfx } from './hooks/useWebAudioSfx';
 import { useGamepadStatus } from './hooks/useGamepadStatus';
@@ -46,6 +47,7 @@ export default function App() {
   const [showProfileSelectModal, setShowProfileSelectModal] = useState(false);
   const [showMiiCreatorModal, setShowMiiCreatorModal] = useState(false);
   const [editingProfile, setEditingProfile] = useState(null);
+  const [editingMetadataGame, setEditingMetadataGame] = useState(null);
   const [oskPos, setOskPos] = useState({ row: 1, col: 0 });
   const [time, setTime] = useState(() => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   const [hasChosenProfileThisSession, setHasChosenProfileThisSession] = useState(false);
@@ -408,6 +410,7 @@ export default function App() {
         onToggleFavorite={toggleFavorite}
         onResetStats={resetGameStats}
         onScrapeGame={scraper.scrapeSingleGame}
+        onEditMetadata={(game, meta) => setEditingMetadataGame({ game, metadata: meta })}
         isScraping={scraper.isScraping}
         scraper={scraper}
         gameStats={getGameStats(selectedGameCard?.id || selectedGameCard?.title)}
@@ -425,6 +428,27 @@ export default function App() {
           sfx.playGameLaunch();
           setActiveGame(gameToLaunch);
         }}
+        sfx={sfx}
+      />
+
+      {/* In-App Jellyfin-Style Metadata Editor */}
+      <MetadataEditModal
+        isOpen={!!editingMetadataGame}
+        game={editingMetadataGame?.game}
+        metadata={editingMetadataGame?.metadata}
+        onSaveSuccess={(updatedRecord) => {
+          if (updatedRecord) {
+            scraper.updateLocalMetadata?.(updatedRecord.id, updatedRecord);
+          } else {
+            scraper.refreshCache?.();
+          }
+        }}
+        onClose={() => {
+          setEditingMetadataGame(null);
+          sfx.playModalClose();
+        }}
+        focusedTarget={focusedTarget}
+        setFocusedTarget={setFocusedTarget}
         sfx={sfx}
       />
 
