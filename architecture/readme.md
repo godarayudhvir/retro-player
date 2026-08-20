@@ -34,6 +34,7 @@ architecture/
 │   └── pwa-service-worker.md # Progressive Web App (PWA), standalone installation & offline caching engine (`public/sw.js`, `usePwaInstall.js`)
 │
 ├── components/             # System Controls & UI Components
+│   ├── mobile-app-view.md  # Dedicated Netflix-style mobile feed & profile gateway (`MobileAppView.jsx`)
 │   ├── topbar.md           # Console header HUD, search input, clock, and sound controls (`Topbar.jsx`)
 │   ├── settings-modal.md   # Console settings, library manager & ROM/BGM upload & deletion hub (`SettingsModal.jsx`)
 │   ├── confirm-modal.md    # Universal in-app confirmation dialog replacing native alerts & confirms (`ConfirmModal.jsx`)

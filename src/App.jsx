@@ -14,6 +14,7 @@ import MiiCreatorModal from './components/MiiCreatorModal';
 import SettingsView from './components/SettingsView';
 import DemoWelcomeModal from './components/DemoWelcomeModal';
 import ScraperModal from './components/ScraperModal';
+import MobileAppView from './components/MobileAppView';
 
 import { useWebAudioSfx } from './hooks/useWebAudioSfx';
 import { useGamepadStatus } from './hooks/useGamepadStatus';
@@ -45,6 +46,18 @@ export default function App() {
   const [editingProfile, setEditingProfile] = useState(null);
   const [oskPos, setOskPos] = useState({ row: 1, col: 0 });
   const [time, setTime] = useState(() => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth <= 768;
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const searchInputRef = useRef(null);
 
@@ -208,8 +221,8 @@ export default function App() {
 
   return (
     <div 
-      className={`console-container ${isDraggingOver ? 'drag-over-active' : ''}`}
-      data-theme={themeEngine.theme}
+      className={`console-container ${isMobile ? 'mobile-mode-active' : ''} ${isDraggingOver ? 'drag-over-active' : ''}`}
+      data-theme={isMobile ? 'classic-light' : themeEngine.theme}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -217,68 +230,99 @@ export default function App() {
       {/* Drag & Drop ROM Overlay */}
       <DropzoneOverlay isDraggingOver={isDraggingOver} />
 
-      {/* Top Console Status Bar */}
-      <Topbar
-        gamepadConnected={gamepadConnected}
-        activeProfile={activeProfile}
-        onOpenProfileSelect={() => setShowProfileSelectModal(true)}
-        bgm={bgm}
-        pwa={pwa}
-        focusedTarget={focusedTarget}
-        setFocusedTarget={setFocusedTarget}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        searchInputRef={searchInputRef}
-        setShowLoadRomModal={setShowLoadRomModal}
-        setShowSettingsModal={setShowSettingsModal}
-        setShowVirtualKeyboard={setShowVirtualKeyboard}
-        onOpenScraperModal={() => setShowScraperModal(true)}
-        time={time}
-        sfx={sfx}
-        themeEngine={themeEngine}
-        scraper={scraper}
-      />
+      {/* MOBILE-SPECIFIC DEDICATED NETFLIX-STYLE VIEW (Zero side-effects on Desktop/PC/TV) */}
+      {isMobile ? (
+        <MobileAppView
+          games={games}
+          systems={systems}
+          activeProfile={activeProfile}
+          profiles={profiles}
+          activeProfileId={activeProfileId}
+          onSelectProfile={switchProfile}
+          onCreateNewProfile={() => {
+            setEditingProfile(null);
+            setShowMiiCreatorModal(true);
+          }}
+          favorites={favorites}
+          recentlyPlayed={recentlyPlayed}
+          isFavorite={isFavorite}
+          toggleFavorite={toggleFavorite}
+          getGameStats={getGameStats}
+          onPlayGame={(game) => {
+            recordGameLaunch(game);
+            sfx.playGameLaunch();
+            setActiveGame(game);
+          }}
+          metadataMap={scraper.metadataMap}
+          onCustomRomLoad={processCustomRomFile}
+          sfx={sfx}
+        />
+      ) : (
+        <>
+          {/* Top Console Status Bar */}
+          <Topbar
+            gamepadConnected={gamepadConnected}
+            activeProfile={activeProfile}
+            onOpenProfileSelect={() => setShowProfileSelectModal(true)}
+            bgm={bgm}
+            pwa={pwa}
+            focusedTarget={focusedTarget}
+            setFocusedTarget={setFocusedTarget}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            searchInputRef={searchInputRef}
+            setShowLoadRomModal={setShowLoadRomModal}
+            setShowSettingsModal={setShowSettingsModal}
+            setShowVirtualKeyboard={setShowVirtualKeyboard}
+            onOpenScraperModal={() => setShowScraperModal(true)}
+            time={time}
+            sfx={sfx}
+            themeEngine={themeEngine}
+            scraper={scraper}
+          />
 
-      {/* System Selection Ribbon */}
-      <SystemRibbon
-        systems={systems}
-        activeSystem={activeSystem}
-        setActiveSystem={setActiveSystem}
-        totalGamesCount={games.length}
-        favoritesCount={favorites.length}
-        recentCount={recentlyPlayed.length}
-        focusedTarget={focusedTarget}
-        setFocusedTarget={setFocusedTarget}
-        sfx={sfx}
-      />
+          {/* System Selection Ribbon */}
+          <SystemRibbon
+            systems={systems}
+            activeSystem={activeSystem}
+            setActiveSystem={setActiveSystem}
+            totalGamesCount={games.length}
+            favoritesCount={favorites.length}
+            recentCount={recentlyPlayed.length}
+            focusedTarget={focusedTarget}
+            setFocusedTarget={setFocusedTarget}
+            sfx={sfx}
+          />
 
-      {/* 3D Cartridge Grid Viewport */}
-      <CartridgeGrid
-        filteredGames={filteredGames}
-        metadataMap={scraper.metadataMap}
-        focusedTarget={focusedTarget}
-        setFocusedTarget={setFocusedTarget}
-        handleGameSelect={handleGameSelect}
-        fetchGames={fetchGames}
-        loading={loading}
-        isFavorite={isFavorite}
-        activeSystem={activeSystem}
-        searchQuery={searchQuery}
-        setActiveSystem={setActiveSystem}
-        setSearchQuery={setSearchQuery}
-        sfx={sfx}
-      />
+          {/* 3D Cartridge Grid Viewport */}
+          <CartridgeGrid
+            filteredGames={filteredGames}
+            metadataMap={scraper.metadataMap}
+            focusedTarget={focusedTarget}
+            setFocusedTarget={setFocusedTarget}
+            handleGameSelect={handleGameSelect}
+            fetchGames={fetchGames}
+            loading={loading}
+            isFavorite={isFavorite}
+            activeSystem={activeSystem}
+            searchQuery={searchQuery}
+            setActiveSystem={setActiveSystem}
+            setSearchQuery={setSearchQuery}
+            sfx={sfx}
+          />
 
-      {/* Bottom Controller HUD */}
-      <ConsoleHud
-        gamepadConnected={gamepadConnected}
-        activeSystem={activeSystem}
-        systems={systems}
-        setActiveSystem={setActiveSystem}
-        focusedTarget={focusedTarget}
-        setFocusedTarget={setFocusedTarget}
-        sfx={sfx}
-      />
+          {/* Bottom Controller HUD */}
+          <ConsoleHud
+            gamepadConnected={gamepadConnected}
+            activeSystem={activeSystem}
+            systems={systems}
+            setActiveSystem={setActiveSystem}
+            focusedTarget={focusedTarget}
+            setFocusedTarget={setFocusedTarget}
+            sfx={sfx}
+          />
+        </>
+      )}
 
       {/* Load Custom ROM In-App Modal Dialog */}
       <LoadRomModal

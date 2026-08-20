@@ -1,5 +1,23 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Gamepad2, Wifi, WifiOff, Menu, Activity, ShieldCheck } from 'lucide-react';
+import { 
+  X, 
+  Gamepad2, 
+  Wifi, 
+  WifiOff, 
+  Menu, 
+  Activity, 
+  ShieldCheck, 
+  RotateCcw, 
+  Pause, 
+  Play, 
+  Volume2, 
+  VolumeX, 
+  Maximize2, 
+  Save, 
+  Download, 
+  Camera, 
+  Sliders 
+} from 'lucide-react';
 import { detectSystemFromExtension } from '../utils/systemDetector';
 import { dbGet, dbSet, STORES } from '../services/db';
 import { resolveAssetPath } from '../utils/assetPath';
@@ -9,6 +27,9 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
   const iframeRef = useRef(null);
   const [isLocalOffline, setIsLocalOffline] = useState(!navigator.onLine);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
+  const [showSubToolbar, setShowSubToolbar] = useState(false);
+  const [isGamePaused, setIsGamePaused] = useState(false);
+  const [isGameMuted, setIsGameMuted] = useState(false);
 
   // Keep references to prevent re-renders in parent from destroying the running emulator
   const onSessionEndRef = useRef(onSessionEnd);
@@ -258,7 +279,12 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
 
       stageRef.current.appendChild(iframe);
 
-      const isMobileTouch = ('ontouchstart' in window) && (navigator.maxTouchPoints > 0) && (window.innerWidth <= 1024);
+      const isMobileTouch = (typeof window !== 'undefined') && (
+        ('ontouchstart' in window) || 
+        (navigator.maxTouchPoints > 0) || 
+        (window.innerWidth <= 1024) ||
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      );
 
       const htmlContent = `
         <!DOCTYPE html>
@@ -308,16 +334,15 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
             }
 
             .ejs_virtualGamepad_parent {
-              position: absolute !important;
+              position: fixed !important;
               bottom: 0 !important;
               left: 0 !important;
               right: 0 !important;
               width: 100% !important;
-              height: 220px !important;
-              max-height: 45vh !important;
+              height: 240px !important;
               pointer-events: none !important;
               z-index: 99999 !important;
-              display: ${isMobileTouch ? 'block' : 'none'} !important;
+              display: block !important;
             }
 
             .ejs_virtualGamepad_left,
@@ -331,8 +356,8 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
 
             .ejs_virtualGamepad_left {
               position: absolute !important;
-              bottom: 24px !important;
-              left: 16px !important;
+              bottom: 16px !important;
+              left: 12px !important;
               width: 130px !important;
               height: 130px !important;
               z-index: 100000 !important;
@@ -340,8 +365,8 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
 
             .ejs_virtualGamepad_right {
               position: absolute !important;
-              bottom: 24px !important;
-              right: 16px !important;
+              bottom: 16px !important;
+              right: 12px !important;
               width: 135px !important;
               height: 135px !important;
               z-index: 100000 !important;
@@ -349,7 +374,7 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
 
             .ejs_virtualGamepad_bottom {
               position: absolute !important;
-              bottom: 16px !important;
+              bottom: 10px !important;
               left: 50% !important;
               transform: translateX(-50%) !important;
               margin-left: 0 !important;
@@ -358,31 +383,34 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
               display: flex !important;
               align-items: center !important;
               justify-content: center !important;
-              gap: 10px !important;
+              gap: 8px !important;
               z-index: 100000 !important;
             }
 
             .ejs_virtualGamepad_button {
-              background: rgba(30, 41, 59, 0.75) !important;
-              border: 2px solid rgba(255, 255, 255, 0.45) !important;
+              background: rgba(30, 41, 59, 0.85) !important;
+              border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
               color: #ffffff !important;
-              box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6) !important;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6) !important;
               touch-action: none !important;
             }
 
             .ejs_virtualGamepad_button_down {
-              background: rgba(59, 130, 246, 0.75) !important;
+              background: rgba(59, 130, 246, 0.9) !important;
               transform: scale(0.92) !important;
             }
 
             .ejs_dpad_main {
-              opacity: 0.9 !important;
-              filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5)) !important;
+              opacity: 0.95 !important;
+              filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6)) !important;
             }
 
-            .ejs_dpad_bar {
-              background: rgba(30, 41, 59, 0.75) !important;
-              border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
+            /* Internal EmulatorJS bar hidden so native React extension toolbar renders cleanly */
+            .ejs_menu_bar,
+            .ejs_menu_bottom,
+            [class*="menu_bar"] {
+              display: none !important;
+              pointer-events: none !important;
             }
 
             .ejs_virtualGamepad_open {
@@ -1108,34 +1136,85 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
 
   const handleToggleEmulatorMenu = (e) => {
     e.stopPropagation();
+    setShowSubToolbar(prev => !prev);
+  };
+
+  const handleEmulatorAction = (action) => {
     try {
-      if (iframeRef.current?.contentWindow) {
-        const win = iframeRef.current.contentWindow;
-        const doc = win.document;
+      const win = iframeRef.current?.contentWindow;
+      const emu = win?.EJS_emulator;
+      if (!win) return;
 
-        const openBtn = doc.querySelector('.ejs_virtualGamepad_open') || doc.querySelector('[class*="virtualGamepad_open"]');
-        if (openBtn) {
-          openBtn.click();
-          return;
-        }
-
-        const menuBar = doc.querySelector('.ejs_menu_bar');
-        if (menuBar) {
-          menuBar.classList.toggle('ejs_menu_bar_hidden');
-          return;
-        }
-
-        const emu = win.EJS_emulator;
-        if (emu) {
-          if (typeof emu.toggleMenu === 'function') {
-            emu.toggleMenu();
-          } else if (typeof emu.openSettings === 'function') {
-            emu.openSettings();
+      switch (action) {
+        case 'restart':
+          if (typeof emu?.restart === 'function') {
+            emu.restart();
+          } else if (win.gameManager && typeof win.gameManager.restart === 'function') {
+            win.gameManager.restart();
           }
-        }
+          break;
+        case 'pause':
+          if (typeof emu?.togglePlay === 'function') {
+            emu.togglePlay();
+            setIsGamePaused(prev => !prev);
+          } else if (typeof emu?.pause === 'function') {
+            if (isGamePaused) {
+              emu.play?.();
+            } else {
+              emu.pause();
+            }
+            setIsGamePaused(prev => !prev);
+          }
+          break;
+        case 'mute':
+          if (typeof emu?.toggleMute === 'function') {
+            emu.toggleMute();
+            setIsGameMuted(prev => !prev);
+          } else if (emu?.audioContext) {
+            if (emu.audioContext.state === 'running') {
+              emu.audioContext.suspend();
+              setIsGameMuted(true);
+            } else {
+              emu.audioContext.resume();
+              setIsGameMuted(false);
+            }
+          }
+          break;
+        case 'saveState':
+          if (typeof emu?.saveState === 'function') {
+            emu.saveState();
+          }
+          break;
+        case 'loadState':
+          if (typeof emu?.loadState === 'function') {
+            emu.loadState();
+          }
+          break;
+        case 'screenshot':
+          if (typeof emu?.screenshot === 'function') {
+            emu.screenshot();
+          }
+          break;
+        case 'settings':
+          if (typeof emu?.openSettings === 'function') {
+            emu.openSettings();
+          } else if (typeof emu?.toggleMenu === 'function') {
+            emu.toggleMenu();
+          }
+          break;
+        case 'fullscreen':
+          if (typeof emu?.fullscreen === 'function') {
+            emu.fullscreen();
+          } else {
+            const el = stageRef.current;
+            if (el?.requestFullscreen) el.requestFullscreen();
+          }
+          break;
+        default:
+          break;
       }
     } catch (err) {
-      console.warn('Failed to toggle emulator menu:', err);
+      console.warn('Action dispatch error:', err);
     }
   };
 
@@ -1196,9 +1275,9 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
           </button>
 
           <button
-            className="emulator-menu-btn"
+            className={`emulator-menu-btn ${showSubToolbar ? 'active' : ''}`}
             onClick={handleToggleEmulatorMenu}
-            title="RetroArch Control Panel & Settings (M)"
+            title="Toggle Emulator Extension Menu (M)"
           >
             <Menu size={18} />
             <span className="btn-label">Menu</span>
@@ -1209,6 +1288,56 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
           </button>
         </div>
       </header>
+
+      {/* Direct In-App Top Extension Toolbar Banner */}
+      {showSubToolbar && (
+        <div className="emulator-sub-toolbar animate-slide-down" onClick={(e) => e.stopPropagation()}>
+          <button 
+            className="sub-toolbar-btn" 
+            onClick={() => handleEmulatorAction('restart')} 
+            title="Restart Game"
+          >
+            <RotateCcw size={16} />
+            <span>Restart</span>
+          </button>
+
+          <button 
+            className="sub-toolbar-btn" 
+            onClick={() => handleEmulatorAction('pause')} 
+            title={isGamePaused ? "Resume Game" : "Pause Game"}
+          >
+            {isGamePaused ? <Play size={16} color="#10b981" /> : <Pause size={16} />}
+            <span>{isGamePaused ? "Resume" : "Pause"}</span>
+          </button>
+
+          <button 
+            className="sub-toolbar-btn" 
+            onClick={() => handleEmulatorAction('mute')} 
+            title={isGameMuted ? "Unmute Audio" : "Mute Audio"}
+          >
+            {isGameMuted ? <VolumeX size={16} color="#f87171" /> : <Volume2 size={16} />}
+            <span>{isGameMuted ? "Unmute" : "Mute"}</span>
+          </button>
+
+          <button 
+            className="sub-toolbar-btn" 
+            onClick={() => handleEmulatorAction('screenshot')} 
+            title="Take Screenshot"
+          >
+            <Camera size={16} />
+            <span>Capture</span>
+          </button>
+
+          <button 
+            className="sub-toolbar-btn" 
+            onClick={() => handleEmulatorAction('settings')} 
+            title="Open RetroArch Control Settings"
+          >
+            <Sliders size={16} />
+            <span>Settings</span>
+          </button>
+        </div>
+      )}
 
       {/* Real-Time Performance & Diagnostic Health HUD */}
       {showDiagnostics && (
