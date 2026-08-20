@@ -1118,7 +1118,7 @@ export function useGamepadNavigation({
             if (!stateRef.current.isMobile) {
               const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
               const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
-              const allSysKeys = ['all', ...sortedSystems.map(s => s.key)];
+              const allSysKeys = ['all', 'favorites', 'recent', ...sortedSystems.map(s => s.key)];
               const curSysIdx = allSysKeys.indexOf(stateRef.current.activeSystem);
               const nextSysIdx = (curSysIdx - 1 + allSysKeys.length) % allSysKeys.length;
               setActiveSystem(allSysKeys[nextSysIdx]);
@@ -1133,7 +1133,7 @@ export function useGamepadNavigation({
             if (!stateRef.current.isMobile) {
               const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
               const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
-              const allSysKeys = ['all', ...sortedSystems.map(s => s.key)];
+              const allSysKeys = ['all', 'favorites', 'recent', ...sortedSystems.map(s => s.key)];
               const curSysIdx = allSysKeys.indexOf(stateRef.current.activeSystem);
               const nextSysIdx = (curSysIdx + 1) % allSysKeys.length;
               setActiveSystem(allSysKeys[nextSysIdx]);

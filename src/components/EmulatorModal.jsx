@@ -28,7 +28,6 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
   const stageRef = useRef(null);
   const iframeRef = useRef(null);
   const [isLocalOffline, setIsLocalOffline] = useState(!navigator.onLine);
-  const [isLoadingGame, setIsLoadingGame] = useState(true);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [showSubToolbar, setShowSubToolbar] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -473,28 +472,80 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
               left: -9999px !important;
             }
 
-            /* Perfectly centered Core & ROM download loading bar above gamepad */
+            @keyframes retroPulse {
+              0% { box-shadow: 0 16px 48px rgba(0, 0, 0, 0.85), 0 0 20px rgba(59, 130, 246, 0.3); }
+              100% { box-shadow: 0 24px 64px rgba(0, 0, 0, 0.95), 0 0 36px rgba(59, 130, 246, 0.55); }
+            }
+
+            @keyframes retroSpin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+
+            /* Perfectly center & beautify EmulatorJS built-in progress line */
             #ejs_loading,
             .ejs_loading,
+            #ejs_load_progress,
+            .ejs_load_progress,
+            #ejs_loading_text,
+            .ejs_loading_text,
+            [id*="loading"],
             [class*="loading_progress"],
-            [class*="load_progress"],
-            .ejs_load_progress {
-              position: absolute !important;
-              top: 36% !important;
+            [class*="load_progress"] {
+              position: fixed !important;
+              top: 42% !important;
               left: 50% !important;
+              bottom: auto !important;
+              right: auto !important;
               transform: translate(-50%, -50%) !important;
               z-index: 100005 !important;
               display: flex !important;
               flex-direction: column !important;
               align-items: center !important;
               justify-content: center !important;
-              gap: 10px !important;
-              background: rgba(15, 23, 42, 0.9) !important;
-              border: 1.5px solid rgba(59, 130, 246, 0.6) !important;
-              border-radius: 20px !important;
-              padding: 16px 24px !important;
-              box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7) !important;
+              text-align: center !important;
+              gap: 12px !important;
+              background: rgba(15, 23, 42, 0.92) !important;
+              border: 1.5px solid rgba(59, 130, 246, 0.65) !important;
+              backdrop-filter: blur(24px) !important;
+              -webkit-backdrop-filter: blur(24px) !important;
+              border-radius: 24px !important;
+              padding: 24px 36px !important;
+              box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(59, 130, 246, 0.35) !important;
               color: #ffffff !important;
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+              font-size: 0.95rem !important;
+              font-weight: 700 !important;
+              letter-spacing: 0.3px !important;
+              max-width: 85% !important;
+              min-width: 260px !important;
+              animation: retroPulse 2s ease-in-out infinite alternate !important;
+              pointer-events: none !important;
+            }
+
+            #ejs_loading progress,
+            .ejs_loading progress,
+            [class*="loading_progress"] progress,
+            [class*="load_progress"] progress {
+              width: 100% !important;
+              height: 8px !important;
+              border-radius: 4px !important;
+              border: none !important;
+              background: rgba(255, 255, 255, 0.15) !important;
+              overflow: hidden !important;
+              margin-top: 6px !important;
+            }
+
+            #ejs_loading progress::-webkit-progress-bar,
+            .ejs_loading progress::-webkit-progress-bar {
+              background: rgba(255, 255, 255, 0.15) !important;
+              border-radius: 4px !important;
+            }
+
+            #ejs_loading progress::-webkit-progress-value,
+            .ejs_loading progress::-webkit-progress-value {
+              background: linear-gradient(90deg, #3b82f6, #60a5fa, #38bdf8) !important;
+              border-radius: 4px !important;
             }
 
             .ejs_virtualGamepad_open {
@@ -529,6 +580,18 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
             window.getEmulationFps = function() {
               return _coreFps;
             };
+            // Dynamically enhance EmulatorJS native loading indicator with animated spinner
+            const _loaderWatcher = setInterval(function() {
+              const loadingEl = document.querySelector('#ejs_loading, .ejs_loading, #ejs_load_progress, .ejs_load_progress, [id*="loading"]');
+              if (loadingEl) {
+                if (!loadingEl.querySelector('.retro-loader-spinner')) {
+                  const sp = document.createElement('div');
+                  sp.className = 'retro-loader-spinner';
+                  sp.style.cssText = 'width: 32px; height: 32px; border-radius: 50%; border: 3px solid rgba(59, 130, 246, 0.25); border-top-color: #38bdf8; animation: retroSpin 0.8s linear infinite; margin-bottom: 8px; display: inline-block;';
+                  loadingEl.insertBefore(sp, loadingEl.firstChild);
+                }
+              }
+            }, 80);
 
             window.EJS_player = '#game';
             window.EJS_gameUrl = ${JSON.stringify(absoluteRomUrl)};
@@ -962,6 +1025,9 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
                 if (window.__INITIAL_SAVE_BASE64__) {
                   injectSaveData(window.__INITIAL_SAVE_BASE64__);
                 }
+                if (window.parent && window.parent !== window) {
+                  window.parent.postMessage({ type: 'RETRO_PLAYER_CORE_RUNNING' }, '*');
+                }
               } catch(e) {}
             };
 
@@ -976,8 +1042,29 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
                 if (window.__INITIAL_SAVE_BASE64__) {
                   injectSaveData(window.__INITIAL_SAVE_BASE64__);
                 }
+                if (window.parent && window.parent !== window) {
+                  window.parent.postMessage({ type: 'RETRO_PLAYER_CORE_RUNNING' }, '*');
+                }
               } catch(e) {}
             };
+
+            // Loop checker to signal parent as soon as first canvas frame is active
+            let _canvasSignaled = false;
+            function _pollCanvasReady() {
+              if (_canvasSignaled) return;
+              const cv = document.querySelector('canvas');
+              if (cv && cv.width > 0 && cv.height > 0) {
+                _canvasSignaled = true;
+                try {
+                  if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'RETRO_PLAYER_CORE_RUNNING' }, '*');
+                  }
+                } catch(e) {}
+                return;
+              }
+              requestAnimationFrame(_pollCanvasReady);
+            }
+            requestAnimationFrame(_pollCanvasReady);
 
             // Direct DB / Parent window save sync bridge
             window.EJS_onLoadSave = function() {
@@ -1106,6 +1193,17 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
           }
         } catch (e) {}
       }, 150);
+
+      // Safety fallback: ensure loading overlay auto-dismisses once core is initialized
+      const safetyTimer = setTimeout(() => {
+        if (!isCancelled) {
+          setIsLoadingGame(false);
+        }
+      }, 3500);
+
+      return () => {
+        clearTimeout(safetyTimer);
+      };
     } catch (err) {
       console.error(`🚨 [EMULATOR IFRAME WRITE ERROR] Failed writing iframe doc for "${currentGame.title}":`, err);
     }
@@ -1157,7 +1255,9 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
   // Listen for Controller Exit triggers & Save Sync posted from within the active emulator iframe
   useEffect(() => {
     const handleFrameMessage = async (e) => {
-      if (!e.data) return;
+      if (e.data.type === 'RETRO_PLAYER_CORE_RUNNING' || e.data.type === 'RETRO_PLAYER_CORE_STARTED' || e.data.type === 'RETRO_PLAYER_FIRST_FRAME') {
+        setIsLoadingGame(false);
+      }
 
       if (e.data.type === 'RETRO_PLAYER_EXIT_GAME') {
         console.log('🎮 [EMULATOR MODAL] Exit command received from gamepad combo. Closing game.');
@@ -1866,22 +1966,6 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
             <span><strong>ESC</strong> Exit</span>
           </div>
         </aside>
-      )}
-
-      {/* Centered WebAssembly Core & ROM Download Loading Overlay */}
-      {isLoadingGame && (
-        <div className="emulator-loading-overlay animate-fade-in" onClick={(e) => e.stopPropagation()}>
-          <div className="emulator-loading-card">
-            <div className="emulator-loading-spinner" />
-            <div className="emulator-loading-meta">
-              <strong>Loading {game.systemName || 'Retro Core'}...</strong>
-              <span>Downloading WebAssembly binary & game assets</span>
-            </div>
-            <div className="emulator-loading-bar-track">
-              <div className="emulator-loading-bar-fill" />
-            </div>
-          </div>
-        </div>
       )}
 
       <div className={`emulator-stage filter-${activeShader}`} ref={stageRef} onClick={focusEmulator}>

@@ -92,7 +92,7 @@ Retro Player supports **12 classic retro gaming platforms** out of the box:
 
 ## 🎮 Bundled Demo Showcase & Compliance
 
-Retro Player includes a lightweight collection of **29 non-commercial demonstration ROMs and homebrew titles** across 12 console platforms to immediately verify core performance in your browser:
+Retro Player includes a lightweight collection of **21 non-commercial demonstration ROMs and homebrew titles** across 12 console platforms to immediately verify core performance in your browser:
 
 - 📑 **Full Demo Catalog & Inventory**: See **[guides/roms.md](guides/roms.md)** for the complete file-by-file inventory, system file sizes, and homebrew developer credits.
 - 🎯 **Strictly Non-Complete Software**: All pre-installed software consists of non-commercial prototypes, trade show trials, and aftermarket homebrew demos. **Zero full retail commercial games are bundled.**

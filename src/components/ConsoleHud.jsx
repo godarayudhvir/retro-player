@@ -15,7 +15,8 @@ export default function ConsoleHud({
 }) {
   const handlePrevSystem = () => {
     if (!systems || !setActiveSystem) return;
-    const availableKeys = ['all', ...systems.filter(s => s.gameCount > 0).sort((a, b) => b.gameCount - a.gameCount).map(s => s.key)];
+    const sorted = systems.filter(s => s.gameCount > 0).sort((a, b) => b.gameCount - a.gameCount);
+    const availableKeys = ['all', 'favorites', 'recent', ...sorted.map(s => s.key)];
     const prevIdx = (availableKeys.indexOf(activeSystem) - 1 + availableKeys.length) % availableKeys.length;
     setActiveSystem(availableKeys[prevIdx]);
     setFocusedTarget?.({ zone: 'ribbon', index: prevIdx });
@@ -24,7 +25,8 @@ export default function ConsoleHud({
 
   const handleNextSystem = () => {
     if (!systems || !setActiveSystem) return;
-    const availableKeys = ['all', ...systems.filter(s => s.gameCount > 0).sort((a, b) => b.gameCount - a.gameCount).map(s => s.key)];
+    const sorted = systems.filter(s => s.gameCount > 0).sort((a, b) => b.gameCount - a.gameCount);
+    const availableKeys = ['all', 'favorites', 'recent', ...sorted.map(s => s.key)];
     const nextIdx = (availableKeys.indexOf(activeSystem) + 1) % availableKeys.length;
     setActiveSystem(availableKeys[nextIdx]);
     setFocusedTarget?.({ zone: 'ribbon', index: nextIdx });
