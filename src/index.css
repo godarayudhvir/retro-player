@@ -10956,25 +10956,85 @@ button.onboarding-feature-pill.onboarding-pwa-card {
   font-family: inherit;
 }
 
+/* Card 4 - Subtle tint with structural standard border */
 .onboarding-feature-pill.onboarding-pwa-card.is-actionable {
-  background: linear-gradient(135deg, #faf5ff 0%, #f5f3ff 100%);
-  border-color: #c4b5fd;
-  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.12);
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
 }
 
-.onboarding-feature-pill.onboarding-pwa-card.is-actionable:hover {
-  transform: translateY(-3px);
-  border-color: #8b5cf6;
-  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.22);
+button.onboarding-feature-pill.onboarding-pwa-card.is-safari-tip {
+  cursor: pointer;
 }
 
-.onboarding-feature-pill.onboarding-pwa-card.is-actionable:active {
+.onboarding-feature-pill.onboarding-pwa-card.is-safari-tip {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+}
+
+.onboarding-feature-pill.onboarding-pwa-card.is-safari-tip.is-copied {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.onboarding-feature-pill.onboarding-pwa-card.is-actionable:hover,
+.onboarding-feature-pill.onboarding-pwa-card.is-safari-tip:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+.onboarding-feature-pill.onboarding-pwa-card.is-safari-tip.is-copied:hover {
+  border-color: #4ade80;
+}
+
+.onboarding-pwa-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.onboarding-pwa-heading {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.onboarding-safari-badge {
+  font-size: 0.60rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(14, 165, 233, 0.12);
+  color: #0284c7;
+  border: 1px solid rgba(14, 165, 233, 0.25);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.onboarding-safari-badge.badge-copied {
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.onboarding-feature-pill.onboarding-pwa-card.is-actionable:active,
+.onboarding-feature-pill.onboarding-pwa-card.is-safari-tip:active {
   transform: scale(0.98);
 }
 
 .onboarding-feature-pill.onboarding-pwa-card.is-standalone {
-  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
-  border-color: #86efac;
+  background: #f8fafc;
+  border-color: #e2e8f0;
   cursor: default;
 }
 

@@ -15,10 +15,16 @@ import {
   Check,
   Smartphone,
   Zap,
-  Monitor
+  Monitor,
+  Compass,
+  Copy,
+  ExternalLink
 } from 'lucide-react';
 import MiiAvatar from './MiiAvatar';
 import { INITIAL_MII_DATA } from '../hooks/useProfileManager';
+
+const isApplePlatform = typeof navigator !== 'undefined' && (/Macintosh|iPhone|iPad|iPod/i.test(navigator.userAgent || ''));
+const isSafariBrowser = typeof navigator !== 'undefined' && (/Safari/i.test(navigator.userAgent || '') && !/Chrome|Chromium|CriOS|FxiOS|Edg/i.test(navigator.userAgent || ''));
 
 const SKIN_PALETTE = ['#fed7aa', '#ffd1a4', '#fde047', '#fef08a', '#fbcfe8', '#d6a374', '#a16207', '#78350f'];
 const HAIR_PALETTE = ['#451a03', '#1e293b', '#78350f', '#d97706', '#f59e0b', '#dc2626', '#3b82f6', '#10b981', '#a855f7', '#64748b'];
@@ -40,7 +46,56 @@ export default function OnboardingScreen({
   pwa
 }) {
   const [currentStep, setCurrentStep] = useState(0); // 0: Value, 1: Character Creation, 2: Tips
+  const [copiedLink, setCopiedLink] = useState(false);
   const totalSteps = 3;
+
+  // 1-Click Robust Copy Current URL (Supports HTTP IP / Local Network & HTTPS)
+  const handleCopySafariLink = async () => {
+    const currentUrl = window.location.href;
+    let successful = false;
+
+    // 1. Try modern Async Clipboard API
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(currentUrl);
+        successful = true;
+      } catch (err) {
+        successful = false;
+      }
+    }
+
+    // 2. Fallback to execCommand('copy') for HTTP / local LAN IP addresses (192.168.x.x)
+    if (!successful) {
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = currentUrl;
+        textArea.style.position = 'fixed';
+        textArea.style.top = '0';
+        textArea.style.left = '0';
+        textArea.style.width = '2em';
+        textArea.style.height = '2em';
+        textArea.style.padding = '0';
+        textArea.style.border = 'none';
+        textArea.style.outline = 'none';
+        textArea.style.boxShadow = 'none';
+        textArea.style.background = 'transparent';
+        textArea.setAttribute('readonly', '');
+        document.body.appendChild(textArea);
+        textArea.select();
+        textArea.setSelectionRange(0, currentUrl.length);
+        successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+      } catch (err) {
+        console.warn('Clipboard fallback copy error:', err);
+      }
+    }
+
+    if (successful) {
+      setCopiedLink(true);
+      sfx?.playKeyTick?.();
+      setTimeout(() => setCopiedLink(false), 2800);
+    }
+  };
 
   // Character Creation State (Pokémon-Style Player Setup)
   const [playerName, setPlayerName] = useState(() => activeProfile?.name || 'Red');
@@ -179,32 +234,112 @@ export default function OnboardingScreen({
                 </div>
               </div>
 
-              {/* Entire PWA Card as an interactive CTA button */}
-              <button
-                type="button"
-                className={`onboarding-feature-pill onboarding-pwa-card ${pwa?.isStandalone ? 'is-standalone' : 'is-actionable'}`}
-                onClick={() => {
-                  if (pwa?.promptInstall && !pwa?.isStandalone) {
-                    pwa.promptInstall();
+              {/* Platform-Aware PWA / Safari Recommendation Card */}
+              {isApplePlatform && !isSafariBrowser && !pwa?.isStandalone ? (
+                <button
+                  type="button"
+                  className={`onboarding-feature-pill onboarding-pwa-card is-safari-tip ${copiedLink ? 'is-copied' : ''}`}
+                  onClick={handleCopySafariLink}
+                  title="Click to copy current URL to open in Safari"
+                  aria-label="Copy URL for Safari"
+                >
+                  <div 
+                    className="onboarding-feat-icon-wrap" 
+                    style={{ 
+                      background: copiedLink ? 'rgba(16, 185, 129, 0.12)' : 'rgba(14, 165, 233, 0.12)', 
+                      color: copiedLink ? '#059669' : '#0284c7' 
+                    }}
+                  >
+                    {copiedLink ? <Check size={22} className="animate-scale-in" /> : <Compass size={22} />}
+                  </div>
+                  <div className="onboarding-feat-text">
+                    <div className="onboarding-pwa-title-row">
+                      <strong className="onboarding-pwa-heading">
+                        {copiedLink ? '✓ Link Copied!' : 'Open in Safari'}
+                      </strong>
+                      <span className={`onboarding-safari-badge ${copiedLink ? 'badge-copied' : ''}`}>
+                        {copiedLink ? 'Ready to Paste' : 'Recommended'}
+                      </span>
+                    </div>
+                    <span>
+                      {copiedLink 
+                        ? (/iPhone|iPad|iPod/i.test(navigator.userAgent || '')
+                            ? 'Paste in Safari & tap Share (📤) → Add to Home Screen.' 
+                            : 'Paste link in Safari & click File → Add to Dock.')
+                        : 'Click to copy URL & paste in Safari for gamepad support.'}
+                    </span>
+                  </div>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={`onboarding-feature-pill onboarding-pwa-card ${pwa?.isStandalone ? 'is-standalone' : 'is-actionable'}`}
+                  onClick={() => {
+                    if (pwa?.promptInstall && !pwa?.isStandalone) {
+                      pwa.promptInstall();
+                    }
+                    sfx?.playThemeSwitch?.();
+                  }}
+                  disabled={pwa?.isStandalone}
+                  title={
+                    pwa?.isStandalone 
+                      ? 'Retro Player is running in standalone app mode' 
+                      : isSafariBrowser 
+                        ? (/iPhone|iPad/i.test(navigator.userAgent) ? 'Safari: Tap Share → Add to Home Screen' : 'Safari: Click File → Add to Dock')
+                        : 'Click to install Retro Player to home screen or desktop'
                   }
-                  sfx?.playThemeSwitch?.();
-                }}
-                disabled={pwa?.isStandalone}
-                title={pwa?.isStandalone ? 'Retro Player is running in standalone app mode' : 'Click to install Retro Player to home screen or desktop'}
-                aria-label={pwa?.isStandalone ? 'App Installed and running standalone' : 'Install Retro Player Standalone App'}
-              >
-                <div className="onboarding-feat-icon-wrap" style={{ background: pwa?.isStandalone ? 'rgba(16, 185, 129, 0.15)' : 'rgba(139, 92, 246, 0.15)', color: pwa?.isStandalone ? '#059669' : '#7c3aed' }}>
-                  {pwa?.isStandalone ? <Check size={22} /> : <Download size={22} />}
-                </div>
-                <div className="onboarding-feat-text">
-                  <strong>{pwa?.isStandalone ? 'Installed & Offline Ready' : 'Optional Standalone App'}</strong>
-                  <span>
-                    {pwa?.isStandalone 
-                      ? 'Running in full standalone mode with offline cache.' 
-                      : 'Tap to add to home screen or desktop for offline play.'}
-                  </span>
-                </div>
-              </button>
+                  aria-label={pwa?.isStandalone ? 'App Installed and running standalone' : 'Install Retro Player Standalone App'}
+                >
+                  <div 
+                    className="onboarding-feat-icon-wrap" 
+                    style={{ 
+                      background: pwa?.isStandalone 
+                        ? 'rgba(16, 185, 129, 0.12)' 
+                        : isSafariBrowser 
+                          ? 'rgba(14, 165, 233, 0.12)' 
+                          : 'rgba(139, 92, 246, 0.12)', 
+                      color: pwa?.isStandalone 
+                        ? '#059669' 
+                        : isSafariBrowser 
+                          ? '#0284c7' 
+                          : '#7c3aed' 
+                    }}
+                  >
+                    {pwa?.isStandalone ? (
+                      <Check size={22} />
+                    ) : isSafariBrowser ? (
+                      <Compass size={22} />
+                    ) : (
+                      <Download size={22} />
+                    )}
+                  </div>
+                  <div className="onboarding-feat-text">
+                    <div className="onboarding-pwa-title-row">
+                      <strong className="onboarding-pwa-heading">
+                        {pwa?.isStandalone 
+                          ? 'Installed & Offline' 
+                          : isSafariBrowser 
+                            ? 'Safari Web App' 
+                            : 'Standalone App'}
+                      </strong>
+                      {isSafariBrowser && !pwa?.isStandalone && (
+                        <span className="onboarding-safari-badge">
+                          Native
+                        </span>
+                      )}
+                    </div>
+                    <span>
+                      {pwa?.isStandalone 
+                        ? 'Running standalone with local cache & gamepad.' 
+                        : isSafariBrowser
+                          ? (/iPhone|iPad/i.test(navigator.userAgent) 
+                              ? 'Tap Share → Add to Home Screen for fullscreen.' 
+                              : 'Click File → Add to Dock for full gamepad support.')
+                          : 'Add to home screen or desktop for offline play.'}
+                    </span>
+                  </div>
+                </button>
+              )}
             </div>
           </div>
         )}

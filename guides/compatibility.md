@@ -15,8 +15,8 @@ Retro Player is built on high-performance **client-side WebAssembly (WASM)**, mo
 
 | Platform / OS | Browser | Emulation Status | Gamepad Status | Notes & Specifications |
 | :--- | :--- | :---: | :---: | :--- |
-| **macOS (Apple Silicon & Intel)** | **Google Chrome** | 🟢 **Verified** | 🟢 **Verified** | Hardware VSync acceleration, native WebAssembly, verified with Bluetooth & USB Xbox/DualSense/Switch gamepads. |
-| **macOS (Apple Silicon & Intel)** | **Apple Safari** | 🟢 **Verified** | 🟢 **Verified** | Full WebKit hardware acceleration, verified with Bluetooth Gamepad connectivity. |
+| **macOS (Apple Silicon & Intel)** | **Apple Safari** *(Recommended)* | 🟢 **Verified** | 🟢 **Verified** | Full WebKit & Metal hardware acceleration, native Game Controller framework integration (DualSense, Xbox, Switch, 8BitDo) with zero sandboxing hurdles. Use **File → Add to Dock** for standalone Web App mode. |
+| **macOS (Apple Silicon & Intel)** | **Google Chrome** | 🟢 **Verified** | 🟡 **Note** | Hardware VSync acceleration & WASM. Note: In Chrome standalone PWA windows on macOS, controller detection may require granting macOS Input Monitoring/Bluetooth permissions. Browser tab mode works as expected. |
 | **macOS** | **Arc / Brave / Edge** | 🟢 **Verified** | 🟢 **Verified** | Chromium engine, standard WASM and Gamepad API support. |
 | **macOS** | **Mozilla Firefox** | 🔵 **Expected** | 🔵 **Expected** | Gecko engine, standard WASM and Gamepad API support. |
 | **Windows 10 / 11** | **Google Chrome / Microsoft Edge** | 🔵 **Expected** | 🔵 **Expected** | Chromium V8 engine, standard Direct3D/Vulkan acceleration and XInput mapping. |
@@ -64,8 +64,8 @@ Retro Player includes a dedicated **10-Foot UI Mode** optimized for viewing from
 ## ⚡ Verified Hardware & Testing Scope
 
 - **Physically Verified Platforms**:
-  - **macOS (Google Chrome & Apple Safari)**: Both keyboard/mouse and physical Bluetooth/USB gamepads (Xbox, PlayStation DualSense, Nintendo Switch Pro, 8BitDo) tested and verified for fluid 60 FPS gameplay, low input latency, and spatial UI navigation.
-  - **iOS / iPadOS (Apple Safari & Google Chrome)**: Verified across multiple systems (NES, SNES, GBA, Genesis, etc.) with responsive on-screen touch controls and Bluetooth gamepads.
+  - **macOS (Apple Safari & Google Chrome)**: Safari is recommended for native Game Controller framework integration (Xbox, PlayStation DualSense, Nintendo Switch Pro, 8BitDo) and standalone Web App mode (**File → Add to Dock**). Chrome tab mode is verified; Chrome standalone PWA on macOS may require granting system Input Monitoring permissions.
+  - **iOS / iPadOS (Apple Safari & Google Chrome)**: Verified across multiple systems (NES, SNES, GBA, Genesis, etc.) with responsive on-screen touch controls and Bluetooth gamepads. Use Safari **Share → Add to Home Screen** for standalone app mode.
 - **Other Platforms**: Implemented against standard **W3C Gamepad API**, **Web Audio**, and **WebAssembly** specifications.
 
 ---
