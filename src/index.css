@@ -2455,9 +2455,8 @@ button.status-pill:active {
 
 /* Universal Directional & Gamepad Focus Glow (Modern Console Highlight) */
 .gamepad-focused {
-  outline: 2.5px solid #3b82f6 !important;
-  outline-offset: 2px !important;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 0 16px rgba(59, 130, 246, 0.45) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2.5px #ffffff, 0 0 0 5px #3b82f6, 0 8px 24px rgba(59, 130, 246, 0.35) !important;
   border-color: #3b82f6 !important;
   transform: translateY(-2px) scale(1.03) !important;
   z-index: 10 !important;
@@ -2471,8 +2470,8 @@ button.status-pill:active {
 .system-tab.active.gamepad-focused {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
   color: #ffffff !important;
-  outline-color: #ffffff !important;
-  box-shadow: 0 0 0 2px #ffffff, 0 0 16px rgba(59, 130, 246, 0.5) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4.5px #3b82f6, 0 6px 16px rgba(59, 130, 246, 0.4) !important;
 }
 
 .tile-artwork {
@@ -6200,72 +6199,65 @@ html[data-theme="dmg"] .favorite-toggle-btn {
 }
 
 .mobile-topbar-profile.gamepad-focused {
-  outline: 3px solid #ef4444 !important;
-  outline-offset: 3px !important;
-  box-shadow: 0 0 16px rgba(239, 68, 68, 0.6) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2.5px #ffffff, 0 0 0 5.5px #3b82f6, 0 6px 18px rgba(59, 130, 246, 0.4) !important;
   transform: scale(1.08) !important;
 }
 
 .mobile-search-widget.gamepad-focused {
-  border-color: #ef4444 !important;
-  outline: 3px solid #ef4444 !important;
-  outline-offset: 1px !important;
-  box-shadow: 0 0 18px rgba(239, 68, 68, 0.35) !important;
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2.5px #ffffff, 0 0 0 5px #3b82f6, 0 6px 18px rgba(59, 130, 246, 0.3) !important;
   background: #ffffff !important;
 }
 
 .mobile-topbar-load-btn.gamepad-focused {
-  outline: 3px solid #ffffff !important;
-  outline-offset: 2px !important;
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.85) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2.5px #ffffff, 0 0 0 5.5px #3b82f6, 0 6px 18px rgba(59, 130, 246, 0.4) !important;
   transform: scale(1.06) !important;
 }
 
 .mobile-system-chip.gamepad-focused {
-  outline: 3px solid var(--sys-accent, #ef4444) !important;
-  outline-offset: 2px !important;
-  border-color: var(--sys-accent, #ef4444) !important;
-  box-shadow: 0 0 18px rgba(239, 68, 68, 0.4) !important;
-  transform: scale(1.05) !important;
+  outline: none !important;
+  border-color: var(--sys-accent, #3b82f6) !important;
+  box-shadow: 0 0 0 2.5px #ffffff, 0 0 0 5px var(--sys-accent, #3b82f6), 0 6px 16px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-2px) scale(1.04) !important;
   background: #ffffff !important;
 }
 
 .mobile-game-card.gamepad-focused {
-  transform: scale(1.06) !important;
+  outline: none !important;
+  transform: translateY(-3px) scale(1.03) !important;
 }
 
 .mobile-game-card.gamepad-focused .mobile-card-cover-wrap {
-  outline: 3px solid #ef4444 !important;
-  outline-offset: 2px !important;
-  border-color: #ef4444 !important;
-  box-shadow: 0 0 24px rgba(239, 68, 68, 0.7), 0 8px 20px rgba(15, 23, 42, 0.3) !important;
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2.5px #ffffff, 0 0 0 5.5px #3b82f6, 0 10px 24px rgba(59, 130, 246, 0.35) !important;
 }
 
 .mobile-back-btn.gamepad-focused {
-  outline: 3px solid #ef4444 !important;
-  outline-offset: 2px !important;
+  outline: none !important;
   background: #ffffff !important;
-  box-shadow: 0 0 14px rgba(239, 68, 68, 0.4) !important;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4.5px #3b82f6, 0 4px 12px rgba(59, 130, 246, 0.3) !important;
 }
 
 .mobile-sheet-close.gamepad-focused {
-  outline: 3px solid #ef4444 !important;
-  outline-offset: 2px !important;
+  outline: none !important;
   background: #e2e8f0 !important;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4.5px #3b82f6 !important;
 }
 
 .mobile-action-play-btn.gamepad-focused {
-  outline: 3px solid #ffffff !important;
-  outline-offset: 2px !important;
-  box-shadow: 0 0 22px rgba(239, 68, 68, 0.85) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2.5px #ffffff, 0 0 0 5.5px #3b82f6, 0 8px 22px rgba(59, 130, 246, 0.5) !important;
   transform: scale(1.04) !important;
 }
 
 .mobile-action-fav-btn.gamepad-focused {
-  outline: 3px solid #ef4444 !important;
-  outline-offset: 2px !important;
+  outline: none !important;
   background: #f1f5f9 !important;
-  box-shadow: 0 0 16px rgba(239, 68, 68, 0.4) !important;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4.5px #3b82f6, 0 4px 12px rgba(59, 130, 246, 0.3) !important;
 }
 
 .animate-slide-up {
@@ -8415,87 +8407,6 @@ html[data-theme="dmg"] .gamepad-battery-alert-toast {
   font-size: 0.78rem;
   color: #64748b;
   line-height: 1.35;
-}
-
-/* Systems Selection Grid */
-.onboarding-systems-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-  gap: 0.75rem;
-  width: 100%;
-  max-height: 52vh;
-  overflow-y: auto;
-  padding: 0.35rem;
-  -webkit-overflow-scrolling: touch;
-}
-
-.onboarding-system-card {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  background: #ffffff;
-  border: 2px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 0.75rem 0.95rem;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.15s ease;
-}
-
-.onboarding-system-card.is-selected {
-  border-color: var(--sys-accent, #3b82f6);
-  background: rgba(59, 130, 246, 0.04);
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.15);
-}
-
-.onboarding-sys-icon-wrap {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.onboarding-sys-icon {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.onboarding-sys-meta {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.onboarding-sys-name {
-  font-size: 0.86rem;
-  font-weight: 800;
-  color: #0f172a;
-}
-
-.onboarding-sys-badge {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #64748b;
-}
-
-.onboarding-sys-checkbox {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 2px solid #cbd5e1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.15s ease;
-}
-
-.onboarding-system-card.is-selected .onboarding-sys-checkbox {
-  background: var(--sys-accent, #3b82f6);
-  border-color: var(--sys-accent, #3b82f6);
 }
 
 /* Pokémon-Style Interactive Player Passport */

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Sparkles, 
   Gamepad2, 
@@ -6,21 +6,14 @@ import {
   Download, 
   ChevronRight, 
   ArrowLeft, 
-  Check, 
   User, 
   Dices,
   Keyboard, 
   Play, 
-  X,
-  Layers,
-  Palette,
-  Eye,
-  Smile,
   LogOut,
   MousePointer
 } from 'lucide-react';
 import MiiAvatar from './MiiAvatar';
-import { resolveAssetPath } from '../utils/assetPath';
 import { INITIAL_MII_DATA } from '../hooks/useProfileManager';
 
 const SKIN_PALETTE = ['#fed7aa', '#ffd1a4', '#fde047', '#fef08a', '#fbcfe8', '#d6a374', '#a16207', '#78350f'];
@@ -29,27 +22,25 @@ const SHIRT_PALETTE = ['#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4', '#
 
 /**
  * Modern Full-Screen Responsive Onboarding Experience for Desktop & Mobile.
- * Step 1: Value Proposition & Outcome
- * Step 2: Personalization (Favorite Consoles)
- * Step 3: Pokémon-Style Interactive Player Passport & Character Creation
- * Step 4: Pro-Tips & Controller Game Exit Combos (L3+R3 / Select+Start)
+ * Streamlined 3-Step Flow:
+ * Step 1: Selling the Outcome / Value Proposition
+ * Step 2: Pokémon-Style Interactive Player Passport & Character Creation
+ * Step 3: Controller Exit Combos (L3+R3 / Select+Start) & Essential Shortcuts
  */
 export default function OnboardingScreen({
   isOpen,
   onComplete,
-  systems = [],
   activeProfile,
   onSaveCreatedProfile,
   sfx
 }) {
-  const [currentStep, setCurrentStep] = useState(0); // 0: Value, 1: Systems, 2: Character Creation, 3: Tips
-  const [selectedSystems, setSelectedSystems] = useState(() => new Set(['gba', 'snes', 'n64', 'playstation', 'nds']));
-  const totalSteps = 4;
+  const [currentStep, setCurrentStep] = useState(0); // 0: Value, 1: Character Creation, 2: Tips
+  const totalSteps = 3;
 
   // Character Creation State (Pokémon-Style Player Setup)
   const [playerName, setPlayerName] = useState(() => activeProfile?.name || 'Red');
   const [customMii, setCustomMii] = useState(() => activeProfile?.miiData ? { ...activeProfile.miiData } : { ...INITIAL_MII_DATA, hairStyle: 1, favoriteColor: '#ef4444' });
-  const [activeCustomTab, setActiveCustomTab] = useState('hair'); // 'hair', 'face', 'eyes', 'shirt'
+  const [activeCustomTab, setActiveCustomTab] = useState('hair'); // 'hair', 'skin', 'eyes', 'shirt'
 
   // Randomize Avatar
   const handleRandomizeAvatar = () => {
@@ -75,17 +66,6 @@ export default function OnboardingScreen({
     sfx?.playDiceRoll?.();
   };
 
-  // Toggle favorite system chip
-  const toggleSystemSelection = (sysKey) => {
-    setSelectedSystems(prev => {
-      const next = new Set(prev);
-      if (next.has(sysKey)) next.delete(sysKey);
-      else next.add(sysKey);
-      sfx?.playTileNav?.();
-      return next;
-    });
-  };
-
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
       setCurrentStep(prev => prev + 1);
@@ -106,7 +86,6 @@ export default function OnboardingScreen({
     try {
       localStorage.setItem('retro_onboarding_completed', 'true');
       localStorage.setItem('retro_demo_dismissed', 'true');
-      localStorage.setItem('retro_favorite_systems', JSON.stringify(Array.from(selectedSystems)));
     } catch {}
 
     // Save customized profile
@@ -199,59 +178,13 @@ export default function OnboardingScreen({
         )}
 
         {/* =========================================================
-            SLIDE 1: PERSONALIZATION / ERA & CONSOLE SELECTION
+            SLIDE 1: POKÉMON-STYLE INTERACTIVE PLAYER PASSPORT & MII
             ========================================================= */}
         {currentStep === 1 && (
           <div className="onboarding-slide animate-slide-up">
             <div className="onboarding-step-badge">
-              <Layers size={14} />
-              <span>STEP 2 OF 4: PERSONALIZATION</span>
-            </div>
-
-            <h1 className="onboarding-slide-title">
-              What are your favorite retro consoles?
-            </h1>
-
-            <p className="onboarding-slide-desc">
-              Select the platforms you love. We&apos;ll pin and prioritize these consoles at the front of your dashboard and mobile feed.
-            </p>
-
-            <div className="onboarding-systems-grid">
-              {systems.map(sys => {
-                const isSelected = selectedSystems.has(sys.key);
-                return (
-                  <button
-                    key={sys.key}
-                    type="button"
-                    className={`onboarding-system-card ${isSelected ? 'is-selected' : ''}`}
-                    style={{ '--sys-accent': sys.color || '#3b82f6' }}
-                    onClick={() => toggleSystemSelection(sys.key)}
-                  >
-                    <div className="onboarding-sys-icon-wrap">
-                      {sys.icon && <img src={resolveAssetPath(sys.icon)} alt="" className="onboarding-sys-icon" />}
-                    </div>
-                    <div className="onboarding-sys-meta">
-                      <span className="onboarding-sys-name">{sys.name}</span>
-                      <span className="onboarding-sys-badge">{sys.gameCount || 0} Games</span>
-                    </div>
-                    <div className="onboarding-sys-checkbox">
-                      {isSelected && <Check size={14} color="#ffffff" strokeWidth={3} />}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* =========================================================
-            SLIDE 2: POKÉMON-STYLE INTERACTIVE PLAYER PASSPORT & MII
-            ========================================================= */}
-        {currentStep === 2 && (
-          <div className="onboarding-slide animate-slide-up">
-            <div className="onboarding-step-badge">
               <User size={14} />
-              <span>STEP 3 OF 4: PLAYER PASSPORT</span>
+              <span>STEP 2 OF 3: PLAYER PASSPORT</span>
             </div>
 
             <h1 className="onboarding-slide-title">
@@ -408,13 +341,13 @@ export default function OnboardingScreen({
         )}
 
         {/* =========================================================
-            SLIDE 3: CONTROLLER EXIT COMBOS & PRO-TIPS
+            SLIDE 2: CONTROLLER EXIT COMBOS & PRO-TIPS
             ========================================================= */}
-        {currentStep === 3 && (
+        {currentStep === 2 && (
           <div className="onboarding-slide animate-slide-up">
             <div className="onboarding-step-badge">
               <Sparkles size={14} />
-              <span>STEP 4 OF 4: CONTROLS & EXIT COMBOS</span>
+              <span>STEP 3 OF 3: CONTROLS & EXIT COMBOS</span>
             </div>
 
             <h1 className="onboarding-slide-title">

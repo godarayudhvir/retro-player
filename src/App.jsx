@@ -548,7 +548,6 @@ export default function App() {
         <OnboardingScreen
           isOpen={showOnboarding}
           onComplete={() => setShowOnboarding(false)}
-          systems={systems}
           activeProfile={activeProfile}
           onSaveCreatedProfile={(name, miiData, favoriteColor) => {
             if (activeProfile?.id) {

@@ -59,7 +59,7 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 ## ✨ Key Highlights & Features
 
-- 🌟 **Modern Full-Screen Onboarding & Personalization**: Outcome-first walkthrough for Desktop and Mobile with interactive platform selection, quick tips, and integrated user profile setup.
+- 🌟 **Modern Full-Screen Onboarding & Character Creation**: Outcome-first walkthrough for Desktop and Mobile with Pokémon-style Mii character passport setup and essential pro-tips.
 - 👤 **Multi-User Profiles & Nintendo Mii Avatar Studio**: Create personalized Mii-style vector avatars with customizable hairstyles, expressions, and accessories; isolated game saves, playtime logs, favorites, and complete in-app player management.
 - 📱 **Dedicated Netflix-Style Mobile Streaming UI**: Custom mobile experience (<= 768px) with "Who's Playing?" profile selector, mobile topbar, smooth horizontal carousels, bottom sheet details drawer, 5-row virtual keyboard, and 100% controller spatial navigation.
 - 📱 **Progressive Web App (PWA) & Offline Standalone Installation**: Install Retro Player as a native desktop/handheld app across macOS, Windows, Linux, Steam Deck, Android, and iOS with landscape gaming display mode and Service Worker caching.
