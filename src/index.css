@@ -10893,27 +10893,31 @@ html[data-theme="dmg"] .gamepad-battery-alert-toast {
 
 .onboarding-features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 0.85rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.9rem;
   width: 100%;
+  max-width: 640px;
   margin-top: 0.5rem;
 }
 
 .onboarding-feature-pill {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.85rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  padding: 0.85rem 1rem;
-  border-radius: 16px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  padding: 0.9rem 1rem;
+  border-radius: 18px;
   text-align: left;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .onboarding-feature-pill:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
 }
 
 .onboarding-feat-icon-wrap {
@@ -10929,7 +10933,9 @@ html[data-theme="dmg"] .gamepad-battery-alert-toast {
 .onboarding-feat-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
 }
 
 .onboarding-feat-text strong {
@@ -10942,6 +10948,43 @@ html[data-theme="dmg"] .gamepad-battery-alert-toast {
   color: #64748b;
   line-height: 1.35;
 }
+
+/* Interactive Clickable PWA Card */
+button.onboarding-feature-pill.onboarding-pwa-card {
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+}
+
+.onboarding-feature-pill.onboarding-pwa-card.is-actionable {
+  background: linear-gradient(135deg, #faf5ff 0%, #f5f3ff 100%);
+  border-color: #c4b5fd;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.12);
+}
+
+.onboarding-feature-pill.onboarding-pwa-card.is-actionable:hover {
+  transform: translateY(-3px);
+  border-color: #8b5cf6;
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.22);
+}
+
+.onboarding-feature-pill.onboarding-pwa-card.is-actionable:active {
+  transform: scale(0.98);
+}
+
+.onboarding-feature-pill.onboarding-pwa-card.is-standalone {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border-color: #86efac;
+  cursor: default;
+}
+
+@media (max-width: 600px) {
+  .onboarding-features-grid {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+}
+
 
 /* Pokémon-Style Interactive Player Passport */
 .onboarding-passport-card {

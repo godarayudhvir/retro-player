@@ -583,6 +583,7 @@ export default function App() {
             }
           }}
           sfx={sfx}
+          pwa={pwa}
         />
       )}
 

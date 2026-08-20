@@ -21,6 +21,7 @@ interface OnboardingScreenProps {
   activeProfile: UserProfile;
   onSaveCreatedProfile: (name: string, miiData: MiiData, favoriteColor: string) => void;
   sfx: SoundEffectsManager;
+  pwa?: PwaInstallManager;
 }
 ```
 

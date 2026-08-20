@@ -11,7 +11,11 @@ import {
   Keyboard, 
   Play, 
   LogOut,
-  MousePointer
+  MousePointer,
+  Check,
+  Smartphone,
+  Zap,
+  Monitor
 } from 'lucide-react';
 import MiiAvatar from './MiiAvatar';
 import { INITIAL_MII_DATA } from '../hooks/useProfileManager';
@@ -32,7 +36,8 @@ export default function OnboardingScreen({
   onComplete,
   activeProfile,
   onSaveCreatedProfile,
-  sfx
+  sfx,
+  pwa
 }) {
   const [currentStep, setCurrentStep] = useState(0); // 0: Value, 1: Character Creation, 2: Tips
   const totalSteps = 3;
@@ -145,34 +150,61 @@ export default function OnboardingScreen({
 
             <div className="onboarding-features-grid">
               <div className="onboarding-feature-pill">
-                <div className="onboarding-feat-icon-wrap" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#2563eb' }}>
-                  <Gamepad2 size={20} />
+                <div className="onboarding-feat-icon-wrap" style={{ background: 'rgba(59, 130, 246, 0.12)', color: '#2563eb' }}>
+                  <Gamepad2 size={22} />
                 </div>
                 <div className="onboarding-feat-text">
-                  <strong>12 Supported Platforms</strong>
-                  <span>Game Boy, SNES, N64, PS1, Sega, NDS & more.</span>
+                  <strong>12 Classic Platforms</strong>
+                  <span>Game Boy, SNES, N64, PS1, Sega, NDS & arcade.</span>
                 </div>
               </div>
 
               <div className="onboarding-feature-pill">
-                <div className="onboarding-feat-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#059669' }}>
-                  <ShieldCheck size={20} />
+                <div className="onboarding-feat-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#059669' }}>
+                  <ShieldCheck size={22} />
                 </div>
                 <div className="onboarding-feat-text">
                   <strong>100% Private Custom ROMs</strong>
-                  <span>Drag & drop your game dumps. ROMs run strictly in local RAM.</span>
+                  <span>Drag & drop game dumps. ROMs run in local RAM.</span>
                 </div>
               </div>
 
               <div className="onboarding-feature-pill">
-                <div className="onboarding-feat-icon-wrap" style={{ background: 'rgba(139, 92, 246, 0.15)', color: '#7c3aed' }}>
-                  <Download size={20} />
+                <div className="onboarding-feat-icon-wrap" style={{ background: 'rgba(6, 182, 212, 0.12)', color: '#0891b2' }}>
+                  <Zap size={22} />
                 </div>
                 <div className="onboarding-feat-text">
-                  <strong>Installable PWA App</strong>
-                  <span>Save to your home screen or desktop for full offline play.</span>
+                  <strong>Local WASM Engine</strong>
+                  <span>Client-side execution with low controller input latency.</span>
                 </div>
               </div>
+
+              {/* Entire PWA Card as an interactive CTA button */}
+              <button
+                type="button"
+                className={`onboarding-feature-pill onboarding-pwa-card ${pwa?.isStandalone ? 'is-standalone' : 'is-actionable'}`}
+                onClick={() => {
+                  if (pwa?.promptInstall && !pwa?.isStandalone) {
+                    pwa.promptInstall();
+                  }
+                  sfx?.playThemeSwitch?.();
+                }}
+                disabled={pwa?.isStandalone}
+                title={pwa?.isStandalone ? 'Retro Player is running in standalone app mode' : 'Click to install Retro Player to home screen or desktop'}
+                aria-label={pwa?.isStandalone ? 'App Installed and running standalone' : 'Install Retro Player Standalone App'}
+              >
+                <div className="onboarding-feat-icon-wrap" style={{ background: pwa?.isStandalone ? 'rgba(16, 185, 129, 0.15)' : 'rgba(139, 92, 246, 0.15)', color: pwa?.isStandalone ? '#059669' : '#7c3aed' }}>
+                  {pwa?.isStandalone ? <Check size={22} /> : <Download size={22} />}
+                </div>
+                <div className="onboarding-feat-text">
+                  <strong>{pwa?.isStandalone ? 'Installed & Offline Ready' : 'Optional Standalone App'}</strong>
+                  <span>
+                    {pwa?.isStandalone 
+                      ? 'Running in full standalone mode with offline cache.' 
+                      : 'Tap to add to home screen or desktop for offline play.'}
+                  </span>
+                </div>
+              </button>
             </div>
           </div>
         )}
