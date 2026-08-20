@@ -37,6 +37,25 @@ Retro Player supports configuration via environment variables in `docker-compose
 
 ---
 
+### 🎮 Demo ROMs & BGM Setup Scenarios
+
+#### Scenario 1: Default / Out-of-the-Box (Recommended)
+- **Settings**: `INCLUDE_DEMO_ROMS=true`, `INCLUDE_DEMO_BGM=true`, `AUTO_SEED_DEMOS=false`
+- **UI Experience**: Instant access to all 52 curated showcase demo ROMs and chiptune BGM tracks. Any custom games you drop in `./roms/` are automatically merged into your library.
+- **Host Disk Impact**: Zero extra host disk space. Your host `./roms/` and `./bgm/` folders remain completely clean and empty (demo files stay inside the Docker image).
+
+#### Scenario 2: 100% Clean Slate / Private Library Only
+- **Settings**: `INCLUDE_DEMO_ROMS=false`, `INCLUDE_DEMO_BGM=false`, `AUTO_SEED_DEMOS=false`
+- **UI Experience**: All bundled demo games and music are hidden. The UI **only** displays games and music you explicitly place into `./roms/` and `./bgm/`. If `./roms/` is empty, your catalog starts at 0 games.
+- **Host Disk Impact**: Your host folders remain clean & empty.
+
+#### Scenario 3: Seed Demos to Host Storage
+- **Settings**: `INCLUDE_DEMO_ROMS=true`, `INCLUDE_DEMO_BGM=true`, `AUTO_SEED_DEMOS=true`
+- **UI Experience**: All games and music are available.
+- **Host Disk Impact**: On first startup, Docker copies the 52 demo ROM files and BGM tracks directly onto your host disk inside `./roms/` and `./bgm/`, allowing you to inspect, organize, or edit the raw files locally.
+
+---
+
 ## 🖥️ Docker CLI (Single Container)
 
 Run directly using standard Docker CLI:
