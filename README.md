@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🕹️ RETRO PLAYER
+<img src="public/favicon.svg" alt="Retro Player Logo" width="80" height="80" />
+
+# RETRO PLAYER
 
 ### *The High-Performance, Zero-Overhead Web Emulation Station*
 
