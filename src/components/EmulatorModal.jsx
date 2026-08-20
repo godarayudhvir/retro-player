@@ -339,7 +339,7 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
               left: 0 !important;
               right: 0 !important;
               width: 100% !important;
-              height: 240px !important;
+              height: 280px !important;
               pointer-events: none !important;
               z-index: 99999 !important;
               display: block !important;
@@ -354,36 +354,37 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
               pointer-events: auto !important;
             }
 
+            /* Natural thumb ergonomics: elevated 52px-64px above screen bottom */
             .ejs_virtualGamepad_left {
               position: absolute !important;
-              bottom: 16px !important;
-              left: 12px !important;
-              width: 130px !important;
-              height: 130px !important;
+              bottom: calc(54px + env(safe-area-inset-bottom, 0px)) !important;
+              left: 16px !important;
+              width: 132px !important;
+              height: 132px !important;
               z-index: 100000 !important;
             }
 
             .ejs_virtualGamepad_right {
               position: absolute !important;
-              bottom: 16px !important;
-              right: 12px !important;
-              width: 135px !important;
-              height: 135px !important;
+              bottom: calc(54px + env(safe-area-inset-bottom, 0px)) !important;
+              right: 16px !important;
+              width: 136px !important;
+              height: 136px !important;
               z-index: 100000 !important;
             }
 
             .ejs_virtualGamepad_bottom {
               position: absolute !important;
-              bottom: 10px !important;
+              bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
               left: 50% !important;
               transform: translateX(-50%) !important;
               margin-left: 0 !important;
               height: 34px !important;
-              width: 130px !important;
+              width: 140px !important;
               display: flex !important;
               align-items: center !important;
               justify-content: center !important;
-              gap: 8px !important;
+              gap: 12px !important;
               z-index: 100000 !important;
             }
 
@@ -402,15 +403,34 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
 
             .ejs_dpad_main {
               opacity: 0.95 !important;
-              filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6)) !important;
+              filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.6)) !important;
             }
 
-            /* Internal EmulatorJS bar hidden so native React extension toolbar renders cleanly */
+            /* Internal EmulatorJS bar and all rogue bottom buttons completely hidden */
             .ejs_menu_bar,
             .ejs_menu_bottom,
-            [class*="menu_bar"] {
+            .ejs_bottom_bar,
+            .ejs_menu_button,
+            .ejs_menu_button_parent,
+            #ejs_menu_bar,
+            #ejs_menu_bottom,
+            [class*="menu_bar"],
+            [class*="menu_button"],
+            [class*="bottom_bar"],
+            .ejs_menu_bar_hidden,
+            #game > div:not(.ejs_virtualGamepad_parent):not(canvas),
+            .ejs_virtualGamepad_parent > div:not(.ejs_virtualGamepad_left):not(.ejs_virtualGamepad_right):not(.ejs_virtualGamepad_bottom):not(.ejs_virtualGamepad_top) {
               display: none !important;
+              opacity: 0 !important;
               pointer-events: none !important;
+              visibility: hidden !important;
+              height: 0 !important;
+              min-height: 0 !important;
+              max-height: 0 !important;
+              overflow: hidden !important;
+              position: absolute !important;
+              top: -9999px !important;
+              left: -9999px !important;
             }
 
             .ejs_virtualGamepad_open {
