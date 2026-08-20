@@ -22,6 +22,7 @@ The Emulator Engine integration handles running retro game ROMs directly in the 
 - **Top Extension Sub-Toolbar & Action Dispatch**: Slide-down top extension toolbar providing instant Restart, Pause/Resume, Mute/Unmute audio toggling, direct WebGL `<canvas>` lossless screenshot capture (PNG), and glassmorphic In-Game Settings HUD.
 - **In-Game Settings, Shaders & Save RAM Hub**: Integrated modal allowing players to adjust master volume, switch real-time display shaders (CRT Phosphor Scanlines, Bilinear Smooth, Vibrant Arcade), trigger Quick Save/Load snapshot states, and export battery `.sav` files directly to disk.
 - **Active Gameplay Scraper Pausing**: Automatically signals the metadata scraper engine (`isPlaying: true`) upon launch to suspend background network scanning, dedicating 100% of CPU and network bandwidth to active emulation.
+- **iOS WebKit Touch-to-Start Handling**: On iOS Safari and Chrome, after core and ROM downloads complete, WebKit's autoplay restrictions may present an initial `undefined` overlay; tapping or clicking the screen immediately activates the audio context and launches the game stage seamlessly.
 - **Clean Unmounting & Memory Teardown**: Destroys active emulator instances on close using `win.EJS_emulator.destroy()`, revokes Object URLs for custom blobs via `URL.revokeObjectURL(game.romUrl)`, and resets iframe URL to `about:blank`.
 
 ---

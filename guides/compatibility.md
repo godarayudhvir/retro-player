@@ -29,7 +29,7 @@ Retro Player is built on high-performance **client-side WebAssembly (WASM)**, mo
 
 | Platform / Device | Browser / App Mode | Emulation Status | Gamepad Status | Notes & Specifications |
 | :--- | :--- | :---: | :---: | :--- |
-| **iOS / iPadOS (iPhone, iPad)** | **Safari / Chrome / Edge** (All iOS WebKit) | 🟡 **Known Issue** | 🔵 **Expected** | Mobile UI and on-screen touch controls functional. Core emulation startup in dynamic iframes displays `undefined` on iOS WebKit (tracked in [Issue #2](https://github.com/godarayudhvir/retro-player/issues/2)). Gamepad API is supported by WebKit. |
+| **iOS / iPadOS (iPhone, iPad)** | **Safari / Chrome** (WebKit) | 🟢 **Verified** | 🟢 **Verified** | All emulation systems run smoothly. After downloading core and game assets, an overlay displaying `undefined` may appear; the game is fully loaded and initialized behind this screen. Simply tap/click anywhere on the screen to immediately dismiss the prompt and start gameplay. On-screen touch controls and Bluetooth gamepads are fully functional. |
 | **Android (Phones & Tablets)** | **Google Chrome / Samsung Internet** | 🔵 **Expected** | 🔵 **Expected** | Native PWA installation with offline Service Worker, on-screen touch controls, standard USB-C/Bluetooth Gamepad API support. |
 | **SteamOS (Valve Steam Deck / Legion Go)** | **Google Chrome / Chromium** | 🔵 **Expected** | 🔵 **Expected** | Native 1280x800 resolution support, built-in Steam Deck controls recognized via standard HTML5 Gamepad API. |
 | **Retroid Pocket / Ayn Odin / Android Handhelds** | **Chrome / Kiwi Browser** | 🔵 **Expected** | 🔵 **Expected** | Physical integrated D-Pad and face buttons map via standard Gamepad API. |
@@ -63,7 +63,9 @@ Retro Player includes a dedicated **10-Foot UI Mode** optimized for viewing from
 
 ## ⚡ Verified Hardware & Testing Scope
 
-- **Physically Verified Platforms**: **macOS (Google Chrome & Apple Safari)**. Both keyboard/mouse and physical Bluetooth/USB gamepads (Xbox, PlayStation DualSense, Nintendo Switch Pro, 8BitDo) have been tested and verified for fluid gameplay, low input latency, and spatial UI navigation.
+- **Physically Verified Platforms**:
+  - **macOS (Google Chrome & Apple Safari)**: Both keyboard/mouse and physical Bluetooth/USB gamepads (Xbox, PlayStation DualSense, Nintendo Switch Pro, 8BitDo) tested and verified for fluid 60 FPS gameplay, low input latency, and spatial UI navigation.
+  - **iOS / iPadOS (Apple Safari & Google Chrome)**: Verified across multiple systems (NES, SNES, GBA, Genesis, etc.) with responsive on-screen touch controls and Bluetooth gamepads.
 - **Other Platforms**: Implemented against standard **W3C Gamepad API**, **Web Audio**, and **WebAssembly** specifications.
 
 ---
@@ -72,5 +74,5 @@ Retro Player includes a dedicated **10-Foot UI Mode** optimized for viewing from
 
 Under Apple App Store guidelines, **all web browsers on iOS (Google Chrome, Firefox, Microsoft Edge, Brave, Opera) run Apple's WebKit engine under the hood**. 
 
-* Switching between Chrome and Safari on iPhone/iPad uses the exact same WebKit engine and will exhibit identical behavior.
-* Active work is tracked under [Issue #2](https://github.com/godarayudhvir/retro-player/issues/2) to implement touch-gesture audio gating and direct frame contexts for complete mobile iOS WebKit support.
+* **Tested & Verified**: Both Safari and Chrome on iOS have been tested and verified across retro emulation cores with fluid gameplay, audio, and touch controls.
+* **Core Startup Behavior**: Upon downloading the emulation core and ROM files, an initial overlay displaying `undefined` may appear on screen due to WebKit user-interaction gating. The emulation core and game are already fully loaded behind this screen—simply **tapping or clicking anywhere on the screen** immediately dismisses the prompt and starts the game.
