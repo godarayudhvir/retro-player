@@ -1,9 +1,12 @@
 /**
  * Retro Player - High-Performance Offline Service Worker
- * Caches core shell assets, Google Fonts, and offline WebAssembly emulator cores.
+ * Caches core UI shell assets, Google Fonts, and offline WebAssembly emulator cores.
+ * 
+ * NOTE: ROMs are downloaded on-demand only and are NEVER cached in ServiceWorker storage.
+ * External scraper probes (Libretro CDN, Wikipedia) are NEVER cached to prevent Chrome quota padding.
  */
 
-const CACHE_NAME = 'retro-player-v1';
+const CACHE_NAME = 'retro-player-v2';
 
 // Critical core assets to pre-cache on service worker installation
 const PRECACHE_ASSETS = [
@@ -21,6 +24,9 @@ const PRECACHE_ASSETS = [
   './screenshots/mobile-1.png'
 ];
 
+// File extensions identifying ROM binaries that must only be fetched on-demand
+const ROM_EXT_REGEX = /\.(zip|7z|nes|sfc|smc|snes|z64|n64|v64|gba|gbc|gb|nds|bin|iso|pbp|chd|cue|md|smd|gen|gg|sms|pce|ngp|ngc|ws|wsc|a26|a78|jag|vec|lynx)$/i;
+
 // Install Event: Pre-cache core shell assets and immediately activate
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -32,7 +38,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate Event: Clean up stale legacy caches and claim active clients
+// Activate Event: Clean up stale legacy caches (wipes old v1 cache to reclaim storage) and claim active clients
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -62,6 +68,23 @@ self.addEventListener('fetch', (event) => {
   // Bypass non-http(s) requests (e.g. chrome-extension://)
   if (!url.protocol.startsWith('http')) {
     return;
+  }
+
+  // RULE 1: ROM Files & ROM Directories -> Direct Network Fetch ONLY (Never stored in ServiceWorker Cache)
+  if (url.pathname.includes('/roms/') || ROM_EXT_REGEX.test(url.pathname)) {
+    return; // Let browser fetch directly on-demand
+  }
+
+  // RULE 2: External Scraper Probes (Libretro CDN, Wikipedia, TheGamesDB, ScreenScraper)
+  // NEVER cache external cross-origin probes in SW to prevent Chromium 7MB opaque quota padding
+  if (
+    url.hostname.includes('thumbnails.libretro.com') ||
+    url.hostname.includes('raw.githubusercontent.com') ||
+    url.hostname.includes('wikipedia.org') ||
+    url.hostname.includes('thegamesdb.net') ||
+    url.hostname.includes('screenscraper.fr')
+  ) {
+    return; // Direct network fetch, metadataMap in IndexedDB handles caching
   }
 
   // Strategy 1: Dynamic REST API endpoints (/api/*) -> Network First with cache fallback
@@ -103,7 +126,8 @@ self.addEventListener('fetch', (event) => {
         }
 
         return fetch(request).then((networkResponse) => {
-          if (networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque')) {
+          // STRICT: Only cache standard 200 OK responses, NEVER opaque responses
+          if (networkResponse && networkResponse.status === 200) {
             const responseClone = networkResponse.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
           }
@@ -136,19 +160,4 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
-
-  // Default: Stale-While-Revalidate
-  event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      const fetchPromise = fetch(request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
-        }
-        return networkResponse;
-      }).catch(() => cachedResponse);
-
-      return cachedResponse || fetchPromise;
-    })
-  );
 });

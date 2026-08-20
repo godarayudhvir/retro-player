@@ -133,7 +133,7 @@ export default function App() {
   } = useRomManifest(handleCustomRomLoaded, { favorites, recentlyPlayed });
 
   // Hook 7: Automated Online Metadata & Cover Art Scraper
-  const scraper = useMetadataScraper(games, { isMobile });
+  const scraper = useMetadataScraper(games, { isMobile, isPlaying: !!activeGame });
 
   // Hook 8: Progressive Web App (PWA) & Service Worker Cache Engine
   const pwa = usePwaInstall();

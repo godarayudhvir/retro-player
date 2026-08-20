@@ -18,7 +18,7 @@ const AUTO_SCRAPE_STORAGE_KEY = 'retroplayer_autoscrape_enabled';
  * state synchronization with IndexedDB, and library-wide progress tracking.
  */
 export function useMetadataScraper(games = [], options = {}) {
-  const { isMobile = false } = options;
+  const { isMobile = false, isPlaying = false } = options;
   const [metadataMap, setMetadataMap] = useState({});
   const [isScraping, setIsScraping] = useState(false);
   const [scrapeProgress, setScrapeProgress] = useState({ current: 0, total: 0 });
@@ -163,8 +163,9 @@ export function useMetadataScraper(games = [], options = {}) {
   }, [games, scrapeAll]);
 
   // Auto-scrape missing games in the background:
-  // Automatically runs when on Mobile UI or when enabled by user in settings
+  // Automatically runs when on Mobile UI or when enabled by user in settings (paused during active gameplay)
   useEffect(() => {
+    if (isPlaying) return; // Never auto-scrape during active gameplay
     const shouldAutoScrape = autoScrapeEnabled || isMobile;
     if (shouldAutoScrape && games && games.length > 0 && !activeScrapeQueueRef.current && !cancelRequestedRef.current) {
       // Find games that have not been scraped yet
@@ -178,7 +179,7 @@ export function useMetadataScraper(games = [], options = {}) {
         scrapeAll(unscraped, false);
       }
     }
-  }, [autoScrapeEnabled, isMobile, games, metadataMap, scrapeAll]);
+  }, [autoScrapeEnabled, isMobile, isPlaying, games, metadataMap, scrapeAll]);
 
   // Clear cache and reset
   const clearCache = useCallback(async () => {

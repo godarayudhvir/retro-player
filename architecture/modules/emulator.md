@@ -18,6 +18,8 @@ The Emulator Engine integration handles running retro game ROMs directly in the 
 - **Custom ROM Blob URL Support**: Accepts local uploaded files as `blob:` URLs without throwing origin resolution errors.
 - **Persistent In-Game Battery SRAM & Emscripten FS Auto-Injection**: Automatically extracts, Base64-serializes, and persists in-game battery RAM (`.sav`) and snapshot states directly to RetroPlayerDB (Server Persistent DB + IndexedDB offline cache). On every session boot, existing `.sav` bytes are preloaded and injected directly into Emscripten's virtual filesystem (`gameManager.FS.writeFile`) before execution so in-game menus immediately display **CONTINUE** without lost progress.
 - **Background SRAM Auto-Flush Engine**: Executes periodic in-game battery RAM extraction every 10 seconds and upon modal exit / window beforeunload, ensuring zero gameplay progress is lost.
+- **Dedicated Canvas Container & UI Cleanliness**: Directly centers and styles `#ejs_screen` and `.ejs_screen` (`100%` width/height) while hiding rogue bottom menu bars and internal EmulatorJS controls.
+- **Active Gameplay Scraper Pausing**: Automatically signals the metadata scraper engine (`isPlaying: true`) upon launch to suspend background network scanning, dedicating 100% of CPU and network bandwidth to 60 FPS emulation.
 - **Clean Unmounting & Memory Teardown**: Destroys active emulator instances on close using `win.EJS_emulator.destroy()`, revokes Object URLs for custom blobs via `URL.revokeObjectURL(game.romUrl)`, and resets iframe URL to `about:blank`.
 
 ---

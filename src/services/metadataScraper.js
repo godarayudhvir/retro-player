@@ -144,8 +144,11 @@ function openDB() {
   });
 }
 
+let isServerDbAvailable = typeof window !== 'undefined' && !window.location.hostname.endsWith('github.io');
+
 // Fetch metadata from server database (/api/db/game_metadata)
 async function fetchServerMetadata() {
+  if (!isServerDbAvailable) return null;
   try {
     const res = await fetch('/api/db/game_metadata');
     if (res.ok) {
@@ -153,8 +156,12 @@ async function fetchServerMetadata() {
       if (data && data.success && data.data) {
         return data.data;
       }
+    } else if (res.status === 404 || res.status === 405) {
+      isServerDbAvailable = false;
     }
-  } catch (_) {}
+  } catch (_) {
+    isServerDbAvailable = false;
+  }
   return null;
 }
 
@@ -185,22 +192,28 @@ async function getCachedMetadata(id) {
     }
 
     // 2. Fallback to server DB
-    try {
-      const res = await fetch(`/api/db/game_metadata/${encodeURIComponent(id)}`);
-      if (res.ok) {
-        const json = await res.json();
-        if (json && json.data) {
-          const item = json.data;
-          if (item.coverUrl && item.coverUrl.endsWith('.svg')) item.coverUrl = null;
-          // Seed local IndexedDB
-          if (db) {
-            const tx = db.transaction(STORE_NAME, 'readwrite');
-            tx.objectStore(STORE_NAME).put(item);
+    if (isServerDbAvailable) {
+      try {
+        const res = await fetch(`/api/db/game_metadata/${encodeURIComponent(id)}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json && json.data) {
+            const item = json.data;
+            if (item.coverUrl && item.coverUrl.endsWith('.svg')) item.coverUrl = null;
+            // Seed local IndexedDB
+            if (db) {
+              const tx = db.transaction(STORE_NAME, 'readwrite');
+              tx.objectStore(STORE_NAME).put(item);
+            }
+            return item;
           }
-          return item;
+        } else if (res.status === 404 || res.status === 405) {
+          isServerDbAvailable = false;
         }
+      } catch (_) {
+        isServerDbAvailable = false;
       }
-    } catch (_) {}
+    }
 
     return null;
   } catch (err) {
@@ -280,14 +293,20 @@ async function saveCachedMetadata(id, data) {
       localStorage.setItem(`rp_meta_${id}`, JSON.stringify(record));
     } catch (_) {}
 
-    // 3. Persistent Server Database (/api/db/game_metadata)
-    try {
-      fetch('/api/db/game_metadata', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: id, value: record })
-      }).catch(() => {});
-    } catch (_) {}
+    // 3. Persistent Server Database (/api/db/game_metadata) if available
+    if (isServerDbAvailable) {
+      try {
+        fetch('/api/db/game_metadata', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key: id, value: record })
+        }).catch(() => {
+          isServerDbAvailable = false;
+        });
+      } catch (_) {
+        isServerDbAvailable = false;
+      }
+    }
 
     return record;
   } catch (err) {

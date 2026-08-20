@@ -406,6 +406,17 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
               filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.6)) !important;
             }
 
+            #ejs_screen,
+            .ejs_screen {
+              width: 100% !important;
+              height: 100% !important;
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+              position: absolute !important;
+              inset: 0 !important;
+            }
+
             /* Internal EmulatorJS bar and all rogue bottom buttons completely hidden */
             .ejs_menu_bar,
             .ejs_menu_bottom,
@@ -418,7 +429,6 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
             [class*="menu_button"],
             [class*="bottom_bar"],
             .ejs_menu_bar_hidden,
-            #game > div:not(.ejs_virtualGamepad_parent):not(canvas),
             .ejs_virtualGamepad_parent > div:not(.ejs_virtualGamepad_left):not(.ejs_virtualGamepad_right):not(.ejs_virtualGamepad_bottom):not(.ejs_virtualGamepad_top) {
               display: none !important;
               opacity: 0 !important;

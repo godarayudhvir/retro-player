@@ -27,7 +27,9 @@ The module provides intelligent background pre-caching and runtime caching for a
 
 - **Offline Service Worker Caching (`sw.js`)**:
   - Pre-caches core HTML shell (`/index.html`), app entrypoints, web manifest, and vector icons during installation.
-  - Implements **Cache-First** strategy for static script bundles, CSS themes, Google Fonts, and local WebAssembly emulator cores (`/emulatorjs/data/*`), dynamically populating the `retro-player-v1` cache on first access.
+  - Implements **Cache-First** strategy for static script bundles, CSS themes, Google Fonts, and local WebAssembly emulator cores (`/emulatorjs/data/*`), dynamically populating the `retro-player-v2` cache on first access.
+  - **On-Demand ROM Fetching**: Explicitly bypasses ServiceWorker CacheStorage for ROM binary paths (`/roms/*` and game binary extensions), ensuring ROMs are loaded purely on-demand without inflating client storage.
+  - **Opaque CDN Probe Bypass**: Bypasses external scraper image candidate probes to prevent Chromium 7MB per-opaque-request security quota padding.
   - Implements **Network-First** strategy with cached fallbacks for dynamic REST API endpoints (`/api/games`, `/api/bgm-tracks`).
   - Implements single-page application navigation fallbacks to `/index.html` during network disconnections.
   - Automatically purges outdated legacy caches during Service Worker activation (`self.clients.claim()`, `self.skipWaiting()`).
