@@ -27,9 +27,10 @@ All scraped assets and metadata records are asynchronously cached in browser **I
   - Asynchronous batch processing queue with throttling (120ms tick intervals) to avoid network congestion and API rate-limiting.
   - Live progress tracking (`current`/`total`) reflected in the Topbar status pill.
   - Immediate cancellation capability (`stopScrape()`) via Topbar click or Settings control.
-- **Persistent User Auto-Scrape Configuration**:
-  - Auto-scrape on application boot / reload defaults to disabled or configurable via `localStorage.getItem('retroplayer_autoscrape_enabled')`.
-  - Prevents unwanted background requests across reloads and new sessions until the user explicitly enables it or runs an on-demand scan.
+- **Persistent User Auto-Scrape Configuration & Automatic Mobile Mode**:
+  - Auto-scrape on desktop application boot / reload defaults to disabled or configurable via `localStorage.getItem('retroplayer_autoscrape_enabled')`.
+  - **Automatic Mobile Execution**: When on Mobile UI (`isMobile: true`), unscraped library titles automatically trigger silent background scraping and live card cover hydration without requiring user intervention or manual buttons.
+  - Prevents unwanted background requests across reloads on desktop until explicitly enabled or triggered on-demand.
 - **Tactile UI Loading & Shimmer Feedback**:
   - Displays smooth gradient shimmer loading animations on 3D cartridge labels while artwork is downloading.
   - Graceful fallback to styled platform badges and clean typography if a game has no online artwork.

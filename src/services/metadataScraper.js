@@ -409,7 +409,7 @@ function generateThumbnailCandidates(game) {
 /**
  * Test if an image exists and loads with a fast timeout
  */
-function probeImageUrl(url, timeoutMs = 1500) {
+function probeImageUrl(url, timeoutMs = 3000) {
   return new Promise((resolve) => {
     let finished = false;
     const img = new Image();

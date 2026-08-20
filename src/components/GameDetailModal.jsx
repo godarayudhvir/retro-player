@@ -32,7 +32,8 @@ export default function GameDetailModal({
   const logsContainerRef = useRef(null);
 
   const meta = metadata || {};
-  const coverSrc = meta.coverUrl || (game.coverUrl && !game.coverUrl.endsWith('.svg') ? game.coverUrl : null);
+  const rawCover = meta.coverUrl || (game.coverUrl && !game.coverUrl.endsWith('.svg') ? game.coverUrl : null);
+  const coverSrc = rawCover ? resolveAssetPath(rawCover) : null;
   const description = meta.description || getGameDescription(game);
   const releaseYear = meta.releaseYear || meta.releaseDate?.split('-')[0] || (getReleaseDate(game) !== '2000-01-01' ? getReleaseDate(game).split('-')[0] : 'Classic');
   const developer = meta.developer || game.systemName || 'Classic';

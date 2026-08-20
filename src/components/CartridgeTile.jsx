@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Star, Sparkles } from 'lucide-react';
 import { getCartridgeColor } from '../utils/cartridgeColors';
+import { resolveAssetPath } from '../utils/assetPath';
 
 /**
  * Individual 3D Physical Retro Cartridge Tile component with tactile sheen, grips, dynamic scraped box art, and brand stamps.
@@ -12,7 +13,8 @@ export default function CartridgeTile({ game, metadata, isFocused, isFavorite, o
   const [imgError, setImgError] = useState(false);
 
   const cartColor = getCartridgeColor(game);
-  const coverSrc = metadata?.coverUrl || (game.coverUrl && !game.coverUrl.endsWith('.svg') ? game.coverUrl : null);
+  const rawCover = metadata?.coverUrl || (game.coverUrl && !game.coverUrl.endsWith('.svg') ? game.coverUrl : null);
+  const coverSrc = rawCover ? resolveAssetPath(rawCover) : null;
 
   return (
     <div

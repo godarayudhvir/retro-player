@@ -175,7 +175,8 @@ export default function MobileAppView({
   // Helper renderer for game item card in mobile carousels or grids
   const renderGameCard = (game) => {
     const meta = metadataMap[game.id] || metadataMap[`${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')];
-    const coverSrc = meta?.coverUrl || (game.coverUrl && !game.coverUrl.endsWith('.svg') ? game.coverUrl : null);
+    const rawCover = meta?.coverUrl || (game.coverUrl && !game.coverUrl.endsWith('.svg') ? game.coverUrl : null);
+    const coverSrc = rawCover ? resolveAssetPath(rawCover) : null;
     const isFav = isFavorite ? isFavorite(game.id || game.title) : false;
 
     return (
@@ -439,7 +440,7 @@ export default function MobileAppView({
                 <div className="mobile-sheet-cover-wrap">
                   {selectedMeta?.coverUrl || (selectedGameForDetails.coverUrl && !selectedGameForDetails.coverUrl.endsWith('.svg')) ? (
                     <img 
-                      src={selectedMeta?.coverUrl || selectedGameForDetails.coverUrl} 
+                      src={resolveAssetPath(selectedMeta?.coverUrl || selectedGameForDetails.coverUrl)} 
                       alt={selectedGameForDetails.title} 
                       className="mobile-sheet-cover-img"
                     />

@@ -17,7 +17,8 @@ const AUTO_SCRAPE_STORAGE_KEY = 'retroplayer_autoscrape_enabled';
  * Custom React hook to coordinate online metadata and cover art scraping,
  * state synchronization with IndexedDB, and library-wide progress tracking.
  */
-export function useMetadataScraper(games = []) {
+export function useMetadataScraper(games = [], options = {}) {
+  const { isMobile = false } = options;
   const [metadataMap, setMetadataMap] = useState({});
   const [isScraping, setIsScraping] = useState(false);
   const [scrapeProgress, setScrapeProgress] = useState({ current: 0, total: 0 });
@@ -161,9 +162,11 @@ export function useMetadataScraper(games = []) {
     await scrapeAll(selectedGames, force);
   }, [games, scrapeAll]);
 
-  // Auto-scrape missing games in the background ONLY if enabled by user
+  // Auto-scrape missing games in the background:
+  // Automatically runs when on Mobile UI or when enabled by user in settings
   useEffect(() => {
-    if (autoScrapeEnabled && games && games.length > 0 && !activeScrapeQueueRef.current && !cancelRequestedRef.current) {
+    const shouldAutoScrape = autoScrapeEnabled || isMobile;
+    if (shouldAutoScrape && games && games.length > 0 && !activeScrapeQueueRef.current && !cancelRequestedRef.current) {
       // Find games that have not been scraped yet
       const unscraped = games.filter(g => {
         const id = g.id || `${g.systemKey}-${g.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
@@ -175,7 +178,7 @@ export function useMetadataScraper(games = []) {
         scrapeAll(unscraped, false);
       }
     }
-  }, [autoScrapeEnabled, games, metadataMap, scrapeAll]);
+  }, [autoScrapeEnabled, isMobile, games, metadataMap, scrapeAll]);
 
   // Clear cache and reset
   const clearCache = useCallback(async () => {
