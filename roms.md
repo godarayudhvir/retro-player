@@ -126,11 +126,11 @@ We deeply respect intellectual property rights and the work of all game develope
 
 | # | Filename | Size | Classification |
 |---|---|---|---|
-| 1 | `Crash Bandicoot - Warped (USA) (Demo)` | 67.55 MB | Curated Showcase Demo |
-| 2 | `Dino Crisis (USA) (Demo)` | 26.36 MB | Curated Showcase Demo |
-| 3 | `Driver - You Are the Wheelman (USA) (Demo)` | 45.28 MB | Curated Showcase Demo |
-| 4 | `Rayman 2 - The Great Escape (USA) (Demo)` | 33.88 MB | Curated Showcase Demo |
-| 5 | `Tony Hawk's Pro Skater 2 (USA) (Demo)` | 67.69 MB | Curated Showcase Demo |
+| 1 | `Crash Bandicoot - Warped (USA) (Demo).iso` | 67.55 MB | Curated Showcase Demo |
+| 2 | `Dino Crisis (USA) (Demo).iso` | 26.36 MB | Curated Showcase Demo |
+| 3 | `Driver - You Are the Wheelman (USA) (Demo).iso` | 45.28 MB | Curated Showcase Demo |
+| 4 | `Rayman 2 - The Great Escape (USA) (Demo).iso` | 33.88 MB | Curated Showcase Demo |
+| 5 | `Tony Hawk's Pro Skater 2 (USA) (Demo).iso` | 67.69 MB | Curated Showcase Demo |
 
 ### `sega_genesis` — Sega Genesis / Mega Drive (5 titles, 14.00 MB)
 

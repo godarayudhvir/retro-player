@@ -234,7 +234,10 @@ function multiConsoleScannerPlugin() {
           const fullRomPath = path.join(romsBaseDir, relativePath);
 
           if (fs.existsSync(fullRomPath) && fs.statSync(fullRomPath).isFile()) {
+            const stat = fs.statSync(fullRomPath);
             res.setHeader('Content-Type', 'application/octet-stream');
+            res.setHeader('Content-Length', stat.size);
+            res.setHeader('Accept-Ranges', 'bytes');
             res.setHeader('Access-Control-Allow-Origin', '*');
             const stream = fs.createReadStream(fullRomPath);
             stream.pipe(res);
