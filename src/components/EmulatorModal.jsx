@@ -276,7 +276,8 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
       if (isCancelled || !stageRef.current) return;
 
       const cdnDataPath = 'https://cdn.emulatorjs.org/stable/data/';
-      const localDataPath = '/emulatorjs/data/';
+      const localDataPath = new URL(resolveAssetPath('emulatorjs/data/'), window.location.href).href;
+      const baseHref = new URL(resolveAssetPath('./'), window.location.href).href;
       const isOffline = !navigator.onLine;
       const initialDataPath = isOffline ? localDataPath : cdnDataPath;
       setIsLocalOffline(isOffline);
@@ -320,6 +321,7 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
         <html>
         <head>
           <meta charset="utf-8">
+          <base href="${baseHref}">
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
           <style>
             *, *::before, *::after {
@@ -602,7 +604,21 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
             window.EJS_pathtodata = ${JSON.stringify(initialDataPath)};
             window.EJS_startOnLoaded = true;
             window.EJS_backgroundColor = '#000000';
+            window.EJS_disableAutoLang = true;
             window.EJS_language = 'en-US';
+            window.EJS_langJson = {
+              "Loading...": "Loading...",
+              "Start Game": "Start Game",
+              "Decompress Game Core": "Decompress Game Core",
+              "Download Game Core": "Download Game Core",
+              "Download Game Data": "Download Game Data",
+              "Download Game State": "Download Game State",
+              "Outdated graphics driver": "Outdated graphics driver",
+              "Error downloading core": "Error downloading core",
+              "Network Error": "Network Error",
+              "Error for site owner": "Notice",
+              "Check console": "Check console for details"
+            };
             window.EJS_VirtualGamepad = ${isMobileTouch ? 'true' : 'false'};
             window.__INITIAL_SAVE_BASE64__ = ${JSON.stringify(initialSaveBase64)};
             window.__INITIAL_STATE_BASE64__ = ${JSON.stringify(initialStateBase64)};
@@ -1163,11 +1179,25 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
               }
             }, 10000);
 
+            // Mobile & iOS Safari WebAudio unlock on first user interaction inside iframe
+            function unlockWebAudio() {
+              try {
+                const emu = window.EJS_emulator;
+                if (emu && emu.audioContext && emu.audioContext.state === 'suspended') {
+                  emu.audioContext.resume();
+                }
+              } catch (e) {}
+            }
+            window.addEventListener('touchstart', unlockWebAudio, { passive: true });
+            window.addEventListener('touchend', unlockWebAudio, { passive: true });
+            window.addEventListener('pointerdown', unlockWebAudio, { passive: true });
+            window.addEventListener('click', unlockWebAudio, { passive: true });
+
             function handleLoaderFallback() {
-              console.warn('⚠️ [EMULATOR LOADER FALLBACK] Primary path failed. Attempting local /emulatorjs/data/loader.js fallback...');
-              window.EJS_pathtodata = '/emulatorjs/data/';
+              console.warn('⚠️ [EMULATOR LOADER FALLBACK] Primary path failed. Attempting local fallback...');
+              window.EJS_pathtodata = ${JSON.stringify(localDataPath)};
               const fallbackScript = document.createElement('script');
-              fallbackScript.src = '/emulatorjs/data/loader.js';
+              fallbackScript.src = ${JSON.stringify(localDataPath + 'loader.js')};
               fallbackScript.onerror = function() {
                 console.error('🚨 [EMULATOR FATAL ERROR] Both online and local EmulatorJS loader failed to load.');
               };
@@ -1180,10 +1210,23 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
     `;
 
     try {
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-      iframeDoc.open();
-      iframeDoc.write(htmlContent);
-      iframeDoc.close();
+      if ('srcdoc' in iframe) {
+        iframe.srcdoc = htmlContent;
+      } else {
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        iframeDoc.open();
+        iframeDoc.write(htmlContent);
+        iframeDoc.close();
+      }
+
+      iframe.onload = () => {
+        try {
+          if (iframeRef.current) {
+            iframeRef.current.focus();
+            iframeRef.current.contentWindow?.focus();
+          }
+        } catch (e) {}
+      };
 
       setTimeout(() => {
         try {

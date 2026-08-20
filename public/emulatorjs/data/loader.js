@@ -128,7 +128,10 @@
     try {
         systemLang = Intl.DateTimeFormat().resolvedOptions().locale;
     } catch(e) {} //Ignore
-    if ((typeof window.EJS_language === "string" && window.EJS_language !== "en-US") || (systemLang && window.EJS_disableAutoLang !== false)) {
+    if (window.EJS_langJson && typeof window.EJS_langJson === "object") {
+        config.langJson = Object.assign({}, window.EJS_langJson);
+    }
+    if ((typeof window.EJS_language === "string" && window.EJS_language !== "en-US") || (systemLang && window.EJS_disableAutoLang === true)) {
         const language = window.EJS_language || systemLang;
         try {
             let path;
@@ -139,11 +142,17 @@
                 path = scriptPath + "localization/" + language + ".json";
             }
             config.language = language;
-            config.langJson = JSON.parse(await (await fetch(path)).text());
+            const res = await fetch(path);
+            if (res.ok) {
+                const fetchedJson = await res.json();
+                config.langJson = Object.assign({}, config.langJson || {}, fetchedJson);
+            }
         } catch(e) {
             console.log("Missing language", language, "!!");
-            delete config.language;
-            delete config.langJson;
+            if (!config.langJson) {
+                delete config.language;
+                delete config.langJson;
+            }
         }
     }
 

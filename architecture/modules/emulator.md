@@ -15,6 +15,9 @@ The Emulator Engine integration handles running retro game ROMs directly in the 
 - **HUD Network & Status Badges**: Displays live status badges for controller readiness (`● GAMEPAD READY`) and network operational mode (`ONLINE CDN` or `LOCAL OFFLINE`).
 - **Session Duration Tracking**: Tracks active gameplay session duration and reports elapsed playtime seconds on modal close/unmount to persist total playtime metrics.
 - **Cross-Console Core Mapping**: Dynamically injects the correct emulation core (`nes`, `snes`, `gba`, `gb` for GB/GBC, `n64`, `nds`, `segaMD`, `psx`, `arcade`) with automatic core name normalization in `EmulatorModal.jsx`.
+- **iOS Safari & WebKit Compatibility Engine**: Injects HTML payloads using `iframe.srcdoc` and `<base href="...">` instead of dynamic `document.write()`, preserving parent origin context and enabling WebAssembly streaming, Web Workers, and CORS asset fetching under iOS WebKit.
+- **WebAudio Autoplay Unlocker**: Binds passive `touchstart`, `touchend`, `pointerdown`, and `click` listeners inside the iframe context to immediately resume suspended `AudioContext` on first touch interaction without browser autoplay lockups.
+- **Localization Safety & "undefined" Error Prevention**: Configures `window.EJS_disableAutoLang = true` with a bundled fallback English dictionary (`window.EJS_langJson`), preventing missing remote locale JSON files from failing and writing literal `"undefined"` to the canvas during boot failures or network glitches.
 - **Custom ROM Blob URL Support**: Accepts local uploaded files as `blob:` URLs without throwing origin resolution errors.
 - **Profile-Scoped Battery SRAM & Emscripten FS Auto-Injection**: Automatically extracts, Base64-serializes, and persists in-game battery RAM (`.sav`) and snapshot states scoped to the active user profile (`save_${activeProfileId}_${gameId}`) in IndexedDB (`STORES.GAME_SAVES`). On every session boot, existing `.sav` bytes are preloaded and injected directly into Emscripten's virtual filesystem (`gameManager.FS.writeFile`) before execution so in-game menus immediately display **CONTINUE** with profile-isolated progress. *(See [Save States Guide](../../guides/save-states.md))*.
 - **Background SRAM Auto-Flush Engine**: Executes periodic in-game battery RAM extraction every 10 seconds and upon modal exit / window beforeunload, ensuring zero gameplay progress is lost.
@@ -29,10 +32,10 @@ The Emulator Engine integration handles running retro game ROMs directly in the 
 ## 3. Detailed Logic Behind Everything and How It Works
 
 ### Lifecycle & Iframe Injection
-1. When `<EmulatorModal game={game} gamepadConnected={gamepadConnected} onClose={handleClose} onSessionEnd={handleSessionEnd} />` mounts, a `useEffect` hook inspects `game.romUrl`. If the URL begins with `blob:`, `data:`, `http://`, or `https://`, it uses the URL directly; otherwise it constructs an absolute URL relative to `window.location.origin`.
-2. Inspects `navigator.onLine` to select initial data path (`https://cdn.emulatorjs.org/stable/data/` if online, `/emulatorjs/data/` if offline).
+1. When `<EmulatorModal game={game} gamepadConnected={gamepadConnected} onClose={handleClose} onSessionEnd={handleSessionEnd} />` mounts, a `useEffect` hook inspects `game.romUrl`. If the URL begins with `blob:`, `data:`, `http://`, or `https://`, it uses the URL directly; otherwise it constructs an absolute URL via `resolveAssetPath(game.romUrl)`.
+2. Resolves local and CDN data paths using `new URL(resolveAssetPath('emulatorjs/data/'), window.location.href).href` and inspects `navigator.onLine` to select the initial data path.
 3. Creates an `<iframe>` dynamically, setting `allow="autoplay *; gamepad *; fullscreen *; cross-origin-isolated; accelerometer; gyroscope"` and `tabIndex=0`.
-4. Injects inline HTML configuring EmulatorJS variables, fallback handlers, and gamepad synchronization:
+4. Injects inline HTML via `iframe.srcdoc = htmlContent` (with fallback to `iframeDoc.write()` for legacy browsers) configuring `<base href>`, EmulatorJS variables, audio gesture unlockers, fallback handlers, and gamepad synchronization:
    ```javascript
    window.EJS_player = '#game';
    window.EJS_gameUrl = absoluteRomUrl;
@@ -40,8 +43,10 @@ The Emulator Engine integration handles running retro game ROMs directly in the 
    window.EJS_gameID = game.id;
    window.EJS_pathtodata = initialDataPath;
    window.EJS_startOnLoaded = true;
+   window.EJS_disableAutoLang = true;
+   window.EJS_language = 'en-US';
    window.EJS_ready = function() { window.focus(); const el = document.querySelector('canvas') || document.querySelector('#game'); el && el.focus(); syncAllGamepads(); };
    window.EJS_onGameStart = function() { window.focus(); const el = document.querySelector('canvas') || document.querySelector('#game'); el && el.focus(); syncAllGamepads(); };
    ```
-5. Loads `loader.js` script with `onerror="handleLoaderFallback()"` so that runtime CDN network failures switch to `/emulatorjs/data/loader.js` automatically.
+5. Loads `loader.js` script with `onerror="handleLoaderFallback()"` so that runtime CDN network failures switch to the dynamically resolved local `loader.js` automatically.
 6. On cleanup/unmount or explicit close, calculates elapsed playtime seconds and triggers `onSessionEnd(gameId, elapsedSeconds)`, revokes custom Blob Object URLs, and invokes `destroy()` on `win.EJS_emulator`.
