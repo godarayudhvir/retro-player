@@ -9,9 +9,14 @@ on:
     paths-ignore:
       - '**.md'
       - 'architecture/**'
+      - 'guides/**'
       - '.agents/**'
       - 'home.webp'
       - '.gitignore'
+      - '.dockerignore'
+      - 'railway.json'
+      - 'render.yaml'
+      - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
 env:
