@@ -13,9 +13,55 @@ const BGM_DIR = process.env.BGM_DIR || path.join(__dirname, 'public/bgm');
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 const DB_FILE = path.join(DATA_DIR, 'retroplayer_db.json');
 const DIST_DIR = path.join(__dirname, 'dist');
+const BUNDLED_ROMS_DIR = path.join(__dirname, 'public/roms');
+const BUNDLED_BGM_DIR = path.join(__dirname, 'public/bgm');
+
+// Configuration flags for demo assets & auto-seeding
+const INCLUDE_DEMO_ROMS = (process.env.INCLUDE_DEMO_ROMS || 'true').toLowerCase() !== 'false';
+const INCLUDE_DEMO_BGM = (process.env.INCLUDE_DEMO_BGM || 'true').toLowerCase() !== 'false';
+const AUTO_SEED_DEMOS = (process.env.AUTO_SEED_DEMOS || 'false').toLowerCase() === 'true';
 
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+if (!fs.existsSync(ROMS_DIR)) {
+  fs.mkdirSync(ROMS_DIR, { recursive: true });
+}
+if (!fs.existsSync(BGM_DIR)) {
+  fs.mkdirSync(BGM_DIR, { recursive: true });
+}
+
+// Helper to copy directory recursively for auto-seeding
+function copyDirRecursive(src, dest) {
+  if (!fs.existsSync(src)) return;
+  if (!fs.existsSync(dest)) {
+    fs.mkdirSync(dest, { recursive: true });
+  }
+  const entries = fs.readdirSync(src, { withFileTypes: true });
+  for (const entry of entries) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+    if (entry.isDirectory()) {
+      copyDirRecursive(srcPath, destPath);
+    } else if (entry.isFile() && !fs.existsSync(destPath)) {
+      try {
+        fs.copyFileSync(srcPath, destPath);
+      } catch (err) {
+        console.warn(`[AUTO-SEED WARN] Failed copying ${entry.name}:`, err.message);
+      }
+    }
+  }
+}
+
+if (AUTO_SEED_DEMOS) {
+  if (path.resolve(ROMS_DIR) !== path.resolve(BUNDLED_ROMS_DIR) && fs.existsSync(BUNDLED_ROMS_DIR)) {
+    console.log(`🌱 [AUTO-SEED] Seeding bundled demo ROMs into: ${ROMS_DIR}`);
+    copyDirRecursive(BUNDLED_ROMS_DIR, ROMS_DIR);
+  }
+  if (path.resolve(BGM_DIR) !== path.resolve(BUNDLED_BGM_DIR) && fs.existsSync(BUNDLED_BGM_DIR)) {
+    console.log(`🌱 [AUTO-SEED] Seeding bundled BGM tracks into: ${BGM_DIR}`);
+    copyDirRecursive(BUNDLED_BGM_DIR, BGM_DIR);
+  }
 }
 
 // System definition mapping — one canonical key per system
@@ -67,23 +113,32 @@ const VALID_EXTENSIONS = [
 ];
 const VALID_AUDIO_EXTENSIONS = ['.mp3', '.ogg', '.wav', '.m4a', '.flac', '.aac'];
 
-// Serve raw ROM binaries with CORS & octet-stream headers
+// Serve raw ROM binaries with CORS & octet-stream headers (with fallback to bundled demos)
 app.use('/roms', (req, res, next) => {
   try {
     const relativePath = decodeURIComponent(req.url.split('?')[0]);
-    const fullRomPath = path.join(ROMS_DIR, relativePath);
+    let targetPath = path.join(ROMS_DIR, relativePath);
 
-    if (fs.existsSync(fullRomPath) && fs.statSync(fullRomPath).isFile()) {
-      const stat = fs.statSync(fullRomPath);
+    if (!fs.existsSync(targetPath) || !fs.statSync(targetPath).isFile()) {
+      if (INCLUDE_DEMO_ROMS && path.resolve(ROMS_DIR) !== path.resolve(BUNDLED_ROMS_DIR)) {
+        const bundledPath = path.join(BUNDLED_ROMS_DIR, relativePath);
+        if (fs.existsSync(bundledPath) && fs.statSync(bundledPath).isFile()) {
+          targetPath = bundledPath;
+        }
+      }
+    }
+
+    if (fs.existsSync(targetPath) && fs.statSync(targetPath).isFile()) {
+      const stat = fs.statSync(targetPath);
       res.setHeader('Content-Type', 'application/octet-stream');
       res.setHeader('Content-Length', stat.size);
       res.setHeader('Accept-Ranges', 'bytes');
       res.setHeader('Access-Control-Allow-Origin', '*');
-      const stream = fs.createReadStream(fullRomPath);
+      const stream = fs.createReadStream(targetPath);
       stream.pipe(res);
       return;
     } else {
-      console.warn(`[ROM SERVER WARN] ROM not found: ${fullRomPath}`);
+      console.warn(`[ROM SERVER WARN] ROM not found: ${targetPath}`);
     }
   } catch (e) {
     console.error('[ROM SERVER ERROR] Error serving ROM:', e);
@@ -91,14 +146,23 @@ app.use('/roms', (req, res, next) => {
   next();
 });
 
-// Serve Background Music (BGM) audio files
+// Serve Background Music (BGM) audio files (with fallback to bundled tracks)
 app.use('/bgm', (req, res, next) => {
   try {
     const relativePath = decodeURIComponent(req.url.split('?')[0]);
-    const fullBgmPath = path.join(BGM_DIR, relativePath);
+    let targetPath = path.join(BGM_DIR, relativePath);
 
-    if (fs.existsSync(fullBgmPath) && fs.statSync(fullBgmPath).isFile()) {
-      const ext = path.extname(fullBgmPath).toLowerCase();
+    if (!fs.existsSync(targetPath) || !fs.statSync(targetPath).isFile()) {
+      if (INCLUDE_DEMO_BGM && path.resolve(BGM_DIR) !== path.resolve(BUNDLED_BGM_DIR)) {
+        const bundledPath = path.join(BUNDLED_BGM_DIR, relativePath);
+        if (fs.existsSync(bundledPath) && fs.statSync(bundledPath).isFile()) {
+          targetPath = bundledPath;
+        }
+      }
+    }
+
+    if (fs.existsSync(targetPath) && fs.statSync(targetPath).isFile()) {
+      const ext = path.extname(targetPath).toLowerCase();
       const mimeMap = {
         '.mp3': 'audio/mpeg',
         '.ogg': 'audio/ogg',
@@ -110,7 +174,7 @@ app.use('/bgm', (req, res, next) => {
       res.setHeader('Content-Type', mimeMap[ext] || 'audio/mpeg');
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Accept-Ranges', 'bytes');
-      const stream = fs.createReadStream(fullBgmPath);
+      const stream = fs.createReadStream(targetPath);
       stream.pipe(res);
       return;
     }
@@ -123,11 +187,12 @@ app.use('/bgm', (req, res, next) => {
 // Dynamic BGM Scanning API endpoint
 app.get('/api/bgm', (req, res) => {
   console.log(`[API BGM SCANNER] Scanning audio tracks in: ${BGM_DIR}`);
-  const tracks = [];
+  const trackMap = new Map();
 
-  if (fs.existsSync(BGM_DIR)) {
+  function scanBgmDir(dirPath) {
+    if (!fs.existsSync(dirPath)) return;
     try {
-      const entries = fs.readdirSync(BGM_DIR, { withFileTypes: true });
+      const entries = fs.readdirSync(dirPath, { withFileTypes: true });
       for (const entry of entries) {
         if (entry.name.startsWith('.')) continue;
         if (entry.isFile()) {
@@ -138,13 +203,16 @@ app.get('/api/bgm', (req, res) => {
               .replace(/[-_]/g, ' ')
               .replace(/\s+/g, ' ')
               .trim();
+            const id = `bgm-${rawTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
 
-            tracks.push({
-              id: `bgm-${rawTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
-              title: cleanTitle.toUpperCase() || rawTitle,
-              filename: entry.name,
-              url: `/bgm/${encodeURIComponent(entry.name)}`
-            });
+            if (!trackMap.has(id)) {
+              trackMap.set(id, {
+                id,
+                title: cleanTitle.toUpperCase() || rawTitle,
+                filename: entry.name,
+                url: `/bgm/${encodeURIComponent(entry.name)}`
+              });
+            }
           }
         }
       }
@@ -153,20 +221,25 @@ app.get('/api/bgm', (req, res) => {
     }
   }
 
+  scanBgmDir(BGM_DIR);
+  if (INCLUDE_DEMO_BGM && path.resolve(BGM_DIR) !== path.resolve(BUNDLED_BGM_DIR)) {
+    scanBgmDir(BUNDLED_BGM_DIR);
+  }
+
+  const tracks = Array.from(trackMap.values()).sort((a, b) => a.title.localeCompare(b.title));
   res.json({
     count: tracks.length,
-    tracks: tracks.sort((a, b) => a.title.localeCompare(b.title))
+    tracks
   });
 });
 
 // Dynamic ROM Scanning API endpoint
 app.get('/api/roms', (req, res) => {
   console.log(`[API SCANNER] Scanning ROMs in directory: ${ROMS_DIR}`);
-  const games = [];
+  const gameMap = new Map();
 
   function scanDirectory(dirPath, systemSubdir = '') {
     if (!fs.existsSync(dirPath)) {
-      console.warn(`[API SCANNER WARN] ROM directory does not exist: ${dirPath}`);
       return;
     }
 
@@ -203,21 +276,24 @@ app.get('/api/roms', (req, res) => {
               .trim();
 
             const systemInfo = SYSTEM_MAP[systemKey] || SYSTEM_MAP['nes'];
+            const gameId = `${systemKey}-${nameWithoutExt}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
 
-            games.push({
-              id: `${systemKey}-${nameWithoutExt}`.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-              title: cleanDisplayTitle || nameWithoutExt,
-              rawTitle: nameWithoutExt,
-              filename: entry.name,
-              systemKey,
-              systemName: systemInfo.name,
-              systemCore: systemInfo.core,
-              systemColor: systemInfo.color,
-              systemIcon: systemInfo.icon,
-              category: systemInfo.category,
-              romUrl: `/roms/${systemSubdir ? `${systemSubdir}` : `${encodeURIComponent(entry.name)}`}`,
-              coverUrl: null
-            });
+            if (!gameMap.has(gameId)) {
+              gameMap.set(gameId, {
+                id: gameId,
+                title: cleanDisplayTitle || nameWithoutExt,
+                rawTitle: nameWithoutExt,
+                filename: entry.name,
+                systemKey,
+                systemName: systemInfo.name,
+                systemCore: systemInfo.core,
+                systemColor: systemInfo.color,
+                systemIcon: systemInfo.icon,
+                category: systemInfo.category,
+                romUrl: `/roms/${systemSubdir ? `${systemSubdir}` : `${encodeURIComponent(entry.name)}`}`,
+                coverUrl: null
+              });
+            }
           }
         }
       }
@@ -227,6 +303,11 @@ app.get('/api/roms', (req, res) => {
   }
 
   scanDirectory(ROMS_DIR);
+  if (INCLUDE_DEMO_ROMS && path.resolve(ROMS_DIR) !== path.resolve(BUNDLED_ROMS_DIR)) {
+    scanDirectory(BUNDLED_ROMS_DIR);
+  }
+
+  const games = Array.from(gameMap.values());
   res.json({
     count: games.length,
     games,
@@ -566,4 +647,8 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 [RETRO PLAYER SERVER] Running at http://0.0.0.0:${PORT}`);
   console.log(`📂 [ROMS DIRECTORY] ${ROMS_DIR}`);
   console.log(`🎵 [BGM DIRECTORY] ${BGM_DIR}`);
+  console.log(`💾 [DATA DIRECTORY] ${DATA_DIR}`);
+  console.log(`🎮 [DEMO ROMS ENABLED] ${INCLUDE_DEMO_ROMS}`);
+  console.log(`🎶 [DEMO BGM ENABLED] ${INCLUDE_DEMO_BGM}`);
+  console.log(`🌱 [AUTO SEED DEMOS] ${AUTO_SEED_DEMOS}`);
 });

@@ -5,5 +5,4 @@ dist
 .github
 *.log
 .DS_Store
-public/roms/*
-!public/roms/.gitkeep
+data

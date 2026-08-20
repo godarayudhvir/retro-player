@@ -18,6 +18,10 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV ROMS_DIR=/roms
 ENV BGM_DIR=/bgm
+ENV DATA_DIR=/data
+ENV INCLUDE_DEMO_ROMS=true
+ENV INCLUDE_DEMO_BGM=true
+ENV AUTO_SEED_DEMOS=false
 
 # Install only production dependencies
 COPY package*.json ./
@@ -28,8 +32,8 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/server.js ./server.js
 COPY --from=builder /app/public ./public
 
-# Default volume mount points for ROMs and BGM
-VOLUME ["/roms", "/bgm"]
+# Default volume mount points for ROMs, BGM, and persistent SQLite/JSON metadata
+VOLUME ["/roms", "/bgm", "/data"]
 
 EXPOSE 3000
 

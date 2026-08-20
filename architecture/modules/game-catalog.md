@@ -56,4 +56,4 @@ The Game Catalog module indexes local ROM files in `/public/roms` (and server `R
 
 ### Client-Side Sandbox vs. Host Library Management
 1. **Live Web Demo / Custom ROMs**: When running on static hosting (GitHub Pages) or loading personal ROMs via the "Load Custom ROM" modal, ROMs run strictly in browser memory via `URL.createObjectURL(file)`.
-2. **Docker Self-Hosted Mode**: When running the Node/Docker server with mounted storage volumes (`-v ./roms:/roms`), administrators can upload and delete library files permanently through the full-screen Settings Manager.
+2. **Docker Self-Hosted Mode**: When running the Node/Docker server with mounted storage volumes (`-v ./roms:/roms`, `-v ./bgm:/bgm`, `-v ./data:/data`), administrators can upload and delete library files permanently through the full-screen Settings Manager. The server supports multi-source discovery (merging user-mounted `/roms` with bundled showcase demo ROMs when `INCLUDE_DEMO_ROMS=true`) and optional auto-seeding (`AUTO_SEED_DEMOS=true`) to populate host folders on first boot.

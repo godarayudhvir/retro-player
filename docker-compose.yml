@@ -12,8 +12,18 @@ services:
       - PORT=3000
       - ROMS_DIR=/roms
       - BGM_DIR=/bgm
+      - DATA_DIR=/data
+      # Demo ROM & BGM configuration flags:
+      # Set to 'true' to include bundled curated showcase demos (52 titles); set to 'false' for purely your own library
+      - INCLUDE_DEMO_ROMS=true
+      # Set to 'true' to include bundled 8-bit chiptune audio tracks; set to 'false' for purely your own audio tracks
+      - INCLUDE_DEMO_BGM=true
+      # Set to 'true' to copy bundled demo ROMs and BGM into your mounted host folders on first boot
+      - AUTO_SEED_DEMOS=false
     volumes:
-      # Mount your host ROMs directory to /roms inside container (Read/Write allows uploading new games directly from the UI)
+      # Mount your host ROMs directory to /roms (Read/Write allows uploading new games directly from the UI)
       - ./roms:/roms
-      # Mount your host BGM tracks directory to /bgm inside container
+      # Mount your host BGM tracks directory to /bgm
       - ./bgm:/bgm
+      # Mount persistent server database (profiles, favorites, playtime, controller mappings, scraped metadata)
+      - ./data:/data

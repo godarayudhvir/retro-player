@@ -191,6 +191,9 @@ docker compose up -d
 
 Open `http://localhost:3000` in your browser!
 
+> [!TIP]
+> **Docker Customization**: You can customize volumes (`./roms`, `./bgm`, `./data`) and environment flags (`INCLUDE_DEMO_ROMS=true/false`, `INCLUDE_DEMO_BGM=true/false`, `AUTO_SEED_DEMOS=true/false`) directly in [`docker-compose.yml`](docker-compose.yml). See the **[Docker Deployment Guide](guides/docker.md)** for full documentation.
+
 ---
 
 ## 📖 Guides & Documentation
