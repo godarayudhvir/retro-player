@@ -1,14 +1,25 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { resolveAssetPath } from '../utils/assetPath';
 
 const BGM_VOLUME_KEY = 'retro_bgm_volume';
 const BGM_MUTED_KEY = 'retro_bgm_muted';
 const BGM_TRACK_INDEX_KEY = 'retro_bgm_track_index';
 
+// Built-in fallback tracklist guaranteeing zero broken BGM on static hosts / GitHub Pages
+const DEFAULT_BGM_TRACKS = [
+  { id: 'bgm-track2', title: 'CHILL LOBBY', filename: 'track2.mp3', url: '/bgm/track2.mp3' },
+  { id: 'bgm-track3', title: 'PIXEL GROOVE', filename: 'track3.mp3', url: '/bgm/track3.mp3' },
+  { id: 'bgm-track4', title: 'RETRO WAVES', filename: 'track4.mp3', url: '/bgm/track4.mp3' },
+  { id: 'bgm-track5', title: 'MIDNIGHT SYNTH', filename: 'track5.mp3', url: '/bgm/track5.mp3' },
+  { id: 'bgm-track6', title: 'ARCADE DREAMS', filename: 'track6.mp3', url: '/bgm/track6.mp3' }
+];
+
 /**
  * Hook managing Background Music (BGM) tracks, looping playlist, volume, and smart auto-pause during gameplay.
+ * Fully compatible with GitHub Pages subpaths, Localhost, Docker, and Offline PWA environments.
  */
 export function useBgmEngine({ activeGame = null } = {}) {
-  const [tracks, setTracks] = useState([]);
+  const [tracks, setTracks] = useState(DEFAULT_BGM_TRACKS);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(() => {
     try {
       const saved = localStorage.getItem(BGM_TRACK_INDEX_KEY);
@@ -39,19 +50,31 @@ export function useBgmEngine({ activeGame = null } = {}) {
   const audioRef = useRef(null);
   const wasPlayingBeforeGameRef = useRef(false);
 
-  // Fetch available BGM tracks from backend API
+  // Fetch available BGM tracks from backend API with automatic JSON / static fallback
   const fetchTracks = useCallback(async () => {
-    try {
-      const apiUrl = (import.meta.env.BASE_URL || './') + 'api/bgm';
-      const res = await fetch(apiUrl);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.tracks && data.tracks.length > 0) {
-          setTracks(data.tracks);
+    const endpoints = [
+      resolveAssetPath('api/bgm'),
+      resolveAssetPath('api/bgm.json'),
+      '/api/bgm',
+      '/api/bgm.json'
+    ];
+
+    for (const endpoint of endpoints) {
+      try {
+        const res = await fetch(endpoint);
+        if (res.ok) {
+          const contentType = res.headers.get('content-type') || '';
+          if (contentType.includes('application/json') || endpoint.endsWith('.json')) {
+            const data = await res.json();
+            if (data.tracks && data.tracks.length > 0) {
+              setTracks(data.tracks);
+              return;
+            }
+          }
         }
+      } catch {
+        // Try next fallback endpoint
       }
-    } catch (e) {
-      console.warn('Failed to load BGM tracklist:', e);
     }
   }, []);
 
@@ -81,9 +104,17 @@ export function useBgmEngine({ activeGame = null } = {}) {
       });
     };
 
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+
     audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+
     return () => {
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
     };
   }, [tracks]);
 
@@ -93,11 +124,18 @@ export function useBgmEngine({ activeGame = null } = {}) {
     const audio = audioRef.current;
     const currentTrack = tracks[currentTrackIndex % tracks.length];
 
-    if (currentTrack && audio.src !== window.location.origin + currentTrack.url) {
-      audio.src = currentTrack.url;
+    if (!currentTrack) return;
+
+    const resolvedUrl = resolveAssetPath(currentTrack.url);
+    const currentAudioUrl = audio.src ? new URL(audio.src, window.location.href).href : '';
+    const targetAudioUrl = new URL(resolvedUrl, window.location.href).href;
+
+    if (currentAudioUrl !== targetAudioUrl) {
+      audio.src = resolvedUrl;
+      audio.load();
       if (isPlaying && !activeGame && !isMuted) {
         audio.play().catch((err) => {
-          console.debug('[BGM ENGINE] Play prevented:', err);
+          console.debug('[BGM ENGINE] Auto-playback prevented by browser policy:', err);
         });
       }
     }
@@ -133,6 +171,12 @@ export function useBgmEngine({ activeGame = null } = {}) {
   const togglePlay = useCallback(() => {
     if (!audioRef.current || tracks.length === 0) return;
     const audio = audioRef.current;
+    const currentTrack = tracks[currentTrackIndex % tracks.length];
+
+    if (!audio.src && currentTrack) {
+      audio.src = resolveAssetPath(currentTrack.url);
+      audio.load();
+    }
 
     if (isPlaying) {
       audio.pause();
@@ -145,7 +189,7 @@ export function useBgmEngine({ activeGame = null } = {}) {
         console.debug('[BGM ENGINE] User interaction needed to start audio:', err);
       });
     }
-  }, [isPlaying, tracks]);
+  }, [isPlaying, tracks, currentTrackIndex]);
 
   // Skip to next track
   const nextTrack = useCallback(() => {
