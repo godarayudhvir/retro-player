@@ -565,7 +565,7 @@ PHASE 4: Next-Gen & Social Innovation (3+ Months)
 
 ## 🛠️ Developer Quickstart & Spec Guidelines
 
-To implement any feature from this blueprint, follow the unified standards outlined in [architecture/README.md](architecture/README.md):
+To implement any feature from this blueprint, follow the unified standards outlined in [architecture/README.md](../README.md):
 
 1. **Create Technical Specification**:
    - Write a detailed design spec under `architecture/mirai/[feature-name].md` containing:
@@ -576,7 +576,7 @@ To implement any feature from this blueprint, follow the unified standards outli
 2. **Adhere to Zero-Browser-Automation Rule**:
    - As specified in `.agents/AGENTS.md`, never run automated browser testing tools. All UI and gameplay validation is performed manually.
 3. **Synchronize Documentation**:
-   - Whenever a core feature or module is merged, update [README.md](README.md), [mirai.md](mirai.md), and [architecture/README.md](architecture/README.md) to reflect the active system architecture.
+   - Whenever a core feature or module is merged, update [README.md](../../README.md), [mirai/README.md](README.md), and [architecture/README.md](../README.md) to reflect the active system architecture.
 
 ---
 

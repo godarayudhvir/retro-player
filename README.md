@@ -57,126 +57,46 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 ---
 
-## ✨ Key Highlights
+## ✨ Key Highlights & Features
 
-- 👤 **Multi-User Profiles & Nintendo Mii Avatar Creator**: Create personalized Mii-style vector avatars with customizable hairstyles, expressions, and accessories; isolated game saves, playtime logs, and favorites.
-- 📱 **Dedicated Netflix-Style Mobile Streaming UI**: Custom-built mobile experience (<= 768px) with "Who's Playing?" initial profile picker, mobile topbar (avatar switcher, search widget, custom ROM loader), smooth horizontal carousels (Recently Played, Favorites, Platforms, and Per-System rows), and minimal game detail bottom sheet with Play & Favorite actions.
-- 📱 **Progressive Web App (PWA) & Offline Standalone Installation**: Install Retro Player as a native desktop/handheld app across macOS, Windows, Linux, Steam Deck, Android, and iOS with landscape gaming display mode and Service Worker caching for 100% air-gapped offline gameplay.
-- 📱 **Multi-Device Responsive Matrix**: Fully responsive and tailored experience on Mobile Phones (<=640px), Tablets/Handhelds (Steam Deck, Nintendo Switch, iPad), Desktop PCs, and 10-Foot UI mode for Large 4K TVs.
-- 🎨 **Unified Theme Engine**: Seamless support for Classic, Midnight OLED, Cyber Neon, and PlayStation XMB dark themes across every modal, drawer, component, and button.
-- 🎵 **Background Music (BGM) Engine & Docker Management**:
-  - Auto-scanning and loop streaming of background music tracks with topbar controls and auto-track progression.
-  - **Smart In-Game Auto-Pause**: Automatically pauses background music when entering a game and resumes upon exit.
-  - Full Docker volume management (`/bgm`) and copyright gitignore protection.
-- ⚙️ **Nintendo Switch Style Full-Screen System Settings Menu**:
-  - 2-column console management hub with category sidebar navigation and rich detail panes.
-  - Dual bulk ROM file batch and recursive folder directory uploader (`webkitdirectory`).
-  - Background Music (BGM) manager with direct audio upload, live playback preview, and file deletion.
-  - Interactive Theme Switcher with realistic mini-console UI preview mockups.
-  - Gamepad mapping references, input status indicators, and Docker storage diagnostics.
-- 🎨 **4 Signature Themes**: **iiSU Light**, **Midnight Cyber**, **Sony XMB Wave**, and **Game Boy DMG**.
-- 🗄️ **Server-Backed Persistent Database & In-Game Save Injection**:
-  - Authoritative server-side persistence in `/data/retroplayer_db.json` (auto-mounted via Docker volume `-v ./data:/data`).
-  - Seamless REST API (`/api/db`) for persistent user profiles, Mii avatars, favorites, recents, in-game battery SRAM (`.sav`), and playtime analytics.
-  - Automatic preloading and injection of saved battery RAM directly into Emscripten Virtual FileSystem (`gameManager.FS`) upon game boot so in-game menus immediately display **CONTINUE** across browser sessions.
-  - Immune to browser "Clear Site Data" or device changes, with local **IndexedDB** (`RetroPlayerDB`) providing instantaneous 0ms offline fallback.
-- 💬 **Universal In-App Modal Dialog System**:
-  - Zero disruptive native browser popups (`alert()`, `confirm()`, `prompt()`).
-  - All confirmations (profile deletion, ROM removal, BGM cleanup) utilize theme-aware, gamepad/keyboard navigable in-app modal dialogs.
-- 💾 **3D Physical Cartridge Engine**: Tactile cartridges with metallic sheens, grip textures, and title color heuristics.
-- 🌐 **Automated Dynamic Online Metadata Scraper with 4-Tier Scope Selection & Logs**: Official 3D box art from **Libretro** & synopsis info from **Wikipedia** with intelligent demo-to-retail matching, automatic background scraping on Mobile UI, 4-tier scope selection on Desktop (Single System, Multi-System Bunch, All Systems, or Single Title), scoped title logging, instant cancellation (`Stop Scraper`), and user-configurable startup auto-scrape toggles, cached in **IndexedDB**.
-- 🚀 **60 FPS Hardware-Accelerated Emulation & Diagnostic HUD**:
-  - Full-speed 60 FPS VSync rendering with low-latency audio dynamic rate control.
-  - Interactive **Diagnostic Performance HUD** (`D` hotkey) displaying real-time FPS, delta frame times (`16.6ms`), audio clock sync, and automated health checks.
+- 👤 **Multi-User Profiles & Nintendo Mii Avatar Studio**: Create personalized Mii-style vector avatars with customizable hairstyles, expressions, and accessories; isolated game saves, playtime logs, and favorites.
+- 📱 **Dedicated Netflix-Style Mobile Streaming UI**: Custom mobile experience (<= 768px) with "Who's Playing?" profile selector, mobile topbar, smooth horizontal carousels, and bottom sheet details drawer.
+- 📱 **Progressive Web App (PWA) & Offline Standalone Installation**: Install Retro Player as a native desktop/handheld app across macOS, Windows, Linux, Steam Deck, Android, and iOS with landscape gaming display mode and Service Worker caching.
+- 📱 **Multi-Device Responsive Matrix**: Fully responsive across Mobile Phones (<=640px), Tablets & Handhelds (Steam Deck, Nintendo Switch, iPad), Desktop PCs, and 10-Foot UI mode for Large 4K TVs. *(See [Hardware Compatibility Matrix](guides/compatibility.md))*.
+- 🎨 **4 Signature Themes**: **iiSU Light**, **Midnight Cyber**, **Sony XMB Wave**, and **Game Boy DMG** with instant live switching across all components.
+- 🎵 **Background Music (BGM) Engine**: Auto-scanning and looping of BGM tracks with topbar controls, custom audio file manager, and **smart in-game auto-pause**.
+- ⚙️ **Nintendo Switch Style System Settings Hub**: Full-screen 2-column console management hub with dual bulk ROM batch uploader, recursive folder directory uploader (`webkitdirectory`), BGM manager, theme previewer, and storage diagnostics.
+- 🗄️ **Server-Backed Persistent Database & SRAM Injection**: Authoritative persistence in `/data/retroplayer_db.json` via REST API (`/api/db`) with auto-injection of saved battery RAM (`.sav`) into Emscripten VFS on game launch. Local **IndexedDB** (`RetroPlayerDB`) provides instantaneous 0ms offline fallback.
+- 💬 **Universal In-App Modal Dialog System**: Zero native browser popups (`alert()`, `confirm()`, `prompt()`). All confirmations utilize theme-aware, gamepad/keyboard navigable in-app modal dialogs.
+- 💾 **3D Physical Cartridge Engine**: Tactile cartridges with metallic sheens, grip textures, dynamic shadows, and title color heuristics.
+- 🌐 **Automated Online Metadata Scraper**: Official 3D box art from **Libretro** & synopsis info from **Wikipedia** with intelligent demo-to-retail matching, 4-tier scope selection, and IndexedDB caching.
+- 🚀 **60 FPS Hardware-Accelerated Emulation & Diagnostic HUD**: Full-speed 60 FPS VSync rendering with low-latency dynamic audio sync and interactive **Diagnostic Performance HUD** (`D` hotkey).
 - 🔊 **Synthesized Pure Web Audio UI SFX**: Zero-latency acoustic feedback synthesizer with zero external audio assets.
-- 🎮 **Full Gamepad & Keyboard Navigation**: D-Pad/Stick navigation, shoulder triggers (`L1`/`R1`), on-screen virtual keyboard (`⌘K`), and quick-launch.
+- 🎮 **100% Gamepad & Keyboard Navigation**: Controller-first spatial navigation, shoulder triggers (`L1`/`R1`), on-screen virtual keyboard (`⌘K`), and hotkey quick-launch. *(See [Controls & Keybindings Guide](guides/controls.md))*.
 - ⏱️ **Playtime Analytics & Smart Collections**: Session durations, total hours played, **Favorites ⭐**, and **Recently Played** queue.
 
 ---
 
-## 🕹️ Supported Systems
+## 🕹️ Supported Consoles & Platforms
 
-| System | Platform Key | Default Core | Supported File Extensions |
+Retro Player supports **12 classic retro gaming platforms** out of the box:
+
+| Category | Supported Consoles | Formats | Default Emulation Core |
 | :--- | :--- | :--- | :--- |
-| **Game Boy Advance** | `gba` | `gba` (mGBA) | `.gba` |
-| **Game Boy Color** | `gbc` | `gb` (Gambatte) | `.gbc` |
-| **Game Boy (DMG)** | `gb` | `gb` (Gambatte) | `.gb` |
-| **Super Nintendo** | `snes` | `snes` (Snes9x) | `.sfc`, `.smc`, `.snes` |
-| **Nintendo (NES)** | `nes` | `nes` (FCEUmm) | `.nes` |
-| **Nintendo 64** | `n64` | `n64` (Mupen64Plus) | `.z64`, `.n64`, `.v64` |
-| **Nintendo DS** | `nds` | `nds` (MelonDS / DeSmuME) | `.nds` |
-| **Sega Genesis / Mega Drive** | `sega_genesis` | `segaMD` (Genesis Plus GX) | `.gen`, `.md`, `.smd` |
-| **Sega Game Gear** | `game_gear` | `segaGG` (Genesis Plus GX) | `.gg` |
-| **PlayStation (PS1)** | `playstation` | `psx` (Beetle PSX / PCSX-ReArmed) | `.chd`, `.iso`, `.cue`, `.bin`, `.pbp` |
-| **Arcade (MAME)** | `arcade` | `mame2003_plus` (MAME 2003 Plus) | `.zip` |
-| **Atari 2600** | `atari_2600` | `atari2600` (Stella) | `.a26` |
+| **Handhelds** | Game Boy Advance (`gba`), Game Boy Color (`gbc`), Game Boy DMG (`gb`), Sega Game Gear (`game_gear`), Nintendo DS (`nds`) | `.gba`, `.gbc`, `.gb`, `.gg`, `.nds` | mGBA, Gambatte, Genesis Plus GX, MelonDS |
+| **Home Consoles** | Super Nintendo (`snes`), NES (`nes`), Nintendo 64 (`n64`), Sega Genesis (`sega_genesis`), Atari 2600 (`atari_2600`), PlayStation 1 (`playstation`) | `.sfc`, `.smc`, `.nes`, `.z64`, `.md`, `.gen`, `.a26`, `.chd`, `.iso`, `.cue` | Snes9x, FCEUmm, Mupen64Plus, Genesis Plus GX, Stella, Beetle PSX |
+| **Arcade** | Arcade MAME (`arcade`) | `.zip` | MAME 2003 Plus |
 
 ---
 
-## 🎮 Bundled Non-Commercial Demo & Homebrew Showcase
+## 🎮 Bundled Demo Showcase & Compliance
 
-Retro Player features a curated collection of **non-complete demonstration ROMs, promotional samples, Sega Channel trials, aftermarket homebrew, and prototypes**, pruned to the top 3–5 best titles per console platform:
+Retro Player includes a lightweight collection of **36 non-commercial demonstration ROMs and homebrew titles** (exactly 3 per console platform) to immediately verify core performance in your browser:
 
-- 🟢 **Curated Web Showcase (52 Titles Across 12 Platforms — 510 MB)**: Pre-packaged directly in the repository and instantly available in the browser across **all 12 supported console platforms**, featuring lightweight, fast-loading, high-quality non-commercial titles.
-- 📑 **Complete ROM Inventory & File Names**: See **[roms.md](roms.md)** for the full file-by-file inventory of all 52 titles and classification tags.
-- 🎯 **Curated as Non-Complete ROMs**: All titles are strictly **non-complete evaluation software** (e.g. *Part One*, *Part A*, *Showdown*, *Trade Show Samples*, *Chapter Zero*, *Homebrew Demos*). **Zero full commercial release games are bundled.**
-- ⚖️ **Creator Compliance & Immediate Removal Policy**: If you are a rights holder, developer, or publisher of any demo or sample and would like it removed, please open an issue or pull request and **we will immediately comply**.
-- 🔒 **100% Private Custom ROM Loading**: To play your own personal game dumps, use **"Load Custom ROM"** or drag & drop—files run purely in local browser memory with zero network uploads.
-
-| Console | Supported Key | Bundled Demos & Samples | Public Web Demo | Sample Highlights |
-| :--- | :--- | :---: | :---: | :--- |
-| **Nintendo Entertainment System (NES)** | `nes` | **3 Titles** | 🟢 3 Public | *Micro Mages Demo*, *Super Tilt Bro.*, *Project Blue* |
-| **Sega Genesis / Mega Drive** | `sega_genesis` | **5 Titles** | 🟢 5 Public | *Sonic 3D Blast (Part One)*, *Comix Zone*, *Mortal Kombat 3*, *Super Street Fighter II*, *Earthworm Jim* |
-| **Atari 2600** | `atari_2600` | **5 Titles** | 🟢 5 Public | *Pitfall!*, *Space Invaders*, *River Raid*, *Pac-Man*, *Asteroids* |
-| **Sony PlayStation (PS1)** | `playstation` | **5 Titles** | 🟢 5 Public | *Crash Bandicoot - Warped*, *Dino Crisis*, *Driver*, *Rayman 2*, *Tony Hawk's Pro Skater 2* |
-| **Nintendo DS** | `nds` | **5 Titles** | 🟢 5 Public | *New Super Mario Bros.*, *Mario Kart DS*, *Super Mario 64 DS*, *Tetris DS*, *WarioWare - Touched!* |
-| **Arcade (MAME)** | `arcade` | **4 Titles** | 🟢 4 Public | *Gridlee*, *Looping*, *Star Fire*, *Targ* |
-| **Game Boy Color** | `gbc` | **4 Titles** | 🟢 4 Public | *Donkey Kong Country*, *Resident Evil*, *Silent Hill 2*, *Dragonborne DX* |
-| **Game Boy (DMG)** | `gb` | **4 Titles** | 🟢 4 Public | *Zelda - Majora's Mask*, *Gargoyle's Quest II*, *Gunman Clive*, *Dragonborne* |
-| **Super Nintendo (SNES)** | `snes` | **4 Titles** | 🟢 4 Public | *Gunman Clive*, *Eyra Crow Maiden*, *Lizard*, *Nova the Squirrel 2* |
-| **Sega Game Gear** | `game_gear` | **4 Titles** | 🟢 4 Public | *Sonic Drift*, *GG Turrican*, *Dangerous Demolition*, *Quest* |
-| **Nintendo 64 (N64)** | `n64` | **4 Titles** | 🟢 4 Public | *Legend of Zelda - Majora's Mask*, *Donkey Kong 64*, *Excitebike 64*, *Turok* |
-| **Game Boy Advance** | `gba` | **5 Titles** | 🟢 5 Public | *The Legend of Zelda: The Minish Cap*, *Mario & Luigi: Superstar Saga*, *Super Mario Advance*, *DK King of Swing*, *Pokemon Mystery Dungeon* |
-| **Total** | **12 Consoles** | **52 Demos** | **52 Public** | **[View Full 52-File Inventory in roms.md ↗](roms.md)** |
-
----
-
-## 🌐 Platform & Hardware Compatibility
-
-### 🖥️ Desktop & Laptops
-| Platform / OS | Browser | Status | Specifications & Notes |
-| :--- | :--- | :---: | :--- |
-| **macOS** | **Google Chrome** | 🟢 **Working** | Tested & verified (60 FPS, WebAssembly, Web Audio & Gamepad API) |
-| **macOS** | **Safari / Firefox / Arc** | ⚪ *Untested* | Apple WebKit / Mozilla Gecko engines |
-| **Windows 10 / 11** | **Google Chrome / Microsoft Edge** | ⚪ *Untested* | Chromium V8 engine |
-| **Windows 10 / 11** | **Mozilla Firefox** | ⚪ *Untested* | Mozilla Gecko engine |
-| **Linux (Ubuntu / Arch / Debian)** | **Chrome / Chromium / Firefox** | ⚪ *Untested* | Native WebAssembly & Gamepad API support |
-
-### 📱 Mobile & Handhelds
-| Platform / OS | Target Devices | Browser | Status | Specifications & Notes |
-| :--- | :--- | :--- | :---: | :--- |
-| **iOS / iPadOS** | iPhone, iPad | **Safari / Chrome** | ⚪ *Untested* | WebKit engine, Touch & Bluetooth Gamepad controls |
-| **Android** | Android Phones & Tablets | **Google Chrome Mobile** | ⚪ *Untested* | Chromium engine, Touch & Bluetooth Gamepad controls |
-| **SteamOS (Linux)** | Valve Steam Deck, Legion Go | **Google Chrome / Chromium** | ⚪ *Untested* | Desktop / Gamepad mode with native controller mapping |
-
-### 📺 Smart TVs & Streaming Devices (10-Foot UI)
-| Platform / OS | Target Devices | Browser / Engine | Status | Specifications & Notes |
-| :--- | :--- | :--- | :---: | :--- |
-| **LG webOS** | LG OLED / QNED / NanoCell Smart TVs | **LG Web Browser** (Chromium WebEngine) | ⚪ *Untested* | Magic Remote pointer / Bluetooth Gamepad navigation |
-| **Samsung Tizen OS** | Samsung QLED / Neo QLED / Smart TVs | **Samsung Internet for TV** (Chromium) | ⚪ *Untested* | Tizen Web Runtime & Bluetooth Gamepad support |
-| **Amazon Fire OS** | Fire TV Stick (4K / Max / Lite), Fire TV Cube | **Amazon Silk Browser** (Chromium-based) | ⚪ *Untested* | Fire TV Remote / Bluetooth Gamepad navigation |
-| **Google TV / Android TV** | Chromecast with Google TV, Nvidia Shield, Sony/TCL | **Google Chrome / TV Bro / Puffin TV** | ⚪ *Untested* | Chromium / Android WebView engine |
-| **Roku OS** | Roku Streaming Sticks & Roku TVs | *No Native Web Browser* | 🔴 *Unsupported* | Roku OS lacks a WebAssembly browser runtime (requires Screen Mirroring) |
-| **Apple tvOS** | Apple TV 4K / HD | *No Native Web Browser* | 🔴 *Unsupported* | tvOS lacks WebKit browser runtime (requires AirPlay Screen Mirroring) |
-
-### 🎮 Gaming Consoles
-| Platform / OS | Console | Browser | Status | Specifications & Notes |
-| :--- | :--- | :--- | :---: | :--- |
-| **Xbox OS** | Xbox Series X\|S / Xbox One | **Microsoft Edge for Xbox** (Chromium) | ⚪ *Untested* | Full Xbox controller support via Gamepad API |
-| **PlayStation OS** | PlayStation 5 / PlayStation 4 | *Integrated WebKit Viewer* | ⚪ *Untested* | System web viewer |
-| **Horizon OS** | Nintendo Switch | *Hidden NetFront Browser* | ⚪ *Untested* | Restricted system captive browser |
-
-> **Note**: **macOS with Google Chrome** is currently the primary tested and verified environment. All other operating system, TV, and browser combinations are currently untested or community-contributed.
+- 📑 **Full 36-ROM Catalog & Inventory**: See **[guides/roms.md](guides/roms.md)** for the complete file-by-file inventory, system file sizes, and homebrew developer credits.
+- 🎯 **Strictly Non-Complete Software**: All pre-installed software consists of non-commercial prototypes, trade show trials, and aftermarket homebrew demos. **Zero full retail commercial games are bundled.**
+- ⚖️ **Compliance & Immediate Removal Policy**: If you are a rights holder or creator and would like any sample removed, open an issue/PR and **we will immediately comply**.
+- 🔒 **100% Private Custom ROM Loading**: To play personal game dumps, use **"Load Custom ROM"** or drag-and-drop—files run 100% in local browser memory with zero network uploads.
 
 ---
 
@@ -193,42 +113,22 @@ docker compose up -d
 Open `http://localhost:3000` in your browser!
 
 > [!TIP]
-> **Docker Customization**: You can customize volumes (`./roms`, `./bgm`, `./data`) and environment flags (`INCLUDE_DEMO_ROMS=true/false`, `INCLUDE_DEMO_BGM=true/false`, `AUTO_SEED_DEMOS=true/false`) directly in [`docker-compose.yml`](docker-compose.yml). See the **[Docker Deployment Guide](guides/docker.md)** for full documentation.
+> **Docker Customization**: You can customize volumes (`./roms`, `./bgm`, `./data`) and environment flags (`INCLUDE_DEMO_ROMS`, `INCLUDE_DEMO_BGM`, `AUTO_SEED_DEMOS`) directly in [`docker-compose.yml`](docker-compose.yml). See the **[Docker Deployment Guide](guides/docker.md)** for full details.
 
 ---
 
-## 📖 Guides & Documentation
+## 📖 Modular Guides & Documentation
 
-Explore dedicated, step-by-step guides located in the [`guides/`](guides/README.md) directory:
+Explore dedicated, step-by-step documentation located in the [`guides/`](guides/README.md) directory:
 
 | Guide | Description |
 | :--- | :--- |
 | **[🐳 Docker Deployment Guide](guides/docker.md)** | Full Docker & Docker Compose setup, CLI commands, updates, and troubleshooting. |
 | **[☁️ Cloud & Self-Hosting Guide](guides/hosting.md)** | Detailed setup for Railway, Render, Fly.io, Coolify, Portainer, and NAS (Unraid/TrueNAS). |
 | **[🌐 Remote Access & Anywhere Play](guides/remote-access.md)** | Access your home instance from phones/tablets via **Tailscale Mesh VPN** or **Cloudflare Tunnels**. |
-
----
-
-## 🎮 Controls Quick Reference
-
-### Dashboard Navigation
-| Action | Keyboard | Gamepad |
-| :--- | :--- | :--- |
-| **Navigate Grid & Menus** | Arrow Keys / `W`, `A`, `S`, `D` | D-Pad / Left Stick |
-| **Switch System / Tab** | `Q` / `E` / `PageUp` / `PageDown` | `L1` / `R1` (Shoulder Buttons) |
-| **Select / Launch Game** | `Enter` / `Space` | `A` Button (Button 0) |
-| **Toggle Favorite ⭐** | `F` Key | `X` Button (Button 2) |
-| **Switch Theme 🎨** | `T` Key | Topbar Theme Button |
-| **Search / Virtual Keyboard** | `⌘K` / `Ctrl+K` | `Y` Button (Button 3) / `Select` |
-| **Back / Close Modals** | `Escape` / `Backspace` | `B` Button (Button 1) |
-
-### In-Game Emulation
-| Action | Keyboard | Gamepad |
-| :--- | :--- | :--- |
-| **Directional Movement** | Arrow Keys / `W`, `A`, `S`, `D` | D-Pad / Left Stick |
-| **Primary Actions (A / B)** | `Z` / `X` | `A` / `B` Buttons |
-| **Start / Select** | `Enter` / `Shift` | `Start` / `Select` |
-| **Exit Game to Launcher** | `Escape` | `Select` + `Start` (or Guide Button) |
+| **[🎮 Controls & Keybindings Guide](guides/controls.md)** | Full gamepad button mappings, dashboard spatial navigation, virtual keyboard, and in-game controls. |
+| **[🌐 Hardware & Platform Compatibility Matrix](guides/compatibility.md)** | Browser, OS, Smart TV (LG webOS, Samsung Tizen, Fire TV), Handheld (Steam Deck), and Console compatibility breakdown. |
+| **[🎮 Bundled ROMs Catalog & Compliance Policy](guides/roms.md)** | Complete 36-file demo inventory, system file sizes, and legal takedown compliance statement. |
 
 ---
 
@@ -245,7 +145,7 @@ Retro Player follows rigorous software engineering standards with full technical
 - **[Theme Engine](architecture/modules/theme-engine.md)**: Real-time CSS tokens and instant theme persistence.
 - **[Game Catalog Indexer](architecture/modules/game-catalog.md)**: Zero-config auto-scanning and persistent upload pipeline.
 - **[Live Demo Welcome Modal](architecture/components/demo-welcome-modal.md)**: Environment-aware GitHub Pages demo dialog and static showcase handler.
-- **[Mirai Master Vision](mirai.md)**: Deliverables checklist and multi-domain innovation roadmap.
+- **[Mirai Master Vision & Roadmap](architecture/mirai/README.md)**: Deliverables checklist and multi-domain innovation roadmap.
 
 ---
 

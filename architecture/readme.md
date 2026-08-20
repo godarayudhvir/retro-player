@@ -50,11 +50,12 @@ architecture/
 │   └── retro-effects.md    # Custom Retro CSS effects, CRT scanlines, glassmorphism, background dots & UI animations (`index.css`)
 │
 └── mirai/                  # Future features and upcoming roadmap specifications ("Mirai" - 未来)
+    ├── README.md           # Master Vision, codebase audit, refactoring matrix & innovation catalog
     ├── multiplayer.md      # WebRTC Peer-to-Peer Netplay & local multiplayer emulation architecture
     └── cloud-saves.md      # Cloud save state synchronization & cross-device backup architecture
 ```
 
-> **Note**: For the overarching future vision, in-depth codebase audit, refactoring matrix, and master innovation catalog across 8 domains, see [mirai.md](../mirai.md) in the project root. For the complete 36-game non-commercial curated demo catalog, file paths, and creator compliance policy, see [roms.md](../roms.md).
+> **Note**: For the overarching future vision, in-depth codebase audit, refactoring matrix, and master innovation catalog across 8 domains, see [mirai/README.md](mirai/README.md). For the complete 36-game non-commercial curated demo catalog, file paths, and creator compliance policy, see [guides/roms.md](../guides/roms.md).
 
 ---
 
@@ -97,7 +98,7 @@ Every feature proposal inside `/architecture/mirai/` must include four mandatory
 
 ## 📌 Deliverables Roadmap & Master Vision
 
-For tracking deliverables, completed milestones, architectural audits, and the grand vision, refer to the master blueprint in [mirai.md](../mirai.md).
+For tracking deliverables, completed milestones, architectural audits, and the grand vision, refer to the master blueprint in [mirai/README.md](mirai/README.md).
 
 ---
 
