@@ -27,8 +27,9 @@
 
 | Platform / OS | Browser | Emulation Status | Gamepad Status | Notes & Specifications |
 | :--- | :--- | :---: | :---: | :--- |
-| **macOS (Apple Silicon & Intel)** | **Apple Safari** *(Recommended)* | 🟢 **Verified** | 🟢 **Verified** | App UI, in-game emulation, and gamepads fully working. Standalone Web App supported (**File → Add to Dock**). |
-| **macOS (Apple Silicon & Intel)** | **Google Chrome** | 🟢 **Verified** | 🔴 **Not Working (Fix in progress)** | App UI and in-game emulation working. **Gamepad input currently not working** (fix in progress). Use Safari in the meantime. |
+| **macOS (Apple Silicon & Intel)** | **Apple Safari** *(Recommended)* | 🟢 **Verified** | 🟢 **Verified** | App UI, in-game emulation, and gamepads fully working in both browser tabs and standalone PWA / Web App (**File → Add to Dock**). |
+| **macOS (Apple Silicon & Intel)** | **Google Chrome (Browser)** | 🟢 **Verified** | 🟢 **Verified** | App UI, in-game emulation, and gamepads fully working in browser tabs. |
+| **macOS (Apple Silicon & Intel)** | **Google Chrome (PWA / Installed App)** | 🟢 **Verified** | 🔴 **Not Working (Fix in progress)** | App UI and in-game emulation working. **Gamepad input currently not working in standalone PWA window** (fix in progress). Use Chrome browser tabs or Safari in the meantime. |
 | **macOS** | **Arc** | ⚪ *Untested* | ⚪ *Untested* | Community verification needed. |
 | **macOS** | **Brave** | ⚪ *Untested* | ⚪ *Untested* | Community verification needed. |
 | **macOS** | **Microsoft Edge** | ⚪ *Untested* | ⚪ *Untested* | Community verification needed. |
