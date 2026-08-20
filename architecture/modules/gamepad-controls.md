@@ -9,8 +9,13 @@ The Gamepad Controls engine provides seamless navigation using standard USB/Blue
 - **Gamepad API Polling Loop**: Listens for `gamepadconnected` and `gamepaddisconnected` events and polls connected gamepads using `navigator.getGamepads()`.
 - **Keyboard Navigation Mapping**: Supports `WASD`, `Arrow Keys`, `Enter` (select), `Escape` (back/close), and `Q`/`E` (tab switching).
 - **Dynamic Input Prompts**: Toggles top bar prompts between keyboard (`Q` / `E`) and gamepad (`L` / `R` or `L1` / `R1`).
-- **In-Game Input Yielding**: Automatically yields all standard controller buttons and axes to the active EmulatorJS canvas/iframe when a game is running, preventing UI navigation cross-talk.
+- **In-Game Input Yielding & Dynamic Virtual Control Auto-Hiding**:
+  - Automatically yields all standard controller buttons and axes to the active EmulatorJS canvas/iframe when a game is running, preventing UI navigation cross-talk.
+  - Dynamically detects connected physical gamepads (USB/Bluetooth) in the emulator and auto-hides on-screen virtual touch buttons (`.ejs_virtualGamepad_parent`). Disconnecting the controller dynamically restores on-screen touch controls without restarting emulation.
 - **Dedicated Gamepad Exit Shortcut**: Provides a universal combo (`Select` [Button 8] + `Start` [Button 9] or `Guide/Home` [Button 16]) to safely return from the emulator to the game library.
+- **Mobile View Spatial Navigation & Visual Focus Rings**:
+  - Delivers complete 2D spatial navigation across `MobileAppView` (Profile Gate, Topbar icons, System Chips, Horizontal Carousels, System Drilldown grids, and the Game Detail Bottom Sheet).
+  - High-visibility luminous neon focus styling (`.gamepad-focused`) and automatic smooth `scrollIntoView` ensure clear cursor tracking across all handheld and Android displays.
 - **Gamepad Search Hotkey & On-Screen Virtual Keyboard**: Allows gamepad users to trigger search instantly with `Button 3 (Y / Triangle)` or `Button 8 (Select/Share)` and type queries via a glassmorphic on-screen virtual keyboard with spatial D-Pad grid navigation, `A` (select), `X` (space), `Y` (backspace), `B` (close), and `Start` (search/done).
 - **Gamepad Battery Monitoring & Telemetry**: Inspects connected gamepad battery telemetry (`gamepad.battery`) to render live battery percentage, icon level (Full, Medium, Low, Critical), and charging status indicator (`⚡`) inside the Topbar gamepad widget and Settings view.
 - **Low & Critical Battery In-App Banner**: Triggers tactile WebAudio warning chimes and floating console notification toasts when battery level drops below 20% (Low) or 10% (Critical) without interrupting gameplay.

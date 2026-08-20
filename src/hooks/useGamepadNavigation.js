@@ -3,7 +3,7 @@ import { KEYBOARD_ROWS } from '../components/OnScreenKeyboard';
 
 /**
  * Unified 2D Spatial Navigation and Gamepad Input Polling Engine.
- * Handles keyboard shortcuts, Gamepad polling, virtual keyboard navigation, and SFX cues.
+ * Handles desktop grid, Netflix-style mobile feed, profile gates, virtual keyboard navigation, and SFX cues.
  */
 export function useGamepadNavigation({
   focusedTarget,
@@ -27,7 +27,7 @@ export function useGamepadNavigation({
   activeSystem,
   setActiveSystem,
   filteredGames,
-  systems,
+  systems = [],
   searchQuery,
   setSearchQuery,
   searchInputRef,
@@ -38,7 +38,23 @@ export function useGamepadNavigation({
   fetchGames,
   toggleFavorite,
   themeEngine,
-  pwa
+  pwa,
+  // Mobile-specific orchestration
+  isMobile = false,
+  selectedMobileGameForDetails = null,
+  setSelectedMobileGameForDetails,
+  hasChosenProfileThisSession = false,
+  setHasChosenProfileThisSession,
+  showProfileSwitcher = false,
+  setShowProfileSwitcher,
+  selectedMobileSystem = null,
+  setSelectedMobileSystem,
+  profiles = [],
+  activeProfileId,
+  onSelectProfile,
+  onCreateNewProfile,
+  onPlayGame,
+  games = []
 }) {
   const stateRef = useRef({});
   const lastInputTimeRef = useRef(0);
@@ -64,7 +80,15 @@ export function useGamepadNavigation({
       gamepadConnected,
       toggleFavorite,
       themeEngine,
-      pwa
+      pwa,
+      isMobile,
+      selectedMobileGameForDetails,
+      hasChosenProfileThisSession,
+      showProfileSwitcher,
+      selectedMobileSystem,
+      profiles,
+      activeProfileId,
+      games
     };
   }, [
     activeSystem,
@@ -83,7 +107,15 @@ export function useGamepadNavigation({
     gamepadConnected,
     toggleFavorite,
     themeEngine,
-    pwa
+    pwa,
+    isMobile,
+    selectedMobileGameForDetails,
+    hasChosenProfileThisSession,
+    showProfileSwitcher,
+    selectedMobileSystem,
+    profiles,
+    activeProfileId,
+    games
   ]);
 
   // Spatial navigation engine
@@ -98,14 +130,26 @@ export function useGamepadNavigation({
       systems: curSystems,
       activeSystem: curActiveSys,
       focusedTarget: curTarget,
-      oskPos: curOskPos
+      oskPos: curOskPos,
+      isMobile: curIsMobile,
+      selectedMobileGameForDetails: curMobileGame,
+      hasChosenProfileThisSession: curHasProfile,
+      showProfileSwitcher: curShowProfSwitch,
+      selectedMobileSystem: curMobileSys,
+      profiles: curProfiles,
+      games: allGames,
+      searchQuery: curQuery
     } = stateRef.current;
 
-    // 0. On-Screen Virtual Keyboard Navigation
+    // 0. On-Screen Virtual Keyboard Navigation (5-Row Matrix)
     if (isOskOpen) {
       if (dir === 'BACK') {
         setShowVirtualKeyboard(false);
-        setFocusedTarget({ zone: 'grid', index: 0 });
+        if (curIsMobile) {
+          setFocusedTarget(curQuery?.trim() ? { zone: 'mobileSearchGrid', index: 0 } : { zone: 'mobileTopbar', id: 'search' });
+        } else {
+          setFocusedTarget({ zone: 'grid', index: 0 });
+        }
         sfx?.playModalClose?.();
         return;
       }
@@ -150,7 +194,11 @@ export function useGamepadNavigation({
           sfx?.playKeyTick?.();
         } else if (key === 'DONE') {
           setShowVirtualKeyboard(false);
-          setFocusedTarget({ zone: 'grid', index: 0 });
+          if (curIsMobile) {
+            setFocusedTarget(curQuery?.trim() ? { zone: 'mobileSearchGrid', index: 0 } : { zone: 'mobileChips', index: 0 });
+          } else {
+            setFocusedTarget({ zone: 'grid', index: 0 });
+          }
           sfx?.playModalClose?.();
         } else if (key) {
           setSearchQuery(q => q + key);
@@ -202,63 +250,371 @@ export function useGamepadNavigation({
           setFocusedTarget({ zone: 'topbar', id: 'loadRom' });
           sfx?.playModalClose?.();
         } else {
-          // Trigger file picker in modal
           const inputEl = document.querySelector('.modal-dropzone input[type="file"]');
-          if (inputEl) {
-            inputEl.click();
+          if (inputEl) inputEl.click();
+        }
+      }
+      return;
+    }
+
+    // 2.5 Active Game in-emulator yield
+    if (curActiveGame) {
+      if (dir === 'BACK') {
+        setActiveGame(null);
+        setFocusedTarget(curIsMobile ? { zone: 'mobileChips', index: 0 } : { zone: 'grid', index: curTarget?.index || 0 });
+      }
+      return;
+    }
+
+    // ==========================================
+    // 3. DEDICATED MOBILE VIEW SPATIAL NAVIGATION
+    // ==========================================
+    if (curIsMobile) {
+      // 3.0 Mobile Search Results Active Grid Navigation
+      if (curQuery?.trim()) {
+        const q = curQuery.toLowerCase().trim();
+        const searched = allGames.filter(g => 
+          g.title.toLowerCase().includes(q) || 
+          (g.systemName && g.systemName.toLowerCase().includes(q))
+        );
+
+        if (curTarget?.zone === 'mobileSearchGrid') {
+          const curIdx = curTarget?.index || 0;
+          if (dir === 'BACK') {
+            setSearchQuery('');
+            setFocusedTarget({ zone: 'mobileChips', index: 0 });
+            sfx?.playTabSwitch?.();
+            return;
+          }
+          if (dir === 'UP') {
+            if (curIdx < 2) {
+              setFocusedTarget({ zone: 'mobileTopbar', id: 'search' });
+              sfx?.playTileNav?.();
+            } else {
+              setFocusedTarget({ zone: 'mobileSearchGrid', index: Math.max(0, curIdx - 2) });
+              sfx?.playTileNav?.();
+            }
+          } else if (dir === 'DOWN') {
+            const nextIdx = Math.min(searched.length - 1, curIdx + 2);
+            setFocusedTarget({ zone: 'mobileSearchGrid', index: nextIdx });
+            sfx?.playTileNav?.();
+          } else if (dir === 'LEFT') {
+            const nextIdx = Math.max(0, curIdx - 1);
+            setFocusedTarget({ zone: 'mobileSearchGrid', index: nextIdx });
+            sfx?.playTileNav?.();
+          } else if (dir === 'RIGHT') {
+            const nextIdx = Math.min(searched.length - 1, curIdx + 1);
+            setFocusedTarget({ zone: 'mobileSearchGrid', index: nextIdx });
+            sfx?.playTileNav?.();
+          } else if (dir === 'SELECT') {
+            if (searched[curIdx]) {
+              setSelectedMobileGameForDetails(searched[curIdx]);
+              setFocusedTarget({ zone: 'mobileSheet', id: 'play' });
+              sfx?.playModalOpen?.();
+            }
+          }
+          return;
+        }
+      }
+
+      // 3.1 Mobile Profile Gate / Profile Switcher Screen
+      if (!curHasProfile || curShowProfSwitch) {
+        const totalItems = (curProfiles?.length || 0) + 1;
+        const curIdx = curTarget?.zone === 'mobileProfileGate' ? (curTarget?.index || 0) : 0;
+
+        if (dir === 'BACK' && curShowProfSwitch) {
+          setShowProfileSwitcher(false);
+          setFocusedTarget({ zone: 'mobileTopbar', id: 'profile' });
+          sfx?.playModalClose?.();
+          return;
+        }
+
+        if (dir === 'LEFT') {
+          const nextIdx = Math.max(0, curIdx - 1);
+          setFocusedTarget({ zone: 'mobileProfileGate', index: nextIdx });
+          sfx?.playTileNav?.();
+        } else if (dir === 'RIGHT') {
+          const nextIdx = Math.min(totalItems - 1, curIdx + 1);
+          setFocusedTarget({ zone: 'mobileProfileGate', index: nextIdx });
+          sfx?.playTileNav?.();
+        } else if (dir === 'UP') {
+          const nextIdx = Math.max(0, curIdx - 2);
+          setFocusedTarget({ zone: 'mobileProfileGate', index: nextIdx });
+          sfx?.playTileNav?.();
+        } else if (dir === 'DOWN') {
+          const nextIdx = Math.min(totalItems - 1, curIdx + 2);
+          setFocusedTarget({ zone: 'mobileProfileGate', index: nextIdx });
+          sfx?.playTileNav?.();
+        } else if (dir === 'SELECT') {
+          if (curIdx < (curProfiles?.length || 0)) {
+            const chosenProf = curProfiles[curIdx];
+            if (chosenProf && onSelectProfile) {
+              onSelectProfile(chosenProf.id);
+            }
+            setHasChosenProfileThisSession(true);
+            setShowProfileSwitcher(false);
+            setFocusedTarget({ zone: 'mobileChips', index: 0 });
+            sfx?.playTileNav?.();
+          } else {
+            // Add Player Card
+            if (onCreateNewProfile) onCreateNewProfile();
+            setHasChosenProfileThisSession(true);
+            setShowProfileSwitcher(false);
+            sfx?.playModalOpen?.();
+          }
+        }
+        return;
+      }
+
+      // 3.2 Mobile Game Detail Drawer / Bottom Sheet
+      if (curMobileGame) {
+        const curBtn = curTarget?.zone === 'mobileSheet' ? (curTarget?.id || 'play') : 'play';
+        if (dir === 'BACK') {
+          setSelectedMobileGameForDetails(null);
+          setFocusedTarget(curQuery?.trim() ? { zone: 'mobileSearchGrid', index: 0 } : { zone: 'mobileChips', index: 0 });
+          sfx?.playModalClose?.();
+          return;
+        }
+        if (dir === 'LEFT') {
+          if (curBtn === 'fav') {
+            setFocusedTarget({ zone: 'mobileSheet', id: 'play' });
+            sfx?.playTileNav?.();
+          } else if (curBtn === 'play') {
+            setFocusedTarget({ zone: 'mobileSheet', id: 'close' });
+            sfx?.playTileNav?.();
+          }
+        } else if (dir === 'RIGHT') {
+          if (curBtn === 'close') {
+            setFocusedTarget({ zone: 'mobileSheet', id: 'play' });
+            sfx?.playTileNav?.();
+          } else if (curBtn === 'play') {
+            setFocusedTarget({ zone: 'mobileSheet', id: 'fav' });
+            sfx?.playTileNav?.();
+          }
+        } else if (dir === 'UP') {
+          setFocusedTarget({ zone: 'mobileSheet', id: 'close' });
+          sfx?.playTileNav?.();
+        } else if (dir === 'DOWN') {
+          setFocusedTarget({ zone: 'mobileSheet', id: 'play' });
+          sfx?.playTileNav?.();
+        } else if (dir === 'SELECT') {
+          if (curBtn === 'play') {
+            const gameToLaunch = curMobileGame;
+            setSelectedMobileGameForDetails(null);
+            sfx?.playGameLaunch?.();
+            if (onPlayGame) onPlayGame(gameToLaunch);
+          } else if (curBtn === 'fav') {
+            if (toggleFavorite) {
+              const nextState = toggleFavorite(curMobileGame);
+              sfx?.playFavoriteToggle?.(nextState);
+            }
+          } else if (curBtn === 'close') {
+            setSelectedMobileGameForDetails(null);
+            setFocusedTarget(curQuery?.trim() ? { zone: 'mobileSearchGrid', index: 0 } : { zone: 'mobileChips', index: 0 });
+            sfx?.playModalClose?.();
+          }
+        }
+        return;
+      }
+
+      // 3.3 Mobile System Drilldown View
+      if (curMobileSys) {
+        const sysGames = allGames.filter(g => g.systemKey === curMobileSys.key);
+        const curZone = curTarget?.zone || 'mobileDrilldown';
+        const curIdx = curTarget?.index || 0;
+        const curId = curTarget?.id;
+
+        if (dir === 'BACK') {
+          setSelectedMobileSystem(null);
+          setFocusedTarget({ zone: 'mobileChips', index: 0 });
+          sfx?.playTabSwitch?.();
+          return;
+        }
+
+        if (dir === 'UP') {
+          if (curId === 'back') {
+            // Top
+          } else if (curIdx < 3) {
+            setFocusedTarget({ zone: 'mobileDrilldown', id: 'back' });
+            sfx?.playTileNav?.();
+          } else {
+            setFocusedTarget({ zone: 'mobileDrilldown', index: Math.max(0, curIdx - 3) });
+            sfx?.playTileNav?.();
+          }
+        } else if (dir === 'DOWN') {
+          if (curId === 'back') {
+            setFocusedTarget({ zone: 'mobileDrilldown', index: 0 });
+            sfx?.playTileNav?.();
+          } else {
+            const nextIdx = Math.min(sysGames.length - 1, curIdx + 3);
+            setFocusedTarget({ zone: 'mobileDrilldown', index: nextIdx });
+            sfx?.playTileNav?.();
+          }
+        } else if (dir === 'LEFT') {
+          if (curId !== 'back') {
+            const nextIdx = Math.max(0, curIdx - 1);
+            setFocusedTarget({ zone: 'mobileDrilldown', index: nextIdx });
+            sfx?.playTileNav?.();
+          }
+        } else if (dir === 'RIGHT') {
+          if (curId === 'back') {
+            if (sysGames.length > 0) {
+              setFocusedTarget({ zone: 'mobileDrilldown', index: 0 });
+              sfx?.playTileNav?.();
+            }
+          } else {
+            const nextIdx = Math.min(sysGames.length - 1, curIdx + 1);
+            setFocusedTarget({ zone: 'mobileDrilldown', index: nextIdx });
+            sfx?.playTileNav?.();
+          }
+        } else if (dir === 'SELECT') {
+          if (curId === 'back') {
+            setSelectedMobileSystem(null);
+            setFocusedTarget({ zone: 'mobileChips', index: 0 });
+            sfx?.playTabSwitch?.();
+          } else if (sysGames[curIdx]) {
+            setSelectedMobileGameForDetails(sysGames[curIdx]);
+            setFocusedTarget({ zone: 'mobileSheet', id: 'play' });
+            sfx?.playModalOpen?.();
+          }
+        }
+        return;
+      }
+
+      // 3.4 Mobile Main Streaming-Style Feed
+      const sysCount = curSystems?.length || 0;
+      const curZone = curTarget?.zone || 'mobileChips';
+      const curIdx = curTarget?.index || 0;
+      const curRow = curTarget?.rowIndex || 0;
+      const curCol = curTarget?.colIndex || 0;
+      const curId = curTarget?.id || 'profile';
+
+      // Build rows definition
+      const systemGamesMap = {};
+      allGames.forEach(g => {
+        if (!g.systemKey) return;
+        if (!systemGamesMap[g.systemKey]) systemGamesMap[g.systemKey] = [];
+        systemGamesMap[g.systemKey].push(g);
+      });
+      const recentIds = (stateRef.current.pwa?.recentIds) || [];
+      const recentGames = allGames.filter(g => recentIds.includes(g.id || g.title));
+      const favoriteGames = allGames.filter(g => (stateRef.current.toggleFavorite ? false : false));
+
+      const feedRows = [];
+      if (recentGames.length > 0) feedRows.push({ key: 'recent', games: recentGames, type: 'recent' });
+      if (favoriteGames.length > 0) feedRows.push({ key: 'favs', games: favoriteGames, type: 'favs' });
+      curSystems.forEach(sys => {
+        const sg = systemGamesMap[sys.key] || [];
+        if (sg.length > 0) feedRows.push({ key: sys.key, sys, games: sg.slice(0, 12), type: 'system' });
+      });
+
+      if (curZone === 'mobileTopbar') {
+        const topbarItems = ['profile', 'search', 'load'];
+        if (dir === 'LEFT') {
+          const idx = topbarItems.indexOf(curId);
+          const nextIdx = Math.max(0, idx - 1);
+          setFocusedTarget({ zone: 'mobileTopbar', id: topbarItems[nextIdx] });
+          sfx?.playTileNav?.();
+        } else if (dir === 'RIGHT') {
+          const idx = topbarItems.indexOf(curId);
+          const nextIdx = Math.min(topbarItems.length - 1, idx + 1);
+          setFocusedTarget({ zone: 'mobileTopbar', id: topbarItems[nextIdx] });
+          sfx?.playTileNav?.();
+        } else if (dir === 'DOWN') {
+          if (curQuery?.trim()) {
+            setFocusedTarget({ zone: 'mobileSearchGrid', index: 0 });
+          } else {
+            setFocusedTarget({ zone: 'mobileChips', index: 0 });
+          }
+          sfx?.playTileNav?.();
+        } else if (dir === 'SELECT') {
+          if (curId === 'profile') {
+            setShowProfileSwitcher(true);
+            setFocusedTarget({ zone: 'mobileProfileGate', index: 0 });
+            sfx?.playModalOpen?.();
+          } else if (curId === 'search') {
+            if (stateRef.current.gamepadConnected) {
+              setShowVirtualKeyboard(true);
+              setOskPos({ row: 0, col: 0 });
+              sfx?.playModalOpen?.();
+            } else {
+              const inp = document.querySelector('.mobile-search-input');
+              if (inp) inp.focus();
+            }
+          } else if (curId === 'load') {
+            const fileInp = document.querySelector('.mobile-app-root input[type="file"]');
+            if (fileInp) fileInp.click();
+          }
+        }
+      } else if (curZone === 'mobileChips') {
+        if (dir === 'LEFT') {
+          const nextIdx = Math.max(0, curIdx - 1);
+          setFocusedTarget({ zone: 'mobileChips', index: nextIdx });
+          sfx?.playTileNav?.();
+        } else if (dir === 'RIGHT') {
+          const nextIdx = Math.min(sysCount - 1, curIdx + 1);
+          setFocusedTarget({ zone: 'mobileChips', index: nextIdx });
+          sfx?.playTileNav?.();
+        } else if (dir === 'UP') {
+          setFocusedTarget({ zone: 'mobileTopbar', id: 'search' });
+          sfx?.playTileNav?.();
+        } else if (dir === 'DOWN') {
+          if (feedRows.length > 0) {
+            setFocusedTarget({ zone: 'mobileFeed', rowIndex: 0, colIndex: 0 });
+            sfx?.playTileNav?.();
+          }
+        } else if (dir === 'SELECT') {
+          if (curSystems[curIdx]) {
+            setSelectedMobileSystem(curSystems[curIdx]);
+            setFocusedTarget({ zone: 'mobileDrilldown', index: 0 });
+            sfx?.playTabSwitch?.();
+          }
+        }
+      } else if (curZone === 'mobileFeed') {
+        const activeRowObj = feedRows[curRow];
+        const rowLen = activeRowObj?.games?.length || 0;
+
+        if (dir === 'LEFT') {
+          const nextCol = Math.max(0, curCol - 1);
+          setFocusedTarget({ zone: 'mobileFeed', rowIndex: curRow, colIndex: nextCol });
+          sfx?.playTileNav?.();
+        } else if (dir === 'RIGHT') {
+          const nextCol = Math.min(rowLen - 1, curCol + 1);
+          setFocusedTarget({ zone: 'mobileFeed', rowIndex: curRow, colIndex: nextCol });
+          sfx?.playTileNav?.();
+        } else if (dir === 'UP') {
+          if (curRow === 0) {
+            setFocusedTarget({ zone: 'mobileChips', index: 0 });
+            sfx?.playTileNav?.();
+          } else {
+            const nextRow = curRow - 1;
+            const nextRowLen = feedRows[nextRow]?.games?.length || 1;
+            setFocusedTarget({ zone: 'mobileFeed', rowIndex: nextRow, colIndex: Math.min(curCol, nextRowLen - 1) });
+            sfx?.playTileNav?.();
+          }
+        } else if (dir === 'DOWN') {
+          if (curRow < feedRows.length - 1) {
+            const nextRow = curRow + 1;
+            const nextRowLen = feedRows[nextRow]?.games?.length || 1;
+            setFocusedTarget({ zone: 'mobileFeed', rowIndex: nextRow, colIndex: Math.min(curCol, nextRowLen - 1) });
+            sfx?.playTileNav?.();
+          }
+        } else if (dir === 'SELECT') {
+          const game = activeRowObj?.games?.[curCol];
+          if (game) {
+            setSelectedMobileGameForDetails(game);
+            setFocusedTarget({ zone: 'mobileSheet', id: 'play' });
+            sfx?.playModalOpen?.();
           }
         }
       }
       return;
     }
 
-    // 2.5 Demo Welcome Modal Navigation
-    if (curTarget?.zone === 'demoModal') {
-      if (dir === 'BACK') {
-        const dismissBtn = document.querySelector('.demo-modal-btn-primary');
-        if (dismissBtn) dismissBtn.click();
-        return;
-      }
-      if (dir === 'LEFT' || dir === 'UP') {
-        setFocusedTarget({ zone: 'demoModal', id: 'github' });
-        sfx?.playTileNav?.();
-      } else if (dir === 'RIGHT' || dir === 'DOWN') {
-        setFocusedTarget({ zone: 'demoModal', id: 'dismiss' });
-        sfx?.playTileNav?.();
-      } else if (dir === 'SELECT') {
-        if (curTarget?.id === 'github') {
-          window.open('https://github.com/godarayudhvir/retro-player/blob/main/guides/docker.md', '_blank');
-        } else {
-          const dismissBtn = document.querySelector('.demo-modal-btn-primary');
-          if (dismissBtn) dismissBtn.click();
-        }
-      }
-      return;
-    }
-
-    // 2b. Settings & Library Manager Modal Navigation
-    if (stateRef.current.showSettingsModal) {
-      if (dir === 'BACK') {
-        setShowSettingsModal(false);
-        setFocusedTarget({ zone: 'topbar', id: 'settings' });
-        sfx?.playModalClose?.();
-        return;
-      }
-      return;
-    }
-
-    // 2c. Scraper Target Scope Modal Navigation
-    if (stateRef.current.showScraperModal) {
-      if (dir === 'BACK') {
-        setShowScraperModal(false);
-        setFocusedTarget({ zone: 'topbar', id: 'scraper' });
-        sfx?.playModalClose?.();
-        return;
-      }
-      return;
-    }
-
-    // 3. Selected Game Card Drawer Navigation
+    // ==========================================
+    // 4. DESKTOP CONSOLE SPATIAL NAVIGATION
+    // ==========================================
+    // 4.1 Selected Game Card Drawer Navigation
     if (curCard) {
       if (dir === 'BACK') {
         setSelectedGameCard(null);
@@ -308,16 +664,7 @@ export function useGamepadNavigation({
       return;
     }
 
-    // 4. Active Game (In-Emulator)
-    if (curActiveGame) {
-      if (dir === 'BACK') {
-        setActiveGame(null);
-        setFocusedTarget({ zone: 'grid', index: curTarget?.index || 0 });
-      }
-      return;
-    }
-
-    // 5. Main Console Dashboard Navigation
+    // 4.2 Main Desktop Dashboard Navigation
     const activeSysList = curSystems.filter(s => s.gameCount > 0);
     const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
     const allTabs = [{ key: 'all' }, { key: 'favorites' }, { key: 'recent' }, ...sortedSystems];
@@ -337,12 +684,15 @@ export function useGamepadNavigation({
     if (dir === 'SELECT') {
       if (curZone === 'topbar') {
         if (curId === 'search') {
-          setShowVirtualKeyboard(true);
-          setOskPos({ row: 1, col: 0 });
-          sfx?.playModalOpen?.();
-          if (searchInputRef.current) {
-            searchInputRef.current.focus();
-            searchInputRef.current.select();
+          if (stateRef.current.gamepadConnected) {
+            setShowVirtualKeyboard(true);
+            setOskPos({ row: 0, col: 0 });
+            sfx?.playModalOpen?.();
+          } else {
+            if (searchInputRef.current) {
+              searchInputRef.current.focus();
+              searchInputRef.current.select();
+            }
           }
         } else if (curId === 'install') {
           if (stateRef.current.pwa?.promptInstall) {
@@ -383,12 +733,10 @@ export function useGamepadNavigation({
       return;
     }
 
-    // Directional Spatial Movements (UP, DOWN, LEFT, RIGHT)
+    // Desktop Spatial Movements (UP, DOWN, LEFT, RIGHT)
     if (curZone === 'topbar') {
       const topbarItems = ['search'];
-      if (stateRef.current.pwa?.canInstall) {
-        topbarItems.push('install');
-      }
+      if (stateRef.current.pwa?.canInstall) topbarItems.push('install');
       topbarItems.push('loadRom', 'settings');
 
       if (dir === 'LEFT') {
@@ -482,7 +830,15 @@ export function useGamepadNavigation({
     searchInputRef,
     sfx,
     handleGameSelect,
-    fetchGames
+    fetchGames,
+    setSelectedMobileGameForDetails,
+    setHasChosenProfileThisSession,
+    setShowProfileSwitcher,
+    setSelectedMobileSystem,
+    onSelectProfile,
+    onCreateNewProfile,
+    onPlayGame,
+    toggleFavorite
   ]);
 
   // Keyboard navigation listener
@@ -491,7 +847,7 @@ export function useGamepadNavigation({
       // Cmd/Ctrl + K search shortcut
       if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
         e.preventDefault();
-        setFocusedTarget({ zone: 'topbar', id: 'search' });
+        setFocusedTarget(stateRef.current.isMobile ? { zone: 'mobileTopbar', id: 'search' } : { zone: 'topbar', id: 'search' });
         sfx?.playModalOpen?.();
         if (searchInputRef.current) {
           searchInputRef.current.focus();
@@ -518,7 +874,7 @@ export function useGamepadNavigation({
         if (e.key === 'Escape' || e.key === 'Esc') {
           e.preventDefault();
           setActiveGame(null);
-          setFocusedTarget({ zone: 'grid', index: stateRef.current.focusedTarget?.index || 0 });
+          setFocusedTarget(stateRef.current.isMobile ? { zone: 'mobileChips', index: 0 } : { zone: 'grid', index: stateRef.current.focusedTarget?.index || 0 });
         }
         return;
       }
@@ -587,7 +943,7 @@ export function useGamepadNavigation({
         case 'Q':
         case 'PageUp':
           e.preventDefault();
-          {
+          if (!stateRef.current.isMobile) {
             const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
             const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
             const allSysKeys = ['all', 'favorites', 'recent', ...sortedSystems.map(s => s.key)];
@@ -602,7 +958,7 @@ export function useGamepadNavigation({
         case 'E':
         case 'PageDown':
           e.preventDefault();
-          {
+          if (!stateRef.current.isMobile) {
             const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
             const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
             const allSysKeys = ['all', 'favorites', 'recent', ...sortedSystems.map(s => s.key)];
@@ -643,8 +999,6 @@ export function useGamepadNavigation({
         }
 
         // When a game is active in the emulator, yield gamepad inputs to EmulatorJS!
-        // The iframe handles in-game inputs and posts RETRO_PLAYER_EXIT_GAME on exit combo.
-        // Throttle parent poll to 250ms to yield 100% of thread & GPU to WebAssembly core.
         if (stateRef.current.activeGame) {
           const b = gp.buttons;
           const selectBtn = b[8]?.pressed;
@@ -655,7 +1009,7 @@ export function useGamepadNavigation({
           if (isExitCombo && !prevButtonsRef.current.exitCombo) {
             console.log('🎮 [GAMEPAD] Controller exit combo triggered. Exiting active game to library.');
             setActiveGame(null);
-            setFocusedTarget({ zone: 'grid', index: stateRef.current.focusedTarget?.index || 0 });
+            setFocusedTarget(stateRef.current.isMobile ? { zone: 'mobileChips', index: 0 } : { zone: 'grid', index: stateRef.current.focusedTarget?.index || 0 });
           }
           prevButtonsRef.current = { exitCombo: isExitCombo };
           setTimeout(() => {
@@ -665,7 +1019,7 @@ export function useGamepadNavigation({
         }
 
         const now = Date.now();
-        const COOLDOWN = 200;
+        const COOLDOWN = 180;
 
         const b = gp.buttons;
         const axes = gp.axes;
@@ -682,11 +1036,12 @@ export function useGamepadNavigation({
         const btnSelect = b[8]?.pressed;
         const btnStart = b[9]?.pressed;
 
-        const shoulderL = b[4]?.pressed || b[6]?.pressed || b[4]?.value > 0.5;
-        const shoulderR = b[5]?.pressed || b[7]?.pressed || b[5]?.value > 0.5;
+        // Clean shoulder bumpers (excluding triggers to avoid false firing)
+        const shoulderL = b[4]?.pressed || false;
+        const shoulderR = b[5]?.pressed || false;
 
         // Controller Hotkey: Y / Triangle or Select toggles Search / Virtual Keyboard
-        if (!stateRef.current.activeGame && !stateRef.current.selectedGameCard && !stateRef.current.showInfoModal) {
+        if (!stateRef.current.activeGame && !stateRef.current.selectedGameCard && !stateRef.current.showInfoModal && !stateRef.current.selectedMobileGameForDetails) {
           if ((btnY && !prevButtonsRef.current.btnY) || (btnSelect && !prevButtonsRef.current.btnSelect)) {
             setShowVirtualKeyboard(prev => {
               const next = !prev;
@@ -694,7 +1049,7 @@ export function useGamepadNavigation({
               else sfx?.playModalClose?.();
               return next;
             });
-            setOskPos({ row: 1, col: 0 });
+            setOskPos({ row: 0, col: 0 });
             lastInputTimeRef.current = now;
             prevButtonsRef.current = { ...prevButtonsRef.current, btnY, btnSelect, btnA, btnB, btnX, btnStart, shoulderL, shoulderR };
             animId = requestAnimationFrame(pollGamepad);
@@ -710,22 +1065,25 @@ export function useGamepadNavigation({
             lastInputTimeRef.current = now;
           } else if (btnStart && !prevButtonsRef.current.btnStart) { // Start button -> Done
             setShowVirtualKeyboard(false);
-            setFocusedTarget({ zone: 'grid', index: 0 });
+            if (stateRef.current.isMobile) {
+              setFocusedTarget(stateRef.current.searchQuery?.trim() ? { zone: 'mobileSearchGrid', index: 0 } : { zone: 'mobileChips', index: 0 });
+            } else {
+              setFocusedTarget({ zone: 'grid', index: 0 });
+            }
             sfx?.playModalClose?.();
             lastInputTimeRef.current = now;
           }
         } else if (!stateRef.current.activeGame && !stateRef.current.showInfoModal && !stateRef.current.showLoadRomModal) {
-          // X button toggles Favorite on focused game in modal or grid
+          // X button toggles Favorite on focused game
           if (btnX && !prevButtonsRef.current.btnX) {
-            if (stateRef.current.selectedGameCard) {
+            if (stateRef.current.selectedMobileGameForDetails) {
               if (stateRef.current.toggleFavorite) {
-                const nextState = stateRef.current.toggleFavorite(stateRef.current.selectedGameCard);
+                const nextState = stateRef.current.toggleFavorite(stateRef.current.selectedMobileGameForDetails);
                 sfx?.playFavoriteToggle?.(nextState);
               }
-            } else if (stateRef.current.focusedTarget?.zone === 'grid') {
-              const game = stateRef.current.filteredGames[stateRef.current.focusedTarget?.index || 0];
-              if (game && stateRef.current.toggleFavorite) {
-                const nextState = stateRef.current.toggleFavorite(game);
+            } else if (stateRef.current.selectedGameCard) {
+              if (stateRef.current.toggleFavorite) {
+                const nextState = stateRef.current.toggleFavorite(stateRef.current.selectedGameCard);
                 sfx?.playFavoriteToggle?.(nextState);
               }
             }
@@ -755,24 +1113,34 @@ export function useGamepadNavigation({
             navigateSpatial('BACK');
             moved = true;
           } else if (shoulderL && !prevButtonsRef.current.shoulderL) {
-            const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
-            const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
-            const allSysKeys = ['all', ...sortedSystems.map(s => s.key)];
-            const curSysIdx = allSysKeys.indexOf(stateRef.current.activeSystem);
-            const nextSysIdx = (curSysIdx - 1 + allSysKeys.length) % allSysKeys.length;
-            setActiveSystem(allSysKeys[nextSysIdx]);
-            setFocusedTarget({ zone: 'ribbon', index: nextSysIdx });
-            sfx?.playTabSwitch?.();
+            if (!stateRef.current.isMobile) {
+              const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
+              const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
+              const allSysKeys = ['all', ...sortedSystems.map(s => s.key)];
+              const curSysIdx = allSysKeys.indexOf(stateRef.current.activeSystem);
+              const nextSysIdx = (curSysIdx - 1 + allSysKeys.length) % allSysKeys.length;
+              setActiveSystem(allSysKeys[nextSysIdx]);
+              setFocusedTarget({ zone: 'ribbon', index: nextSysIdx });
+              sfx?.playTabSwitch?.();
+            } else {
+              setFocusedTarget(prev => ({ zone: 'mobileChips', index: Math.max(0, (prev.index || 0) - 1) }));
+              sfx?.playTabSwitch?.();
+            }
             moved = true;
           } else if (shoulderR && !prevButtonsRef.current.shoulderR) {
-            const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
-            const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
-            const allSysKeys = ['all', ...sortedSystems.map(s => s.key)];
-            const curSysIdx = allSysKeys.indexOf(stateRef.current.activeSystem);
-            const nextSysIdx = (curSysIdx + 1) % allSysKeys.length;
-            setActiveSystem(allSysKeys[nextSysIdx]);
-            setFocusedTarget({ zone: 'ribbon', index: nextSysIdx });
-            sfx?.playTabSwitch?.();
+            if (!stateRef.current.isMobile) {
+              const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
+              const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
+              const allSysKeys = ['all', ...sortedSystems.map(s => s.key)];
+              const curSysIdx = allSysKeys.indexOf(stateRef.current.activeSystem);
+              const nextSysIdx = (curSysIdx + 1) % allSysKeys.length;
+              setActiveSystem(allSysKeys[nextSysIdx]);
+              setFocusedTarget({ zone: 'ribbon', index: nextSysIdx });
+              sfx?.playTabSwitch?.();
+            } else {
+              setFocusedTarget(prev => ({ zone: 'mobileChips', index: Math.min((stateRef.current.systems?.length || 1) - 1, (prev.index || 0) + 1) }));
+              sfx?.playTabSwitch?.();
+            }
             moved = true;
           }
 

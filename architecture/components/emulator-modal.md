@@ -1,12 +1,12 @@
 # Emulator Modal UI Component (`architecture/components/emulator-modal.md`)
 
 ## 1. Description
-The Emulator Modal UI component ([EmulatorModal.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/EmulatorModal.jsx)) renders the hardware-accelerated 60 FPS full-screen retro console overlay, top HUD bar, isolated iframe canvas stage, real-time performance & diagnostic health HUD, and RetroArch control panel integration.
+The Emulator Modal UI component ([EmulatorModal.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/EmulatorModal.jsx)) renders the hardware-accelerated full-screen retro console overlay, top HUD bar, isolated iframe canvas stage, real-time performance & diagnostic health HUD, and RetroArch control panel integration.
 
 ---
 
 ## 2. Detailed List of What It Does
-- **60 FPS Hardware-Accelerated Container**: Renders fixed overlay `.emulator-backdrop-iisu` with dark background `#090b10`, `contain: layout style paint;`, and `transform: translateZ(0)` to eliminate GPU compositor bottlenecks and maintain a solid 60 FPS / 16.6ms frame rate.
+- **Hardware-Accelerated Container**: Renders fixed overlay `.emulator-backdrop-iisu` with dark background `#090b10`, `contain: layout style paint;`, and `transform: translateZ(0)` to eliminate GPU compositor bottlenecks.
 - **Top Responsive Header (`.emulator-topbar`)**: Shows active game title with ellipsis constraints, system badge, offline/CDN indicator, live controller status indicator, real-time FPS badge (`.tag-fps`), Diagnostic Performance HUD toggle (`.emulator-diag-btn`), Extension **Menu** toolbar toggle button (`<Menu size={18} />`), and exit close button (`<X size={18} />`).
 - **In-App Extension Toolbar (`.emulator-sub-toolbar`)**: Slide-down action bar featuring Restart (`RotateCcw`), Pause/Resume (`Play`/`Pause`), Mute/Unmute (`Volume2`/`VolumeX`), Instant Lossless Capture (`Camera`), and In-Game Retro Settings (`Sliders`).
 - **In-Game Retro Settings & Shader Modal (`.emulator-settings-panel`)**: Toggleable in-game HUD modal providing audio volume slider control, real-time display shaders (Pixel Perfect, CRT Phosphor scanlines, Bilinear Smooth, Vibrant Arcade), Quick Save/Load state actions, battery RAM export (`.sav` download), and keyboard/gamepad shortcut layout reference.
@@ -18,7 +18,7 @@ The Emulator Modal UI component ([EmulatorModal.jsx](file:///Users/godarayudhvir
 ---
 
 ## 3. Detailed Logic Behind Everything and How It Works
-- **60 FPS Core Engine Configuration**: Injects `window.EJS_defaultOptions` with `video_vsync: 'true'`, `video_threaded: 'true'`, `video_max_swapchain_images: '2'`, `audio_sync: 'true'`, `audio_rate_control: 'true'`, and `audio_max_timing_skew: '0.05'` ensuring smooth 60 FPS presentation without audio-induced frame rate halving.
+- **Core Engine Configuration**: Injects `window.EJS_defaultOptions` with `video_vsync: 'true'`, `video_threaded: 'true'`, `video_max_swapchain_images: '2'`, `audio_sync: 'true'`, `audio_rate_control: 'true'`, and `audio_max_timing_skew: '0.05'` ensuring smooth VSync presentation without audio-induced frame rate halving.
 - **Action Dispatch Engine (`handleEmulatorAction`)**:
   - `restart`: Directly invokes `emu.gameManager.restart()` and `emu.gameManager.functions.restart()` with iframe fallback.
   - `pause`: Synchronizes `emu.togglePlaying()` and `emu.gameManager.functions.toggleMainLoop()` with state tracking.

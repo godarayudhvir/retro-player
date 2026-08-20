@@ -32,7 +32,11 @@ The `MobileAppView` component delivers a dedicated, streaming-app inspired (Netf
      - **Play Game**: Launches the emulator immediately.
      - **Favorite**: Stars or unstars the game.
 
-6. **Light Theme & Silent Background Services**:
+6. **Gamepad & Spatial Navigation Integration**:
+   - Supports 100% controller-first navigation (`focusedTarget` tracking) with luminous neon focus highlights (`.gamepad-focused`) across Profile chooser cards, Topbar actions, System filter chips, Horizontal carousel game cards, and the Game Detail Bottom Sheet.
+   - Automatic smooth scroll-into-view keeps the active selection centered on small phone screens during D-pad / stick navigation.
+
+7. **Light Theme & Silent Background Services**:
    - Standardizes on a clean Light Theme (`data-theme="classic-light"`) for maximum readability on small screens.
    - BGM audio, SFX synthesizer, and online scraper operate seamlessly in the background without UI clutter.
 
@@ -58,5 +62,17 @@ interface MobileAppViewProps {
   metadataMap: Record<string, GameMetadata>;
   onCustomRomLoad: (file: File) => void;
   sfx: WebAudioSfx;
+  focusedTarget?: { zone: string; index?: number; id?: string; rowIndex?: number; colIndex?: number };
+  setFocusedTarget?: (target: any) => void;
+  selectedGameForDetails?: Game | null;
+  setSelectedGameForDetails?: (game: Game | null) => void;
+  hasChosenProfileThisSession?: boolean;
+  setHasChosenProfileThisSession?: (chosen: boolean) => void;
+  showProfileSwitcher?: boolean;
+  setShowProfileSwitcher?: (show: boolean) => void;
+  selectedSystem?: System | null;
+  setSelectedSystem?: (sys: System | null) => void;
+  searchQuery?: string;
+  setSearchQuery?: (query: string) => void;
 }
 ```

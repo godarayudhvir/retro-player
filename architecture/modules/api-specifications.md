@@ -43,7 +43,7 @@ The **API Protocols & Integration Specifications** architecture document catalog
 - **IndexedDB API**: Centralized local database (`RetroPlayerDB` & `RetroPlayerMetadataDB`) for zero-loss offline data persistence.
 - **Web Audio API (`AudioContext`)**: Zero-latency acoustic UI sound effect synthesizer.
 - **HTML5 Audio API**: Background music playlist engine.
-- **Gamepad API (`navigator.getGamepads`)**: 60fps input polling loop for USB/Bluetooth controllers.
+- **Gamepad API (`navigator.getGamepads`)**: Real-time `requestAnimationFrame` input polling loop for USB/Bluetooth controllers.
 
 ---
 

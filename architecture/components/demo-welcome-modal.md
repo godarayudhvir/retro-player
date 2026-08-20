@@ -14,7 +14,7 @@ When the application is self-hosted with Docker Compose, Node.js (`server.js`), 
   - Checks if `window.location.hostname.endsWith('github.io')` or `window.location.search.includes('demo=true')`.
   - Checks `localStorage.getItem('retro_demo_dismissed')` to avoid prompting returning visitors.
 - **Showcase Feature Transparency**:
-  - Highlights full 60 FPS client-side WebAssembly emulation across all 12 console cores.
+  - Highlights hardware-accelerated client-side WebAssembly emulation across all 12 console cores.
   - Informs players about 100% private local custom ROM testing via the topbar **Load Custom ROM** button and drag-and-drop.
   - Explains the 1-click PWA standalone console installation on desktop and mobile.
 - **Non-Commercial Demo Showcase & Compliance Disclaimer**:

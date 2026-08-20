@@ -15,7 +15,7 @@ Retro Player is built on high-performance **client-side WebAssembly (WASM)**, mo
 
 | Platform / OS | Browser | Emulation Status | Gamepad Status | Notes & Specifications |
 | :--- | :--- | :---: | :---: | :--- |
-| **macOS (Apple Silicon & Intel)** | **Google Chrome** | 🟢 **Verified** | 🟢 **Verified** | 60 FPS VSync, native WebAssembly, verified with Bluetooth & USB Xbox/DualSense/Switch gamepads. |
+| **macOS (Apple Silicon & Intel)** | **Google Chrome** | 🟢 **Verified** | 🟢 **Verified** | Hardware VSync acceleration, native WebAssembly, verified with Bluetooth & USB Xbox/DualSense/Switch gamepads. |
 | **macOS (Apple Silicon & Intel)** | **Apple Safari** | 🟢 **Verified** | 🟢 **Verified** | Full WebKit hardware acceleration, verified with Bluetooth Gamepad connectivity. |
 | **macOS** | **Arc / Brave / Edge** | 🟢 **Verified** | 🟢 **Verified** | Chromium engine, standard WASM and Gamepad API support. |
 | **macOS** | **Mozilla Firefox** | 🔵 **Expected** | 🔵 **Expected** | Gecko engine, standard WASM and Gamepad API support. |
@@ -63,7 +63,7 @@ Retro Player includes a dedicated **10-Foot UI Mode** optimized for viewing from
 
 ## ⚡ Verified Hardware & Testing Scope
 
-- **Physically Verified Platforms**: **macOS (Google Chrome & Apple Safari)**. Both keyboard/mouse and physical Bluetooth/USB gamepads (Xbox, PlayStation DualSense, Nintendo Switch Pro, 8BitDo) have been tested and verified for 60 FPS gameplay, low input latency, and spatial UI navigation.
+- **Physically Verified Platforms**: **macOS (Google Chrome & Apple Safari)**. Both keyboard/mouse and physical Bluetooth/USB gamepads (Xbox, PlayStation DualSense, Nintendo Switch Pro, 8BitDo) have been tested and verified for fluid gameplay, low input latency, and spatial UI navigation.
 - **Other Platforms**: Implemented against standard **W3C Gamepad API**, **Web Audio**, and **WebAssembly** specifications.
 
 ---

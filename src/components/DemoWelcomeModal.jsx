@@ -80,7 +80,7 @@ export default function DemoWelcomeModal({
               <Gamepad2 size={20} color="#3b82f6" />
             </div>
             <div className="demo-feature-text">
-              <strong>60 FPS WASM Emulation</strong>
+              <strong>Hardware-Accelerated WASM Emulation</strong>
               <span>Zero-install retro gaming across 10+ legendary consoles.</span>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
 import { 
   Search, 
   FolderOpen, 
@@ -11,7 +11,9 @@ import {
   X, 
   Plus, 
   Calendar, 
-  Cpu 
+  Cpu,
+  Edit3,
+  Trash2
 } from 'lucide-react';
 import MiiAvatar from './MiiAvatar';
 import { getReleaseDate, getGameDescription } from '../gameDescriptions';
@@ -19,7 +21,7 @@ import { resolveAssetPath } from '../utils/assetPath';
 
 /**
  * Dedicated Netflix / Streaming-Style Mobile View for Retro Player.
- * Exclusively active on mobile devices with zero side-effects on tablet, PC, or TV modes.
+ * Exclusively active on mobile devices with full gamepad, spatial navigation, and user management integration.
  */
 export default function MobileAppView({
   games = [],
@@ -29,6 +31,8 @@ export default function MobileAppView({
   activeProfileId,
   onSelectProfile,
   onCreateNewProfile,
+  onEditProfile,
+  onDeleteProfile,
   favorites = [],
   recentlyPlayed = [],
   isFavorite,
@@ -37,14 +41,29 @@ export default function MobileAppView({
   onPlayGame,
   metadataMap = {},
   onCustomRomLoad,
-  sfx
+  sfx,
+  focusedTarget = { zone: 'mobileChips', index: 0 },
+  setFocusedTarget,
+  selectedGameForDetails,
+  setSelectedGameForDetails,
+  hasChosenProfileThisSession,
+  setHasChosenProfileThisSession,
+  showProfileSwitcher,
+  setShowProfileSwitcher,
+  selectedSystem,
+  setSelectedSystem,
+  searchQuery = '',
+  setSearchQuery
 }) {
-  const [hasChosenProfileThisSession, setHasChosenProfileThisSession] = useState(false);
-  const [showProfileSwitcher, setShowProfileSwitcher] = useState(false);
-  const [selectedSystem, setSelectedSystem] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedGameForDetails, setSelectedGameForDetails] = useState(null);
   const fileInputRef = useRef(null);
+
+  // Auto scroll focused element into view
+  useEffect(() => {
+    const focusedEl = document.querySelector('.gamepad-focused');
+    if (focusedEl) {
+      focusedEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    }
+  }, [focusedTarget]);
 
   // Group games by platform / system
   const systemGamesMap = useMemo(() => {
@@ -111,8 +130,11 @@ export default function MobileAppView({
           </div>
           {showProfileSwitcher && (
             <button 
-              className="mobile-gate-close-btn" 
-              onClick={() => setShowProfileSwitcher(false)}
+              className={`mobile-gate-close-btn ${focusedTarget?.zone === 'mobileProfileGate' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`}
+              onClick={() => {
+                setShowProfileSwitcher(false);
+                setFocusedTarget?.({ zone: 'mobileTopbar', id: 'profile' });
+              }}
               aria-label="Close Profile Switcher"
             >
               <X size={20} />
@@ -127,33 +149,55 @@ export default function MobileAppView({
           </p>
 
           <div className="mobile-profile-grid">
-            {profiles.map((p) => {
+            {profiles.map((p, idx) => {
               const isCurrent = p.id === activeProfileId;
+              const isFocused = focusedTarget?.zone === 'mobileProfileGate' && focusedTarget?.index === idx;
               return (
                 <div
                   key={p.id}
-                  className={`mobile-profile-item ${isCurrent ? 'is-active' : ''}`}
+                  className={`mobile-profile-item ${isCurrent ? 'is-active' : ''} ${isFocused ? 'gamepad-focused' : ''}`}
                   onClick={() => {
                     onSelectProfile?.(p.id);
                     setHasChosenProfileThisSession(true);
                     setShowProfileSwitcher(false);
+                    setFocusedTarget?.({ zone: 'mobileChips', index: 0 });
                     sfx?.playTileNav?.();
                   }}
                 >
                   <div 
                     className="mobile-profile-avatar-wrap"
-                    style={{ borderColor: p.favoriteColor || '#ef4444' }}
+                    style={{ borderColor: p.favoriteColor || '#3b82f6' }}
                   >
                     <MiiAvatar miiData={p.miiData || {}} size={80} />
                   </div>
                   <span className="mobile-profile-name">{p.name}</span>
+
+                  {/* Profile Management Actions */}
+                  <div className="mobile-profile-card-actions" onClick={e => e.stopPropagation()}>
+                    <button
+                      className="mobile-prof-btn"
+                      onClick={() => onEditProfile?.(p)}
+                      title={`Edit ${p.name}'s Mii Avatar`}
+                    >
+                      <Edit3 size={13} />
+                    </button>
+                    {profiles.length > 1 && (
+                      <button
+                        className="mobile-prof-btn is-delete"
+                        onClick={() => onDeleteProfile?.(p.id)}
+                        title={`Delete ${p.name}`}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })}
 
             {/* Create Profile Card */}
             <div
-              className="mobile-profile-item mobile-add-profile"
+              className={`mobile-profile-item mobile-add-profile ${focusedTarget?.zone === 'mobileProfileGate' && focusedTarget?.index === profiles.length ? 'gamepad-focused' : ''}`}
               onClick={() => {
                 onCreateNewProfile?.();
                 setHasChosenProfileThisSession(true);
@@ -173,7 +217,7 @@ export default function MobileAppView({
   }
 
   // Helper renderer for game item card in mobile carousels or grids
-  const renderGameCard = (game) => {
+  const renderGameCard = (game, isFocused = false) => {
     const meta = metadataMap[game.id] || metadataMap[`${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')];
     const rawCover = meta?.coverUrl || (game.coverUrl && !game.coverUrl.endsWith('.svg') ? game.coverUrl : null);
     const coverSrc = rawCover ? resolveAssetPath(rawCover) : null;
@@ -182,9 +226,10 @@ export default function MobileAppView({
     return (
       <div 
         key={game.id} 
-        className="mobile-game-card"
+        className={`mobile-game-card ${isFocused ? 'gamepad-focused' : ''}`}
         onClick={() => {
           setSelectedGameForDetails(game);
+          setFocusedTarget?.({ zone: 'mobileSheet', id: 'play' });
           sfx?.playModalOpen?.();
         }}
       >
@@ -214,6 +259,21 @@ export default function MobileAppView({
     ? (metadataMap[selectedGameForDetails.id] || metadataMap[`${selectedGameForDetails.systemKey}-${selectedGameForDetails.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')]) 
     : null;
 
+  // Active Feed Row builder for 2D spatial mapping
+  const feedRows = [];
+  if (recentGames.length > 0) {
+    feedRows.push({ key: 'recent', title: 'Recently Played', games: recentGames, type: 'recent' });
+  }
+  if (favoriteGames.length > 0) {
+    feedRows.push({ key: 'favs', title: 'Your Favorites', games: favoriteGames, type: 'favs' });
+  }
+  systems.forEach(sys => {
+    const sysGames = systemGamesMap[sys.key] || [];
+    if (sysGames.length > 0) {
+      feedRows.push({ key: sys.key, title: sys.name, sys, games: sysGames.slice(0, 12), type: 'system' });
+    }
+  });
+
   return (
     <div className="mobile-app-root">
       {/* Hidden File Input for Custom ROM Loader */}
@@ -229,9 +289,10 @@ export default function MobileAppView({
       <header className="mobile-topbar">
         {/* Profile Avatar (Left) */}
         <div 
-          className="mobile-topbar-profile"
+          className={`mobile-topbar-profile ${focusedTarget?.zone === 'mobileTopbar' && focusedTarget?.id === 'profile' ? 'gamepad-focused' : ''}`}
           onClick={() => {
             setShowProfileSwitcher(true);
+            setFocusedTarget?.({ zone: 'mobileProfileGate', index: 0 });
             sfx?.playModalOpen?.();
           }}
           title="Switch Profile"
@@ -240,7 +301,7 @@ export default function MobileAppView({
         </div>
 
         {/* Search Input Widget (Center) */}
-        <div className="mobile-search-widget">
+        <div className={`mobile-search-widget ${focusedTarget?.zone === 'mobileTopbar' && focusedTarget?.id === 'search' ? 'gamepad-focused' : ''}`}>
           <Search size={16} className="mobile-search-icon" />
           <input 
             type="text"
@@ -248,6 +309,7 @@ export default function MobileAppView({
             placeholder="Search games..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => setFocusedTarget?.({ zone: 'mobileTopbar', id: 'search' })}
           />
           {searchQuery && (
             <button 
@@ -262,7 +324,7 @@ export default function MobileAppView({
 
         {/* Load Custom ROM Button (Right) */}
         <button 
-          className="mobile-topbar-load-btn"
+          className={`mobile-topbar-load-btn ${focusedTarget?.zone === 'mobileTopbar' && focusedTarget?.id === 'load' ? 'gamepad-focused' : ''}`}
           onClick={() => fileInputRef.current?.click()}
           title="Load Custom ROM"
           aria-label="Load Custom ROM"
@@ -282,7 +344,10 @@ export default function MobileAppView({
             </h2>
             {searchedGames.length > 0 ? (
               <div className="mobile-games-grid">
-                {searchedGames.map(renderGameCard)}
+                {searchedGames.map((game, idx) => {
+                  const isFocused = focusedTarget?.zone === 'mobileSearchGrid' && focusedTarget?.index === idx;
+                  return renderGameCard(game, isFocused);
+                })}
               </div>
             ) : (
               <div className="mobile-empty-state">
@@ -295,9 +360,10 @@ export default function MobileAppView({
           <div className="mobile-section-container animate-fade-in">
             <div className="mobile-drilldown-header">
               <button 
-                className="mobile-back-btn" 
+                className={`mobile-back-btn ${focusedTarget?.zone === 'mobileDrilldown' && focusedTarget?.id === 'back' ? 'gamepad-focused' : ''}`}
                 onClick={() => {
                   setSelectedSystem(null);
+                  setFocusedTarget?.({ zone: 'mobileChips', index: 0 });
                   sfx?.playTabSwitch?.();
                 }}
               >
@@ -313,98 +379,82 @@ export default function MobileAppView({
             </div>
 
             <div className="mobile-games-grid">
-              {activeSystemGames.map(renderGameCard)}
+              {activeSystemGames.map((game, idx) => {
+                const isFocused = focusedTarget?.zone === 'mobileDrilldown' && focusedTarget?.index === idx;
+                return renderGameCard(game, isFocused);
+              })}
             </div>
           </div>
         ) : (
           /* State C: Main Streaming-Style Home Feed (Recents, Favorites, Systems, Rows per System) */
           <>
-            {/* 1. Recently Played Horizontal Carousel */}
-            {recentGames.length > 0 && (
-              <section className="mobile-feed-row">
-                <div className="mobile-feed-row-header">
-                  <div className="mobile-row-title-wrap">
-                    <Clock size={16} color="#10b981" />
-                    <h3>Recently Played</h3>
-                  </div>
-                </div>
-                <div className="mobile-horizontal-carousel">
-                  {recentGames.map(renderGameCard)}
-                </div>
-              </section>
-            )}
-
-            {/* 2. Favorites Horizontal Carousel */}
-            {favoriteGames.length > 0 && (
-              <section className="mobile-feed-row">
-                <div className="mobile-feed-row-header">
-                  <div className="mobile-row-title-wrap">
-                    <Star size={16} fill="#f59e0b" color="#f59e0b" />
-                    <h3>Your Favorites</h3>
-                  </div>
-                </div>
-                <div className="mobile-horizontal-carousel">
-                  {favoriteGames.map(renderGameCard)}
-                </div>
-              </section>
-            )}
-
-            {/* 3. Systems Grid / Chip Selector */}
+            {/* 1. Systems Grid / Chip Selector */}
             <section className="mobile-feed-row">
               <div className="mobile-feed-row-header">
                 <div className="mobile-row-title-wrap">
-                  <Sparkles size={16} color="#ef4444" />
+                  <Sparkles size={16} color="#3b82f6" />
                   <h3>Platforms &amp; Systems</h3>
                 </div>
               </div>
               <div className="mobile-systems-chip-list">
-                {systems.map(sys => (
-                  <button 
-                    key={sys.key}
-                    className="mobile-system-chip"
-                    style={{ '--sys-accent': sys.color || '#ef4444' }}
-                    onClick={() => {
-                      setSelectedSystem(sys);
-                      sfx?.playTabSwitch?.();
-                    }}
-                  >
-                    {sys.icon && <img src={resolveAssetPath(sys.icon)} alt="" className="mobile-chip-icon" />}
-                    <span className="mobile-chip-name">{sys.name}</span>
-                    <span className="mobile-chip-count">{sys.gameCount || 0}</span>
-                  </button>
-                ))}
+                {systems.map((sys, idx) => {
+                  const isFocused = focusedTarget?.zone === 'mobileChips' && focusedTarget?.index === idx;
+                  return (
+                    <button 
+                      key={sys.key}
+                      className={`mobile-system-chip ${isFocused ? 'gamepad-focused' : ''}`}
+                      style={{ '--sys-accent': sys.color || '#3b82f6' }}
+                      onClick={() => {
+                        setSelectedSystem(sys);
+                        setFocusedTarget?.({ zone: 'mobileDrilldown', index: 0 });
+                        sfx?.playTabSwitch?.();
+                      }}
+                    >
+                      {sys.icon && <img src={resolveAssetPath(sys.icon)} alt="" className="mobile-chip-icon" />}
+                      <span className="mobile-chip-name">{sys.name}</span>
+                      <span className="mobile-chip-count">{sys.gameCount || 0}</span>
+                    </button>
+                  );
+                })}
               </div>
             </section>
 
-            {/* 4. Individual System Game Horizontal Carousels */}
-            {systems.map(sys => {
-              const sysGames = systemGamesMap[sys.key] || [];
-              if (sysGames.length === 0) return null;
-
+            {/* 2. Dynamic Mobile Feed Rows (Recent, Favorites, Per-System Carousels) */}
+            {feedRows.map((row, rIdx) => {
               return (
-                <section key={sys.key} className="mobile-feed-row">
+                <section key={row.key} className="mobile-feed-row">
                   <div 
-                    className="mobile-feed-row-header is-clickable"
+                    className={`mobile-feed-row-header ${row.type === 'system' ? 'is-clickable' : ''}`}
                     onClick={() => {
-                      setSelectedSystem(sys);
-                      sfx?.playTabSwitch?.();
+                      if (row.type === 'system') {
+                        setSelectedSystem(row.sys);
+                        setFocusedTarget?.({ zone: 'mobileDrilldown', index: 0 });
+                        sfx?.playTabSwitch?.();
+                      }
                     }}
                   >
                     <div className="mobile-row-title-wrap">
-                      {sys.icon && (
-                        <img src={resolveAssetPath(sys.icon)} alt="" className="mobile-feed-row-icon" />
+                      {row.type === 'recent' && <Clock size={16} color="#10b981" />}
+                      {row.type === 'favs' && <Star size={16} fill="#f59e0b" color="#f59e0b" />}
+                      {row.type === 'system' && row.sys?.icon && (
+                        <img src={resolveAssetPath(row.sys.icon)} alt="" className="mobile-feed-row-icon" />
                       )}
-                      <h3>{sys.name}</h3>
-                      <span className="mobile-row-badge">{sysGames.length}</span>
+                      <h3>{row.title}</h3>
+                      <span className="mobile-row-badge">{row.games.length}</span>
                     </div>
-                    <div className="mobile-see-all-link">
-                      <span>See All</span>
-                      <ChevronRight size={15} />
-                    </div>
+                    {row.type === 'system' && (
+                      <div className="mobile-see-all-link">
+                        <span>See All</span>
+                        <ChevronRight size={15} />
+                      </div>
+                    )}
                   </div>
 
                   <div className="mobile-horizontal-carousel">
-                    {sysGames.slice(0, 12).map(renderGameCard)}
+                    {row.games.map((game, cIdx) => {
+                      const isFocused = focusedTarget?.zone === 'mobileFeed' && focusedTarget?.rowIndex === rIdx && focusedTarget?.colIndex === cIdx;
+                      return renderGameCard(game, isFocused);
+                    })}
                   </div>
                 </section>
               );
@@ -417,7 +467,10 @@ export default function MobileAppView({
       {selectedGameForDetails && (
         <div 
           className="mobile-sheet-backdrop animate-fade-in"
-          onClick={() => setSelectedGameForDetails(null)}
+          onClick={() => {
+            setSelectedGameForDetails(null);
+            setFocusedTarget?.({ zone: 'mobileChips', index: 0 });
+          }}
         >
           <div 
             className="mobile-sheet-content animate-slide-up"
@@ -427,8 +480,11 @@ export default function MobileAppView({
             <div className="mobile-sheet-handle-bar" />
 
             <button 
-              className="mobile-sheet-close"
-              onClick={() => setSelectedGameForDetails(null)}
+              className={`mobile-sheet-close ${focusedTarget?.zone === 'mobileSheet' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`}
+              onClick={() => {
+                setSelectedGameForDetails(null);
+                setFocusedTarget?.({ zone: 'mobileChips', index: 0 });
+              }}
               aria-label="Close"
             >
               <X size={18} />
@@ -452,7 +508,7 @@ export default function MobileAppView({
                 </div>
 
                 <div className="mobile-sheet-meta-info">
-                  <div className="mobile-sheet-sys-pill" style={{ background: selectedGameForDetails.systemColor || '#ef4444' }}>
+                  <div className="mobile-sheet-sys-pill" style={{ background: selectedGameForDetails.systemColor || '#3b82f6' }}>
                     {selectedGameForDetails.systemName}
                   </div>
                   <h2 className="mobile-sheet-title">{selectedGameForDetails.title}</h2>
@@ -472,7 +528,7 @@ export default function MobileAppView({
               {/* Action Buttons: Prominently displayed right under the title */}
               <div className="mobile-sheet-actions">
                 <button 
-                  className="mobile-action-play-btn"
+                  className={`mobile-action-play-btn ${focusedTarget?.zone === 'mobileSheet' && focusedTarget?.id === 'play' ? 'gamepad-focused' : ''}`}
                   onClick={() => {
                     const gameToLaunch = selectedGameForDetails;
                     setSelectedGameForDetails(null);
@@ -485,7 +541,7 @@ export default function MobileAppView({
                 </button>
 
                 <button 
-                  className={`mobile-action-fav-btn ${isFavorite?.(selectedGameForDetails.id || selectedGameForDetails.title) ? 'is-favorited' : ''}`}
+                  className={`mobile-action-fav-btn ${isFavorite?.(selectedGameForDetails.id || selectedGameForDetails.title) ? 'is-favorited' : ''} ${focusedTarget?.zone === 'mobileSheet' && focusedTarget?.id === 'fav' ? 'gamepad-focused' : ''}`}
                   onClick={() => {
                     if (toggleFavorite) {
                       const nextState = toggleFavorite(selectedGameForDetails);

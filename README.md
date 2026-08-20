@@ -43,7 +43,7 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
                                │                     YOUR BROWSER                         │
                                │                                                          │
 ┌────────────────┐  ROM File   │  ┌────────────────────┐   ┌───────────────────────────┐  │
-│  Host Server   │ ──────────> │  │ WebAssembly Core   │──>│  60 FPS Canvas Rendering  │  │
+│  Host Server   │ ──────────> │  │ WebAssembly Core   │──>│ Hardware Canvas Rendering │  │
 │ (Railway/NAS)  │  (Few MB)   │  │ (Runs on client)   │   │  0ms Gamepad Polling      │  │
 │ ~0% CPU / RAM  │             │  └────────────────────┘   │  Web Audio SFX Synthesizer│  │
 └────────────────┘             │                           └───────────────────────────┘  │
@@ -59,8 +59,9 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 ## ✨ Key Highlights & Features
 
-- 👤 **Multi-User Profiles & Nintendo Mii Avatar Studio**: Create personalized Mii-style vector avatars with customizable hairstyles, expressions, and accessories; isolated game saves, playtime logs, and favorites.
-- 📱 **Dedicated Netflix-Style Mobile Streaming UI**: Custom mobile experience (<= 768px) with "Who's Playing?" profile selector, mobile topbar, smooth horizontal carousels, and bottom sheet details drawer.
+- 🌟 **Modern Full-Screen Onboarding & Personalization**: Outcome-first walkthrough for Desktop and Mobile with interactive platform selection, quick tips, and integrated user profile setup.
+- 👤 **Multi-User Profiles & Nintendo Mii Avatar Studio**: Create personalized Mii-style vector avatars with customizable hairstyles, expressions, and accessories; isolated game saves, playtime logs, favorites, and complete in-app player management.
+- 📱 **Dedicated Netflix-Style Mobile Streaming UI**: Custom mobile experience (<= 768px) with "Who's Playing?" profile selector, mobile topbar, smooth horizontal carousels, bottom sheet details drawer, 5-row virtual keyboard, and 100% controller spatial navigation.
 - 📱 **Progressive Web App (PWA) & Offline Standalone Installation**: Install Retro Player as a native desktop/handheld app across macOS, Windows, Linux, Steam Deck, Android, and iOS with landscape gaming display mode and Service Worker caching.
 - 📱 **Multi-Device Responsive Matrix**: Fully responsive across Mobile Phones (<=640px), Tablets & Handhelds (Steam Deck, Nintendo Switch, iPad), Desktop PCs, and 10-Foot UI mode for Large 4K TVs. *(See [Hardware Compatibility Matrix](guides/compatibility.md))*.
 - 🎨 **4 Signature Themes**: **iiSU Light**, **Midnight Cyber**, **Sony XMB Wave**, and **Game Boy DMG** with instant live switching across all components.
@@ -70,9 +71,9 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 - 💬 **Universal In-App Modal Dialog System**: Zero native browser popups (`alert()`, `confirm()`, `prompt()`). All confirmations utilize theme-aware, gamepad/keyboard navigable in-app modal dialogs.
 - 💾 **3D Physical Cartridge Engine**: Tactile cartridges with metallic sheens, grip textures, dynamic shadows, and title color heuristics.
 - 🌐 **Automated Online Metadata Scraper**: Official 3D box art from **Libretro** & synopsis info from **Wikipedia** with intelligent demo-to-retail matching, 4-tier scope selection, and IndexedDB caching.
-- 🚀 **60 FPS Hardware-Accelerated Emulation & Diagnostic HUD**: Full-speed 60 FPS VSync rendering with low-latency dynamic audio sync and interactive **Diagnostic Performance HUD** (`D` hotkey).
+- 🚀 **Hardware-Accelerated Web Emulation & Diagnostic HUD**: Low-latency dynamic audio sync and interactive **Diagnostic Performance HUD** (`D` hotkey).
 - 🔊 **Synthesized Pure Web Audio UI SFX**: Zero-latency acoustic feedback synthesizer with zero external audio assets.
-- 🎮 **100% Gamepad & Keyboard Navigation**: Controller-first spatial navigation, shoulder triggers (`L1`/`R1`), on-screen virtual keyboard (`⌘K`), live **Gamepad Battery % / Charging Telemetry Widget**, and **Low-Battery In-App Notification Alerts**. *(See [Controls & Keybindings Guide](guides/controls.md))*.
+- 🎮 **100% Gamepad & Keyboard Navigation**: Controller-first spatial navigation across desktop & mobile feeds, dynamic emulator touch control auto-hiding on controller detection, shoulder triggers (`L1`/`R1`), on-screen virtual keyboard (`⌘K`), live **Gamepad Battery % / Charging Telemetry Widget**, and **Low-Battery In-App Notification Alerts**. *(See [Controls & Keybindings Guide](guides/controls.md))*.
 - ⏱️ **Playtime Analytics & Smart Collections**: Session durations, total hours played, **Favorites ⭐**, and **Recently Played** queue.
 
 ---

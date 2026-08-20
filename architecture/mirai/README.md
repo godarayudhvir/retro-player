@@ -416,7 +416,7 @@ mindmap
     - Full native integration with Steam Deck controller mapping.
 
 ### 7.2 Low-Battery & Performance Eco Mode
-- **Current Limitation**: Polling loops run at full 60fps regardless of battery status.
+- **Current Limitation**: Polling loops run continuously regardless of battery status.
 - **Mirai Solution**:
   - Monitor `navigator.getBattery()`.
   - Automatically throttle UI animation frame rates and disable background blur effects when battery falls below 20% to maximize handheld battery life.

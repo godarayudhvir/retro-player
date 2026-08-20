@@ -1,13 +1,18 @@
 import React from 'react';
-import { Search, Delete, Space, X, Check } from 'lucide-react';
+import { Search, Delete, Space, X, Check, Trash2 } from 'lucide-react';
 
 export const KEYBOARD_ROWS = [
   ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '⌫'],
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '-'],
-  ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', "'", 'CLEAR'],
-  ['Z', 'X', 'C', 'V', 'B', 'N', 'M', '.', 'SPACE', 'DONE']
+  ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', "'"],
+  ['Z', 'X', 'C', 'V', 'B', 'N', 'M', '.'],
+  ['CLEAR', 'SPACE', 'DONE']
 ];
 
+/**
+ * Ergonomic 5-Row Glassmorphic Virtual On-Screen Keyboard.
+ * 100% responsive across mobile phones, tablets, and desktop TV UI modes.
+ */
 export default function OnScreenKeyboard({
   isOpen,
   searchQuery,
@@ -36,17 +41,17 @@ export default function OnScreenKeyboard({
 
   return (
     <div
-      className="osk-overlay"
+      className="osk-overlay animate-fade-in"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="osk-modal" role="dialog" aria-modal="true" aria-label="On Screen Keyboard">
+      <div className="osk-modal animate-slide-up" role="dialog" aria-modal="true" aria-label="On Screen Keyboard">
         {/* Header HUD Bar */}
         <div className="osk-header">
           <div className="osk-title-group">
             <div className="osk-icon-badge">
-              <Search size={18} color="#ef4444" />
+              <Search size={18} color="#3b82f6" />
             </div>
             <div>
               <h3 className="osk-title">SEARCH LIBRARY</h3>
@@ -67,7 +72,7 @@ export default function OnScreenKeyboard({
 
         {/* Live Search Query Display Bar */}
         <div className="osk-query-bar">
-          <Search size={20} color="#ef4444" className="osk-query-icon" />
+          <Search size={18} color="#3b82f6" className="osk-query-icon" />
           <div className="osk-query-display">
             {searchQuery ? (
               <span className="osk-query-text">{searchQuery}</span>
@@ -104,7 +109,7 @@ export default function OnScreenKeyboard({
             </div>
             <div className="osk-hint-pill">
               <span className="osk-hint-key osk-key-start">START</span>
-              <span>Done</span>
+              <span>Submit</span>
             </div>
             <div className="osk-hint-pill">
               <span className="osk-hint-key osk-key-b">B</span>
@@ -113,44 +118,53 @@ export default function OnScreenKeyboard({
           </div>
         )}
 
-        {/* Virtual Key Grid */}
+        {/* Virtual Key Grid: 5 Rows */}
         <div className="osk-grid">
-          {KEYBOARD_ROWS.map((row, rIdx) => (
-            <div key={`row-${rIdx}`} className="osk-row">
-              {row.map((key, cIdx) => {
-                const isFocused = focusedPos.row === rIdx && focusedPos.col === cIdx;
-                const isSpecial = ['⌫', 'CLEAR', 'SPACE', 'DONE'].includes(key);
+          {KEYBOARD_ROWS.map((row, rIdx) => {
+            const isBottomActionRow = rIdx === 4;
 
-                let specialClass = '';
-                if (key === 'SPACE') specialClass = 'osk-key-space';
-                else if (key === 'DONE') specialClass = 'osk-key-done';
-                else if (key === 'CLEAR') specialClass = 'osk-key-clear';
-                else if (key === '⌫') specialClass = 'osk-key-backspace';
+            return (
+              <div 
+                key={`row-${rIdx}`} 
+                className={`osk-row ${isBottomActionRow ? 'osk-row-actions' : ''}`}
+              >
+                {row.map((key, cIdx) => {
+                  const isFocused = focusedPos.row === rIdx && focusedPos.col === cIdx;
+                  const isSpecial = ['⌫', 'CLEAR', 'SPACE', 'DONE'].includes(key);
 
-                return (
-                  <button
-                    key={`key-${rIdx}-${cIdx}`}
-                    className={`osk-key ${isSpecial ? 'osk-key-special' : ''} ${specialClass} ${isFocused ? 'osk-key-focused' : ''}`}
-                    onClick={() => {
-                      if (onKeyClick) onKeyClick(rIdx, cIdx);
-                      handleVirtualKey(key);
-                    }}
-                    type="button"
-                  >
-                    {key === '⌫' ? (
-                      <span className="osk-key-label"><Delete size={18} /></span>
-                    ) : key === 'SPACE' ? (
-                      <span className="osk-key-label"><Space size={18} /> SPACE</span>
-                    ) : key === 'DONE' ? (
-                      <span className="osk-key-label"><Check size={18} /> SEARCH</span>
-                    ) : (
-                      <span className="osk-key-label">{key}</span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          ))}
+                  let specialClass = '';
+                  if (key === 'SPACE') specialClass = 'osk-key-space';
+                  else if (key === 'DONE') specialClass = 'osk-key-done';
+                  else if (key === 'CLEAR') specialClass = 'osk-key-clear';
+                  else if (key === '⌫') specialClass = 'osk-key-backspace';
+
+                  return (
+                    <button
+                      key={`key-${rIdx}-${cIdx}`}
+                      className={`osk-key ${isSpecial ? 'osk-key-special' : ''} ${specialClass} ${isFocused ? 'osk-key-focused' : ''}`}
+                      onClick={() => {
+                        if (onKeyClick) onKeyClick(rIdx, cIdx);
+                        handleVirtualKey(key);
+                      }}
+                      type="button"
+                    >
+                      {key === '⌫' ? (
+                        <span className="osk-key-label"><Delete size={17} /></span>
+                      ) : key === 'SPACE' ? (
+                        <span className="osk-key-label"><Space size={17} /> SPACE</span>
+                      ) : key === 'CLEAR' ? (
+                        <span className="osk-key-label"><Trash2 size={15} /> CLEAR</span>
+                      ) : key === 'DONE' ? (
+                        <span className="osk-key-label"><Check size={17} /> SEARCH</span>
+                      ) : (
+                        <span className="osk-key-label">{key}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

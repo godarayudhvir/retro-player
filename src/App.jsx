@@ -13,6 +13,7 @@ import ProfileSelectModal from './components/ProfileSelectModal';
 import MiiCreatorModal from './components/MiiCreatorModal';
 import SettingsView from './components/SettingsView';
 import DemoWelcomeModal from './components/DemoWelcomeModal';
+import OnboardingScreen from './components/OnboardingScreen';
 import ScraperModal from './components/ScraperModal';
 import MobileAppView from './components/MobileAppView';
 
@@ -47,6 +48,21 @@ export default function App() {
   const [editingProfile, setEditingProfile] = useState(null);
   const [oskPos, setOskPos] = useState({ row: 1, col: 0 });
   const [time, setTime] = useState(() => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+  const [hasChosenProfileThisSession, setHasChosenProfileThisSession] = useState(false);
+  const [showProfileSwitcher, setShowProfileSwitcher] = useState(false);
+  const [selectedMobileSystem, setSelectedMobileSystem] = useState(null);
+  const [selectedMobileGameForDetails, setSelectedMobileGameForDetails] = useState(null);
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    try {
+      if (typeof window === 'undefined') return false;
+      const isCompleted = localStorage.getItem('retro_onboarding_completed') === 'true';
+      const isDemoEnv = window.location.hostname.endsWith('github.io') || window.location.search.includes('demo=true');
+      return !isCompleted || isDemoEnv;
+    } catch {
+      return false;
+    }
+  });
+
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window === 'undefined') return false;
     return window.innerWidth <= 768;
@@ -174,7 +190,30 @@ export default function App() {
     fetchGames,
     toggleFavorite,
     themeEngine,
-    pwa
+    pwa,
+    // Mobile coordination
+    isMobile,
+    selectedMobileGameForDetails,
+    setSelectedMobileGameForDetails,
+    hasChosenProfileThisSession,
+    setHasChosenProfileThisSession,
+    showProfileSwitcher,
+    setShowProfileSwitcher,
+    selectedMobileSystem,
+    setSelectedMobileSystem,
+    profiles,
+    activeProfileId,
+    onSelectProfile: switchProfile,
+    onCreateNewProfile: () => {
+      setEditingProfile(null);
+      setShowMiiCreatorModal(true);
+    },
+    onPlayGame: (game) => {
+      recordGameLaunch(game);
+      sfx.playGameLaunch();
+      setActiveGame(game);
+    },
+    games
   });
 
   // Digital clock tick
@@ -204,16 +243,9 @@ export default function App() {
 
   // Auto-scroll focused element into view
   useEffect(() => {
-    if (focusedTarget.zone === 'grid') {
-      const focusedTile = document.querySelector('.game-tile.gamepad-focused');
-      if (focusedTile) {
-        focusedTile.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-      }
-    } else if (focusedTarget.zone === 'ribbon') {
-      const focusedTab = document.querySelector('.system-tab.gamepad-focused');
-      if (focusedTab) {
-        focusedTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-      }
+    const focusedEl = document.querySelector('.gamepad-focused');
+    if (focusedEl) {
+      focusedEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
     }
   }, [focusedTarget]);
 
@@ -245,6 +277,11 @@ export default function App() {
             setEditingProfile(null);
             setShowMiiCreatorModal(true);
           }}
+          onEditProfile={(prof) => {
+            setEditingProfile(prof);
+            setShowMiiCreatorModal(true);
+          }}
+          onDeleteProfile={deleteProfile}
           favorites={favorites}
           recentlyPlayed={recentlyPlayed}
           isFavorite={isFavorite}
@@ -258,6 +295,18 @@ export default function App() {
           metadataMap={scraper.metadataMap}
           onCustomRomLoad={processCustomRomFile}
           sfx={sfx}
+          focusedTarget={focusedTarget}
+          setFocusedTarget={setFocusedTarget}
+          selectedGameForDetails={selectedMobileGameForDetails}
+          setSelectedGameForDetails={setSelectedMobileGameForDetails}
+          hasChosenProfileThisSession={hasChosenProfileThisSession}
+          setHasChosenProfileThisSession={setHasChosenProfileThisSession}
+          showProfileSwitcher={showProfileSwitcher}
+          setShowProfileSwitcher={setShowProfileSwitcher}
+          selectedSystem={selectedMobileSystem}
+          setSelectedSystem={setSelectedMobileSystem}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
         />
       ) : (
         <>
@@ -496,12 +545,30 @@ export default function App() {
         />
       )}
 
-      {/* GitHub Pages Live Demo Showcase Welcome & Notice Dialog */}
-      <DemoWelcomeModal
-        sfx={sfx}
-        focusedTarget={focusedTarget}
-        setFocusedTarget={setFocusedTarget}
-      />
+      {/* Modern Full-Screen Responsive Onboarding Experience (Desktop & Mobile) */}
+      {showOnboarding && (
+        <OnboardingScreen
+          isOpen={showOnboarding}
+          onComplete={() => setShowOnboarding(false)}
+          systems={systems}
+          profiles={profiles}
+          activeProfileId={activeProfileId}
+          onSelectProfile={switchProfile}
+          onCreateNewProfile={() => {
+            setEditingProfile(null);
+            setShowMiiCreatorModal(true);
+          }}
+          onEditProfile={(prof) => {
+            setEditingProfile(prof);
+            setShowMiiCreatorModal(true);
+          }}
+          onDeleteProfile={deleteProfile}
+          sfx={sfx}
+          focusedTarget={focusedTarget}
+          setFocusedTarget={setFocusedTarget}
+          gamepadConnected={gamepadConnected}
+        />
+      )}
 
       {/* Gamepad Low Battery Alert In-App Banner */}
       {gamepadStatus.lowBatteryAlert && (

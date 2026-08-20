@@ -64,9 +64,9 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
     droppedFrames: 0,
     audioState: 'Active (48.0 kHz)',
     inputLatency: '< 1 ms',
-    healthStatus: 'OPTIMAL (60 FPS)',
+    healthStatus: 'OPTIMAL (VSYNC)',
     healthColor: '#10b981',
-    diagnosticTip: 'WebAssembly core & GPU swapchain running at full 60 FPS sync.'
+    diagnosticTip: 'WebAssembly core & GPU swapchain running with synchronized audio/video presentation.'
   });
 
   const sessionReportedRef = useRef(false);
@@ -144,14 +144,14 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
         frameTime = parseFloat((1000 / coreFps).toFixed(1));
       }
 
-      let status = 'OPTIMAL (60 FPS)';
+      let status = 'OPTIMAL (VSYNC)';
       let color = '#10b981';
-      let tip = 'Hardware accelerated 60Hz presentation. VSync & audio buffer in sync.';
+      let tip = 'Hardware accelerated presentation. VSync & audio buffer in sync.';
 
       if (!isTabActiveRef.current) {
         status = 'BACKGROUND PAUSED';
         color = '#f59e0b';
-        tip = 'Browser throttled background tab. Focus the game window to resume 60 FPS.';
+        tip = 'Browser throttled background tab. Focus the game window to resume.';
       } else if (coreFps < 45) {
         status = 'PERFORMANCE THROTTLED';
         color = '#ef4444';
@@ -159,7 +159,7 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
       } else if (coreFps < 58) {
         status = 'STABLE EMULATION';
         color = '#10b981';
-        tip = 'Emulation running smoothly near 60 FPS.';
+        tip = 'Emulation running smoothly.';
       }
 
       setPerfStats(prev => ({
@@ -569,7 +569,7 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
 
                 if (!emu._gamepadPatched) {
                   emu._gamepadPatched = true;
-                  console.log('🎮 [PATCHING EMULATORJS GAMEPAD ENGINE] Direct 60 FPS mapped controller dispatch');
+                  console.log('🎮 [PATCHING EMULATORJS GAMEPAD ENGINE] Direct mapped controller dispatch');
 
                   emu.gamepadEvent = function(e) {
                     if (!this.started || !this.gameManager) return;
@@ -793,11 +793,47 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
               } catch (e) {}
             }
 
+            function syncVirtualGamepadVisibility() {
+              try {
+                const gps = navigator.getGamepads ? navigator.getGamepads() : [];
+                let hasPhysical = false;
+                for (let i = 0; i < gps.length; i++) {
+                  if (gps[i] && gps[i].connected) {
+                    hasPhysical = true;
+                    break;
+                  }
+                }
+                const vgp = document.querySelector('.ejs_virtualGamepad_parent');
+                if (vgp) {
+                  if (hasPhysical) {
+                    vgp.style.setProperty('display', 'none', 'important');
+                    vgp.style.setProperty('opacity', '0', 'important');
+                    vgp.style.setProperty('pointer-events', 'none', 'important');
+                  } else if (${isMobileTouch ? 'true' : 'false'}) {
+                    vgp.style.setProperty('display', 'block', 'important');
+                    vgp.style.setProperty('opacity', '1', 'important');
+                    vgp.style.removeProperty('pointer-events');
+                  }
+                }
+              } catch (e) {}
+            }
+
             window.addEventListener('gamepadconnected', function(e) {
               autoBindGamepadsToPlayers();
+              syncVirtualGamepadVisibility();
             });
 
-            window.addEventListener('focus', syncAllGamepads, { once: false });
+            window.addEventListener('gamepaddisconnected', function(e) {
+              syncVirtualGamepadVisibility();
+            });
+
+            window.addEventListener('focus', function() {
+              syncAllGamepads();
+              syncVirtualGamepadVisibility();
+            }, { once: false });
+
+            // Periodic sync check to ensure seamless controller plug/unplug handling
+            setInterval(syncVirtualGamepadVisibility, 500);
             window.addEventListener('click', syncAllGamepads, { once: true });
             window.addEventListener('keydown', syncAllGamepads, { once: true });
 
@@ -883,7 +919,7 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
             }
 
             window.EJS_ready = function() {
-              console.log('🎮 [EMULATORJS READY] 60 FPS Emulation Ready');
+              console.log('🎮 [EMULATORJS READY] Emulation Ready');
               try {
                 window.focus();
                 const el = document.querySelector('canvas') || document.querySelector('#game canvas') || document.querySelector('#game');
@@ -897,7 +933,7 @@ export default function EmulatorModal({ game, gamepadConnected, sfx, onClose, on
             };
 
             window.EJS_onGameStart = function() {
-              console.log('🎮 [GAME STARTED] Emulation canvas active at 60 FPS');
+              console.log('🎮 [GAME STARTED] Emulation canvas active');
               try {
                 window.focus();
                 const el = document.querySelector('canvas') || document.querySelector('#game canvas') || document.querySelector('#game');

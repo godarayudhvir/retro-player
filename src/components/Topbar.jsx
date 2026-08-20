@@ -247,12 +247,13 @@ export default function Topbar({
           </button>
         )}
 
-        {/* Search Input & Virtual Keyboard Trigger */}
+        {/* Search Input Widget */}
         <div
           className={`status-pill status-search ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'search' ? 'gamepad-focused' : ''}`}
           onClick={() => {
-            setShowVirtualKeyboard(true);
-            sfx?.playModalOpen?.();
+            if (searchInputRef?.current) {
+              searchInputRef.current.focus();
+            }
           }}
         >
           <Search size={16} color="#64748b" />
