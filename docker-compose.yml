@@ -14,7 +14,7 @@ services:
       - BGM_DIR=/bgm
       - DATA_DIR=/data
       # Demo ROM & BGM configuration flags:
-      # Set to 'true' to include bundled curated showcase demos (52 titles); set to 'false' for purely your own library
+      # Set to 'true' to include bundled curated showcase demos (36 titles); set to 'false' for purely your own library
       - INCLUDE_DEMO_ROMS=true
       # Set to 'true' to include bundled 8-bit chiptune audio tracks; set to 'false' for purely your own audio tracks
       - INCLUDE_DEMO_BGM=true
