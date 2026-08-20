@@ -9,7 +9,7 @@ The `Topbar` component serves as the primary console header and status HUD for R
 ## 2. Detailed List of What It Does
 
 - **Console Identity Badge**: Renders the user tag and red gamepad icon (`.avatar-badge`).
-- **Controller Connectivity Indicator**: Displays a green `GAMEPAD READY` badge when a physical gamepad is detected, or `NO CONTROLLER` in grey. Auto-hides on mobile touch devices.
+- **Controller Connectivity & Battery Widget**: Displays a green `GAMEPAD READY` badge or active battery indicator (`PAD` + `BatteryIcon` + `XX%` + `⚡` charging indicator) when a physical gamepad is detected, or `NO CONTROLLER` in grey. Auto-hides on mobile touch devices.
 - **Automated Metadata Scraper Button**: Icon-only action button (`Sparkles` / `RefreshCw`) triggering library-wide metadata & box art scraping.
 - **SFX Mute Toggle Button**: Compact icon-only button toggle between active audio and muted sound using `Volume2`/`VolumeX` icons with tooltips.
 - **Multi-Theme Engine Button**: Compact icon-only button displaying the active theme icon (☀️, 🌙, 🌊, 📟), cycling themes on click or `T` key.
@@ -24,6 +24,7 @@ The `Topbar` component serves as the primary console header and status HUD for R
 
 ### Props & Data Flow
 - `gamepadConnected` (boolean): Controls gamepad status badge color and search hotkey badge (`Y` vs `⌘K`).
+- `gamepadBattery` (object): Exposes `{ hasBatteryInfo, batteryPercent, isCharging, gamepadId }` for live power telemetry.
 - `searchQuery` & `setSearchQuery`: Binds directly to the search input field.
 - `sfx`: Invokes `sfx.playModalOpen()`, and `sfx.toggleMute()`.
 - `themeEngine`: Calls `themeEngine.cycleTheme()` and displays active theme icon.

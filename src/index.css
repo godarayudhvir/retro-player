@@ -7855,3 +7855,255 @@ html[data-theme="xmb"] .demo-modal-btn-secondary {
     font-size: 0.84rem;
   }
 }
+
+/* ==========================================================================
+   GAMEPAD BATTERY WIDGET & LOW BATTERY NOTIFICATIONS
+   ========================================================================== */
+
+.status-gamepad .battery-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 2px 7px;
+  border-radius: 12px;
+  margin-left: 5px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+html[data-theme="midnight"] .status-gamepad .battery-badge,
+html[data-theme="xmb"] .status-gamepad .battery-badge {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+html[data-theme="dmg"] .status-gamepad .battery-badge {
+  background: rgba(15, 56, 15, 0.2);
+}
+
+.status-gamepad .battery-icon {
+  flex-shrink: 0;
+}
+
+.status-gamepad .battery-icon.is-charging {
+  color: #10b981;
+  animation: pulse-charge 1.5s infinite ease-in-out;
+}
+
+.status-gamepad .battery-icon.is-full {
+  color: #10b981;
+}
+
+.status-gamepad .battery-icon.is-medium {
+  color: #3b82f6;
+}
+
+.status-gamepad .battery-icon.is-low {
+  color: #f59e0b;
+}
+
+.status-gamepad .battery-icon.is-critical {
+  color: #ef4444;
+  animation: pulse-critical-battery 1s infinite alternate;
+}
+
+.status-gamepad.is-battery-low {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.35) !important;
+}
+
+.status-gamepad .charging-tag {
+  font-size: 0.8rem;
+  margin-left: 2px;
+}
+
+@keyframes pulse-charge {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.8;
+  }
+}
+
+@keyframes pulse-critical-battery {
+  from {
+    transform: scale(1);
+    filter: drop-shadow(0 0 2px #ef4444);
+  }
+  to {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 6px #ef4444);
+  }
+}
+
+/* Settings View Gamepad Telemetry Card */
+.settings-gamepad-telemetry {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.gamepad-telemetry-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 0.4rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #059669;
+}
+
+html[data-theme="midnight"] .gamepad-telemetry-pill,
+html[data-theme="xmb"] .gamepad-telemetry-pill {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(52, 211, 153, 0.4);
+  color: #34d399;
+}
+
+html[data-theme="dmg"] .gamepad-telemetry-pill {
+  background: #9bbc0f;
+  border-color: #0f380f;
+  color: #0f380f;
+}
+
+.telemetry-id {
+  opacity: 0.85;
+  font-size: 0.75rem;
+  font-family: monospace;
+}
+
+/* Floating Gamepad Low Battery Alert Toast Banner */
+.gamepad-battery-alert-toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  max-width: 440px;
+  padding: 0.9rem 1.25rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.4);
+  border-left: 5px solid #f59e0b;
+  color: #1e293b;
+  pointer-events: auto;
+  animation: slide-up-toast 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.gamepad-battery-alert-toast.is-critical {
+  border-left-color: #ef4444;
+  box-shadow: 0 12px 36px rgba(239, 68, 68, 0.3), 0 0 0 1px rgba(239, 68, 68, 0.4);
+}
+
+html[data-theme="midnight"] .gamepad-battery-alert-toast,
+html[data-theme="xmb"] .gamepad-battery-alert-toast {
+  background: rgba(15, 23, 42, 0.95);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+}
+
+html[data-theme="dmg"] .gamepad-battery-alert-toast {
+  background: #8b956d;
+  border: 2px solid #0f380f;
+  color: #0f380f;
+}
+
+.pulse-battery-alert {
+  color: #f59e0b;
+  animation: pulse-crit-icon 1s infinite alternate ease-in-out;
+}
+
+.is-critical .pulse-battery-alert {
+  color: #ef4444;
+}
+
+@keyframes pulse-crit-icon {
+  from { transform: scale(1); }
+  to { transform: scale(1.18); }
+}
+
+.alert-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.alert-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.alert-pct-badge {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.alert-message {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.85;
+  line-height: 1.35;
+}
+
+.alert-dismiss-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  color: inherit;
+  opacity: 0.6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.alert-dismiss-btn:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
+  transform: scale(1.1);
+}
+
+@keyframes slide-up-toast {
+  from {
+    transform: translateY(30px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .gamepad-battery-alert-toast {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    max-width: none;
+    padding: 0.75rem 1rem;
+  }
+}
+

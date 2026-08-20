@@ -62,7 +62,7 @@ export default function GameDetailModal({
     <div className="info-modal-backdrop" onClick={onClose}>
       <div className="game-card-modal-content" onClick={(e) => e.stopPropagation()}>
         <button
-          className={`game-card-close ${focusedTarget.zone === 'cardModal' && focusedTarget.id === 'close' ? 'gamepad-focused' : ''}`}
+          className={`game-card-close ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`}
           onClick={onClose}
           title="Close (ESC / B)"
         >
@@ -198,7 +198,7 @@ export default function GameDetailModal({
 
             <div className="game-card-actions">
               <button
-                className={`play-now-btn ${focusedTarget.zone === 'cardModal' && focusedTarget.id === 'play' ? 'gamepad-focused' : ''}`}
+                className={`play-now-btn ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'play' ? 'gamepad-focused' : ''}`}
                 onClick={onPlay}
               >
                 <Play size={20} fill="#ffffff" />
@@ -206,7 +206,7 @@ export default function GameDetailModal({
               </button>
 
               <button
-                className={`favorite-toggle-btn icon-only ${isFavorite ? 'active' : ''} ${focusedTarget.zone === 'cardModal' && focusedTarget.id === 'fav' ? 'gamepad-focused' : ''}`}
+                className={`favorite-toggle-btn icon-only ${isFavorite ? 'active' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'fav' ? 'gamepad-focused' : ''}`}
                 onClick={() => {
                   if (onToggleFavorite) {
                     const nextState = onToggleFavorite(game);

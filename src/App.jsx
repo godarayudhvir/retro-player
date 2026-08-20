@@ -27,6 +27,7 @@ import { useMetadataScraper } from './hooks/useMetadataScraper';
 import { useProfileManager } from './hooks/useProfileManager';
 import { useBgmEngine } from './hooks/useBgmEngine';
 import { usePwaInstall } from './hooks/usePwaInstall';
+import { BatteryWarning, Zap, X } from 'lucide-react';
 
 /**
  * Root Application Orchestrator for Retro Player.
@@ -93,8 +94,9 @@ export default function App() {
     getGameStats
   } = usePlaytimeAndFavorites(activeProfileId);
 
-  // Hook 6: Gamepad Connection Tracking
-  const { gamepadConnected, setGamepadConnected } = useGamepadStatus();
+  // Hook 6: Gamepad Connection Tracking & Battery Telemetry
+  const gamepadStatus = useGamepadStatus({ sfx });
+  const { gamepadConnected, setGamepadConnected } = gamepadStatus;
 
   // Hook 7: Save Data & Battery SRAM Inspection
   const { hasSaveData, checkSaveData } = useSaveDataManager();
@@ -262,6 +264,7 @@ export default function App() {
           {/* Top Console Status Bar */}
           <Topbar
             gamepadConnected={gamepadConnected}
+            gamepadBattery={gamepadStatus}
             activeProfile={activeProfile}
             onOpenProfileSelect={() => setShowProfileSelectModal(true)}
             bgm={bgm}
@@ -462,6 +465,7 @@ export default function App() {
         focusedTarget={focusedTarget}
         setFocusedTarget={setFocusedTarget}
         gamepadConnected={gamepadConnected}
+        gamepadBattery={gamepadStatus}
       />
 
       {/* Granular Scraper Scope Selector Modal */}
@@ -498,6 +502,37 @@ export default function App() {
         focusedTarget={focusedTarget}
         setFocusedTarget={setFocusedTarget}
       />
+
+      {/* Gamepad Low Battery Alert In-App Banner */}
+      {gamepadStatus.lowBatteryAlert && (
+        <aside 
+          className={`gamepad-battery-alert-toast ${gamepadStatus.lowBatteryAlert.isCritical ? 'is-critical' : 'is-warning'} animate-slide-up`}
+          role="alert"
+          aria-live="assertive"
+        >
+          <div className="alert-icon-wrap">
+            <BatteryWarning size={24} className="pulse-battery-alert" />
+          </div>
+          <div className="alert-content">
+            <div className="alert-title">
+              <strong>{gamepadStatus.lowBatteryAlert.isCritical ? 'CRITICAL GAMEPAD BATTERY' : 'LOW GAMEPAD BATTERY'}</strong>
+              <span className="alert-pct-badge">{gamepadStatus.lowBatteryAlert.levelPercent}%</span>
+            </div>
+            <p className="alert-message">{gamepadStatus.lowBatteryAlert.message}</p>
+          </div>
+          <button 
+            className="alert-dismiss-btn"
+            onClick={() => {
+              gamepadStatus.dismissBatteryAlert();
+              sfx?.playModalClose?.();
+            }}
+            title="Dismiss Battery Alert (B / Esc)"
+            aria-label="Dismiss Battery Alert"
+          >
+            <X size={18} />
+          </button>
+        </aside>
+      )}
     </div>
   );
 }

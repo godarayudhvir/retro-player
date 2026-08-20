@@ -52,7 +52,8 @@ export default function SettingsView({
   onOpenScraperModal,
   focusedTarget,
   setFocusedTarget,
-  gamepadConnected
+  gamepadConnected,
+  gamepadBattery
 }) {
   const [activeCategory, setActiveCategory] = useState('roms'); // 'roms', 'bgm', 'theme', 'controls', 'system'
   const [romSearch, setRomSearch] = useState('');
@@ -941,9 +942,28 @@ export default function SettingsView({
                     </p>
                   </div>
 
-                  <div className="settings-gamepad-badge">
-                    <Gamepad2 size={20} color={gamepadConnected ? '#10b981' : '#64748b'} />
-                    <span>{gamepadConnected ? 'Controller Connected' : 'Keyboard Active'}</span>
+                  <div className="settings-gamepad-telemetry">
+                    <div className="settings-gamepad-badge">
+                      <Gamepad2 size={20} color={gamepadConnected ? '#10b981' : '#64748b'} />
+                      <span>{gamepadConnected ? 'Controller Connected' : 'Keyboard Active'}</span>
+                    </div>
+
+                    {gamepadConnected && (
+                      <div className="gamepad-telemetry-pill">
+                        {gamepadBattery?.hasBatteryInfo ? (
+                          <span className="telemetry-battery">
+                            🔋 <strong>{gamepadBattery.batteryPercent}%</strong> {gamepadBattery.isCharging ? '(Charging ⚡)' : 'Battery'}
+                          </span>
+                        ) : (
+                          <span className="telemetry-wired">⚡ USB / Wireless Ready</span>
+                        )}
+                        {gamepadBattery?.gamepadId && (
+                          <span className="telemetry-id" title={gamepadBattery.gamepadId}>
+                            🎮 {gamepadBattery.gamepadId.substring(0, 24)}{gamepadBattery.gamepadId.length > 24 ? '...' : ''}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 

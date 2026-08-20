@@ -1,5 +1,25 @@
 import React from 'react';
-import { Search, FolderOpen, Gamepad2, Volume2, VolumeX, Sparkles, RefreshCw, Square, Music, SkipForward, Settings, Download } from 'lucide-react';
+import { 
+  Search, 
+  FolderOpen, 
+  Gamepad2, 
+  Volume2, 
+  VolumeX, 
+  Sparkles, 
+  RefreshCw, 
+  Square, 
+  Music, 
+  SkipForward, 
+  Settings, 
+  Download,
+  Battery,
+  BatteryCharging,
+  BatteryFull,
+  BatteryMedium,
+  BatteryLow,
+  BatteryWarning,
+  Zap
+} from 'lucide-react';
 import MiiAvatar from './MiiAvatar';
 
 /**
@@ -8,6 +28,7 @@ import MiiAvatar from './MiiAvatar';
  */
 export default function Topbar({
   gamepadConnected,
+  gamepadBattery,
   activeProfile,
   onOpenProfileSelect,
   bgm,
@@ -27,6 +48,51 @@ export default function Topbar({
   scraper
 }) {
   const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent || navigator.platform);
+
+  // Helper to render accurate battery icon and theme styling
+  const renderBatteryIcon = () => {
+    if (!gamepadBattery || !gamepadBattery.hasBatteryInfo) return null;
+    const { batteryPercent, isCharging } = gamepadBattery;
+
+    if (isCharging) {
+      return <BatteryCharging size={16} className="battery-icon is-charging" />;
+    }
+    if (batteryPercent > 70) {
+      return <BatteryFull size={16} className="battery-icon is-full" />;
+    }
+    if (batteryPercent > 30) {
+      return <BatteryMedium size={16} className="battery-icon is-medium" />;
+    }
+    if (batteryPercent > 10) {
+      return <BatteryLow size={16} className="battery-icon is-low" />;
+    }
+    return <BatteryWarning size={16} className="battery-icon is-critical" />;
+  };
+
+  // Helper for title tooltip
+  const getGamepadTooltip = () => {
+    if (!gamepadConnected) {
+      return "No Gamepad Detected (Plug in USB or pair Bluetooth controller)";
+    }
+    if (gamepadBattery?.hasBatteryInfo) {
+      const { batteryPercent, isCharging } = gamepadBattery;
+      return `Gamepad Connected: ${gamepadBattery.gamepadId || 'Controller'} • Battery: ${batteryPercent}% ${isCharging ? '(Charging ⚡)' : ''}`;
+    }
+    return `Gamepad Connected: ${gamepadBattery?.gamepadId || 'Ready'} • USB / Wireless Active`;
+  };
+
+  // Battery status color styling
+  const getGamepadColor = () => {
+    if (!gamepadConnected) return '#64748b';
+    if (gamepadBattery?.hasBatteryInfo) {
+      const { batteryPercent, isCharging } = gamepadBattery;
+      if (isCharging) return '#10b981';
+      if (batteryPercent <= 10) return '#ef4444';
+      if (batteryPercent <= 20) return '#f59e0b';
+      return '#10b981';
+    }
+    return '#10b981';
+  };
 
   return (
     <header className="console-topbar">
@@ -93,14 +159,31 @@ export default function Topbar({
           </div>
         )}
 
-        {/* Gamepad Connection Status */}
+        {/* Gamepad Connection & Battery Status Pill */}
         <div 
-          className="status-pill status-gamepad" 
-          style={{ color: gamepadConnected ? '#10b981' : '#64748b' }}
-          title={gamepadConnected ? "Gamepad Connected & Ready" : "No Gamepad Detected (Plug in USB or pair Bluetooth controller)"}
+          className={`status-pill status-gamepad ${gamepadBattery?.hasBatteryInfo && gamepadBattery.batteryPercent <= 20 && !gamepadBattery.isCharging ? 'is-battery-low' : ''}`} 
+          style={{ color: getGamepadColor() }}
+          title={getGamepadTooltip()}
         >
           <Gamepad2 size={18} />
-          <span className="pill-text">{gamepadConnected ? 'GAMEPAD READY' : 'NO CONTROLLER'}</span>
+          <span className="pill-text">
+            {gamepadConnected ? (
+              gamepadBattery?.hasBatteryInfo ? (
+                <>
+                  <span className="gamepad-label">PAD</span>
+                  <span className="battery-badge">
+                    {renderBatteryIcon()}
+                    <span className="battery-percent-text">{gamepadBattery.batteryPercent}%</span>
+                    {gamepadBattery.isCharging && <span className="charging-tag">⚡</span>}
+                  </span>
+                </>
+              ) : (
+                'GAMEPAD READY'
+              )
+            ) : (
+              'NO CONTROLLER'
+            )}
+          </span>
         </div>
 
         {/* Metadata Scraper Status / Trigger / Stop Button */}

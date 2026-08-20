@@ -378,6 +378,38 @@ export function useWebAudioSfx() {
     }
   }, []);
 
+  /**
+   * Retro warning double-chime when controller battery drops low.
+   */
+  const playBatteryLow = useCallback(() => {
+    if (isMuted) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      [0, 0.14].forEach((delay) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, now + delay);
+        osc.frequency.exponentialRampToValueAtTime(330, now + delay + 0.1);
+
+        gain.gain.setValueAtTime(0.09, now + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.1);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now + delay);
+        osc.stop(now + delay + 0.105);
+      });
+    } catch (e) {
+      console.debug('SFX error:', e);
+    }
+  }, [isMuted, getAudioContext]);
+
   return {
     isMuted,
     toggleMute,
@@ -391,7 +423,8 @@ export function useWebAudioSfx() {
     playKeyTick,
     playSaveDetected,
     playFavoriteToggle,
-    playThemeSwitch
+    playThemeSwitch,
+    playBatteryLow
   };
 }
 

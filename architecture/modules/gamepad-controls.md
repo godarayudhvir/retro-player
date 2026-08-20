@@ -12,6 +12,8 @@ The Gamepad Controls engine provides seamless navigation using standard USB/Blue
 - **In-Game Input Yielding**: Automatically yields all standard controller buttons and axes to the active EmulatorJS canvas/iframe when a game is running, preventing UI navigation cross-talk.
 - **Dedicated Gamepad Exit Shortcut**: Provides a universal combo (`Select` [Button 8] + `Start` [Button 9] or `Guide/Home` [Button 16]) to safely return from the emulator to the game library.
 - **Gamepad Search Hotkey & On-Screen Virtual Keyboard**: Allows gamepad users to trigger search instantly with `Button 3 (Y / Triangle)` or `Button 8 (Select/Share)` and type queries via a glassmorphic on-screen virtual keyboard with spatial D-Pad grid navigation, `A` (select), `X` (space), `Y` (backspace), `B` (close), and `Start` (search/done).
+- **Gamepad Battery Monitoring & Telemetry**: Inspects connected gamepad battery telemetry (`gamepad.battery`) to render live battery percentage, icon level (Full, Medium, Low, Critical), and charging status indicator (`⚡`) inside the Topbar gamepad widget and Settings view.
+- **Low & Critical Battery In-App Banner**: Triggers tactile WebAudio warning chimes and floating console notification toasts when battery level drops below 20% (Low) or 10% (Critical) without interrupting gameplay.
 
 ---
 
@@ -20,6 +22,11 @@ The Gamepad Controls engine provides seamless navigation using standard USB/Blue
 ### Gamepad Polling & Focus Routing
 - Polling runs inside a `requestAnimationFrame` loop in [App.jsx](file:///Users/godarayudhvir/Github/retro-player/src/App.jsx).
 - Implements debounce logic using `lastInputTimeRef` (threshold: 200ms) to prevent accidental fast scrolling.
+- **Battery Inspection & Alerting Engine**:
+  - Managed by `useGamepadStatus.js` through a 3-second background polling cycle and `gamepadconnected` / `gamepaddisconnected` event bindings.
+  - Queries `gamepad.battery` object (where supported by browser and controller driver) to extract `level` ($0.0 - 1.0$) and `charging` state ($true/false$).
+  - When battery is low ($\le 20\%$) or critical ($\le 10\%$) while not charging, triggers `sfx.playBatteryLow()` synthesized double-tone chime and mounts `.gamepad-battery-alert-toast`.
+  - Fallback logic automatically designates wired USB / standard gamepads without hardware battery reporting as "USB / Wireless Active" or "Gamepad Ready" without displaying broken UI tags.
 - **Active Gameplay Detection**:
   - When `activeGame` is truthy, UI spatial navigation is bypassed. Standard buttons (A, B, D-Pad, Shoulder) are not consumed by the main window, allowing EmulatorJS to directly handle gameplay input inside its focused iframe.
   - If `Select` + `Start` or `Guide/Home` is detected simultaneously, `setActiveGame(null)` is executed, safely unmounting the emulator.

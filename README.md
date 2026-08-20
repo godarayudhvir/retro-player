@@ -72,7 +72,7 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 - 🌐 **Automated Online Metadata Scraper**: Official 3D box art from **Libretro** & synopsis info from **Wikipedia** with intelligent demo-to-retail matching, 4-tier scope selection, and IndexedDB caching.
 - 🚀 **60 FPS Hardware-Accelerated Emulation & Diagnostic HUD**: Full-speed 60 FPS VSync rendering with low-latency dynamic audio sync and interactive **Diagnostic Performance HUD** (`D` hotkey).
 - 🔊 **Synthesized Pure Web Audio UI SFX**: Zero-latency acoustic feedback synthesizer with zero external audio assets.
-- 🎮 **100% Gamepad & Keyboard Navigation**: Controller-first spatial navigation, shoulder triggers (`L1`/`R1`), on-screen virtual keyboard (`⌘K`), and hotkey quick-launch. *(See [Controls & Keybindings Guide](guides/controls.md))*.
+- 🎮 **100% Gamepad & Keyboard Navigation**: Controller-first spatial navigation, shoulder triggers (`L1`/`R1`), on-screen virtual keyboard (`⌘K`), live **Gamepad Battery % / Charging Telemetry Widget**, and **Low-Battery In-App Notification Alerts**. *(See [Controls & Keybindings Guide](guides/controls.md))*.
 - ⏱️ **Playtime Analytics & Smart Collections**: Session durations, total hours played, **Favorites ⭐**, and **Recently Played** queue.
 
 ---
