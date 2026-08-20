@@ -1003,8 +1003,10 @@ export function useGamepadNavigation({
           const b = gp.buttons;
           const selectBtn = b[8]?.pressed;
           const startBtn = b[9]?.pressed;
+          const l3Btn = b[10]?.pressed; // Left stick click (L3)
+          const r3Btn = b[11]?.pressed; // Right stick click (R3)
           const guideBtn = b[16]?.pressed;
-          const isExitCombo = (selectBtn && startBtn) || guideBtn;
+          const isExitCombo = (selectBtn && startBtn) || (l3Btn && r3Btn) || guideBtn;
 
           if (isExitCombo && !prevButtonsRef.current.exitCombo) {
             console.log('🎮 [GAMEPAD] Controller exit combo triggered. Exiting active game to library.');

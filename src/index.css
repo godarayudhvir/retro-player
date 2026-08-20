@@ -171,7 +171,7 @@ body {
   inset: 0;
   background: rgba(10, 15, 29, 0.85);
   backdrop-filter: blur(24px);
-  z-index: 1500;
+  z-index: 25000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -8498,109 +8498,179 @@ html[data-theme="dmg"] .gamepad-battery-alert-toast {
   border-color: var(--sys-accent, #3b82f6);
 }
 
-/* Onboarding Profiles Grid */
-.onboarding-profiles-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 1.15rem;
+/* Pokémon-Style Interactive Player Passport */
+.onboarding-passport-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2rem;
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 28px;
+  padding: 1.75rem 2rem;
+  max-width: 620px;
   width: 100%;
-  max-width: 520px;
-  margin-top: 0.5rem;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  box-sizing: border-box;
 }
 
-.onboarding-profile-card {
+.onboarding-passport-avatar-side {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.85rem;
+  flex-shrink: 0;
+}
+
+.onboarding-passport-mii-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid #ef4444;
+  padding: 4px;
   background: #f8fafc;
-  border: 2px solid #e2e8f0;
-  border-radius: 20px;
-  padding: 1rem 0.75rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  position: relative;
-}
-
-.onboarding-profile-card.is-active {
-  border-color: #3b82f6;
-  background: #eff6ff;
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2);
-}
-
-.onboarding-profile-avatar {
-  position: relative;
-  width: 78px;
-  height: 78px;
-  border-radius: 50%;
-  border: 3px solid #3b82f6;
-  padding: 3px;
-  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
 }
 
-.onboarding-profile-avatar.add-circle {
-  border: 2px dashed #cbd5e1;
-  background: #ffffff;
-}
-
-.onboarding-avatar-active-badge {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  background: #3b82f6;
-  border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #ffffff;
-}
-
-.onboarding-profile-name {
-  font-size: 0.95rem;
+.onboarding-randomize-btn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  font-size: 0.82rem;
   font-weight: 800;
-  color: #0f172a;
-}
-
-.onboarding-add-sub {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #64748b;
-  margin-top: -0.3rem;
-}
-
-.onboarding-profile-actions {
-  display: flex;
-  gap: 0.4rem;
-  margin-top: 0.25rem;
-}
-
-.onboarding-prof-tool-btn {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 4px 8px;
-  color: #64748b;
-  cursor: pointer;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: 20px;
+  cursor: pointer;
   transition: all 0.15s ease;
 }
 
-.onboarding-prof-tool-btn:hover {
-  background: #f1f5f9;
+.onboarding-randomize-btn:hover {
+  background: #e2e8f0;
   color: #0f172a;
+  transform: translateY(-1px);
 }
 
-.onboarding-prof-tool-btn.is-delete:hover {
-  background: #fef2f2;
-  border-color: #fecaca;
-  color: #ef4444;
+.onboarding-passport-form-side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: left;
+  min-width: 0;
+}
+
+.onboarding-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.onboarding-form-label {
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.onboarding-name-input {
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.onboarding-name-input:focus {
+  border-color: #3b82f6;
+  background: #ffffff;
+}
+
+.onboarding-mii-subtabs {
+  display: flex;
+  gap: 0.35rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.4rem;
+}
+
+.onboarding-subtab {
+  background: transparent;
+  border: none;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.onboarding-subtab.is-active {
+  color: #2563eb;
+  background: rgba(59, 130, 246, 0.1);
+  font-weight: 800;
+}
+
+.onboarding-mii-options-area {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+.onboarding-palette-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.onboarding-opt-chip {
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.onboarding-opt-chip.is-active {
+  background: #3b82f6;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.onboarding-palette-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.onboarding-col-circle {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.onboarding-col-circle.is-active {
+  transform: scale(1.25);
+  border-color: #0f172a;
 }
 
 /* Mobile Profile Switcher Action Buttons */
@@ -8644,6 +8714,11 @@ html[data-theme="dmg"] .gamepad-battery-alert-toast {
   border-radius: 16px;
   padding: 1rem 1.15rem;
   text-align: left;
+}
+
+.onboarding-tip-row.is-featured-tip {
+  background: #fff1f2;
+  border-color: #fecdd3;
 }
 
 .onboarding-tip-icon {
@@ -8754,5 +8829,13 @@ html[data-theme="dmg"] .gamepad-battery-alert-toast {
 
 .onboarding-primary-btn:active {
   transform: scale(0.98);
+}
+
+@media (max-width: 600px) {
+  .onboarding-passport-card {
+    flex-direction: column;
+    padding: 1.25rem;
+    gap: 1.25rem;
+  }
 }
 

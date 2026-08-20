@@ -8,44 +8,72 @@ import {
   ArrowLeft, 
   Check, 
   User, 
-  Plus, 
-  Edit3, 
-  Trash2, 
+  Dices,
   Keyboard, 
   Play, 
   X,
   Layers,
-  ExternalLink
+  Palette,
+  Eye,
+  Smile,
+  LogOut,
+  MousePointer
 } from 'lucide-react';
 import MiiAvatar from './MiiAvatar';
 import { resolveAssetPath } from '../utils/assetPath';
+import { INITIAL_MII_DATA } from '../hooks/useProfileManager';
+
+const SKIN_PALETTE = ['#fed7aa', '#ffd1a4', '#fde047', '#fef08a', '#fbcfe8', '#d6a374', '#a16207', '#78350f'];
+const HAIR_PALETTE = ['#451a03', '#1e293b', '#78350f', '#d97706', '#f59e0b', '#dc2626', '#3b82f6', '#10b981', '#a855f7', '#64748b'];
+const SHIRT_PALETTE = ['#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#6366f1', '#a855f7', '#ec4899', '#334155'];
 
 /**
  * Modern Full-Screen Responsive Onboarding Experience for Desktop & Mobile.
- * Inspired by modern best practices (Mobbin analysis, Duolingo, Netflix, WanderWise):
- * 1. Selling the Outcome (WASM Emulation, zero-install, 10+ consoles)
- * 2. Personalization (Favorite consoles/eras selection)
- * 3. Human Touch & User Management (Mii Avatars, Profile creation & editing)
- * 4. Controller & Shortcut Tips (Quick "Aha!" moment)
+ * Step 1: Value Proposition & Outcome
+ * Step 2: Personalization (Favorite Consoles)
+ * Step 3: Pokémon-Style Interactive Player Passport & Character Creation
+ * Step 4: Pro-Tips & Controller Game Exit Combos (L3+R3 / Select+Start)
  */
 export default function OnboardingScreen({
   isOpen,
   onComplete,
   systems = [],
-  profiles = [],
-  activeProfileId,
-  onSelectProfile,
-  onCreateNewProfile,
-  onEditProfile,
-  onDeleteProfile,
-  sfx,
-  focusedTarget,
-  setFocusedTarget,
-  gamepadConnected = false
+  activeProfile,
+  onSaveCreatedProfile,
+  sfx
 }) {
-  const [currentStep, setCurrentStep] = useState(0); // 0: Value, 1: Systems, 2: Profiles, 3: Tips
+  const [currentStep, setCurrentStep] = useState(0); // 0: Value, 1: Systems, 2: Character Creation, 3: Tips
   const [selectedSystems, setSelectedSystems] = useState(() => new Set(['gba', 'snes', 'n64', 'playstation', 'nds']));
   const totalSteps = 4;
+
+  // Character Creation State (Pokémon-Style Player Setup)
+  const [playerName, setPlayerName] = useState(() => activeProfile?.name || 'Red');
+  const [customMii, setCustomMii] = useState(() => activeProfile?.miiData ? { ...activeProfile.miiData } : { ...INITIAL_MII_DATA, hairStyle: 1, favoriteColor: '#ef4444' });
+  const [activeCustomTab, setActiveCustomTab] = useState('hair'); // 'hair', 'face', 'eyes', 'shirt'
+
+  // Randomize Avatar
+  const handleRandomizeAvatar = () => {
+    const randomSkin = SKIN_PALETTE[Math.floor(Math.random() * SKIN_PALETTE.length)];
+    const randomHair = HAIR_PALETTE[Math.floor(Math.random() * HAIR_PALETTE.length)];
+    const randomShirt = SHIRT_PALETTE[Math.floor(Math.random() * SHIRT_PALETTE.length)];
+
+    setCustomMii({
+      gender: Math.random() > 0.5 ? 'male' : 'female',
+      faceShape: Math.floor(Math.random() * 4),
+      skinColor: randomSkin,
+      hairStyle: Math.floor(Math.random() * 6),
+      hairColor: randomHair,
+      eyeType: Math.floor(Math.random() * 4),
+      eyeColor: '#1e293b',
+      eyebrowType: Math.floor(Math.random() * 3),
+      noseType: Math.floor(Math.random() * 3),
+      mouthType: Math.floor(Math.random() * 4),
+      glasses: 0,
+      mustache: 0,
+      favoriteColor: randomShirt
+    });
+    sfx?.playDiceRoll?.();
+  };
 
   // Toggle favorite system chip
   const toggleSystemSelection = (sysKey) => {
@@ -78,7 +106,14 @@ export default function OnboardingScreen({
     try {
       localStorage.setItem('retro_onboarding_completed', 'true');
       localStorage.setItem('retro_demo_dismissed', 'true');
+      localStorage.setItem('retro_favorite_systems', JSON.stringify(Array.from(selectedSystems)));
     } catch {}
+
+    // Save customized profile
+    if (onSaveCreatedProfile) {
+      onSaveCreatedProfile(playerName.trim() || 'Player', customMii, customMii.favoriteColor);
+    }
+
     sfx?.playGameLaunch?.();
     onComplete();
   };
@@ -178,7 +213,7 @@ export default function OnboardingScreen({
             </h1>
 
             <p className="onboarding-slide-desc">
-              Select the platforms you love. We&apos;ll tailor your library discovery feed and recommendations.
+              Select the platforms you love. We&apos;ll pin and prioritize these consoles at the front of your dashboard and mobile feed.
             </p>
 
             <div className="onboarding-systems-grid">
@@ -210,137 +245,219 @@ export default function OnboardingScreen({
         )}
 
         {/* =========================================================
-            SLIDE 2: HUMAN TOUCH & COMPREHENSIVE USER MANAGEMENT
+            SLIDE 2: POKÉMON-STYLE INTERACTIVE PLAYER PASSPORT & MII
             ========================================================= */}
         {currentStep === 2 && (
           <div className="onboarding-slide animate-slide-up">
             <div className="onboarding-step-badge">
               <User size={14} />
-              <span>STEP 3 OF 4: PLAYERS & PROFILES</span>
+              <span>STEP 3 OF 4: PLAYER PASSPORT</span>
             </div>
 
             <h1 className="onboarding-slide-title">
-              Who&apos;s Playing Today?
+              Create Your Player Character
             </h1>
 
             <p className="onboarding-slide-desc">
-              Create your personalized Nintendo Mii avatar. Each player keeps their own independent saves, playtime records, and starred favorites.
+              Set up your profile identity and customize your personal Nintendo Mii avatar.
             </p>
 
-            <div className="onboarding-profiles-grid">
-              {profiles.map(p => {
-                const isActive = p.id === activeProfileId;
-                return (
-                  <div
-                    key={p.id}
-                    className={`onboarding-profile-card ${isActive ? 'is-active' : ''}`}
-                    onClick={() => {
-                      onSelectProfile?.(p.id);
-                      sfx?.playTileNav?.();
-                    }}
-                  >
-                    <div 
-                      className="onboarding-profile-avatar"
-                      style={{ borderColor: p.favoriteColor || '#3b82f6' }}
-                    >
-                      <MiiAvatar miiData={p.miiData || {}} size={72} />
-                      {isActive && (
-                        <div className="onboarding-avatar-active-badge">
-                          <Check size={12} color="#ffffff" strokeWidth={3} />
-                        </div>
-                      )}
-                    </div>
-                    <span className="onboarding-profile-name">{p.name}</span>
-
-                    {/* Profile Action Toolbar */}
-                    <div className="onboarding-profile-actions" onClick={e => e.stopPropagation()}>
-                      <button
-                        className="onboarding-prof-tool-btn"
-                        onClick={() => onEditProfile?.(p)}
-                        title={`Edit ${p.name}'s Mii Avatar`}
-                        aria-label="Edit Profile"
-                      >
-                        <Edit3 size={13} />
-                      </button>
-                      {profiles.length > 1 && (
-                        <button
-                          className="onboarding-prof-tool-btn is-delete"
-                          onClick={() => onDeleteProfile?.(p.id)}
-                          title={`Delete ${p.name}`}
-                          aria-label="Delete Profile"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-
-              {/* Add New Player Card */}
-              <div
-                className="onboarding-profile-card add-card"
-                onClick={() => {
-                  onCreateNewProfile?.();
-                  sfx?.playModalOpen?.();
-                }}
-              >
-                <div className="onboarding-profile-avatar add-circle">
-                  <Plus size={32} color="#64748b" />
+            {/* Interactive Player Passport Card */}
+            <div className="onboarding-passport-card">
+              {/* Left Column: Live Avatar Preview */}
+              <div className="onboarding-passport-avatar-side">
+                <div 
+                  className="onboarding-passport-mii-circle"
+                  style={{ borderColor: customMii.favoriteColor || '#ef4444' }}
+                >
+                  <MiiAvatar miiData={customMii} size={110} />
                 </div>
-                <span className="onboarding-profile-name">Add Player</span>
-                <span className="onboarding-add-sub">Create Mii</span>
+                <button
+                  type="button"
+                  className="onboarding-randomize-btn"
+                  onClick={handleRandomizeAvatar}
+                  title="Randomize Character"
+                >
+                  <Dices size={16} />
+                  <span>Randomize</span>
+                </button>
+              </div>
+
+              {/* Right Column: Interactive Editor Controls */}
+              <div className="onboarding-passport-form-side">
+                {/* Player Name Input */}
+                <div className="onboarding-form-group">
+                  <label className="onboarding-form-label">Player Name</label>
+                  <input
+                    type="text"
+                    className="onboarding-name-input"
+                    value={playerName}
+                    onChange={(e) => setPlayerName(e.target.value)}
+                    placeholder="Enter your name..."
+                    maxLength={16}
+                  />
+                </div>
+
+                {/* Quick Style Category Tabs */}
+                <div className="onboarding-mii-subtabs">
+                  <button
+                    type="button"
+                    className={`onboarding-subtab ${activeCustomTab === 'hair' ? 'is-active' : ''}`}
+                    onClick={() => setActiveCustomTab('hair')}
+                  >
+                    Hairstyle
+                  </button>
+                  <button
+                    type="button"
+                    className={`onboarding-subtab ${activeCustomTab === 'skin' ? 'is-active' : ''}`}
+                    onClick={() => setActiveCustomTab('skin')}
+                  >
+                    Skin
+                  </button>
+                  <button
+                    type="button"
+                    className={`onboarding-subtab ${activeCustomTab === 'eyes' ? 'is-active' : ''}`}
+                    onClick={() => setActiveCustomTab('eyes')}
+                  >
+                    Face
+                  </button>
+                  <button
+                    type="button"
+                    className={`onboarding-subtab ${activeCustomTab === 'shirt' ? 'is-active' : ''}`}
+                    onClick={() => setActiveCustomTab('shirt')}
+                  >
+                    Shirt Color
+                  </button>
+                </div>
+
+                {/* Subtab Dynamic Option Palette */}
+                <div className="onboarding-mii-options-area">
+                  {activeCustomTab === 'hair' && (
+                    <div className="onboarding-palette-row">
+                      {[0, 1, 2, 3, 4, 5].map((styleIdx) => (
+                        <button
+                          key={styleIdx}
+                          type="button"
+                          className={`onboarding-opt-chip ${customMii.hairStyle === styleIdx ? 'is-active' : ''}`}
+                          onClick={() => {
+                            setCustomMii(m => ({ ...m, hairStyle: styleIdx }));
+                            sfx?.playTileNav?.();
+                          }}
+                        >
+                          Style {styleIdx + 1}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {activeCustomTab === 'skin' && (
+                    <div className="onboarding-palette-colors">
+                      {SKIN_PALETTE.map((col) => (
+                        <button
+                          key={col}
+                          type="button"
+                          className={`onboarding-col-circle ${customMii.skinColor === col ? 'is-active' : ''}`}
+                          style={{ background: col }}
+                          onClick={() => {
+                            setCustomMii(m => ({ ...m, skinColor: col }));
+                            sfx?.playTileNav?.();
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {activeCustomTab === 'eyes' && (
+                    <div className="onboarding-palette-row">
+                      {[0, 1, 2, 3].map((eyeIdx) => (
+                        <button
+                          key={eyeIdx}
+                          type="button"
+                          className={`onboarding-opt-chip ${customMii.eyeType === eyeIdx ? 'is-active' : ''}`}
+                          onClick={() => {
+                            setCustomMii(m => ({ ...m, eyeType: eyeIdx }));
+                            sfx?.playTileNav?.();
+                          }}
+                        >
+                          Eyes {eyeIdx + 1}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {activeCustomTab === 'shirt' && (
+                    <div className="onboarding-palette-colors">
+                      {SHIRT_PALETTE.map((col) => (
+                        <button
+                          key={col}
+                          type="button"
+                          className={`onboarding-col-circle ${customMii.favoriteColor === col ? 'is-active' : ''}`}
+                          style={{ background: col }}
+                          onClick={() => {
+                            setCustomMii(m => ({ ...m, favoriteColor: col }));
+                            sfx?.playTileNav?.();
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         )}
 
         {/* =========================================================
-            SLIDE 3: CONTROLLER & TOUCH PRO-TIPS
+            SLIDE 3: CONTROLLER EXIT COMBOS & PRO-TIPS
             ========================================================= */}
         {currentStep === 3 && (
           <div className="onboarding-slide animate-slide-up">
             <div className="onboarding-step-badge">
               <Sparkles size={14} />
-              <span>STEP 4 OF 4: READY TO PLAY</span>
+              <span>STEP 4 OF 4: CONTROLS & EXIT COMBOS</span>
             </div>
 
             <h1 className="onboarding-slide-title">
-              You&apos;re Ready to Game! 🚀
+              You&apos;re Ready to Play! 🚀
             </h1>
 
             <p className="onboarding-slide-desc">
-              Here are a few quick tips to get the most out of your Retro Player console:
+              Master these essential shortcuts to control games and return to your library effortlessly:
             </p>
 
             <div className="onboarding-tips-list">
-              <div className="onboarding-tip-row">
-                <div className="onboarding-tip-icon" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#2563eb' }}>
-                  <Gamepad2 size={22} />
+              {/* Highlighted Controller Quick Exit Banner */}
+              <div className="onboarding-tip-row is-featured-tip">
+                <div className="onboarding-tip-icon" style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444' }}>
+                  <LogOut size={24} />
                 </div>
                 <div className="onboarding-tip-content">
-                  <strong>Plug-and-Play Gamepads</strong>
-                  <p>Connect any USB or Bluetooth controller (PS5, PS4 DualShock, Xbox, Switch Pro). The DualShock 4 touchpad also works as an on-screen mouse!</p>
+                  <strong>🎮 Controller Quick Exit</strong>
+                  <p>
+                    Press <strong>L3 + R3</strong> (Click Both Thumbsticks) or <strong>Select + Start</strong> at the same time to instantly exit any running game and return to the library!
+                  </p>
                 </div>
               </div>
 
+              {/* Touchpad Pointer & NDS Stylus */}
+              <div className="onboarding-tip-row">
+                <div className="onboarding-tip-icon" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#2563eb' }}>
+                  <MousePointer size={22} />
+                </div>
+                <div className="onboarding-tip-content">
+                  <strong>DualShock 4 Touchpad Pointer</strong>
+                  <p>The PS4/PS5 touchpad acts as an on-screen mouse pointer for browsing and serves as the touchscreen stylus in Nintendo DS games.</p>
+                </div>
+              </div>
+
+              {/* Universal Keyboard Shortcuts */}
               <div className="onboarding-tip-row">
                 <div className="onboarding-tip-icon" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#059669' }}>
                   <Keyboard size={22} />
                 </div>
                 <div className="onboarding-tip-content">
                   <strong>Universal Keyboard Shortcuts</strong>
-                  <p>Use <strong>Arrow Keys / WASD</strong> to navigate, <strong>Enter</strong> to select, <strong>ESC / B</strong> to go back, <strong>⌘K</strong> for quick search, and <strong>D</strong> for live FPS diagnostics.</p>
-                </div>
-              </div>
-
-              <div className="onboarding-tip-row">
-                <div className="onboarding-tip-icon" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#d97706' }}>
-                  <ShieldCheck size={22} />
-                </div>
-                <div className="onboarding-tip-content">
-                  <strong>Instant Battery SRAM Saves</strong>
-                  <p>In-game progress is automatically saved to your browser&apos;s IndexedDB and instantly re-injected on your next play session.</p>
+                  <p>Use <strong>Arrow Keys / WASD</strong> to navigate, <strong>Enter</strong> to launch, <strong>ESC</strong> to exit games, <strong>⌘K</strong> for quick search, and <strong>D</strong> for live diagnostics.</p>
                 </div>
               </div>
             </div>

@@ -55,9 +55,7 @@ export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(() => {
     try {
       if (typeof window === 'undefined') return false;
-      const isCompleted = localStorage.getItem('retro_onboarding_completed') === 'true';
-      const isDemoEnv = window.location.hostname.endsWith('github.io') || window.location.search.includes('demo=true');
-      return !isCompleted || isDemoEnv;
+      return localStorage.getItem('retro_onboarding_completed') !== 'true';
     } catch {
       return false;
     }
@@ -551,22 +549,15 @@ export default function App() {
           isOpen={showOnboarding}
           onComplete={() => setShowOnboarding(false)}
           systems={systems}
-          profiles={profiles}
-          activeProfileId={activeProfileId}
-          onSelectProfile={switchProfile}
-          onCreateNewProfile={() => {
-            setEditingProfile(null);
-            setShowMiiCreatorModal(true);
+          activeProfile={activeProfile}
+          onSaveCreatedProfile={(name, miiData, favoriteColor) => {
+            if (activeProfile?.id) {
+              updateProfile(activeProfile.id, { name, miiData, favoriteColor });
+            } else {
+              createProfile(name, miiData, favoriteColor);
+            }
           }}
-          onEditProfile={(prof) => {
-            setEditingProfile(prof);
-            setShowMiiCreatorModal(true);
-          }}
-          onDeleteProfile={deleteProfile}
           sfx={sfx}
-          focusedTarget={focusedTarget}
-          setFocusedTarget={setFocusedTarget}
-          gamepadConnected={gamepadConnected}
         />
       )}
 
