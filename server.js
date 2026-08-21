@@ -750,6 +750,8 @@ app.delete('/api/db/:store/:key', (req, res) => {
     writeServerDB(db);
     console.log(`🗑️ [SERVER DB DELETED] Store: "${store}" | Key: "${key}"`);
   }
+  res.json({ success: true, store, key });
+});
 
 // 5. POST Save companion sidecar metadata & cover artwork to disk
 app.post('/api/metadata/save-sidecar', express.json({ limit: '50mb' }), (req, res) => {

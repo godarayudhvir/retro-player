@@ -822,6 +822,8 @@ export async function scrapeGame(game, force = false) {
   if (!game) return null;
   const id = game.id || `${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
 
+  const hasLocalSidecar = game.hasSidecar || game.sidecarMetadata || (game.coverUrl && !game.coverUrl.endsWith('.svg'));
+
   const cached = await getCachedMetadata(id);
   if (cached) {
     // 1. If user has manually edited metadata, preserve it unless force re-scrape is explicitly requested
@@ -829,14 +831,14 @@ export async function scrapeGame(game, force = false) {
       addScraperLog(`✏️ Loaded "${cached.title || game.title}" from manual override`, 'info', { gameId: id, title: game.title, systemKey: game.systemKey });
       return cached;
     }
-    if (!force) {
+    // If we have a local companion sidecar/cover on disk, local files ALWAYS take precedence over previous online scraped cache
+    if (!hasLocalSidecar && !force) {
       addScraperLog(`📦 Loaded "${game.title}" from IndexedDB cache`, 'info', { gameId: id, title: game.title, systemKey: game.systemKey });
       return cached;
     }
   }
 
   // 2. Local Sidecar Priority: If local files / sidecar exist, local files ALWAYS override online scrapers and ZERO online network calls are made.
-  const hasLocalSidecar = game.hasSidecar || game.sidecarMetadata || (game.coverUrl && !game.coverUrl.endsWith('.svg'));
   if (hasLocalSidecar && (!cached || !cached.isManualOverride || !force)) {
     const sidecar = game.sidecarMetadata || {};
     const sidecarCover = (game.coverUrl && !game.coverUrl.endsWith('.svg')) ? game.coverUrl : null;
