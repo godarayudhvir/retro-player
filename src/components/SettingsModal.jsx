@@ -14,9 +14,11 @@ import {
   Check, 
   AlertCircle,
   Play,
-  Volume2
+  Volume2,
+  Trash
 } from 'lucide-react';
 import { detectSystemFromExtension } from '../utils/systemDetector';
+import { clearBrowserCacheAndData } from '../utils/storageCleaner';
 import ConfirmModal from './ConfirmModal';
 
 /**
@@ -253,6 +255,23 @@ export default function SettingsModal({
           setDeletingId(null);
           setTimeout(() => setUploadStatus(null), 4000);
         }
+      }
+    });
+  };
+
+  // Trigger Client-Side Browser Storage & Cache Purge
+  const promptClearBrowserCache = () => {
+    setPendingConfirm({
+      title: 'Clear Browser Cache & App Data?',
+      message: 'This will purge client-side IndexedDB databases, cached scraper box art, and offline service worker storage. Your ROMs and files on disk will NOT be affected. The page will reload after clearing.',
+      confirmLabel: 'Clear Cache & Reload',
+      onConfirm: async () => {
+        setPendingConfirm(null);
+        setUploadStatus({ type: 'info', message: 'Clearing browser cache and databases...' });
+        await clearBrowserCacheAndData();
+        setTimeout(() => {
+          window.location.reload();
+        }, 600);
       }
     });
   };
@@ -519,9 +538,20 @@ export default function SettingsModal({
             <HardDrive size={16} color="#64748b" />
             <span>Volume Mounts: <code>./roms</code> & <code>./bgm</code></span>
           </div>
-          <button className="settings-done-btn" onClick={onClose}>
-            Done
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button 
+              className="settings-upload-btn" 
+              style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1.5px solid rgba(239, 68, 68, 0.3)', padding: '0.45rem 0.85rem', fontSize: '0.78rem' }}
+              onClick={promptClearBrowserCache}
+              title="Purge client-side browser cache & IndexedDB (files on disk are safe)"
+            >
+              <Trash size={14} />
+              <span>Clear Browser Cache</span>
+            </button>
+            <button className="settings-done-btn" onClick={onClose}>
+              Done
+            </button>
+          </div>
         </div>
 
       </div>

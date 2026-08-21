@@ -13,6 +13,7 @@ The **System Settings & Library Manager Menu** (`SettingsView.jsx`) is a full-sc
     3. 🎨 **Themes & Visuals**: Live theme switcher cards for **iiSU Light**, **Midnight OLED**, **Cyber Neon**, and **Sony XMB Wave**, plus real-time Web Audio SFX mute/unmute toggle.
     4. 🎮 **Controllers & Keys**: Gamepad connection indicator and full controller & keyboard shortcut mapping reference.
     5. ℹ️ **System & Diagnostics**: Real-time status of `./roms` and `./bgm` Docker volume mounts, total indexed games, and IndexedDB permanent storage state.
+    6. 🧹 **1-Click Clear Browser Cache & App Data**: Purges client-side IndexedDB databases, cached scraper box art, and offline Service Worker data with custom in-app confirmation while keeping host ROMs, sidecars, and server storage 100% safe.
 - **Top Header & Bottom HUD Guide**:
   - Top header with return button (`Back` / `Esc` / `B` button) and Station badge.
   - Bottom controller HUD with key prompts (`[B] Back to Games`, `[A] Select Option`, `[D-Pad] Navigation`).

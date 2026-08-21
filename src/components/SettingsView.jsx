@@ -27,9 +27,11 @@ import {
   Square,
   Terminal,
   FileText,
-  ExternalLink
+  ExternalLink,
+  Trash
 } from 'lucide-react';
 import { detectSystemFromExtension } from '../utils/systemDetector';
+import { clearBrowserCacheAndData } from '../utils/storageCleaner';
 import ConfirmModal from './ConfirmModal';
 
 /**
@@ -281,6 +283,23 @@ export default function SettingsView({
           setDeletingId(null);
           setTimeout(() => setUploadStatus(null), 4000);
         }
+      }
+    });
+  };
+
+  // Trigger Client-Side Browser Storage & Cache Purge
+  const promptClearBrowserCache = () => {
+    setPendingConfirm({
+      title: 'Clear Browser Cache & App Data?',
+      message: 'This will purge client-side IndexedDB databases, cached scraper box art, and offline service worker storage. Your ROMs and files on disk will NOT be affected. The page will reload after clearing.',
+      confirmLabel: 'Clear Cache & Reload',
+      onConfirm: async () => {
+        setPendingConfirm(null);
+        setUploadStatus({ type: 'info', message: 'Clearing browser cache and databases...' });
+        await clearBrowserCacheAndData();
+        setTimeout(() => {
+          window.location.reload();
+        }, 600);
       }
     });
   };
@@ -1128,6 +1147,28 @@ export default function SettingsView({
                         >
                           <RefreshCw size={13} className={pwa?.cacheStatus === 'updating' ? 'spin' : ''} />
                           <span>{pwa?.cacheStatus === 'updating' ? 'Updating...' : (pwa?.cacheStatus === 'updated' ? 'Cache Updated!' : 'Refresh Cache')}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="settings-diag-card">
+                    <div className="diag-icon-box" style={{ background: 'rgba(239, 68, 68, 0.15)' }}>
+                      <Trash size={24} color="#ef4444" />
+                    </div>
+                    <div className="diag-info">
+                      <h4>Client Browser Cache & Data</h4>
+                      <p>Purge local IndexedDB, scraper art cache, and offline Service Worker data</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px', flexWrap: 'wrap' }}>
+                        <span className="diag-status info">Files on disk remain safe</span>
+                        <button
+                          className="settings-action-btn"
+                          style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)', padding: '4px 10px', fontSize: '0.75rem', height: 'auto' }}
+                          onClick={promptClearBrowserCache}
+                          title="Purge all client browser data and reload app"
+                        >
+                          <Trash size={13} />
+                          <span>Clear Cache & Reload</span>
                         </button>
                       </div>
                     </div>

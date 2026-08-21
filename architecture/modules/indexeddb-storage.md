@@ -32,14 +32,17 @@ The **Storage & Database Engine** (`src/services/db.js`, `server.js`, `vite.conf
 - `dbSet(storeName, key, value)`: Asynchronously writes to both the Server DB REST API (`POST /api/db/:store`) and local IndexedDB.
 - `dbDelete(storeName, key)`: Deletes the record from both the Server DB (`DELETE /api/db/:store/:key`) and local IndexedDB.
 - `dbGetAll(storeName)`: Fetches the entire collection from `/api/db/:store` and synchronizes the local IndexedDB store.
+- `clearBrowserCacheAndData()`: Safely purges client-side IndexedDB databases, CacheStorage (Service Worker), and localStorage without affecting host disk files.
 
 ### Module Integrations
 - [useProfileManager.js](file:///Users/godarayudhvir/Github/retro-player/src/hooks/useProfileManager.js): Reads and writes all profile configurations to `STORES.PROFILES` and active profile pointer in `STORES.SETTINGS`.
 - [usePlaytimeAndFavorites.js](file:///Users/godarayudhvir/Github/retro-player/src/hooks/usePlaytimeAndFavorites.js): Reads and writes favorites (`favs_<profileId>`), recently played (`recents_<profileId>`), and playtime logs (`playtime_<profileId>`) to `STORES.USER_DATA`.
 - [EmulatorModal.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/EmulatorModal.jsx): Commits battery SRAM and snapshot states to `STORES.GAME_SAVES` and `STORES.SAVE_STATES`.
+- [storageCleaner.js](file:///Users/godarayudhvir/Github/retro-player/src/utils/storageCleaner.js): Client cache cleaner utilized by `SettingsModal.jsx` and `SettingsView.jsx`.
 
 ### Source Locations
 - Core Database Service: [src/services/db.js](file:///Users/godarayudhvir/Github/retro-player/src/services/db.js)
+- Client Storage Purger: [src/utils/storageCleaner.js](file:///Users/godarayudhvir/Github/retro-player/src/utils/storageCleaner.js)
 - Server DB REST Engine: [server.js](file:///Users/godarayudhvir/Github/retro-player/server.js), [vite.config.js](file:///Users/godarayudhvir/Github/retro-player/vite.config.js)
 - Profile Manager: [src/hooks/useProfileManager.js](file:///Users/godarayudhvir/Github/retro-player/src/hooks/useProfileManager.js)
 - User Analytics & Favorites: [src/hooks/usePlaytimeAndFavorites.js](file:///Users/godarayudhvir/Github/retro-player/src/hooks/usePlaytimeAndFavorites.js)

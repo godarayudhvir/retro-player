@@ -26,7 +26,7 @@ We deeply respect intellectual property rights and the work of all game develope
 | `atari_2600` | **Atari 2600** | **2** | 0.01 MB |
 | `game_gear` | **Sega Game Gear** | **2** | 0.53 MB |
 | `gb` | **Game Boy (DMG)** | **1** | 0.06 MB |
-| `gba` | **Game Boy Advance** | **10** | 216.00 MB |
+| `gba` | **Game Boy Advance** | **12** | 263.80 MB |
 | `gbc` | **Game Boy Color** | **2** | 8.00 MB |
 | `n64` | **Nintendo 64** | **1** | 32.00 MB |
 | `nds` | **Nintendo DS** | **2** | 48.00 MB |
@@ -65,20 +65,22 @@ We deeply respect intellectual property rights and the work of all game develope
 |---|---|---|---|
 | 1 | `Gunman Clive (World) (Demo) (Aftermarket) (Unl)` | 0.06 MB | Curated Showcase Demo |
 
-### `gba` — Game Boy Advance (10 titles, 216.00 MB)
+### `gba` — Game Boy Advance (12 titles, 263.80 MB)
 
 | # | Filename | Size | Classification |
 |---|---|---|---|
-| 1 | `Legend of Zelda, The - The Minish Cap (USA) (Demo) (Kiosk)` | 16.00 MB | Curated Showcase Demo |
-| 2 | `Mario & Luigi - Superstar Saga (USA) (Demo) (Kiosk)` | 8.00 MB | Curated Showcase Demo |
-| 3 | `Pokemon FireRed - Rocket Edition (v1.02)` | 16.00 MB | Curated Romhack (Local Sidecar) |
-| 4 | `Pokemon Gaia (v3.2)` | 32.00 MB | Curated Romhack (Local Sidecar) |
-| 5 | `Pokemon Heart & Soul (v1.2.1)` | 32.00 MB | Curated Romhack (Local Sidecar) |
-| 6 | `Pokemon Lazarus (v2.0)` | 32.00 MB | Curated Romhack (Local Sidecar) |
-| 7 | `Pokemon Mystery Dungeon - Red Rescue Team (USA) (Demo) (Kiosk)` | 16.00 MB | Curated Showcase Demo |
-| 8 | `Pokemon Recharged Yellow (v1.9.0)` | 16.00 MB | Curated Romhack (Local Sidecar) |
-| 9 | `Pokemon Seaglass (v3.0)` | 16.00 MB | Curated Romhack (Local Sidecar) |
-| 10 | `Pokemon Unbound (v2.1.1.1)` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 1 | `Blind Jump (World) (Aftermarket) (Unl)` | 15.80 MB | Curated Homebrew (Local Sidecar) |
+| 2 | `Goodboy Galaxy (World) (En,Ja,Fr,De,Es,Pt-BR,Zh,Ar) (v1.3) (Aftermarket) (Unl)` | 32.00 MB | Curated Homebrew (Local Sidecar) |
+| 3 | `Legend of Zelda, The - The Minish Cap (USA) (Demo) (Kiosk)` | 16.00 MB | Curated Showcase Demo |
+| 4 | `Mario & Luigi - Superstar Saga (USA) (Demo) (Kiosk)` | 8.00 MB | Curated Showcase Demo |
+| 5 | `Pokemon FireRed - Rocket Edition (v1.02)` | 16.00 MB | Curated Romhack (Local Sidecar) |
+| 6 | `Pokemon Gaia (v3.2)` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 7 | `Pokemon Heart & Soul (v1.2.1)` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 8 | `Pokemon Lazarus (v2.0)` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 9 | `Pokemon Mystery Dungeon - Red Rescue Team (USA) (Demo) (Kiosk)` | 16.00 MB | Curated Showcase Demo |
+| 10 | `Pokemon Recharged Yellow (v1.9.0)` | 16.00 MB | Curated Romhack (Local Sidecar) |
+| 11 | `Pokemon Seaglass (v3.0)` | 16.00 MB | Curated Romhack (Local Sidecar) |
+| 12 | `Pokemon Unbound (v2.1.1.1)` | 32.00 MB | Curated Romhack (Local Sidecar) |
 
 ### `gbc` — Game Boy Color (2 titles, 8.00 MB)
 
