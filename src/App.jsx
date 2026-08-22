@@ -132,11 +132,14 @@ export default function App() {
     }
   }, [checkSaveData, activeProfileId, sfx, themeEngine?.theme]);
 
-  // Hook 6: ROM Catalog Manifest & Drag-Drop Loading (opens GameDetailModal)
+  // Custom ROM Loaded: skip GameDetailModal, launch directly into emulator.
+  // Custom ROMs have no library entry, metadata, or save history — no reason to stop at a detail screen.
+  // Fixes: Vanilla showing GameDetailModal on load; DS Touch silently ignoring the ROM entirely.
   const handleCustomRomLoaded = useCallback((customGame) => {
-    handleGameSelect(customGame);
-    setFocusedTarget({ zone: 'cardModal', id: 'play' });
-  }, [handleGameSelect]);
+    recordGameLaunch(customGame);
+    sfx.playGameLaunch();
+    setActiveGame(customGame);
+  }, [recordGameLaunch, sfx]);
 
   const {
     games,
