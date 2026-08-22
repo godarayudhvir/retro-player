@@ -1352,8 +1352,9 @@ export function useGamepadNavigation({
   // HTML5 Gamepad polling engine
   useEffect(() => {
     let animId;
+    const STICK_DEADZONE = 0.45;
 
-    const pollGamepad = () => {
+    const pollGamepad = (timestamp) => {
       const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
       let gp = null;
       for (let i = 0; i < gamepads.length; i++) {
@@ -1392,7 +1393,7 @@ export function useGamepadNavigation({
         }
 
         const b = gp.buttons;
-        const now = timestamp || performance.now();
+        const now = (typeof timestamp === 'number') ? timestamp : performance.now();
         const COOLDOWN = 180;
 
         // Detect all standard buttons
