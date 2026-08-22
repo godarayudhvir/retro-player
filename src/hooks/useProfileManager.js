@@ -4,116 +4,46 @@ import { dbGet, dbSet, dbDelete, dbGetAll, STORES } from '../services/db';
 const PROFILES_KEY = 'retro_player_profiles';
 const ACTIVE_PROFILE_ID_KEY = 'retro_player_active_profile_id';
 
-// Default starter Mii character presets
-export const MII_PRESETS = [
-  {
-    id: 'mario',
-    name: 'Mario',
-    favoriteColor: '#ef4444',
-    miiData: {
-      gender: 'male',
-      faceShape: 0,
-      skinColor: '#fed7aa',
-      hairStyle: 3,
-      hairColor: '#451a03',
-      eyeType: 0,
-      eyeColor: '#1e293b',
-      eyebrowType: 1,
-      noseType: 1,
-      mouthType: 0,
-      glasses: 0,
-      mustache: 1,
-      favoriteColor: '#ef4444'
-    }
-  },
-  {
-    id: 'luigi',
-    name: 'Luigi',
-    favoriteColor: '#10b981',
-    miiData: {
-      gender: 'male',
-      faceShape: 1,
-      skinColor: '#fed7aa',
-      hairStyle: 3,
-      hairColor: '#451a03',
-      eyeType: 0,
-      eyeColor: '#1e293b',
-      eyebrowType: 1,
-      noseType: 0,
-      mouthType: 0,
-      glasses: 0,
-      mustache: 1,
-      favoriteColor: '#10b981'
-    }
-  },
-  {
-    id: 'peach',
-    name: 'Peach',
-    favoriteColor: '#ec4899',
-    miiData: {
-      gender: 'female',
-      faceShape: 0,
-      skinColor: '#fef08a',
-      hairStyle: 2,
-      hairColor: '#f59e0b',
-      eyeType: 1,
-      eyeColor: '#0284c7',
-      eyebrowType: 0,
-      noseType: 0,
-      mouthType: 0,
-      glasses: 0,
-      mustache: 0,
-      favoriteColor: '#ec4899'
-    }
-  },
-  {
-    id: 'link',
-    name: 'Link',
-    favoriteColor: '#84cc16',
-    miiData: {
-      gender: 'male',
-      faceShape: 1,
-      skinColor: '#fde047',
-      hairStyle: 1,
-      hairColor: '#ca8a04',
-      eyeType: 0,
-      eyeColor: '#0284c7',
-      eyebrowType: 0,
-      noseType: 2,
-      mouthType: 2,
-      glasses: 0,
-      mustache: 0,
-      favoriteColor: '#84cc16'
-    }
-  }
+// Curated avatar presets with themed seeds for Multiavatar (https://multiavatar.com/)
+export const AVATAR_PRESETS = [
+  { id: 'retro', name: 'Retro Gamer', avatarSeed: 'RetroGamer', favoriteColor: '#ef4444' },
+  { id: 'mario', name: 'Mario', avatarSeed: 'SuperMario', favoriteColor: '#ef4444' },
+  { id: 'zelda', name: 'Zelda', avatarSeed: 'PrincessZelda', favoriteColor: '#ec4899' },
+  { id: 'link', name: 'Link', avatarSeed: 'HeroOfTime', favoriteColor: '#84cc16' },
+  { id: 'samus', name: 'Samus', avatarSeed: 'MetroidSamus', favoriteColor: '#f97316' },
+  { id: 'sonic', name: 'Sonic', avatarSeed: 'SonicSpeed', favoriteColor: '#3b82f6' },
+  { id: 'pixel', name: 'Pixel Knight', avatarSeed: 'PixelKnight', favoriteColor: '#6366f1' },
+  { id: 'cyber', name: 'Cyber Ninja', avatarSeed: 'CyberNinja', favoriteColor: '#10b981' },
+  { id: 'cosmic', name: 'Cosmic Pilot', avatarSeed: 'CosmicPilot', favoriteColor: '#06b6d4' },
+  { id: 'chrono', name: 'Chrono Mage', avatarSeed: 'ChronoMage', favoriteColor: '#a855f7' }
 ];
 
-export const INITIAL_MII_DATA = {
-  gender: 'male',
-  faceShape: 0,
-  skinColor: '#fed7aa',
-  hairStyle: 0,
-  hairColor: '#451a03',
-  eyeType: 0,
-  eyeColor: '#1e293b',
-  eyebrowType: 0,
-  noseType: 0,
-  mouthType: 0,
-  glasses: 0,
-  mustache: 0,
-  favoriteColor: '#ef4444'
-};
+export const RANDOM_SEEDS = [
+  'RetroGamer', 'PixelKnight', 'CyberNinja', 'CosmicPilot', 'NeonSamurai',
+  'SuperMario', 'HeroOfTime', 'StarVoyager', 'ChronoMage', 'ArcadeMaster',
+  'VoxelHero', 'SpaceCadet', 'HyperSonic', 'ShadowRogue', 'MegaBuster'
+];
 
-const DEFAULT_MASTER_PROFILE = {
+export const DEFAULT_MASTER_PROFILE = {
   id: 'prof_default',
   name: 'Player 1',
+  avatarSeed: 'Player 1',
   favoriteColor: '#ef4444',
-  miiData: { ...INITIAL_MII_DATA },
   created: 1
 };
 
+// Normalize profile objects for backward compatibility
+function normalizeProfile(p) {
+  if (!p) return DEFAULT_MASTER_PROFILE;
+  return {
+    ...p,
+    avatarSeed: p.avatarSeed || p.name || 'Player 1',
+    favoriteColor: p.favoriteColor || p.miiData?.favoriteColor || '#ef4444'
+  };
+}
+
 /**
- * Hook for managing user profiles, Mii avatars, profile switching, and profile-scoped storage in IndexedDB.
+ * Hook for managing user profiles, Multiavatar avatars, profile switching, and profile-scoped storage in IndexedDB.
  */
 export function useProfileManager() {
   // Profiles state initialized from fast cache with instant IndexedDB sync
@@ -122,7 +52,9 @@ export function useProfileManager() {
       const stored = localStorage.getItem(PROFILES_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map(normalizeProfile);
+        }
       }
     } catch {}
     return [DEFAULT_MASTER_PROFILE];
@@ -142,9 +74,10 @@ export function useProfileManager() {
       try {
         const dbProfiles = await dbGetAll(STORES.PROFILES);
         if (Array.isArray(dbProfiles) && dbProfiles.length > 0) {
-          setProfiles(dbProfiles);
+          const normalized = dbProfiles.map(normalizeProfile);
+          setProfiles(normalized);
           try {
-            localStorage.setItem(PROFILES_KEY, JSON.stringify(dbProfiles));
+            localStorage.setItem(PROFILES_KEY, JSON.stringify(normalized));
           } catch {}
         } else {
           // Seed master profile into IndexedDB if empty
@@ -177,12 +110,14 @@ export function useProfileManager() {
   /**
    * Create a new user profile in IndexedDB.
    */
-  const createProfile = useCallback(async (name, miiData, favoriteColor) => {
+  const createProfile = useCallback(async (name, avatarSeed, favoriteColor) => {
+    const cleanName = (name || 'Player').trim();
+    const cleanSeed = (avatarSeed || cleanName).trim() || 'Player';
     const newProfile = {
       id: `prof_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-      name: (name || 'Player').trim(),
-      favoriteColor: favoriteColor || miiData?.favoriteColor || '#ef4444',
-      miiData: { ...miiData, favoriteColor: favoriteColor || miiData?.favoriteColor || '#ef4444' },
+      name: cleanName,
+      avatarSeed: cleanSeed,
+      favoriteColor: favoriteColor || '#ef4444',
       created: Date.now()
     };
 
@@ -220,7 +155,9 @@ export function useProfileManager() {
           updatedProfile = {
             ...p,
             ...updates,
-            miiData: updates.miiData ? { ...p.miiData, ...updates.miiData } : p.miiData
+            name: updates.name !== undefined ? updates.name.trim() : p.name,
+            avatarSeed: updates.avatarSeed !== undefined ? updates.avatarSeed.trim() : (updates.name ? updates.name.trim() : p.avatarSeed),
+            favoriteColor: updates.favoriteColor || p.favoriteColor
           };
           return updatedProfile;
         }

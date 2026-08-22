@@ -11,7 +11,7 @@ The **Storage & Database Engine** (`src/services/db.js`, `server.js`, `vite.conf
   - Exposes REST endpoints (`/api/db/:store`, `/api/db/:store/:key`) for robust CRUD operations.
   - Immune to browser "Clear Site Data", incognito sessions, browser switching, and cache resets.
 - **Client-Side Database (`RetroPlayerDB` & `RetroPlayerMetadataDB`)**:
-  - `profiles`: User accounts, Nintendo Mii vector configurations, and signature colors (`keyPath: 'id'`).
+  - `profiles`: User accounts, Multiavatar avatar seeds, and signature colors (`keyPath: 'id'`).
   - `user_data`: Scoped user activity logs, persistent favorites, recents queue, and playtime sessions (`keyPath: 'key'`).
   - `app_settings`: Global console configuration, active profile ID, volume, and preferences.
   - `game_saves`: Native in-game battery SRAM (.sav) blobs.

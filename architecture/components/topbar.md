@@ -12,7 +12,7 @@ The `Topbar` component serves as the primary console header and status HUD for R
 - **Controller Connectivity & Battery Widget**: Displays a green `GAMEPAD READY` badge or active battery indicator (`PAD` + `BatteryIcon` + `XX%` + `⚡` charging indicator) when a physical gamepad is detected, or `NO CONTROLLER` in grey. Auto-hides on mobile touch devices.
 - **Automated Metadata Scraper Button**: Icon-only action button (`Sparkles` / `RefreshCw`) triggering library-wide metadata & box art scraping.
 - **SFX Mute Toggle Button**: Compact icon-only button toggle between active audio and muted sound using `Volume2`/`VolumeX` icons with tooltips.
-- **Search Bar & Virtual Keyboard Trigger**: Interactive search input with an adaptive keyboard badge (`⌘K` on Mac, `Ctrl+K` on Windows/Linux, or `Y` when a gamepad is connected).
+- **Search Bar & Virtual Keyboard Trigger**: Interactive search input with instant library filtering on keyup/typing, and direct on-screen virtual keyboard trigger for gamepads.
 - **Custom ROM Modal Trigger (`FolderOpen`)**: Icon-only button that opens the in-app `LoadRomModal` dialog for selecting or dragging local custom ROMs.
 - **Digital Clock**: Displays local time updated every 10 seconds.
 - **Complete D-Pad & Keyboard Spatial Navigation**: Every control in the Topbar (User Profile Avatar & Name, BGM Play/Pause, BGM Skip, Scraper Trigger, SFX Mute, Search Input, PWA Install, and Load ROM) is 100% accessible and navigable via D-Pad (`LEFT` / `RIGHT` / `UP` / `DOWN`) and gamepad `A` button with luminous focus highlights (`.gamepad-focused`).
@@ -23,7 +23,7 @@ The `Topbar` component serves as the primary console header and status HUD for R
 ## 3. Detailed Logic Behind Everything and How It Works
 
 ### Props & Data Flow
-- `gamepadConnected` (boolean): Controls gamepad status badge color and search hotkey badge (`Y` vs `⌘K`).
+- `gamepadConnected` (boolean): Controls gamepad status badge color.
 - `gamepadBattery` (object): Exposes `{ hasBatteryInfo, batteryPercent, isCharging, gamepadId }` for live power telemetry.
 - `searchQuery` & `setSearchQuery`: Binds directly to the search input field.
 - `sfx`: Invokes `sfx.playModalOpen()`, and `sfx.toggleMute()`.

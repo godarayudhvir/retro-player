@@ -39,7 +39,7 @@ Mobile phones are personal gaming devices. Users want to launch the app, tap a g
   - Shoulder buttons ($L_1 / R_1 / L_2 / R_2$) and Start/Select buttons ergonomically mapped for two-thumb play.
 - **Lightweight User Preferences**:
   - Theme switching (Game Boy Green, Cyberpunk, OLED Midnight, Retro Famicom, PlayStation Purple).
-  - Profile Avatar creator (custom Mii avatar).
+  - Profile Avatar creator (custom Multiavatar avatar).
   - Web Audio UI SFX toggles and volume control.
   - Cloud save download / local save state restore.
 

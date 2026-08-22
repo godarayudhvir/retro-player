@@ -104,7 +104,7 @@ export default function GameDetailModal({
               sfx?.playTileNav?.();
               onPrevGame?.();
             }}
-            title="Previous ROM (Left Arrow / Q / A / L1)"
+            title="Previous ROM"
             aria-label="Previous ROM"
           >
             <ChevronLeft size={28} />
@@ -115,7 +115,7 @@ export default function GameDetailModal({
           <button
             className={`game-card-close ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`}
             onClick={onClose}
-            title="Close (ESC / B)"
+            title="Close"
           >
             <X size={20} />
           </button>
@@ -259,7 +259,7 @@ export default function GameDetailModal({
                     sfx?.playFavoriteToggle?.(nextState);
                   }
                 }}
-                title={isFavorite ? "Remove from Favorites (X on Gamepad / F on Keyboard)" : "Add to Favorites (X on Gamepad / F on Keyboard)"}
+                title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
                 aria-label={isFavorite ? "Favorited" : "Add Favorite"}
               >
                 <Star size={20} fill={isFavorite ? '#fbbf24' : 'none'} color={isFavorite ? '#f59e0b' : 'currentColor'} />
@@ -354,7 +354,7 @@ export default function GameDetailModal({
             sfx?.playTileNav?.();
             onNextGame?.();
           }}
-          title="Next ROM (Right Arrow / E / D / R1)"
+          title="Next ROM"
           aria-label="Next ROM"
         >
           <ChevronRight size={28} />

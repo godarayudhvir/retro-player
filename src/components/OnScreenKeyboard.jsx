@@ -92,32 +92,6 @@ export default function OnScreenKeyboard({
           )}
         </div>
 
-        {/* Controller Shortcut Hints Bar */}
-        {gamepadConnected && (
-          <div className="osk-hints-bar">
-            <div className="osk-hint-pill">
-              <span className="osk-hint-key">A</span>
-              <span>Select Key</span>
-            </div>
-            <div className="osk-hint-pill">
-              <span className="osk-hint-key osk-key-x">X</span>
-              <span>Space</span>
-            </div>
-            <div className="osk-hint-pill">
-              <span className="osk-hint-key osk-key-y">Y</span>
-              <span>Backspace</span>
-            </div>
-            <div className="osk-hint-pill">
-              <span className="osk-hint-key osk-key-start">START</span>
-              <span>Submit</span>
-            </div>
-            <div className="osk-hint-pill">
-              <span className="osk-hint-key osk-key-b">B</span>
-              <span>Close</span>
-            </div>
-          </div>
-        )}
-
         {/* Virtual Key Grid: 5 Rows */}
         <div className="osk-grid">
           {KEYBOARD_ROWS.map((row, rIdx) => {

@@ -18,6 +18,8 @@ export function useGamepadNavigation({
   setShowThemeModal,
   showProfileSelectModal,
   setShowProfileSelectModal,
+  showProfileCreatorModal,
+  setShowProfileCreatorModal,
   showMiiCreatorModal,
   setShowMiiCreatorModal,
   showVirtualKeyboard,
@@ -82,7 +84,7 @@ export function useGamepadNavigation({
       showThemeModal,
       setShowThemeModal,
       showProfileSelectModal,
-      showMiiCreatorModal,
+      showProfileCreatorModal: showProfileCreatorModal || showMiiCreatorModal,
       showVirtualKeyboard,
       oskPos,
       filteredGames,
@@ -115,6 +117,7 @@ export function useGamepadNavigation({
     showScraperModal,
     showThemeModal,
     showProfileSelectModal,
+    showProfileCreatorModal,
     showMiiCreatorModal,
     showVirtualKeyboard,
     oskPos,
@@ -347,14 +350,14 @@ export function useGamepadNavigation({
       return;
     }
 
-    // 2.3 Mii Creator Modal Navigation (Desktop & Mobile)
-    const { showMiiCreatorModal: isMiiOpen } = stateRef.current;
-    if (isMiiOpen) {
-      const curId = curTarget?.id || 'tab-face';
-      const miiTabs = ['tab-face', 'tab-hair', 'tab-eyes', 'tab-extras', 'tab-presets'];
+    // 2.3 Profile Creator Modal Navigation (Desktop & Mobile)
+    const isCreatorOpen = stateRef.current.showProfileCreatorModal || stateRef.current.showMiiCreatorModal;
+    if (isCreatorOpen) {
+      const curId = curTarget?.id || 'nameInput';
+      const setCreatorClose = setShowProfileCreatorModal || setShowMiiCreatorModal;
 
       if (dir === 'BACK') {
-        setShowMiiCreatorModal(false);
+        setCreatorClose?.(false);
         setFocusedTarget({ zone: 'topbar', id: 'profile' });
         sfx?.playModalClose?.();
         return;
@@ -364,94 +367,106 @@ export function useGamepadNavigation({
         if (curId === 'close') {
           // Top limit
         } else if (curId === 'nameInput') {
-          setFocusedTarget({ zone: 'miiModal', id: 'close' });
+          setFocusedTarget({ zone: 'profileModal', id: 'close' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'seedInput') {
+          setFocusedTarget({ zone: 'profileModal', id: 'nameInput' });
           sfx?.playTileNav?.();
         } else if (curId === 'random') {
-          setFocusedTarget({ zone: 'miiModal', id: 'nameInput' });
+          setFocusedTarget({ zone: 'profileModal', id: 'close' });
           sfx?.playTileNav?.();
-        } else if (miiTabs.includes(curId)) {
-          setFocusedTarget({ zone: 'miiModal', id: 'close' });
+        } else if (curId.startsWith('preset_')) {
+          setFocusedTarget({ zone: 'profileModal', id: 'seedInput' });
+          sfx?.playTileNav?.();
+        } else if (curId.startsWith('color_')) {
+          setFocusedTarget({ zone: 'profileModal', id: 'preset_0' });
           sfx?.playTileNav?.();
         } else if (curId === 'save' || curId === 'cancel') {
-          setFocusedTarget({ zone: 'miiModal', id: 'tab-face' });
+          setFocusedTarget({ zone: 'profileModal', id: 'color_0' });
           sfx?.playTileNav?.();
         }
       } else if (dir === 'DOWN') {
         if (curId === 'close') {
-          setFocusedTarget({ zone: 'miiModal', id: 'tab-face' });
+          setFocusedTarget({ zone: 'profileModal', id: 'nameInput' });
           sfx?.playTileNav?.();
         } else if (curId === 'nameInput') {
-          setFocusedTarget({ zone: 'miiModal', id: 'random' });
+          setFocusedTarget({ zone: 'profileModal', id: 'seedInput' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'seedInput') {
+          setFocusedTarget({ zone: 'profileModal', id: 'preset_0' });
+          sfx?.playTileNav?.();
+        } else if (curId.startsWith('preset_')) {
+          setFocusedTarget({ zone: 'profileModal', id: 'color_0' });
+          sfx?.playTileNav?.();
+        } else if (curId.startsWith('color_')) {
+          setFocusedTarget({ zone: 'profileModal', id: 'save' });
           sfx?.playTileNav?.();
         } else if (curId === 'random') {
-          setFocusedTarget({ zone: 'miiModal', id: 'save' });
-          sfx?.playTileNav?.();
-        } else if (miiTabs.includes(curId)) {
-          setFocusedTarget({ zone: 'miiModal', id: 'save' });
+          setFocusedTarget({ zone: 'profileModal', id: 'cancel' });
           sfx?.playTileNav?.();
         }
       } else if (dir === 'LEFT') {
         if (curId === 'save') {
-          setFocusedTarget({ zone: 'miiModal', id: 'cancel' });
+          setFocusedTarget({ zone: 'profileModal', id: 'cancel' });
           sfx?.playTileNav?.();
-        } else if (curId === 'cancel') {
-          setFocusedTarget({ zone: 'miiModal', id: 'random' });
+        } else if (curId === 'nameInput' || curId === 'seedInput') {
+          setFocusedTarget({ zone: 'profileModal', id: 'random' });
           sfx?.playTileNav?.();
-        } else if (miiTabs.includes(curId)) {
-          const tabIdx = miiTabs.indexOf(curId);
-          if (tabIdx > 0) {
-            const nextTab = miiTabs[tabIdx - 1];
-            setFocusedTarget({ zone: 'miiModal', id: nextTab });
-            const tabBtn = document.querySelector(`.mii-tab-btn.${nextTab.replace('tab-', '')}`);
-            if (tabBtn) tabBtn.click();
-            sfx?.playTabSwitch?.();
+        } else if (curId.startsWith('preset_')) {
+          const pIdx = parseInt(curId.replace('preset_', ''), 10);
+          if (pIdx > 0) {
+            setFocusedTarget({ zone: 'profileModal', id: `preset_${pIdx - 1}` });
+            sfx?.playTileNav?.();
           } else {
-            setFocusedTarget({ zone: 'miiModal', id: 'nameInput' });
+            setFocusedTarget({ zone: 'profileModal', id: 'random' });
+            sfx?.playTileNav?.();
+          }
+        } else if (curId.startsWith('color_')) {
+          const cIdx = parseInt(curId.replace('color_', ''), 10);
+          if (cIdx > 0) {
+            setFocusedTarget({ zone: 'profileModal', id: `color_${cIdx - 1}` });
             sfx?.playTileNav?.();
           }
         }
       } else if (dir === 'RIGHT') {
         if (curId === 'cancel') {
-          setFocusedTarget({ zone: 'miiModal', id: 'save' });
+          setFocusedTarget({ zone: 'profileModal', id: 'save' });
           sfx?.playTileNav?.();
-        } else if (curId === 'nameInput' || curId === 'random') {
-          setFocusedTarget({ zone: 'miiModal', id: 'tab-face' });
+        } else if (curId === 'random') {
+          setFocusedTarget({ zone: 'profileModal', id: 'nameInput' });
           sfx?.playTileNav?.();
-        } else if (miiTabs.includes(curId)) {
-          const tabIdx = miiTabs.indexOf(curId);
-          if (tabIdx < miiTabs.length - 1) {
-            const nextTab = miiTabs[tabIdx + 1];
-            setFocusedTarget({ zone: 'miiModal', id: nextTab });
-            const tabBtn = document.querySelector(`.mii-tab-btn.${nextTab.replace('tab-', '')}`);
-            if (tabBtn) tabBtn.click();
-            sfx?.playTabSwitch?.();
-          }
+        } else if (curId.startsWith('preset_')) {
+          const pIdx = parseInt(curId.replace('preset_', ''), 10);
+          setFocusedTarget({ zone: 'profileModal', id: `preset_${pIdx + 1}` });
+          sfx?.playTileNav?.();
+        } else if (curId.startsWith('color_')) {
+          const cIdx = parseInt(curId.replace('color_', ''), 10);
+          setFocusedTarget({ zone: 'profileModal', id: `color_${cIdx + 1}` });
+          sfx?.playTileNav?.();
         }
       } else if (dir === 'SELECT') {
         if (curId === 'close' || curId === 'cancel') {
-          setShowMiiCreatorModal(false);
+          setCreatorClose?.(false);
           setFocusedTarget({ zone: 'topbar', id: 'profile' });
           sfx?.playModalClose?.();
         } else if (curId === 'random') {
-          const randBtn = document.querySelector('.mii-random-btn');
+          const randBtn = document.querySelector('.avatar-random-btn');
           if (randBtn) randBtn.click();
         } else if (curId === 'save') {
-          const saveBtn = document.querySelector('.mii-save-btn');
+          const saveBtn = document.querySelector('.profile-btn-primary');
           if (saveBtn) saveBtn.click();
         } else if (curId === 'nameInput') {
-          const inputEl = document.getElementById('mii-name-input');
+          const inputEl = document.getElementById('player-name-input');
           if (inputEl) {
             inputEl.focus();
             inputEl.select();
           }
-        } else if (miiTabs.includes(curId)) {
-          const tabName = curId.replace('tab-', '');
-          const tabButtons = document.querySelectorAll('.mii-tab-btn');
-          tabButtons.forEach(btn => {
-            if (btn.textContent.toLowerCase().includes(tabName) || btn.innerHTML.includes(tabName)) {
-              btn.click();
-            }
-          });
+        } else if (curId === 'seedInput') {
+          const seedEl = document.getElementById('avatar-seed-input');
+          if (seedEl) {
+            seedEl.focus();
+            seedEl.select();
+          }
         }
       }
       return;

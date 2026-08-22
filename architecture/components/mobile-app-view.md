@@ -7,7 +7,7 @@ The `MobileAppView` component delivers a clean, focused, **5-stage progressive m
 
 ## 2. Detailed List of What It Does
 - **Streamlined Mobile Topbar**:
-  - **Profile Icon** (left): Active Mii avatar, opens Profile Switcher.
+  - **Profile Icon** (left): Active Multiavatar avatar, opens Profile Switcher.
   - **Action Button Group** (right):
     - 🔍 **Search Button**: Toggles expandable search bar with instant query filtering.
     - 🎨 **Theme Button**: Opens Theme Studio / Switcher Modal (Vanilla & DS Touch).
@@ -16,7 +16,7 @@ The `MobileAppView` component delivers a clean, focused, **5-stage progressive m
     - 📂 **Load Button**: Minimized icon-only button triggering local file picker for custom ROMs.
 
 - **Stage 1: Choose Profile ("Who's Playing?")**:
-  - Full-screen Mii avatar profile chooser with active badges, "+ Add Player", and avatar editor triggers.
+  - Full-screen Multiavatar profile chooser with active badges, "+ Add Player", and avatar editor triggers.
   - Seamlessly transitions to Stage 2 once a profile is active.
 
 - **Stage 2: Choose System (Console SVG Gallery)**:

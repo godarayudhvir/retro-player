@@ -25,7 +25,7 @@ architecture/
 │   ├── metadata-scraper.md # Online 3D box art & game metadata scraper with IndexedDB caching (`metadataScraper.js`, `useMetadataScraper.js`)
 │   ├── audio-sfx.md        # Pure Web Audio API UI sound effects synthesizer (`useWebAudioSfx.js`)
 │   ├── bgm-engine.md       # Background Music (BGM) playback, track discovery & smart in-game pause (`useBgmEngine.js`)
-│   ├── user-profiles.md    # Multi-User profiles & Nintendo Mii avatar studio system (`useProfileManager.js`, `MiiAvatar.jsx`)
+│   ├── user-profiles.md    # Multi-User profiles & Multiavatar studio system (`useProfileManager.js`, `MultiAvatar.jsx`, `ProfileCreatorModal.jsx`)
 │   ├── theme-engine.md     # Theme engine, Vanilla console styling & CSS custom properties (`useThemeEngine.js`, `index.css`)
 │   ├── playtime-favorites.md # Smart Collections (Favorites & Recents) & Playtime analytics (`usePlaytimeAndFavorites.js`)
 │   ├── console-switcher.md # Console system switching, smart collections filtering & tab ribbon (`SystemRibbon.jsx`)

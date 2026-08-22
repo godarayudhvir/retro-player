@@ -6,11 +6,10 @@ import GameDetailModal from './components/GameDetailModal';
 import LoadRomModal from './components/LoadRomModal';
 import AboutInfoModal from './components/AboutInfoModal';
 import DropzoneOverlay from './components/DropzoneOverlay';
-import ConsoleHud from './components/ConsoleHud';
 import OnScreenKeyboard from './components/OnScreenKeyboard';
 import EmulatorModal from './components/EmulatorModal';
 import ProfileSelectModal from './components/ProfileSelectModal';
-import MiiCreatorModal from './components/MiiCreatorModal';
+import ProfileCreatorModal from './components/ProfileCreatorModal';
 import DemoWelcomeModal from './components/DemoWelcomeModal';
 import OnboardingScreen from './components/OnboardingScreen';
 import ScraperModal from './components/ScraperModal';
@@ -34,7 +33,7 @@ import { BatteryWarning, Zap, X } from 'lucide-react';
 
 /**
  * Root Application Orchestrator for Retro Player.
- * Coordinates modular UI components, profiles, Mii avatars, BGM audio, themes, PWA, and emulation.
+ * Coordinates modular UI components, profiles, Multiavatar avatars, BGM audio, themes, PWA, and emulation.
  */
 export default function App() {
   const [activeGame, setActiveGame] = useState(null);
@@ -46,7 +45,7 @@ export default function App() {
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [showVirtualKeyboard, setShowVirtualKeyboard] = useState(false);
   const [showProfileSelectModal, setShowProfileSelectModal] = useState(false);
-  const [showMiiCreatorModal, setShowMiiCreatorModal] = useState(false);
+  const [showProfileCreatorModal, setShowProfileCreatorModal] = useState(false);
   const [editingProfile, setEditingProfile] = useState(null);
   const [editingMetadataGame, setEditingMetadataGame] = useState(null);
   const [oskPos, setOskPos] = useState({ row: 1, col: 0 });
@@ -69,7 +68,7 @@ export default function App() {
 
   const searchInputRef = useRef(null);
 
-  // Hook 1: Profile Manager & Mii Avatars
+  // Hook 1: Profile Manager & Multiavatar Avatars
   const {
     profiles,
     activeProfile,
@@ -189,8 +188,8 @@ export default function App() {
     setShowThemeModal,
     showProfileSelectModal,
     setShowProfileSelectModal,
-    showMiiCreatorModal,
-    setShowMiiCreatorModal,
+    showProfileCreatorModal,
+    setShowProfileCreatorModal,
     showVirtualKeyboard,
     setShowVirtualKeyboard,
     oskPos,
@@ -233,7 +232,7 @@ export default function App() {
     onSelectProfile: switchProfile,
     onCreateNewProfile: () => {
       setEditingProfile(null);
-      setShowMiiCreatorModal(true);
+      setShowProfileCreatorModal(true);
     },
     onPlayGame: (game) => {
       recordGameLaunch(game);
@@ -302,11 +301,11 @@ export default function App() {
           onSelectProfile={switchProfile}
           onCreateNewProfile={() => {
             setEditingProfile(null);
-            setShowMiiCreatorModal(true);
+            setShowProfileCreatorModal(true);
           }}
           onEditProfile={(prof) => {
             setEditingProfile(prof);
-            setShowMiiCreatorModal(true);
+            setShowProfileCreatorModal(true);
           }}
           onDeleteProfile={deleteProfile}
           favorites={favorites}
@@ -407,17 +406,6 @@ export default function App() {
             onScrapeGame={scraper.scrapeSingleGame}
             hasSaveData={hasSaveData}
             scraper={scraper}
-          />
-
-          {/* Bottom Controller HUD */}
-          <ConsoleHud
-            gamepadConnected={gamepadConnected}
-            activeSystem={activeSystem}
-            systems={systems}
-            setActiveSystem={setActiveSystem}
-            focusedTarget={focusedTarget}
-            setFocusedTarget={setFocusedTarget}
-            sfx={sfx}
           />
         </>
       )}
@@ -538,12 +526,12 @@ export default function App() {
         onCreateNewProfile={() => {
           setEditingProfile(null);
           setShowProfileSelectModal(false);
-          setShowMiiCreatorModal(true);
+          setShowProfileCreatorModal(true);
         }}
         onEditProfile={(profile) => {
           setEditingProfile(profile);
           setShowProfileSelectModal(false);
-          setShowMiiCreatorModal(true);
+          setShowProfileCreatorModal(true);
         }}
         onDeleteProfile={(id) => {
           deleteProfile(id);
@@ -556,9 +544,9 @@ export default function App() {
         sfx={sfx}
       />
 
-      {/* Nintendo Mii Profile & Avatar Studio Wizard Modal */}
-      <MiiCreatorModal
-        isOpen={showMiiCreatorModal}
+      {/* Multiavatar Profile Creator & Studio Wizard Modal */}
+      <ProfileCreatorModal
+        isOpen={showProfileCreatorModal}
         initialProfile={editingProfile}
         focusedTarget={focusedTarget}
         setFocusedTarget={setFocusedTarget}
@@ -566,13 +554,13 @@ export default function App() {
           if (editingProfile) {
             updateProfile(editingProfile.id, data);
           } else {
-            createProfile(data.name, data.miiData, data.favoriteColor);
+            createProfile(data.name, data.avatarSeed, data.favoriteColor);
           }
-          setShowMiiCreatorModal(false);
+          setShowProfileCreatorModal(false);
           setFocusedTarget({ zone: 'topbar', id: 'profile' });
         }}
         onClose={() => {
-          setShowMiiCreatorModal(false);
+          setShowProfileCreatorModal(false);
           setEditingProfile(null);
           setFocusedTarget({ zone: 'topbar', id: 'profile' });
           sfx.playModalClose();
@@ -628,11 +616,11 @@ export default function App() {
           isOpen={showOnboarding}
           onComplete={() => setShowOnboarding(false)}
           activeProfile={activeProfile}
-          onSaveCreatedProfile={(name, miiData, favoriteColor) => {
+          onSaveCreatedProfile={(name, avatarSeed, favoriteColor) => {
             if (activeProfile?.id) {
-              updateProfile(activeProfile.id, { name, miiData, favoriteColor });
+              updateProfile(activeProfile.id, { name, avatarSeed, favoriteColor });
             } else {
-              createProfile(name, miiData, favoriteColor);
+              createProfile(name, avatarSeed, favoriteColor);
             }
           }}
           sfx={sfx}
@@ -663,7 +651,7 @@ export default function App() {
               gamepadStatus.dismissBatteryAlert();
               sfx?.playModalClose?.();
             }}
-            title="Dismiss Battery Alert (B / Esc)"
+            title="Dismiss Battery Alert"
             aria-label="Dismiss Battery Alert"
           >
             <X size={18} />

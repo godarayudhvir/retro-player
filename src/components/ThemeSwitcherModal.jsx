@@ -233,16 +233,6 @@ export default function ThemeSwitcherModal({
             );
           })}
         </div>
-
-        {/* Modal Footer Controls Hint (Desktop Only) */}
-        <div className="theme-switcher-footer desktop-only">
-          <div className="theme-nav-hints">
-            <span className="theme-nav-pill"><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> Navigate</span>
-            <span className="theme-nav-pill"><kbd>ENTER</kbd> Apply Theme</span>
-            <span className="theme-nav-pill"><kbd>TAB</kbd> Toggle Light/Dark</span>
-            <span className="theme-nav-pill"><kbd>ESC</kbd> Close</span>
-          </div>
-        </div>
       </div>
     </div>
   );

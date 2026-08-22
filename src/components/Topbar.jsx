@@ -19,11 +19,11 @@ import {
   BatteryWarning,
   Zap
 } from 'lucide-react';
-import MiiAvatar from './MiiAvatar';
+import MultiAvatar from './MultiAvatar';
 import { resolveAssetPath } from '../utils/assetPath';
 
 /**
- * Topbar console header with active Mii profile avatar, BGM music player, status indicators,
+ * Topbar console header with active profile avatar, BGM music player, status indicators,
  * PWA install button, search input, custom ROM loader, and digital clock.
  */
 export default function Topbar({
@@ -47,8 +47,6 @@ export default function Topbar({
   themeEngine,
   scraper
 }) {
-  const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent || navigator.platform);
-
   // Helper to render accurate battery icon and theme styling
   const renderBatteryIcon = () => {
     if (!gamepadBattery || !gamepadBattery.hasBatteryInfo) return null;
@@ -106,11 +104,10 @@ export default function Topbar({
           title={`Profile: ${activeProfile?.name || 'Player 1'} (Click to switch)`}
           aria-label="Switch User Profile"
         >
-          {activeProfile?.miiData ? (
-            <MiiAvatar miiData={activeProfile.miiData} size={36} />
-          ) : (
-            <Gamepad2 size={24} color="#ef4444" />
-          )}
+          <MultiAvatar 
+            seed={activeProfile?.avatarSeed || activeProfile?.name || 'Player 1'} 
+            size={36} 
+          />
         </div>
         <span 
           className={`user-tag profile-name-tag ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'profile' ? 'gamepad-focused' : ''}`}
@@ -245,7 +242,7 @@ export default function Topbar({
                 sfx?.playThemeSwitch?.();
               }
             }}
-            title={`Theme Studio: ${themeEngine.currentThemeMeta.name} (${themeEngine.colorMode === 'dark' ? 'Dark' : 'Light'}) • Click or Press 'T'`}
+            title={`Theme Studio: ${themeEngine.currentThemeMeta.name} (${themeEngine.colorMode === 'dark' ? 'Dark' : 'Light'})`}
             aria-label={`Theme Studio: Current ${themeEngine.currentThemeMeta.name}`}
           >
             {themeEngine.currentThemeMeta.icon && (themeEngine.currentThemeMeta.icon.endsWith('.svg') || themeEngine.currentThemeMeta.icon.includes('/')) ? (
@@ -294,9 +291,6 @@ export default function Topbar({
               color: 'inherit'
             }}
           />
-          <kbd className="lr-badge pill-badge" style={{ fontSize: '0.7rem', padding: '2px 6px', pointerEvents: 'none', userSelect: 'none', background: gamepadConnected ? '#f59e0b' : undefined, color: gamepadConnected ? '#ffffff' : undefined }}>
-            {gamepadConnected ? 'Y' : (isMac ? '⌘K' : 'Ctrl+K')}
-          </kbd>
         </div>
 
         {/* PWA Standalone App Install Button */}

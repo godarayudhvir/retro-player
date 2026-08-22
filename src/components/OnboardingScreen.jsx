@@ -7,35 +7,29 @@ import {
   ChevronRight, 
   ArrowLeft, 
   User, 
-  Dices,
-  Keyboard, 
+  Dices, 
   Play, 
-  LogOut,
-  MousePointer,
-  Check,
-  Smartphone,
-  Zap,
-  Monitor,
-  Compass,
-  Copy,
-  ExternalLink
+  Check, 
+  Smartphone, 
+  Zap, 
+  Monitor, 
+  Compass, 
+  Copy, 
+  ExternalLink 
 } from 'lucide-react';
-import MiiAvatar from './MiiAvatar';
-import { INITIAL_MII_DATA } from '../hooks/useProfileManager';
+import MultiAvatar from './MultiAvatar';
+import { AVATAR_PRESETS, RANDOM_SEEDS } from '../hooks/useProfileManager';
 
 const isApplePlatform = typeof navigator !== 'undefined' && (/Macintosh|iPhone|iPad|iPod/i.test(navigator.userAgent || ''));
 const isSafariBrowser = typeof navigator !== 'undefined' && (/Safari/i.test(navigator.userAgent || '') && !/Chrome|Chromium|CriOS|FxiOS|Edg/i.test(navigator.userAgent || ''));
 
-const SKIN_PALETTE = ['#fed7aa', '#ffd1a4', '#fde047', '#fef08a', '#fbcfe8', '#d6a374', '#a16207', '#78350f'];
-const HAIR_PALETTE = ['#451a03', '#1e293b', '#78350f', '#d97706', '#f59e0b', '#dc2626', '#3b82f6', '#10b981', '#a855f7', '#64748b'];
-const SHIRT_PALETTE = ['#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#6366f1', '#a855f7', '#ec4899', '#334155'];
+const COLOR_PALETTE = ['#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#6366f1', '#a855f7', '#ec4899', '#334155'];
 
 /**
  * Modern Full-Screen Responsive Onboarding Experience for Desktop & Mobile.
- * Streamlined 3-Step Flow:
+ * Streamlined 2-Step Flow:
  * Step 1: Selling the Outcome / Value Proposition
- * Step 2: Pokémon-Style Interactive Player Passport & Character Creation
- * Step 3: Controller Exit Combos (L3+R3 / Select+Start) & Essential Shortcuts
+ * Step 2: Multiavatar Player Passport & Profile Customization
  */
 export default function OnboardingScreen({
   isOpen,
@@ -45,9 +39,9 @@ export default function OnboardingScreen({
   sfx,
   pwa
 }) {
-  const [currentStep, setCurrentStep] = useState(0); // 0: Value, 1: Character Creation, 2: Tips
+  const [currentStep, setCurrentStep] = useState(0); // 0: Value, 1: Character Creation
   const [copiedLink, setCopiedLink] = useState(false);
-  const totalSteps = 3;
+  const totalSteps = 2;
 
   // 1-Click Robust Copy Current URL (Supports HTTP IP / Local Network & HTTPS)
   const handleCopySafariLink = async () => {
@@ -97,33 +91,18 @@ export default function OnboardingScreen({
     }
   };
 
-  // Character Creation State (Pokémon-Style Player Setup)
-  const [playerName, setPlayerName] = useState(() => activeProfile?.name || 'Red');
-  const [customMii, setCustomMii] = useState(() => activeProfile?.miiData ? { ...activeProfile.miiData } : { ...INITIAL_MII_DATA, hairStyle: 1, favoriteColor: '#ef4444' });
-  const [activeCustomTab, setActiveCustomTab] = useState('hair'); // 'hair', 'skin', 'eyes', 'shirt'
+  // Multiavatar Profile Setup State
+  const [playerName, setPlayerName] = useState(() => activeProfile?.name || 'Player');
+  const [avatarSeed, setAvatarSeed] = useState(() => activeProfile?.avatarSeed || activeProfile?.name || 'RetroGamer');
+  const [favoriteColor, setFavoriteColor] = useState(() => activeProfile?.favoriteColor || '#ef4444');
 
   // Randomize Avatar
   const handleRandomizeAvatar = () => {
-    const randomSkin = SKIN_PALETTE[Math.floor(Math.random() * SKIN_PALETTE.length)];
-    const randomHair = HAIR_PALETTE[Math.floor(Math.random() * HAIR_PALETTE.length)];
-    const randomShirt = SHIRT_PALETTE[Math.floor(Math.random() * SHIRT_PALETTE.length)];
-
-    setCustomMii({
-      gender: Math.random() > 0.5 ? 'male' : 'female',
-      faceShape: Math.floor(Math.random() * 4),
-      skinColor: randomSkin,
-      hairStyle: Math.floor(Math.random() * 6),
-      hairColor: randomHair,
-      eyeType: Math.floor(Math.random() * 4),
-      eyeColor: '#1e293b',
-      eyebrowType: Math.floor(Math.random() * 3),
-      noseType: Math.floor(Math.random() * 3),
-      mouthType: Math.floor(Math.random() * 4),
-      glasses: 0,
-      mustache: 0,
-      favoriteColor: randomShirt
-    });
-    sfx?.playDiceRoll?.();
+    const randomSeed = RANDOM_SEEDS[Math.floor(Math.random() * RANDOM_SEEDS.length)] + Math.floor(Math.random() * 999);
+    const randomColor = COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)];
+    setAvatarSeed(randomSeed);
+    setFavoriteColor(randomColor);
+    sfx?.playFavoriteToggle?.(true);
   };
 
   const handleNext = () => {
@@ -150,7 +129,9 @@ export default function OnboardingScreen({
 
     // Save customized profile
     if (onSaveCreatedProfile) {
-      onSaveCreatedProfile(playerName.trim() || 'Player', customMii, customMii.favoriteColor);
+      const finalName = playerName.trim() || 'Player';
+      const finalSeed = avatarSeed.trim() || finalName;
+      onSaveCreatedProfile(finalName, finalSeed, favoriteColor);
     }
 
     sfx?.playGameLaunch?.();
@@ -171,7 +152,7 @@ export default function OnboardingScreen({
         <button
           className="onboarding-skip-btn"
           onClick={handleFinish}
-          title="Skip Onboarding & Explore Library (ESC / B)"
+          title="Skip Onboarding & Explore Library"
         >
           <span>Skip to Games</span>
           <ChevronRight size={16} />
@@ -185,181 +166,148 @@ export default function OnboardingScreen({
             ========================================================= */}
         {currentStep === 0 && (
           <div className="onboarding-slide animate-slide-up">
-            <div className="onboarding-hero-icon-cluster">
-              <div className="onboarding-hero-bubble bubble-primary">
-                <Gamepad2 size={42} color="#ffffff" />
-              </div>
-              <div className="onboarding-hero-bubble bubble-accent">
-                <Sparkles size={24} color="#ffffff" />
-              </div>
-            </div>
-
             <h1 className="onboarding-slide-title">
-              Zero Install. Instant Play. <br />
-              <span className="onboarding-text-gradient">Pure Retro Gaming in Your Browser.</span>
+              Play 12 Classic Consoles in Your Browser
             </h1>
 
             <p className="onboarding-slide-desc">
-              Experience authentic console emulation running 100% locally on your device via WebAssembly with fluid hardware-accelerated rendering and low controller input latency.
+              High-performance retro gaming running 100% locally in your browser sandbox with low input latency, instant battery saves, and USB/Bluetooth gamepad support.
             </p>
 
-            <div className="onboarding-features-grid">
-              <div className="onboarding-feature-pill">
-                <div className="onboarding-feat-icon-wrap" style={{ background: 'rgba(59, 130, 246, 0.12)', color: '#2563eb' }}>
-                  <Gamepad2 size={22} />
+            {/* 3 High-Impact Spacious Feature Cards */}
+            <div className="onboarding-cards-stack">
+              {/* Card 1: 12 Classic Systems & Embedded Platform Strip */}
+              <div className="onboarding-showcase-card">
+                <div className="onboarding-card-header">
+                  <div className="onboarding-card-icon-wrap" style={{ background: 'rgba(59, 130, 246, 0.12)', color: '#2563eb' }}>
+                    <Gamepad2 size={24} />
+                  </div>
+                  <div className="onboarding-card-heading">
+                    <strong>12 Handheld & Home Consoles</strong>
+                    <span>WASM emulation cores for Game Boy, SNES, N64, PS1, Sega, NDS & arcade classics.</span>
+                  </div>
                 </div>
-                <div className="onboarding-feat-text">
-                  <strong>12 Classic Platforms</strong>
-                  <span>Game Boy, SNES, N64, PS1, Sega, NDS & arcade.</span>
+                <div className="onboarding-card-tags-row">
+                  <span className="system-pill" style={{ '--accent': '#7c3aed' }}>GBA</span>
+                  <span className="system-pill" style={{ '--accent': '#ef4444' }}>SNES</span>
+                  <span className="system-pill" style={{ '--accent': '#2563eb' }}>N64</span>
+                  <span className="system-pill" style={{ '--accent': '#0284c7' }}>PS1</span>
+                  <span className="system-pill" style={{ '--accent': '#06b6d4' }}>NDS</span>
+                  <span className="system-pill" style={{ '--accent': '#10b981' }}>GENESIS</span>
+                  <span className="system-pill" style={{ '--accent': '#dc2626' }}>NES</span>
+                  <span className="system-pill" style={{ '--accent': '#f59e0b' }}>GBC</span>
+                  <span className="system-pill" style={{ '--accent': '#ec4899' }}>ARCADE</span>
                 </div>
               </div>
 
-              <div className="onboarding-feature-pill">
-                <div className="onboarding-feat-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#059669' }}>
-                  <ShieldCheck size={22} />
-                </div>
-                <div className="onboarding-feat-text">
-                  <strong>100% Private Custom ROMs</strong>
-                  <span>Drag & drop game dumps. ROMs run in local RAM.</span>
-                </div>
-              </div>
-
-              <div className="onboarding-feature-pill">
-                <div className="onboarding-feat-icon-wrap" style={{ background: 'rgba(6, 182, 212, 0.12)', color: '#0891b2' }}>
-                  <Zap size={22} />
-                </div>
-                <div className="onboarding-feat-text">
-                  <strong>Local WASM Engine</strong>
-                  <span>Client-side execution with low controller input latency.</span>
+              {/* Card 2: SRAM Battery Saves & Profiles */}
+              <div className="onboarding-showcase-card">
+                <div className="onboarding-card-header">
+                  <div className="onboarding-card-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#059669' }}>
+                    <ShieldCheck size={24} />
+                  </div>
+                  <div className="onboarding-card-heading">
+                    <strong>100% Private Client-Side Saves & Profiles</strong>
+                    <span>Real in-game battery RAM (.sav), quick save states, playtime analytics, and Multiavatar profiles.</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Platform-Aware PWA / Safari Recommendation Card */}
-              {isApplePlatform && !isSafariBrowser && !pwa?.isStandalone ? (
-                <button
-                  type="button"
-                  className={`onboarding-feature-pill onboarding-pwa-card is-safari-tip ${copiedLink ? 'is-copied' : ''}`}
-                  onClick={handleCopySafariLink}
-                  title="Click to copy current URL to open in Safari"
-                  aria-label="Copy URL for Safari"
-                >
-                  <div 
-                    className="onboarding-feat-icon-wrap" 
-                    style={{ 
-                      background: copiedLink ? 'rgba(16, 185, 129, 0.12)' : 'rgba(14, 165, 233, 0.12)', 
-                      color: copiedLink ? '#059669' : '#0284c7' 
-                    }}
-                  >
-                    {copiedLink ? <Check size={22} className="animate-scale-in" /> : <Compass size={22} />}
+              {/* Card 3: Gamepad & Audio */}
+              <div className="onboarding-showcase-card">
+                <div className="onboarding-card-header">
+                  <div className="onboarding-card-icon-wrap" style={{ background: 'rgba(168, 85, 247, 0.12)', color: '#9333ea' }}>
+                    <Zap size={24} />
                   </div>
-                  <div className="onboarding-feat-text">
-                    <div className="onboarding-pwa-title-row">
-                      <strong className="onboarding-pwa-heading">
-                        {copiedLink ? '✓ Link Copied!' : 'Open in Safari'}
-                      </strong>
-                      <span className={`onboarding-safari-badge ${copiedLink ? 'badge-copied' : ''}`}>
-                        {copiedLink ? 'Ready to Paste' : 'Recommended'}
-                      </span>
-                    </div>
-                    <span>
-                      {copiedLink 
-                        ? (/iPhone|iPad|iPod/i.test(navigator.userAgent || '')
-                            ? 'Paste in Safari & tap Share (📤) → Add to Home Screen.' 
-                            : 'Paste link in Safari & click File → Add to Dock.')
-                        : 'Click to copy URL & paste in Safari for gamepad support.'}
-                    </span>
+                  <div className="onboarding-card-heading">
+                    <strong>Universal Gamepad Navigation & Web Audio</strong>
+                    <span>Plug-and-play controller spatial navigation, synthesized acoustic SFX, and ambient BGM jukebox.</span>
                   </div>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className={`onboarding-feature-pill onboarding-pwa-card ${pwa?.isStandalone ? 'is-standalone' : 'is-actionable'}`}
-                  onClick={() => {
-                    if (pwa?.promptInstall && !pwa?.isStandalone) {
-                      pwa.promptInstall();
-                    }
-                    sfx?.playThemeSwitch?.();
-                  }}
-                  disabled={pwa?.isStandalone}
-                  title={
-                    pwa?.isStandalone 
-                      ? 'Retro Player is running in standalone app mode' 
-                      : isSafariBrowser 
-                        ? (/iPhone|iPad/i.test(navigator.userAgent) ? 'Safari: Tap Share → Add to Home Screen' : 'Safari: Click File → Add to Dock')
-                        : 'Click to install Retro Player to home screen or desktop'
-                  }
-                  aria-label={pwa?.isStandalone ? 'App Installed and running standalone' : 'Install Retro Player Standalone App'}
-                >
-                  <div 
-                    className="onboarding-feat-icon-wrap" 
-                    style={{ 
-                      background: pwa?.isStandalone 
-                        ? 'rgba(16, 185, 129, 0.12)' 
-                        : isSafariBrowser 
-                          ? 'rgba(14, 165, 233, 0.12)' 
-                          : 'rgba(139, 92, 246, 0.12)', 
-                      color: pwa?.isStandalone 
-                        ? '#059669' 
-                        : isSafariBrowser 
-                          ? '#0284c7' 
-                          : '#7c3aed' 
-                    }}
-                  >
-                    {pwa?.isStandalone ? (
-                      <Check size={22} />
-                    ) : isSafariBrowser ? (
-                      <Compass size={22} />
-                    ) : (
-                      <Download size={22} />
-                    )}
-                  </div>
-                  <div className="onboarding-feat-text">
-                    <div className="onboarding-pwa-title-row">
-                      <strong className="onboarding-pwa-heading">
-                        {pwa?.isStandalone 
-                          ? 'Installed & Offline' 
-                          : isSafariBrowser 
-                            ? 'Safari Web App' 
-                            : 'Standalone App'}
-                      </strong>
-                      {isSafariBrowser && !pwa?.isStandalone && (
-                        <span className="onboarding-safari-badge">
-                          Native
-                        </span>
-                      )}
-                    </div>
-                    <span>
-                      {pwa?.isStandalone 
-                        ? 'Running standalone with local cache & gamepad.' 
-                        : isSafariBrowser
-                          ? (/iPhone|iPad/i.test(navigator.userAgent) 
-                              ? 'Tap Share → Add to Home Screen for fullscreen.' 
-                              : 'Click File → Add to Dock for full gamepad support.')
-                          : 'Add to home screen or desktop for offline play.'}
-                    </span>
-                  </div>
-                </button>
-              )}
+                </div>
+              </div>
             </div>
+
+            {/* Standalone Install & Platform Guidance Cards (Only rendered if relevant) */}
+            {(pwa?.canInstall || (isSafariBrowser && isApplePlatform)) && (
+              <div className="onboarding-pwa-cta-container">
+                {pwa?.canInstall ? (
+                  <button
+                    type="button"
+                    className="onboarding-install-card-btn"
+                    onClick={() => {
+                      pwa.promptInstall();
+                      sfx?.playThemeSwitch?.();
+                    }}
+                  >
+                    <div className="onboarding-install-icon">
+                      <Download size={24} />
+                    </div>
+                    <div className="onboarding-install-text">
+                      <strong>Install Standalone App</strong>
+                      <span>Enjoy full-screen offline gaming with zero browser address bar distractions.</span>
+                    </div>
+                  </button>
+                ) : (
+                  <div className="onboarding-apple-guidance-card animate-fade-in">
+                    <div className="apple-guidance-header">
+                      <div className="apple-guidance-badge">
+                        <Compass size={18} />
+                        <span>SAFARI RECOMMENDATION</span>
+                      </div>
+                      <span className="apple-metal-badge">⚡ METAL HW ACCEL</span>
+                    </div>
+
+                    <p className="apple-guidance-text">
+                      For optimal <strong>W3C Gamepad API</strong> support and zero-latency audio on Apple devices, add Retro Player to your Home Screen or Dock:
+                    </p>
+
+                    <div className="apple-steps-grid">
+                      <div className="apple-step-item">
+                        <Smartphone size={20} className="apple-step-icon" />
+                        <div>
+                          <strong>iPhone & iPad</strong>
+                          <span>Tap <em>Share</em> (<ExternalLink size={12} style={{ display: 'inline', verticalAlign: 'middle' }} />) &rarr; <em>&quot;Add to Home Screen&quot;</em></span>
+                        </div>
+                      </div>
+
+                      <div className="apple-step-item">
+                        <Monitor size={20} className="apple-step-icon" />
+                        <div>
+                          <strong>macOS Sonoma & Newer</strong>
+                          <span>Click <em>File</em> &rarr; <em>&quot;Add to Dock...&quot;</em> for standalone app mode</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="apple-copy-link-row">
+                      <button
+                        type="button"
+                        className={`apple-copy-btn ${copiedLink ? 'is-copied' : ''}`}
+                        onClick={handleCopySafariLink}
+                        title="Copy URL to paste in Safari"
+                      >
+                        {copiedLink ? <Check size={16} /> : <Copy size={16} />}
+                        <span>{copiedLink ? 'Link Copied to Clipboard!' : 'Copy Link for Safari'}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
         {/* =========================================================
-            SLIDE 1: POKÉMON-STYLE INTERACTIVE PLAYER PASSPORT & MII
+            SLIDE 1: MULTIAVATAR PLAYER PASSPORT & CUSTOMIZATION
             ========================================================= */}
         {currentStep === 1 && (
           <div className="onboarding-slide animate-slide-up">
-            <div className="onboarding-step-badge">
-              <User size={14} />
-              <span>STEP 2 OF 3: PLAYER PASSPORT</span>
-            </div>
-
             <h1 className="onboarding-slide-title">
               Create Your Player Character
             </h1>
 
             <p className="onboarding-slide-desc">
-              Set up your profile identity and customize your personal Nintendo Mii avatar.
+              Set up your profile identity and customize your avatar with Multiavatar.
             </p>
 
             {/* Interactive Player Passport Card */}
@@ -367,10 +315,10 @@ export default function OnboardingScreen({
               {/* Left Column: Live Avatar Preview */}
               <div className="onboarding-passport-avatar-side">
                 <div 
-                  className="onboarding-passport-mii-circle"
-                  style={{ borderColor: customMii.favoriteColor || '#ef4444' }}
+                  className="onboarding-passport-avatar-circle"
+                  style={{ borderColor: favoriteColor, boxShadow: `0 8px 24px ${favoriteColor}33` }}
                 >
-                  <MiiAvatar miiData={customMii} size={110} />
+                  <MultiAvatar seed={avatarSeed || playerName || 'Player'} size={110} />
                 </div>
                 <button
                   type="button"
@@ -392,172 +340,61 @@ export default function OnboardingScreen({
                     type="text"
                     className="onboarding-name-input"
                     value={playerName}
-                    onChange={(e) => setPlayerName(e.target.value)}
+                    onChange={(e) => {
+                      setPlayerName(e.target.value);
+                      if (!avatarSeed || avatarSeed === playerName) {
+                        setAvatarSeed(e.target.value);
+                      }
+                    }}
                     placeholder="Enter your name..."
                     maxLength={16}
                   />
                 </div>
 
-                {/* Quick Style Category Tabs */}
-                <div className="onboarding-mii-subtabs">
-                  <button
-                    type="button"
-                    className={`onboarding-subtab ${activeCustomTab === 'hair' ? 'is-active' : ''}`}
-                    onClick={() => setActiveCustomTab('hair')}
-                  >
-                    Hairstyle
-                  </button>
-                  <button
-                    type="button"
-                    className={`onboarding-subtab ${activeCustomTab === 'skin' ? 'is-active' : ''}`}
-                    onClick={() => setActiveCustomTab('skin')}
-                  >
-                    Skin
-                  </button>
-                  <button
-                    type="button"
-                    className={`onboarding-subtab ${activeCustomTab === 'eyes' ? 'is-active' : ''}`}
-                    onClick={() => setActiveCustomTab('eyes')}
-                  >
-                    Face
-                  </button>
-                  <button
-                    type="button"
-                    className={`onboarding-subtab ${activeCustomTab === 'shirt' ? 'is-active' : ''}`}
-                    onClick={() => setActiveCustomTab('shirt')}
-                  >
-                    Shirt Color
-                  </button>
-                </div>
-
-                {/* Subtab Dynamic Option Palette */}
-                <div className="onboarding-mii-options-area">
-                  {activeCustomTab === 'hair' && (
-                    <div className="onboarding-palette-row">
-                      {[0, 1, 2, 3, 4, 5].map((styleIdx) => (
+                {/* Avatar Seed Presets */}
+                <div className="onboarding-form-group">
+                  <label className="onboarding-form-label">Avatar Presets</label>
+                  <div className="avatar-presets-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))' }}>
+                    {AVATAR_PRESETS.slice(0, 6).map((preset) => {
+                      const isSelected = avatarSeed === preset.avatarSeed;
+                      return (
                         <button
-                          key={styleIdx}
+                          key={preset.id}
                           type="button"
-                          className={`onboarding-opt-chip ${customMii.hairStyle === styleIdx ? 'is-active' : ''}`}
+                          className={`avatar-preset-chip ${isSelected ? 'is-active' : ''}`}
                           onClick={() => {
-                            setCustomMii(m => ({ ...m, hairStyle: styleIdx }));
+                            setAvatarSeed(preset.avatarSeed);
+                            setFavoriteColor(preset.favoriteColor);
                             sfx?.playTileNav?.();
                           }}
                         >
-                          Style {styleIdx + 1}
+                          <MultiAvatar seed={preset.avatarSeed} size={24} />
+                          <span className="preset-name">{preset.name}</span>
                         </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {activeCustomTab === 'skin' && (
-                    <div className="onboarding-palette-colors">
-                      {SKIN_PALETTE.map((col) => (
-                        <button
-                          key={col}
-                          type="button"
-                          className={`onboarding-col-circle ${customMii.skinColor === col ? 'is-active' : ''}`}
-                          style={{ background: col }}
-                          onClick={() => {
-                            setCustomMii(m => ({ ...m, skinColor: col }));
-                            sfx?.playTileNav?.();
-                          }}
-                        />
-                      ))}
-                    </div>
-                  )}
-
-                  {activeCustomTab === 'eyes' && (
-                    <div className="onboarding-palette-row">
-                      {[0, 1, 2, 3].map((eyeIdx) => (
-                        <button
-                          key={eyeIdx}
-                          type="button"
-                          className={`onboarding-opt-chip ${customMii.eyeType === eyeIdx ? 'is-active' : ''}`}
-                          onClick={() => {
-                            setCustomMii(m => ({ ...m, eyeType: eyeIdx }));
-                            sfx?.playTileNav?.();
-                          }}
-                        >
-                          Eyes {eyeIdx + 1}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {activeCustomTab === 'shirt' && (
-                    <div className="onboarding-palette-colors">
-                      {SHIRT_PALETTE.map((col) => (
-                        <button
-                          key={col}
-                          type="button"
-                          className={`onboarding-col-circle ${customMii.favoriteColor === col ? 'is-active' : ''}`}
-                          style={{ background: col }}
-                          onClick={() => {
-                            setCustomMii(m => ({ ...m, favoriteColor: col }));
-                            sfx?.playTileNav?.();
-                          }}
-                        />
-                      ))}
-                    </div>
-                  )}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        )}
 
-        {/* =========================================================
-            SLIDE 2: CONTROLLER EXIT COMBOS & PRO-TIPS
-            ========================================================= */}
-        {currentStep === 2 && (
-          <div className="onboarding-slide animate-slide-up">
-            <div className="onboarding-step-badge">
-              <Sparkles size={14} />
-              <span>STEP 3 OF 3: CONTROLS & EXIT COMBOS</span>
-            </div>
-
-            <h1 className="onboarding-slide-title">
-              You&apos;re Ready to Play! 🚀
-            </h1>
-
-            <p className="onboarding-slide-desc">
-              Master these essential shortcuts to control games and return to your library effortlessly:
-            </p>
-
-            <div className="onboarding-tips-list">
-              {/* Highlighted Controller Quick Exit Banner */}
-              <div className="onboarding-tip-row is-featured-tip">
-                <div className="onboarding-tip-icon" style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444' }}>
-                  <LogOut size={24} />
-                </div>
-                <div className="onboarding-tip-content">
-                  <strong>🎮 Controller Quick Exit</strong>
-                  <p>
-                    Press <strong>L3 + R3</strong> (Click Both Thumbsticks) or <strong>Select + Start</strong> at the same time to instantly exit any running game and return to the library!
-                  </p>
-                </div>
-              </div>
-
-              {/* Touchpad Pointer & NDS Stylus */}
-              <div className="onboarding-tip-row">
-                <div className="onboarding-tip-icon" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#2563eb' }}>
-                  <MousePointer size={22} />
-                </div>
-                <div className="onboarding-tip-content">
-                  <strong>DualShock 4 Touchpad Pointer</strong>
-                  <p>The PS4/PS5 touchpad acts as an on-screen mouse pointer for browsing and serves as the touchscreen stylus in Nintendo DS games.</p>
-                </div>
-              </div>
-
-              {/* Universal Keyboard Shortcuts */}
-              <div className="onboarding-tip-row">
-                <div className="onboarding-tip-icon" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#059669' }}>
-                  <Keyboard size={22} />
-                </div>
-                <div className="onboarding-tip-content">
-                  <strong>Universal Keyboard Shortcuts</strong>
-                  <p>Use <strong>Arrow Keys / WASD</strong> to navigate, <strong>Enter</strong> to launch, <strong>ESC</strong> to exit games, <strong>⌘K</strong> for quick search, and <strong>D</strong> for live diagnostics.</p>
+                {/* Favorite Color Palette */}
+                <div className="onboarding-form-group">
+                  <label className="onboarding-form-label">Profile Accent Color</label>
+                  <div className="color-swatch-row">
+                    {COLOR_PALETTE.map((col) => (
+                      <button
+                        key={col}
+                        type="button"
+                        className={`color-swatch-circle ${favoriteColor === col ? 'is-active' : ''}`}
+                        style={{ background: col }}
+                        onClick={() => {
+                          setFavoriteColor(col);
+                          sfx?.playTileNav?.();
+                        }}
+                      >
+                        {favoriteColor === col && <Check size={12} color="#ffffff" strokeWidth={3} />}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

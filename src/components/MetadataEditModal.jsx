@@ -229,7 +229,7 @@ export default function MetadataEditModal({
           <button
             className={`meta-edit-close-btn ${focusedTarget?.zone === 'metaEditModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`}
             onClick={onClose}
-            title="Close (Esc / B)"
+            title="Close"
           >
             <X size={18} />
           </button>

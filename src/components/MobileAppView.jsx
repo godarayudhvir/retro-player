@@ -25,7 +25,7 @@ import {
   VolumeX,
   Palette
 } from 'lucide-react';
-import MiiAvatar from './MiiAvatar';
+import MultiAvatar from './MultiAvatar';
 import CartridgeTile from './CartridgeTile';
 import { getReleaseDate, getGameDescription } from '../gameDescriptions';
 import { resolveAssetPath } from '../utils/assetPath';
@@ -34,7 +34,7 @@ import { resolveAssetPath } from '../utils/assetPath';
  * MobileAppView: Stage-Based Mobile Experience for Retro Player.
  * 
  * 5 Seamless Stages:
- * - Stage 1: Choose Profile ("Who's Playing?" Mii avatar selector)
+ * - Stage 1: Choose Profile ("Who's Playing?" Multiavatar profile selector)
  * - Stage 2: Choose System (Beautiful Console Cards displaying authentic console SVGs, total titles, categories)
  * - Stage 3: Choose Game (Clean 2/3-column box art grid with quick search filter)
  * - Stage 4: Shows Game Detail (Full-screen detail view with cover, synopsis, stats, and save data status)
@@ -217,7 +217,7 @@ export default function MobileAppView({
                     }}
                   >
                     <div className="mobile-profile-avatar-wrap">
-                      <MiiAvatar miiData={p.miiData || {}} size={68} />
+                      <MultiAvatar seed={p.avatarSeed || p.name || 'Player'} size={68} />
                     </div>
                     <span className="mobile-profile-name">{p.name}</span>
 
@@ -564,7 +564,7 @@ export default function MobileAppView({
           }}
           title="Switch Profile"
         >
-          <MiiAvatar miiData={activeProfile?.miiData || {}} size={36} />
+          <MultiAvatar seed={activeProfile?.avatarSeed || activeProfile?.name || 'Player'} size={36} />
         </div>
 
         {/* Right Icon Actions Group */}

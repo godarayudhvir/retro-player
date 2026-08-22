@@ -79,7 +79,7 @@ export default function LoadRomModal({
           <button
             className={`load-rom-close-btn ${focusedTarget?.zone === 'loadRomModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`}
             onClick={onClose}
-            title="Close (ESC / B)"
+            title="Close"
           >
             <X size={20} />
           </button>

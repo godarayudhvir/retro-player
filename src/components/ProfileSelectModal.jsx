@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Check, Edit2, Trash2, X, Sparkles, Gamepad2 } from 'lucide-react';
-import MiiAvatar from './MiiAvatar';
+import MultiAvatar from './MultiAvatar';
 import ConfirmModal from './ConfirmModal';
 
 /**
@@ -69,7 +69,7 @@ export default function ProfileSelectModal({
                     className="profile-avatar-container"
                     style={{ borderColor: isActive ? (profile.favoriteColor || '#ef4444') : undefined }}
                   >
-                    <MiiAvatar miiData={profile.miiData || {}} size={110} />
+                    <MultiAvatar seed={profile.avatarSeed || profile.name || 'Player'} size={110} />
                     {isActive && !isManaging && (
                       <div className="profile-active-check" style={{ background: profile.favoriteColor || '#ef4444' }}>
                         <Check size={16} strokeWidth={3} />

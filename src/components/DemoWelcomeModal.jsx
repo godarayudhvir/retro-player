@@ -51,14 +51,14 @@ export default function DemoWelcomeModal({
       <div className="demo-modal-content" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="demo-modal-header">
-          <div className="demo-modal-badge">
-            <Sparkles size={16} />
-            <span>LIVE WEB DEMO</span>
+          <div className="demo-modal-brand">
+            <span className="demo-brand-retro">RETRO</span>
+            <span className="demo-brand-player">PLAYER</span>
           </div>
           <button
             className={`demo-modal-close-btn ${focusedTarget?.zone === 'demoModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`}
             onClick={handleDismiss}
-            title="Close (ESC / B)"
+            title="Close"
             aria-label="Close Demo Notice"
           >
             <X size={18} />

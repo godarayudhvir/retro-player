@@ -71,7 +71,7 @@ export default function CartridgeGrid({
           </div>
           <h3>No Favorites Starred Yet</h3>
           <p>
-            Press <strong>F</strong> on keyboard or <strong>Y-Button</strong> on your gamepad while browsing cartridges to pin your all-time favorites here.
+            Star games while browsing cartridges to pin your all-time favorites here.
           </p>
           <button
             className="nes-btn is-primary"
