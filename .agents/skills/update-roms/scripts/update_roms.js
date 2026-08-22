@@ -155,9 +155,8 @@ function sanitizeTitle(raw) {
 function normalizeTitleForMatching(str) {
   return str
     .toLowerCase()
-    .replace(/_screenshot_\d+/gi, '')
-    .replace(/_screenshot/gi, '')
-    .replace(/screenshot/gi, '')
+    .replace(/_screenshot.*$/gi, '')
+    .replace(/screenshot.*$/gi, '')
     .replace(/_v(\d+)_(\d+)/gi, ' v$1.$2')
     .replace(/_v(\d+)/gi, ' v$1')
     .replace(/[^a-z0-9]/g, '');
@@ -398,11 +397,15 @@ function matchImageToGame(imageName, allGames) {
 
   for (const g of allGames) {
     const normGame = normalizeTitleForMatching(g.folderName);
-    if (normGame === normFile) {
+    const normCleanGame = normalizeTitleForMatching(sanitizeTitle(g.folderName));
+
+    if (normGame === normFile || normCleanGame === normFile) {
       return g;
     }
-    if (normGame.includes(normFile) || normFile.includes(normGame)) {
-      const score = Math.min(normGame.length, normFile.length) / Math.max(normGame.length, normFile.length);
+    if (normGame.includes(normFile) || normFile.includes(normGame) ||
+        normCleanGame.includes(normFile) || normFile.includes(normCleanGame)) {
+      const matchLen = normCleanGame.length > 0 ? normCleanGame.length : normGame.length;
+      const score = Math.min(matchLen, normFile.length) / Math.max(matchLen, normFile.length);
       if (score > bestScore) {
         bestScore = score;
         bestMatch = g;
@@ -410,7 +413,7 @@ function matchImageToGame(imageName, allGames) {
     }
   }
 
-  if (bestScore >= 0.35) {
+  if (bestScore >= 0.2) {
     return bestMatch;
   }
   return null;
