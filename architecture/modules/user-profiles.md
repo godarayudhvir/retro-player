@@ -9,7 +9,7 @@ The **User Profiles & Multiavatar System** introduces multi-user profile managem
 - **Netflix / Nintendo Switch Style "Who's Playing?" Selector (`ProfileSelectModal.jsx`)**:
   - Fullscreen profile selection modal displaying large animated Multiavatar avatars, profile names, and active status indicators.
   - "Add Profile" card with styled dashed circular button triggering the interactive creator.
-  - Console-grade "Manage Profiles" / "Done Editing" action pill button supporting all color themes (Classic, Midnight, Cyber, XMB).
+  - Console-grade "Manage Profiles" / "Done Editing" action pill button supporting all color modes (Vanilla Light, Vanilla Dark, DS Touch Light, DS Touch Dark).
   - 100% responsive layout across mobile phones (<=640px), tablets (641px - 1024px), desktop PCs, and large TVs (1601px+).
 - **Multiavatar Profile Creator Studio (`ProfileCreatorModal.jsx`)**:
   - Live vector avatar rendering stage that morphs in real-time as the user types their name or avatar seed.

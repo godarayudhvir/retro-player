@@ -9,11 +9,11 @@ The `LoadRomModal` component (`.info-modal-backdrop` + `.load-rom-modal`) provid
 ## 2. Detailed List of What It Does
 
 - **In-App Modal Shell**: Styled with glassmorphic backdrop (`.modal-backdrop.load-rom-backdrop`), pop-in animation, and dedicated theme-reactive classes (`.load-rom-modal-content`).
-- **Full Theme Engine Fidelity**: Natively styled and overridden across all 4 system themes:
-  - **iiSU Light**: Porcelain glass container with soft blue border and sky blue dropzone.
-  - **Midnight Cyber**: `#0f172a` midnight panel with neon cyan borders, cyan dropzone glow, and cyan action buttons.
-  - **Sony XMB Wave**: Deep indigo/obsidian panel `#0a1124` with translucent blue laser glow and silver accents.
-  - **Game Boy DMG**: Retro olive LCD container `#8bac0f` with dark green `#0f380f` borders and monochrome pixel chip cards.
+- **Full Theme Engine Fidelity**: Natively styled across both console themes and both color modes:
+  - **Vanilla Light**: Porcelain glass container with soft blue border and sky blue dropzone.
+  - **Vanilla Dark**: Deep slate `#0f172a` panel with muted borders and dark dropzone.
+  - **DS Touch Light**: Graph paper–style container with beveled borders matching the DS firmware aesthetic.
+  - **DS Touch Dark**: Dark graph paper container with high-contrast accent borders.
 - **Interactive Modal Dropzone (`.load-rom-dropzone`)**:
   - Handles drag-over hover glow effects (`.drag-active`).
   - Supports direct file dropping onto the modal.

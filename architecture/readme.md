@@ -20,6 +20,8 @@ architecture/
 │
 ├── modules/                # Core Functional Modules & Systems
 │   ├── api-specifications.md # Internal REST endpoints, external CDNs & Web APIs contracts (`server.js`, `vite.config.js`)
+│   ├── device-detection.md # W3C matchMedia viewport detection & UI Display Mode override engine (`useDeviceDetection.js`)
+│   ├── rom-manifest.md     # ROM catalog fetch, deduplication, filtering, sorting & custom ROM loading (`useRomManifest.js`)
 │   ├── indexeddb-storage.md # Centralized IndexedDB permanent storage engine (`services/db.js`)
 │   ├── emulator.md         # Emulator Engine integration, offline core resilience & save state management (`EmulatorModal.jsx`, EmulatorJS)
 │   ├── metadata-scraper.md # Online 3D box art & game metadata scraper with IndexedDB caching (`metadataScraper.js`, `useMetadataScraper.js`)
@@ -35,12 +37,17 @@ architecture/
 │
 ├── components/             # System Controls & UI Components
 │   ├── mobile-app-view.md  # Dedicated Netflix-style mobile feed & profile gateway (`MobileAppView.jsx`)
-│   ├── topbar.md           # Console header HUD, search input, clock, and sound controls (`Topbar.jsx`)
+│   ├── topbar.md           # Console header HUD, profile avatar, BGM controls, scraper, theme studio & search (`Topbar.jsx`)
 │   ├── confirm-modal.md    # Universal in-app confirmation dialog replacing native alerts & confirms (`ConfirmModal.jsx`)
 │   ├── load-rom-modal.md   # In-app Load Custom ROM modal with drag-drop and supported formats (`LoadRomModal.jsx`)
 │   ├── system-ribbon.md    # Category tab ribbon with dynamic game count sorting (`SystemRibbon.jsx`)
 │   ├── cartridge-tile.md   # Physical 3D game cartridge component with sheen and color heuristics (`CartridgeTile.jsx`)
+│   ├── cartridge-grid.md   # Theme-routing viewport: VanillaView shelf or DsView dual-screen layout (`CartridgeGrid.jsx`, `theme-views/`)
 │   ├── game-detail-modal.md # Game drawer modal with metadata & save data detection (`GameDetailModal.jsx`)
+│   ├── metadata-edit-modal.md # Jellyfin-style manual metadata editor for ROM hacks & homebrew (`MetadataEditModal.jsx`)
+│   ├── scraper-modal.md    # Granular scraper scope selector: All / Single / Multi / Title (`ScraperModal.jsx`)
+│   ├── settings-modal.md   # Nintendo Switch–style 3-tab console manager: ROMs, BGM, General (`SettingsModal.jsx`)
+│   ├── theme-switcher-modal.md # Console Theme Studio: theme grid, light/dark switch, UI Display Mode picker (`ThemeSwitcherModal.jsx`)
 │   ├── about-info-modal.md # Project about dialog and full controls reference table (`AboutInfoModal.jsx`)
 │   ├── emulator-modal.md   # Emulator Modal UI dialog, status displays, HUD bar & isolated iframe engine (`EmulatorModal.jsx`)
 │   ├── on-screen-keyboard.md # On-Screen Virtual Keyboard for gamepad/touch search entry (`OnScreenKeyboard.jsx`)
