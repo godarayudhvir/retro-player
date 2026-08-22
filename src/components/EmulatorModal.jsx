@@ -58,6 +58,85 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
   const recordingTimerRef = useRef(null);
+  const recordingStartTimeRef = useRef(0);
+
+  // Standalone EBML Segment Duration Patcher for WebM
+  const fixWebmDuration = async (blob, durationMs) => {
+    try {
+      const buffer = await blob.arrayBuffer();
+      const uint8 = new Uint8Array(buffer);
+      const dataView = new DataView(buffer);
+
+      // Scan for Segment Info element (0x15, 0x49, 0xA9, 0x66)
+      let infoPos = -1;
+      for (let i = 0; i < uint8.length - 4; i++) {
+        if (uint8[i] === 0x15 && uint8[i + 1] === 0x49 && uint8[i + 2] === 0xA9 && uint8[i + 3] === 0x66) {
+          infoPos = i;
+          break;
+        }
+      }
+
+      if (infoPos === -1) return blob;
+
+      // Scan for Duration element (0x44, 0x89) inside Info segment (search up to 256 bytes)
+      let durationPos = -1;
+      const maxSearch = Math.min(uint8.length - 8, infoPos + 256);
+      for (let i = infoPos; i < maxSearch; i++) {
+        if (uint8[i] === 0x44 && uint8[i + 1] === 0x89) {
+          durationPos = i;
+          break;
+        }
+      }
+
+      if (durationPos !== -1) {
+        const lenType = uint8[durationPos + 2];
+        if (lenType === 0x84) {
+          dataView.setFloat32(durationPos + 3, durationMs, false);
+          return new Blob([buffer], { type: blob.type });
+        } else if (lenType === 0x88) {
+          dataView.setFloat64(durationPos + 3, durationMs, false);
+          return new Blob([buffer], { type: blob.type });
+        }
+      }
+
+      // If Duration element does not exist, insert 0x44, 0x89, 0x88 + Float64 (11 bytes)
+      const offset = infoPos + 4;
+      const firstByte = uint8[offset];
+      let vintLen = 0;
+      for (let j = 0; j < 8; j++) {
+        if (firstByte & (0x80 >> j)) {
+          vintLen = j + 1;
+          break;
+        }
+      }
+
+      if (vintLen > 0) {
+        const durationBytes = new Uint8Array(11);
+        durationBytes[0] = 0x44;
+        durationBytes[1] = 0x89;
+        durationBytes[2] = 0x88;
+        const dv = new DataView(durationBytes.buffer);
+        dv.setFloat64(3, durationMs, false);
+
+        const insertAt = offset + vintLen;
+        const newBuffer = new Uint8Array(uint8.length + 11);
+        newBuffer.set(uint8.subarray(0, insertAt), 0);
+        newBuffer.set(durationBytes, insertAt);
+        newBuffer.set(uint8.subarray(insertAt), insertAt + 11);
+
+        if (vintLen === 1 && (firstByte & 0x7F) < 127 - 11) {
+          newBuffer[offset] = firstByte + 11;
+        }
+
+        return new Blob([newBuffer.buffer], { type: blob.type });
+      }
+
+      return blob;
+    } catch (err) {
+      console.warn('WebM duration fix warning:', err);
+      return blob;
+    }
+  };
 
   const SPEED_PRESETS = [1.0, 1.5, 2.0, 3.0, 4.0, 5.0];
   const SHADERS = ['none', 'crt', 'smooth', 'vibrant'];
@@ -1057,6 +1136,48 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
               }
             }
 
+            // Automatic Audio Node Mirror for Lossless Recording
+            window.__audioNodes = new Set();
+            try {
+              const OrigAudioNodeConnect = AudioNode.prototype.connect;
+              AudioNode.prototype.connect = function(dest, outIdx, inIdx) {
+                try {
+                  if (dest && this.context && dest === this.context.destination) {
+                    window.__audioNodes.add(this);
+                    if (window.__activeMediaStreamDest) {
+                      OrigAudioNodeConnect.call(this, window.__activeMediaStreamDest);
+                    }
+                  }
+                } catch(e) {}
+                return OrigAudioNodeConnect.apply(this, arguments);
+              };
+            } catch(e) {}
+
+            window.attachRecordingDestination = function(destNode) {
+              window.__activeMediaStreamDest = destNode;
+              try {
+                if (window.__audioNodes) {
+                  window.__audioNodes.forEach(node => {
+                    try { node.connect(destNode); } catch(e) {}
+                  });
+                }
+                const emu = window.EJS_emulator;
+                const alCtx = emu?.Module?.AL?.currentCtx;
+                if (alCtx?.gain) {
+                  try { alCtx.gain.connect(destNode); } catch(e) {}
+                }
+                if (emu?.gainNode) {
+                  try { emu.gainNode.connect(destNode); } catch(e) {}
+                }
+                if (emu?.audioNode) {
+                  try { emu.audioNode.connect(destNode); } catch(e) {}
+                }
+                if (emu?.Module?.SDL2?.audio?.gainNode) {
+                  try { emu.Module.SDL2.audio.gainNode.connect(destNode); } catch(e) {}
+                }
+              } catch(e) {}
+            };
+
             window._isMutedState = false;
 
             window.setEmulatorMute = function(isMuted, vol) {
@@ -1632,14 +1753,20 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
         if (audioCtx && typeof audioCtx.createMediaStreamDestination === 'function') {
           try {
             const dest = audioCtx.createMediaStreamDestination();
-            let audioConnected = false;
+            if (typeof win?.attachRecordingDestination === 'function') {
+              win.attachRecordingDestination(dest);
+            }
             if (emu?.gainNode) {
-              try { emu.gainNode.connect(dest); audioConnected = true; } catch(e) {}
+              try { emu.gainNode.connect(dest); } catch(e) {}
             }
-            if (!audioConnected && emu?.audioNode) {
-              try { emu.audioNode.connect(dest); audioConnected = true; } catch(e) {}
+            if (emu?.audioNode) {
+              try { emu.audioNode.connect(dest); } catch(e) {}
             }
-            if (audioConnected && dest.stream && dest.stream.getAudioTracks().length > 0) {
+            const alCtx = emu?.Module?.AL?.currentCtx;
+            if (alCtx?.gain) {
+              try { alCtx.gain.connect(dest); } catch(e) {}
+            }
+            if (dest.stream && dest.stream.getAudioTracks().length > 0) {
               tracks.push(dest.stream.getAudioTracks()[0]);
             }
           } catch(e) {}
@@ -1657,6 +1784,7 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
 
         const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 4000000 });
         recordedChunksRef.current = [];
+        recordingStartTimeRef.current = performance.now();
 
         recorder.ondataavailable = (e) => {
           if (e.data && e.data.size > 0) {
@@ -1664,17 +1792,21 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
           }
         };
 
-        recorder.onstop = () => {
+        recorder.onstop = async () => {
           if (recordedChunksRef.current.length === 0) {
             showToast('No video frames captured');
             return;
           }
-          const blob = new Blob(recordedChunksRef.current, { type: mimeType });
-          if (blob.size === 0) {
+          const rawBlob = new Blob(recordedChunksRef.current, { type: mimeType });
+          if (rawBlob.size === 0) {
             showToast('Recording was empty');
             return;
           }
-          const url = URL.createObjectURL(blob);
+          
+          const durationMs = Math.max(1000, performance.now() - recordingStartTimeRef.current);
+          const finalBlob = await fixWebmDuration(rawBlob, durationMs);
+
+          const url = URL.createObjectURL(finalBlob);
           const a = document.createElement('a');
           const fileName = formatCleanFilename(game?.title, 'Gameplay', 'webm');
           a.href = url;
@@ -2285,7 +2417,7 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
             <button
               className="diag-close-btn"
               onClick={() => setShowDiagnostics(false)}
-              title="Close Diagnostics (D)"
+              title="Close Diagnostics"
             >
               <X size={14} />
             </button>
@@ -2331,13 +2463,6 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
               <span>{perfStats.healthStatus}</span>
             </div>
             <p className="diag-health-desc">{perfStats.diagnosticTip}</p>
-          </div>
-
-          <div className="diag-shortcuts-footer">
-            <span><strong>D</strong> Diagnostics</span>
-            <span><strong>M</strong> Menu</span>
-            <span><strong>S</strong> Settings</span>
-            <span><strong>ESC</strong> Exit</span>
           </div>
         </aside>
       )}

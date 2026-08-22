@@ -1283,10 +1283,21 @@ export function useGamepadNavigation({
               const nextState = stateRef.current.toggleFavorite(stateRef.current.selectedGameCard);
               sfx?.playFavoriteToggle?.(nextState);
             }
-          } else if (stateRef.current.focusedTarget?.zone === 'grid') {
-            const game = stateRef.current.filteredGames[stateRef.current.focusedTarget?.index || 0];
-            if (game && stateRef.current.toggleFavorite) {
-              const nextState = stateRef.current.toggleFavorite(game);
+          } else if (stateRef.current.selectedMobileGameForDetails) {
+            if (stateRef.current.toggleFavorite) {
+              const nextState = stateRef.current.toggleFavorite(stateRef.current.selectedMobileGameForDetails);
+              sfx?.playFavoriteToggle?.(nextState);
+            }
+          } else if (stateRef.current.isMobile) {
+            const curMobileGame = stateRef.current.mobileGamesList?.[stateRef.current.focusedTarget?.index || 0] || stateRef.current.filteredGames?.[stateRef.current.focusedTarget?.index || 0];
+            if (curMobileGame && stateRef.current.toggleFavorite) {
+              const nextState = stateRef.current.toggleFavorite(curMobileGame);
+              sfx?.playFavoriteToggle?.(nextState);
+            }
+          } else {
+            const curGame = stateRef.current.filteredGames?.[stateRef.current.focusedTarget?.index || 0];
+            if (curGame && stateRef.current.toggleFavorite) {
+              const nextState = stateRef.current.toggleFavorite(curGame);
               sfx?.playFavoriteToggle?.(nextState);
             }
           }
@@ -1380,30 +1391,30 @@ export function useGamepadNavigation({
           return;
         }
 
-        const now = Date.now();
+        const b = gp.buttons;
+        const now = timestamp || performance.now();
         const COOLDOWN = 180;
 
-        const b = gp.buttons;
-        const axes = gp.axes;
+        // Detect all standard buttons
+        const btnA = b[0]?.pressed;      // A / Cross (Select / Confirm)
+        const btnB = b[1]?.pressed;      // B / Circle (Back / Cancel)
+        const btnX = b[2]?.pressed;      // X / Square (Favorite / Space)
+        const btnY = b[3]?.pressed;      // Y / Triangle (Search / OSK)
+        const shoulderL = b[4]?.pressed; // L1 / Left Bumper (Prev System / Prev Game)
+        const shoulderR = b[5]?.pressed; // R1 / Right Bumper (Next System / Next Game)
+        const btnSelect = b[8]?.pressed; // Select / Back (Search)
+        const btnStart = b[9]?.pressed;  // Start / Menu
 
-        const dpadUp = b[12]?.pressed || axes[1] < -0.55;
-        const dpadDown = b[13]?.pressed || axes[1] > 0.55;
-        const dpadLeft = b[14]?.pressed || axes[0] < -0.55;
-        const dpadRight = b[15]?.pressed || axes[0] > 0.55;
+        // D-Pad + Analog Stick Thresholds
+        const dpadUp = b[12]?.pressed || (gp.axes[1] < -STICK_DEADZONE);
+        const dpadDown = b[13]?.pressed || (gp.axes[1] > STICK_DEADZONE);
+        const dpadLeft = b[14]?.pressed || (gp.axes[0] < -STICK_DEADZONE);
+        const dpadRight = b[15]?.pressed || (gp.axes[0] > STICK_DEADZONE);
 
-        const btnA = b[0]?.pressed;
-        const btnB = b[1]?.pressed;
-        const btnX = b[2]?.pressed;
-        const btnY = b[3]?.pressed;
-        const btnSelect = b[8]?.pressed;
-        const btnStart = b[9]?.pressed;
-
-        // Clean shoulder bumpers (excluding triggers to avoid false firing)
-        const shoulderL = b[4]?.pressed || false;
-        const shoulderR = b[5]?.pressed || false;
-
-        // Controller Hotkey: Y / Triangle or Select toggles Search / Virtual Keyboard
-        if (!stateRef.current.activeGame && !stateRef.current.selectedGameCard && !stateRef.current.showInfoModal && !stateRef.current.selectedMobileGameForDetails) {
+        // Instant Action Triggers (Bypasses cooldown timer for zero latency feel)
+        
+        // Y button or Select opens/toggles Search OSK when not in game
+        if (!stateRef.current.activeGame && !stateRef.current.showInfoModal && !stateRef.current.showLoadRomModal) {
           if ((btnY && !prevButtonsRef.current.btnY) || (btnSelect && !prevButtonsRef.current.btnSelect)) {
             setShowVirtualKeyboard(prev => {
               const next = !prev;
@@ -1436,18 +1447,25 @@ export function useGamepadNavigation({
             lastInputTimeRef.current = now;
           }
         } else if (!stateRef.current.activeGame && !stateRef.current.showInfoModal && !stateRef.current.showLoadRomModal) {
-          // X button toggles Favorite on focused game
+          // X button (Button 2 / Square / X) toggles Favorite on focused game or modal card
           if (btnX && !prevButtonsRef.current.btnX) {
+            let targetGame = null;
             if (stateRef.current.selectedMobileGameForDetails) {
-              if (stateRef.current.toggleFavorite) {
-                const nextState = stateRef.current.toggleFavorite(stateRef.current.selectedMobileGameForDetails);
-                sfx?.playFavoriteToggle?.(nextState);
-              }
+              targetGame = stateRef.current.selectedMobileGameForDetails;
             } else if (stateRef.current.selectedGameCard) {
-              if (stateRef.current.toggleFavorite) {
-                const nextState = stateRef.current.toggleFavorite(stateRef.current.selectedGameCard);
-                sfx?.playFavoriteToggle?.(nextState);
-              }
+              targetGame = stateRef.current.selectedGameCard;
+            } else if (stateRef.current.isMobile) {
+              const mList = stateRef.current.mobileGamesList || stateRef.current.filteredGames || [];
+              const mIdx = stateRef.current.focusedTarget?.index || 0;
+              targetGame = mList[mIdx] || mList[0] || null;
+            } else {
+              const gList = stateRef.current.filteredGames || [];
+              const gIdx = stateRef.current.focusedTarget?.zone === 'grid' ? (stateRef.current.focusedTarget?.index || 0) : 0;
+              targetGame = gList[gIdx] || gList[0] || null;
+            }
+            if (targetGame && stateRef.current.toggleFavorite) {
+              const nextState = stateRef.current.toggleFavorite(targetGame);
+              sfx?.playFavoriteToggle?.(nextState);
             }
             lastInputTimeRef.current = now;
           }
