@@ -23,9 +23,10 @@ The **User Profiles & Multiavatar System** introduces multi-user profile managem
 - **Topbar Profile Switcher**:
   - Topbar renders the active user's custom Multiavatar avatar and player name.
   - Clicking the avatar or user tag immediately opens the "Who's Playing?" profile selector.
-- **Isolated Storage Namespaces**:
+- **Isolated Storage Namespaces & Battery Save Manager**:
   - Automatically scopes `favorites`, `recentlyPlayed`, and `playtimeStats` to the active profile ID in IndexedDB (`favs_${activeProfileId}`, `recents_${activeProfileId}`, `playtime_${activeProfileId}`).
   - Strictly isolates In-Game Battery RAM saves (`save_${activeProfileId}_${gameId}`) and Save States (`state_${activeProfileId}_${gameId}`) per profile, preventing cross-profile save leakage or accidental game continuation between different players.
+  - **In-Game Battery Save Suite (`useSaveDataManager.js`)**: Allows players to export their active profile's in-game battery RAM as a downloadable `.sav` file, import existing `.sav` backups into the active profile's IndexedDB, or delete saved battery progress safely with custom in-app confirmation modals.
 
 ---
 

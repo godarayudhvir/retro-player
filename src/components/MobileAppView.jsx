@@ -23,10 +23,14 @@ import {
   Layers,
   Volume2,
   VolumeX,
-  Palette
+  Palette,
+  Download,
+  Upload,
+  RotateCcw
 } from 'lucide-react';
 import MultiAvatar from './MultiAvatar';
 import CartridgeTile from './CartridgeTile';
+import ConfirmModal from './ConfirmModal';
 import { getReleaseDate, getGameDescription } from '../gameDescriptions';
 import { resolveAssetPath } from '../utils/assetPath';
 
@@ -76,12 +80,19 @@ export default function MobileAppView({
   onOpenThemeModal,
   onEditMetadata,
   onScrapeGame,
+  onExportSave,
+  onImportSave,
+  onDeleteSave,
+  onResetStats,
   hasSaveData,
   scraper
 }) {
   const fileInputRef = useRef(null);
+  const saveFileInputRef = useRef(null);
   const [isLocalScraping, setIsLocalScraping] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [saveActionStatus, setSaveActionStatus] = useState('');
 
   // Group games by platform / system
   const systemGamesMap = useMemo(() => {
@@ -386,27 +397,144 @@ export default function MobileAppView({
             </div>
           </div>
 
-          {/* Save State & Battery RAM Status */}
-          <div className="mobile-detail-save-card">
-            {hasSaveData ? (
-              <div className="mobile-save-status has-save">
-                <Save size={16} color="#10b981" />
-                <div className="mobile-save-info">
-                  <strong>BATTERY SAVE RAM DETECTED</strong>
-                  <span>State ready to resume instantly</span>
+          {/* In-Game Battery Save Data Management Suite */}
+          {(() => {
+            const supportsBattery = selectedGameForDetails?.supportsBatterySaves !== false && selectedGameForDetails?.systemKey !== 'arcade' && selectedGameForDetails?.systemKey !== 'atari2600' && !selectedGameForDetails?.systemName?.toLowerCase().includes('arcade') && !selectedGameForDetails?.systemName?.toLowerCase().includes('atari 2600');
+
+            if (!supportsBattery) {
+              return (
+                <div className="mobile-detail-save-card" style={{ opacity: 0.8 }}>
+                  <div className="mobile-save-status no-save" style={{ padding: '0.65rem 0.85rem' }}>
+                    <Save size={16} color="#94a3b8" />
+                    <div className="mobile-save-info">
+                      <strong style={{ color: '#64748b', fontSize: '0.74rem' }}>NO BATTERY SAVE REQUIRED</strong>
+                      <span style={{ fontSize: '0.66rem', color: '#94a3b8' }}>Arcade session loop (Quick Saves supported)</span>
+                    </div>
+                  </div>
                 </div>
-                <CheckCircle2 size={18} color="#10b981" />
-              </div>
-            ) : (
-              <div className="mobile-save-status no-save">
-                <CheckCircle2 size={16} color="#64748b" />
-                <div className="mobile-save-info">
-                  <strong>READY TO LAUNCH</strong>
-                  <span>Auto-saves battery RAM upon playing</span>
+              );
+            }
+
+            return (
+              <div className="mobile-detail-save-card" style={{ display: 'flex', alignItems: 'stretch', gap: '0.45rem', background: 'none', border: 'none', padding: 0 }}>
+                <input
+                  type="file"
+                  ref={saveFileInputRef}
+                  accept=".sav,.srm,.state,.ram,.mcr,application/octet-stream"
+                  style={{ display: 'none' }}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (file && onImportSave && selectedGameForDetails) {
+                      setSaveActionStatus('Importing save...');
+                      const success = await onImportSave(file, selectedGameForDetails);
+                      if (success) {
+                        sfx?.playMenuConfirm?.();
+                        setSaveActionStatus('Save imported!');
+                        setTimeout(() => setSaveActionStatus(''), 3000);
+                      } else {
+                        setSaveActionStatus('Import failed');
+                        setTimeout(() => setSaveActionStatus(''), 3000);
+                      }
+                    }
+                    e.target.value = '';
+                  }}
+                />
+
+                {/* Left Live Status Badge */}
+                <div className={`mobile-save-status ${hasSaveData ? 'has-save' : 'no-save'}`} style={{ flex: 1, margin: 0, padding: '0.6rem 0.85rem' }}>
+                  <Save size={16} color={hasSaveData ? '#10b981' : '#64748b'} />
+                  <div className="mobile-save-info">
+                    <strong style={{ fontSize: '0.74rem' }}>{hasSaveData ? 'BATTERY SAVE DETECTED' : 'NO SAVE DATA FOUND'}</strong>
+                    <span style={{ fontSize: '0.66rem' }}>{saveActionStatus || (hasSaveData ? 'Saved battery RAM ready' : 'Auto-saves or import .sav')}</span>
+                  </div>
+                  {hasSaveData && <CheckCircle2 size={16} color="#10b981" />}
+                </div>
+
+                {/* 3 Square Action Boxes */}
+                <div className="save-square-actions" style={{ display: 'flex', gap: '0.3rem' }}>
+                  {/* Import Button */}
+                  <button
+                    type="button"
+                    className="save-square-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      saveFileInputRef.current?.click();
+                    }}
+                    title="Import .sav file"
+                    aria-label="Import .sav file"
+                    style={{ minWidth: '48px', padding: '0.3rem 0.45rem' }}
+                  >
+                    <Upload size={14} />
+                    <span style={{ fontSize: '0.62rem' }}>Import</span>
+                  </button>
+
+                  {/* Export Button */}
+                  <button
+                    type="button"
+                    className={`save-square-btn ${!hasSaveData ? 'is-disabled' : ''}`}
+                    disabled={!hasSaveData}
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      if (hasSaveData && onExportSave && selectedGameForDetails) {
+                        setSaveActionStatus('Exporting...');
+                        const success = await onExportSave(selectedGameForDetails);
+                        if (success) {
+                          sfx?.playNotification?.();
+                          setSaveActionStatus('Downloaded!');
+                          setTimeout(() => setSaveActionStatus(''), 3000);
+                        }
+                      }
+                    }}
+                    title={hasSaveData ? 'Export .sav file' : 'No save data to export'}
+                    aria-label="Export .sav file"
+                    style={{ minWidth: '48px', padding: '0.3rem 0.45rem' }}
+                  >
+                    <Download size={14} />
+                    <span style={{ fontSize: '0.62rem' }}>Export</span>
+                  </button>
+
+                  {/* Delete Button */}
+                  <button
+                    type="button"
+                    className={`save-square-btn is-delete ${!hasSaveData ? 'is-disabled' : ''}`}
+                    disabled={!hasSaveData}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (hasSaveData) {
+                        setShowDeleteConfirm(true);
+                        sfx?.playTileNav?.();
+                      }
+                    }}
+                    title={hasSaveData ? 'Delete save data' : 'No save data to delete'}
+                    aria-label="Delete save data"
+                    style={{ minWidth: '48px', padding: '0.3rem 0.45rem' }}
+                  >
+                    <Trash2 size={14} />
+                    <span style={{ fontSize: '0.62rem' }}>Delete</span>
+                  </button>
                 </div>
               </div>
-            )}
-          </div>
+            );
+          })()}
+
+          {/* Delete Save Confirmation Modal */}
+          <ConfirmModal
+            isOpen={showDeleteConfirm}
+            title={`Delete Save Data?`}
+            message={`Are you sure you want to permanently erase the saved battery RAM and save states for "${selectedGameForDetails?.title}"? This action cannot be undone.`}
+            confirmLabel="Delete Save"
+            cancelLabel="Cancel"
+            isDestructive={true}
+            onConfirm={async () => {
+              setShowDeleteConfirm(false);
+              if (onDeleteSave && selectedGameForDetails) {
+                await onDeleteSave(selectedGameForDetails);
+                sfx?.playDelete?.();
+              }
+            }}
+            onCancel={() => setShowDeleteConfirm(false)}
+            sfx={sfx}
+          />
 
           {/* Synopsis Description */}
           <div className="mobile-detail-synopsis-card">
@@ -414,10 +542,26 @@ export default function MobileAppView({
             <p>{description}</p>
           </div>
 
-          {/* Playtime Analytics */}
+          {/* Playtime Analytics (3-Column with Reset Support) */}
           <div className="mobile-detail-stats-card">
-            <div className="mobile-stat-box">
-              <span className="mobile-stat-lbl"><Clock size={12} /> Playtime</span>
+            <div className="mobile-stat-box" style={{ position: 'relative' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                <span className="mobile-stat-lbl"><Clock size={12} /> Playtime</span>
+                {selectedStats?.playtimeFormatted && selectedStats.playtimeFormatted !== '0m' && onResetStats && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onResetStats(selectedGameForDetails);
+                      sfx?.playDelete?.();
+                    }}
+                    title="Reset Playtime"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#94a3b8' }}
+                  >
+                    <RotateCcw size={11} />
+                  </button>
+                )}
+              </div>
               <span className="mobile-stat-val">{selectedStats?.playtimeFormatted || '< 1 min'}</span>
             </div>
             <div className="mobile-stat-box">

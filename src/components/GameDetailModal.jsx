@@ -1,21 +1,26 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Play, Save, Cpu, Calendar, CheckCircle2, Star, Clock, History, RotateCcw, RefreshCw, Tag, Terminal, ChevronDown, ChevronUp, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Play, Save, Cpu, Calendar, CheckCircle2, Star, Clock, History, RotateCcw, RefreshCw, Tag, Terminal, ChevronDown, ChevronUp, Pencil, ChevronLeft, ChevronRight, Download, Upload, Trash2 } from 'lucide-react';
 import { getGameDescription, getReleaseDate } from '../gameDescriptions';
 import { resolveAssetPath } from '../utils/assetPath';
+import ConfirmModal from './ConfirmModal';
 
 /**
  * Game Detail Drawer Modal presenting rich scraped metadata, release dates, developer, publisher, genre tags,
- * live save data status, playtime stats, carousel left/right ROM navigation, and on-demand online scraping actions.
+ * live save data status, in-game battery save (.sav) manager, playtime stats, carousel navigation, and on-demand scraping.
  */
 export default function GameDetailModal({
   game,
   metadata,
   hasSaveData,
+  activeProfileId = 'prof_default',
   isFavorite = false,
   onToggleFavorite,
   onResetStats,
   onScrapeGame,
   onEditMetadata,
+  onExportSave,
+  onImportSave,
+  onDeleteSave,
   onPrevGame,
   onNextGame,
   hasPrev = false,
@@ -34,6 +39,9 @@ export default function GameDetailModal({
   const [imgError, setImgError] = useState(false);
   const [isLocalScraping, setIsLocalScraping] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [saveActionStatus, setSaveActionStatus] = useState('');
+  const fileInputRef = useRef(null);
   const logsContainerRef = useRef(null);
 
   // Reset img error and local state when game changes
@@ -220,27 +228,144 @@ export default function GameDetailModal({
               </div>
             </div>
 
-            {/* Save State Detector Badge */}
-            <div className="save-status-container">
-              {hasSaveData ? (
-                <div className="save-badge has-save">
-                  <Save size={16} />
-                  <div className="save-text">
-                    <strong>SAVE DATA DETECTED</strong>
-                    <span>Saved battery RAM / state ready to resume</span>
+            {/* In-Game Battery Save Data Management Suite */}
+            {(() => {
+              const supportsBattery = game?.supportsBatterySaves !== false && game?.systemKey !== 'arcade' && game?.systemKey !== 'atari2600' && !game?.systemName?.toLowerCase().includes('arcade') && !game?.systemName?.toLowerCase().includes('atari 2600');
+
+              if (!supportsBattery) {
+                return (
+                  <div className="save-status-container" style={{ display: 'flex', alignItems: 'stretch', gap: '0.5rem' }}>
+                    <div className="save-badge no-save" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.65rem 0.95rem', opacity: 0.75 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                        <Save size={16} color="#94a3b8" />
+                        <div className="save-text">
+                          <strong style={{ color: '#64748b' }}>NO BATTERY SAVE REQUIRED</strong>
+                          <span style={{ color: '#94a3b8' }}>Arcade session loop (Supports In-Game Quick Saves & Snapshots)</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <CheckCircle2 size={18} color="#10b981" />
-                </div>
-              ) : (
-                <div className="save-badge no-save">
-                  <Save size={16} />
-                  <div className="save-text">
-                    <strong>NO SAVE DATA FOUND</strong>
-                    <span>Start fresh session (Auto-saves on play)</span>
+                );
+              }
+
+              return (
+                <div className="save-status-container" style={{ display: 'flex', alignItems: 'stretch', gap: '0.5rem' }}>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept=".sav,.srm,.state,.ram,.mcr,application/octet-stream"
+                    style={{ display: 'none' }}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file && onImportSave) {
+                        setSaveActionStatus('Importing save...');
+                        const success = await onImportSave(file, game);
+                        if (success) {
+                          sfx?.playMenuConfirm?.();
+                          setSaveActionStatus('Save imported!');
+                          setTimeout(() => setSaveActionStatus(''), 3000);
+                        } else {
+                          setSaveActionStatus('Import failed');
+                          setTimeout(() => setSaveActionStatus(''), 3000);
+                        }
+                      }
+                      e.target.value = '';
+                    }}
+                  />
+
+                  {/* Main Status Badge */}
+                  <div className={`save-badge ${hasSaveData ? 'has-save' : 'no-save'}`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.65rem 0.95rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                      <Save size={16} color={hasSaveData ? '#10b981' : '#64748b'} />
+                      <div className="save-text">
+                        <strong>{hasSaveData ? 'SAVE DATA DETECTED' : 'NO SAVE DATA FOUND'}</strong>
+                        <span>{saveActionStatus || (hasSaveData ? 'Saved battery RAM / state ready to resume' : 'Start fresh session or import existing .sav')}</span>
+                      </div>
+                    </div>
+                    {hasSaveData && <CheckCircle2 size={18} color="#10b981" />}
                   </div>
-                </div>
-              )}
+
+              {/* 3 Square Action Boxes of Same Height */}
+              <div className="save-square-actions" style={{ display: 'flex', gap: '0.35rem' }}>
+                {/* 1. Import Button (Always active) */}
+                <button
+                  type="button"
+                  className="save-square-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    fileInputRef.current?.click();
+                  }}
+                  title="Import .sav file"
+                  aria-label="Import .sav file"
+                >
+                  <Upload size={16} />
+                  <span>Import</span>
+                </button>
+
+                {/* 2. Export Button (Disabled / greyed out when no save) */}
+                <button
+                  type="button"
+                  className={`save-square-btn ${!hasSaveData ? 'is-disabled' : ''}`}
+                  disabled={!hasSaveData}
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    if (hasSaveData && onExportSave) {
+                      setSaveActionStatus('Exporting save...');
+                      const success = await onExportSave(game);
+                      if (success) {
+                        sfx?.playNotification?.();
+                        setSaveActionStatus('Save downloaded!');
+                        setTimeout(() => setSaveActionStatus(''), 3000);
+                      }
+                    }
+                  }}
+                  title={hasSaveData ? 'Export .sav file' : 'No save data to export'}
+                  aria-label="Export .sav file"
+                >
+                  <Download size={16} />
+                  <span>Export</span>
+                </button>
+
+                {/* 3. Delete Button (Disabled / greyed out when no save) */}
+                <button
+                  type="button"
+                  className={`save-square-btn is-delete ${!hasSaveData ? 'is-disabled' : ''}`}
+                  disabled={!hasSaveData}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (hasSaveData) {
+                      setShowDeleteConfirm(true);
+                      sfx?.playTileNav?.();
+                    }
+                  }}
+                  title={hasSaveData ? 'Delete save data' : 'No save data to delete'}
+                  aria-label="Delete save data"
+                >
+                  <Trash2 size={16} />
+                  <span>Delete</span>
+                </button>
+              </div>
             </div>
+          );
+        })()}
+
+            <ConfirmModal
+              isOpen={showDeleteConfirm}
+              title={`Delete Save Data?`}
+              message={`Are you sure you want to permanently erase the saved battery RAM and save states for "${game.title}"? This action cannot be undone.`}
+              confirmLabel="Delete Save"
+              cancelLabel="Cancel"
+              isDestructive={true}
+              onConfirm={async () => {
+                setShowDeleteConfirm(false);
+                if (onDeleteSave) {
+                  await onDeleteSave(game);
+                  sfx?.playDelete?.();
+                }
+              }}
+              onCancel={() => setShowDeleteConfirm(false)}
+              sfx={sfx}
+            />
 
             <div className="game-card-actions">
               <button

@@ -23,10 +23,14 @@ export default function CartridgeGrid({
   sfx,
   themeEngine,
   getGameStats,
+  onResetStats,
   onPlayGame,
   onToggleFavorite,
   onEditMetadata,
   onScrapeGame,
+  onExportSave,
+  onImportSave,
+  onDeleteSave,
   hasSaveData,
   scraper
 }) {
@@ -137,10 +141,14 @@ export default function CartridgeGrid({
             handleGameSelect={handleGameSelect}
             isFavorite={isFavorite}
             getGameStats={getGameStats}
+            onResetStats={onResetStats}
             onPlayGame={onPlayGame}
             onToggleFavorite={onToggleFavorite}
             onEditMetadata={onEditMetadata}
             onScrapeGame={onScrapeGame}
+            onExportSave={onExportSave}
+            onImportSave={onImportSave}
+            onDeleteSave={onDeleteSave}
             hasSaveData={hasSaveData}
             scraper={scraper}
             sfx={sfx}

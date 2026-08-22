@@ -105,8 +105,14 @@ export default function App() {
   const gamepadStatus = useGamepadStatus({ sfx });
   const { gamepadConnected, setGamepadConnected } = gamepadStatus;
 
-  // Hook 7: Save Data & Battery SRAM Inspection
-  const { hasSaveData, checkSaveData } = useSaveDataManager();
+  // Hook 7: Save Data & Battery SRAM Inspection and Management
+  const {
+    hasSaveData,
+    checkSaveData,
+    exportSaveFile,
+    importSaveFile,
+    deleteSaveFile
+  } = useSaveDataManager();
 
   // Selection Handler for opening Game Detail Drawer Modal
   const handleGameSelect = useCallback(async (game, isNavigating = false) => {
@@ -339,6 +345,10 @@ export default function App() {
           onOpenThemeModal={() => setShowThemeModal(true)}
           onEditMetadata={(game, meta) => setEditingMetadataGame({ game, metadata: meta })}
           onScrapeGame={scraper.scrapeSingleGame}
+          onExportSave={(game) => exportSaveFile(game, activeProfileId)}
+          onImportSave={(file, game) => importSaveFile(file, game, activeProfileId)}
+          onDeleteSave={(game) => deleteSaveFile(game, activeProfileId)}
+          onResetStats={resetGameStats}
           hasSaveData={hasSaveData}
           scraper={scraper}
         />
@@ -397,6 +407,7 @@ export default function App() {
             sfx={sfx}
             themeEngine={themeEngine}
             getGameStats={getGameStats}
+            onResetStats={resetGameStats}
             onPlayGame={(game) => {
               recordGameLaunch(game);
               sfx.playGameLaunch();
@@ -405,6 +416,9 @@ export default function App() {
             onToggleFavorite={toggleFavorite}
             onEditMetadata={(game, meta) => setEditingMetadataGame({ game, metadata: meta })}
             onScrapeGame={scraper.scrapeSingleGame}
+            onExportSave={(game) => exportSaveFile(game, activeProfileId)}
+            onImportSave={(file, game) => importSaveFile(file, game, activeProfileId)}
+            onDeleteSave={(game) => deleteSaveFile(game, activeProfileId)}
             hasSaveData={hasSaveData}
             scraper={scraper}
           />
@@ -441,11 +455,15 @@ export default function App() {
         game={themeEngine?.theme === 'ds' ? null : selectedGameCard}
         metadata={selectedGameMetadata}
         hasSaveData={hasSaveData}
+        activeProfileId={activeProfileId}
         isFavorite={isFavorite(selectedGameCard?.id || selectedGameCard?.title)}
         onToggleFavorite={toggleFavorite}
         onResetStats={resetGameStats}
         onScrapeGame={scraper.scrapeSingleGame}
         onEditMetadata={(game, meta) => setEditingMetadataGame({ game, metadata: meta })}
+        onExportSave={(game) => exportSaveFile(game, activeProfileId)}
+        onImportSave={(file, game) => importSaveFile(file, game, activeProfileId)}
+        onDeleteSave={(game) => deleteSaveFile(game, activeProfileId)}
         onPrevGame={handlePrevGame}
         onNextGame={handleNextGame}
         hasPrev={filteredGames && filteredGames.length > 1}

@@ -9,39 +9,39 @@ export function detectSystemFromExtension(filename) {
   const ext = (filename || '').split('.').pop()?.toLowerCase() || '';
   switch (ext) {
     case 'gba':
-      return { key: 'gba',          core: 'gba',          name: 'Game Boy Advance', color: '#6366f1', icon: resolveAssetPath('assets/platforms/gba.svg') };
+      return { key: 'gba',          core: 'gba',          name: 'Game Boy Advance', color: '#6366f1', icon: resolveAssetPath('assets/platforms/gba.svg'), supportsBatterySaves: true, saveExt: 'sav' };
     case 'gb':
-      return { key: 'gb',           core: 'gb',           name: 'Game Boy',         color: '#94a3b8', icon: resolveAssetPath('assets/platforms/gb.svg') };
+      return { key: 'gb',           core: 'gb',           name: 'Game Boy',         color: '#94a3b8', icon: resolveAssetPath('assets/platforms/gb.svg'), supportsBatterySaves: true, saveExt: 'sav' };
     case 'gbc':
-      return { key: 'gbc',          core: 'gb',           name: 'Game Boy Color',   color: '#8b5cf6', icon: resolveAssetPath('assets/platforms/gbc.svg') };
+      return { key: 'gbc',          core: 'gb',           name: 'Game Boy Color',   color: '#8b5cf6', icon: resolveAssetPath('assets/platforms/gbc.svg'), supportsBatterySaves: true, saveExt: 'sav' };
     case 'nes':
-      return { key: 'nes',          core: 'nes',          name: 'Nintendo Entertainment System', color: '#ef4444', icon: resolveAssetPath('assets/platforms/nes.svg') };
+      return { key: 'nes',          core: 'nes',          name: 'Nintendo Entertainment System', color: '#ef4444', icon: resolveAssetPath('assets/platforms/nes.svg'), supportsBatterySaves: true, saveExt: 'sav' };
     case 'sfc':
     case 'smc':
-      return { key: 'snes',         core: 'snes',         name: 'Super Nintendo',   color: '#8b5cf6', icon: resolveAssetPath('assets/platforms/snes.svg') };
+      return { key: 'snes',         core: 'snes',         name: 'Super Nintendo',   color: '#8b5cf6', icon: resolveAssetPath('assets/platforms/snes.svg'), supportsBatterySaves: true, saveExt: 'srm' };
     case 'z64':
     case 'n64':
     case 'v64':
-      return { key: 'n64',          core: 'n64',          name: 'Nintendo 64',      color: '#f59e0b', icon: resolveAssetPath('assets/platforms/n64.svg') };
+      return { key: 'n64',          core: 'n64',          name: 'Nintendo 64',      color: '#f59e0b', icon: resolveAssetPath('assets/platforms/n64.svg'), supportsBatterySaves: true, saveExt: 'srm' };
     case 'nds':
-      return { key: 'nds',          core: 'nds',          name: 'Nintendo DS',      color: '#06b6d4', icon: resolveAssetPath('assets/platforms/nds.svg') };
+      return { key: 'nds',          core: 'nds',          name: 'Nintendo DS',      color: '#06b6d4', icon: resolveAssetPath('assets/platforms/nds.svg'), supportsBatterySaves: true, saveExt: 'sav' };
     case 'bin':
     case 'cue':
     case 'chd':
     case 'pbp':
     case 'iso':
-      return { key: 'ps1',          core: 'psx',          name: 'PlayStation',      color: '#6366f1', icon: resolveAssetPath('assets/platforms/psx.svg') };
+      return { key: 'ps1',          core: 'psx',          name: 'PlayStation',      color: '#6366f1', icon: resolveAssetPath('assets/platforms/psx.svg'), supportsBatterySaves: true, saveExt: 'mcr' };
     case 'zip':
-      return { key: 'arcade',       core: 'mame2003_plus',name: 'Arcade (MAME)',    color: '#f43f5e', icon: resolveAssetPath('assets/platforms/arcade.svg') };
+      return { key: 'arcade',       core: 'mame2003_plus',name: 'Arcade (MAME)',    color: '#f43f5e', icon: resolveAssetPath('assets/platforms/arcade.svg'), supportsBatterySaves: false, saveExt: 'nvram' };
     case 'md':
     case 'smd':
     case 'gen':
-      return { key: 'genesis',      core: 'segaMD',       name: 'Sega Genesis',     color: '#ec4899', icon: resolveAssetPath('assets/platforms/genesis.svg') };
+      return { key: 'genesis',      core: 'segaMD',       name: 'Sega Genesis',     color: '#ec4899', icon: resolveAssetPath('assets/platforms/genesis.svg'), supportsBatterySaves: true, saveExt: 'srm' };
     case 'gg':
-      return { key: 'gamegear',     core: 'segaGG',       name: 'Game Gear',        color: '#14b8a6', icon: resolveAssetPath('assets/platforms/gamegear.svg') };
+      return { key: 'gamegear',     core: 'segaGG',       name: 'Game Gear',        color: '#14b8a6', icon: resolveAssetPath('assets/platforms/gamegear.svg'), supportsBatterySaves: true, saveExt: 'srm' };
     case 'a26':
-      return { key: 'atari2600',    core: 'atari2600',    name: 'Atari 2600',       color: '#d97706', icon: resolveAssetPath('assets/platforms/atari2600.svg') };
+      return { key: 'atari2600',    core: 'atari2600',    name: 'Atari 2600',       color: '#d97706', icon: resolveAssetPath('assets/platforms/atari2600.svg'), supportsBatterySaves: false, saveExt: 'sav' };
     default:
-      return { key: 'nes',          core: 'nes',          name: 'Custom System',    color: '#64748b', icon: resolveAssetPath('assets/pokeball.png') };
+      return { key: 'nes',          core: 'nes',          name: 'Custom System',    color: '#64748b', icon: resolveAssetPath('assets/pokeball.png'), supportsBatterySaves: true, saveExt: 'sav' };
   }
 }
