@@ -1,8 +1,8 @@
 {
   "title": "Pokémon Unbound (v2.1.1.1)",
-  "description": "Expansive custom Pokémon adventure set in the Borrius region with dynamic missions.",
   "releaseYear": "2022",
   "developer": "Skeli & Unbound Team",
-  "publisher": "Homebrew / Romhack",
-  "genre": "RPG / Romhack"
+  "publisher": "Homebrew / PokeCommunity",
+  "genre": "RPG / Romhack",
+  "description": "Expansive custom Pokémon adventure set in the Borrius region with dynamic missions, custom battle engine, Gen 1-8 roster, difficulty settings, and extensive post-game content."
 }

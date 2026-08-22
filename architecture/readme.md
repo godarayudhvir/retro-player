@@ -57,7 +57,7 @@ architecture/
     └── cloud-saves.md      # Cloud save state synchronization & cross-device backup architecture
 ```
 
-> **Note**: For the overarching future vision, in-depth codebase audit, refactoring matrix, and master innovation catalog across 8 domains, see [mirai/README.md](mirai/README.md). For device tier variations (Mobile vs Handheld vs Desktop vs TV), see [guides/device-experience-matrix.md](../guides/device-experience-matrix.md). For the curated non-commercial demo catalog, file paths, and creator compliance policy, see [guides/roms.md](../guides/roms.md).
+> **Note**: For the overarching future vision, in-depth codebase audit, refactoring matrix, and master innovation catalog across 8 domains, see [mirai/README.md](mirai/README.md). For device tier variations (Mobile vs Handheld vs Desktop vs TV), see [guides/device-experience-matrix.md](../guides/device-experience-matrix.md). For the curated non-commercial demo catalog, file paths, and creator compliance policy, see [guides/roms.md](../guides/roms.md). For automated ROM organization, cover conversion, and metadata sidecar generation pipelines, see the [update-roms skill](../.agents/skills/update-roms/SKILL.md) and [rom-cleanup skill](../.agents/skills/rom-cleanup/SKILL.md).
 
 ---
 

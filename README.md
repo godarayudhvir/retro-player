@@ -73,6 +73,7 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 - 💬 **Universal In-App Modal Dialog System**: Zero native browser popups (`alert()`, `confirm()`, `prompt()`). All confirmations utilize theme-aware, gamepad/keyboard navigable in-app modal dialogs.
 - 💾 **3D Physical Cartridge Engine**: Tactile cartridges with metallic sheens, grip textures, dynamic shadows, and title color heuristics.
 - 🌐 **Automated Online Metadata Scraper & In-App Editor**: Official 3D box art from **Libretro** & synopsis info from **Wikipedia** with intelligent demo-to-retail matching, 4-tier scope selection, local metadata editor, adjacent re-scrape trigger button in detail drawers, and IndexedDB caching.
+- 📹 **60 FPS Screen Video Recorder & Emulation Speed (1.0x–5.0x)**: Built-in native Web `MediaRecorder` 60 FPS gameplay capture with live `REC ● MM:SS` topbar HUD badge, instant auto-download, configurable emulation speed cycling (`1.0x`–`5.0x`), and live engine tuning toggles (VSync 60Hz lock, Multi-Threaded WASM, on-screen FPS display).
 - 🚀 **Hardware-Accelerated Web Emulation & Diagnostic HUD**: Low-latency dynamic audio sync and interactive **Diagnostic Performance HUD** (`D` hotkey).
 - 🔊 **Synthesized Pure Web Audio UI SFX**: Low-latency acoustic feedback synthesizer with zero external audio assets.
 - 🎮 **100% Gamepad & Keyboard Navigation**: Controller-first spatial navigation across desktop & mobile feeds, sequential single-step ROM library shelf navigation, 100% D-pad reachability across all Topbar controls (Profile, BGM, Scraper, SFX, Theme, Search, Install, Load ROM, Settings), full Game Detail & Profile modal navigation, dynamic emulator touch control auto-hiding on controller detection, shoulder triggers (`L1`/`R1`), on-screen virtual keyboard (`⌘K`), live **Gamepad Battery % / Charging Telemetry Widget**, and **Low-Battery In-App Notification Alerts**. *(See [Controls & Keybindings Guide](guides/controls.md))*.
@@ -134,6 +135,17 @@ Explore dedicated, step-by-step documentation located in the [`guides/`](guides/
 | **[🌐 Hardware & Platform Compatibility Matrix](guides/compatibility.md)** | Browser, OS, Smart TV (LG webOS, Samsung Tizen, Fire TV), Handheld (Steam Deck), and Console compatibility breakdown. |
 | **[📱 Cross-Device Experience Matrix](guides/device-experience-matrix.md)** | Feature sets, UI density, input modes, and admin capabilities compared across Mobile, Handheld, PC, and TV. |
 | **[🎮 Bundled ROMs Catalog & Compliance Policy](guides/roms.md)** | Curated demo inventory, legal compliance, and local companion sidecars (`.nfo`, `.json`, `cover.webp`) guide. |
+
+---
+
+## 🛠️ Workspace Skills & Automation Tooling
+
+Retro Player includes built-in AI agent skills and automated utility scripts under [`.agents/skills/`](.agents/skills/):
+
+| Skill | Path | Description |
+| :--- | :--- | :--- |
+| **[Update ROMs](.agents/skills/update-roms/SKILL.md)** | [`.agents/skills/update-roms/`](.agents/skills/update-roms/) | Organizes ROM folders, ingests loose screenshots/covers to WebP, and dynamically queries online sources to generate `metadata.json` sidecars. |
+| **[ROM Cleanup](.agents/skills/rom-cleanup/SKILL.md)** | [`.agents/skills/rom-cleanup/`](.agents/skills/rom-cleanup/) | Deduplicates dated builds, prunes non-English regions, and filters obscure releases with structured keep/remove approval. |
 
 ---
 

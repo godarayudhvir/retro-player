@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Topbar from './components/Topbar';
 import SystemRibbon from './components/SystemRibbon';
 import CartridgeGrid from './components/CartridgeGrid';
@@ -118,14 +118,18 @@ export default function App() {
   const { hasSaveData, checkSaveData } = useSaveDataManager();
 
   // Selection Handler for opening Game Detail Drawer Modal
-  const handleGameSelect = useCallback(async (game) => {
+  const handleGameSelect = useCallback(async (game, isNavigating = false) => {
     setSelectedGameCard(game);
-    sfx.playModalOpen();
-    const saveExists = await checkSaveData(game);
+    if (!isNavigating) {
+      sfx.playModalOpen();
+    } else {
+      sfx.playTileNav();
+    }
+    const saveExists = await checkSaveData(game, activeProfileId);
     if (saveExists) {
       sfx.playSaveDetected();
     }
-  }, [checkSaveData, sfx]);
+  }, [checkSaveData, activeProfileId, sfx]);
 
   // Hook 6: ROM Catalog Manifest & Drag-Drop Loading (opens GameDetailModal)
   const handleCustomRomLoaded = useCallback((customGame) => {
@@ -152,6 +156,26 @@ export default function App() {
 
   // Hook 7: Automated Online Metadata & Cover Art Scraper
   const scraper = useMetadataScraper(games, { isMobile, isPlaying: !!activeGame });
+
+  // Calculate active index and prev/next handlers for Detailed View Carousel
+  const currentFilteredIndex = useMemo(() => {
+    if (!selectedGameCard || !filteredGames || filteredGames.length === 0) return -1;
+    return filteredGames.findIndex(g => (g.id && g.id === selectedGameCard.id) || g.title === selectedGameCard.title);
+  }, [selectedGameCard, filteredGames]);
+
+  const handlePrevGame = useCallback(() => {
+    if (!filteredGames || filteredGames.length <= 1 || currentFilteredIndex === -1) return;
+    const prevIdx = (currentFilteredIndex - 1 + filteredGames.length) % filteredGames.length;
+    const nextGame = filteredGames[prevIdx];
+    handleGameSelect(nextGame, true);
+  }, [filteredGames, currentFilteredIndex, handleGameSelect]);
+
+  const handleNextGame = useCallback(() => {
+    if (!filteredGames || filteredGames.length <= 1 || currentFilteredIndex === -1) return;
+    const nextIdx = (currentFilteredIndex + 1) % filteredGames.length;
+    const nextGame = filteredGames[nextIdx];
+    handleGameSelect(nextGame, true);
+  }, [filteredGames, currentFilteredIndex, handleGameSelect]);
 
   // Hook 8: Progressive Web App (PWA) & Service Worker Cache Engine
   const pwa = usePwaInstall();
@@ -192,6 +216,8 @@ export default function App() {
     setGamepadConnected,
     sfx,
     handleGameSelect,
+    onPrevGame: handlePrevGame,
+    onNextGame: handleNextGame,
     fetchGames,
     toggleFavorite,
     themeEngine,
@@ -418,6 +444,12 @@ export default function App() {
         onResetStats={resetGameStats}
         onScrapeGame={scraper.scrapeSingleGame}
         onEditMetadata={(game, meta) => setEditingMetadataGame({ game, metadata: meta })}
+        onPrevGame={handlePrevGame}
+        onNextGame={handleNextGame}
+        hasPrev={filteredGames && filteredGames.length > 1}
+        hasNext={filteredGames && filteredGames.length > 1}
+        currentIndex={currentFilteredIndex}
+        totalGames={filteredGames?.length || 0}
         isScraping={scraper.isScraping}
         scraper={scraper}
         gameStats={getGameStats(selectedGameCard?.id || selectedGameCard?.title)}

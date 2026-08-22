@@ -2,9 +2,15 @@
 
 ## 1. Description
 
-The **Automated Metadata & Cover Art Scraper** is a high-performance, zero-latency background metadata scraping and asset enrichment engine for Retro Player. It automatically queries the official **Libretro Thumbnails** repository, Wikipedia REST APIs, and retro gaming open databases to fetch high-resolution 3D box art, in-game screenshot captures, release dates, developers, publishers, genre tags, and synopses for every ROM loaded in the user's library or added via drag-and-drop.
+The **Automated Metadata & Cover Art Scraper** is a high-performance, zero-latency metadata and asset enrichment engine for Retro Player operating across two distinct layers:
 
-All scraped assets and metadata records are asynchronously cached in browser **IndexedDB** storage with a lightweight `localStorage` fallback, ensuring that network requests are executed only once and all cartridges load instantaneously with zero network overhead on subsequent application visits.
+1. **Local Codebase Sidecar Pipeline (Backend / IDE - Top Priority)**:
+   - Powered by the `update-roms` automation skill and [update_roms.js](file:///Users/godarayudhvir/Github/retro-player/.agents/skills/update-roms/scripts/update_roms.js).
+   - Ingests loose ROMs and screenshot drops in `public/roms/`, converts covers to `.webp`, and dynamically scrapes authentic metadata from online APIs/web search to generate permanent `metadata.json` sidecars in the repository.
+   - When local sidecars exist, they take **absolute top precedence**, loading instantaneously with 0ms network latency and bypassing browser scrapers entirely.
+2. **Client-Side Online Scraper (Browser / IndexedDB - Fallback Priority)**:
+   - Designed for web users accessing the app on GitHub Pages or loading ad-hoc custom ROMs in-browser without local file access.
+   - Queries Libretro CDN, TheGamesDB, ScreenScraper, and Wikipedia in real-time, caching responses into browser **IndexedDB** (`RetroPlayerMetadataDB`).
 
 ---
 

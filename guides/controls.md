@@ -41,7 +41,15 @@ When a game is actively running in the emulator canvas, inputs are processed dir
 | **Trigger Right (R2 / ZR)** | `3` Key | `R2` (Right Trigger) |
 | **Start / Pause** | `Enter` Key | `Start` / `Menu` Button |
 | **Select / Coin** | `Shift` Key | `Select` / `View` Button |
-| **Exit Game to Launcher** | `Escape` Key | Press `Select` + `Start` simultaneously (or Guide / Home) |
+| **Pause / Resume Emulation** | Topbar Pause Button | Topbar Pause Button |
+| **Mute / Unmute Audio** | Topbar Mute Button | Topbar Mute Button |
+| **60 FPS Screen Recording (with Audio)** | Topbar Record Button | Topbar Record Button |
+| **Emulation Speed (1.0x - 5.0x)** | Topbar Speed Button | Topbar Speed Button |
+| **Lossless PNG Screenshot** | Topbar Capture Button | Topbar Capture Button |
+| **Display Filters / Shaders** | Topbar Shaders Button | Topbar Shaders Button |
+| **Quick Save & Quick Load** | Topbar Save/Load Buttons | Topbar Save/Load Buttons |
+| **Diagnostic Health HUD** | Topbar Diagnostics Button | Topbar Diagnostics Button |
+| **Exit Game to Launcher** | `Escape` Key / Close Button | Press `Select` + `Start` simultaneously (or Guide / Home) |
 
 ---
 

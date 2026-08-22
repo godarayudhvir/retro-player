@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Play, Save, Cpu, Calendar, CheckCircle2, Star, Clock, History, RotateCcw, RefreshCw, Tag, ShieldCheck, Terminal, ChevronDown, ChevronUp, Pencil } from 'lucide-react';
+import { X, Play, Save, Cpu, Calendar, CheckCircle2, Star, Clock, History, RotateCcw, RefreshCw, Tag, Terminal, ChevronDown, ChevronUp, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getGameDescription, getReleaseDate } from '../gameDescriptions';
 import { resolveAssetPath } from '../utils/assetPath';
 
 /**
  * Game Detail Drawer Modal presenting rich scraped metadata, release dates, developer, publisher, genre tags,
- * live save data status, playtime stats, and on-demand online scraping actions.
+ * live save data status, playtime stats, carousel left/right ROM navigation, and on-demand online scraping actions.
  */
 export default function GameDetailModal({
   game,
@@ -16,6 +16,12 @@ export default function GameDetailModal({
   onResetStats,
   onScrapeGame,
   onEditMetadata,
+  onPrevGame,
+  onNextGame,
+  hasPrev = false,
+  hasNext = false,
+  currentIndex = -1,
+  totalGames = 0,
   isScraping = false,
   scraper,
   gameStats = { playtimeFormatted: '< 1 min', launchCount: 0, lastPlayedFormatted: 'Never' },
@@ -25,21 +31,37 @@ export default function GameDetailModal({
   onPlay,
   sfx
 }) {
-  if (!game) return null;
-
   const [imgError, setImgError] = useState(false);
   const [isLocalScraping, setIsLocalScraping] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
   const logsContainerRef = useRef(null);
 
-  const meta = metadata || {};
-  const rawCover = meta.coverUrl || (game.coverUrl && !game.coverUrl.endsWith('.svg') ? game.coverUrl : null);
-  const coverSrc = rawCover ? resolveAssetPath(rawCover) : null;
-  const description = meta.description || getGameDescription(game);
-  const releaseYear = meta.releaseYear || meta.releaseDate?.split('-')[0] || (getReleaseDate(game) !== '2000-01-01' ? getReleaseDate(game).split('-')[0] : 'Classic');
-  const developer = meta.developer || game.systemName || 'Classic';
-  const publisher = meta.publisher || game.systemName || 'Classic';
-  const genre = meta.genre || 'Retro Classic';
+  // Reset img error and local state when game changes
+  useEffect(() => {
+    setImgError(false);
+    setIsLocalScraping(false);
+  }, [game?.id, game?.title, game?.coverUrl]);
+
+  // Keyboard Arrow Left/Right / Q/E/A/D navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+      if (e.key === 'ArrowLeft' || e.key === 'q' || e.key === 'Q' || e.key === 'a' || e.key === 'A') {
+        if (hasPrev && onPrevGame) {
+          e.preventDefault();
+          onPrevGame();
+        }
+      } else if (e.key === 'ArrowRight' || e.key === 'e' || e.key === 'E' || e.key === 'd' || e.key === 'D') {
+        if (hasNext && onNextGame) {
+          e.preventDefault();
+          onNextGame();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [hasPrev, hasNext, onPrevGame, onNextGame]);
 
   // Automatically scroll to logs when opened or when re-scraping
   useEffect(() => {
@@ -47,6 +69,17 @@ export default function GameDetailModal({
       logsContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }, [showLogs]);
+
+  if (!game) return null;
+
+  const meta = metadata || {};
+  const rawCover = meta.coverUrl || (game.coverUrl && !game.coverUrl.endsWith('.svg') ? game.coverUrl : null);
+  const coverSrc = rawCover ? resolveAssetPath(rawCover) : null;
+  const description = meta.description || game.sidecarMetadata?.description || getGameDescription(game);
+  const releaseYear = meta.releaseYear || game.sidecarMetadata?.releaseYear || meta.releaseDate?.split('-')[0] || (getReleaseDate(game) !== '2000-01-01' ? getReleaseDate(game).split('-')[0] : 'Classic');
+  const developer = meta.developer || game.sidecarMetadata?.developer || game.systemName || 'Classic';
+  const publisher = meta.publisher || game.sidecarMetadata?.publisher || game.systemName || 'Classic';
+  const genre = meta.genre || game.sidecarMetadata?.genre || 'Retro Classic';
 
   const handleManualScrape = async () => {
     if (onScrapeGame) {
@@ -60,60 +93,72 @@ export default function GameDetailModal({
   };
 
   return (
-    <div className="info-modal-backdrop" onClick={onClose}>
-      <div className="game-card-modal-content" onClick={(e) => e.stopPropagation()}>
-        <button
-          className={`game-card-close ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`}
-          onClick={onClose}
-          title="Close (ESC / B)"
-        >
-          <X size={20} />
-        </button>
+    <div className="info-modal-backdrop game-card-backdrop" onClick={onClose}>
+      <div className="game-card-modal-wrapper" onClick={(e) => e.stopPropagation()}>
+        {/* Left Floating ROM Nav Arrow */}
+        {hasPrev && (
+          <button
+            className={`game-card-nav-arrow nav-arrow-left ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'prevGame' ? 'gamepad-focused' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              sfx?.playTileNav?.();
+              onPrevGame?.();
+            }}
+            title="Previous ROM (Left Arrow / Q / A / L1)"
+            aria-label="Previous ROM"
+          >
+            <ChevronLeft size={28} />
+          </button>
+        )}
 
-        <div className="game-card-grid">
-          <div className="game-card-cover-wrapper">
-            {coverSrc && !imgError ? (
-              <img
-                src={coverSrc}
-                alt={game.title}
-                className="game-card-cover-img"
-                onError={() => setImgError(true)}
-              />
-            ) : (
-              <div className="tile-fallback" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', padding: '1.5rem', textAlign: 'center', background: 'var(--panel-bg, #f8fafc)' }}>
-                <span className="fallback-console-pill" style={{ marginBottom: '0.75rem', fontSize: '0.8rem' }}>{game.systemName}</span>
-                <span className="fallback-game-title" style={{ fontSize: '1rem', color: 'var(--text-main, #1e293b)' }}>{game.title}</span>
-              </div>
-            )}
+        <div className="game-card-modal-content">
+          <button
+            className={`game-card-close ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`}
+            onClick={onClose}
+            title="Close (ESC / B)"
+          >
+            <X size={20} />
+          </button>
 
-            {isFavorite && (
-              <div className="drawer-favorite-badge" title="Favorited Game">
-                <Star size={16} fill="#fbbf24" color="#d97706" />
-                <span>FAVORITE</span>
-              </div>
-            )}
-          </div>
+          <div className="game-card-grid">
+            <div className="game-card-cover-wrapper">
+              {coverSrc && !imgError ? (
+                <img
+                  src={coverSrc}
+                  alt={game.title}
+                  className="game-card-cover-img"
+                  onError={() => setImgError(true)}
+                />
+              ) : (
+                <div className="tile-fallback" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', padding: '1.5rem', textAlign: 'center', background: 'var(--panel-bg, #f8fafc)' }}>
+                  <span className="fallback-console-pill" style={{ marginBottom: '0.75rem', fontSize: '0.8rem' }}>{game.systemName}</span>
+                  <span className="fallback-game-title" style={{ fontSize: '1rem', color: 'var(--text-main, #1e293b)' }}>{game.title}</span>
+                </div>
+              )}
 
-          <div className="game-card-details">
-            <div className="game-card-header-badge">
-              <span className="game-card-sys-tag" style={{ '--sys-color': game.systemColor || '#ef4444' }}>
-                {game.systemIcon && (
-                  <img src={resolveAssetPath(game.systemIcon)} alt="" className="tile-sys-badge-icon" />
-                )}
-                <span>{game.systemName}</span>
-              </span>
-              <span className="game-card-core-tag">
-                <Calendar size={14} /> {releaseYear}
-              </span>
-              <span className="game-card-core-tag">
-                <Cpu size={14} /> {game.systemCore?.toUpperCase() || 'EMULATORJS'}
-              </span>
-              {meta.source && (
-                <span className="game-card-core-tag scraper-verified-tag" title={`Enriched via ${meta.source}`}>
-                  <ShieldCheck size={14} color="#10b981" /> {meta.source}
-                </span>
+              {isFavorite && (
+                <div className="drawer-favorite-badge" title="Favorited Game">
+                  <Star size={16} fill="#fbbf24" color="#d97706" />
+                  <span>FAVORITE</span>
+                </div>
               )}
             </div>
+
+            <div className="game-card-details">
+              <div className="game-card-header-badge">
+                <span className="game-card-sys-tag" style={{ '--sys-color': game.systemColor || '#ef4444' }}>
+                  {game.systemIcon && (
+                    <img src={resolveAssetPath(game.systemIcon)} alt="" className="tile-sys-badge-icon" />
+                  )}
+                  <span>{game.systemName}</span>
+                </span>
+                <span className="game-card-core-tag">
+                  <Calendar size={14} /> {releaseYear}
+                </span>
+                <span className="game-card-core-tag">
+                  <Cpu size={14} /> {game.systemCore?.toUpperCase() || 'EMULATORJS'}
+                </span>
+              </div>
 
             <h2 className="game-card-title">{game.title}</h2>
 
@@ -299,6 +344,23 @@ export default function GameDetailModal({
           </div>
         </div>
       </div>
+
+      {/* Right Floating ROM Nav Arrow */}
+      {hasNext && (
+        <button
+          className={`game-card-nav-arrow nav-arrow-right ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'nextGame' ? 'gamepad-focused' : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            sfx?.playTileNav?.();
+            onNextGame?.();
+          }}
+          title="Next ROM (Right Arrow / E / D / R1)"
+          aria-label="Next ROM"
+        >
+          <ChevronRight size={28} />
+        </button>
+      )}
     </div>
-  );
+  </div>
+);
 }

@@ -533,7 +533,7 @@ export default function MobileAppView({
                   <div className="mobile-sheet-badges">
                     <span className="mobile-badge-item">
                       <Calendar size={12} />
-                      {selectedMeta?.releaseYear || selectedMeta?.releaseDate?.split('-')[0] || (getReleaseDate(selectedGameForDetails) !== '2000-01-01' ? getReleaseDate(selectedGameForDetails).split('-')[0] : 'Classic')}
+                      {selectedMeta?.releaseYear || selectedGameForDetails.sidecarMetadata?.releaseYear || selectedMeta?.releaseDate?.split('-')[0] || (getReleaseDate(selectedGameForDetails) !== '2000-01-01' ? getReleaseDate(selectedGameForDetails).split('-')[0] : 'Classic')}
                     </span>
                     <span className="mobile-badge-item">
                       <Cpu size={12} />
@@ -578,7 +578,7 @@ export default function MobileAppView({
 
               {/* Game Synopsis */}
               <p className="mobile-sheet-description">
-                {selectedMeta?.description || getGameDescription(selectedGameForDetails)}
+                {selectedMeta?.description || selectedGameForDetails.sidecarMetadata?.description || getGameDescription(selectedGameForDetails)}
               </p>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   getAllCachedMetadata,
+  saveCachedMetadata,
   scrapeGame,
   clearAllCachedMetadata,
   subscribeScraperLogs,
@@ -79,7 +80,7 @@ export function useMetadataScraper(games = [], options = {}) {
           if (hasLocalSidecar && (!merged[id] || (!merged[id].isManualOverride && merged[id].source !== 'Manual Override'))) {
             const sidecar = g.sidecarMetadata || {};
             const sidecarCover = (g.coverUrl && !g.coverUrl.endsWith('.svg')) ? g.coverUrl : null;
-            merged[id] = {
+            const updatedMeta = {
               id,
               title: sidecar.title || g.title,
               systemKey: g.systemKey,
@@ -95,6 +96,11 @@ export function useMetadataScraper(games = [], options = {}) {
               hasSidecar: true,
               scrapedAt: new Date().toISOString()
             };
+            merged[id] = updatedMeta;
+            // Persist companion cover updates into IndexedDB cache
+            if (sidecarCover && (!cached[id] || cached[id].coverUrl !== sidecarCover)) {
+              saveCachedMetadata(id, updatedMeta).catch(() => {});
+            }
           }
         });
       }

@@ -39,6 +39,8 @@ export function useGamepadNavigation({
   setGamepadConnected,
   sfx,
   handleGameSelect,
+  onPrevGame,
+  onNextGame,
   fetchGames,
   toggleFavorite,
   themeEngine,
@@ -91,6 +93,8 @@ export function useGamepadNavigation({
       pwa,
       bgm,
       onOpenScraperModal,
+      onPrevGame,
+      onNextGame,
       isMobile,
       selectedMobileGameForDetails,
       hasChosenProfileThisSession,
@@ -925,7 +929,7 @@ export function useGamepadNavigation({
     // ==========================================
     // 4.1 Selected Game Card Drawer Navigation
     if (curCard) {
-      const cardButtons = ['play', 'fav', 'editMeta', 'scrape'];
+      const cardButtons = ['prevGame', 'play', 'fav', 'editMeta', 'scrape', 'nextGame'];
       const curId = curTarget?.id || 'play';
       const curIdx = cardButtons.indexOf(curId);
 
@@ -942,24 +946,37 @@ export function useGamepadNavigation({
         setFocusedTarget({ zone: 'cardModal', id: 'play' });
         sfx?.playTileNav?.();
       } else if (dir === 'LEFT') {
-        if (curId === 'close') {
-          // Stay at close or loop
-        } else {
-          const nextIdx = Math.max(0, curIdx - 1);
+        if (curId === 'prevGame') {
+          stateRef.current.onPrevGame?.();
+        } else if (curId === 'close') {
+          setFocusedTarget({ zone: 'cardModal', id: 'prevGame' });
+          sfx?.playTileNav?.();
+        } else if (curIdx > 0) {
+          const nextIdx = curIdx - 1;
           setFocusedTarget({ zone: 'cardModal', id: cardButtons[nextIdx] });
           sfx?.playTileNav?.();
+        } else {
+          stateRef.current.onPrevGame?.();
         }
       } else if (dir === 'RIGHT') {
-        if (curId === 'close') {
+        if (curId === 'nextGame') {
+          stateRef.current.onNextGame?.();
+        } else if (curId === 'close') {
           setFocusedTarget({ zone: 'cardModal', id: 'play' });
           sfx?.playTileNav?.();
-        } else {
-          const nextIdx = Math.min(cardButtons.length - 1, curIdx + 1);
+        } else if (curIdx >= 0 && curIdx < cardButtons.length - 1) {
+          const nextIdx = curIdx + 1;
           setFocusedTarget({ zone: 'cardModal', id: cardButtons[nextIdx] });
           sfx?.playTileNav?.();
+        } else {
+          stateRef.current.onNextGame?.();
         }
       } else if (dir === 'SELECT') {
-        if (curId === 'close') {
+        if (curId === 'prevGame') {
+          stateRef.current.onPrevGame?.();
+        } else if (curId === 'nextGame') {
+          stateRef.current.onNextGame?.();
+        } else if (curId === 'close') {
           setSelectedGameCard(null);
           setFocusedTarget({ zone: 'grid', index: curTarget?.index || 0 });
           sfx?.playModalClose?.();
@@ -974,11 +991,9 @@ export function useGamepadNavigation({
         } else if (curId === 'scrape') {
           const scrapeBtn = document.querySelector('.scraper-refresh-btn');
           if (scrapeBtn) scrapeBtn.click();
-        } else {
-          const gameToPlay = curCard;
-          setSelectedGameCard(null);
-          sfx?.playGameLaunch?.();
-          setActiveGame(gameToPlay);
+        } else if (curId === 'play') {
+          const playBtn = document.querySelector('.play-now-btn');
+          if (playBtn) playBtn.click();
         }
       }
       return;
@@ -1460,7 +1475,9 @@ export function useGamepadNavigation({
             navigateSpatial('BACK');
             moved = true;
           } else if (shoulderL && !prevButtonsRef.current.shoulderL) {
-            if (!stateRef.current.isMobile) {
+            if (stateRef.current.selectedGameCard) {
+              stateRef.current.onPrevGame?.();
+            } else if (!stateRef.current.isMobile) {
               const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
               const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
               const allSysKeys = ['all', 'favorites', 'recent', ...sortedSystems.map(s => s.key)];
@@ -1475,7 +1492,9 @@ export function useGamepadNavigation({
             }
             moved = true;
           } else if (shoulderR && !prevButtonsRef.current.shoulderR) {
-            if (!stateRef.current.isMobile) {
+            if (stateRef.current.selectedGameCard) {
+              stateRef.current.onNextGame?.();
+            } else if (!stateRef.current.isMobile) {
               const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
               const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
               const allSysKeys = ['all', 'favorites', 'recent', ...sortedSystems.map(s => s.key)];
