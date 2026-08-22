@@ -1,13 +1,14 @@
 import React from 'react';
 import { FolderOpen, RefreshCw, Star, Clock, Search, Sparkles } from 'lucide-react';
-import CartridgeTile from './CartridgeTile';
+import VanillaView from './theme-views/VanillaView';
+import DsView from './theme-views/DsView';
 
 /**
- * Viewport rendering the 3D cartridge tiles grid or tailored, professional empty state prompts.
- * Designed with a full-bleed ambient canvas layout inspired by Apple Arcade and modern console showcases.
+ * Viewport rendering the theme-specific layout architecture or tailored empty state prompts.
+ * Routes dynamically to Vanilla, Adroit, Canvas, DS Touch, Modern, or PlayStation-X layouts.
  */
 export default function CartridgeGrid({
-  filteredGames,
+  filteredGames = [],
   metadataMap = {},
   focusedTarget,
   setFocusedTarget,
@@ -19,7 +20,15 @@ export default function CartridgeGrid({
   searchQuery,
   setActiveSystem,
   setSearchQuery,
-  sfx
+  sfx,
+  themeEngine,
+  getGameStats,
+  onPlayGame,
+  onToggleFavorite,
+  onEditMetadata,
+  onScrapeGame,
+  hasSaveData,
+  scraper
 }) {
   const currentSystemName =
     activeSystem === 'all'
@@ -30,6 +39,8 @@ export default function CartridgeGrid({
       ? 'Recently Played'
       : filteredGames[0]?.systemName || activeSystem.toUpperCase();
 
+  const currentTheme = themeEngine?.theme || 'vanilla';
+
   const renderEmptyState = () => {
     if (searchQuery && searchQuery.trim().length > 0) {
       return (
@@ -39,16 +50,11 @@ export default function CartridgeGrid({
           </div>
           <h3>No Matching Titles Found</h3>
           <p>
-            No games match &ldquo;<strong style={{ color: 'var(--text-main)' }}>{searchQuery}</strong>&rdquo;.
-            <br />
-            Try checking for spelling or search by platform name.
+            No games found matching "<strong>{searchQuery}</strong>". Try clearing your search query or looking in another system.
           </p>
           <button
-            className={`system-tab active ${focusedTarget.zone === 'grid' ? 'gamepad-focused' : ''}`}
-            onClick={() => {
-              setSearchQuery?.('');
-              sfx?.playTileNav?.();
-            }}
+            className="nes-btn is-primary"
+            onClick={() => setSearchQuery('')}
             style={{ margin: '1.5rem auto 0', cursor: 'pointer' }}
           >
             Clear Search Filter
@@ -60,25 +66,19 @@ export default function CartridgeGrid({
     if (activeSystem === 'favorites') {
       return (
         <div className="console-empty">
-          <div className="empty-icon-circle favorite-circle">
-            <Star size={38} fill="#f59e0b" color="#f59e0b" />
+          <div className="empty-icon-circle">
+            <Star size={36} color="#f59e0b" />
           </div>
-          <h3>Your Favorites Collection is Empty</h3>
+          <h3>No Favorites Starred Yet</h3>
           <p>
-            Mark games with a star to quickly access your favorite adventures here.
-            <br />
-            Select any title in the library and press <kbd className="lr-badge" style={{ verticalAlign: 'middle', margin: '0 4px' }}>⭐ Favorite</kbd> (or press <strong>F</strong> / <strong>X</strong> on controller).
+            Press <strong>F</strong> on keyboard or <strong>Y-Button</strong> on your gamepad while browsing cartridges to pin your all-time favorites here.
           </p>
           <button
-            className={`system-tab active ${focusedTarget.zone === 'grid' ? 'gamepad-focused' : ''}`}
-            onClick={() => {
-              setActiveSystem?.('all');
-              setFocusedTarget?.({ zone: 'ribbon', index: 0 });
-              sfx?.playTabSwitch?.();
-            }}
+            className="nes-btn is-primary"
+            onClick={() => setActiveSystem('all')}
             style={{ margin: '1.5rem auto 0', cursor: 'pointer' }}
           >
-            <Sparkles size={16} /> Browse All Games
+            Browse All Games
           </button>
         </div>
       );
@@ -87,25 +87,19 @@ export default function CartridgeGrid({
     if (activeSystem === 'recent') {
       return (
         <div className="console-empty">
-          <div className="empty-icon-circle recent-circle">
-            <Clock size={38} color="#10b981" />
+          <div className="empty-icon-circle">
+            <Clock size={36} color="#3b82f6" />
           </div>
-          <h3>No Recently Played Games</h3>
+          <h3>No Play History Recorded</h3>
           <p>
-            Jump into any game to have your playtime sessions and saves automatically tracked here.
-            <br />
-            Pick a title from the catalog and start playing!
+            Games you launch will automatically appear here with recorded playtime, sessions, and battery save states.
           </p>
           <button
-            className={`system-tab active ${focusedTarget.zone === 'grid' ? 'gamepad-focused' : ''}`}
-            onClick={() => {
-              setActiveSystem?.('all');
-              setFocusedTarget?.({ zone: 'ribbon', index: 0 });
-              sfx?.playTabSwitch?.();
-            }}
+            className="nes-btn is-primary"
+            onClick={() => setActiveSystem('all')}
             style={{ margin: '1.5rem auto 0', cursor: 'pointer' }}
           >
-            <Sparkles size={16} /> Discover Games to Play
+            Browse All Games
           </button>
         </div>
       );
@@ -114,20 +108,15 @@ export default function CartridgeGrid({
     return (
       <div className="console-empty">
         <div className="empty-icon-circle">
-          <FolderOpen size={38} color="#94a3b8" />
+          <FolderOpen size={36} color="#64748b" />
         </div>
-        <h3>No Titles Registered</h3>
+        <h3>No ROMs Found</h3>
         <p>
-          Drop your ROM files into <span className="code-block">public/roms/[system]</span> or use the Load ROM button.
-          <br />
-          The scraper will automatically fetch authentic 3D box art & metadata!
+          No ROM files found in this category. Drop <code>.gba</code>, <code>.nes</code>, <code>.gbc</code>, <code>.nds</code>, or <code>.zip</code> ROMs directly into this window to load them.
         </p>
         <button
-          className={`system-tab active ${focusedTarget.zone === 'grid' ? 'gamepad-focused' : ''}`}
-          onClick={() => {
-            fetchGames?.();
-            sfx?.playTileNav?.();
-          }}
+          className="nes-btn is-primary"
+          onClick={fetchGames}
           style={{ margin: '1.5rem auto 0', cursor: 'pointer' }}
         >
           <RefreshCw size={16} className={loading ? 'spin' : ''} /> Rescan Channels
@@ -136,49 +125,47 @@ export default function CartridgeGrid({
     );
   };
 
-    return (
+  const renderThemeLayout = () => {
+    switch (currentTheme) {
+      case 'ds':
+        return (
+          <DsView
+            filteredGames={filteredGames}
+            metadataMap={metadataMap}
+            focusedTarget={focusedTarget}
+            setFocusedTarget={setFocusedTarget}
+            handleGameSelect={handleGameSelect}
+            isFavorite={isFavorite}
+            getGameStats={getGameStats}
+            onPlayGame={onPlayGame}
+            onToggleFavorite={onToggleFavorite}
+            onEditMetadata={onEditMetadata}
+            onScrapeGame={onScrapeGame}
+            hasSaveData={hasSaveData}
+            scraper={scraper}
+            sfx={sfx}
+          />
+        );
+      case 'vanilla':
+      default:
+        return (
+          <VanillaView
+            filteredGames={filteredGames}
+            metadataMap={metadataMap}
+            focusedTarget={focusedTarget}
+            setFocusedTarget={setFocusedTarget}
+            handleGameSelect={handleGameSelect}
+            isFavorite={isFavorite}
+            activeSystem={activeSystem}
+            currentSystemName={currentSystemName}
+          />
+        );
+    }
+  };
+
+  return (
     <main className="console-viewport">
-      {filteredGames.length > 0 ? (
-        <div className="console-viewport-inner">
-          {/* Ambient Channel Showcase Header */}
-          <div className="channel-spotlight-bar">
-            <div className="channel-meta-badge">
-              <span className="channel-title-text">{currentSystemName}</span>
-              <span className="channel-count-pill">
-                {filteredGames.length} {filteredGames.length === 1 ? 'Title' : 'Titles'}
-              </span>
-            </div>
-          </div>
-
-          {/* Full-Bleed Ambient Tiles Grid */}
-          <div className="tiles-grid">
-            {filteredGames.map((game, index) => {
-              const isFocused = focusedTarget.zone === 'grid' && focusedTarget.index === index;
-              const isFav = isFavorite ? isFavorite(game.id || game.title) : false;
-              const meta =
-                metadataMap[game.id] ||
-                metadataMap[`${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')];
-
-              return (
-                <CartridgeTile
-                  key={game.id}
-                  game={game}
-                  metadata={meta}
-                  isFocused={isFocused}
-                  isFavorite={isFav}
-                  coverOnly={activeSystem === 'all'}
-                  onClick={() => {
-                    setFocusedTarget({ zone: 'grid', index });
-                    handleGameSelect(game);
-                  }}
-                />
-              );
-            })}
-          </div>
-        </div>
-      ) : (
-        renderEmptyState()
-      )}
+      {filteredGames.length > 0 ? renderThemeLayout() : renderEmptyState()}
     </main>
   );
 }

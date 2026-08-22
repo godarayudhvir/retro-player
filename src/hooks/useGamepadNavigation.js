@@ -14,6 +14,8 @@ export function useGamepadNavigation({
   setShowLoadRomModal,
   showScraperModal,
   setShowScraperModal,
+  showThemeModal,
+  setShowThemeModal,
   showProfileSelectModal,
   setShowProfileSelectModal,
   showMiiCreatorModal,
@@ -77,6 +79,8 @@ export function useGamepadNavigation({
       showInfoModal,
       showLoadRomModal,
       showScraperModal,
+      showThemeModal,
+      setShowThemeModal,
       showProfileSelectModal,
       showMiiCreatorModal,
       showVirtualKeyboard,
@@ -109,6 +113,7 @@ export function useGamepadNavigation({
     showInfoModal,
     showLoadRomModal,
     showScraperModal,
+    showThemeModal,
     showProfileSelectModal,
     showMiiCreatorModal,
     showVirtualKeyboard,
@@ -938,8 +943,13 @@ export function useGamepadNavigation({
         } else if (curId === 'sfx') {
           sfx?.toggleMute?.();
         } else if (curId === 'theme') {
-          stateRef.current.themeEngine?.cycleTheme?.();
-          sfx?.playThemeSwitch?.();
+          if (stateRef.current.setShowThemeModal) {
+            stateRef.current.setShowThemeModal(true);
+            sfx?.playModalOpen?.();
+          } else {
+            stateRef.current.themeEngine?.cycleTheme?.();
+            sfx?.playThemeSwitch?.();
+          }
         } else if (curId === 'search') {
           if (stateRef.current.gamepadConnected) {
             setShowVirtualKeyboard(true);
@@ -1029,29 +1039,73 @@ export function useGamepadNavigation({
           const sysIdx = allTabs.findIndex(t => t.key === curActiveSys);
           setFocusedTarget({ zone: 'ribbon', index: sysIdx >= 0 ? sysIdx : 0 });
           sfx?.playTileNav?.();
-        } else if (dir === 'DOWN') {
-          setFocusedTarget({ zone: 'hud', id: 'rescan' });
-          sfx?.playTileNav?.();
         }
         return;
       }
 
-      // Single step navigation for single horizontal row cartridge library shelf
-      if (dir === 'RIGHT') {
-        const nextIdx = Math.min(curIndex + 1, curGames.length - 1);
-        setFocusedTarget({ zone: 'grid', index: nextIdx });
-        sfx?.playTileNav?.();
-      } else if (dir === 'LEFT') {
-        const nextIdx = Math.max(0, curIndex - 1);
-        setFocusedTarget({ zone: 'grid', index: nextIdx });
-        sfx?.playTileNav?.();
-      } else if (dir === 'UP') {
-        const sysIdx = allTabs.findIndex(t => t.key === curActiveSys);
-        setFocusedTarget({ zone: 'ribbon', index: sysIdx >= 0 ? sysIdx : 0 });
-        sfx?.playTileNav?.();
-      } else if (dir === 'DOWN') {
-        setFocusedTarget({ zone: 'hud', id: 'rescan' });
-        sfx?.playTileNav?.();
+      const curTheme = stateRef.current.themeEngine?.theme || 'vanilla';
+
+      // 1. Nintendo DS Touch Dual-Screen (3-Column Buttons Grid)
+      if (curTheme === 'ds') {
+        let cols = 3;
+        const gridEl = document.querySelector('.ds-buttons-grid');
+        if (gridEl) {
+          try {
+            const computed = window.getComputedStyle(gridEl);
+            const gridTemplateCols = computed.getPropertyValue('grid-template-columns');
+            if (gridTemplateCols) {
+              const count = gridTemplateCols.split(' ').filter(Boolean).length;
+              if (count > 0) cols = count;
+            }
+          } catch {}
+        }
+
+        if (dir === 'RIGHT') {
+          const nextIdx = Math.min(curIndex + 1, curGames.length - 1);
+          setFocusedTarget({ zone: 'grid', index: nextIdx });
+          sfx?.playTileNav?.();
+        } else if (dir === 'LEFT') {
+          const prevIdx = Math.max(0, curIndex - 1);
+          setFocusedTarget({ zone: 'grid', index: prevIdx });
+          sfx?.playTileNav?.();
+        } else if (dir === 'DOWN') {
+          if (curIndex + cols < curGames.length) {
+            setFocusedTarget({ zone: 'grid', index: curIndex + cols });
+            sfx?.playTileNav?.();
+          } else if (curIndex < curGames.length - 1) {
+            setFocusedTarget({ zone: 'grid', index: curGames.length - 1 });
+            sfx?.playTileNav?.();
+          }
+        } else if (dir === 'UP') {
+          if (curIndex - cols >= 0) {
+            setFocusedTarget({ zone: 'grid', index: curIndex - cols });
+            sfx?.playTileNav?.();
+          } else {
+            const sysIdx = allTabs.findIndex(t => t.key === curActiveSys);
+            setFocusedTarget({ zone: 'ribbon', index: sysIdx >= 0 ? sysIdx : 0 });
+            sfx?.playTileNav?.();
+          }
+        }
+      } 
+      // 2. Horizontal Shelf Theme (Vanilla)
+      else {
+        if (dir === 'RIGHT') {
+          const nextIdx = Math.min(curIndex + 1, curGames.length - 1);
+          setFocusedTarget({ zone: 'grid', index: nextIdx });
+          sfx?.playTileNav?.();
+        } else if (dir === 'LEFT') {
+          const prevIdx = Math.max(0, curIndex - 1);
+          setFocusedTarget({ zone: 'grid', index: prevIdx });
+          sfx?.playTileNav?.();
+        } else if (dir === 'UP') {
+          const sysIdx = allTabs.findIndex(t => t.key === curActiveSys);
+          setFocusedTarget({ zone: 'ribbon', index: sysIdx >= 0 ? sysIdx : 0 });
+          sfx?.playTileNav?.();
+        } else if (dir === 'DOWN') {
+          const nextIdx = Math.min(curIndex + 1, curGames.length - 1);
+          setFocusedTarget({ zone: 'grid', index: nextIdx });
+          sfx?.playTileNav?.();
+        }
       }
     } else if (curZone === 'hud') {
       if (dir === 'UP') {
@@ -1187,7 +1241,10 @@ export function useGamepadNavigation({
         case 't':
         case 'T':
           e.preventDefault();
-          if (stateRef.current.themeEngine?.cycleTheme) {
+          if (stateRef.current.setShowThemeModal) {
+            stateRef.current.setShowThemeModal(true);
+            sfx?.playModalOpen?.();
+          } else if (stateRef.current.themeEngine?.cycleTheme) {
             stateRef.current.themeEngine.cycleTheme();
             sfx?.playThemeSwitch?.();
           }

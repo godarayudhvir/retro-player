@@ -16,6 +16,7 @@ import OnboardingScreen from './components/OnboardingScreen';
 import ScraperModal from './components/ScraperModal';
 import MobileAppView from './components/MobileAppView';
 import MetadataEditModal from './components/MetadataEditModal';
+import ThemeSwitcherModal from './components/ThemeSwitcherModal';
 
 import { useWebAudioSfx } from './hooks/useWebAudioSfx';
 import { useGamepadStatus } from './hooks/useGamepadStatus';
@@ -41,6 +42,7 @@ export default function App() {
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showLoadRomModal, setShowLoadRomModal] = useState(false);
   const [showScraperModal, setShowScraperModal] = useState(false);
+  const [showThemeModal, setShowThemeModal] = useState(false);
   const [showVirtualKeyboard, setShowVirtualKeyboard] = useState(false);
   const [showProfileSelectModal, setShowProfileSelectModal] = useState(false);
   const [showMiiCreatorModal, setShowMiiCreatorModal] = useState(false);
@@ -61,17 +63,25 @@ export default function App() {
     }
   });
 
-  const [isMobile, setIsMobile] = useState(() => {
+  const checkIsMobile = () => {
     if (typeof window === 'undefined') return false;
-    return window.innerWidth <= 768;
-  });
+    const isSmallWidth = window.innerWidth <= 768;
+    const isLandscapePhone = window.innerHeight <= 550 && window.innerWidth <= 1024;
+    return isSmallWidth || isLandscapePhone;
+  };
+
+  const [isMobile, setIsMobile] = useState(checkIsMobile);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
+      setIsMobile(checkIsMobile());
     };
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
   }, []);
 
   const searchInputRef = useRef(null);
@@ -117,9 +127,13 @@ export default function App() {
 
   // Selection Handler for opening Game Detail Drawer Modal
   const handleGameSelect = useCallback(async (game, isNavigating = false) => {
-    setSelectedGameCard(game);
-    if (!isNavigating) {
-      sfx.playModalOpen();
+    if (themeEngine?.theme !== 'ds') {
+      setSelectedGameCard(game);
+      if (!isNavigating) {
+        sfx.playModalOpen();
+      } else {
+        sfx.playTileNav();
+      }
     } else {
       sfx.playTileNav();
     }
@@ -127,7 +141,7 @@ export default function App() {
     if (saveExists) {
       sfx.playSaveDetected();
     }
-  }, [checkSaveData, activeProfileId, sfx]);
+  }, [checkSaveData, activeProfileId, sfx, themeEngine?.theme]);
 
   // Hook 6: ROM Catalog Manifest & Drag-Drop Loading (opens GameDetailModal)
   const handleCustomRomLoaded = useCallback((customGame) => {
@@ -188,6 +202,8 @@ export default function App() {
     setShowLoadRomModal,
     showScraperModal,
     setShowScraperModal,
+    showThemeModal,
+    setShowThemeModal,
     showProfileSelectModal,
     setShowProfileSelectModal,
     showMiiCreatorModal,
@@ -355,6 +371,7 @@ export default function App() {
             setShowLoadRomModal={setShowLoadRomModal}
             setShowVirtualKeyboard={setShowVirtualKeyboard}
             onOpenScraperModal={() => setShowScraperModal(true)}
+            onOpenThemeModal={() => setShowThemeModal(true)}
             time={time}
             sfx={sfx}
             themeEngine={themeEngine}
@@ -389,6 +406,18 @@ export default function App() {
             setActiveSystem={setActiveSystem}
             setSearchQuery={setSearchQuery}
             sfx={sfx}
+            themeEngine={themeEngine}
+            getGameStats={getGameStats}
+            onPlayGame={(game) => {
+              recordGameLaunch(game);
+              sfx.playGameLaunch();
+              setActiveGame(game);
+            }}
+            onToggleFavorite={toggleFavorite}
+            onEditMetadata={(game, meta) => setEditingMetadataGame({ game, metadata: meta })}
+            onScrapeGame={scraper.scrapeSingleGame}
+            hasSaveData={hasSaveData}
+            scraper={scraper}
           />
 
           {/* Bottom Controller HUD */}
@@ -429,9 +458,9 @@ export default function App() {
         }}
       />
 
-      {/* Game Detail Drawer Modal */}
+      {/* Game Detail Drawer Modal (Used for Vanilla Carousel shelf; DS Touch uses direct integrated stage) */}
       <GameDetailModal
-        game={selectedGameCard}
+        game={themeEngine?.theme === 'ds' ? null : selectedGameCard}
         metadata={selectedGameMetadata}
         hasSaveData={hasSaveData}
         isFavorite={isFavorite(selectedGameCard?.id || selectedGameCard?.title)}
@@ -575,6 +604,17 @@ export default function App() {
         sfx={sfx}
         focusedTarget={focusedTarget}
         setFocusedTarget={setFocusedTarget}
+      />
+
+      {/* Console Theme Studio & Light/Dark Switcher Modal */}
+      <ThemeSwitcherModal
+        isOpen={showThemeModal}
+        onClose={() => {
+          setShowThemeModal(false);
+          sfx.playModalClose();
+        }}
+        themeEngine={themeEngine}
+        sfx={sfx}
       />
 
       {/* Active Game Emulator Sandbox */}

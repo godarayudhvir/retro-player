@@ -20,6 +20,7 @@ import {
   Zap
 } from 'lucide-react';
 import MiiAvatar from './MiiAvatar';
+import { resolveAssetPath } from '../utils/assetPath';
 
 /**
  * Topbar console header with active Mii profile avatar, BGM music player, status indicators,
@@ -40,6 +41,7 @@ export default function Topbar({
   setShowLoadRomModal,
   setShowVirtualKeyboard,
   onOpenScraperModal,
+  onOpenThemeModal,
   time,
   sfx,
   themeEngine,
@@ -235,13 +237,26 @@ export default function Topbar({
           <button
             className={`status-pill theme-toggle-btn ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'theme' ? 'gamepad-focused' : ''}`}
             onClick={() => {
-              themeEngine.cycleTheme();
-              sfx?.playThemeSwitch?.();
+              if (onOpenThemeModal) {
+                onOpenThemeModal();
+                sfx?.playModalOpen?.();
+              } else {
+                themeEngine.cycleTheme();
+                sfx?.playThemeSwitch?.();
+              }
             }}
-            title={`Current Theme: ${themeEngine.currentThemeMeta.name} (Press 'T' to switch)`}
-            aria-label={`Switch Theme. Current: ${themeEngine.currentThemeMeta.name}`}
+            title={`Theme Studio: ${themeEngine.currentThemeMeta.name} (${themeEngine.colorMode === 'dark' ? 'Dark' : 'Light'}) • Click or Press 'T'`}
+            aria-label={`Theme Studio: Current ${themeEngine.currentThemeMeta.name}`}
           >
-            <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>{themeEngine.currentThemeMeta.icon}</span>
+            {themeEngine.currentThemeMeta.icon && (themeEngine.currentThemeMeta.icon.endsWith('.svg') || themeEngine.currentThemeMeta.icon.includes('/')) ? (
+              <img 
+                src={resolveAssetPath(themeEngine.currentThemeMeta.icon)} 
+                alt={themeEngine.currentThemeMeta.name} 
+                style={{ width: '20px', height: '20px', objectFit: 'contain' }}
+              />
+            ) : (
+              <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>{themeEngine.currentThemeMeta.icon}</span>
+            )}
           </button>
         )}
 

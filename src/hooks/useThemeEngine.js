@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const THEME_STORAGE_KEY = 'retro_player_theme';
+const COLOR_MODE_STORAGE_KEY = 'retro_player_color_mode';
 
 export const THEMES = [
   {
@@ -8,12 +9,22 @@ export const THEMES = [
     name: 'Vanilla',
     shortName: 'VANILLA',
     icon: '🍦',
-    description: 'Clean porcelain-white console UI with vibrant accents'
+    description: 'Clean porcelain-white console UI with vibrant accents',
+    accentColor: '#ef4444'
+  },
+  {
+    key: 'ds',
+    name: 'DS Touch',
+    shortName: 'DS TOUCH',
+    icon: 'assets/platforms/nds.svg',
+    description: 'Nintendo DS touchscreen graph paper with beveled silver tiles',
+    accentColor: '#e11d48'
   }
 ];
 
 /**
- * Hook to manage console visual themes with instant persistence and data-theme DOM synchronization.
+ * Hook to manage console visual themes and Light/Dark modes with instant persistence
+ * and data-theme / data-color-mode DOM synchronization.
  */
 export function useThemeEngine() {
   const [theme, setThemeState] = useState(() => {
@@ -28,20 +39,44 @@ export function useThemeEngine() {
     return 'vanilla';
   });
 
-  // Synchronize document data-theme attribute
+  const [colorMode, setColorModeState] = useState(() => {
+    try {
+      const stored = localStorage.getItem(COLOR_MODE_STORAGE_KEY);
+      if (stored === 'dark' || stored === 'light') {
+        return stored;
+      }
+    } catch (e) {
+      console.error('Failed to load color mode from localStorage:', e);
+    }
+    return 'light';
+  });
+
+  // Synchronize document data-theme and data-color-mode attributes
   useEffect(() => {
     try {
       document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.setAttribute('data-color-mode', colorMode);
       localStorage.setItem(THEME_STORAGE_KEY, theme);
+      localStorage.setItem(COLOR_MODE_STORAGE_KEY, colorMode);
     } catch (e) {
-      console.error('Failed to persist theme:', e);
+      console.error('Failed to persist theme & color mode:', e);
     }
-  }, [theme]);
+  }, [theme, colorMode]);
 
   const setTheme = useCallback((themeKey) => {
     if (THEMES.some(t => t.key === themeKey)) {
       setThemeState(themeKey);
     }
+  }, []);
+
+  const setColorMode = useCallback((mode) => {
+    if (mode === 'light' || mode === 'dark') {
+      setColorModeState(mode);
+    }
+  }, []);
+
+  const toggleColorMode = useCallback(() => {
+    setColorModeState(prev => (prev === 'light' ? 'dark' : 'light'));
   }, []);
 
   const cycleTheme = useCallback(() => {
@@ -56,9 +91,12 @@ export function useThemeEngine() {
 
   return {
     theme,
+    colorMode,
     currentThemeMeta,
     availableThemes: THEMES,
     setTheme,
+    setColorMode,
+    toggleColorMode,
     cycleTheme
   };
 }
