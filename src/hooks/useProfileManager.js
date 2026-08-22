@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { dbGet, dbSet, dbDelete, dbGetAll, STORES } from '../services/db';
+import { dbGet, dbSet, dbDelete, dbGetAll, dbGetAllKeys, STORES } from '../services/db';
 
 const PROFILES_KEY = 'retro_player_profiles';
 const ACTIVE_PROFILE_ID_KEY = 'retro_player_active_profile_id';
@@ -108,11 +108,30 @@ export function useProfileManager() {
   const activeProfile = profiles.find(p => p.id === activeProfileId) || profiles[0] || DEFAULT_MASTER_PROFILE;
 
   /**
+   * Helper to compute next sequential player name (e.g. Player 2, Player 3)
+   */
+  const getNextPlayerName = useCallback(() => {
+    const existingPlayerNumbers = profiles
+      .map(p => {
+        const match = (p.name || '').match(/^Player\s+(\d+)$/i);
+        return match ? parseInt(match[1], 10) : null;
+      })
+      .filter(n => n !== null);
+
+    if (existingPlayerNumbers.length === 0) {
+      return `Player ${profiles.length + 1}`;
+    }
+    const maxNumber = Math.max(...existingPlayerNumbers, profiles.length);
+    return `Player ${maxNumber + 1}`;
+  }, [profiles]);
+
+  /**
    * Create a new user profile in IndexedDB.
    */
   const createProfile = useCallback(async (name, avatarSeed, favoriteColor) => {
-    const cleanName = (name || 'Player').trim();
-    const cleanSeed = (avatarSeed || cleanName).trim() || 'Player';
+    const defaultName = getNextPlayerName();
+    const cleanName = (name && name.trim()) ? name.trim() : defaultName;
+    const cleanSeed = (avatarSeed && avatarSeed.trim()) ? avatarSeed.trim() : cleanName;
     const newProfile = {
       id: `prof_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       name: cleanName,
@@ -141,7 +160,7 @@ export function useProfileManager() {
     await dbSet(STORES.SETTINGS, ACTIVE_PROFILE_ID_KEY, newProfile.id);
 
     return newProfile;
-  }, []);
+  }, [getNextPlayerName]);
 
   /**
    * Update an existing user profile in IndexedDB.
@@ -179,12 +198,13 @@ export function useProfileManager() {
    * Delete a profile from IndexedDB.
    */
   const deleteProfile = useCallback(async (profileId) => {
+    let nextActiveId = null;
+
     setProfiles(prev => {
       if (prev.length <= 1) return prev;
       const filtered = prev.filter(p => p.id !== profileId);
       if (activeProfileId === profileId && filtered.length > 0) {
-        setActiveProfileId(filtered[0].id);
-        dbSet(STORES.SETTINGS, ACTIVE_PROFILE_ID_KEY, filtered[0].id);
+        nextActiveId = filtered[0].id;
       }
       try {
         localStorage.setItem(PROFILES_KEY, JSON.stringify(filtered));
@@ -192,10 +212,54 @@ export function useProfileManager() {
       return filtered;
     });
 
+    if (nextActiveId) {
+      setActiveProfileId(nextActiveId);
+      try {
+        localStorage.setItem(ACTIVE_PROFILE_ID_KEY, nextActiveId);
+      } catch {}
+      await dbSet(STORES.SETTINGS, ACTIVE_PROFILE_ID_KEY, nextActiveId);
+    }
+
+    // 1. Delete profile and user data entries
     await dbDelete(STORES.PROFILES, profileId);
     await dbDelete(STORES.USER_DATA, `favs_${profileId}`);
     await dbDelete(STORES.USER_DATA, `recents_${profileId}`);
     await dbDelete(STORES.USER_DATA, `playtime_${profileId}`);
+
+    // 2. Sweep and delete all battery RAM saves and save states belonging to this profile
+    try {
+      const saveKeys = await dbGetAllKeys(STORES.GAME_SAVES);
+      for (const k of saveKeys) {
+        if (typeof k === 'string' && k.startsWith(`save_${profileId}_`)) {
+          await dbDelete(STORES.GAME_SAVES, k);
+        }
+      }
+
+      const stateKeys = await dbGetAllKeys(STORES.SAVE_STATES);
+      for (const k of stateKeys) {
+        if (typeof k === 'string' && k.startsWith(`state_${profileId}_`)) {
+          await dbDelete(STORES.SAVE_STATES, k);
+        }
+      }
+    } catch (e) {
+      console.warn('Error purging profile save states:', e);
+    }
+
+    // 3. Clear all LocalStorage keys associated with this profile
+    try {
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (
+          key.includes(`_${profileId}`) ||
+          key.startsWith(`save_${profileId}_`) ||
+          key.startsWith(`state_${profileId}_`)
+        )) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+    } catch (e) {}
   }, [activeProfileId]);
 
   /**
@@ -215,6 +279,7 @@ export function useProfileManager() {
     profiles,
     activeProfile,
     activeProfileId,
+    getNextPlayerName,
     createProfile,
     updateProfile,
     deleteProfile,

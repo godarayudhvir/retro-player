@@ -306,13 +306,25 @@ body {
 
 .profile-edit-overlay {
   position: absolute;
-  inset: 0;
+  bottom: -4px;
+  right: -4px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: rgba(15, 23, 42, 0.65);
+  background: #3b82f6;
+  color: #ffffff;
+  border: 2.5px solid #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.45);
+  pointer-events: none;
+  z-index: 20;
+  transition: transform 0.2s ease;
+}
+
+.profile-card:hover .profile-edit-overlay {
+  transform: scale(1.15);
 }
 
 .profile-card-name {
@@ -323,19 +335,31 @@ body {
 
 .profile-delete-btn {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 28px;
-  height: 28px;
+  top: -4px;
+  right: -4px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: #ef4444;
   color: #ffffff;
-  border: 2px solid #ffffff;
+  border: 2.5px solid #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+  z-index: 30;
+  pointer-events: auto;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.45);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.profile-delete-btn:hover {
+  transform: scale(1.15);
+  background: #dc2626;
+}
+
+.profile-delete-btn:active {
+  transform: scale(0.95);
 }
 
 .add-profile-circle {
@@ -2059,7 +2083,7 @@ body {
   inset: 0;
   background: rgba(10, 15, 29, 0.88);
   backdrop-filter: blur(28px);
-  z-index: 2500;
+  z-index: 30000;
   display: flex;
   align-items: center;
   justify-content: center;

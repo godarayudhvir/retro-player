@@ -24,7 +24,8 @@ The **User Profiles & Multiavatar System** introduces multi-user profile managem
   - Topbar renders the active user's custom Multiavatar avatar and player name.
   - Clicking the avatar or user tag immediately opens the "Who's Playing?" profile selector.
 - **Isolated Storage Namespaces**:
-  - Automatically scopes `favorites`, `recentlyPlayed`, and `playtimeStats` to the active profile ID in IndexedDB.
+  - Automatically scopes `favorites`, `recentlyPlayed`, and `playtimeStats` to the active profile ID in IndexedDB (`favs_${activeProfileId}`, `recents_${activeProfileId}`, `playtime_${activeProfileId}`).
+  - Strictly isolates In-Game Battery RAM saves (`save_${activeProfileId}_${gameId}`) and Save States (`state_${activeProfileId}_${gameId}`) per profile, preventing cross-profile save leakage or accidental game continuation between different players.
 
 ---
 
@@ -38,12 +39,15 @@ The **User Profiles & Multiavatar System** introduces multi-user profile managem
 - `deleteProfile(profileId)`: Deletes specified profile while ensuring at least one profile remains.
 - `switchProfile(profileId)`: Transitions active user and triggers smooth data re-scoping.
 
-### Data Isolation (`usePlaytimeAndFavorites.js`)
+### Data Isolation (`usePlaytimeAndFavorites.js`, `useSaveDataManager.js` & `EmulatorModal.jsx`)
 - Automatically generates keys: `${FAVORITES_KEY}_${activeProfileId}`, `${RECENTS_KEY}_${activeProfileId}`, and `${PLAYTIME_KEY}_${activeProfileId}`.
 - Re-syncs internal state on `activeProfileId` changes, guaranteeing isolated saves and history per player.
+- Strict profile scoping on in-game battery RAM SRAM inspection (`checkSaveData`) and state preloading/quick saving (`EmulatorModal.jsx`), ensuring newly created profiles start completely fresh without inheriting save files or states from other profiles.
 
 ### Source Locations
 - Profile Hook: [src/hooks/useProfileManager.js](file:///Users/godarayudhvir/Github/retro-player/src/hooks/useProfileManager.js)
+- Save Data Manager: [src/hooks/useSaveDataManager.js](file:///Users/godarayudhvir/Github/retro-player/src/hooks/useSaveDataManager.js)
+- Playtime & Favorites Hook: [src/hooks/usePlaytimeAndFavorites.js](file:///Users/godarayudhvir/Github/retro-player/src/hooks/usePlaytimeAndFavorites.js)
 - MultiAvatar Component: [src/components/MultiAvatar.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/MultiAvatar.jsx)
 - Profile Selector: [src/components/ProfileSelectModal.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/ProfileSelectModal.jsx)
 - Profile Creator Wizard: [src/components/ProfileCreatorModal.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/ProfileCreatorModal.jsx)

@@ -16,14 +16,15 @@ const COLOR_PALETTE = [
 export default function ProfileCreatorModal({
   isOpen,
   initialProfile = null,
+  suggestedName = 'Player',
   onSave,
   onClose,
   focusedTarget,
   setFocusedTarget,
   sfx
 }) {
-  const [name, setName] = useState('Player');
-  const [avatarSeed, setAvatarSeed] = useState('Player');
+  const [name, setName] = useState('');
+  const [avatarSeed, setAvatarSeed] = useState(suggestedName);
   const [favoriteColor, setFavoriteColor] = useState('#ef4444');
 
   useEffect(() => {
@@ -34,12 +35,13 @@ export default function ProfileCreatorModal({
       setAvatarSeed(initialProfile.avatarSeed || initialProfile.name || 'Player');
       setFavoriteColor(initialProfile.favoriteColor || '#ef4444');
     } else {
+      const defaultSuggested = suggestedName || 'Player';
       const randomPreset = AVATAR_PRESETS[Math.floor(Math.random() * AVATAR_PRESETS.length)];
       setName('');
-      setAvatarSeed(randomPreset.avatarSeed);
+      setAvatarSeed(randomPreset.avatarSeed || defaultSuggested);
       setFavoriteColor(randomPreset.favoriteColor);
     }
-  }, [isOpen, initialProfile]);
+  }, [isOpen, initialProfile, suggestedName]);
 
   if (!isOpen) return null;
 
@@ -60,7 +62,8 @@ export default function ProfileCreatorModal({
 
   const handleSubmit = (e) => {
     e?.preventDefault();
-    const finalName = name.trim() || 'Player';
+    const fallbackName = suggestedName || 'Player';
+    const finalName = name.trim() || fallbackName;
     const finalSeed = avatarSeed.trim() || finalName;
 
     onSave?.({
@@ -100,7 +103,7 @@ export default function ProfileCreatorModal({
                 boxShadow: `0 12px 32px ${favoriteColor}33`
               }}
             >
-              <MultiAvatar seed={avatarSeed || name || 'Player'} size={140} />
+              <MultiAvatar seed={avatarSeed || name || suggestedName || 'Player'} size={140} />
             </div>
 
             <button
@@ -133,7 +136,7 @@ export default function ProfileCreatorModal({
                     setAvatarSeed(e.target.value);
                   }
                 }}
-                placeholder="Enter player name..."
+                placeholder={suggestedName || 'Enter player name...'}
                 maxLength={20}
                 onFocus={() => setFocusedTarget?.({ zone: 'profileModal', id: 'nameInput' })}
                 className={`profile-input-field ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'nameInput' ? 'gamepad-focused' : ''}`}

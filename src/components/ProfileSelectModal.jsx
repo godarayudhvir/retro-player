@@ -76,26 +76,29 @@ export default function ProfileSelectModal({
                       </div>
                     )}
                     {isManaging && (
-                      <div className="profile-edit-overlay">
-                        <Edit2 size={22} color="#ffffff" />
+                      <div className="profile-edit-overlay" title="Edit Profile">
+                        <Edit2 size={15} color="#ffffff" />
                       </div>
+                    )}
+                    {isManaging && profiles.length > 1 && (
+                      <button
+                        type="button"
+                        className="profile-delete-btn"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setPendingDeleteProfile(profile);
+                          sfx?.playTileNav?.();
+                        }}
+                        aria-label={`Delete profile ${profile.name}`}
+                        title="Delete Profile"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     )}
                   </div>
 
                   <span className="profile-card-name">{profile.name}</span>
-
-                  {isManaging && profiles.length > 1 && (
-                    <button
-                      className="profile-delete-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setPendingDeleteProfile(profile);
-                      }}
-                      title="Delete Profile"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  )}
                 </div>
               );
             })}
@@ -134,7 +137,7 @@ export default function ProfileSelectModal({
       <ConfirmModal
         isOpen={!!pendingDeleteProfile}
         title="Delete Profile?"
-        message={`Are you sure you want to permanently delete profile "${pendingDeleteProfile?.name}"? All profile favorites, recents, and playtime data will be erased.`}
+        message={`Are you sure you want to permanently delete profile "${pendingDeleteProfile?.name}"? All profile favorites, recents, in-game saves, save states, and playtime data will be permanently erased.`}
         confirmLabel="Delete Profile"
         onConfirm={() => {
           if (pendingDeleteProfile) {

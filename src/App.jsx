@@ -73,6 +73,7 @@ export default function App() {
     profiles,
     activeProfile,
     activeProfileId,
+    getNextPlayerName,
     createProfile,
     updateProfile,
     deleteProfile,
@@ -548,6 +549,7 @@ export default function App() {
       <ProfileCreatorModal
         isOpen={showProfileCreatorModal}
         initialProfile={editingProfile}
+        suggestedName={getNextPlayerName ? getNextPlayerName() : 'Player'}
         focusedTarget={focusedTarget}
         setFocusedTarget={setFocusedTarget}
         onSave={(data) => {

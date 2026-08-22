@@ -24,14 +24,12 @@ export function useSaveDataManager() {
         game.title
       ].filter(Boolean);
 
-      const profilePrefixes = [
-        activeProfileId,
-        'prof_default',
-        'default',
-        ''
-      ];
+      const isMasterProfile = activeProfileId === 'prof_default' || activeProfileId === 'default';
+      const profilePrefixes = isMasterProfile
+        ? [activeProfileId, 'prof_default', 'default', '']
+        : [activeProfileId];
 
-      // 1. Direct Key Lookup across profile scopes
+      // 1. Direct Key Lookup across valid profile scope
       for (const id of identifiers) {
         for (const prof of profilePrefixes) {
           const saveKey = prof ? `save_${prof}_${id}` : `save_${id}`;
@@ -77,17 +75,31 @@ export function useSaveDataManager() {
         }
       }
 
-      // 2. Comprehensive Store Scan for matching gameId
+      // 2. Comprehensive Store Scan strictly matching activeProfileId
       try {
         const allSaves = await dbGetAll(STORES.GAME_SAVES);
         const matchSave = (allSaves || []).find(item => {
           if (!item) return false;
+          // Verify profile ownership
+          if (item.profileId && item.profileId !== activeProfileId) {
+            if (!isMasterProfile || (item.profileId !== 'prof_default' && item.profileId !== 'default')) {
+              return false;
+            }
+          }
           const key = (item.id || item.key || '').toLowerCase();
           const gId = (item.gameId || '').toLowerCase();
-          return identifiers.some(id => {
+          const idMatches = identifiers.some(id => {
             const target = id.toLowerCase();
             return gId === target || key.includes(target);
           });
+          if (!idMatches) return false;
+
+          // Key prefix check if profileId is missing from item
+          if (!item.profileId) {
+            if (isMasterProfile) return true;
+            return key.includes(`_${activeProfileId.toLowerCase()}_`);
+          }
+          return true;
         });
 
         if (matchSave && matchSave.data) {
@@ -99,12 +111,26 @@ export function useSaveDataManager() {
         const allStates = await dbGetAll(STORES.SAVE_STATES);
         const matchState = (allStates || []).find(item => {
           if (!item) return false;
+          // Verify profile ownership
+          if (item.profileId && item.profileId !== activeProfileId) {
+            if (!isMasterProfile || (item.profileId !== 'prof_default' && item.profileId !== 'default')) {
+              return false;
+            }
+          }
           const key = (item.id || item.key || '').toLowerCase();
           const gId = (item.gameId || '').toLowerCase();
-          return identifiers.some(id => {
+          const idMatches = identifiers.some(id => {
             const target = id.toLowerCase();
             return gId === target || key.includes(target);
           });
+          if (!idMatches) return false;
+
+          // Key prefix check if profileId is missing from item
+          if (!item.profileId) {
+            if (isMasterProfile) return true;
+            return key.includes(`_${activeProfileId.toLowerCase()}_`);
+          }
+          return true;
         });
 
         if (matchState && matchState.data) {

@@ -273,4 +273,26 @@ export async function dbGetAll(storeName) {
   }
 }
 
+/**
+ * Get all keys from a store in IndexedDB.
+ */
+export async function dbGetAllKeys(storeName) {
+  try {
+    const db = await getDB();
+    if (!db) return [];
+
+    return new Promise((resolve) => {
+      const transaction = db.transaction([storeName], 'readonly');
+      const store = transaction.objectStore(storeName);
+      const request = store.getAllKeys();
+
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => resolve([]);
+    });
+  } catch (e) {
+    console.error(`[INDEXEDDB GET_ALL_KEYS ERROR in ${storeName}]:`, e);
+    return [];
+  }
+}
+
 export { STORES };

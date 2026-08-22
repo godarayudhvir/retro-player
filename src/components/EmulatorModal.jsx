@@ -345,16 +345,17 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
       let initialSaveBase64 = null;
       let initialStateBase64 = null;
       try {
+        const isMasterProfile = activeProfileId === 'prof_default' || activeProfileId === 'default';
         const scopedSaveKey = `save_${activeProfileId}_${currentGame.id}`;
         const legacySaveKey = `save_${currentGame.id}`;
         let dbSave = await dbGet(STORES.GAME_SAVES, scopedSaveKey);
-        if (!dbSave) dbSave = await dbGet(STORES.GAME_SAVES, legacySaveKey);
+        if (!dbSave && isMasterProfile) dbSave = await dbGet(STORES.GAME_SAVES, legacySaveKey);
 
         if (dbSave && dbSave.data) {
           initialSaveBase64 = typeof dbSave.data === 'string' ? dbSave.data : (dbSave.data.save || null);
         }
         if (!initialSaveBase64) {
-          const lsSave = localStorage.getItem(scopedSaveKey) || localStorage.getItem(legacySaveKey);
+          const lsSave = localStorage.getItem(scopedSaveKey) || (isMasterProfile ? localStorage.getItem(legacySaveKey) : null);
           if (lsSave) {
             const parsed = JSON.parse(lsSave);
             if (parsed && parsed.data) {
@@ -366,13 +367,13 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
         const scopedStateKey = `state_${activeProfileId}_${currentGame.id}`;
         const legacyStateKey = `state_${currentGame.id}`;
         let dbState = await dbGet(STORES.SAVE_STATES, scopedStateKey);
-        if (!dbState) dbState = await dbGet(STORES.SAVE_STATES, legacyStateKey);
+        if (!dbState && isMasterProfile) dbState = await dbGet(STORES.SAVE_STATES, legacyStateKey);
 
         if (dbState && dbState.data) {
           initialStateBase64 = typeof dbState.data === 'string' ? dbState.data : (dbState.data.state || null);
         }
         if (!initialStateBase64) {
-          const lsState = localStorage.getItem(scopedStateKey) || localStorage.getItem(legacyStateKey);
+          const lsState = localStorage.getItem(scopedStateKey) || (isMasterProfile ? localStorage.getItem(legacyStateKey) : null);
           if (lsState) {
             const parsed = JSON.parse(lsState);
             if (parsed && parsed.data) {
@@ -1678,13 +1679,14 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
       if (typeof emu?.gameManager?.saveSaveFiles === 'function') {
         emu.gameManager.saveSaveFiles();
       }
+      const isMasterProfile = activeProfileId === 'prof_default' || activeProfileId === 'default';
       const scopedKey = `save_${activeProfileId}_${game.id || game.title}`;
       const legacyKey = `save_${game.id || game.title}`;
       let dbSave = await dbGet(STORES.GAME_SAVES, scopedKey);
-      if (!dbSave) dbSave = await dbGet(STORES.GAME_SAVES, legacyKey);
+      if (!dbSave && isMasterProfile) dbSave = await dbGet(STORES.GAME_SAVES, legacyKey);
       let base64Data = dbSave?.data || null;
       if (!base64Data) {
-        const lsSave = localStorage.getItem(scopedKey) || localStorage.getItem(legacyKey);
+        const lsSave = localStorage.getItem(scopedKey) || (isMasterProfile ? localStorage.getItem(legacyKey) : null);
         if (lsSave) {
           const parsed = JSON.parse(lsSave);
           base64Data = parsed?.data || null;
@@ -2093,13 +2095,14 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
 
         case 'loadState':
           try {
+            const isMasterProfile = activeProfileId === 'prof_default' || activeProfileId === 'default';
             const scopedKey = `state_${activeProfileId}_${game.id || game.title}`;
             const legacyKey = `state_${game.id || game.title}`;
             let dbState = await dbGet(STORES.SAVE_STATES, scopedKey);
-            if (!dbState) dbState = await dbGet(STORES.SAVE_STATES, legacyKey);
+            if (!dbState && isMasterProfile) dbState = await dbGet(STORES.SAVE_STATES, legacyKey);
             let b64 = dbState?.data || null;
             if (!b64) {
-              const ls = localStorage.getItem(scopedKey) || localStorage.getItem(legacyKey);
+              const ls = localStorage.getItem(scopedKey) || (isMasterProfile ? localStorage.getItem(legacyKey) : null);
               if (ls) {
                 const parsed = JSON.parse(ls);
                 b64 = parsed?.data || null;
