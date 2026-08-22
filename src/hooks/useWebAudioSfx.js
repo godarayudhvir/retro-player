@@ -7,9 +7,11 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 export function useWebAudioSfx() {
   const [isMuted, setIsMuted] = useState(() => {
     try {
-      return localStorage.getItem('retro_sfx_muted') === 'true';
+      const saved = localStorage.getItem('retro_sfx_muted');
+      if (saved !== null) return saved === 'true';
+      return true; // Off / muted by default
     } catch {
-      return false;
+      return true;
     }
   });
 

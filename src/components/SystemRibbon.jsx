@@ -49,8 +49,8 @@ export default function SystemRibbon({
             setFocusedTarget({ zone: 'ribbon', index: idx });
             sfx?.playTabSwitch?.();
           }}
-          title={`${tab.name} (${tab.count} games)`}
-          aria-label={`${tab.name} (${tab.count} games)`}
+          title={tab.name}
+          aria-label={tab.name}
         >
           {tab.isSpecialIcon ? (
             tab.iconNode
@@ -58,7 +58,6 @@ export default function SystemRibbon({
             <>
               {tab.icon && <img src={resolveAssetPath(tab.icon)} alt="" className="tab-icon" />}
               <span>{tab.name}</span>
-              <span className="tab-count">({tab.count})</span>
             </>
           )}
         </button>

@@ -65,9 +65,9 @@ export default function App() {
 
   const checkIsMobile = () => {
     if (typeof window === 'undefined') return false;
-    const isSmallWidth = window.innerWidth <= 768;
-    const isLandscapePhone = window.innerHeight <= 550 && window.innerWidth <= 1024;
-    return isSmallWidth || isLandscapePhone;
+    // MobileAppView is strictly for portrait phone screens (width <= 768 AND portrait orientation)
+    const isPortraitPhone = window.innerWidth <= 768 && window.innerHeight > window.innerWidth;
+    return isPortraitPhone;
   };
 
   const [isMobile, setIsMobile] = useState(checkIsMobile);
@@ -352,6 +352,12 @@ export default function App() {
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           bgm={bgm}
+          themeEngine={themeEngine}
+          onOpenThemeModal={() => setShowThemeModal(true)}
+          onEditMetadata={(game, meta) => setEditingMetadataGame({ game, metadata: meta })}
+          onScrapeGame={scraper.scrapeSingleGame}
+          hasSaveData={hasSaveData}
+          scraper={scraper}
         />
       ) : (
         <>

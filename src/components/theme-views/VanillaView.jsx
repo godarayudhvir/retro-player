@@ -21,9 +21,6 @@ export default function VanillaView({
       <div className="channel-spotlight-bar">
         <div className="channel-meta-badge">
           <span className="channel-title-text">{currentSystemName}</span>
-          <span className="channel-count-pill">
-            {filteredGames.length} {filteredGames.length === 1 ? 'Title' : 'Titles'}
-          </span>
         </div>
       </div>
 

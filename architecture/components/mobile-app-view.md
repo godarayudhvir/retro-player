@@ -1,78 +1,51 @@
 # Mobile Experience Architecture Specification (`MobileAppView.jsx`)
 
-## Overview
-The `MobileAppView` component delivers a dedicated, streaming-app inspired (Netflix / Switch style) mobile experience specifically tailored for smartphones and compact touch devices (<= 768px). It leaves tablet, desktop, and 10-foot TV UI modes completely unaffected while streamlining mobile interactions into a clean, modern, light-themed gaming feed.
+## 1. Description
+The `MobileAppView` component delivers a clean, focused, **5-stage progressive mobile experience** specifically tailored for smartphones and compact touch devices (<= 768px in portrait). It features a streamlined topbar with circular action buttons (Search, Theme Studio, SFX, BGM, Load ROM), authentic vector console illustrations, neatly scaled 2-column 3D physical cartridges for Vanilla theme with zero cutouts, a 3-column square touch matrix for DS Touch theme, full app-level Light/Dark mode responsiveness, and full-screen detail stages.
 
 ---
 
-## Architectural Principles
+## 2. Detailed List of What It Does
+- **Streamlined Mobile Topbar**:
+  - **Profile Icon** (left): Active Mii avatar, opens Profile Switcher.
+  - **Action Button Group** (right):
+    - 🔍 **Search Button**: Toggles expandable search bar with instant query filtering.
+    - 🎨 **Theme Button**: Opens Theme Studio / Switcher Modal (Vanilla & DS Touch).
+    - 🔊/🔇 **SFX Button**: Toggles Web Audio synthesized tactile UI sound effects (**off by default**).
+    - 🎵 **BGM Button**: Toggles retro background music playback (**off by default**).
+    - 📂 **Load Button**: Minimized icon-only button triggering local file picker for custom ROMs.
 
-1. **Initial Profile Gateway ("Who's Playing?")**:
-   - When opened on mobile, the app presents a clean profile chooser with Mii avatar circles.
-   - Once selected, the user seamlessly enters the primary catalog feed with their scoped favorites, recently played list, and playtime tracking.
-   - The user can switch profiles at any time by tapping their avatar in the mobile topbar.
+- **Stage 1: Choose Profile ("Who's Playing?")**:
+  - Full-screen Mii avatar profile chooser with active badges, "+ Add Player", and avatar editor triggers.
+  - Seamlessly transitions to Stage 2 once a profile is active.
 
-2. **Streamlined Mobile Topbar**:
-   - **Profile Icon** (left): Displays active Mii avatar; tapping opens profile switcher.
-   - **Search Bar Widget** (center): Real-time search with instant game card filtering.
-   - **Load ROM Button** (right): Quick button to open local file picker for custom ROMs.
+- **Stage 2: Choose System (Console SVG Gallery)**:
+  - Quick-access smart collection pills (⭐ Favorites, 🕒 Recently Played, 📚 All Games).
+  - 2-column gallery of all available platforms (GBA, SNES, NES, NDS, Genesis, PS1, Arcade, etc.) displaying authentic console vector SVGs (`assets/platforms/*.svg`), system category labels, and navigation arrows without distracting count numbers.
+  - Tapping any console transitions directly to Stage 3 for that platform.
 
-3. **Streaming-Style Horizontal Feed**:
-   - **Recently Played**: Horizontal carousel of recently launched titles with playtime tracking.
-   - **Favorites**: Horizontal carousel of starred titles.
-   - **Platforms & Systems**: Interactive system chips showing game counts and custom platform icons.
-   - **Per-System Carousels**: Dedicated horizontal rows for each system (GBA, SNES, N64, NES, Genesis, etc.) with a "See All" drill-down trigger.
+- **Stage 3: Choose Game**:
+  - **Vanilla Theme**: 2-column responsive cartridge grid (`.mobile-cartridges-2col-grid`) with fluid scaling constraints per console type (`max-width: 175px-185px`, `min-width: 0`, auto heights), guaranteeing zero clipping or cutouts of SNES, GBA, NES, N64, Genesis, GB/GBC, and NDS 3D cartridge molds, plastic ribs, and drop shadows.
+  - **DS Touch Theme**: 3-column square beveled touch buttons matrix (`.mobile-ds-buttons-grid` with `.ds-touch-btn`), displaying clean square cover artwork/titles and favorite stars with zero physical cartridges.
+  - Real-time instant search filter across all titles.
+  - Tapping any game card opens Stage 4.
 
-4. **Drill-Down System View**:
-   - Tapping "See All" or a system chip displays a dedicated grid of all ROMs in that system with an instant back button to return to the main feed.
+- **Stage 4: Shows Game Detail (Full-Screen Immersion Stage)**:
+  - "← Back to Games" top navigation.
+  - High-resolution cover art / screenshot hero header with gradient overlay.
+  - System badge, release year, genre, and developer pills.
+  - Full synopsis overview and game storyline.
+  - Live **Battery Save RAM** status badge (`💾 Battery Save RAM Detected • Ready to Resume`).
+  - Playtime analytics and sessions count.
+  - Primary **`▶ PLAY GAME NOW`** action button.
+  - Action toolbar: ⭐ Favorite, ✏️ Edit Metadata, 🔄 Scrape Art.
 
-5. **Streamlined Game Detail Bottom Sheet**:
-   - Tapping any game opens a clean bottom drawer displaying high-res box art, platform badge, release year, core, and game synopsis.
-   - Contains only two focused actions:
-     - **Play Game**: Launches the emulator immediately.
-     - **Favorite**: Stars or unstars the game.
-
-6. **Gamepad & Spatial Navigation Integration**:
-   - Supports 100% controller-first navigation (`focusedTarget` tracking) with luminous neon focus highlights (`.gamepad-focused`) across Profile chooser cards, Topbar actions, System filter chips, Horizontal carousel game cards, and the Game Detail Bottom Sheet.
-   - Automatic smooth scroll-into-view keeps the active selection centered on small phone screens during D-pad / stick navigation.
-
-7. **Light Theme & Silent Background Services**:
-   - Standardizes on a clean Light Theme (`data-theme="classic-light"`) for maximum readability on small screens.
-   - BGM audio, SFX synthesizer, and online scraper operate seamlessly in the background without UI clutter.
+- **Stage 5: Plays Game (Full-Screen Emulation)**:
+  - Tapping `PLAY GAME NOW` launches `EmulatorModal` in full-screen with virtual on-screen touch gamepad controls.
 
 ---
 
-## Component Interface
-
-```typescript
-interface MobileAppViewProps {
-  games: Game[];
-  systems: System[];
-  activeProfile: Profile;
-  profiles: Profile[];
-  activeProfileId: string;
-  onSelectProfile: (id: string) => void;
-  onCreateNewProfile: () => void;
-  favorites: string[];
-  recentlyPlayed: RecentItem[];
-  isFavorite: (id: string) => boolean;
-  toggleFavorite: (id: string) => void;
-  getGameStats: (id: string) => GameStats;
-  onPlayGame: (game: Game) => void;
-  metadataMap: Record<string, GameMetadata>;
-  onCustomRomLoad: (file: File) => void;
-  sfx: WebAudioSfx;
-  focusedTarget?: { zone: string; index?: number; id?: string; rowIndex?: number; colIndex?: number };
-  setFocusedTarget?: (target: any) => void;
-  selectedGameForDetails?: Game | null;
-  setSelectedGameForDetails?: (game: Game | null) => void;
-  hasChosenProfileThisSession?: boolean;
-  setHasChosenProfileThisSession?: (chosen: boolean) => void;
-  showProfileSwitcher?: boolean;
-  setShowProfileSwitcher?: (show: boolean) => void;
-  selectedSystem?: System | null;
-  setSelectedSystem?: (sys: System | null) => void;
-  searchQuery?: string;
-  setSearchQuery?: (query: string) => void;
-}
-```
+## 3. Theming & Color Modes
+- **Vanilla Theme**: Clean porcelain-white console layout with 2-column responsive 3D physical cartridge models.
+- **DS Touch Theme**: Nintendo DS touchscreen graph paper grid with silver beveled touch matrix buttons and dual-screen styling.
+- **Light / Dark Mode**: Full app-level synchronization applying dark slate/midnight backgrounds (`#090d16` / `#1e293b`) and high-contrast typography across all mobile stages, navigation bars, cards, and modal drawers.

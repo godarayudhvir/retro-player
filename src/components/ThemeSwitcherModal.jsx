@@ -80,6 +80,9 @@ export default function ThemeSwitcherModal({
         onClick={(e) => e.stopPropagation()}
         ref={modalRef}
       >
+        {/* Mobile Sheet Drag Handle Bar */}
+        <div className="theme-sheet-handle-bar"></div>
+
         {/* Modal Header */}
         <div className="theme-switcher-header">
           <div className="theme-switcher-title">
@@ -184,8 +187,8 @@ export default function ThemeSwitcherModal({
           })}
         </div>
 
-        {/* Modal Footer Controls Hint */}
-        <div className="theme-switcher-footer">
+        {/* Modal Footer Controls Hint (Desktop Only) */}
+        <div className="theme-switcher-footer desktop-only">
           <div className="theme-nav-hints">
             <span className="theme-nav-pill"><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> Navigate</span>
             <span className="theme-nav-pill"><kbd>ENTER</kbd> Apply Theme</span>

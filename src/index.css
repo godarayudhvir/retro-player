@@ -5291,6 +5291,17 @@ button.status-pill:active {
   font-weight: 900;
 }
 
+/* Hide Console HUD and Keyboard Legends on All Mobile & Touch Screens */
+@media (max-width: 1024px), (hover: none) and (pointer: coarse), (max-height: 600px) {
+  .console-hud,
+  .footer-shoulder-capsule,
+  .hud-button-group,
+  .theme-switcher-footer,
+  .desktop-only {
+    display: none !important;
+  }
+}
+
 /* Empty State */
 .console-empty {
   margin: auto;
@@ -8070,7 +8081,7 @@ html[data-theme="vanilla"],
   z-index: 100;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: space-between;
   padding: 0.75rem 1rem;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
@@ -8091,15 +8102,77 @@ html[data-theme="vanilla"],
   padding: 1px;
 }
 
+.mobile-topbar-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.mobile-topbar-action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.mobile-topbar-action-btn:active {
+  transform: scale(0.92);
+}
+
+.mobile-topbar-action-btn.is-active {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.35);
+  color: #2563eb;
+}
+
+.mobile-topbar-action-btn.is-playing {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #10b981;
+}
+
+.mobile-topbar-action-btn.theme-action-btn {
+  color: #6366f1;
+}
+
+.mobile-topbar-action-btn.load-action-btn {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+/* Expandable Search Row */
+.mobile-expandable-search-bar {
+  position: sticky;
+  top: 57px;
+  z-index: 99;
+  padding: 0.5rem 1rem 0.65rem;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
 .mobile-search-widget {
-  flex: 1;
+  width: 100%;
   display: flex;
   align-items: center;
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
   border-radius: 20px;
-  padding: 0.4rem 0.75rem;
+  padding: 0.45rem 0.85rem;
   gap: 0.5rem;
+  box-sizing: border-box;
 }
 
 .mobile-search-icon {
@@ -8132,558 +8205,795 @@ html[data-theme="vanilla"],
   padding: 0;
 }
 
-.mobile-topbar-bgm-btn {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1.5px solid rgba(0, 0, 0, 0.08);
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s ease;
-}
+/* ==========================================================================
+   STAGE-BASED MOBILE EXPERIENCE (5 STAGES)
+   ========================================================================== */
 
-.mobile-topbar-bgm-btn.is-playing {
-  background: rgba(16, 185, 129, 0.12);
-  border-color: rgba(16, 185, 129, 0.35);
-  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.2);
-}
-
-.mobile-topbar-bgm-btn:active {
-  transform: scale(0.92);
-}
-
-.mobile-topbar-load-btn {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
+.mobile-stage-badge {
   background: #ef4444;
   color: #ffffff;
-  border: none;
-  border-radius: 18px;
-  padding: 0.45rem 0.85rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
-  transition: transform 0.15s ease;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
 }
 
-.mobile-topbar-load-btn:active {
-  transform: scale(0.94);
-}
-
-/* Main Mobile Feed Rows */
-.mobile-main-feed {
-  padding: 1rem 0;
+/* STAGE 2: CHOOSE SYSTEM */
+.mobile-systems-body {
+  padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.15rem;
 }
 
-.mobile-feed-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-}
-
-.mobile-feed-row-header {
+.mobile-systems-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 1rem;
 }
 
-.mobile-feed-row-header.is-clickable {
-  cursor: pointer;
+.mobile-systems-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
 }
 
-.mobile-row-title-wrap {
+.mobile-systems-title {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.mobile-total-games-badge {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Quick Access Smart Categories */
+.mobile-quick-categories-row {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  padding: 0.2rem 0;
+  scrollbar-width: none;
+}
+
+.mobile-quick-categories-row::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-quick-cat-card {
+  flex: 1;
+  min-width: 125px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.65rem 0.85rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+  text-align: left;
 }
 
-.mobile-feed-row-icon {
+.mobile-quick-cat-card:active {
+  transform: scale(0.96);
+  border-color: #ef4444;
+}
+
+.mobile-quick-cat-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex: 1;
+}
+
+.mobile-quick-cat-text strong {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.mobile-quick-cat-text span {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.mobile-quick-arrow {
+  color: #94a3b8;
+}
+
+/* Beautiful Console SVG Cards Grid */
+.mobile-console-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+}
+
+.mobile-console-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-console-card:active {
+  transform: scale(0.96);
+  border-color: var(--sys-accent, #ef4444);
+}
+
+.mobile-console-art-wrap {
+  height: 95px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+  position: relative;
+}
+
+.mobile-console-svg-img {
+  max-height: 75px;
+  max-width: 110px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.15));
+}
+
+.mobile-console-card-footer {
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-console-text-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.mobile-console-name {
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #0f172a;
+}
+
+.mobile-console-category {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.mobile-console-count-pill {
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+/* STAGE 3: CHOOSE GAME */
+.mobile-games-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.mobile-games-back-btn,
+.mobile-detail-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #334155;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.mobile-games-back-btn:active,
+.mobile-detail-back-btn:active {
+  transform: scale(0.95);
+}
+
+.mobile-games-nav-center {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.mobile-games-nav-sys-icon {
   width: 20px;
   height: 20px;
   object-fit: contain;
 }
 
-.mobile-row-title-wrap h3 {
-  font-size: 1.1rem;
-  font-weight: 800;
+.mobile-games-nav-title {
+  font-size: 0.95rem;
+  font-weight: 900;
   color: #0f172a;
-  margin: 0;
-  letter-spacing: -0.01em;
 }
 
-.mobile-row-badge {
+.mobile-games-count-pill {
   background: #e2e8f0;
   color: #475569;
-  font-size: 0.72rem;
-  font-weight: 700;
+  font-size: 0.7rem;
+  font-weight: 800;
   padding: 2px 7px;
   border-radius: 10px;
 }
 
-.mobile-see-all-link {
-  display: flex;
-  align-items: center;
-  gap: 0.15rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #ef4444;
+.mobile-games-grid-body {
+  padding: 1rem;
 }
 
-/* Horizontal Carousels */
-.mobile-horizontal-carousel {
-  display: flex;
-  gap: 0.85rem;
-  padding: 0.35rem 1rem;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.mobile-horizontal-carousel::-webkit-scrollbar {
-  display: none;
-}
-
-/* Mobile Game Cards */
-.mobile-game-card {
-  flex-shrink: 0;
-  width: 124px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  cursor: pointer;
-  user-select: none;
-  transition: transform 0.15s ease;
-}
-
-.mobile-game-card:active {
-  transform: scale(0.96);
-}
-
-.mobile-card-cover-wrap {
-  width: 124px;
-  height: 164px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #e2e8f0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  position: relative;
-}
-
-.mobile-card-cover-img {
+/* Vanilla 2-Column Responsive Physical Cartridges Grid */
+.mobile-cartridges-2col-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem 0.85rem;
+  padding: 0.35rem 0.25rem 2.5rem;
+  box-sizing: border-box;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
 }
 
-.mobile-card-fallback-cover {
+.mobile-cartridge-tile-cell {
   width: 100%;
-  height: 100%;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  padding: 0.75rem;
-  text-align: center;
+  align-items: center;
+  overflow: visible;
+  padding: 0;
   box-sizing: border-box;
 }
 
-.mobile-card-fallback-pill {
-  font-size: 0.65rem;
-  font-weight: 800;
-  background: rgba(0, 0, 0, 0.3);
-  color: #ffffff;
-  padding: 2px 6px;
-  border-radius: 6px;
-  margin-bottom: 0.4rem;
-  text-transform: uppercase;
+.mobile-cartridge-tile-cell .game-tile {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 175px !important;
+  height: auto !important;
+  margin: 0 auto !important;
+  overflow: visible !important;
+  transform: none;
+  box-sizing: border-box;
 }
 
-.mobile-card-fallback-title {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #ffffff;
-  line-height: 1.2;
+.mobile-cartridge-tile-cell .game-tile.cartridge-shell-snes {
+  width: 100% !important;
+  max-width: 185px !important;
+  aspect-ratio: 1.3 / 1 !important;
 }
 
-.mobile-card-fav-star {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(4px);
-  border-radius: 50%;
-  width: 22px;
-  height: 22px;
+.mobile-cartridge-tile-cell .game-tile.cartridge-shell-gba {
+  width: 100% !important;
+  max-width: 180px !important;
+  aspect-ratio: 1.25 / 1 !important;
+}
+
+.mobile-cartridge-tile-cell .game-tile.cartridge-shell-n64 {
+  width: 100% !important;
+  max-width: 180px !important;
+  aspect-ratio: 1.25 / 1 !important;
+}
+
+.mobile-cartridge-tile-cell .game-tile.cartridge-shell-genesis {
+  width: 100% !important;
+  max-width: 175px !important;
+  aspect-ratio: 1.22 / 1 !important;
+}
+
+.mobile-cartridge-tile-cell .game-tile.cartridge-shell-nes,
+.mobile-cartridge-tile-cell .game-tile.cartridge-shell-gb {
+  width: 100% !important;
+  max-width: 165px !important;
+  aspect-ratio: 1 / 1.15 !important;
+}
+
+.mobile-cartridge-tile-cell .game-tile.cartridge-shell-nds {
+  width: 100% !important;
+  max-width: 155px !important;
+  aspect-ratio: 1 / 1.08 !important;
+}
+
+.mobile-cartridge-tile-cell .game-tile.cartridge-shell-psx {
+  width: 100% !important;
+  max-width: 170px !important;
+  aspect-ratio: 1 / 1.02 !important;
+}
+
+.mobile-cartridge-tile-cell .game-tile.cover-poster-tile {
+  width: 100% !important;
+  max-width: 165px !important;
+  aspect-ratio: 1 / 1.15 !important;
+}
+
+/* DS Touch Theme: 3-Column Square Beveled Touch Button Matrix on Mobile */
+.mobile-ds-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+  padding: 0.25rem 0;
+}
+
+.mobile-ds-buttons-grid .ds-touch-btn {
+  aspect-ratio: 1 / 1;
+  height: auto;
+  width: 100%;
+  border-radius: 8px;
+  border: 2px solid #94a3b8;
+  background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 3px 6px rgba(0, 0, 0, 0.12);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-}
-
-.mobile-card-title {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #1e293b;
-  white-space: nowrap;
+  padding: 4px;
+  position: relative;
   overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.2;
-}
-
-.mobile-card-sys {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #64748b;
-  margin-top: -0.2rem;
-}
-
-/* Systems Chip Selector */
-.mobile-systems-chip-list {
-  display: flex;
-  gap: 0.6rem;
-  padding: 0.25rem 1rem;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.mobile-systems-chip-list::-webkit-scrollbar {
-  display: none;
-}
-
-.mobile-system-chip {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 24px;
-  padding: 0.45rem 0.85rem;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-  transition: transform 0.15s ease, border-color 0.15s ease;
+  box-sizing: border-box;
+  transition: transform 0.12s ease, border-color 0.12s ease;
 }
 
-.mobile-system-chip:active {
-  transform: scale(0.95);
-  border-color: var(--sys-accent, #ef4444);
+.mobile-ds-buttons-grid .ds-touch-btn:active {
+  transform: scale(0.94);
+  border-color: #e11d48;
 }
 
-.mobile-chip-icon {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
+.mobile-ds-buttons-grid .ds-btn-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
 }
 
-.mobile-chip-name {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #1e293b;
-}
-
-.mobile-chip-count {
+.mobile-ds-buttons-grid .ds-btn-text {
   font-size: 0.72rem;
-  font-weight: 700;
-  background: #f1f5f9;
-  color: #64748b;
-  padding: 1px 6px;
-  border-radius: 8px;
+  font-weight: 800;
+  color: #0f172a;
+  text-align: center;
+  line-height: 1.15;
+  padding: 2px;
 }
 
-/* Drilldown Section & Grids */
-.mobile-section-container {
-  padding: 0 1rem;
+[data-color-mode="dark"] .mobile-ds-buttons-grid .ds-touch-btn {
+  background: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);
+  border-color: #475569;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+[data-color-mode="dark"] .mobile-ds-buttons-grid .ds-btn-text {
+  color: #f8fafc;
+}
+
+.mobile-empty-catalog {
+  text-align: center;
+  padding: 3.5rem 1rem;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ==========================================================================
+   MOBILE DARK MODE TOKENS & OVERRIDES
+   ========================================================================== */
+
+[data-color-mode="dark"] .mobile-app-root {
+  background: var(--bg-iisu, #090d16) !important;
+  color: #f8fafc !important;
+}
+
+[data-color-mode="dark"] .mobile-topbar,
+[data-color-mode="dark"] .mobile-games-nav,
+[data-color-mode="dark"] .mobile-detail-nav,
+[data-color-mode="dark"] .mobile-expandable-search-bar {
+  background: rgba(15, 23, 42, 0.96) !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+[data-color-mode="dark"] .mobile-topbar-action-btn,
+[data-color-mode="dark"] .mobile-games-back-btn,
+[data-color-mode="dark"] .mobile-detail-back-btn,
+[data-color-mode="dark"] .mobile-quick-cat-card,
+[data-color-mode="dark"] .mobile-console-card,
+[data-color-mode="dark"] .mobile-game-tile-card,
+[data-color-mode="dark"] .mobile-detail-save-card,
+[data-color-mode="dark"] .mobile-detail-synopsis-card,
+[data-color-mode="dark"] .mobile-stat-box,
+[data-color-mode="dark"] .mobile-detail-tool-btn {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+[data-color-mode="dark"] .mobile-console-art-wrap {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+  border-bottom-color: #334155 !important;
+}
+
+[data-color-mode="dark"] .mobile-console-name,
+[data-color-mode="dark"] .mobile-systems-title,
+[data-color-mode="dark"] .mobile-detail-title,
+[data-color-mode="dark"] .mobile-quick-cat-text strong,
+[data-color-mode="dark"] .mobile-games-nav-title,
+[data-color-mode="dark"] .mobile-save-info strong,
+[data-color-mode="dark"] .mobile-detail-synopsis-card h3,
+[data-color-mode="dark"] .mobile-stat-val,
+[data-color-mode="dark"] .mobile-tile-title,
+[data-color-mode="dark"] .mobile-search-input {
+  color: #f8fafc !important;
+}
+
+[data-color-mode="dark"] .mobile-search-widget {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+[data-color-mode="dark"] .mobile-console-category,
+[data-color-mode="dark"] .mobile-quick-cat-text span,
+[data-color-mode="dark"] .mobile-tile-sub,
+[data-color-mode="dark"] .mobile-meta-pill,
+[data-color-mode="dark"] .mobile-detail-synopsis-card p,
+[data-color-mode="dark"] .mobile-stat-lbl,
+[data-color-mode="dark"] .mobile-save-info span {
+  color: #94a3b8 !important;
+}
+
+[data-color-mode="dark"] .mobile-meta-pill {
+  background: #0f172a !important;
+}
+
+/* ==========================================================================
+   MOBILE DS TOUCH THEME OVERRIDES
+   ========================================================================== */
+
+[data-theme="ds"] .mobile-app-root {
+  background-color: var(--bg-iisu, #eaedf0) !important;
+  background-image: 
+    linear-gradient(to right, rgba(148, 163, 184, 0.3) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.3) 1px, transparent 1px) !important;
+  background-size: 16px 16px !important;
+}
+
+[data-theme="ds"] .mobile-console-card,
+[data-theme="ds"] .mobile-quick-cat-card,
+[data-theme="ds"] .mobile-topbar-action-btn,
+[data-theme="ds"] .mobile-games-back-btn,
+[data-theme="ds"] .mobile-detail-back-btn,
+[data-theme="ds"] .mobile-detail-tool-btn,
+[data-theme="ds"] .mobile-stat-box,
+[data-theme="ds"] .mobile-detail-save-card,
+[data-theme="ds"] .mobile-detail-synopsis-card {
+  border-radius: 8px !important;
+  border: 2px solid var(--panel-border, #94a3b8) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 3px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .mobile-console-card,
+[data-theme="ds"][data-color-mode="dark"] .mobile-quick-cat-card,
+[data-theme="ds"][data-color-mode="dark"] .mobile-topbar-action-btn,
+[data-theme="ds"][data-color-mode="dark"] .mobile-games-back-btn,
+[data-theme="ds"][data-color-mode="dark"] .mobile-detail-back-btn,
+[data-theme="ds"][data-color-mode="dark"] .mobile-detail-tool-btn,
+[data-theme="ds"][data-color-mode="dark"] .mobile-stat-box,
+[data-theme="ds"][data-color-mode="dark"] .mobile-detail-save-card,
+[data-theme="ds"][data-color-mode="dark"] .mobile-detail-synopsis-card {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 3px 8px rgba(0, 0, 0, 0.4) !important;
+  border-color: #475569 !important;
+}
+
+[data-theme="ds"] .mobile-stage-badge {
+  background: #e11d48 !important;
+  border-radius: 4px !important;
+}
+
+[data-theme="ds"] .mobile-detail-play-btn {
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 6px 18px rgba(225, 29, 72, 0.4) !important;
+}
+
+/* STAGE 4: SHOWS GAME DETAIL */
+.mobile-detail-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.mobile-detail-body {
+  padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.mobile-drilldown-header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
-}
-
-.mobile-back-btn {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: #f1f5f9;
-  border: none;
-  border-radius: 16px;
-  padding: 0.4rem 0.75rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #334155;
-  cursor: pointer;
-}
-
-.mobile-drilldown-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.mobile-system-badge-icon {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-}
-
-.mobile-drilldown-title h2 {
-  font-size: 1.35rem;
-  font-weight: 800;
-  color: #0f172a;
-  margin: 0;
-}
-
-.mobile-games-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
-  gap: 0.85rem;
-}
-
-.mobile-games-grid .mobile-game-card {
-  width: 100%;
-}
-
-.mobile-games-grid .mobile-card-cover-wrap {
-  width: 100%;
-  height: 145px;
-}
-
-.mobile-empty-state {
-  text-align: center;
-  padding: 3rem 1rem;
-  color: #64748b;
-  font-size: 0.95rem;
-}
-
-/* Mobile Streamlined Game Detail Drawer / Bottom Sheet */
-.mobile-sheet-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-
-.mobile-sheet-content {
-  width: 100%;
-  min-height: 55vh;
-  max-height: 88vh;
-  background: #ffffff;
-  border-top-left-radius: 24px;
-  border-top-right-radius: 24px;
-  padding: 1rem 1.25rem calc(2rem + env(safe-area-inset-bottom, 0px));
-  box-sizing: border-box;
-  overflow-y: auto;
+.mobile-detail-hero {
   position: relative;
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.25);
-  display: flex;
-  flex-direction: column;
-}
-
-.mobile-sheet-handle-bar {
-  width: 36px;
-  height: 4px;
-  background: #cbd5e1;
-  border-radius: 2px;
-  margin: 0 auto 0.85rem;
-  flex-shrink: 0;
-}
-
-.mobile-sheet-close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: #f1f5f9;
-  border: none;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+  width: 100%;
+  height: 210px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #0f172a;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #64748b;
-  cursor: pointer;
 }
 
-.mobile-sheet-body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.95rem;
-  flex: 1;
-}
-
-.mobile-sheet-top-row {
-  display: flex;
-  gap: 0.95rem;
-  align-items: flex-start;
-}
-
-.mobile-sheet-cover-wrap {
-  width: 95px;
-  height: 125px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #e2e8f0;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
-  flex-shrink: 0;
-}
-
-.mobile-sheet-cover-img {
+.mobile-detail-hero-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.mobile-sheet-fallback-cover {
+.mobile-detail-hero-img.cover-fit {
+  object-fit: contain;
+}
+
+.mobile-detail-hero-placeholder {
   width: 100%;
   height: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   color: #ffffff;
   font-weight: 800;
-  font-size: 0.85rem;
-  text-align: center;
-  padding: 0.5rem;
+  gap: 0.5rem;
 }
 
-.mobile-sheet-meta-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  padding-right: 2.2rem; /* Avoid close button overlap */
+.mobile-detail-hero-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, transparent 60%);
+  pointer-events: none;
 }
 
-.mobile-sheet-sys-pill {
-  align-self: flex-start;
+.mobile-detail-sys-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: #ffffff;
   font-size: 0.72rem;
   font-weight: 800;
-  color: #ffffff;
-  padding: 2px 8px;
-  border-radius: 6px;
+  padding: 3px 10px;
+  border-radius: 8px;
   text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  z-index: 5;
 }
 
-.mobile-sheet-title {
-  font-size: 1.25rem;
-  font-weight: 800;
+.mobile-detail-header-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.mobile-detail-title {
+  font-size: 1.45rem;
+  font-weight: 900;
   color: #0f172a;
+  letter-spacing: -0.02em;
   line-height: 1.2;
   margin: 0;
 }
 
-.mobile-sheet-badges {
+.mobile-detail-pills-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
-  margin-top: 0.15rem;
 }
 
-.mobile-badge-item {
+.mobile-meta-pill {
+  background: #e2e8f0;
+  color: #475569;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #64748b;
-  background: #f1f5f9;
-  padding: 3px 7px;
-  border-radius: 6px;
 }
 
-.mobile-sheet-description {
-  font-size: 0.86rem;
-  color: #334155;
-  line-height: 1.55;
-  margin: 0;
-  background: #f8fafc;
-  padding: 0.85rem 1rem;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  max-height: 140px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Action Buttons: Play + Favorite */
-.mobile-sheet-actions {
+.mobile-detail-cta-block {
   display: flex;
-  gap: 0.75rem;
-  margin-top: 0.15rem;
+  flex-direction: column;
+  gap: 0.65rem;
 }
 
-.mobile-action-play-btn {
-  flex: 1.8;
+.mobile-detail-play-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 16px;
+  padding: 0.9rem 1.25rem;
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 0.03em;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
-  background: #ef4444;
-  color: #ffffff;
-  border: none;
-  border-radius: 12px;
-  padding: 0.75rem 1rem;
-  font-size: 0.95rem;
-  font-weight: 800;
+  gap: 0.65rem;
+  box-shadow: 0 8px 22px rgba(239, 68, 68, 0.4);
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
   transition: transform 0.15s ease;
 }
 
-.mobile-action-play-btn:active {
+.mobile-detail-play-btn:active {
   transform: scale(0.97);
 }
 
-.mobile-action-fav-btn {
-  flex: 1.2;
+.mobile-detail-actions-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.mobile-detail-tool-btn {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 0.55rem 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  background: #f1f5f9;
+  font-size: 0.8rem;
+  font-weight: 800;
   color: #334155;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 0.75rem 0.65rem;
-  font-size: 0.85rem;
-  font-weight: 700;
   cursor: pointer;
-  transition: transform 0.15s ease, background 0.15s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: all 0.15s ease;
 }
 
-.mobile-action-fav-btn.is-favorited {
-  background: #fef3c7;
-  border-color: #fde68a;
-  color: #b45309;
+.mobile-detail-tool-btn:active {
+  transform: scale(0.95);
 }
 
-.mobile-action-fav-btn:active {
-  transform: scale(0.97);
+.mobile-detail-tool-btn.is-fav {
+  border-color: #f59e0b;
+  color: #d97706;
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.mobile-detail-save-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.mobile-save-status {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.mobile-save-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex: 1;
+}
+
+.mobile-save-info strong {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.mobile-save-info span {
+  font-size: 0.7rem;
+  color: #64748b;
+}
+
+.mobile-detail-synopsis-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.mobile-detail-synopsis-card h3 {
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: #0f172a;
+  margin: 0;
+}
+
+.mobile-detail-synopsis-card p {
+  font-size: 0.82rem;
+  color: #475569;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.mobile-detail-stats-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.mobile-stat-box {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.mobile-stat-lbl {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  text-transform: uppercase;
+}
+
+.mobile-stat-val {
+  font-size: 0.92rem;
+  font-weight: 900;
+  color: #0f172a;
 }
 
 /* Mobile Spatial Navigation & Gamepad High-Visibility Focus System */
@@ -9013,49 +9323,238 @@ html[data-theme="vanilla"],
   }
 
   .console-container {
-    padding: 0.5rem 0.85rem !important;
-    gap: 0.4rem !important;
+    padding: 0.35rem 0.75rem !important;
+    gap: 0.25rem !important;
     max-width: 100vw !important;
     width: 100vw !important;
     height: 100vh !important;
     max-height: 100vh !important;
+    justify-content: flex-start !important;
   }
 
-  .console-viewport {
-    padding: 0.75rem 1rem !important;
-    border-radius: 18px !important;
-  }
-
-  .topbar-right {
+  .console-topbar {
     gap: 0.5rem !important;
   }
 
+  .avatar-badge {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .user-tag {
+    font-size: 0.85rem !important;
+  }
+
+  .topbar-right {
+    gap: 0.4rem !important;
+  }
+
   .status-pill {
-    padding: 0.35rem 0.65rem !important;
+    padding: 0.25rem 0.55rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .system-ribbon-container {
+    padding: 0.1rem 0 !important;
+  }
+
+  .system-tab {
+    padding: 0.25rem 0.65rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .tab-icon {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .console-viewport {
+    flex: 1 !important;
+    min-height: 0 !important;
+    padding: 0.4rem 0.75rem !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+  }
+
+  .shelf-container {
+    height: 100% !important;
+    min-height: 0 !important;
+    gap: 0.2rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .shelf-ribbon-bar {
+    padding: 0.2rem 0.5rem !important;
+    margin-bottom: 0.15rem !important;
+  }
+
+  .tiles-grid {
+    flex: 1 !important;
+    min-height: 0 !important;
+    grid-auto-columns: minmax(130px, 155px) !important;
+    gap: 0.75rem !important;
+    padding: 0.2rem 0.25rem 0.4rem !important;
+  }
+
+  .cartridge-shell {
+    max-height: 100% !important;
+  }
+
+  .ds-theme-container {
+    height: 100% !important;
+    min-height: 0 !important;
+    gap: 0.5rem !important;
+    padding: 0.2rem !important;
+  }
+
+  .ds-buttons-grid {
+    gap: 0.35rem !important;
+  }
+
+  .ds-screen-frame {
+    border-width: 2px !important;
+  }
+
+  .ds-play-now-btn {
+    padding: 0.45rem 0.75rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  .ds-spec-card {
+    padding: 0.35rem 0.5rem !important;
+    font-size: 0.72rem !important;
+  }
+
+  /* Compact Game Detail Drawer Modal for Landscape Handhelds */
+  .info-modal-backdrop.game-card-backdrop {
+    padding: 0.35rem !important;
+    align-items: center !important;
+  }
+
+  .game-card-modal-wrapper {
+    max-width: 96vw !important;
+    gap: 0.4rem !important;
+  }
+
+  .game-card-modal-content {
+    max-height: 94vh !important;
+    overflow-y: auto !important;
+    padding: 0.75rem 1.25rem !important;
+    border-radius: 20px !important;
+    border-width: 3px !important;
+  }
+
+  .game-card-grid {
+    grid-template-columns: 140px 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .game-card-cover-wrapper {
+    width: 140px !important;
+    height: 140px !important;
+    border-radius: 16px !important;
+    border-width: 3px !important;
+  }
+
+  .game-card-header-badge {
+    margin-bottom: 0.2rem !important;
+    gap: 0.35rem !important;
+  }
+
+  .game-card-title {
+    font-size: 1.1rem !important;
+    margin: 0.1rem 0 0.2rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .game-card-meta-row {
+    margin: 0.15rem 0 0.25rem !important;
+    gap: 0.3rem !important;
+  }
+
+  .meta-pill {
+    padding: 1px 6px !important;
+    font-size: 0.68rem !important;
+  }
+
+  .game-card-description {
+    font-size: 0.76rem !important;
+    line-height: 1.35 !important;
+    max-height: 42px !important;
+    -webkit-line-clamp: 2 !important;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    margin-bottom: 0.3rem !important;
+  }
+
+  .game-card-stats-grid {
+    margin: 0.25rem 0 !important;
+    gap: 0.4rem !important;
+  }
+
+  .stat-card {
+    padding: 0.25rem 0.5rem !important;
+    gap: 0.35rem !important;
+    border-radius: 8px !important;
+  }
+
+  .stat-info .stat-label {
+    font-size: 0.58rem !important;
+  }
+
+  .stat-info .stat-value {
     font-size: 0.78rem !important;
   }
 
-  /* Mobile App Root Landscape adaptations */
-  .mobile-app-root {
-    padding-bottom: 1.5rem !important;
+  .save-status-container {
+    margin: 0.25rem 0 !important;
   }
 
-  .mobile-header {
-    padding: 0.6rem 1rem 0.4rem !important;
+  .save-badge {
+    padding: 0.25rem 0.55rem !important;
+    border-radius: 8px !important;
+    gap: 0.4rem !important;
   }
 
-  .mobile-system-chips-row {
-    padding: 0.4rem 1rem !important;
+  .save-badge strong {
+    font-size: 0.7rem !important;
   }
 
-  .mobile-horizontal-row-track {
-    padding: 0 1rem !important;
-    gap: 0.65rem !important;
+  .save-badge span {
+    font-size: 0.65rem !important;
   }
 
-  .mobile-game-card {
-    width: 120px !important;
-    min-width: 120px !important;
+  .game-card-actions {
+    margin-top: 0.35rem !important;
+    gap: 0.4rem !important;
+  }
+
+  .play-now-btn {
+    padding: 0.45rem 1rem !important;
+    font-size: 0.85rem !important;
+    border-radius: 12px !important;
+  }
+
+  .favorite-toggle-btn.icon-only,
+  .drawer-scrape-btn.icon-only,
+  .drawer-edit-btn.icon-only {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 10px !important;
+  }
+
+  .game-card-nav-arrow {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .game-card-close {
+    width: 28px !important;
+    height: 28px !important;
+    top: 0.6rem !important;
+    right: 0.6rem !important;
   }
 }
 
@@ -11895,6 +12394,90 @@ button.onboarding-feature-pill.onboarding-pwa-card.is-safari-tip {
   font-size: 0.78rem;
   letter-spacing: 0.04em;
   margin-left: 2px;
+}
+
+.theme-sheet-handle-bar {
+  display: none;
+}
+
+/* Mobile Responsive Bottom-Sheet Style for ThemeSwitcherModal */
+@media (max-width: 768px) {
+  .theme-modal-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .theme-sheet-handle-bar {
+    display: block;
+    width: 38px;
+    height: 4px;
+    background: rgba(148, 163, 184, 0.5);
+    border-radius: 2px;
+    margin: -0.25rem auto 0.4rem;
+    flex-shrink: 0;
+  }
+
+  .theme-switcher-modal-content {
+    width: 100%;
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: 28px 28px 0 0;
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+    padding: 1.15rem 1.25rem calc(1.75rem + env(safe-area-inset-bottom, 0px));
+    gap: 0.95rem;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.35);
+  }
+
+  .theme-switcher-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .theme-header-icon {
+    padding: 6px;
+  }
+
+  .theme-switcher-title h2 {
+    font-size: 1.15rem;
+  }
+
+  .theme-switcher-title p {
+    font-size: 0.75rem;
+  }
+
+  .theme-card-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    max-height: 60vh;
+  }
+
+  .theme-preset-card {
+    padding: 0.75rem;
+    gap: 0.6rem;
+  }
+
+  .theme-card-preview-strip {
+    height: 62px;
+    padding: 0.6rem 0.85rem;
+  }
+
+  .theme-preview-svg-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .theme-preview-icon {
+    font-size: 1.6rem;
+  }
+
+  .theme-switcher-footer {
+    display: none !important;
+  }
 }
 
 /* ==========================================================================
