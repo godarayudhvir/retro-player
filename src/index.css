@@ -13040,3 +13040,646 @@ html[data-theme="vanilla"],
   text-transform: uppercase;
 }
 
+/* ==========================================================================
+   DS Touch Theme Overrides for Load Custom ROM Modal
+   ========================================================================== */
+
+[data-theme="ds"] .load-rom-modal-content {
+  border-radius: 8px;
+  border: 3px solid #cbd5e1;
+  background: #f8fafc;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.9), 0 12px 36px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="ds"] .load-rom-header {
+  border-radius: 5px 5px 0 0;
+  border-bottom: 2px solid #cbd5e1;
+  background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+  padding: 1rem 1.25rem;
+}
+
+[data-theme="ds"] .load-rom-icon-badge {
+  border-radius: 4px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  color: #2563eb;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="ds"] .load-rom-close-btn {
+  border-radius: 4px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="ds"] .load-rom-close-btn:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  border-color: #ef4444;
+  transform: none;
+}
+
+[data-theme="ds"] .load-rom-tagline {
+  border-radius: 4px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  font-family: inherit;
+}
+
+[data-theme="ds"] .load-rom-dropzone {
+  border-radius: 6px;
+  border: 2px dashed #94a3b8;
+  background: #ffffff;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="ds"] .load-rom-dropzone:hover,
+[data-theme="ds"] .load-rom-dropzone.drag-active,
+[data-theme="ds"] .load-rom-dropzone.gamepad-focused {
+  border-color: #e11d48;
+  background: rgba(225, 29, 72, 0.04);
+  box-shadow: 0 0 0 2px #ffffff, 0 0 12px rgba(225, 29, 72, 0.35);
+  transform: none;
+}
+
+[data-theme="ds"] .load-rom-browse-btn {
+  border-radius: 4px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  color: #1e293b;
+  font-weight: 800;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="ds"] .load-rom-browse-btn:hover {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #1d4ed8;
+  transform: none;
+}
+
+[data-theme="ds"] .load-rom-platform-pill {
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="ds"] .load-rom-security-note {
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+
+/* DS Touch Dark Mode Overrides */
+[data-theme="ds"][data-color-mode="dark"] .load-rom-modal-content {
+  background: #0f172a;
+  border-color: #334155;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="ds"][data-color-mode="dark"] .load-rom-header {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-bottom-color: #334155;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .load-rom-icon-badge,
+[data-theme="ds"][data-color-mode="dark"] .load-rom-close-btn {
+  background: #1e293b;
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .load-rom-tagline {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .load-rom-dropzone {
+  background: #1e293b;
+  border-color: #475569;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .load-rom-dropzone:hover,
+[data-theme="ds"][data-color-mode="dark"] .load-rom-dropzone.drag-active {
+  border-color: #e11d48;
+  background: rgba(225, 29, 72, 0.1);
+}
+
+[data-theme="ds"][data-color-mode="dark"] .load-rom-browse-btn {
+  background: #1e293b;
+  border-color: #475569;
+  color: #f8fafc;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .load-rom-platform-pill {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .load-rom-security-note {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+/* ==========================================================================
+   DS TOUCH THEME — PROFILE SELECT MODAL
+   ========================================================================== */
+
+[data-theme="ds"] .profile-select-backdrop {
+  background: rgba(15, 23, 42, 0.7);
+}
+
+[data-theme="ds"] .profile-select-modal {
+  border-radius: 8px;
+  border: 3px solid #cbd5e1;
+  background: #f8fafc;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.9), 0 12px 36px rgba(0, 0, 0, 0.3);
+  padding: 0 0 1.75rem 0;
+  overflow: hidden;
+}
+
+/* DS-style header bar */
+[data-theme="ds"] .profile-modal-header {
+  background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-bottom: 2px solid #cbd5e1;
+  border-radius: 5px 5px 0 0;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0;
+}
+
+[data-theme="ds"] .profile-select-subtitle {
+  color: #475569;
+  font-weight: 600;
+  border-bottom: 1px solid #e2e8f0;
+  background: #ffffff;
+  margin: 0;
+  padding: 0.65rem 1.5rem;
+  font-size: 0.88rem;
+  text-align: left;
+}
+
+[data-theme="ds"] .profile-modal-title h2 {
+  color: #0f172a;
+  font-size: 1.5rem;
+  letter-spacing: 0;
+}
+
+[data-theme="ds"] .profile-cards-grid {
+  padding: 1.75rem 1.5rem 0 1.5rem;
+}
+
+/* Close button: squared DS button */
+[data-theme="ds"] .profile-close-btn {
+  border-radius: 4px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="ds"] .profile-close-btn:hover {
+  background: #fee2e2;
+  color: #e11d48;
+  border-color: #e11d48;
+  transform: none;
+}
+
+/* Profile card: no floaty transform, bevel on avatar */
+[data-theme="ds"] .profile-card:hover {
+  transform: none;
+}
+
+[data-theme="ds"] .profile-avatar-container {
+  border-radius: 50%;
+  border: 2.5px solid #cbd5e1;
+  background: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="ds"] .profile-card:hover .profile-avatar-container {
+  border-color: #e11d48;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 0 0 2px rgba(225, 29, 72, 0.2), 0 4px 10px rgba(0, 0, 0, 0.12);
+  transform: none;
+}
+
+[data-theme="ds"] .profile-card.gamepad-focused .profile-avatar-container {
+  border-color: #e11d48;
+  box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Active check: DS red instead of green */
+[data-theme="ds"] .profile-active-check {
+  border-radius: 50%;
+  border: 2.5px solid #ffffff;
+  background: #e11d48;
+}
+
+/* Edit overlay: DS blue bevel */
+[data-theme="ds"] .profile-edit-overlay {
+  border-radius: 50%;
+  background: #2563eb;
+  border: 2px solid #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 2px 6px rgba(37, 99, 235, 0.5);
+}
+
+[data-theme="ds"] .profile-card:hover .profile-edit-overlay {
+  transform: none;
+}
+
+/* Delete button: DS-style red bevel */
+[data-theme="ds"] .profile-delete-btn {
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
+  background: #e11d48;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 2px 6px rgba(225, 29, 72, 0.5);
+}
+
+[data-theme="ds"] .profile-delete-btn:hover {
+  background: #be123c;
+  transform: none;
+}
+
+/* Card name */
+[data-theme="ds"] .profile-card-name {
+  color: #1e293b;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+/* Add profile circle: DS recessed well */
+[data-theme="ds"] .add-profile-circle {
+  border-radius: 50%;
+  border: 2px dashed #94a3b8;
+  background: #ffffff;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="ds"] .add-profile-card:hover .add-profile-circle {
+  border-color: #2563eb;
+  background: #eff6ff;
+  transform: none;
+}
+
+[data-theme="ds"] .add-profile-card:hover .add-profile-circle svg {
+  color: #2563eb;
+}
+
+/* Manage toggle: DS hardware button */
+[data-theme="ds"] .profile-modal-footer {
+  padding: 0 1.5rem;
+}
+
+[data-theme="ds"] .profile-manage-toggle-btn {
+  border-radius: 4px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 800;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 2px 4px rgba(0, 0, 0, 0.08);
+  transition: all 0.15s ease;
+}
+
+[data-theme="ds"] .profile-manage-toggle-btn:hover {
+  border-color: #94a3b8;
+  background: #e2e8f0;
+}
+
+[data-theme="ds"] .profile-manage-toggle-btn.active {
+  background: #e11d48;
+  color: #ffffff;
+  border-color: #be123c;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 6px rgba(225, 29, 72, 0.4);
+}
+
+/* ==========================================================================
+   DS TOUCH DARK MODE — PROFILE SELECT MODAL
+   ========================================================================== */
+
+[data-theme="ds"][data-color-mode="dark"] .profile-select-modal {
+  background: #0f172a;
+  border-color: #334155;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-modal-header {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-bottom-color: #334155;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-modal-title h2 {
+  color: #f1f5f9;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-select-subtitle {
+  background: #1e293b;
+  border-bottom-color: #334155;
+  color: #94a3b8;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-close-btn {
+  background: #1e293b;
+  border-color: #475569;
+  color: #94a3b8;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-close-btn:hover {
+  background: rgba(225, 29, 72, 0.15);
+  color: #e11d48;
+  border-color: #e11d48;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-avatar-container {
+  background: #1e293b;
+  border-color: #475569;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-card:hover .profile-avatar-container {
+  border-color: #e11d48;
+  box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.3), 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-card-name {
+  color: #e2e8f0;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .add-profile-circle {
+  background: #1e293b;
+  border-color: #475569;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="ds"][data-color-mode="dark"] .add-profile-card:hover .add-profile-circle {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-manage-toggle-btn {
+  background: #1e293b;
+  border-color: #475569;
+  color: #cbd5e1;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-manage-toggle-btn:hover {
+  background: #334155;
+  border-color: #64748b;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-manage-toggle-btn.active {
+  background: #e11d48;
+  color: #ffffff;
+  border-color: #be123c;
+}
+
+
+/* ==========================================================================
+   DS TOUCH THEME — PROFILE CREATOR MODAL (Edit / Create Player Profile)
+   ========================================================================== */
+
+[data-theme="ds"] .profile-creator-backdrop {
+  background: rgba(15, 23, 42, 0.7);
+}
+
+[data-theme="ds"] .profile-creator-modal {
+  border-radius: 8px;
+  border: 3px solid #cbd5e1;
+  background: #f8fafc;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.9), 0 12px 36px rgba(0, 0, 0, 0.3);
+  padding: 0;
+  overflow: hidden;
+}
+
+/* DS-style header bar */
+[data-theme="ds"] .profile-creator-header {
+  background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-bottom: 2px solid #cbd5e1;
+  border-radius: 5px 5px 0 0;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0;
+}
+
+[data-theme="ds"] .profile-creator-title h2 {
+  color: #0f172a;
+  font-size: 1.35rem;
+  letter-spacing: 0;
+}
+
+/* Body padding compensation since modal is now flush */
+[data-theme="ds"] .profile-creator-body {
+  padding: 1.75rem 1.75rem 0 1.75rem;
+}
+
+/* Avatar preview stage: DS recessed inset panel */
+[data-theme="ds"] .avatar-preview-stage {
+  border-radius: 6px;
+  border: 2px solid #cbd5e1;
+  background: #ffffff;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Avatar ring stays circular, accent uses DS red */
+[data-theme="ds"] .avatar-stage-circle {
+  border-radius: 50%;
+  border: 3px solid #e11d48;
+  background: #f8fafc;
+  box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.15);
+  transition: none;
+}
+
+[data-theme="ds"] .avatar-stage-circle:hover {
+  transform: none;
+}
+
+/* Randomize button: DS hardware button style */
+[data-theme="ds"] .avatar-random-btn {
+  border-radius: 4px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 800;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="ds"] .avatar-random-btn:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #1e293b;
+  transform: none;
+}
+
+/* Text inputs: DS squared inset fields */
+[data-theme="ds"] .profile-input-field {
+  border-radius: 4px;
+  border: 2px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="ds"] .profile-input-field:focus {
+  border-color: #2563eb;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04), 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+/* Avatar preset chips: DS-squared */
+[data-theme="ds"] .avatar-preset-chip {
+  border-radius: 4px;
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
+  color: #334155;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="ds"] .avatar-preset-chip:hover {
+  border-color: #2563eb;
+  color: #1e40af;
+  background: #eff6ff;
+  transform: none;
+}
+
+[data-theme="ds"] .avatar-preset-chip.is-active {
+  background: #2563eb;
+  border-color: #1d4ed8;
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 6px rgba(37, 99, 235, 0.35);
+}
+
+/* Footer: DS divider rule */
+[data-theme="ds"] .profile-creator-footer {
+  padding: 1rem 1.75rem 1.5rem 1.75rem;
+  border-top: 2px solid #e2e8f0;
+  margin-top: 0;
+}
+
+/* Cancel button */
+[data-theme="ds"] .profile-btn-secondary {
+  border-radius: 4px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 800;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="ds"] .profile-btn-secondary:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+/* Save Changes button: DS green bevel */
+[data-theme="ds"] .profile-btn-primary {
+  border-radius: 4px;
+  background: #16a34a;
+  border: 1.5px solid #15803d;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 6px rgba(22, 163, 74, 0.4);
+}
+
+[data-theme="ds"] .profile-btn-primary:hover {
+  background: #15803d;
+  transform: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 8px rgba(22, 163, 74, 0.5);
+}
+
+/* ==========================================================================
+   DS TOUCH DARK MODE — PROFILE CREATOR MODAL
+   ========================================================================== */
+
+[data-theme="ds"][data-color-mode="dark"] .profile-creator-modal {
+  background: #0f172a;
+  border-color: #334155;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-creator-header {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-bottom-color: #334155;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-creator-title h2 {
+  color: #f1f5f9;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .avatar-preview-stage {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="ds"][data-color-mode="dark"] .avatar-stage-circle {
+  background: #0f172a;
+  box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.25);
+}
+
+[data-theme="ds"][data-color-mode="dark"] .avatar-random-btn {
+  background: #1e293b;
+  border-color: #475569;
+  color: #cbd5e1;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="ds"][data-color-mode="dark"] .avatar-random-btn:hover {
+  background: #334155;
+  border-color: #64748b;
+  color: #f1f5f9;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-input-field {
+  background: #1e293b;
+  border-color: #475569;
+  color: #f1f5f9;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-input-field:focus {
+  border-color: #3b82f6;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+[data-theme="ds"][data-color-mode="dark"] .avatar-preset-chip {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .avatar-preset-chip:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+  color: #93c5fd;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .avatar-preset-chip.is-active {
+  background: #2563eb;
+  border-color: #1d4ed8;
+  color: #ffffff;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-creator-footer {
+  border-top-color: #334155;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-btn-secondary {
+  background: #1e293b;
+  border-color: #475569;
+  color: #94a3b8;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-btn-secondary:hover {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-btn-primary {
+  background: #16a34a;
+  border-color: #15803d;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .profile-btn-primary:hover {
+  background: #15803d;
+}
