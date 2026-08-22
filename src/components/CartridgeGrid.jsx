@@ -30,14 +30,6 @@ export default function CartridgeGrid({
       ? 'Recently Played'
       : filteredGames[0]?.systemName || activeSystem.toUpperCase();
 
-  const handleRandomPick = () => {
-    if (!filteredGames || filteredGames.length === 0) return;
-    const randomIndex = Math.floor(Math.random() * filteredGames.length);
-    setFocusedTarget({ zone: 'grid', index: randomIndex });
-    sfx?.playTileNav?.();
-    handleGameSelect(filteredGames[randomIndex]);
-  };
-
   const renderEmptyState = () => {
     if (searchQuery && searchQuery.trim().length > 0) {
       return (
@@ -144,7 +136,7 @@ export default function CartridgeGrid({
     );
   };
 
-  return (
+    return (
     <main className="console-viewport">
       {filteredGames.length > 0 ? (
         <div className="console-viewport-inner">
@@ -156,17 +148,6 @@ export default function CartridgeGrid({
                 {filteredGames.length} {filteredGames.length === 1 ? 'Title' : 'Titles'}
               </span>
             </div>
-
-            {filteredGames.length > 1 && (
-              <button
-                className="channel-random-btn"
-                title="Pick a random game from this collection"
-                onClick={handleRandomPick}
-              >
-                <Sparkles size={14} className="sparkle-anim" />
-                <span>Surprise Me</span>
-              </button>
-            )}
           </div>
 
           {/* Full-Bleed Ambient Tiles Grid */}

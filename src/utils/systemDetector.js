@@ -30,17 +30,17 @@ export function detectSystemFromExtension(filename) {
     case 'chd':
     case 'pbp':
     case 'iso':
-      return { key: 'playstation',  core: 'psx',          name: 'PlayStation',      color: '#3b82f6', icon: resolveAssetPath('assets/platforms/psx.svg') };
+      return { key: 'ps1',          core: 'psx',          name: 'PlayStation',      color: '#6366f1', icon: resolveAssetPath('assets/platforms/psx.svg') };
     case 'zip':
-      return { key: 'arcade',       core: 'mame2003_plus',name: 'Arcade (MAME)',    color: '#ec4899', icon: resolveAssetPath('assets/platforms/arcade.svg') };
+      return { key: 'arcade',       core: 'mame2003_plus',name: 'Arcade (MAME)',    color: '#f43f5e', icon: resolveAssetPath('assets/platforms/arcade.svg') };
     case 'md':
     case 'smd':
     case 'gen':
-      return { key: 'sega_genesis', core: 'segaMD',       name: 'Sega Genesis',     color: '#10b981', icon: resolveAssetPath('assets/platforms/genesis.svg') };
+      return { key: 'genesis',      core: 'segaMD',       name: 'Sega Genesis',     color: '#ec4899', icon: resolveAssetPath('assets/platforms/genesis.svg') };
     case 'gg':
-      return { key: 'game_gear',    core: 'segaGG',       name: 'Game Gear',        color: '#14b8a6', icon: resolveAssetPath('assets/platforms/gamegear.svg') };
+      return { key: 'gamegear',     core: 'segaGG',       name: 'Game Gear',        color: '#14b8a6', icon: resolveAssetPath('assets/platforms/gamegear.svg') };
     case 'a26':
-      return { key: 'atari_2600',   core: 'atari2600',    name: 'Atari 2600',       color: '#d97706', icon: resolveAssetPath('assets/platforms/atari2600.svg') };
+      return { key: 'atari2600',    core: 'atari2600',    name: 'Atari 2600',       color: '#d97706', icon: resolveAssetPath('assets/platforms/atari2600.svg') };
     default:
       return { key: 'nes',          core: 'nes',          name: 'Custom System',    color: '#64748b', icon: resolveAssetPath('assets/pokeball.png') };
   }

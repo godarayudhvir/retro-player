@@ -16,6 +16,10 @@ export function useGamepadNavigation({
   setShowSettingsModal,
   showScraperModal,
   setShowScraperModal,
+  showProfileSelectModal,
+  setShowProfileSelectModal,
+  showMiiCreatorModal,
+  setShowMiiCreatorModal,
   showVirtualKeyboard,
   setShowVirtualKeyboard,
   oskPos,
@@ -39,6 +43,8 @@ export function useGamepadNavigation({
   toggleFavorite,
   themeEngine,
   pwa,
+  bgm,
+  onOpenScraperModal,
   // Mobile-specific orchestration
   isMobile = false,
   selectedMobileGameForDetails = null,
@@ -72,6 +78,8 @@ export function useGamepadNavigation({
       showLoadRomModal,
       showSettingsModal,
       showScraperModal,
+      showProfileSelectModal,
+      showMiiCreatorModal,
       showVirtualKeyboard,
       oskPos,
       filteredGames,
@@ -81,6 +89,8 @@ export function useGamepadNavigation({
       toggleFavorite,
       themeEngine,
       pwa,
+      bgm,
+      onOpenScraperModal,
       isMobile,
       selectedMobileGameForDetails,
       hasChosenProfileThisSession,
@@ -99,6 +109,8 @@ export function useGamepadNavigation({
     showLoadRomModal,
     showSettingsModal,
     showScraperModal,
+    showProfileSelectModal,
+    showMiiCreatorModal,
     showVirtualKeyboard,
     oskPos,
     filteredGames,
@@ -108,6 +120,8 @@ export function useGamepadNavigation({
     toggleFavorite,
     themeEngine,
     pwa,
+    bgm,
+    onOpenScraperModal,
     isMobile,
     selectedMobileGameForDetails,
     hasChosenProfileThisSession,
@@ -252,6 +266,301 @@ export function useGamepadNavigation({
         } else {
           const inputEl = document.querySelector('.modal-dropzone input[type="file"]');
           if (inputEl) inputEl.click();
+        }
+      }
+      return;
+    }
+
+    // 2.2 Profile Select Modal Navigation (Desktop)
+    const { showProfileSelectModal: isProfileOpen, profiles: curDeskProfiles } = stateRef.current;
+    if (isProfileOpen) {
+      const totalCards = (curDeskProfiles?.length || 0) + 1; // profiles + add card
+      const curIndex = curTarget?.zone === 'profileModal' && typeof curTarget.index === 'number' ? curTarget.index : 0;
+      const curId = curTarget?.id;
+
+      if (dir === 'BACK') {
+        setShowProfileSelectModal(false);
+        setFocusedTarget({ zone: 'topbar', id: 'profile' });
+        sfx?.playModalClose?.();
+        return;
+      }
+
+      if (dir === 'UP') {
+        if (curId === 'manage') {
+          setFocusedTarget({ zone: 'profileModal', index: Math.min(curDeskProfiles?.length || 0, curIndex) });
+          sfx?.playTileNav?.();
+        } else if (curId === 'close') {
+          // Stay at top
+        } else {
+          setFocusedTarget({ zone: 'profileModal', id: 'close' });
+          sfx?.playTileNav?.();
+        }
+      } else if (dir === 'DOWN') {
+        if (curId === 'close') {
+          setFocusedTarget({ zone: 'profileModal', index: 0 });
+          sfx?.playTileNav?.();
+        } else if (curId !== 'manage') {
+          setFocusedTarget({ zone: 'profileModal', id: 'manage' });
+          sfx?.playTileNav?.();
+        }
+      } else if (dir === 'LEFT') {
+        if (!curId) {
+          const nextIdx = Math.max(0, curIndex - 1);
+          setFocusedTarget({ zone: 'profileModal', index: nextIdx });
+          sfx?.playTileNav?.();
+        }
+      } else if (dir === 'RIGHT') {
+        if (!curId) {
+          const nextIdx = Math.min(totalCards - 1, curIndex + 1);
+          setFocusedTarget({ zone: 'profileModal', index: nextIdx });
+          sfx?.playTileNav?.();
+        }
+      } else if (dir === 'SELECT') {
+        if (curId === 'close') {
+          setShowProfileSelectModal(false);
+          setFocusedTarget({ zone: 'topbar', id: 'profile' });
+          sfx?.playModalClose?.();
+        } else if (curId === 'manage') {
+          const manageBtn = document.querySelector('.profile-manage-toggle-btn');
+          if (manageBtn) manageBtn.click();
+        } else {
+          if (curIndex < (curDeskProfiles?.length || 0)) {
+            const chosenProf = curDeskProfiles[curIndex];
+            if (chosenProf && onSelectProfile) {
+              onSelectProfile(chosenProf.id);
+            }
+            setShowProfileSelectModal(false);
+            setFocusedTarget({ zone: 'topbar', id: 'profile' });
+            sfx?.playTileNav?.();
+          } else {
+            if (onCreateNewProfile) onCreateNewProfile();
+            setShowProfileSelectModal(false);
+            sfx?.playModalOpen?.();
+          }
+        }
+      }
+      return;
+    }
+
+    // 2.3 Mii Creator Modal Navigation (Desktop & Mobile)
+    const { showMiiCreatorModal: isMiiOpen } = stateRef.current;
+    if (isMiiOpen) {
+      const curId = curTarget?.id || 'tab-face';
+      const miiTabs = ['tab-face', 'tab-hair', 'tab-eyes', 'tab-extras', 'tab-presets'];
+
+      if (dir === 'BACK') {
+        setShowMiiCreatorModal(false);
+        setFocusedTarget({ zone: 'topbar', id: 'profile' });
+        sfx?.playModalClose?.();
+        return;
+      }
+
+      if (dir === 'UP') {
+        if (curId === 'close') {
+          // Top limit
+        } else if (curId === 'nameInput') {
+          setFocusedTarget({ zone: 'miiModal', id: 'close' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'random') {
+          setFocusedTarget({ zone: 'miiModal', id: 'nameInput' });
+          sfx?.playTileNav?.();
+        } else if (miiTabs.includes(curId)) {
+          setFocusedTarget({ zone: 'miiModal', id: 'close' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'save' || curId === 'cancel') {
+          setFocusedTarget({ zone: 'miiModal', id: 'tab-face' });
+          sfx?.playTileNav?.();
+        }
+      } else if (dir === 'DOWN') {
+        if (curId === 'close') {
+          setFocusedTarget({ zone: 'miiModal', id: 'tab-face' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'nameInput') {
+          setFocusedTarget({ zone: 'miiModal', id: 'random' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'random') {
+          setFocusedTarget({ zone: 'miiModal', id: 'save' });
+          sfx?.playTileNav?.();
+        } else if (miiTabs.includes(curId)) {
+          setFocusedTarget({ zone: 'miiModal', id: 'save' });
+          sfx?.playTileNav?.();
+        }
+      } else if (dir === 'LEFT') {
+        if (curId === 'save') {
+          setFocusedTarget({ zone: 'miiModal', id: 'cancel' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'cancel') {
+          setFocusedTarget({ zone: 'miiModal', id: 'random' });
+          sfx?.playTileNav?.();
+        } else if (miiTabs.includes(curId)) {
+          const tabIdx = miiTabs.indexOf(curId);
+          if (tabIdx > 0) {
+            const nextTab = miiTabs[tabIdx - 1];
+            setFocusedTarget({ zone: 'miiModal', id: nextTab });
+            const tabBtn = document.querySelector(`.mii-tab-btn.${nextTab.replace('tab-', '')}`);
+            if (tabBtn) tabBtn.click();
+            sfx?.playTabSwitch?.();
+          } else {
+            setFocusedTarget({ zone: 'miiModal', id: 'nameInput' });
+            sfx?.playTileNav?.();
+          }
+        }
+      } else if (dir === 'RIGHT') {
+        if (curId === 'cancel') {
+          setFocusedTarget({ zone: 'miiModal', id: 'save' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'nameInput' || curId === 'random') {
+          setFocusedTarget({ zone: 'miiModal', id: 'tab-face' });
+          sfx?.playTileNav?.();
+        } else if (miiTabs.includes(curId)) {
+          const tabIdx = miiTabs.indexOf(curId);
+          if (tabIdx < miiTabs.length - 1) {
+            const nextTab = miiTabs[tabIdx + 1];
+            setFocusedTarget({ zone: 'miiModal', id: nextTab });
+            const tabBtn = document.querySelector(`.mii-tab-btn.${nextTab.replace('tab-', '')}`);
+            if (tabBtn) tabBtn.click();
+            sfx?.playTabSwitch?.();
+          }
+        }
+      } else if (dir === 'SELECT') {
+        if (curId === 'close' || curId === 'cancel') {
+          setShowMiiCreatorModal(false);
+          setFocusedTarget({ zone: 'topbar', id: 'profile' });
+          sfx?.playModalClose?.();
+        } else if (curId === 'random') {
+          const randBtn = document.querySelector('.mii-random-btn');
+          if (randBtn) randBtn.click();
+        } else if (curId === 'save') {
+          const saveBtn = document.querySelector('.mii-save-btn');
+          if (saveBtn) saveBtn.click();
+        } else if (curId === 'nameInput') {
+          const inputEl = document.getElementById('mii-name-input');
+          if (inputEl) {
+            inputEl.focus();
+            inputEl.select();
+          }
+        } else if (miiTabs.includes(curId)) {
+          const tabName = curId.replace('tab-', '');
+          const tabButtons = document.querySelectorAll('.mii-tab-btn');
+          tabButtons.forEach(btn => {
+            if (btn.textContent.toLowerCase().includes(tabName) || btn.innerHTML.includes(tabName)) {
+              btn.click();
+            }
+          });
+        }
+      }
+      return;
+    }
+
+    // 2.4 System Settings Modal Navigation (Desktop & Mobile)
+    const { showSettingsModal: isSettingsOpen } = stateRef.current;
+    if (isSettingsOpen) {
+      const settingsCategories = ['roms', 'scraper', 'bgm', 'theme', 'controls', 'system'];
+      const curZone = curTarget?.zone || 'settingsModal';
+      const curId = curTarget?.id;
+      const curIndex = typeof curTarget?.index === 'number' ? curTarget.index : settingsCategories.indexOf(curId) >= 0 ? settingsCategories.indexOf(curId) : 0;
+
+      if (dir === 'BACK') {
+        if (curZone === 'settingsPane') {
+          // Return from pane to sidebar
+          setFocusedTarget({ zone: 'settingsModal', id: settingsCategories[curIndex] || 'roms', index: curIndex });
+          sfx?.playTileNav?.();
+          return;
+        }
+        setShowSettingsModal(false);
+        setFocusedTarget({ zone: 'topbar', id: 'settings' });
+        sfx?.playModalClose?.();
+        return;
+      }
+
+      if (curZone === 'settingsPane') {
+        // Navigating inside the settings pane content
+        if (dir === 'LEFT') {
+          // Go back to the left sidebar category
+          setFocusedTarget({ zone: 'settingsModal', id: settingsCategories[curIndex] || 'roms', index: curIndex });
+          sfx?.playTileNav?.();
+          return;
+        }
+        
+        // Find interactive elements inside .settings-detail-pane
+        const paneFocusables = Array.from(document.querySelectorAll('.settings-detail-pane button, .settings-detail-pane input, .settings-detail-pane select, .settings-detail-pane .settings-theme-card'));
+        const activeElem = document.activeElement;
+        let elemIdx = paneFocusables.indexOf(activeElem);
+        if (elemIdx === -1) elemIdx = 0;
+
+        if (dir === 'UP') {
+          const nextElemIdx = Math.max(0, elemIdx - 1);
+          paneFocusables[nextElemIdx]?.focus();
+          sfx?.playTileNav?.();
+        } else if (dir === 'DOWN') {
+          const nextElemIdx = Math.min(paneFocusables.length - 1, elemIdx + 1);
+          paneFocusables[nextElemIdx]?.focus();
+          sfx?.playTileNav?.();
+        } else if (dir === 'RIGHT') {
+          const nextElemIdx = Math.min(paneFocusables.length - 1, elemIdx + 1);
+          paneFocusables[nextElemIdx]?.focus();
+          sfx?.playTileNav?.();
+        } else if (dir === 'SELECT') {
+          if (paneFocusables[elemIdx]) {
+            paneFocusables[elemIdx].click();
+            sfx?.playTileNav?.();
+          }
+        }
+        return;
+      }
+
+      // Navigating in Sidebar
+      if (dir === 'UP') {
+        if (curId === 'back') {
+          // Top limit
+        } else if (curIndex === 0) {
+          setFocusedTarget({ zone: 'settingsModal', id: 'back' });
+          sfx?.playTileNav?.();
+        } else {
+          const nextIdx = Math.max(0, curIndex - 1);
+          setFocusedTarget({ zone: 'settingsModal', id: settingsCategories[nextIdx], index: nextIdx });
+          const navBtns = document.querySelectorAll('.settings-nav-item');
+          if (navBtns[nextIdx]) navBtns[nextIdx].click();
+          sfx?.playTabSwitch?.();
+        }
+      } else if (dir === 'DOWN') {
+        if (curId === 'back') {
+          setFocusedTarget({ zone: 'settingsModal', id: settingsCategories[0], index: 0 });
+          sfx?.playTileNav?.();
+        } else {
+          const nextIdx = Math.min(settingsCategories.length - 1, curIndex + 1);
+          setFocusedTarget({ zone: 'settingsModal', id: settingsCategories[nextIdx], index: nextIdx });
+          const navBtns = document.querySelectorAll('.settings-nav-item');
+          if (navBtns[nextIdx]) navBtns[nextIdx].click();
+          sfx?.playTabSwitch?.();
+        }
+      } else if (dir === 'LEFT') {
+        if (curId !== 'back') {
+          setFocusedTarget({ zone: 'settingsModal', id: 'back' });
+          sfx?.playTileNav?.();
+        }
+      } else if (dir === 'RIGHT') {
+        if (curId === 'back') {
+          setFocusedTarget({ zone: 'settingsModal', id: settingsCategories[curIndex], index: curIndex });
+          sfx?.playTileNav?.();
+        } else {
+          // Move from sidebar into right settings detail pane
+          setFocusedTarget({ zone: 'settingsPane', index: curIndex });
+          const firstPaneElem = document.querySelector('.settings-detail-pane button, .settings-detail-pane input, .settings-detail-pane select, .settings-detail-pane .settings-theme-card');
+          if (firstPaneElem) firstPaneElem.focus();
+          sfx?.playTileNav?.();
+        }
+      } else if (dir === 'SELECT') {
+        if (curId === 'back') {
+          setShowSettingsModal(false);
+          setFocusedTarget({ zone: 'topbar', id: 'settings' });
+          sfx?.playModalClose?.();
+        } else {
+          // Enter the settings pane
+          setFocusedTarget({ zone: 'settingsPane', index: curIndex });
+          const firstPaneElem = document.querySelector('.settings-detail-pane button, .settings-detail-pane input, .settings-detail-pane select, .settings-detail-pane .settings-theme-card');
+          if (firstPaneElem) firstPaneElem.focus();
+          sfx?.playTileNav?.();
         }
       }
       return;
@@ -616,6 +925,10 @@ export function useGamepadNavigation({
     // ==========================================
     // 4.1 Selected Game Card Drawer Navigation
     if (curCard) {
+      const cardButtons = ['play', 'fav', 'editMeta', 'scrape'];
+      const curId = curTarget?.id || 'play';
+      const curIdx = cardButtons.indexOf(curId);
+
       if (dir === 'BACK') {
         setSelectedGameCard(null);
         setFocusedTarget({ zone: 'grid', index: curTarget?.index || 0 });
@@ -629,31 +942,38 @@ export function useGamepadNavigation({
         setFocusedTarget({ zone: 'cardModal', id: 'play' });
         sfx?.playTileNav?.();
       } else if (dir === 'LEFT') {
-        if (curTarget?.id === 'fav') {
-          setFocusedTarget({ zone: 'cardModal', id: 'play' });
-          sfx?.playTileNav?.();
+        if (curId === 'close') {
+          // Stay at close or loop
         } else {
-          setFocusedTarget({ zone: 'cardModal', id: 'close' });
+          const nextIdx = Math.max(0, curIdx - 1);
+          setFocusedTarget({ zone: 'cardModal', id: cardButtons[nextIdx] });
           sfx?.playTileNav?.();
         }
       } else if (dir === 'RIGHT') {
-        if (curTarget?.id === 'play') {
-          setFocusedTarget({ zone: 'cardModal', id: 'fav' });
+        if (curId === 'close') {
+          setFocusedTarget({ zone: 'cardModal', id: 'play' });
           sfx?.playTileNav?.();
         } else {
-          setFocusedTarget({ zone: 'cardModal', id: 'play' });
+          const nextIdx = Math.min(cardButtons.length - 1, curIdx + 1);
+          setFocusedTarget({ zone: 'cardModal', id: cardButtons[nextIdx] });
           sfx?.playTileNav?.();
         }
       } else if (dir === 'SELECT') {
-        if (curTarget?.id === 'close') {
+        if (curId === 'close') {
           setSelectedGameCard(null);
           setFocusedTarget({ zone: 'grid', index: curTarget?.index || 0 });
           sfx?.playModalClose?.();
-        } else if (curTarget?.id === 'fav') {
+        } else if (curId === 'fav') {
           if (stateRef.current.toggleFavorite) {
             const nextState = stateRef.current.toggleFavorite(curCard);
             sfx?.playFavoriteToggle?.(nextState);
           }
+        } else if (curId === 'editMeta') {
+          const editBtn = document.querySelector('.edit-metadata-btn');
+          if (editBtn) editBtn.click();
+        } else if (curId === 'scrape') {
+          const scrapeBtn = document.querySelector('.scraper-refresh-btn');
+          if (scrapeBtn) scrapeBtn.click();
         } else {
           const gameToPlay = curCard;
           setSelectedGameCard(null);
@@ -673,6 +993,22 @@ export function useGamepadNavigation({
     const curIndex = curTarget?.index || 0;
     const curId = curTarget?.id;
 
+    // Helper to get active desktop topbar items
+    const getDesktopTopbarItems = () => {
+      const items = ['profile'];
+      if (stateRef.current.bgm?.tracks?.length > 0) {
+        items.push('bgm');
+        if (stateRef.current.bgm.isPlaying) {
+          items.push('bgmSkip');
+        }
+      }
+      if (stateRef.current.onOpenScraperModal) items.push('scraper');
+      items.push('sfx', 'theme', 'search');
+      if (stateRef.current.pwa?.canInstall) items.push('install');
+      items.push('loadRom', 'settings');
+      return items;
+    };
+
     if (dir === 'BACK') {
       if (curZone !== 'grid') {
         setFocusedTarget({ zone: 'grid', index: 0 });
@@ -683,7 +1019,27 @@ export function useGamepadNavigation({
 
     if (dir === 'SELECT') {
       if (curZone === 'topbar') {
-        if (curId === 'search') {
+        if (curId === 'profile') {
+          setShowProfileSelectModal?.(true);
+          setFocusedTarget({ zone: 'profileModal', index: 0 });
+          sfx?.playModalOpen?.();
+        } else if (curId === 'bgm') {
+          stateRef.current.bgm?.togglePlay?.();
+          sfx?.playTileNav?.();
+        } else if (curId === 'bgmSkip') {
+          stateRef.current.bgm?.nextTrack?.();
+          sfx?.playTabSwitch?.();
+        } else if (curId === 'scraper') {
+          if (stateRef.current.onOpenScraperModal) {
+            stateRef.current.onOpenScraperModal();
+            sfx?.playModalOpen?.();
+          }
+        } else if (curId === 'sfx') {
+          sfx?.toggleMute?.();
+        } else if (curId === 'theme') {
+          stateRef.current.themeEngine?.cycleTheme?.();
+          sfx?.playThemeSwitch?.();
+        } else if (curId === 'search') {
           if (stateRef.current.gamepadConnected) {
             setShowVirtualKeyboard(true);
             setOskPos({ row: 0, col: 0 });
@@ -735,17 +1091,15 @@ export function useGamepadNavigation({
 
     // Desktop Spatial Movements (UP, DOWN, LEFT, RIGHT)
     if (curZone === 'topbar') {
-      const topbarItems = ['search'];
-      if (stateRef.current.pwa?.canInstall) topbarItems.push('install');
-      topbarItems.push('loadRom', 'settings');
+      const topbarItems = getDesktopTopbarItems();
+      const curItemId = curTarget?.id || 'profile';
+      const curIdx = topbarItems.indexOf(curItemId) >= 0 ? topbarItems.indexOf(curItemId) : 0;
 
       if (dir === 'LEFT') {
-        const curIdx = topbarItems.indexOf(curTarget?.id || 'search');
         const prevIdx = Math.max(0, curIdx - 1);
         setFocusedTarget({ zone: 'topbar', id: topbarItems[prevIdx] });
         sfx?.playTileNav?.();
       } else if (dir === 'RIGHT') {
-        const curIdx = topbarItems.indexOf(curTarget?.id || 'search');
         const nextIdx = Math.min(topbarItems.length - 1, curIdx + 1);
         setFocusedTarget({ zone: 'topbar', id: topbarItems[nextIdx] });
         sfx?.playTileNav?.();
@@ -766,7 +1120,7 @@ export function useGamepadNavigation({
         setFocusedTarget({ zone: 'ribbon', index: nextIdx });
         sfx?.playTabSwitch?.();
       } else if (dir === 'UP') {
-        setFocusedTarget({ zone: 'topbar', id: curIndex < allTabs.length / 2 ? 'search' : 'loadRom' });
+        setFocusedTarget({ zone: 'topbar', id: curIndex === 0 ? 'profile' : (curIndex < allTabs.length / 2 ? 'search' : 'loadRom') });
         sfx?.playTileNav?.();
       } else if (dir === 'DOWN') {
         setFocusedTarget({ zone: 'grid', index: 0 });
@@ -785,31 +1139,22 @@ export function useGamepadNavigation({
         return;
       }
 
+      // Single step navigation for single horizontal row cartridge library shelf
       if (dir === 'RIGHT') {
-        const nextIdx = Math.min(curIndex + 2, curGames.length - 1);
+        const nextIdx = Math.min(curIndex + 1, curGames.length - 1);
         setFocusedTarget({ zone: 'grid', index: nextIdx });
         sfx?.playTileNav?.();
       } else if (dir === 'LEFT') {
-        const nextIdx = Math.max(0, curIndex - 2);
+        const nextIdx = Math.max(0, curIndex - 1);
         setFocusedTarget({ zone: 'grid', index: nextIdx });
         sfx?.playTileNav?.();
       } else if (dir === 'UP') {
-        if (curIndex % 2 === 1) {
-          setFocusedTarget({ zone: 'grid', index: curIndex - 1 });
-          sfx?.playTileNav?.();
-        } else {
-          const sysIdx = allTabs.findIndex(t => t.key === curActiveSys);
-          setFocusedTarget({ zone: 'ribbon', index: sysIdx >= 0 ? sysIdx : 0 });
-          sfx?.playTileNav?.();
-        }
+        const sysIdx = allTabs.findIndex(t => t.key === curActiveSys);
+        setFocusedTarget({ zone: 'ribbon', index: sysIdx >= 0 ? sysIdx : 0 });
+        sfx?.playTileNav?.();
       } else if (dir === 'DOWN') {
-        if (curIndex % 2 === 0 && curIndex + 1 < curGames.length) {
-          setFocusedTarget({ zone: 'grid', index: curIndex + 1 });
-          sfx?.playTileNav?.();
-        } else {
-          setFocusedTarget({ zone: 'hud', id: 'rescan' });
-          sfx?.playTileNav?.();
-        }
+        setFocusedTarget({ zone: 'hud', id: 'rescan' });
+        sfx?.playTileNav?.();
       }
     } else if (curZone === 'hud') {
       if (dir === 'UP') {

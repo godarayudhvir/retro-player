@@ -25,14 +25,24 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
         const data = await res.json();
         console.log(`✅ [CLIENT FETCH SUCCESS] Indexed ${data.games?.length || 0} games.`);
         const loadedGames = data.games || [];
-        setGames(loadedGames);
+        const uniqueGames = [];
+        const seenIds = new Set();
+        for (const g of loadedGames) {
+          const id = g.id || `${g.systemKey}-${g.title}`;
+          if (!seenIds.has(id)) {
+            seenIds.add(id);
+            uniqueGames.push(g);
+          }
+        }
+        console.log(`✅ [CLIENT FETCH SUCCESS] Indexed ${uniqueGames.length} unique games.`);
+        setGames(uniqueGames);
 
-        // If backend provided systems array with gameCount, use it, or derive from loadedGames
+        // If backend provided systems array with gameCount, use it, or derive from uniqueGames
         if (data.systems && data.systems.length > 0) {
           setSystems(data.systems);
         } else {
           const sysMap = {};
-          loadedGames.forEach(g => {
+          uniqueGames.forEach(g => {
             if (!g.systemKey) return;
             if (!sysMap[g.systemKey]) {
               sysMap[g.systemKey] = {
@@ -139,7 +149,28 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
           return idxA - idxB;
         });
     } else if (activeSystem !== 'all') {
-      result = result.filter(game => game.systemKey === activeSystem);
+      const normalizeSys = (k) => {
+        if (!k) return '';
+        const lower = k.toLowerCase().replace(/[-_]/g, '');
+        if (lower === 'segagenesis' || lower === 'megadrive' || lower === 'sega') return 'genesis';
+        if (lower === 'playstation' || lower === 'psx' || lower === 'ps') return 'ps1';
+        if (lower === 'gamegear' || lower === 'gg') return 'gamegear';
+        if (lower === 'atari2600' || lower === 'atari' || lower === 'a2600') return 'atari2600';
+        if (lower === 'supernintendo' || lower === 'sfc') return 'snes';
+        if (lower === 'famicom') return 'nes';
+        if (lower === 'gameboyadvance') return 'gba';
+        if (lower === 'gameboycolor') return 'gbc';
+        if (lower === 'gameboy') return 'gb';
+        if (lower === 'nintendo64') return 'n64';
+        if (lower === 'nintendods' || lower === 'ds') return 'nds';
+        if (lower === 'mame' || lower === 'neogeo' || lower === 'fbalpha' || lower === 'fbneo') return 'arcade';
+        return lower;
+      };
+      const targetSys = normalizeSys(activeSystem);
+      result = result.filter(game => {
+        const gSys = normalizeSys(game.systemKey);
+        return gSys === targetSys || game.systemKey === activeSystem;
+      });
     }
 
     // Apply search query

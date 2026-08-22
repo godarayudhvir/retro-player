@@ -27,7 +27,8 @@ The Game Catalog module indexes local ROM files in `/public/roms` (and server `R
 - **Universal Relative Subpath Resolution**: Resolves all static assets and demo ROM URLs relative to the application's base URL (`import.meta.env.BASE_URL`) via `src/utils/assetPath.js` for 100% portability across GitHub Pages subpaths and custom domain root paths.
 - **Client-Side Private Custom ROM Sandbox**: Custom ROMs opened via "Load Custom ROM" or viewport drag-and-drop execute immediately in browser WebAssembly memory without sending any personal game files to the remote server.
 - **Local Sidecar Metadata & Companion Artwork Discovery**: Detects adjacent companion artwork (`<romname>.webp`, `<romname>.png`, `<romname>.jpg`, `cover.*`) and companion metadata sidecars (`<romname>.nfo`, `<romname>.json`, `game.nfo`) to support custom ROM hacks and indie homebrew without relying on online scrapers.
-- **Zero-Config Pure Indexing with Sidecar Enrichment**: Returns pure game descriptors with optional pre-parsed sidecar metadata and cover URLs attached, falling back cleanly to the dynamic online scraper module when sidecars are absent.
+- **Zero-Config Pure Indexing with Sidecar Enrichment & Deduplication**: Returns pure game descriptors with optional pre-parsed sidecar metadata and cover URLs attached, falling back cleanly to the dynamic online scraper module when sidecars are absent. Uses Map-based canonical key deduplication to prevent duplicate title indexing and React key collisions.
+- **Canonical System Key & Alias Normalization**: Maps diverse folder structures and naming conventions (`sega_genesis` -> `genesis`, `game_gear` -> `gamegear`, `playstation` -> `ps1`, `atari_2600` -> `atari2600`) to standardized canonical keys (`nes`, `snes`, `gba`, `gbc`, `gb`, `n64`, `nds`, `genesis`, `ps1`, `arcade`, `gamegear`, `atari2600`) across scanner, API endpoints, system ribbons, and cartridge renderers.
 - **Sorting & Filtering**: Supplies clean title and extension metadata for category filtering, smart collections (Favorites/Recents), and search queries.
 
 ---
@@ -35,8 +36,9 @@ The Game Catalog module indexes local ROM files in `/public/roms` (and server `R
 ## 3. Detailed Logic Behind Everything and How It Works
 
 ### Matching & Indexing Algorithm
-1. `vite.config.js` and `server.js` scan ROM directories and sanitize title names.
-2. Constructs clean game descriptor objects:
+1. `vite.config.js` and `server.js` scan ROM directories, resolve canonical system keys, and sanitize title names.
+2. Deduplicates catalog entries by `${canonicalKey}-${rawTitle}` Map keys, ensuring companion covers and sidecars take precedence over loose ROM files.
+3. Constructs clean game descriptor objects:
    ```javascript
    {
      id: 'gba-goodboy-galaxy-chapter-zero',
@@ -53,7 +55,7 @@ The Game Catalog module indexes local ROM files in `/public/roms` (and server `R
      coverUrl: null // Scraped dynamically on-the-fly by metadataScraper service
    }
    ```
-3. The client receives the catalog and automatically coordinates background scraping through `useMetadataScraper.js` and `metadataScraper.js`.
+4. The client receives the catalog and automatically coordinates background scraping through `useMetadataScraper.js` and `metadataScraper.js`.
 
 ### Client-Side Sandbox vs. Host Library Management
 1. **Live Web Demo / Custom ROMs**: When running on static hosting (GitHub Pages) or loading personal ROMs via the "Load Custom ROM" modal, ROMs run strictly in browser memory via `URL.createObjectURL(file)`.

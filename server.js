@@ -64,20 +64,77 @@ if (AUTO_SEED_DEMOS) {
   }
 }
 
-// System definition mapping — one canonical key per system
+// System definition mapping with canonical keys and platform aliases
 const SYSTEM_MAP = {
-  nes:         { name: 'NES',              core: 'nes',          color: '#e63946', category: 'Console',  icon: 'assets/platforms/nes.svg' },
-  snes:        { name: 'Super Nintendo',   core: 'snes',         color: '#8b5cf6', category: 'Console',  icon: 'assets/platforms/snes.svg' },
-  gba:         { name: 'Game Boy Advance', core: 'gba',          color: '#3b82f6', category: 'Handheld', icon: 'assets/platforms/gba.svg' },
-  gbc:         { name: 'Game Boy Color',   core: 'gb',           color: '#10b981', category: 'Handheld', icon: 'assets/platforms/gbc.svg' },
-  gb:          { name: 'Game Boy',         core: 'gb',           color: '#84cc16', category: 'Handheld', icon: 'assets/platforms/gb.svg' },
-  n64:         { name: 'Nintendo 64',      core: 'n64',          color: '#f59e0b', category: 'Console',  icon: 'assets/platforms/n64.svg' },
-  nds:         { name: 'Nintendo DS',      core: 'nds',          color: '#06b6d4', category: 'Handheld', icon: 'assets/platforms/nds.svg' },
-  sega_genesis:{ name: 'Sega Genesis',     core: 'segaMD',       color: '#ec4899', category: 'Console',  icon: 'assets/platforms/genesis.svg' },
-  playstation: { name: 'PlayStation',      core: 'psx',          color: '#6366f1', category: 'Console',  icon: 'assets/platforms/psx.svg' },
-  game_gear:   { name: 'Game Gear',        core: 'segaGG',       color: '#14b8a6', category: 'Handheld', icon: 'assets/platforms/gamegear.svg' },
-  arcade:      { name: 'Arcade (MAME)',    core: 'mame2003_plus',color: '#f43f5e', category: 'Arcade',   icon: 'assets/platforms/arcade.svg' },
-  atari_2600:  { name: 'Atari 2600',       core: 'atari2600',    color: '#d97706', category: 'Console',  icon: 'assets/platforms/atari2600.svg' },
+  // NES
+  nes: { key: 'nes', name: 'NES', core: 'nes', color: '#e63946', category: 'Console', icon: 'assets/platforms/nes.svg' },
+  famicom: { key: 'nes', name: 'NES', core: 'nes', color: '#e63946', category: 'Console', icon: 'assets/platforms/nes.svg' },
+
+  // SNES
+  snes: { key: 'snes', name: 'Super Nintendo', core: 'snes', color: '#8b5cf6', category: 'Console', icon: 'assets/platforms/snes.svg' },
+  super_nintendo: { key: 'snes', name: 'Super Nintendo', core: 'snes', color: '#8b5cf6', category: 'Console', icon: 'assets/platforms/snes.svg' },
+  supernintendo: { key: 'snes', name: 'Super Nintendo', core: 'snes', color: '#8b5cf6', category: 'Console', icon: 'assets/platforms/snes.svg' },
+  sfc: { key: 'snes', name: 'Super Nintendo', core: 'snes', color: '#8b5cf6', category: 'Console', icon: 'assets/platforms/snes.svg' },
+  super_famicom: { key: 'snes', name: 'Super Nintendo', core: 'snes', color: '#8b5cf6', category: 'Console', icon: 'assets/platforms/snes.svg' },
+
+  // GBA
+  gba: { key: 'gba', name: 'Game Boy Advance', core: 'gba', color: '#3b82f6', category: 'Handheld', icon: 'assets/platforms/gba.svg' },
+  gameboyadvance: { key: 'gba', name: 'Game Boy Advance', core: 'gba', color: '#3b82f6', category: 'Handheld', icon: 'assets/platforms/gba.svg' },
+  game_boy_advance: { key: 'gba', name: 'Game Boy Advance', core: 'gba', color: '#3b82f6', category: 'Handheld', icon: 'assets/platforms/gba.svg' },
+
+  // GBC
+  gbc: { key: 'gbc', name: 'Game Boy Color', core: 'gb', color: '#10b981', category: 'Handheld', icon: 'assets/platforms/gbc.svg' },
+  gameboycolor: { key: 'gbc', name: 'Game Boy Color', core: 'gb', color: '#10b981', category: 'Handheld', icon: 'assets/platforms/gbc.svg' },
+  game_boy_color: { key: 'gbc', name: 'Game Boy Color', core: 'gb', color: '#10b981', category: 'Handheld', icon: 'assets/platforms/gbc.svg' },
+
+  // GB
+  gb: { key: 'gb', name: 'Game Boy', core: 'gb', color: '#84cc16', category: 'Handheld', icon: 'assets/platforms/gb.svg' },
+  gameboy: { key: 'gb', name: 'Game Boy', core: 'gb', color: '#84cc16', category: 'Handheld', icon: 'assets/platforms/gb.svg' },
+  game_boy: { key: 'gb', name: 'Game Boy', core: 'gb', color: '#84cc16', category: 'Handheld', icon: 'assets/platforms/gb.svg' },
+
+  // N64
+  n64: { key: 'n64', name: 'Nintendo 64', core: 'n64', color: '#f59e0b', category: 'Console', icon: 'assets/platforms/n64.svg' },
+  nintendo64: { key: 'n64', name: 'Nintendo 64', core: 'n64', color: '#f59e0b', category: 'Console', icon: 'assets/platforms/n64.svg' },
+  nintendo_64: { key: 'n64', name: 'Nintendo 64', core: 'n64', color: '#f59e0b', category: 'Console', icon: 'assets/platforms/n64.svg' },
+
+  // NDS
+  nds: { key: 'nds', name: 'Nintendo DS', core: 'nds', color: '#06b6d4', category: 'Handheld', icon: 'assets/platforms/nds.svg' },
+  nintendods: { key: 'nds', name: 'Nintendo DS', core: 'nds', color: '#06b6d4', category: 'Handheld', icon: 'assets/platforms/nds.svg' },
+  nintendo_ds: { key: 'nds', name: 'Nintendo DS', core: 'nds', color: '#06b6d4', category: 'Handheld', icon: 'assets/platforms/nds.svg' },
+  ds: { key: 'nds', name: 'Nintendo DS', core: 'nds', color: '#06b6d4', category: 'Handheld', icon: 'assets/platforms/nds.svg' },
+
+  // Sega Genesis / Mega Drive
+  genesis: { key: 'genesis', name: 'Sega Genesis', core: 'segaMD', color: '#ec4899', category: 'Console', icon: 'assets/platforms/genesis.svg' },
+  sega_genesis: { key: 'genesis', name: 'Sega Genesis', core: 'segaMD', color: '#ec4899', category: 'Console', icon: 'assets/platforms/genesis.svg' },
+  segagenesis: { key: 'genesis', name: 'Sega Genesis', core: 'segaMD', color: '#ec4899', category: 'Console', icon: 'assets/platforms/genesis.svg' },
+  megadrive: { key: 'genesis', name: 'Sega Genesis', core: 'segaMD', color: '#ec4899', category: 'Console', icon: 'assets/platforms/genesis.svg' },
+  mega_drive: { key: 'genesis', name: 'Sega Genesis', core: 'segaMD', color: '#ec4899', category: 'Console', icon: 'assets/platforms/genesis.svg' },
+  sega: { key: 'genesis', name: 'Sega Genesis', core: 'segaMD', color: '#ec4899', category: 'Console', icon: 'assets/platforms/genesis.svg' },
+  md: { key: 'genesis', name: 'Sega Genesis', core: 'segaMD', color: '#ec4899', category: 'Console', icon: 'assets/platforms/genesis.svg' },
+
+  // PlayStation
+  ps1: { key: 'ps1', name: 'PlayStation', core: 'psx', color: '#6366f1', category: 'Console', icon: 'assets/platforms/psx.svg' },
+  playstation: { key: 'ps1', name: 'PlayStation', core: 'psx', color: '#6366f1', category: 'Console', icon: 'assets/platforms/psx.svg' },
+  psx: { key: 'ps1', name: 'PlayStation', core: 'psx', color: '#6366f1', category: 'Console', icon: 'assets/platforms/psx.svg' },
+  ps: { key: 'ps1', name: 'PlayStation', core: 'psx', color: '#6366f1', category: 'Console', icon: 'assets/platforms/psx.svg' },
+
+  // Arcade
+  arcade: { key: 'arcade', name: 'Arcade (MAME)', core: 'arcade', color: '#f43f5e', category: 'Arcade', icon: 'assets/platforms/arcade.svg' },
+  mame: { key: 'arcade', name: 'Arcade (MAME)', core: 'arcade', color: '#f43f5e', category: 'Arcade', icon: 'assets/platforms/arcade.svg' },
+  neogeo: { key: 'arcade', name: 'Arcade (MAME)', core: 'arcade', color: '#f43f5e', category: 'Arcade', icon: 'assets/platforms/arcade.svg' },
+  fbalpha: { key: 'arcade', name: 'Arcade (MAME)', core: 'arcade', color: '#f43f5e', category: 'Arcade', icon: 'assets/platforms/arcade.svg' },
+  fbneo: { key: 'arcade', name: 'Arcade (MAME)', core: 'arcade', color: '#f43f5e', category: 'Arcade', icon: 'assets/platforms/arcade.svg' },
+
+  // Game Gear
+  gamegear: { key: 'gamegear', name: 'Game Gear', core: 'segaGG', color: '#14b8a6', category: 'Handheld', icon: 'assets/platforms/gamegear.svg' },
+  game_gear: { key: 'gamegear', name: 'Game Gear', core: 'segaGG', color: '#14b8a6', category: 'Handheld', icon: 'assets/platforms/gamegear.svg' },
+  gg: { key: 'gamegear', name: 'Game Gear', core: 'segaGG', color: '#14b8a6', category: 'Handheld', icon: 'assets/platforms/gamegear.svg' },
+
+  // Atari 2600
+  atari2600: { key: 'atari2600', name: 'Atari 2600', core: 'atari2600', color: '#d97706', category: 'Console', icon: 'assets/platforms/atari2600.svg' },
+  atari_2600: { key: 'atari2600', name: 'Atari 2600', core: 'atari2600', color: '#d97706', category: 'Console', icon: 'assets/platforms/atari2600.svg' },
+  atari: { key: 'atari2600', name: 'Atari 2600', core: 'atari2600', color: '#d97706', category: 'Console', icon: 'assets/platforms/atari2600.svg' },
+  a2600: { key: 'atari2600', name: 'Atari 2600', core: 'atari2600', color: '#d97706', category: 'Console', icon: 'assets/platforms/atari2600.svg' }
 };
 
 const EXTENSION_MAP = {
@@ -92,17 +149,17 @@ const EXTENSION_MAP = {
   '.z64': 'n64',
   '.v64': 'n64',
   '.nds': 'nds',
-  '.gen': 'sega_genesis',
-  '.md':  'sega_genesis',
-  '.smd': 'sega_genesis',
-  '.gg':  'game_gear',
-  '.iso': 'playstation',
-  '.cue': 'playstation',
-  '.chd': 'playstation',
-  '.pbp': 'playstation',
-  '.bin': 'playstation',
-  '.a26': 'atari_2600',
-  '.7z':  'atari_2600',
+  '.gen': 'genesis',
+  '.md': 'genesis',
+  '.smd': 'genesis',
+  '.gg': 'gamegear',
+  '.iso': 'ps1',
+  '.cue': 'ps1',
+  '.chd': 'ps1',
+  '.pbp': 'ps1',
+  '.bin': 'ps1',
+  '.a26': 'atari2600',
+  '.7z': 'atari2600',
   '.zip': 'arcade'
 };
 
@@ -364,6 +421,7 @@ app.get('/api/roms', (req, res) => {
 
     try {
       const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+      const hasCue = entries.some(e => e.isFile() && path.extname(e.name).toLowerCase() === '.cue');
 
       for (const entry of entries) {
         if (entry.name.startsWith('.')) continue;
@@ -376,47 +434,62 @@ app.get('/api/roms', (req, res) => {
         } else if (entry.isFile()) {
           const ext = path.extname(entry.name).toLowerCase();
 
+          if (ext === '.bin' && hasCue) continue;
+
           if (VALID_EXTENSIONS.includes(ext)) {
             const nameWithoutExt = path.parse(entry.name).name;
-            const pathParts = systemSubdir.split('/');
-            let systemKey = null;
+            const pathParts = systemSubdir ? systemSubdir.split('/') : [];
+            const topFolderKey = pathParts.length > 0 ? pathParts[0].toLowerCase().replace(/[-_]/g, '') : '';
+            const rawTopFolder = pathParts.length > 0 ? pathParts[0].toLowerCase() : '';
+            const parentFolderKey = pathParts.length > 1 ? pathParts[pathParts.length - 1] : '';
 
-            if (pathParts.length > 0 && SYSTEM_MAP[pathParts[0].toLowerCase()]) {
-              systemKey = pathParts[0].toLowerCase();
-            } else {
-              systemKey = EXTENSION_MAP[ext] || 'nes';
-            }
+            const extSystemKey = EXTENSION_MAP[ext];
+            const systemMeta = SYSTEM_MAP[rawTopFolder] || SYSTEM_MAP[topFolderKey] || (extSystemKey ? SYSTEM_MAP[extSystemKey] : SYSTEM_MAP['nes']);
+            const canonicalKey = systemMeta?.key || (extSystemKey || 'nes');
+            const systemInfo = SYSTEM_MAP[canonicalKey] || SYSTEM_MAP['nes'];
 
-            const cleanDisplayTitle = nameWithoutExt
+            const rawTitle = (nameWithoutExt.toLowerCase() === 'game' || nameWithoutExt.toLowerCase() === 'rom') && parentFolderKey
+              ? parentFolderKey
+              : nameWithoutExt;
+
+            const cleanDisplayTitle = rawTitle
               .replace(/\(.*?\)/g, '')
               .replace(/\[.*?\]/g, '')
               .replace(/_/g, ' ')
               .replace(/\s+/g, ' ')
               .trim();
 
-            const systemInfo = SYSTEM_MAP[systemKey] || SYSTEM_MAP['nes'];
-            const gameId = `${systemKey}-${nameWithoutExt}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
-
+            const gameId = `${canonicalKey}-${rawTitle}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
             const sidecarMeta = parseCompanionMetadata(dirPath, nameWithoutExt, entries);
             const companionCover = findCompanionCover(nameWithoutExt, currentSubdir, entries, sidecarMeta);
 
-            if (!gameMap.has(gameId)) {
-              gameMap.set(gameId, {
-                id: gameId,
-                title: sidecarMeta?.title || cleanDisplayTitle || nameWithoutExt,
-                rawTitle: nameWithoutExt,
-                filename: entry.name,
-                systemKey,
-                systemName: systemInfo.name,
-                systemCore: systemInfo.core,
-                systemColor: systemInfo.color,
-                systemIcon: systemInfo.icon,
-                category: systemInfo.category,
-                romUrl: `/roms/${systemSubdir ? `${systemSubdir}` : `${encodeURIComponent(entry.name)}`}`,
-                coverUrl: companionCover || null,
-                sidecarMetadata: sidecarMeta || null,
-                hasSidecar: !!(sidecarMeta || companionCover)
-              });
+            const pathSegments = currentSubdir.split('/').map(segment => encodeURIComponent(segment));
+            const romUrl = `/roms/${pathSegments.join('/')}`;
+
+            const gameObj = {
+              id: gameId,
+              title: sidecarMeta?.title || cleanDisplayTitle || rawTitle,
+              rawTitle: rawTitle,
+              filename: entry.name,
+              systemKey: canonicalKey,
+              systemName: systemInfo.name,
+              systemCore: systemInfo.core,
+              systemColor: systemInfo.color,
+              systemIcon: systemInfo.icon,
+              category: systemInfo.category,
+              romUrl,
+              coverUrl: companionCover || null,
+              sidecarMetadata: sidecarMeta || null,
+              hasSidecar: !!(sidecarMeta || companionCover)
+            };
+
+            if (gameMap.has(gameId)) {
+              const existing = gameMap.get(gameId);
+              if (!existing.hasSidecar && gameObj.hasSidecar) {
+                gameMap.set(gameId, gameObj);
+              }
+            } else {
+              gameMap.set(gameId, gameObj);
             }
           }
         }
@@ -432,13 +505,27 @@ app.get('/api/roms', (req, res) => {
   }
 
   const games = Array.from(gameMap.values());
+  const canonicalSystems = [
+    { key: 'nes', name: 'NES', core: 'nes', color: '#e63946', category: 'Console', icon: 'assets/platforms/nes.svg' },
+    { key: 'snes', name: 'Super Nintendo', core: 'snes', color: '#8b5cf6', category: 'Console', icon: 'assets/platforms/snes.svg' },
+    { key: 'gba', name: 'Game Boy Advance', core: 'gba', color: '#3b82f6', category: 'Handheld', icon: 'assets/platforms/gba.svg' },
+    { key: 'gbc', name: 'Game Boy Color', core: 'gb', color: '#10b981', category: 'Handheld', icon: 'assets/platforms/gbc.svg' },
+    { key: 'gb', name: 'Game Boy', core: 'gb', color: '#84cc16', category: 'Handheld', icon: 'assets/platforms/gb.svg' },
+    { key: 'n64', name: 'Nintendo 64', core: 'n64', color: '#f59e0b', category: 'Console', icon: 'assets/platforms/n64.svg' },
+    { key: 'nds', name: 'Nintendo DS', core: 'nds', color: '#06b6d4', category: 'Handheld', icon: 'assets/platforms/nds.svg' },
+    { key: 'genesis', name: 'Sega Genesis', core: 'segaMD', color: '#ec4899', category: 'Console', icon: 'assets/platforms/genesis.svg' },
+    { key: 'ps1', name: 'PlayStation', core: 'psx', color: '#6366f1', category: 'Console', icon: 'assets/platforms/psx.svg' },
+    { key: 'arcade', name: 'Arcade (MAME)', core: 'arcade', color: '#f43f5e', category: 'Arcade', icon: 'assets/platforms/arcade.svg' },
+    { key: 'gamegear', name: 'Game Gear', core: 'segaGG', color: '#14b8a6', category: 'Handheld', icon: 'assets/platforms/gamegear.svg' },
+    { key: 'atari2600', name: 'Atari 2600', core: 'atari2600', color: '#d97706', category: 'Console', icon: 'assets/platforms/atari2600.svg' }
+  ];
+
   res.json({
     count: games.length,
     games,
-    systems: Object.keys(SYSTEM_MAP).map(key => ({
-      key,
-      ...SYSTEM_MAP[key],
-      gameCount: games.filter(g => g.systemKey === key).length
+    systems: canonicalSystems.map(sys => ({
+      ...sys,
+      gameCount: games.filter(g => g.systemKey === sys.key).length
     }))
   });
 });

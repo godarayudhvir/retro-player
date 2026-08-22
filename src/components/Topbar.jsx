@@ -98,7 +98,7 @@ export default function Topbar({
     <header className="console-topbar">
       <div className="topbar-left">
         <div 
-          className="avatar-badge profile-avatar-trigger"
+          className={`avatar-badge profile-avatar-trigger ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'profile' ? 'gamepad-focused' : ''}`}
           onClick={() => {
             onOpenProfileSelect?.();
             sfx?.playModalOpen?.();
@@ -113,7 +113,7 @@ export default function Topbar({
           )}
         </div>
         <span 
-          className="user-tag profile-name-tag"
+          className={`user-tag profile-name-tag ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'profile' ? 'gamepad-focused' : ''}`}
           onClick={() => {
             onOpenProfileSelect?.();
             sfx?.playModalOpen?.();
@@ -129,7 +129,7 @@ export default function Topbar({
         {bgm && bgm.tracks && bgm.tracks.length > 0 && (
           <div className="bgm-control-group">
             <button
-              className={`status-pill status-bgm ${bgm.isPlaying ? 'is-bgm-playing' : ''}`}
+              className={`status-pill status-bgm ${bgm.isPlaying ? 'is-bgm-playing' : ''} ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'bgm' ? 'gamepad-focused' : ''}`}
               onClick={() => {
                 bgm.togglePlay();
                 sfx?.playTileNav?.();
@@ -145,7 +145,7 @@ export default function Topbar({
 
             {bgm.isPlaying && (
               <button
-                className="status-pill status-bgm-skip"
+                className={`status-pill status-bgm-skip ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'bgmSkip' ? 'gamepad-focused' : ''}`}
                 onClick={() => {
                   bgm.nextTrack();
                   sfx?.playTabSwitch?.();
@@ -189,7 +189,7 @@ export default function Topbar({
         {/* Metadata Scraper Status / Trigger / Stop Button */}
         {scraper && (
           <button
-            className={`status-pill status-scraper ${scraper.isScraping ? 'is-active-scraping is-stoppable' : ''}`}
+            className={`status-pill status-scraper ${scraper.isScraping ? 'is-active-scraping is-stoppable' : ''} ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'scraper' ? 'gamepad-focused' : ''}`}
             onClick={() => {
               if (scraper.isScraping) {
                 scraper.stopScrape();
@@ -223,7 +223,7 @@ export default function Topbar({
         {/* SFX Audio Mute/Unmute Toggle */}
         {sfx && (
           <button
-            className="status-pill status-sfx"
+            className={`status-pill status-sfx ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'sfx' ? 'gamepad-focused' : ''}`}
             onClick={sfx.toggleMute}
             title={sfx.isMuted ? 'Unmute UI Sound Effects' : 'Mute UI Sound Effects'}
             aria-label={sfx.isMuted ? 'Unmute UI Sound Effects' : 'Mute UI Sound Effects'}
@@ -235,7 +235,7 @@ export default function Topbar({
         {/* Multi-Theme Selector Pill */}
         {themeEngine && (
           <button
-            className="status-pill theme-toggle-btn"
+            className={`status-pill theme-toggle-btn ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'theme' ? 'gamepad-focused' : ''}`}
             onClick={() => {
               themeEngine.cycleTheme();
               sfx?.playThemeSwitch?.();

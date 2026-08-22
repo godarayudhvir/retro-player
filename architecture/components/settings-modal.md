@@ -18,7 +18,10 @@ The **System Settings & Library Manager Menu** (`SettingsView.jsx`) is a full-sc
   - Top header with return button (`Back` / `Esc` / `B` button) and Station badge.
   - Bottom controller HUD with key prompts (`[B] Back to Games`, `[A] Select Option`, `[D-Pad] Navigation`).
 - **100% Gamepad & Keyboard Spatial Navigation**:
-  - Smooth 2D directional navigation, hotkey support (`Esc`, `B` button to return, `Enter`, `A` button to select).
+  - Smooth 2D directional navigation with full D-Pad / Arrow key control over the Category Sidebar, Back button, and Category selection with luminous `.gamepad-focused` rings.
+  - Pressing **D-Pad Right** or **A Button / Enter** enters the active Settings Detail Pane, allowing players to navigate through upload buttons, search filters, theme cards, toggles, API inputs, and diagnostic action buttons.
+  - Pressing **D-Pad Left** seamlessly returns focus from the settings content pane back to the left sidebar categories.
+  - Hotkey support (`Esc` or controller `B` button to return to library, `Enter` or controller `A` button to select).
 - **Theme Support & Mobile Responsiveness**:
   - Full dark mode & dynamic theme compatibility with mobile-responsive horizontal scrolling tabs for phones and tablets.
 

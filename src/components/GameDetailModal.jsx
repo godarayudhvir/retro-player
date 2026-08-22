@@ -235,7 +235,7 @@ export default function GameDetailModal({
 
               {/* Scrape Online Metadata Button */}
               <button
-                className={`scraper-refresh-btn icon-only ${showLogs ? 'active-logs' : ''}`}
+                className={`scraper-refresh-btn icon-only ${showLogs ? 'active-logs' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'scrape' ? 'gamepad-focused' : ''}`}
                 onClick={handleManualScrape}
                 disabled={isLocalScraping || isScraping}
                 title="Re-scrape 3D Box Art & Online Overview"

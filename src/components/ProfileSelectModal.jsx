@@ -15,6 +15,8 @@ export default function ProfileSelectModal({
   onEditProfile,
   onDeleteProfile,
   onClose,
+  focusedTarget,
+  setFocusedTarget,
   sfx
 }) {
   const [isManaging, setIsManaging] = useState(false);
@@ -32,7 +34,11 @@ export default function ProfileSelectModal({
               <h2>Who&apos;s Playing?</h2>
             </div>
             {onClose && (
-              <button className="profile-close-btn" onClick={onClose} aria-label="Close Profile Selector">
+              <button 
+                className={`profile-close-btn ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`} 
+                onClick={onClose} 
+                aria-label="Close Profile Selector"
+              >
                 <X size={20} />
               </button>
             )}
@@ -43,12 +49,13 @@ export default function ProfileSelectModal({
           </p>
 
           <div className="profile-cards-grid">
-            {profiles.map((profile) => {
+            {profiles.map((profile, index) => {
               const isActive = profile.id === activeProfileId;
+              const isFocused = focusedTarget?.zone === 'profileModal' && focusedTarget?.index === index;
               return (
                 <div
                   key={profile.id}
-                  className={`profile-card ${isActive ? 'active' : ''} ${isManaging ? 'managing' : ''}`}
+                  className={`profile-card ${isActive ? 'active' : ''} ${isManaging ? 'managing' : ''} ${isFocused ? 'gamepad-focused' : ''}`}
                   onClick={() => {
                     if (isManaging) {
                       onEditProfile?.(profile);
@@ -95,7 +102,7 @@ export default function ProfileSelectModal({
 
             {/* Add Profile Card */}
             <div
-              className="profile-card add-profile-card"
+              className={`profile-card add-profile-card ${focusedTarget?.zone === 'profileModal' && focusedTarget?.index === profiles.length ? 'gamepad-focused' : ''}`}
               onClick={() => {
                 onCreateNewProfile?.();
               }}
@@ -111,7 +118,7 @@ export default function ProfileSelectModal({
           {/* Footer Management Actions */}
           <div className="profile-modal-footer">
             <button
-              className={`profile-manage-toggle-btn ${isManaging ? 'active' : ''}`}
+              className={`profile-manage-toggle-btn ${isManaging ? 'active' : ''} ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'manage' ? 'gamepad-focused' : ''}`}
               onClick={() => {
                 setIsManaging(!isManaging);
                 sfx?.playTileNav?.();

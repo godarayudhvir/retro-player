@@ -16,6 +16,8 @@ export default function MiiCreatorModal({
   initialProfile = null,
   onSave,
   onClose,
+  focusedTarget,
+  setFocusedTarget,
   sfx
 }) {
   const [name, setName] = useState('Player');
@@ -119,7 +121,11 @@ export default function MiiCreatorModal({
             <Sparkles size={24} color="#f59e0b" />
             <h2>{initialProfile ? 'Edit Profile & Mii Avatar' : 'Create Mii Profile'}</h2>
           </div>
-          <button className="profile-close-btn" onClick={onClose} aria-label="Close">
+          <button 
+            className={`profile-close-btn ${focusedTarget?.zone === 'miiModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`} 
+            onClick={onClose} 
+            aria-label="Close"
+          >
             <X size={20} />
           </button>
         </div>
@@ -139,14 +145,19 @@ export default function MiiCreatorModal({
                 value={name}
                 maxLength={20}
                 onChange={(e) => setName(e.target.value)}
+                onFocus={() => setFocusedTarget?.({ zone: 'miiModal', id: 'nameInput' })}
                 placeholder="Enter Name"
-                className="mii-input-field"
+                className={`mii-input-field ${focusedTarget?.zone === 'miiModal' && focusedTarget?.id === 'nameInput' ? 'gamepad-focused' : ''}`}
               />
             </div>
 
-            <button type="button" className="mii-random-btn" onClick={handleRandomize}>
+            <button 
+              type="button" 
+              className={`mii-random-btn ${focusedTarget?.zone === 'miiModal' && focusedTarget?.id === 'random' ? 'gamepad-focused' : ''}`} 
+              onClick={handleRandomize}
+            >
               <Dices size={18} />
-              <span>Surprise Me / Randomize</span>
+              <span>Randomize Avatar</span>
             </button>
           </div>
 
@@ -156,7 +167,7 @@ export default function MiiCreatorModal({
             <div className="mii-editor-tabs">
               <button
                 type="button"
-                className={`mii-tab-btn ${activeTab === 'face' ? 'active' : ''}`}
+                className={`mii-tab-btn ${activeTab === 'face' ? 'active' : ''} ${focusedTarget?.zone === 'miiModal' && focusedTarget?.id === 'tab-face' ? 'gamepad-focused' : ''}`}
                 onClick={() => setActiveTab('face')}
               >
                 <Smile size={16} />
@@ -165,7 +176,7 @@ export default function MiiCreatorModal({
 
               <button
                 type="button"
-                className={`mii-tab-btn ${activeTab === 'hair' ? 'active' : ''}`}
+                className={`mii-tab-btn ${activeTab === 'hair' ? 'active' : ''} ${focusedTarget?.zone === 'miiModal' && focusedTarget?.id === 'tab-hair' ? 'gamepad-focused' : ''}`}
                 onClick={() => setActiveTab('hair')}
               >
                 <Palette size={16} />
@@ -174,7 +185,7 @@ export default function MiiCreatorModal({
 
               <button
                 type="button"
-                className={`mii-tab-btn ${activeTab === 'eyes' ? 'active' : ''}`}
+                className={`mii-tab-btn ${activeTab === 'eyes' ? 'active' : ''} ${focusedTarget?.zone === 'miiModal' && focusedTarget?.id === 'tab-eyes' ? 'gamepad-focused' : ''}`}
                 onClick={() => setActiveTab('eyes')}
               >
                 <Eye size={16} />
@@ -183,7 +194,7 @@ export default function MiiCreatorModal({
 
               <button
                 type="button"
-                className={`mii-tab-btn ${activeTab === 'extras' ? 'active' : ''}`}
+                className={`mii-tab-btn ${activeTab === 'extras' ? 'active' : ''} ${focusedTarget?.zone === 'miiModal' && focusedTarget?.id === 'tab-extras' ? 'gamepad-focused' : ''}`}
                 onClick={() => setActiveTab('extras')}
               >
                 <Glasses size={16} />
@@ -192,7 +203,7 @@ export default function MiiCreatorModal({
 
               <button
                 type="button"
-                className={`mii-tab-btn ${activeTab === 'presets' ? 'active' : ''}`}
+                className={`mii-tab-btn ${activeTab === 'presets' ? 'active' : ''} ${focusedTarget?.zone === 'miiModal' && focusedTarget?.id === 'tab-presets' ? 'gamepad-focused' : ''}`}
                 onClick={() => setActiveTab('presets')}
               >
                 <User size={16} />
@@ -381,10 +392,19 @@ export default function MiiCreatorModal({
 
         {/* Footer */}
         <div className="mii-creator-footer">
-          <button type="button" className="mii-cancel-btn" onClick={onClose}>
+          <button 
+            type="button" 
+            className={`mii-cancel-btn ${focusedTarget?.zone === 'miiModal' && focusedTarget?.id === 'cancel' ? 'gamepad-focused' : ''}`} 
+            onClick={onClose}
+          >
             Cancel
           </button>
-          <button type="button" className="mii-save-btn" onClick={handleSubmit} disabled={!name.trim()}>
+          <button 
+            type="button" 
+            className={`mii-save-btn ${focusedTarget?.zone === 'miiModal' && focusedTarget?.id === 'save' ? 'gamepad-focused' : ''}`} 
+            onClick={handleSubmit} 
+            disabled={!name.trim()}
+          >
             <Check size={18} />
             <span>Save Profile</span>
           </button>

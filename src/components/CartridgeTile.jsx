@@ -24,17 +24,17 @@ export default function CartridgeTile({
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
 
-  const isNes = game.systemKey === 'nes' || game.systemCore === 'nes';
-  const isSnes = game.systemKey === 'snes' || game.systemCore === 'snes';
-  const isN64 = game.systemKey === 'n64' || game.systemCore === 'n64';
-  const isGba = game.systemKey === 'gba' || game.systemCore === 'gba';
-  const isNds = game.systemKey === 'nds' || game.systemCore === 'nds';
-  const isGenesis = game.systemKey === 'genesis' || game.systemCore === 'segaMD' || game.systemKey === 'megadrive';
-  const isGb = game.systemKey === 'gb' || game.systemKey === 'gbc' || game.systemCore === 'gb';
-  const isGameGear = game.systemKey === 'gamegear' || game.systemCore === 'segaGG';
-  const isAtari = game.systemKey === 'atari2600' || game.systemCore === 'atari2600' || game.systemKey === 'atari';
+  const isNes = game.systemKey === 'nes' || game.systemCore === 'nes' || game.systemKey === 'famicom';
+  const isSnes = game.systemKey === 'snes' || game.systemCore === 'snes' || game.systemKey === 'super_nintendo' || game.systemKey === 'supernintendo' || game.systemKey === 'sfc';
+  const isN64 = game.systemKey === 'n64' || game.systemCore === 'n64' || game.systemKey === 'nintendo64';
+  const isGba = game.systemKey === 'gba' || game.systemCore === 'gba' || game.systemKey === 'gameboyadvance';
+  const isNds = game.systemKey === 'nds' || game.systemCore === 'nds' || game.systemKey === 'nintendods' || game.systemKey === 'ds';
+  const isGenesis = game.systemKey === 'genesis' || game.systemCore === 'segaMD' || game.systemKey === 'megadrive' || game.systemKey === 'sega_genesis' || game.systemKey === 'segagenesis' || game.systemKey === 'sega';
+  const isGb = game.systemKey === 'gb' || game.systemKey === 'gbc' || game.systemCore === 'gb' || game.systemKey === 'gameboy' || game.systemKey === 'gameboycolor';
+  const isGameGear = game.systemKey === 'gamegear' || game.systemCore === 'segaGG' || game.systemKey === 'game_gear' || game.systemKey === 'gg';
+  const isAtari = game.systemKey === 'atari2600' || game.systemCore === 'atari2600' || game.systemKey === 'atari' || game.systemKey === 'atari_2600' || game.systemKey === 'a2600';
   const isPsx = game.systemKey === 'psx' || game.systemKey === 'ps1' || game.systemKey === 'playstation' || game.systemCore === 'psx' || game.systemCore === 'playstation';
-  const isArcade = game.systemKey === 'arcade' || game.systemKey === 'mame' || game.systemKey === 'neogeo' || game.systemKey === 'fbalpha' || game.systemKey === 'fbneo' || game.systemCore === 'mame' || game.systemCore === 'fbalpha' || game.systemCore === 'fbneo' || game.systemCore === 'arcade';
+  const isArcade = game.systemKey === 'arcade' || game.systemKey === 'mame' || game.systemKey === 'neogeo' || game.systemKey === 'fbalpha' || game.systemKey === 'fbneo' || game.systemCore === 'mame' || game.systemCore === 'fbalpha' || game.systemCore === 'fbneo' || game.systemCore === 'arcade' || game.systemCore === 'mame2003_plus';
   const cartColor = getCartridgeColor(game);
   const rawCover = metadata?.coverUrl || (game.coverUrl && !game.coverUrl.endsWith('.svg') ? game.coverUrl : null);
   const coverSrc = rawCover ? resolveAssetPath(rawCover) : null;

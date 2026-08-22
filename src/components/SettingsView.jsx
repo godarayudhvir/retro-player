@@ -321,7 +321,7 @@ export default function SettingsView({
         <header className="settings-page-header">
           <div className="settings-header-left">
             <button 
-              className="settings-back-btn" 
+              className={`settings-back-btn ${focusedTarget?.zone === 'settingsModal' && focusedTarget?.id === 'back' ? 'gamepad-focused' : ''}`} 
               onClick={onClose}
               title="Return to Main Console View (Esc / B)"
               aria-label="Back"
@@ -357,12 +357,16 @@ export default function SettingsView({
           {/* Left Category Sidebar */}
           <aside className="settings-sidebar">
             <nav className="settings-nav-list" aria-label="Settings Categories">
-              {navCategories.map((cat) => {
+              {navCategories.map((cat, idx) => {
                 const isActive = activeCategory === cat.id;
+                const isFocused = focusedTarget?.zone === 'settingsModal' && 
+                  ((focusedTarget?.id === 'tab' && idx === 0) || 
+                   focusedTarget?.id === cat.id || 
+                   focusedTarget?.index === idx);
                 return (
                   <button
                     key={cat.id}
-                    className={`settings-nav-item ${isActive ? 'active' : ''}`}
+                    className={`settings-nav-item ${isActive ? 'active' : ''} ${isFocused ? 'gamepad-focused' : ''}`}
                     onClick={() => {
                       setActiveCategory(cat.id);
                       sfx?.playTabSwitch?.();

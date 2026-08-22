@@ -168,6 +168,10 @@ export default function App() {
     setShowSettingsModal,
     showScraperModal,
     setShowScraperModal,
+    showProfileSelectModal,
+    setShowProfileSelectModal,
+    showMiiCreatorModal,
+    setShowMiiCreatorModal,
     showVirtualKeyboard,
     setShowVirtualKeyboard,
     oskPos,
@@ -178,6 +182,7 @@ export default function App() {
     setActiveGame,
     activeSystem,
     setActiveSystem,
+    bgm,
     filteredGames,
     systems,
     searchQuery,
@@ -191,6 +196,7 @@ export default function App() {
     toggleFavorite,
     themeEngine,
     pwa,
+    onOpenScraperModal: () => setShowScraperModal(true),
     // Mobile coordination
     isMobile,
     selectedMobileGameForDetails,
@@ -477,9 +483,12 @@ export default function App() {
         isOpen={showProfileSelectModal}
         profiles={profiles}
         activeProfileId={activeProfileId}
+        focusedTarget={focusedTarget}
+        setFocusedTarget={setFocusedTarget}
         onSelectProfile={(id) => {
           switchProfile(id);
           setShowProfileSelectModal(false);
+          setFocusedTarget({ zone: 'topbar', id: 'profile' });
         }}
         onCreateNewProfile={() => {
           setEditingProfile(null);
@@ -494,7 +503,11 @@ export default function App() {
         onDeleteProfile={(id) => {
           deleteProfile(id);
         }}
-        onClose={() => setShowProfileSelectModal(false)}
+        onClose={() => {
+          setShowProfileSelectModal(false);
+          setFocusedTarget({ zone: 'topbar', id: 'profile' });
+          sfx.playModalClose();
+        }}
         sfx={sfx}
       />
 
@@ -502,6 +515,8 @@ export default function App() {
       <MiiCreatorModal
         isOpen={showMiiCreatorModal}
         initialProfile={editingProfile}
+        focusedTarget={focusedTarget}
+        setFocusedTarget={setFocusedTarget}
         onSave={(data) => {
           if (editingProfile) {
             updateProfile(editingProfile.id, data);
@@ -509,10 +524,13 @@ export default function App() {
             createProfile(data.name, data.miiData, data.favoriteColor);
           }
           setShowMiiCreatorModal(false);
+          setFocusedTarget({ zone: 'topbar', id: 'profile' });
         }}
         onClose={() => {
           setShowMiiCreatorModal(false);
           setEditingProfile(null);
+          setFocusedTarget({ zone: 'topbar', id: 'profile' });
+          sfx.playModalClose();
         }}
         sfx={sfx}
       />

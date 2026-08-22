@@ -16,6 +16,7 @@ The `Topbar` component serves as the primary console header and status HUD for R
 - **Search Bar & Virtual Keyboard Trigger**: Interactive search input with an adaptive keyboard badge (`⌘K` on Mac, `Ctrl+K` on Windows/Linux, or `Y` when a gamepad is connected).
 - **Custom ROM Modal Trigger (`FolderOpen`)**: Icon-only button that opens the in-app `LoadRomModal` dialog for selecting or dragging local custom ROMs.
 - **Digital Clock**: Displays local time updated every 10 seconds.
+- **Complete D-Pad & Keyboard Spatial Navigation**: Every control in the Topbar (User Profile Avatar & Name, BGM Play/Pause, BGM Skip, Scraper Trigger, SFX Mute, Theme Switcher, Search Input, PWA Install, Load ROM, and Settings) is 100% accessible and navigable via D-Pad (`LEFT` / `RIGHT` / `UP` / `DOWN`) and gamepad `A` button with luminous focus highlights (`.gamepad-focused`).
 - **Adaptive Layout**: Sleek, circular icon-only buttons provide a streamlined, distraction-free console topbar across desktop, tablet, and mobile views.
 
 ---

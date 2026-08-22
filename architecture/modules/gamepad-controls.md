@@ -36,10 +36,13 @@ The Gamepad Controls engine provides seamless navigation using standard USB/Blue
   - When `activeGame` is truthy, UI spatial navigation is bypassed. Standard buttons (A, B, D-Pad, Shoulder) are not consumed by the main window, allowing EmulatorJS to directly handle gameplay input inside its focused iframe.
   - If `Select` + `Start` or `Guide/Home` is detected simultaneously, `setActiveGame(null)` is executed, safely unmounting the emulator.
 - **UI Shell Navigation** (when `activeGame` is null):
-  - `D-Pad Left / Right`: Navigates grid columns or system tabs in the ribbon.
-  - `D-Pad Up / Down`: Navigates grid rows, ribbon tabs, or HUD actions.
-  - `Button 0 (A / Cross)`: Triggers game card selection or action modal confirmation.
-  - `Button 1 (B / Circle)`: Closes game detail drawer, info modal, or returns to grid.
+  - `D-Pad Left / Right`: Navigates games sequentially 1-by-1 across the single horizontal library shelf, or moves across topbar pills / modal buttons.
+  - `D-Pad Up / Down`: Navigates seamlessly across UI tiers (Topbar items $\leftrightarrow$ Category Ribbon $\leftrightarrow$ Cartridge Shelf $\leftrightarrow$ Controller HUD).
+  - `Full Topbar Spatial Coverage`: Complete D-Pad reachability across Profile Avatar (`profile`), BGM Play/Pause (`bgm`), BGM Next (`bgmSkip`), Online Scraper (`scraper`), UI SFX Mute/Unmute (`sfx`), Theme Switcher (`theme`), Search (`search`), PWA Install (`install`), Load Custom ROM (`loadRom`), and Settings (`settings`).
+  - `Complete Modal D-Pad Nav`: In-app Game Detail Drawer (`play`, `fav`, `editMeta`, `scrape`, `close`), Profile Select Modal (`profile cards`, `add profile`, `manage`, `close`), Mii Creator Studio Wizard (`close`, `nameInput`, `random`, category tabs `tab-face`/`tab-hair`/`tab-eyes`/`tab-extras`/`tab-presets`, `save`, `cancel`), and System Settings Hub (Back button, left category sidebar with D-Pad `UP`/`DOWN`, pressing `RIGHT` or `A` enters the settings detail pane to navigate interactive settings controls/inputs/buttons, pressing `LEFT` returns to sidebar, and `B` exits) support 100% keyboard and gamepad spatial movement.
+  - `Button 0 (A / Cross)`: Triggers selection, play, or action modal confirmation.
+  - `Button 1 (B / Circle)`: Closes game detail drawer, modals, or returns focus to library grid.
+  - `Button 2 (X / Square)`: Toggles game Favorite status instantaneously.
   - `Button 3 (Y / Triangle)` / `Button 8 (Select)`: Opens Search bar and launches On-Screen Virtual Keyboard.
   - `Button 4 / 5 (L1 / R1)`: Cycles active console system tabs left/right.
 - **On-Screen Virtual Keyboard (OSK)**:
