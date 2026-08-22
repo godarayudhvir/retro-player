@@ -37,7 +37,6 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
   const [isLocalOffline, setIsLocalOffline] = useState(!navigator.onLine);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [showSubToolbar, setShowSubToolbar] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [isGamePaused, setIsGamePaused] = useState(false);
   const [isGameMuted, setIsGameMuted] = useState(false);
   const isGameMutedRef = useRef(false);
@@ -2049,11 +2048,6 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
           sfx?.play?.('click');
           break;
         }
-
-        case 'settings':
-          setShowSettingsModal(prev => !prev);
-          sfx?.play?.('click');
-          break;
 
         case 'saveState':
           try {

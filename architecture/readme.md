@@ -46,7 +46,6 @@ architecture/
 │   ├── game-detail-modal.md # Game drawer modal with metadata & save data detection (`GameDetailModal.jsx`)
 │   ├── metadata-edit-modal.md # Jellyfin-style manual metadata editor for ROM hacks & homebrew (`MetadataEditModal.jsx`)
 │   ├── scraper-modal.md    # Granular scraper scope selector: All / Single / Multi / Title (`ScraperModal.jsx`)
-│   ├── settings-modal.md   # Nintendo Switch–style 3-tab console manager: ROMs, BGM, General (`SettingsModal.jsx`)
 │   ├── theme-switcher-modal.md # Console Theme Studio: theme grid, light/dark switch, UI Display Mode picker (`ThemeSwitcherModal.jsx`)
 │   ├── about-info-modal.md # Project about dialog and full controls reference table (`AboutInfoModal.jsx`)
 │   ├── emulator-modal.md   # Emulator Modal UI dialog, status displays, HUD bar & isolated iframe engine (`EmulatorModal.jsx`)
@@ -58,6 +57,7 @@ architecture/
 │
 └── mirai/                  # Future features and upcoming roadmap specifications ("Mirai" - 未来)
     ├── README.md           # Master Vision, codebase audit, refactoring matrix & innovation catalog
+    ├── settings-hub.md     # Settings & Library Management Hub: removed UI, preserved server infra & full redesign spec
     ├── local-sidecars-and-metadata-editor.md # Local companion sidecars (.nfo/.json/cover.webp) & in-app metadata editor
     ├── multiplayer.md      # WebRTC Peer-to-Peer Netplay & local multiplayer emulation architecture
     └── cloud-saves.md      # Cloud save state synchronization & cross-device backup architecture
