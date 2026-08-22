@@ -28,6 +28,7 @@ import { useThemeEngine } from './hooks/useThemeEngine';
 import { useMetadataScraper } from './hooks/useMetadataScraper';
 import { useProfileManager } from './hooks/useProfileManager';
 import { useBgmEngine } from './hooks/useBgmEngine';
+import { useDeviceDetection } from './hooks/useDeviceDetection';
 import { usePwaInstall } from './hooks/usePwaInstall';
 import { BatteryWarning, Zap, X } from 'lucide-react';
 
@@ -63,26 +64,8 @@ export default function App() {
     }
   });
 
-  const checkIsMobile = () => {
-    if (typeof window === 'undefined') return false;
-    // MobileAppView is strictly for portrait phone screens (width <= 768 AND portrait orientation)
-    const isPortraitPhone = window.innerWidth <= 768 && window.innerHeight > window.innerWidth;
-    return isPortraitPhone;
-  };
-
-  const [isMobile, setIsMobile] = useState(checkIsMobile);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(checkIsMobile());
-    };
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleResize);
-    };
-  }, []);
+  // Modern W3C matchMedia viewport and UI mode tracking
+  const { uiMode, setUiMode, isMobile } = useDeviceDetection();
 
   const searchInputRef = useRef(null);
 
@@ -620,6 +603,8 @@ export default function App() {
           sfx.playModalClose();
         }}
         themeEngine={themeEngine}
+        uiMode={uiMode}
+        setUiMode={setUiMode}
         sfx={sfx}
       />
 

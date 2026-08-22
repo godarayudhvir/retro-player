@@ -423,10 +423,9 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
       stageRef.current.appendChild(iframe);
 
       const isMobileTouch = (typeof window !== 'undefined') && (
-        ('ontouchstart' in window) || 
-        (navigator.maxTouchPoints > 0) || 
-        (window.innerWidth <= 1024) ||
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        (window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches) ||
+        (('ontouchstart' in window) && window.innerWidth <= 768) ||
+        /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '')
       );
 
       const htmlContent = `

@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Palette, Sun, Moon, Check, X } from 'lucide-react';
+import { Palette, Sun, Moon, Check, X, Monitor, Smartphone, Cpu } from 'lucide-react';
 import { resolveAssetPath } from '../utils/assetPath';
 
 /**
- * ThemeSwitcherModal: Visual console re-theming & Light/Dark mode picker.
+ * ThemeSwitcherModal: Visual console re-theming, Light/Dark mode picker & UI Display Mode Selector.
  * 100% accessible via Keyboard and Gamepad.
  */
 export default function ThemeSwitcherModal({
   isOpen,
   onClose,
   themeEngine,
+  uiMode = 'auto',
+  setUiMode,
   sfx
 }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -89,11 +91,56 @@ export default function ThemeSwitcherModal({
             <Palette size={22} className="theme-header-icon" />
             <div>
               <h2>Console Theme Studio</h2>
-              <p>Select visual layout theme and display color mode</p>
+              <p>Select visual layout theme, color mode & display mode</p>
             </div>
           </div>
 
           <div className="theme-switcher-actions">
+            {/* UI Display Mode Picker */}
+            {setUiMode && (
+              <div className="theme-mode-toggle-group ui-mode-toggle-group" title="Select UI Layout Mode">
+                <button
+                  type="button"
+                  className={`theme-mode-btn ${uiMode === 'auto' ? 'is-active' : ''}`}
+                  onClick={() => {
+                    setUiMode('auto');
+                    sfx?.playTabSwitch?.();
+                  }}
+                  title="Auto: Responsively adapt to screen & orientation"
+                  aria-label="Auto Responsive Display Mode"
+                >
+                  <Cpu size={14} />
+                  <span>Auto</span>
+                </button>
+                <button
+                  type="button"
+                  className={`theme-mode-btn ${uiMode === 'console' ? 'is-active' : ''}`}
+                  onClick={() => {
+                    setUiMode('console');
+                    sfx?.playTabSwitch?.();
+                  }}
+                  title="Console / TV Mode: 10-Foot UI shelf layout"
+                  aria-label="Console 10-Foot Display Mode"
+                >
+                  <Monitor size={14} />
+                  <span>Console / TV</span>
+                </button>
+                <button
+                  type="button"
+                  className={`theme-mode-btn ${uiMode === 'mobile' ? 'is-active' : ''}`}
+                  onClick={() => {
+                    setUiMode('mobile');
+                    sfx?.playTabSwitch?.();
+                  }}
+                  title="Mobile Touch Mode: Vertical stream feed layout"
+                  aria-label="Mobile Touch Display Mode"
+                >
+                  <Smartphone size={14} />
+                  <span>Mobile Feed</span>
+                </button>
+              </div>
+            )}
+
             {/* Light / Dark Mode Toggle */}
             <div className="theme-mode-toggle-group">
               <button

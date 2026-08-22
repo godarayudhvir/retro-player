@@ -12163,7 +12163,8 @@ button.onboarding-feature-pill.onboarding-pwa-card.is-safari-tip {
 .theme-switcher-actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.65rem;
 }
 
 .theme-mode-toggle-group {
@@ -12175,16 +12176,21 @@ button.onboarding-feature-pill.onboarding-pwa-card.is-safari-tip {
   gap: 4px;
 }
 
+.ui-mode-toggle-group {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
 .theme-mode-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.45rem 0.85rem;
+  padding: 0.45rem 0.75rem;
   border-radius: 10px;
   border: none;
   background: transparent;
   color: var(--text-sub);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
