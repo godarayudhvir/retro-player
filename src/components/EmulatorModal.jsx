@@ -2395,6 +2395,50 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
             <Camera size={16} />
             <span>Capture</span>
           </button>
+
+          <button 
+            className="sub-toolbar-btn" 
+            onClick={() => {
+              const sIdx = (SHADERS.indexOf(activeShader) + 1) % SHADERS.length;
+              setActiveShader(SHADERS[sIdx]);
+              showToast(`Display Filter: ${SHADER_LABELS[SHADERS[sIdx]]}`);
+            }}
+            title="Cycle Display Filters"
+          >
+            <Tv size={16} color="#a78bfa" />
+            <span>{SHADER_LABELS[activeShader]}</span>
+          </button>
+
+          <button 
+            className="sub-toolbar-btn" 
+            onClick={() => handleEmulatorAction('saveState')} 
+            title="Quick Save State"
+          >
+            <Save size={16} color="#10b981" />
+            <span>Save</span>
+          </button>
+
+          <button 
+            className="sub-toolbar-btn" 
+            onClick={() => handleEmulatorAction('loadState')} 
+            title="Quick Load State"
+          >
+            <RotateCcw size={16} color="#38bdf8" />
+            <span>Load</span>
+          </button>
+
+          <button 
+            className={`sub-toolbar-btn ${showDiagnostics ? 'diag-active' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowDiagnostics(prev => !prev);
+              setShowSubToolbar(false);
+            }}
+            title="Toggle Performance Diagnostics"
+          >
+            <Activity size={16} color="#38bdf8" />
+            <span>Diagnostics</span>
+          </button>
         </div>
       )}
 
