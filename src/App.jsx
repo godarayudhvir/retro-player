@@ -11,7 +11,6 @@ import OnScreenKeyboard from './components/OnScreenKeyboard';
 import EmulatorModal from './components/EmulatorModal';
 import ProfileSelectModal from './components/ProfileSelectModal';
 import MiiCreatorModal from './components/MiiCreatorModal';
-import SettingsView from './components/SettingsView';
 import DemoWelcomeModal from './components/DemoWelcomeModal';
 import OnboardingScreen from './components/OnboardingScreen';
 import ScraperModal from './components/ScraperModal';
@@ -33,7 +32,7 @@ import { BatteryWarning, Zap, X } from 'lucide-react';
 
 /**
  * Root Application Orchestrator for Retro Player.
- * Coordinates modular UI components, profiles, Mii avatars, BGM audio, themes, settings, PWA, and emulation.
+ * Coordinates modular UI components, profiles, Mii avatars, BGM audio, themes, PWA, and emulation.
  */
 export default function App() {
   const [activeGame, setActiveGame] = useState(null);
@@ -41,7 +40,6 @@ export default function App() {
   const [focusedTarget, setFocusedTarget] = useState({ zone: 'grid', index: 0 });
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showLoadRomModal, setShowLoadRomModal] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showScraperModal, setShowScraperModal] = useState(false);
   const [showVirtualKeyboard, setShowVirtualKeyboard] = useState(false);
   const [showProfileSelectModal, setShowProfileSelectModal] = useState(false);
@@ -188,8 +186,6 @@ export default function App() {
     setShowInfoModal,
     showLoadRomModal,
     setShowLoadRomModal,
-    showSettingsModal,
-    setShowSettingsModal,
     showScraperModal,
     setShowScraperModal,
     showProfileSelectModal,
@@ -288,7 +284,7 @@ export default function App() {
   return (
     <div 
       className={`console-container ${isMobile ? 'mobile-mode-active' : ''} ${isDraggingOver ? 'drag-over-active' : ''}`}
-      data-theme={isMobile ? 'classic-light' : themeEngine.theme}
+      data-theme={themeEngine.theme}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -357,7 +353,6 @@ export default function App() {
             setSearchQuery={setSearchQuery}
             searchInputRef={searchInputRef}
             setShowLoadRomModal={setShowLoadRomModal}
-            setShowSettingsModal={setShowSettingsModal}
             setShowVirtualKeyboard={setShowVirtualKeyboard}
             onOpenScraperModal={() => setShowScraperModal(true)}
             time={time}
@@ -565,29 +560,6 @@ export default function App() {
           sfx.playModalClose();
         }}
         sfx={sfx}
-      />
-
-      {/* Full-Screen Nintendo Switch Style System Settings Menu Page */}
-      <SettingsView
-        isOpen={showSettingsModal}
-        onClose={() => {
-          setShowSettingsModal(false);
-          setFocusedTarget({ zone: 'topbar', id: 'settings' });
-          sfx.playModalClose();
-        }}
-        games={games}
-        systems={systems}
-        fetchGames={fetchGames}
-        bgm={bgm}
-        pwa={pwa}
-        sfx={sfx}
-        themeEngine={themeEngine}
-        scraper={scraper}
-        onOpenScraperModal={() => setShowScraperModal(true)}
-        focusedTarget={focusedTarget}
-        setFocusedTarget={setFocusedTarget}
-        gamepadConnected={gamepadConnected}
-        gamepadBattery={gamepadStatus}
       />
 
       {/* Granular Scraper Scope Selector Modal */}

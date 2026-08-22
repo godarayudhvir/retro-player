@@ -7,7 +7,7 @@ The Main Application Shell ([App.jsx](file:///Users/godarayudhvir/Github/retro-p
 
 ## 2. Detailed List of What It Does
 - **Modular Component Orchestration**: Composes dedicated subcomponents for topbar status HUD, system category ribbon, 3D cartridge grid, game drawer modal, Load ROM dialog, info modal, virtual keyboard, and gamepad HUD.
-- **Multi-Theme Engine Coordination (`useThemeEngine`)**: Manages real-time theme switching across 4 console aesthetics (iiSU Light, Midnight Cyber Dark, Sony XMB Wave, Game Boy DMG) and persists to localStorage.
+- **Theme Engine Coordination (`useThemeEngine`)**: Manages the canonical Vanilla console aesthetic and persists state to localStorage.
 - **Smart Collections & Playtime Analytics (`usePlaytimeAndFavorites`)**: Manages persistent favorites, chronological recently played history, active gameplay session timing, and in-app stats resetting.
 - **Audio Synthesizer Coordination (`useWebAudioSfx`)**: Injects zero-latency synthesized tactile clicks, swooshes, modal chimes, and cartridge insertion audio throughout the UI.
 - **Dynamic Controller Connection Management (`useGamepadStatus`)**: Tracks active gamepad connectivity and controller hardware ID.

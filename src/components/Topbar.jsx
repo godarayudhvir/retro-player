@@ -10,7 +10,6 @@ import {
   Square, 
   Music, 
   SkipForward, 
-  Settings, 
   Download,
   Battery,
   BatteryCharging,
@@ -24,7 +23,7 @@ import MiiAvatar from './MiiAvatar';
 
 /**
  * Topbar console header with active Mii profile avatar, BGM music player, status indicators,
- * settings trigger, PWA install button, search input, custom ROM loader, and digital clock.
+ * PWA install button, search input, custom ROM loader, and digital clock.
  */
 export default function Topbar({
   gamepadConnected,
@@ -39,7 +38,6 @@ export default function Topbar({
   setSearchQuery,
   searchInputRef,
   setShowLoadRomModal,
-  setShowSettingsModal,
   setShowVirtualKeyboard,
   onOpenScraperModal,
   time,
@@ -233,7 +231,7 @@ export default function Topbar({
         )}
 
         {/* Multi-Theme Selector Pill */}
-        {themeEngine && (
+        {themeEngine && themeEngine.availableThemes?.length > 1 && (
           <button
             className={`status-pill theme-toggle-btn ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'theme' ? 'gamepad-focused' : ''}`}
             onClick={() => {
@@ -314,20 +312,6 @@ export default function Topbar({
           aria-label="Load Custom ROM"
         >
           <FolderOpen size={18} color="#3b82f6" />
-        </button>
-
-        {/* Console Settings & Library Manager Trigger */}
-        <button
-          className={`status-pill status-settings ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'settings' ? 'gamepad-focused' : ''}`}
-          onClick={() => {
-            setShowSettingsModal?.(true);
-            setFocusedTarget?.({ zone: 'settingsModal', id: 'tab' });
-            sfx?.playModalOpen?.();
-          }}
-          title="Console Settings & Library Manager (Manage ROMs & BGM)"
-          aria-label="Console Settings"
-        >
-          <Settings size={18} color="#64748b" />
         </button>
 
         {/* Real-time Clock */}

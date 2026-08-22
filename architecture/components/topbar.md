@@ -12,11 +12,10 @@ The `Topbar` component serves as the primary console header and status HUD for R
 - **Controller Connectivity & Battery Widget**: Displays a green `GAMEPAD READY` badge or active battery indicator (`PAD` + `BatteryIcon` + `XX%` + `⚡` charging indicator) when a physical gamepad is detected, or `NO CONTROLLER` in grey. Auto-hides on mobile touch devices.
 - **Automated Metadata Scraper Button**: Icon-only action button (`Sparkles` / `RefreshCw`) triggering library-wide metadata & box art scraping.
 - **SFX Mute Toggle Button**: Compact icon-only button toggle between active audio and muted sound using `Volume2`/`VolumeX` icons with tooltips.
-- **Multi-Theme Engine Button**: Compact icon-only button displaying the active theme icon (☀️, 🌙, 🌊, 📟), cycling themes on click or `T` key.
 - **Search Bar & Virtual Keyboard Trigger**: Interactive search input with an adaptive keyboard badge (`⌘K` on Mac, `Ctrl+K` on Windows/Linux, or `Y` when a gamepad is connected).
 - **Custom ROM Modal Trigger (`FolderOpen`)**: Icon-only button that opens the in-app `LoadRomModal` dialog for selecting or dragging local custom ROMs.
 - **Digital Clock**: Displays local time updated every 10 seconds.
-- **Complete D-Pad & Keyboard Spatial Navigation**: Every control in the Topbar (User Profile Avatar & Name, BGM Play/Pause, BGM Skip, Scraper Trigger, SFX Mute, Theme Switcher, Search Input, PWA Install, Load ROM, and Settings) is 100% accessible and navigable via D-Pad (`LEFT` / `RIGHT` / `UP` / `DOWN`) and gamepad `A` button with luminous focus highlights (`.gamepad-focused`).
+- **Complete D-Pad & Keyboard Spatial Navigation**: Every control in the Topbar (User Profile Avatar & Name, BGM Play/Pause, BGM Skip, Scraper Trigger, SFX Mute, Search Input, PWA Install, and Load ROM) is 100% accessible and navigable via D-Pad (`LEFT` / `RIGHT` / `UP` / `DOWN`) and gamepad `A` button with luminous focus highlights (`.gamepad-focused`).
 - **Adaptive Layout**: Sleek, circular icon-only buttons provide a streamlined, distraction-free console topbar across desktop, tablet, and mobile views.
 
 ---

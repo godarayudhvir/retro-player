@@ -26,7 +26,7 @@ architecture/
 │   ├── audio-sfx.md        # Pure Web Audio API UI sound effects synthesizer (`useWebAudioSfx.js`)
 │   ├── bgm-engine.md       # Background Music (BGM) playback, track discovery & smart in-game pause (`useBgmEngine.js`)
 │   ├── user-profiles.md    # Multi-User profiles & Nintendo Mii avatar studio system (`useProfileManager.js`, `MiiAvatar.jsx`)
-│   ├── theme-engine.md     # Multi-theme engine, CSS custom properties & instant persistence (`useThemeEngine.js`, `index.css`)
+│   ├── theme-engine.md     # Theme engine, Vanilla console styling & CSS custom properties (`useThemeEngine.js`, `index.css`)
 │   ├── playtime-favorites.md # Smart Collections (Favorites & Recents) & Playtime analytics (`usePlaytimeAndFavorites.js`)
 │   ├── console-switcher.md # Console system switching, smart collections filtering & tab ribbon (`SystemRibbon.jsx`)
 │   ├── game-catalog.md     # Game database catalog, ROM path mapping & game descriptions (`gameDescriptions.js`, Vite API middleware)
@@ -36,7 +36,6 @@ architecture/
 ├── components/             # System Controls & UI Components
 │   ├── mobile-app-view.md  # Dedicated Netflix-style mobile feed & profile gateway (`MobileAppView.jsx`)
 │   ├── topbar.md           # Console header HUD, search input, clock, and sound controls (`Topbar.jsx`)
-│   ├── settings-modal.md   # Console settings, library manager & ROM/BGM upload & deletion hub (`SettingsModal.jsx`)
 │   ├── confirm-modal.md    # Universal in-app confirmation dialog replacing native alerts & confirms (`ConfirmModal.jsx`)
 │   ├── load-rom-modal.md   # In-app Load Custom ROM modal with drag-drop and supported formats (`LoadRomModal.jsx`)
 │   ├── system-ribbon.md    # Category tab ribbon with dynamic game count sorting (`SystemRibbon.jsx`)

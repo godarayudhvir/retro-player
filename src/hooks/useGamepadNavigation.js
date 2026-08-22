@@ -12,8 +12,6 @@ export function useGamepadNavigation({
   setShowInfoModal,
   showLoadRomModal,
   setShowLoadRomModal,
-  showSettingsModal,
-  setShowSettingsModal,
   showScraperModal,
   setShowScraperModal,
   showProfileSelectModal,
@@ -78,7 +76,6 @@ export function useGamepadNavigation({
       selectedGameCard,
       showInfoModal,
       showLoadRomModal,
-      showSettingsModal,
       showScraperModal,
       showProfileSelectModal,
       showMiiCreatorModal,
@@ -111,7 +108,6 @@ export function useGamepadNavigation({
     selectedGameCard,
     showInfoModal,
     showLoadRomModal,
-    showSettingsModal,
     showScraperModal,
     showProfileSelectModal,
     showMiiCreatorModal,
@@ -456,121 +452,7 @@ export function useGamepadNavigation({
       return;
     }
 
-    // 2.4 System Settings Modal Navigation (Desktop & Mobile)
-    const { showSettingsModal: isSettingsOpen } = stateRef.current;
-    if (isSettingsOpen) {
-      const settingsCategories = ['roms', 'scraper', 'bgm', 'theme', 'controls', 'system'];
-      const curZone = curTarget?.zone || 'settingsModal';
-      const curId = curTarget?.id;
-      const curIndex = typeof curTarget?.index === 'number' ? curTarget.index : settingsCategories.indexOf(curId) >= 0 ? settingsCategories.indexOf(curId) : 0;
-
-      if (dir === 'BACK') {
-        if (curZone === 'settingsPane') {
-          // Return from pane to sidebar
-          setFocusedTarget({ zone: 'settingsModal', id: settingsCategories[curIndex] || 'roms', index: curIndex });
-          sfx?.playTileNav?.();
-          return;
-        }
-        setShowSettingsModal(false);
-        setFocusedTarget({ zone: 'topbar', id: 'settings' });
-        sfx?.playModalClose?.();
-        return;
-      }
-
-      if (curZone === 'settingsPane') {
-        // Navigating inside the settings pane content
-        if (dir === 'LEFT') {
-          // Go back to the left sidebar category
-          setFocusedTarget({ zone: 'settingsModal', id: settingsCategories[curIndex] || 'roms', index: curIndex });
-          sfx?.playTileNav?.();
-          return;
-        }
-        
-        // Find interactive elements inside .settings-detail-pane
-        const paneFocusables = Array.from(document.querySelectorAll('.settings-detail-pane button, .settings-detail-pane input, .settings-detail-pane select, .settings-detail-pane .settings-theme-card'));
-        const activeElem = document.activeElement;
-        let elemIdx = paneFocusables.indexOf(activeElem);
-        if (elemIdx === -1) elemIdx = 0;
-
-        if (dir === 'UP') {
-          const nextElemIdx = Math.max(0, elemIdx - 1);
-          paneFocusables[nextElemIdx]?.focus();
-          sfx?.playTileNav?.();
-        } else if (dir === 'DOWN') {
-          const nextElemIdx = Math.min(paneFocusables.length - 1, elemIdx + 1);
-          paneFocusables[nextElemIdx]?.focus();
-          sfx?.playTileNav?.();
-        } else if (dir === 'RIGHT') {
-          const nextElemIdx = Math.min(paneFocusables.length - 1, elemIdx + 1);
-          paneFocusables[nextElemIdx]?.focus();
-          sfx?.playTileNav?.();
-        } else if (dir === 'SELECT') {
-          if (paneFocusables[elemIdx]) {
-            paneFocusables[elemIdx].click();
-            sfx?.playTileNav?.();
-          }
-        }
-        return;
-      }
-
-      // Navigating in Sidebar
-      if (dir === 'UP') {
-        if (curId === 'back') {
-          // Top limit
-        } else if (curIndex === 0) {
-          setFocusedTarget({ zone: 'settingsModal', id: 'back' });
-          sfx?.playTileNav?.();
-        } else {
-          const nextIdx = Math.max(0, curIndex - 1);
-          setFocusedTarget({ zone: 'settingsModal', id: settingsCategories[nextIdx], index: nextIdx });
-          const navBtns = document.querySelectorAll('.settings-nav-item');
-          if (navBtns[nextIdx]) navBtns[nextIdx].click();
-          sfx?.playTabSwitch?.();
-        }
-      } else if (dir === 'DOWN') {
-        if (curId === 'back') {
-          setFocusedTarget({ zone: 'settingsModal', id: settingsCategories[0], index: 0 });
-          sfx?.playTileNav?.();
-        } else {
-          const nextIdx = Math.min(settingsCategories.length - 1, curIndex + 1);
-          setFocusedTarget({ zone: 'settingsModal', id: settingsCategories[nextIdx], index: nextIdx });
-          const navBtns = document.querySelectorAll('.settings-nav-item');
-          if (navBtns[nextIdx]) navBtns[nextIdx].click();
-          sfx?.playTabSwitch?.();
-        }
-      } else if (dir === 'LEFT') {
-        if (curId !== 'back') {
-          setFocusedTarget({ zone: 'settingsModal', id: 'back' });
-          sfx?.playTileNav?.();
-        }
-      } else if (dir === 'RIGHT') {
-        if (curId === 'back') {
-          setFocusedTarget({ zone: 'settingsModal', id: settingsCategories[curIndex], index: curIndex });
-          sfx?.playTileNav?.();
-        } else {
-          // Move from sidebar into right settings detail pane
-          setFocusedTarget({ zone: 'settingsPane', index: curIndex });
-          const firstPaneElem = document.querySelector('.settings-detail-pane button, .settings-detail-pane input, .settings-detail-pane select, .settings-detail-pane .settings-theme-card');
-          if (firstPaneElem) firstPaneElem.focus();
-          sfx?.playTileNav?.();
-        }
-      } else if (dir === 'SELECT') {
-        if (curId === 'back') {
-          setShowSettingsModal(false);
-          setFocusedTarget({ zone: 'topbar', id: 'settings' });
-          sfx?.playModalClose?.();
-        } else {
-          // Enter the settings pane
-          setFocusedTarget({ zone: 'settingsPane', index: curIndex });
-          const firstPaneElem = document.querySelector('.settings-detail-pane button, .settings-detail-pane input, .settings-detail-pane select, .settings-detail-pane .settings-theme-card');
-          if (firstPaneElem) firstPaneElem.focus();
-          sfx?.playTileNav?.();
-        }
-      }
-      return;
-    }
-
-    // 2.5 Active Game in-emulator yield
+    // 2.4 Active Game in-emulator yield
     if (curActiveGame) {
       if (dir === 'BACK') {
         setActiveGame(null);
@@ -1018,9 +900,13 @@ export function useGamepadNavigation({
         }
       }
       if (stateRef.current.onOpenScraperModal) items.push('scraper');
-      items.push('sfx', 'theme', 'search');
+      items.push('sfx');
+      if (stateRef.current.themeEngine?.availableThemes?.length > 1) {
+        items.push('theme');
+      }
+      items.push('search');
       if (stateRef.current.pwa?.canInstall) items.push('install');
-      items.push('loadRom', 'settings');
+      items.push('loadRom');
       return items;
     };
 
@@ -1073,10 +959,6 @@ export function useGamepadNavigation({
         } else if (curId === 'loadRom') {
           setShowLoadRomModal(true);
           setFocusedTarget({ zone: 'loadRomModal', id: 'browse' });
-          sfx?.playModalOpen?.();
-        } else if (curId === 'settings') {
-          setShowSettingsModal?.(true);
-          setFocusedTarget?.({ zone: 'settingsModal', id: 'tab' });
           sfx?.playModalOpen?.();
         } else if (curId === 'info') {
           setShowInfoModal(true);

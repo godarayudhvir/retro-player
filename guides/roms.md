@@ -3,7 +3,7 @@ This document provides a complete inventory of all pre-packaged demonstration RO
 ---
 ## 📜 Curatorial Statement: Non-Complete & Demo ROMs Only
 Retro Player is engineered specifically as an educational, high-performance WebAssembly retro emulation showcase. In accordance with this principle:
-1. **Strictly Non-Complete Titles**: All ROMs in this repository were **specifically curated to be non-complete evaluation software** (27 titles across 12 platforms).
+1. **Strictly Non-Complete Titles**: All ROMs in this repository were **specifically curated to be non-complete evaluation software** (39 titles across 12 platforms).
 2. **Zero Commercial Full-Release Games**: No full, retail commercial video games are bundled with this application. The pre-installed titles exist exclusively to demonstrate that the WebAssembly emulator cores initialize, render smoothly, and accept gamepad/keyboard inputs within modern web browsers.
 3. **Private Personal ROM Loading**: Users who own full retail game cartridges are encouraged to use the built-in **"Load Custom ROM"** button or viewport drag-and-drop. Personal files run strictly in browser RAM and are never transmitted to any external server.
 ---
@@ -26,14 +26,15 @@ We deeply respect intellectual property rights and the work of all game develope
 | `atari_2600` | **Atari 2600** | **2** | 0.01 MB |
 | `game_gear` | **Sega Game Gear** | **2** | 0.53 MB |
 | `gb` | **Game Boy (DMG)** | **1** | 0.06 MB |
-| `gba` | **Game Boy Advance** | **12** | 263.80 MB |
-| `gbc` | **Game Boy Color** | **2** | 8.00 MB |
+| `gba` | **Game Boy Advance** | **20** | 515.99 MB |
+| `gbc` | **Game Boy Color** | **3** | 10.00 MB |
 | `n64` | **Nintendo 64** | **1** | 32.00 MB |
 | `nds` | **Nintendo DS** | **2** | 48.00 MB |
 | `nes` | **Nintendo (NES)** | **3** | 1.04 MB |
 | `playstation` | **Sony PlayStation (PS1)** | **1** | 67.69 MB |
 | `sega_genesis` | **Sega Genesis / Mega Drive** | **2** | 5.00 MB |
 | `snes` | **Super Nintendo (SNES)** | **1** | 2.00 MB |
+| **Total** | **All 12 Systems** | **39** | **682.34 MB** |
 
 ---
 
@@ -65,7 +66,7 @@ We deeply respect intellectual property rights and the work of all game develope
 |---|---|---|---|
 | 1 | `Gunman Clive (World) (Demo) (Aftermarket) (Unl)` | 0.06 MB | Curated Showcase Demo |
 
-### `gba` — Game Boy Advance (12 titles, 263.80 MB)
+### `gba` — Game Boy Advance (20 titles, 515.99 MB)
 
 | # | Filename | Size | Classification |
 |---|---|---|---|
@@ -73,21 +74,30 @@ We deeply respect intellectual property rights and the work of all game develope
 | 2 | `Goodboy Galaxy (World) (En,Ja,Fr,De,Es,Pt-BR,Zh,Ar) (v1.3) (Aftermarket) (Unl)` | 32.00 MB | Curated Homebrew (Local Sidecar) |
 | 3 | `Legend of Zelda, The - The Minish Cap (USA) (Demo) (Kiosk)` | 16.00 MB | Curated Showcase Demo |
 | 4 | `Mario & Luigi - Superstar Saga (USA) (Demo) (Kiosk)` | 8.00 MB | Curated Showcase Demo |
-| 5 | `Pokemon FireRed - Rocket Edition (v1.02)` | 16.00 MB | Curated Romhack (Local Sidecar) |
-| 6 | `Pokemon Gaia (v3.2)` | 32.00 MB | Curated Romhack (Local Sidecar) |
-| 7 | `Pokemon Heart & Soul (v1.2.1)` | 32.00 MB | Curated Romhack (Local Sidecar) |
-| 8 | `Pokemon Lazarus (v2.0)` | 32.00 MB | Curated Romhack (Local Sidecar) |
-| 9 | `Pokemon Mystery Dungeon - Red Rescue Team (USA) (Demo) (Kiosk)` | 16.00 MB | Curated Showcase Demo |
-| 10 | `Pokemon Recharged Yellow (v1.9.0)` | 16.00 MB | Curated Romhack (Local Sidecar) |
-| 11 | `Pokemon Seaglass (v3.0)` | 16.00 MB | Curated Romhack (Local Sidecar) |
-| 12 | `Pokemon Unbound (v2.1.1.1)` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 5 | `Pokemon Adventure - Red Chapter b.15EF` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 6 | `Pokemon Celias Stupid  rom hack(1.0.91)` | 28.20 MB | Curated Romhack (Local Sidecar) |
+| 7 | `Pokemon Dreamstone Mysteries` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 8 | `Pokemon FireRed - Rocket Edition (v1.02)` | 16.00 MB | Curated Romhack (Local Sidecar) |
+| 9 | `Pokemon Gaia (v3.2)` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 10 | `Pokemon Glazed (Unofficial v9.1.0)` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 11 | `Pokemon Heart & Soul (v1.2.1)` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 12 | `Pokemon Lazarus (v2.0)` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 13 | `Pokemon Mystery Dungeon - Red Rescue Team (USA) (Demo) (Kiosk)` | 16.00 MB | Curated Showcase Demo |
+| 14 | `Pokemon Recharged Yellow (v1.9.0)` | 16.00 MB | Curated Romhack (Local Sidecar) |
+| 15 | `Pokemon Seaglass (v3.0)` | 16.00 MB | Curated Romhack (Local Sidecar) |
+| 16 | `Pokemon Spirits of the Storm` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 17 | `Pokemon Unbound (v2.1.1.1)` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 18 | `Pokemon odyssey v4.1` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 19 | `Pokemon scorchedsilver v1.3` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 20 | `super mariomon (v1.5.1-Anniversary)` | 32.00 MB | Curated Homebrew (Local Sidecar) |
 
-### `gbc` — Game Boy Color (2 titles, 8.00 MB)
+### `gbc` — Game Boy Color (3 titles, 10.00 MB)
 
 | # | Filename | Size | Classification |
 |---|---|---|---|
 | 1 | `Donkey Kong Country (USA) (En,Fr,De,Es,It) (Demo) (Kiosk)` | 4.00 MB | Curated Showcase Demo |
 | 2 | `Dragonborne DX (World) (v1.0.2) (Demo) (GB Compatible) (Aftermarket) (Unl)` | 4.00 MB | Curated Showcase Demo |
+| 3 | `pokeprism (v0.95.0254)` | 2.00 MB | Curated Romhack (Local Sidecar) |
 
 ### `n64` — Nintendo 64 (1 title, 32.00 MB)
 

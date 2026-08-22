@@ -4,32 +4,11 @@ const THEME_STORAGE_KEY = 'retro_player_theme';
 
 export const THEMES = [
   {
-    key: 'iisu',
-    name: 'iiSU Light',
-    shortName: 'LIGHT',
-    icon: '☀️',
-    description: 'Crisp porcelain white with Nintendo accents'
-  },
-  {
-    key: 'midnight',
-    name: 'Midnight Cyber',
-    shortName: 'DARK',
-    icon: '🌙',
-    description: 'Deep obsidian slate with neon cyan glow'
-  },
-  {
-    key: 'xmb',
-    name: 'Sony XMB Wave',
-    shortName: 'XMB',
-    icon: '🌊',
-    description: 'PlayStation dashboard with flowing wave aura'
-  },
-  {
-    key: 'dmg',
-    name: 'Game Boy DMG',
-    shortName: 'DMG',
-    icon: '📟',
-    description: 'Classic monochromatic olive-green dot matrix'
+    key: 'vanilla',
+    name: 'Vanilla',
+    shortName: 'VANILLA',
+    icon: '🍦',
+    description: 'Clean porcelain-white console UI with vibrant accents'
   }
 ];
 
@@ -46,7 +25,7 @@ export function useThemeEngine() {
     } catch (e) {
       console.error('Failed to load theme from localStorage:', e);
     }
-    return 'iisu';
+    return 'vanilla';
   });
 
   // Synchronize document data-theme attribute
