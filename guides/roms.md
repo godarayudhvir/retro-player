@@ -26,7 +26,7 @@ We deeply respect intellectual property rights and the work of all game develope
 | `atari_2600` | **Atari 2600** | **2** | 0.01 MB |
 | `game_gear` | **Sega Game Gear** | **2** | 0.53 MB |
 | `gb` | **Game Boy (DMG)** | **1** | 0.06 MB |
-| `gba` | **Game Boy Advance** | **20** | 515.99 MB |
+| `gba` | **Game Boy Advance** | **22** | 563.99 MB |
 | `gbc` | **Game Boy Color** | **3** | 10.00 MB |
 | `n64` | **Nintendo 64** | **1** | 32.00 MB |
 | `nds` | **Nintendo DS** | **2** | 48.00 MB |
@@ -34,7 +34,7 @@ We deeply respect intellectual property rights and the work of all game develope
 | `playstation` | **Sony PlayStation (PS1)** | **1** | 67.69 MB |
 | `sega_genesis` | **Sega Genesis / Mega Drive** | **2** | 5.00 MB |
 | `snes` | **Super Nintendo (SNES)** | **1** | 2.00 MB |
-| **Total** | **All 12 Systems** | **39** | **682.34 MB** |
+| **Total** | **All 12 Systems** | **41** | **730.34 MB** |
 
 ---
 
@@ -66,7 +66,7 @@ We deeply respect intellectual property rights and the work of all game develope
 |---|---|---|---|
 | 1 | `Gunman Clive (World) (Demo) (Aftermarket) (Unl)` | 0.06 MB | Curated Showcase Demo |
 
-### `gba` — Game Boy Advance (20 titles, 515.99 MB)
+### `gba` — Game Boy Advance (22 titles, 563.99 MB)
 
 | # | Filename | Size | Classification |
 |---|---|---|---|
@@ -75,21 +75,23 @@ We deeply respect intellectual property rights and the work of all game develope
 | 3 | `Legend of Zelda, The - The Minish Cap (USA) (Demo) (Kiosk)` | 16.00 MB | Curated Showcase Demo |
 | 4 | `Mario & Luigi - Superstar Saga (USA) (Demo) (Kiosk)` | 8.00 MB | Curated Showcase Demo |
 | 5 | `Pokemon Adventure - Red Chapter b.15EF` | 32.00 MB | Curated Romhack (Local Sidecar) |
-| 6 | `Pokemon Celias Stupid  rom hack(1.0.91)` | 28.20 MB | Curated Romhack (Local Sidecar) |
+| 6 | `Pokemon Celias Stupid rom hack(1.0.91)` | 28.20 MB | Curated Romhack (Local Sidecar) |
 | 7 | `Pokemon Dreamstone Mysteries` | 32.00 MB | Curated Romhack (Local Sidecar) |
 | 8 | `Pokemon FireRed - Rocket Edition (v1.02)` | 16.00 MB | Curated Romhack (Local Sidecar) |
 | 9 | `Pokemon Gaia (v3.2)` | 32.00 MB | Curated Romhack (Local Sidecar) |
 | 10 | `Pokemon Glazed (Unofficial v9.1.0)` | 32.00 MB | Curated Romhack (Local Sidecar) |
-| 11 | `Pokemon Heart & Soul (v1.2.1)` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 11 | `Pokemon Heart and Soul (v2.0.2)` | 32.00 MB | Curated Romhack (Local Sidecar) |
 | 12 | `Pokemon Lazarus (v2.0)` | 32.00 MB | Curated Romhack (Local Sidecar) |
 | 13 | `Pokemon Mystery Dungeon - Red Rescue Team (USA) (Demo) (Kiosk)` | 16.00 MB | Curated Showcase Demo |
-| 14 | `Pokemon Recharged Yellow (v1.9.0)` | 16.00 MB | Curated Romhack (Local Sidecar) |
-| 15 | `Pokemon Seaglass (v3.0)` | 16.00 MB | Curated Romhack (Local Sidecar) |
-| 16 | `Pokemon Spirits of the Storm` | 32.00 MB | Curated Romhack (Local Sidecar) |
-| 17 | `Pokemon Unbound (v2.1.1.1)` | 32.00 MB | Curated Romhack (Local Sidecar) |
-| 18 | `Pokemon odyssey v4.1` | 32.00 MB | Curated Romhack (Local Sidecar) |
-| 19 | `Pokemon scorchedsilver v1.3` | 32.00 MB | Curated Romhack (Local Sidecar) |
-| 20 | `super mariomon (v1.5.1-Anniversary)` | 32.00 MB | Curated Homebrew (Local Sidecar) |
+| 14 | `Pokemon Recharged Emerald (v2.2.5)` | 16.00 MB | Curated Romhack (Local Sidecar) |
+| 15 | `Pokemon Recharged Yellow (v1.9.0)` | 16.00 MB | Curated Romhack (Local Sidecar) |
+| 16 | `Pokemon Seaglass (v3.0)` | 16.00 MB | Curated Romhack (Local Sidecar) |
+| 17 | `Pokemon Spirits of the Storm` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 18 | `Pokemon Sword & Shield Ultimate Plus (v1.2.1.2)` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 19 | `Pokemon Unbound (v2.1.1.1)` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 20 | `Pokemon odyssey v4.1` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 21 | `Pokemon scorchedsilver v1.3` | 32.00 MB | Curated Romhack (Local Sidecar) |
+| 22 | `super mariomon (v1.5.1-Anniversary)` | 32.00 MB | Curated Homebrew (Local Sidecar) |
 
 ### `gbc` — Game Boy Color (3 titles, 10.00 MB)
 

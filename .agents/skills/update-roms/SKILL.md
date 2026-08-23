@@ -27,8 +27,9 @@ Retro Player maintains two completely independent metadata enrichment layers:
 
 ---
 
-## 🚀 The Universal Drop-In Workflow
+## 🚀 Universal Workflows
 
+### 1. New ROM & Cover Drop-In Workflow
 Whenever a new game or cover is added:
 1. **Drop ROM file** (`.gba`, `.sfc`, `.nes`, `.nds`, `.z64`, `.zip`, `.iso`, etc.) anywhere into `public/roms/` or inside a console folder.
 2. **Drop Screenshot / Box Art image** (`.png`, `.jpg`, `.jpeg`, `.webp`) into `public/roms/`.
@@ -42,6 +43,35 @@ Whenever a new game or cover is added:
    - Matches the loose screenshot/cover to the game via fuzzy title normalization, converts it to `<Clean Title>.webp` (quality 85), and removes the loose source image.
    - Dynamically queries online databases (Wikipedia Full-Text Open Search, PokeCommunity, ROMhacking, and Open Web Search) to extract authentic plot descriptions, developer/author names, release years, and genres without any hardcoded lists.
    - Generates the local companion `metadata.json` sidecar directly in the game's directory.
+
+### 2. In-Folder ROM Version Upgrade & Custom Screenshot Replacement Workflow
+Whenever an existing game receives an updated ROM version or a new custom screenshot inside its existing folder (e.g. `public/roms/gba/Pokemon Heart & Soul (v1.2.1)`):
+1. **Drop New ROM Version** (e.g. `Pokémon Heart and Soul (v2.0.2).gba`) directly into the existing game folder.
+2. **Drop New Custom Screenshot / Cover** (e.g. `Pokemon_Heart_and_Soul_v2_0_2_Custom_Screenshot_...png`) into the folder.
+3. **Run `update-roms`**:
+   ```bash
+   node .agents/skills/update-roms/scripts/update_roms.js --all
+   ```
+4. **The script automatically**:
+   - Compares ROM version numbers/dates within the folder, selects the latest active ROM, and safely purges obsolete superseded ROMs.
+   - Converts the new custom screenshot to the standardized `<Clean Title>.webp` and cleans up old covers and source PNG/JPG files.
+   - Renames the parent folder and ROM file to match the clean canonical active title and version tag.
+   - Synchronizes `metadata.json` so the title version tag matches the updated ROM.
+
+### 3. Staging Drop-In Folders Workflow (`/roms/new/`, `/roms/drops/`, `/roms/staging/`)
+Whenever one or more ROMs and screenshots are placed inside staging folders like `public/roms/new/`:
+1. **Drop ROMs and Screenshots** inside any staging directory (`public/roms/new/`, `public/roms/staging/`, or `public/roms/drops/`).
+2. **Run `update-roms`**:
+   ```bash
+   node .agents/skills/update-roms/scripts/update_roms.js --all
+   ```
+3. **The script automatically**:
+   - Recursively inspects staging folders, detecting console systems from file extensions (e.g. `.gba` -> `gba`).
+   - Normalizes game titles to canonical formatting (e.g. `Pokemon Recharged Emerald (v2.2.5)`).
+   - Routes ROMs into `public/roms/<system>/<Canonical Title>/`.
+   - Converts companion staging screenshots/covers to `<Canonical Title>.webp` (quality 85) in the game directory and removes the source images.
+   - Generates or enriches companion `metadata.json` sidecars.
+   - Cleans up and deletes the staging folder when complete.
 
 ---
 

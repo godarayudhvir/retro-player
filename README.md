@@ -159,7 +159,7 @@ Retro Player includes built-in AI agent skills and automated utility scripts und
 
 | Skill | Path | Description |
 | :--- | :--- | :--- |
-| **[Update ROMs](.agents/skills/update-roms/SKILL.md)** | [`.agents/skills/update-roms/`](.agents/skills/update-roms/) | Organizes ROM folders, ingests loose screenshots/covers to WebP, and dynamically queries online sources to generate `metadata.json` sidecars. |
+| **[Update ROMs](.agents/skills/update-roms/SKILL.md)** | [`.agents/skills/update-roms/`](.agents/skills/update-roms/) | Organizes ROM folders, handles version upgrades & custom screenshot replacements, converts covers to WebP, and generates/syncs `metadata.json` sidecars. |
 | **[ROM Cleanup](.agents/skills/rom-cleanup/SKILL.md)** | [`.agents/skills/rom-cleanup/`](.agents/skills/rom-cleanup/) | Deduplicates dated builds, prunes non-English regions, and filters obscure releases with structured keep/remove approval. |
 
 ---

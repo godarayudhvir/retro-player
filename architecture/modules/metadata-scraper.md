@@ -6,7 +6,7 @@ The **Automated Metadata & Cover Art Scraper** is a high-performance, zero-laten
 
 1. **Local Codebase Sidecar Pipeline (Backend / IDE - Top Priority)**:
    - Powered by the `update-roms` automation skill and [update_roms.js](file:///Users/godarayudhvir/Github/retro-player/.agents/skills/update-roms/scripts/update_roms.js).
-   - Ingests loose ROMs and screenshot drops in `public/roms/`, converts covers to `.webp`, and dynamically scrapes authentic metadata from online APIs/web search to generate permanent `metadata.json` sidecars in the repository.
+   - Ingests loose ROMs and screenshot drops in `public/roms/`, handles in-folder version upgrades with automatic purge of obsolete superseded ROMs and older covers, converts custom screenshot drops to high-performance `.webp`, and dynamically scrapes authentic metadata from online APIs/web search to generate/sync permanent `metadata.json` sidecars in the repository.
    - When local sidecars exist, they take **absolute top precedence**, loading instantaneously with 0ms network latency and bypassing browser scrapers entirely.
 2. **Client-Side Online Scraper (Browser / IndexedDB - Fallback Priority)**:
    - Designed for web users accessing the app on GitHub Pages or loading ad-hoc custom ROMs in-browser without local file access.

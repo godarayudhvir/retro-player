@@ -126,15 +126,9 @@ export default function DsView({
       <div className="ds-center-pane">
         {/* Hardware-Grade DS Title Banner Card */}
         <div className="ds-game-title-card">
-          {selectedGame?.systemIcon && (
-            <img src={resolveAssetPath(selectedGame.systemIcon)} alt="" className="tile-sys-badge-icon" style={{ width: 16, height: 16 }} />
-          )}
           <h2 className="ds-game-header-title">
             {selectedGame?.title}
           </h2>
-          <span className="ds-title-sys-tag">
-            {selectedGame?.systemName || selectedGame?.systemKey?.toUpperCase()}
-          </span>
         </div>
 
         {/* Top Screen: Cover or Gameplay Snapshot */}

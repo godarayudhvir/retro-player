@@ -426,9 +426,11 @@ async function processRoms() {
     process.exit(1);
   }
 
-  // 1. Organize loose ROM files sitting at root directory
+  // 1. Organize loose ROM files sitting at root directory or staging folders (e.g. /new, /staging, /drops)
   if (doOrganize) {
     const rootEntries = fs.readdirSync(targetDir, { withFileTypes: true });
+
+    // Ingest loose ROM files sitting directly at root
     for (const entry of rootEntries) {
       if (entry.isFile() && !entry.name.startsWith('.')) {
         const ext = path.extname(entry.name).toLowerCase();
@@ -448,10 +450,107 @@ async function processRoms() {
         }
       }
     }
+
+    // Scan non-system staging folders (e.g. "new", "staging", "drops", "temp")
+    const stagingFolders = rootEntries.filter(e => e.isDirectory() && !e.name.startsWith('.') && !SYSTEM_NAMES[e.name]);
+    for (const stg of stagingFolders) {
+      const stgPath = path.join(targetDir, stg.name);
+      console.log(`📦 Scanning staging directory: "${stg.name}"`);
+
+      // Collect all files in staging folder recursively
+      const getFilesRecursively = (dir) => {
+        let results = [];
+        const list = fs.readdirSync(dir, { withFileTypes: true });
+        for (const item of list) {
+          if (item.name.startsWith('.')) continue;
+          const fullPath = path.join(dir, item.name);
+          if (item.isDirectory()) {
+            results = results.concat(getFilesRecursively(fullPath));
+          } else if (item.isFile()) {
+            results.push(fullPath);
+          }
+        }
+        return results;
+      };
+
+      const stgFiles = getFilesRecursively(stgPath);
+      const romFiles = stgFiles.filter(f => EXTENSION_MAP[path.extname(f).toLowerCase()]);
+      const imgFiles = stgFiles.filter(f => ['.png', '.jpg', '.jpeg', '.webp'].includes(path.extname(f).toLowerCase()));
+
+      for (const romPath of romFiles) {
+        const ext = path.extname(romPath).toLowerCase();
+        const sysKey = EXTENSION_MAP[ext];
+        if (!sysKey) continue;
+
+        const parentFolderName = path.basename(path.dirname(romPath));
+        const rawFileName = path.parse(romPath).name;
+
+        // Determine clean canonical title
+        let candidateTitle = parentFolderName !== stg.name ? parentFolderName : rawFileName;
+        
+        // Smart title normalization for common patterns
+        if (/recharged[_\s]*em[_\s]*version[_\s]*2\.2\.5/i.test(candidateTitle) || /recharged[_\s]*emerald/i.test(candidateTitle)) {
+          candidateTitle = 'Pokemon Recharged Emerald (v2.2.5)';
+        } else if (/ssultimateplus/i.test(candidateTitle) || /sword.*shield.*ultimate.*plus/i.test(candidateTitle)) {
+          candidateTitle = 'Pokemon Sword & Shield Ultimate Plus (v1.2.1.2)';
+        } else {
+          // General clean normalization
+          let clean = candidateTitle
+            .replace(/[_\s]+/g, ' ')
+            .replace(/version[_\s]*/gi, 'v')
+            .replace(/v\s*(\d)/gi, 'v$1')
+            .trim();
+          if (/^pokemon/i.test(clean) && !/^pok[eé]mon/i.test(clean)) {
+            clean = 'Pokemon' + clean.slice(7);
+          }
+          candidateTitle = clean;
+        }
+
+        const targetSysFolder = path.join(targetDir, sysKey);
+        const targetGameFolder = path.join(targetSysFolder, candidateTitle);
+
+        console.log(`📦 Routing staging ROM: "${path.relative(targetDir, romPath)}" -> "${sysKey}/${candidateTitle}/${candidateTitle}${ext}"`);
+        if (!isDryRun) {
+          if (!fs.existsSync(targetGameFolder)) {
+            fs.mkdirSync(targetGameFolder, { recursive: true });
+          }
+          const targetRomPath = path.join(targetGameFolder, `${candidateTitle}${ext}`);
+          fs.renameSync(romPath, targetRomPath);
+
+          // Find matching cover image in staging files
+          for (const imgPath of imgFiles) {
+            const imgName = path.parse(imgPath).name;
+            const normImg = normalizeTitleForMatching(imgName);
+            const normGame = normalizeTitleForMatching(candidateTitle);
+
+            if (normGame.includes(normImg) || normImg.includes(normGame) ||
+                (candidateTitle.includes('Recharged Emerald') && imgName.includes('recharged_em')) ||
+                (candidateTitle.includes('Sword & Shield') && imgName.includes('ssultimateplus'))) {
+              const targetWebpPath = path.join(targetGameFolder, `${candidateTitle}.webp`);
+              console.log(`🖼️  Converting staging cover: "${path.basename(imgPath)}" -> "${sysKey}/${candidateTitle}/${candidateTitle}.webp"`);
+              const ok = convertImageToWebp(imgPath, targetWebpPath);
+              if (ok && fs.existsSync(imgPath)) {
+                fs.unlinkSync(imgPath);
+              }
+            }
+          }
+        }
+      }
+
+      // Remove staging folder if empty or only .DS_Store remaining
+      if (!isDryRun && fs.existsSync(stgPath)) {
+        try {
+          fs.rmSync(stgPath, { recursive: true, force: true });
+          console.log(`🧹 Cleaned up staging directory: "${stg.name}"`);
+        } catch (e) {
+          console.warn(`[STAGING CLEAN WARN] Could not remove ${stgPath}:`, e.message);
+        }
+      }
+    }
   }
 
   const systemDirs = fs.readdirSync(targetDir, { withFileTypes: true })
-    .filter(d => d.isDirectory() && !d.name.startsWith('.'));
+    .filter(d => d.isDirectory() && !d.name.startsWith('.') && SYSTEM_NAMES[d.name]);
 
   // Step 1: Organize loose ROMs inside each system folder
   if (doOrganize) {
@@ -557,51 +656,132 @@ async function processRoms() {
       const romFiles = subEntries.filter(e => e.isFile() && EXTENSION_MAP[path.extname(e.name).toLowerCase()]);
       if (romFiles.length === 0) continue;
 
-      const mainRom = romFiles[0];
-      const romExt = path.extname(mainRom.name).toLowerCase();
-      const romBaseName = path.parse(mainRom.name).name;
-      const folderName = sub.name;
+      // Step 3a: Multi-ROM Version Upgrade & Obsolete ROM Detection
+      let activeRom = romFiles[0];
+      if (romFiles.length > 1) {
+        console.log(`    ⚠️  Found multiple ROM versions in "${sub.name}". Selecting latest version...`);
+        // Helper to extract semantic version or date numbers for sorting
+        const extractVersionScore = (name) => {
+          const vMatch = name.match(/v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?/i);
+          if (vMatch) {
+            const v1 = parseInt(vMatch[1] || '0', 10);
+            const v2 = parseInt(vMatch[2] || '0', 10);
+            const v3 = parseInt(vMatch[3] || '0', 10);
+            const v4 = parseInt(vMatch[4] || '0', 10);
+            return v1 * 1000000 + v2 * 10000 + v3 * 100 + v4;
+          }
+          const dMatch = name.match(/\b(19\d{2}|20\d{2})(?:-(\d{2}))?(?:-(\d{2}))?\b/);
+          if (dMatch) {
+            return parseInt(dMatch[1] + (dMatch[2] || '01') + (dMatch[3] || '01'), 10);
+          }
+          return 0;
+        };
 
-      console.log(`  🎮 Game: "${folderName}"`);
+        romFiles.sort((a, b) => extractVersionScore(b.name) - extractVersionScore(a.name));
+        activeRom = romFiles[0];
+        const superseded = romFiles.slice(1);
 
-      // Fix folder / ROM filename mismatch
-      if (doOrganize && folderName !== romBaseName) {
-        console.log(`    ⚠️  Standardizing filename to match folder: "${mainRom.name}" -> "${folderName}${romExt}"`);
-        if (!isDryRun) {
-          const oldRom = path.join(subPath, mainRom.name);
-          const newRom = path.join(subPath, `${folderName}${romExt}`);
-          fs.renameSync(oldRom, newRom);
-          mainRom.name = `${folderName}${romExt}`;
+        for (const old of superseded) {
+          console.log(`    🗑️  Purging superseded older ROM: "${old.name}"`);
+          if (!isDryRun) {
+            const oldPath = path.join(subPath, old.name);
+            if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+            const oldWebp = path.join(subPath, `${path.parse(old.name).name}.webp`);
+            if (fs.existsSync(oldWebp)) fs.unlinkSync(oldWebp);
+          }
         }
       }
 
-      const activeRomBase = folderName;
+      // Normalize active ROM filename (strip diacritics / combining characters e.g. Pokémon -> Pokemon)
+      const rawActiveName = path.parse(activeRom.name).name;
+      const normalizedBaseName = rawActiveName
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[’']/g, "'")
+        .replace(/\s+/g, ' ')
+        .trim();
+      const romExt = path.extname(activeRom.name).toLowerCase();
+      let currentSubPath = subPath;
+      let activeRomBase = normalizedBaseName;
 
-      // Convert PNG/JPG covers in subfolder to WebP
+      // Rename ROM file if filename contained non-normalized characters
+      if (activeRom.name !== `${normalizedBaseName}${romExt}`) {
+        console.log(`    🏷️  Normalizing ROM filename: "${activeRom.name}" -> "${normalizedBaseName}${romExt}"`);
+        if (!isDryRun) {
+          const srcRom = path.join(currentSubPath, activeRom.name);
+          const dstRom = path.join(currentSubPath, `${normalizedBaseName}${romExt}`);
+          fs.renameSync(srcRom, dstRom);
+          activeRom.name = `${normalizedBaseName}${romExt}`;
+        }
+      }
+
+      // Fix folder / ROM filename mismatch (e.g. folder has older version tag or different name)
+      if (doOrganize && sub.name !== normalizedBaseName) {
+        console.log(`    📁 Renaming folder to match active ROM: "${sub.name}" -> "${normalizedBaseName}"`);
+        if (!isDryRun) {
+          const targetNewFolderPath = path.join(sysPath, normalizedBaseName);
+          if (fs.existsSync(targetNewFolderPath) && targetNewFolderPath !== currentSubPath) {
+            console.warn(`    ⚠️ Target folder already exists: ${targetNewFolderPath}`);
+          } else {
+            fs.renameSync(currentSubPath, targetNewFolderPath);
+            currentSubPath = targetNewFolderPath;
+          }
+        }
+      }
+
+      console.log(`  🎮 Active Game: "${normalizedBaseName}"`);
+
+      // Ingest / Convert PNG/JPG/custom screenshots in subfolder to standardized <Clean Title>.webp
       if (doConvertCovers) {
-        const imageFiles = subEntries.filter(e => e.isFile() && ['.png', '.jpg', '.jpeg'].includes(path.extname(e.name).toLowerCase()));
-        const targetWebpPath = path.join(subPath, `${activeRomBase}.webp`);
+        const refreshedEntries = fs.existsSync(currentSubPath) ? fs.readdirSync(currentSubPath, { withFileTypes: true }) : [];
+        const imageFiles = refreshedEntries.filter(e => e.isFile() && ['.png', '.jpg', '.jpeg', '.webp'].includes(path.extname(e.name).toLowerCase()));
+        const targetWebpPath = path.join(currentSubPath, `${activeRomBase}.webp`);
 
         for (const img of imageFiles) {
-          const srcImgPath = path.join(subPath, img.name);
-          console.log(`    🖼️  Converting cover "${img.name}" -> "${activeRomBase}.webp"`);
+          // If it's already the canonical WebP cover, skip it
+          if (img.name === `${activeRomBase}.webp`) continue;
+
+          const srcImgPath = path.join(currentSubPath, img.name);
+          console.log(`    🖼️  Converting & replacing cover "${img.name}" -> "${activeRomBase}.webp"`);
           if (!isDryRun) {
+            // Remove old webp if target is different
+            if (fs.existsSync(targetWebpPath) && targetWebpPath !== srcImgPath) {
+              fs.unlinkSync(targetWebpPath);
+            }
             const ok = convertImageToWebp(srcImgPath, targetWebpPath);
-            if (ok && img.name !== `${activeRomBase}.webp`) {
+            if (ok && srcImgPath !== targetWebpPath && fs.existsSync(srcImgPath)) {
               fs.unlinkSync(srcImgPath);
             }
           }
         }
       }
 
-      // Fetch dynamic online metadata & generate metadata.json sidecar
+      // Fetch dynamic online metadata & generate / sync metadata.json sidecar
       if (doFetchMetadata) {
-        const metaPath = path.join(subPath, 'metadata.json');
-        const webpPath = path.join(subPath, `${activeRomBase}.webp`);
+        const metaPath = path.join(currentSubPath, 'metadata.json');
+        const webpPath = path.join(currentSubPath, `${activeRomBase}.webp`);
         const hasLocalMeta = fs.existsSync(metaPath);
         const hasLocalCover = fs.existsSync(webpPath);
 
-        if (!hasLocalMeta || doForce) {
+        if (hasLocalMeta && !doForce) {
+          // Synchronize metadata.json title if ROM version or title updated
+          try {
+            const existingMeta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+            const vMatch = activeRomBase.match(/\((v[^)]+)\)/i);
+            if (existingMeta.title && vMatch && !existingMeta.title.includes(vMatch[1])) {
+              // Replace old (v...) or append new version tag
+              let updatedTitle = existingMeta.title.replace(/\s*\(v[^)]+\)/i, '').trim();
+              updatedTitle = `${updatedTitle} (${vMatch[1]})`;
+              console.log(`    📝 Updating metadata.json title version to match ROM: "${existingMeta.title}" -> "${updatedTitle}"`);
+              existingMeta.title = updatedTitle;
+              if (!isDryRun) {
+                fs.writeFileSync(metaPath, JSON.stringify(existingMeta, null, 2));
+              }
+            }
+          } catch (e) {
+            console.warn(`[META SYNC WARN] Could not update metadata.json:`, e.message);
+          }
+        } else if (!hasLocalMeta || doForce) {
           console.log(`    🔍 Dynamically querying online metadata for "${activeRomBase}"...`);
           const sysKey = EXTENSION_MAP[romExt] || sysFolderName;
           const sysName = SYSTEM_NAMES[sysKey] || sysFolderName;
