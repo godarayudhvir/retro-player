@@ -767,6 +767,30 @@ body {
   box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45);
 }
 
+.profile-btn-danger {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 16px;
+  border: 1.5px solid rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.08);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-btn-danger:hover {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.35);
+  transform: translateY(-1px);
+}
+
 
 
 /* ==========================================================================
@@ -5799,22 +5823,47 @@ button.status-pill.status-scraper-pill {
   box-shadow: 0 0 0 3px #ffffff, 0 0 0 6.5px #3b82f6, 0 10px 24px rgba(59, 130, 246, 0.6) !important;
 }
 
-/* DS Game Detail Panel — Play, Fav, Guides, Edit buttons */
+/* DS Game Detail Panel — Play, Fav, Save, Guides, Edit buttons */
 .ds-play-now-btn.gamepad-focused {
-  outline: 2px solid #ffffff !important;
-  outline-offset: 1px !important;
-  box-shadow: 0 0 0 3px #ffffff, 0 0 0 7px #ef4444, 0 12px 30px rgba(239, 68, 68, 0.6) !important;
-  border-color: #ef4444 !important;
-  transform: translateY(-2px) scale(1.05) !important;
+  outline: none !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 0 0 2.5px rgba(239, 68, 68, 0.6), 0 4px 14px rgba(239, 68, 68, 0.4) !important;
+  transform: translateY(-1px) scale(1.01) !important;
 }
 
 .ds-tool-btn.gamepad-focused {
-  outline: 2px solid #ffffff !important;
-  outline-offset: 1px !important;
-  box-shadow: 0 0 0 3px #ffffff, 0 0 0 6px #3b82f6, 0 8px 24px rgba(59, 130, 246, 0.5) !important;
+  outline: none !important;
   border-color: #3b82f6 !important;
-  transform: translateY(-2px) scale(1.08) !important;
-  z-index: 25 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4), 0 2px 6px rgba(59, 130, 246, 0.25) !important;
+  transform: translateY(-1px) !important;
+  z-index: 5 !important;
+}
+
+.ds-tool-btn.is-favorited.gamepad-focused {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.4), 0 2px 6px rgba(245, 158, 11, 0.25) !important;
+}
+
+.ds-tool-btn.ds-save-tab-btn.gamepad-focused {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.4), 0 2px 6px rgba(16, 185, 129, 0.25) !important;
+}
+
+.ds-save-action-tile.gamepad-focused {
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  background: rgba(59, 130, 246, 0.08) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5) !important;
+  transform: translateY(-1px) !important;
+  z-index: 5 !important;
+}
+
+.ds-save-action-tile.is-delete.gamepad-focused {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.08) !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.5) !important;
+  transform: translateY(-1px) !important;
+  z-index: 5 !important;
 }
 
 /* Scraper Modal — scope tabs and footer buttons */
@@ -5925,6 +5974,14 @@ button.status-pill.status-scraper-pill {
   outline: 2px solid #ffffff !important;
   box-shadow: 0 0 0 3px #ffffff, 0 0 0 6.5px #3b82f6, 0 10px 24px rgba(59, 130, 246, 0.5) !important;
   border-color: #3b82f6 !important;
+  transform: translateY(-2px) scale(1.06) !important;
+  z-index: 20 !important;
+}
+
+.profile-btn-danger.gamepad-focused {
+  outline: 2px solid #ffffff !important;
+  box-shadow: 0 0 0 3px #ffffff, 0 0 0 6.5px #ef4444, 0 10px 24px rgba(239, 68, 68, 0.5) !important;
+  border-color: #ef4444 !important;
   transform: translateY(-2px) scale(1.06) !important;
   z-index: 20 !important;
 }
@@ -15123,14 +15180,15 @@ button.status-pill.status-scraper-pill {
   transform: translateY(1px);
 }
 
-/* Action Toolbar (Favorite, Guides, Edit, Scrape) */
+/* Action Toolbar (Favorite, Save Data, Guides, Edit & Scrape) */
 .ds-action-toolbar {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
   gap: 0.35rem;
 }
 
 .ds-tool-btn {
+  flex: 1;
+  min-width: 0;
   background: var(--panel-bg);
   border: 1.5px solid var(--panel-border);
   border-radius: 4px;
@@ -15148,15 +15206,75 @@ button.status-pill.status-scraper-pill {
   white-space: nowrap;
 }
 
+.ds-tool-btn.ds-icon-btn {
+  padding: 0.5rem 0.35rem;
+  min-height: 34px;
+}
+
 .ds-tool-btn:hover {
-  border-color: #e11d48;
-  background: rgba(225, 29, 72, 0.08);
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.08);
 }
 
 .ds-tool-btn.is-favorited {
   color: #d97706;
   border-color: #f59e0b;
   background: rgba(245, 158, 11, 0.1);
+}
+
+.ds-tool-btn.is-active {
+  color: #ffffff !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+}
+
+.ds-tool-btn.ds-save-tab-btn.is-active {
+  background: #10b981 !important;
+  border-color: #059669 !important;
+}
+
+.ds-tool-btn.ds-guide-btn.is-active {
+  background: #3b82f6 !important;
+  border-color: #2563eb !important;
+}
+
+.ds-tool-btn.ds-edit-tab-btn.is-active {
+  background: #6366f1 !important;
+  border-color: #4f46e5 !important;
+}
+
+.ds-tool-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.58rem;
+  font-weight: 900;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  color: var(--text-main);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+[data-color-mode="dark"] .ds-tool-badge {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #f1f5f9;
+}
+
+.ds-tool-btn.is-favorited .ds-tool-badge {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #d97706;
+}
+
+[data-color-mode="dark"] .ds-tool-btn.is-favorited .ds-tool-badge {
+  background: rgba(245, 158, 11, 0.25);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
 }
 
 .ds-tool-btn.ds-guide-btn.is-active {
@@ -15167,6 +15285,142 @@ button.status-pill.status-scraper-pill {
 
 .ds-tool-btn.ds-guide-btn.is-active svg {
   color: #ffffff !important;
+}
+
+.ds-tool-btn.ds-save-tab-btn.is-active {
+  background: #10b981;
+  border-color: #059669;
+  color: #ffffff;
+}
+
+.ds-tool-btn.ds-save-tab-btn.is-active svg {
+  color: #ffffff !important;
+}
+
+.ds-save-desc {
+  font-size: 0.72rem;
+  color: var(--text-sub);
+  margin: 0;
+  line-height: 1.35;
+}
+
+.ds-save-desc code {
+  font-family: ui-monospace, monospace;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-weight: 700;
+}
+
+[data-color-mode="dark"] .ds-save-desc code {
+  background: rgba(255, 255, 255, 0.1);
+  color: #a7f3d0;
+}
+
+.ds-save-status-toast {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #047857;
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+[data-color-mode="dark"] .ds-save-status-toast {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #6ee7b7;
+}
+
+.ds-save-tiles-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.ds-save-action-tile {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: var(--panel-bg);
+  border: 1.5px solid var(--panel-border);
+  border-radius: 4px;
+  padding: 0.55rem 0.75rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.ds-save-action-tile:hover {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.06);
+  transform: translateY(-1px);
+}
+
+.ds-save-action-tile.is-delete:hover {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.ds-save-tile-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ds-save-tile-icon.export {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+}
+
+.ds-save-tile-icon.import {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
+.ds-save-tile-icon.delete {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+}
+
+[data-color-mode="dark"] .ds-save-tile-icon.export {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+
+[data-color-mode="dark"] .ds-save-tile-icon.import {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+[data-color-mode="dark"] .ds-save-tile-icon.delete {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.ds-save-tile-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ds-save-tile-title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.ds-save-tile-sub {
+  font-size: 0.66rem;
+  color: var(--text-sub);
+  font-weight: 500;
 }
 
 /* =========================================================================
@@ -15416,49 +15670,94 @@ button.status-pill.status-scraper-pill {
   background: var(--panel-bg);
   border: 1.5px solid var(--panel-border);
   border-radius: 4px;
-  padding: 0.6rem 0.75rem;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  padding: 0.55rem 0.75rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-.ds-stats-row,
 .ds-stats-row-3 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
 }
 
 .ds-stat-item {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.2rem;
+  flex: 1;
   min-width: 0;
 }
 
-.ds-stat-label-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.2rem;
+.ds-stat-divider {
+  width: 1px;
+  height: 26px;
+  background: var(--panel-border);
+  opacity: 0.8;
+  flex-shrink: 0;
 }
 
 .ds-stat-label {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  font-size: 0.65rem;
-  font-weight: 700;
+  gap: 0.3rem;
+  font-size: 0.63rem;
+  font-weight: 800;
   color: var(--text-sub);
   text-transform: uppercase;
+  letter-spacing: 0.03em;
   white-space: nowrap;
 }
 
+.ds-stat-val-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .ds-stat-val {
-  font-size: 0.82rem;
+  font-size: 0.86rem;
   font-weight: 900;
   color: var(--text-main);
   white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+
+.ds-stat-val.ds-stat-date {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: var(--text-main);
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.ds-stat-reset-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--panel-border);
+  color: var(--text-sub);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.ds-stat-reset-icon-btn:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: #ef4444;
+  color: #ef4444;
+  transform: rotate(-30deg);
+}
+
+[data-color-mode="dark"] .ds-stat-reset-icon-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
 }
 
 /* Specs Cards */

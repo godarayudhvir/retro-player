@@ -2,7 +2,7 @@
 
 > **"Mirai" (未来)** is the Japanese word for **"Future"**. This document serves as the central directory and status index for all upcoming architectural specifications and roadmap milestones for **Retro Player**.
 >
-> **Nintendo DS Dual-Screen Touch Theme**: Features a top screen for game artwork, battery save indicators, and live specs, and a bottom touchscreen with search, game selection carousel, inline **Strategy Guides Deck** (written walkthroughs, video guides, QR codes), and unified **Edit & Scrape Studio** (cover asset manager, real-time Libretro/Wikipedia search logs terminal, sidecar export) without modal popups. Detailed technical designs are decoupled into their respective domain specification files within this directory, **sorted below from Least Code Impact (Quick Wins / UI additions) to Most Code Impact (Complex distributed systems)**.
+> **Nintendo DS Dual-Screen Touch Theme**: Features a top screen for game artwork, battery save indicators, and live specs, and a bottom touchscreen with search, game selection carousel, inline **Save Data Studio** (`.sav` battery RAM import/export/erasure), inline **Strategy Guides Deck** (written walkthroughs, video guides, QR codes), and unified **Edit & Scrape Studio** (cover asset manager, real-time Libretro/Wikipedia search logs terminal, sidecar export) with instant zero-click tab switching and zero modal popups. Detailed technical designs are decoupled into their respective domain specification files within this directory, **sorted below from Least Code Impact (Quick Wins / UI additions) to Most Code Impact (Complex distributed systems)**.
 
 ---
 

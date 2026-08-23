@@ -14,6 +14,7 @@ export default function CharacterStudio({
   setAvatarSeed,
   favoriteColor,
   setFavoriteColor,
+  suggestedName = 'Player',
   sfx,
   focusedTarget,
   setFocusedTarget,
@@ -60,12 +61,12 @@ export default function CharacterStudio({
             className="character-avatar-portal"
             style={{ borderColor: favoriteColor }}
           >
-            <MultiAvatar seed={avatarSeed || playerName || 'Player'} size={120} />
+            <MultiAvatar seed={avatarSeed || playerName || suggestedName || 'Player'} size={120} />
           </div>
 
           {/* Player Identity Details */}
           <div className="character-passport-meta">
-            <div className="character-passport-name">{playerName || 'Player 1'}</div>
+            <div className="character-passport-name">{playerName || suggestedName || 'Player'}</div>
           </div>
 
           {/* Single Clear Randomizer Action */}

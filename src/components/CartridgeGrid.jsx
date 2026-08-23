@@ -31,7 +31,8 @@ export default function CartridgeGrid({
   onImportSave,
   onDeleteSave,
   hasSaveData,
-  scraper
+  scraper,
+  gamepadConnected = false
 }) {
   const currentTheme = themeEngine?.theme || 'ds';
 
@@ -164,6 +165,7 @@ export default function CartridgeGrid({
             hasSaveData={hasSaveData}
             scraper={scraper}
             sfx={sfx}
+            gamepadConnected={gamepadConnected}
           />
         );
     }

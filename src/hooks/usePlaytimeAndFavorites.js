@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { dbGet, dbSet, STORES } from '../services/db';
 
 const FAVORITES_KEY = 'retro_player_favorites';
@@ -49,6 +49,9 @@ export function usePlaytimeAndFavorites(activeProfileId = 'default') {
   const recentsKey = `${RECENTS_KEY}_${activeProfileId}`;
   const playtimeKey = `${PLAYTIME_KEY}_${activeProfileId}`;
 
+  // Track which profile the currently loaded in-memory state belongs to
+  const loadedProfileIdRef = useRef(null);
+
   // Favorites collection (array of game IDs)
   const [favorites, setFavorites] = useState(() => {
     try {
@@ -97,80 +100,60 @@ export function usePlaytimeAndFavorites(activeProfileId = 'default') {
   // Authoritative load from IndexedDB or LocalStorage cache whenever activeProfileId changes
   useEffect(() => {
     let isMounted = true;
-
-    // Immediately reset in-memory state to the current profile's cache to avoid cross-profile leakage
-    try {
-      const cachedFavs = localStorage.getItem(favKey);
-      if (cachedFavs) {
-        setFavorites(JSON.parse(cachedFavs));
-      } else if (activeProfileId === 'prof_default' || activeProfileId === 'default') {
-        const legacy = localStorage.getItem(FAVORITES_KEY);
-        setFavorites(legacy ? JSON.parse(legacy) : []);
-      } else {
-        setFavorites([]);
-      }
-
-      const cachedRecents = localStorage.getItem(recentsKey);
-      if (cachedRecents) {
-        setRecentlyPlayed(JSON.parse(cachedRecents));
-      } else if (activeProfileId === 'prof_default' || activeProfileId === 'default') {
-        const legacy = localStorage.getItem(RECENTS_KEY);
-        setRecentlyPlayed(legacy ? JSON.parse(legacy) : []);
-      } else {
-        setRecentlyPlayed([]);
-      }
-
-      const cachedPlaytime = localStorage.getItem(playtimeKey);
-      if (cachedPlaytime) {
-        setPlaytimeStats(JSON.parse(cachedPlaytime));
-      } else if (activeProfileId === 'prof_default' || activeProfileId === 'default') {
-        const legacy = localStorage.getItem(PLAYTIME_KEY);
-        setPlaytimeStats(legacy ? JSON.parse(legacy) : {});
-      } else {
-        setPlaytimeStats({});
-      }
-    } catch (e) {
-      setFavorites([]);
-      setRecentlyPlayed([]);
-      setPlaytimeStats({});
-    }
+    const targetProfileId = activeProfileId;
 
     async function loadData() {
       try {
-        const dbFavs = await dbGet(STORES.USER_DATA, `favs_${activeProfileId}`);
-        if (isMounted) {
-          if (Array.isArray(dbFavs)) {
-            setFavorites(dbFavs);
-            try { localStorage.setItem(favKey, JSON.stringify(dbFavs)); } catch {}
-          } else if (activeProfileId !== 'prof_default' && activeProfileId !== 'default') {
-            // If new user profile has no favs in DB, ensure empty array
-            setFavorites([]);
-            try { localStorage.setItem(favKey, JSON.stringify([])); } catch {}
+        // 1. Fetch favorites for target profile
+        let profileFavs = [];
+        const dbFavs = await dbGet(STORES.USER_DATA, `favs_${targetProfileId}`);
+        if (Array.isArray(dbFavs)) {
+          profileFavs = dbFavs;
+        } else {
+          const cachedFavs = localStorage.getItem(`${FAVORITES_KEY}_${targetProfileId}`);
+          if (cachedFavs) {
+            profileFavs = JSON.parse(cachedFavs);
+          } else if (targetProfileId === 'prof_default' || targetProfileId === 'default') {
+            const legacy = localStorage.getItem(FAVORITES_KEY);
+            profileFavs = legacy ? JSON.parse(legacy) : [];
           }
         }
 
-        const dbRecents = await dbGet(STORES.USER_DATA, `recents_${activeProfileId}`);
-        if (isMounted) {
-          if (Array.isArray(dbRecents)) {
-            setRecentlyPlayed(dbRecents);
-            try { localStorage.setItem(recentsKey, JSON.stringify(dbRecents)); } catch {}
-          } else if (activeProfileId !== 'prof_default' && activeProfileId !== 'default') {
-            // If new user profile has no recents in DB, ensure empty array
-            setRecentlyPlayed([]);
-            try { localStorage.setItem(recentsKey, JSON.stringify([])); } catch {}
+        // 2. Fetch recents for target profile
+        let profileRecents = [];
+        const dbRecents = await dbGet(STORES.USER_DATA, `recents_${targetProfileId}`);
+        if (Array.isArray(dbRecents)) {
+          profileRecents = dbRecents;
+        } else {
+          const cachedRecents = localStorage.getItem(`${RECENTS_KEY}_${targetProfileId}`);
+          if (cachedRecents) {
+            profileRecents = JSON.parse(cachedRecents);
+          } else if (targetProfileId === 'prof_default' || targetProfileId === 'default') {
+            const legacy = localStorage.getItem(RECENTS_KEY);
+            profileRecents = legacy ? JSON.parse(legacy) : [];
           }
         }
 
-        const dbPlaytime = await dbGet(STORES.USER_DATA, `playtime_${activeProfileId}`);
-        if (isMounted) {
-          if (dbPlaytime && typeof dbPlaytime === 'object') {
-            setPlaytimeStats(dbPlaytime);
-            try { localStorage.setItem(playtimeKey, JSON.stringify(dbPlaytime)); } catch {}
-          } else if (activeProfileId !== 'prof_default' && activeProfileId !== 'default') {
-            // If new user profile has no playtime in DB, ensure empty object
-            setPlaytimeStats({});
-            try { localStorage.setItem(playtimeKey, JSON.stringify({})); } catch {}
+        // 3. Fetch playtime analytics for target profile
+        let profilePlaytime = {};
+        const dbPlaytime = await dbGet(STORES.USER_DATA, `playtime_${targetProfileId}`);
+        if (dbPlaytime && typeof dbPlaytime === 'object') {
+          profilePlaytime = dbPlaytime;
+        } else {
+          const cachedPlaytime = localStorage.getItem(`${PLAYTIME_KEY}_${targetProfileId}`);
+          if (cachedPlaytime) {
+            profilePlaytime = JSON.parse(cachedPlaytime);
+          } else if (targetProfileId === 'prof_default' || targetProfileId === 'default') {
+            const legacy = localStorage.getItem(PLAYTIME_KEY);
+            profilePlaytime = legacy ? JSON.parse(legacy) : {};
           }
+        }
+
+        if (isMounted) {
+          loadedProfileIdRef.current = targetProfileId;
+          setFavorites(profileFavs);
+          setRecentlyPlayed(profileRecents);
+          setPlaytimeStats(profilePlaytime);
         }
       } catch (e) {
         console.error('Failed loading profile data from IndexedDB:', e);
@@ -179,22 +162,25 @@ export function usePlaytimeAndFavorites(activeProfileId = 'default') {
 
     loadData();
     return () => { isMounted = false; };
-  }, [activeProfileId, favKey, recentsKey, playtimeKey]);
+  }, [activeProfileId]);
 
-  // Persist Favorites for active profile into IndexedDB & Cache
+  // Persist Favorites ONLY when the in-memory favorites belong to activeProfileId
   useEffect(() => {
+    if (loadedProfileIdRef.current !== activeProfileId) return;
     try { localStorage.setItem(favKey, JSON.stringify(favorites)); } catch {}
     dbSet(STORES.USER_DATA, `favs_${activeProfileId}`, favorites);
   }, [favorites, favKey, activeProfileId]);
 
-  // Persist Recently Played for active profile into IndexedDB & Cache
+  // Persist Recently Played ONLY when in-memory recents belong to activeProfileId
   useEffect(() => {
+    if (loadedProfileIdRef.current !== activeProfileId) return;
     try { localStorage.setItem(recentsKey, JSON.stringify(recentlyPlayed)); } catch {}
     dbSet(STORES.USER_DATA, `recents_${activeProfileId}`, recentlyPlayed);
   }, [recentlyPlayed, recentsKey, activeProfileId]);
 
-  // Persist Playtime Stats for active profile into IndexedDB & Cache
+  // Persist Playtime Stats ONLY when in-memory playtime belongs to activeProfileId
   useEffect(() => {
+    if (loadedProfileIdRef.current !== activeProfileId) return;
     try { localStorage.setItem(playtimeKey, JSON.stringify(playtimeStats)); } catch {}
     dbSet(STORES.USER_DATA, `playtime_${activeProfileId}`, playtimeStats);
   }, [playtimeStats, playtimeKey, activeProfileId]);

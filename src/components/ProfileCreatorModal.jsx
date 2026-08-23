@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Check, User, Sparkles } from 'lucide-react';
+import { X, Check, User, Sparkles, Trash2 } from 'lucide-react';
 import CharacterStudio from './CharacterStudio';
 import { CHARACTER_ARCHETYPES } from '../utils/characterPresets';
 
@@ -13,6 +13,8 @@ export default function ProfileCreatorModal({
   initialProfile = null,
   suggestedName = 'Player',
   onSave,
+  onDelete,
+  canDelete = false,
   onClose,
   focusedTarget,
   setFocusedTarget,
@@ -56,61 +58,83 @@ export default function ProfileCreatorModal({
   };
 
   return (
-    <div className="profile-creator-backdrop animate-fade-in" onClick={onClose}>
-      <div className="profile-creator-modal custom-studio-modal" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div className="profile-creator-header">
-          <div className="profile-creator-title">
-            <User size={22} color={favoriteColor} />
-            <h2>{initialProfile ? 'Edit Character Profile' : 'Character Creation Studio'}</h2>
+    <>
+      <div className="profile-creator-backdrop animate-fade-in" onClick={onClose}>
+        <div className="profile-creator-modal custom-studio-modal" onClick={(e) => e.stopPropagation()}>
+          {/* Header */}
+          <div className="profile-creator-header">
+            <div className="profile-creator-title">
+              <User size={22} color={favoriteColor} />
+              <h2>{initialProfile ? 'Edit Character Profile' : 'Character Creation Studio'}</h2>
+            </div>
+            <button 
+              className={`profile-close-btn ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`} 
+              onClick={onClose}
+              aria-label="Close"
+            >
+              <X size={20} />
+            </button>
           </div>
-          <button 
-            className={`profile-close-btn ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`} 
-            onClick={onClose}
-            aria-label="Close"
-          >
-            <X size={20} />
-          </button>
-        </div>
 
-        {/* Modal Body: Character Studio */}
-        <div className="profile-creator-body custom-studio-body">
-          <CharacterStudio
-            playerName={name}
-            setPlayerName={setName}
-            avatarSeed={avatarSeed}
-            setAvatarSeed={setAvatarSeed}
-            favoriteColor={favoriteColor}
-            setFavoriteColor={setFavoriteColor}
-            sfx={sfx}
-            focusedTarget={focusedTarget}
-            setFocusedTarget={setFocusedTarget}
-            focusZone="profileModal"
-            gamepadConnected={gamepadConnected}
-          />
-        </div>
+          {/* Modal Body: Character Studio */}
+          <div className="profile-creator-body custom-studio-body">
+            <CharacterStudio
+              playerName={name}
+              setPlayerName={setName}
+              avatarSeed={avatarSeed}
+              setAvatarSeed={setAvatarSeed}
+              favoriteColor={favoriteColor}
+              setFavoriteColor={setFavoriteColor}
+              suggestedName={suggestedName}
+              sfx={sfx}
+              focusedTarget={focusedTarget}
+              setFocusedTarget={setFocusedTarget}
+              focusZone="profileModal"
+              gamepadConnected={gamepadConnected}
+            />
+          </div>
 
-        {/* Footer Actions */}
-        <div className="profile-creator-footer">
-          <button
-            type="button"
-            className={`profile-btn-secondary profile-btn-cancel ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'cancel' ? 'gamepad-focused' : ''}`}
-            onClick={onClose}
-          >
-            Cancel
-          </button>
+          {/* Footer Actions */}
+          <div className="profile-creator-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            {canDelete && onDelete && (
+              <button
+                type="button"
+                className={`profile-btn-danger ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'delete' ? 'gamepad-focused' : ''}`}
+                onClick={() => {
+                  if (onDelete && initialProfile) {
+                    onDelete(initialProfile.id);
+                    onClose?.();
+                    sfx?.playModalClose?.();
+                  }
+                }}
+              >
+                <Trash2 size={16} />
+                <span>Delete Profile</span>
+              </button>
+            )}
 
-          <button
-            type="button"
-            className={`profile-btn-primary profile-btn-save ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'save' ? 'gamepad-focused' : ''}`}
-            style={{ backgroundColor: favoriteColor }}
-            onClick={handleSubmit}
-          >
-            <Check size={18} />
-            <span>{initialProfile ? 'Save Changes' : 'Create Profile'}</span>
-          </button>
+            <div style={{ display: 'flex', gap: '0.5rem', marginLeft: 'auto' }}>
+              <button
+                type="button"
+                className={`profile-btn-secondary profile-btn-cancel ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'cancel' ? 'gamepad-focused' : ''}`}
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className={`profile-btn-primary profile-btn-save ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'save' ? 'gamepad-focused' : ''}`}
+                style={{ backgroundColor: favoriteColor }}
+                onClick={handleSubmit}
+              >
+                <Check size={18} />
+                <span>{initialProfile ? 'Save Changes' : 'Create Profile'}</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

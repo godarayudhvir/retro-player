@@ -1,3 +1,95 @@
-# Controls, Keybindings & Gamepad Mapping Guide
+# 🎮 Controls, Keybindings & Gamepad Mapping Guide
 
-This document details keyboard navigation, hotkeys, and USB/Bluetooth gamepad button mappings for Retro Player across all views and emulation cores.
+Retro Player is designed from the ground up for **100% controller and keyboard controllability**. Every view, modal, virtual keyboard, and in-game menu can be navigated seamlessly without touching a mouse.
+
+---
+
+## 🕹️ Gamepad Button Mapping
+
+Retro Player supports standard USB, Bluetooth, and 2.4GHz wireless controllers (Xbox, PlayStation DualShock/DualSense, Nintendo Switch Pro Controller, Steam Deck, 8BitDo, and generic D-Input/X-Input gamepads).
+
+### Standard Layout Legend
+
+| Standard / Xbox | PlayStation | Nintendo Switch | Primary Function |
+| :---: | :---: | :---: | :--- |
+| **`A`** | **`✕` Cross** | **`B`** | **Select / Confirm / Launch Game** |
+| **`B`** | **`○` Circle** | **`A`** | **Back / Cancel / Close Modal** |
+| **`X`** | **`□` Square** | **`Y`** | **Open Metadata Scraper** (Library) / **Start/Confirm** (Scraper) / **Backspace** (OSK) |
+| **`Y`** | **`△` Triangle** | **`X`** | **Open Search Virtual Keyboard** (Library) / **Space** (OSK) |
+| **`LB` / `L1`** | **`L1`** | **`L`** | **Previous System** (Ribbon) / **Previous Tab** (Modals) / **Clear All** (OSK) |
+| **`RB` / `R1`** | **`R1`** | **`R`** | **Next System** (Ribbon) / **Next Tab** (Modals) / **Submit** (OSK) |
+| **`D-Pad` / `Left Stick`** | **`D-Pad` / `Left Stick`** | **`D-Pad` / `Left Stick`** | **Spatial Navigation** across grid cards and UI buttons |
+| **`L3` (Left Stick Click)** | **`L3`** | **`L3`** | **Toggle In-Game Topbar HUD Menu** (In-Game) |
+| **`L3 + R3` (Both Clicks)** | **`L3 + R3`** | **`L3 + R3`** | **Direct Exit Active Game to Library** (In-Game) |
+| **`Select` / `Share`** | **`Share` / `Select`** | **`-` Minus** | **Toggle Favorite ⭐** (Library) / Standard Game Input (In-Game) |
+| **`Start` / `Menu`** | **`Options` / `Start`** | **`+` Plus** | **Quick-Launch Game** (Library) / **Submit** (OSK) / Standard Game Input (In-Game) |
+
+---
+
+## 📺 Dashboard & Cartridge Library Controls
+
+| Gamepad Button | Keyboard Key | Action |
+| :--- | :--- | :--- |
+| **`D-Pad` / `Left Stick`** | **`Arrow Keys`** | Move focus between cartridge cards and topbar icons |
+| **`[A]` Button** | **`Enter` / `Space`** | Launch highlighted game cartridge |
+| **`START` Button** | **`Enter`** | **Quick-Launch Highlighted Game Immediately** |
+| **`SELECT` Button** | **`F`** | **Toggle Favorite ⭐ on Highlighted Game** |
+| **`[Y]` Button** | **`/` (Slash) or `S`** | Open Search virtual keyboard |
+| **`[X]` Button** | **`M`** | Open Scraper Modal |
+| **`[L]` / `[R]` Bumpers** | **`[` and `]`** | Cycle active platform console on System Ribbon |
+| **`[B]` Button** | **`Escape`** | Close open modals, drawers, or reset focus |
+
+---
+
+## 🕹️ In-Game Controls & Gestures
+
+When a game is running in the emulator core:
+
+| Gesture / Shortcut | Action | Description |
+| :--- | :--- | :--- |
+| **`L3` (Left Stick Click)** | **Toggle Topbar HUD** | Opens the in-game action menu starting at **`Restart`**. Use D-Pad to select options. |
+| **`L3 + R3` (Thumbstick Clicks)** | **Exit Game** | Exits the running game immediately and returns to the cartridge shelf. |
+| **`[A]` Button** (in HUD) | **Activate Option** | Triggers the selected HUD action (**Restart**, **Pause**, **Mute**, **Record**, **Speed**, **Capture**, **Filter**, **Save**, **Load**, **Diagnostics**, **Exit**). |
+| **`[B]` / `L3`** (in HUD) | **Resume Gameplay** | Dismisses the topbar and restores focus to gameplay. |
+| **`Select` & `Start`** | **Game Inputs** | Untouched and reserved exclusively for games (e.g. Pause, Inventory, Coin insert). |
+
+---
+
+## ⌨️ On-Screen Virtual Keyboard (OSK)
+
+When searching or typing character handles with a controller:
+
+| Gamepad Button | Keyboard Equivalent | Function |
+| :--- | :--- | :--- |
+| **`D-Pad` / `Left Stick`** | **`Arrow Keys`** | Navigate keys on the virtual keyboard |
+| **`[A]` Button** | **`Enter`** | Type the focused character |
+| **`[X]` Button** | **`Backspace`** | Clear previous character (⌫) |
+| **`[Y]` Button** | **`Space`** | Insert space (␣) |
+| **`[L]` Bumper** | **`Ctrl + A, Backspace`** | Clear all text |
+| **`[R]` Bumper** / **`Start`** | **`Enter` (Submit)** | Submit and save text |
+| **`[B]` Button** | **`Escape`** | Cancel and restore original text |
+
+---
+
+## 🔍 Metadata Scraper Modal Controls
+
+| Gamepad Button | Keyboard Equivalent | Function |
+| :--- | :--- | :--- |
+| **`[L]` / `[R]` Bumpers** | **`[` and `]`** | Switch between **"All Systems"** and **"Single System"** tabs |
+| **`[X]` Button** | **`Enter`** | **Start Scraping** / **Confirm & Start** / **Scrape Again** |
+| **`[B]` Button** | **`Escape`** | Cancel and close modal / Return from prompt |
+| **`D-Pad Up / Down`** | **`Up / Down`** | Select platform chips or individual ROM items |
+
+---
+
+## ⌨️ Global Keyboard Hotkeys Reference
+
+| Key | Description |
+| :--- | :--- |
+| **`Arrow Keys`** | Spatial navigation across cards and buttons |
+| **`Enter`** | Select / Launch / Activate |
+| **`Escape`** | Close modal / Back to library |
+| **`/` (Slash)** | Focus search bar or open Search OSK |
+| **`F`** | Toggle Fullscreen mode |
+| **`M`** | Toggle Background Music (BGM) |
+| **`1` - `9`** | Quick switch console system tabs |

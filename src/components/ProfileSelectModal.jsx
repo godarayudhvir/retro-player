@@ -75,27 +75,6 @@ export default function ProfileSelectModal({
                         <Check size={16} strokeWidth={3} />
                       </div>
                     )}
-                    {isManaging && (
-                      <div className="profile-edit-overlay" title="Edit Profile">
-                        <Edit2 size={15} color="#ffffff" />
-                      </div>
-                    )}
-                    {isManaging && profiles.length > 1 && (
-                      <button
-                        type="button"
-                        className="profile-delete-btn"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setPendingDeleteProfile(profile);
-                          sfx?.playTileNav?.();
-                        }}
-                        aria-label={`Delete profile ${profile.name}`}
-                        title="Delete Profile"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    )}
                   </div>
 
                   <span className="profile-card-name">{profile.name}</span>

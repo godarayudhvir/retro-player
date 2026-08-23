@@ -902,7 +902,8 @@ export function useGamepadNavigation({
             sfx?.playTileNav?.();
           }
         } else if (curId === 'random') {
-          setFocusedTarget({ zone: 'profileModal', id: 'cancel' });
+          const hasDelete = Boolean(document.querySelector('.profile-btn-danger'));
+          setFocusedTarget({ zone: 'profileModal', id: hasDelete ? 'delete' : 'cancel' });
           sfx?.playTileNav?.();
         } else if (curId === 'nameInput') {
           setFocusedTarget({ zone: 'profileModal', id: 'seedInput' });
@@ -919,6 +920,14 @@ export function useGamepadNavigation({
           setFocusedTarget({ zone: 'profileModal', id: 'cancel' });
           sfx?.playTileNav?.();
         } else if (curId === 'cancel') {
+          const hasDelete = Boolean(document.querySelector('.profile-btn-danger'));
+          if (hasDelete) {
+            setFocusedTarget({ zone: 'profileModal', id: 'delete' });
+          } else {
+            setFocusedTarget({ zone: 'profileModal', id: 'random' });
+          }
+          sfx?.playTileNav?.();
+        } else if (curId === 'delete') {
           setFocusedTarget({ zone: 'profileModal', id: 'random' });
           sfx?.playTileNav?.();
         } else if (curId === 'archetypeTab') {
@@ -960,7 +969,10 @@ export function useGamepadNavigation({
           }
         }
       } else if (dir === 'RIGHT') {
-        if (curId === 'cancel') {
+        if (curId === 'delete') {
+          setFocusedTarget({ zone: 'profileModal', id: 'cancel' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'cancel') {
           setFocusedTarget({ zone: 'profileModal', id: 'save' });
           sfx?.playTileNav?.();
         } else if (curId === 'random') {
@@ -979,14 +991,13 @@ export function useGamepadNavigation({
         } else if (curId.startsWith('preset_')) {
           const pIdx = parseInt(curId.replace('preset_', ''), 10) || 0;
           const presetCards = document.querySelectorAll('.archetype-card-chip');
-          if (pIdx % 2 === 0 && pIdx + 1 < presetCards.length) {
+          if (pIdx % 2 === 0 && pIdx + 1 < 6) {
             setFocusedTarget({ zone: 'profileModal', id: `preset_${pIdx + 1}` });
             sfx?.playTileNav?.();
           }
         } else if (curId.startsWith('color_')) {
           const cIdx = parseInt(curId.replace('color_', ''), 10) || 0;
-          const colorDots = document.querySelectorAll('.character-color-circle');
-          if (cIdx < colorDots.length - 1) {
+          if (cIdx < 7) {
             setFocusedTarget({ zone: 'profileModal', id: `color_${cIdx + 1}` });
             sfx?.playTileNav?.();
           }
@@ -996,6 +1007,10 @@ export function useGamepadNavigation({
           setCreatorClose?.(false);
           setFocusedTarget({ zone: 'topbar', id: 'profile' });
           sfx?.playModalClose?.();
+        } else if (curId === 'delete') {
+          const delBtn = document.querySelector('.profile-btn-danger');
+          if (delBtn) delBtn.click();
+          sfx?.playTileNav?.();
         } else if (curId === 'random') {
           const randBtn = document.querySelector('.avatar-random-btn');
           if (randBtn) randBtn.click();
@@ -1157,7 +1172,45 @@ export function useGamepadNavigation({
       return;
     }
 
-    // 2.4 Active Game in-emulator yield
+    // 2.4 In-Game Topbar HUD Navigation
+    if (curTarget?.zone === 'inGameBar') {
+      const topbarBtns = ['restart', 'pause', 'mute', 'record', 'speed', 'screenshot', 'shader', 'save', 'load', 'diagnostics', 'close'];
+      const curId = curTarget?.id || 'close';
+      const curIdx = topbarBtns.indexOf(curId) >= 0 ? topbarBtns.indexOf(curId) : topbarBtns.length - 1;
+
+      if (dir === 'BACK') {
+        setFocusedTarget({ zone: 'gameplay', id: 'canvas' });
+        sfx?.playModalClose?.();
+        return;
+      }
+      if (dir === 'LEFT') {
+        const nextIdx = (curIdx - 1 + topbarBtns.length) % topbarBtns.length;
+        setFocusedTarget({ zone: 'inGameBar', id: topbarBtns[nextIdx] });
+        sfx?.playTileNav?.();
+        return;
+      }
+      if (dir === 'RIGHT') {
+        const nextIdx = (curIdx + 1) % topbarBtns.length;
+        setFocusedTarget({ zone: 'inGameBar', id: topbarBtns[nextIdx] });
+        sfx?.playTileNav?.();
+        return;
+      }
+      if (dir === 'SELECT') {
+        if (curId === 'close' || curId === 'exit') {
+          setActiveGame(null);
+          setFocusedTarget(curIsMobile ? { zone: 'mobileChips', index: 0 } : { zone: 'grid', index: 0 });
+          sfx?.playModalClose?.();
+        } else {
+          const el = document.getElementById('ingame-' + curId);
+          if (el) el.click();
+          sfx?.playMenuConfirm?.();
+        }
+        return;
+      }
+      return;
+    }
+
+    // 2.4b Active Game in-emulator yield
     if (curActiveGame) {
       if (dir === 'BACK') {
         setActiveGame(null);
@@ -1652,6 +1705,10 @@ export function useGamepadNavigation({
           const favBtn = document.querySelector('.ds-tool-btn.is-favorited, .ds-action-toolbar .ds-tool-btn:first-child');
           if (favBtn) favBtn.click();
           sfx?.playFavoriteToggle?.(true);
+        } else if (curId === 'save') {
+          const saveBtn = document.querySelector('.ds-save-tab-btn');
+          if (saveBtn) saveBtn.click();
+          sfx?.playTabSwitch?.();
         } else if (curId === 'guides') {
           const guidesBtn = document.querySelector('.ds-guide-btn');
           if (guidesBtn) guidesBtn.click();
@@ -1660,6 +1717,15 @@ export function useGamepadNavigation({
           const editBtn = document.querySelector('.ds-action-toolbar .ds-tool-btn:last-child');
           if (editBtn) editBtn.click();
           sfx?.playTabSwitch?.();
+        } else if (curId === 'save-export') {
+          const exportBtn = document.querySelector('.ds-save-action-tile:nth-child(1)');
+          if (exportBtn) exportBtn.click();
+        } else if (curId === 'save-import') {
+          const importBtn = document.querySelector('.ds-save-action-tile:nth-child(2)');
+          if (importBtn) importBtn.click();
+        } else if (curId === 'save-delete') {
+          const deleteBtn = document.querySelector('.ds-save-action-tile.is-delete');
+          if (deleteBtn) deleteBtn.click();
         }
       } else if (curZone === 'hud') {
         fetchGames();
@@ -1708,17 +1774,30 @@ export function useGamepadNavigation({
     } else if (curZone === 'cardModal') {
       // Navigation within the DS game detail card panel
       const curId = curTarget?.id || 'play';
-      // Tab order: fav -> guides -> edit (top toolbar), play (bottom)
-      const toolbarItems = ['fav', 'guides', 'edit'];
-      const allItems = [...toolbarItems, 'play'];
-      const curIdxInAll = allItems.indexOf(curId);
+      const hasGuides = Boolean(document.querySelector('.ds-guide-btn'));
+      // Tab order: fav -> save -> (guides) -> edit (top toolbar), play (bottom)
+      const toolbarItems = hasGuides ? ['fav', 'save', 'guides', 'edit'] : ['fav', 'save', 'edit'];
+      const isSavePaneOpen = Boolean(document.querySelector('.ds-save-studio'));
+      const saveTiles = ['save-export', 'save-import', 'save-delete'];
 
       if (dir === 'BACK') {
         setFocusedTarget({ zone: 'grid', index: curIndex });
         sfx?.playTileNav?.();
       } else if (dir === 'UP') {
         if (curId === 'play') {
-          setFocusedTarget({ zone: 'cardModal', id: 'fav' });
+          if (isSavePaneOpen) {
+            setFocusedTarget({ zone: 'cardModal', id: 'save-delete' });
+          } else {
+            setFocusedTarget({ zone: 'cardModal', id: 'fav' });
+          }
+          sfx?.playTileNav?.();
+        } else if (saveTiles.includes(curId)) {
+          const sIdx = saveTiles.indexOf(curId);
+          if (sIdx > 0) {
+            setFocusedTarget({ zone: 'cardModal', id: saveTiles[sIdx - 1] });
+          } else {
+            setFocusedTarget({ zone: 'cardModal', id: 'save' });
+          }
           sfx?.playTileNav?.();
         } else {
           // Move to grid zone when pressing up from toolbar
@@ -1727,7 +1806,19 @@ export function useGamepadNavigation({
         }
       } else if (dir === 'DOWN') {
         if (toolbarItems.includes(curId)) {
-          setFocusedTarget({ zone: 'cardModal', id: 'play' });
+          if (curId === 'save' && isSavePaneOpen) {
+            setFocusedTarget({ zone: 'cardModal', id: 'save-export' });
+          } else {
+            setFocusedTarget({ zone: 'cardModal', id: 'play' });
+          }
+          sfx?.playTileNav?.();
+        } else if (saveTiles.includes(curId)) {
+          const sIdx = saveTiles.indexOf(curId);
+          if (sIdx < saveTiles.length - 1) {
+            setFocusedTarget({ zone: 'cardModal', id: saveTiles[sIdx + 1] });
+          } else {
+            setFocusedTarget({ zone: 'cardModal', id: 'play' });
+          }
           sfx?.playTileNav?.();
         }
       } else if (dir === 'LEFT') {
@@ -1735,14 +1826,14 @@ export function useGamepadNavigation({
           const idx = toolbarItems.indexOf(curId);
           const next = Math.max(0, idx - 1);
           setFocusedTarget({ zone: 'cardModal', id: toolbarItems[next] });
-          sfx?.playTileNav?.();
+          sfx?.playTabSwitch?.();
         }
       } else if (dir === 'RIGHT') {
         if (toolbarItems.includes(curId)) {
           const idx = toolbarItems.indexOf(curId);
           const next = Math.min(toolbarItems.length - 1, idx + 1);
           setFocusedTarget({ zone: 'cardModal', id: toolbarItems[next] });
-          sfx?.playTileNav?.();
+          sfx?.playTabSwitch?.();
         } else if (curId === 'play') {
           setFocusedTarget({ zone: 'cardModal', id: 'fav' });
           sfx?.playTileNav?.();
@@ -2020,25 +2111,79 @@ export function useGamepadNavigation({
           setGamepadConnected(true);
         }
 
-        // When a game is active in the emulator, yield gamepad inputs to EmulatorJS!
+        // When a game is active in the emulator
         if (stateRef.current.activeGame) {
           const b = gp.buttons;
-          const selectBtn = b[8]?.pressed;
-          const startBtn = b[9]?.pressed;
           const l3Btn = b[10]?.pressed; // Left stick click (L3)
           const r3Btn = b[11]?.pressed; // Right stick click (R3)
-          const guideBtn = b[16]?.pressed;
-          const isExitCombo = (selectBtn && startBtn) || (l3Btn && r3Btn) || guideBtn;
+          const now = (typeof timestamp === 'number') ? timestamp : performance.now();
+          const COOLDOWN = 180;
 
-          if (isExitCombo && !prevButtonsRef.current.exitCombo) {
-            console.log('🎮 [GAMEPAD] Controller exit combo triggered. Exiting active game to library.');
+          // 1. L3 + R3 directly exits active game back to cartridge library
+          const isDirectExit = l3Btn && r3Btn;
+          if (isDirectExit && !prevButtonsRef.current.directExit) {
+            console.log('🎮 [GAMEPAD] L3 + R3 pressed. Exiting active game to library.');
             setActiveGame(null);
             setFocusedTarget(stateRef.current.isMobile ? { zone: 'mobileChips', index: 0 } : { zone: 'grid', index: stateRef.current.focusedTarget?.index || 0 });
+            sfx?.playModalClose?.();
+            prevButtonsRef.current = { directExit: true, l3Single: false };
+            setTimeout(() => {
+              animId = requestAnimationFrame(pollGamepad);
+            }, 250);
+            return;
           }
-          prevButtonsRef.current = { exitCombo: isExitCombo };
+
+          // 2. Single L3 (when R3 is NOT pressed) toggles in-game Topbar HUD focus
+          const isL3Single = l3Btn && !r3Btn;
+          if (isL3Single && !prevButtonsRef.current.l3Single) {
+            if (stateRef.current.focusedTarget?.zone === 'inGameBar') {
+              setFocusedTarget({ zone: 'gameplay', id: 'canvas' });
+              sfx?.playModalClose?.();
+            } else {
+              setFocusedTarget({ zone: 'inGameBar', id: 'restart' });
+              sfx?.playModalOpen?.();
+            }
+            lastInputTimeRef.current = now;
+          }
+
+          // 3. If inGameBar is focused, navigate the topbar controls
+          if (stateRef.current.focusedTarget?.zone === 'inGameBar') {
+            const btnA = b[0]?.pressed;
+            const btnB = b[1]?.pressed;
+            const dpadLeft = b[14]?.pressed || (gp.axes[0] < -STICK_DEADZONE);
+            const dpadRight = b[15]?.pressed || (gp.axes[0] > STICK_DEADZONE);
+
+            if (now - lastInputTimeRef.current > COOLDOWN) {
+              if (btnB && !prevButtonsRef.current.btnB) {
+                setFocusedTarget({ zone: 'gameplay', id: 'canvas' });
+                sfx?.playModalClose?.();
+                lastInputTimeRef.current = now;
+              } else if (btnA && !prevButtonsRef.current.btnA) {
+                navigateSpatial('SELECT');
+                lastInputTimeRef.current = now;
+              } else if (dpadLeft) {
+                navigateSpatial('LEFT');
+                lastInputTimeRef.current = now;
+              } else if (dpadRight) {
+                navigateSpatial('RIGHT');
+                lastInputTimeRef.current = now;
+              }
+            }
+          }
+
+          prevButtonsRef.current = { 
+            directExit: isDirectExit, 
+            l3Single: isL3Single,
+            btnA: b[0]?.pressed,
+            btnB: b[1]?.pressed,
+            btnSelect: b[8]?.pressed,
+            btnStart: b[9]?.pressed,
+            btnY: b[3]?.pressed,
+            btnX: b[2]?.pressed
+          };
           setTimeout(() => {
             animId = requestAnimationFrame(pollGamepad);
-          }, 250);
+          }, 150);
           return;
         }
 
@@ -2053,7 +2198,7 @@ export function useGamepadNavigation({
         const btnY = b[3]?.pressed;      // Y / Triangle (Search / OSK)
         const shoulderL = b[4]?.pressed; // L1 / Left Bumper (Prev System / Prev Game)
         const shoulderR = b[5]?.pressed; // R1 / Right Bumper (Next System / Next Game)
-        const btnSelect = b[8]?.pressed; // Select / Back (Search)
+        const btnSelect = b[8]?.pressed; // Select / Back
         const btnStart = b[9]?.pressed;  // Start / Menu
 
         // D-Pad + Analog Stick Thresholds
@@ -2062,9 +2207,9 @@ export function useGamepadNavigation({
         const dpadLeft = b[14]?.pressed || (gp.axes[0] < -STICK_DEADZONE);
         const dpadRight = b[15]?.pressed || (gp.axes[0] > STICK_DEADZONE);
 
-        // Y button or Select opens/toggles Search OSK when not in game and when OSK is not already open
+        // Y button opens/toggles Search OSK when not in game and when OSK is not already open
         if (!stateRef.current.isMobile && !stateRef.current.activeGame && !stateRef.current.showInfoModal && !stateRef.current.showLoadRomModal && !stateRef.current.showVirtualKeyboard) {
-          if ((btnY && !prevButtonsRef.current.btnY) || (btnSelect && !prevButtonsRef.current.btnSelect)) {
+          if (btnY && !prevButtonsRef.current.btnY) {
             if (stateRef.current.setOskConfig) {
               stateRef.current.setOskConfig({
                 title: 'SEARCH LIBRARY',
@@ -2184,7 +2329,7 @@ export function useGamepadNavigation({
             lastInputTimeRef.current = now;
           }
         } else if (!stateRef.current.activeGame && !stateRef.current.showVirtualKeyboard) {
-          // X button (Button 2 / Square / X) -> Opens Metadata Scraper from main UI, or triggers start/confirm/scrape-again when inside scraper modal
+          // 1. X button (Button 2 / Square / X) -> Opens Metadata Scraper from main UI, or triggers start/confirm/scrape-again inside scraper modal
           if (btnX && !prevButtonsRef.current.btnX) {
             if (stateRef.current.showScraperModal) {
               if (document.querySelector('.scraper-completion-pane')) {
@@ -2195,15 +2340,61 @@ export function useGamepadNavigation({
                 if (btn) btn.click();
               }
               sfx?.playThemeSwitch?.();
-            } else if (stateRef.current.showInfoModal) {
-              if (stateRef.current.toggleFavorite) {
-                const nextState = stateRef.current.toggleFavorite(stateRef.current.showInfoModal);
-                sfx?.playFavoriteToggle?.(nextState);
-              }
             } else if (!stateRef.current.showThemeModal && !stateRef.current.showLoadRomModal && !stateRef.current.showProfileSelectModal && !stateRef.current.showProfileCreatorModal) {
               setShowScraperModal(true);
               setFocusedTarget({ zone: 'scraperModal', id: 'tab-all' });
               sfx?.playModalOpen?.();
+            }
+            lastInputTimeRef.current = now;
+          }
+
+          // 2. SELECT button (Button 8 / Share / Minus) -> Toggles Favorite ⭐ on focused game
+          if (btnSelect && !prevButtonsRef.current.btnSelect) {
+            if (stateRef.current.showInfoModal) {
+              if (stateRef.current.toggleFavorite) {
+                const nextState = stateRef.current.toggleFavorite(stateRef.current.showInfoModal);
+                sfx?.playFavoriteToggle?.(nextState);
+              }
+            } else if (stateRef.current.selectedMobileGameForDetails) {
+              if (stateRef.current.toggleFavorite) {
+                const nextState = stateRef.current.toggleFavorite(stateRef.current.selectedMobileGameForDetails);
+                sfx?.playFavoriteToggle?.(nextState);
+              }
+            } else if (stateRef.current.focusedTarget?.zone === 'grid') {
+              const curGame = stateRef.current.filteredGames?.[stateRef.current.focusedTarget?.index || 0];
+              if (curGame && stateRef.current.toggleFavorite) {
+                const nextState = stateRef.current.toggleFavorite(curGame);
+                sfx?.playFavoriteToggle?.(nextState);
+              }
+            } else if (stateRef.current.focusedTarget?.zone === 'mobileChips') {
+              const curMobileGame = stateRef.current.mobileGamesList?.[stateRef.current.focusedTarget?.index || 0] || stateRef.current.filteredGames?.[stateRef.current.focusedTarget?.index || 0];
+              if (curMobileGame && stateRef.current.toggleFavorite) {
+                const nextState = stateRef.current.toggleFavorite(curMobileGame);
+                sfx?.playFavoriteToggle?.(nextState);
+              }
+            }
+            lastInputTimeRef.current = now;
+          }
+
+          // 3. START button (Button 9 / Options / Menu / Plus) -> Immediately quick-launches highlighted game
+          if (btnStart && !prevButtonsRef.current.btnStart) {
+            if (!stateRef.current.showThemeModal && !stateRef.current.showLoadRomModal && !stateRef.current.showProfileSelectModal && !stateRef.current.showProfileCreatorModal && !stateRef.current.showScraperModal) {
+              if (stateRef.current.selectedMobileGameForDetails && stateRef.current.onPlayGame) {
+                stateRef.current.onPlayGame(stateRef.current.selectedMobileGameForDetails);
+                sfx?.playGameLaunch?.();
+              } else if (stateRef.current.focusedTarget?.zone === 'grid') {
+                const curGame = stateRef.current.filteredGames?.[stateRef.current.focusedTarget?.index || 0];
+                if (curGame && stateRef.current.onPlayGame) {
+                  stateRef.current.onPlayGame(curGame);
+                  sfx?.playGameLaunch?.();
+                }
+              } else if (stateRef.current.focusedTarget?.zone === 'mobileChips') {
+                const curMobileGame = stateRef.current.mobileGamesList?.[stateRef.current.focusedTarget?.index || 0] || stateRef.current.filteredGames?.[stateRef.current.focusedTarget?.index || 0];
+                if (curMobileGame && stateRef.current.onPlayGame) {
+                  stateRef.current.onPlayGame(curMobileGame);
+                  sfx?.playGameLaunch?.();
+                }
+              }
             }
             lastInputTimeRef.current = now;
           }

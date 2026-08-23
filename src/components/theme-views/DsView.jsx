@@ -30,7 +30,6 @@ import QRCode from 'qrcode';
 import { resolveAssetPath } from '../../utils/assetPath';
 import { getGameDescription, getReleaseDate } from '../../gameDescriptions';
 import { saveCachedMetadata } from '../../services/metadataScraper';
-import ConfirmModal from '../ConfirmModal';
 
 /**
  * DsView: Nintendo DS / DSi Dual-Screen Touchscreen Firmware Layout.
@@ -59,7 +58,8 @@ export default function DsView({
   onDeleteSave,
   hasSaveData,
   scraper,
-  sfx
+  sfx,
+  gamepadConnected = false
 }) {
   const lastGridIndexRef = useRef(0);
   if (focusedTarget?.zone === 'grid' && typeof focusedTarget.index === 'number') {
@@ -88,7 +88,6 @@ export default function DsView({
 
   const [dsTab, setDsTab] = useState('overview'); // 'overview' | 'guides' | 'edit' | 'scrape'
   const [isLocalScraping, setIsLocalScraping] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [saveActionStatus, setSaveActionStatus] = useState('');
   
   // Inline DS Strategy Guides QR Companion State
@@ -127,6 +126,20 @@ export default function DsView({
     setCopiedLink(false);
     setEditSaveStatus('');
   }, [selectedGame?.id, selectedGame?.title]);
+
+  // Instant gamepad tab switching: change active panel automatically as focus lands on toolbar buttons
+  useEffect(() => {
+    if (focusedTarget?.zone !== 'cardModal') return;
+    if (focusedTarget.id === 'fav') {
+      setDsTab('overview');
+    } else if (focusedTarget.id === 'save') {
+      setDsTab('save');
+    } else if (focusedTarget.id === 'guides') {
+      setDsTab('guides');
+    } else if (focusedTarget.id === 'edit') {
+      setDsTab('manage');
+    }
+  }, [focusedTarget?.zone, focusedTarget?.id]);
 
   // Synchronize inline edit form values with currently selected game/meta
   useEffect(() => {
@@ -407,211 +420,118 @@ export default function DsView({
 
       {/* Right Column: Direct Integrated Action Stage, Metadata Badges & Specs */}
       <div className="ds-right-pane">
-        {/* Balanced Action Toolbar: Favorite, Guides, Edit, Scrape */}
+        {/* Balanced Action Toolbar: Favorite, Save Data, Guides, Edit & Scrape */}
         <div className="ds-action-toolbar">
+          {/* Favorite */}
           <button
             type="button"
-            className={`ds-tool-btn ${selectedFav ? 'is-favorited' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'fav' ? 'gamepad-focused' : ''}`}
+            className={`ds-tool-btn ds-icon-btn ${selectedFav ? 'is-favorited' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'fav' ? 'gamepad-focused' : ''}`}
             onClick={() => {
               if (onToggleFavorite && selectedGame) {
                 const nextState = onToggleFavorite(selectedGame);
                 sfx?.playFavoriteToggle?.(nextState);
               }
             }}
-            title={selectedFav ? 'Remove Favorite' : 'Add to Favorites'}
+            title={selectedFav ? 'Favorited (Click to remove / SELECT)' : 'Add to Favorites (SELECT)'}
+            aria-label={selectedFav ? 'Remove Favorite' : 'Add to Favorites'}
           >
-            <Star size={14} fill={selectedFav ? '#f59e0b' : 'none'} color={selectedFav ? '#d97706' : 'currentColor'} />
-            <span>{selectedFav ? 'Favorited' : 'Favorite'}</span>
+            <Star size={16} fill={selectedFav ? '#f59e0b' : 'none'} color={selectedFav ? '#d97706' : 'currentColor'} />
+          </button>
+
+          {/* Dedicated In-Game Save Data Touch Tab */}
+          <button
+            type="button"
+            className={`ds-tool-btn ds-icon-btn ds-save-tab-btn ${dsTab === 'save' ? 'is-active' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'save' ? 'gamepad-focused' : ''}`}
+            onClick={() => {
+              setDsTab(dsTab === 'save' ? 'overview' : 'save');
+              sfx?.playTabSwitch?.();
+            }}
+            title="In-Game Save Data & Battery RAM (.sav)"
+            aria-label="Save Data"
+          >
+            <Save size={16} color={dsTab === 'save' ? '#ffffff' : '#10b981'} />
           </button>
 
           {/* Guides Touch Button (Toggles between Overview and Strategy Guides inside DS pane) */}
           {hasGuides && (
             <button
               type="button"
-              className={`ds-tool-btn ds-guide-btn ${dsTab === 'guides' ? 'is-active' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'guides' ? 'gamepad-focused' : ''}`}
+              className={`ds-tool-btn ds-icon-btn ds-guide-btn ${dsTab === 'guides' ? 'is-active' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'guides' ? 'gamepad-focused' : ''}`}
               onClick={() => {
                 setDsTab(dsTab === 'guides' ? 'overview' : 'guides');
                 sfx?.playTabSwitch?.();
               }}
-              title="Toggle Strategy Guides"
+              title="Strategy Guides & Walkthroughs"
+              aria-label="Strategy Guides"
             >
-              <BookOpen size={14} color="#3b82f6" />
-              <span>Guides</span>
+              <BookOpen size={16} color={dsTab === 'guides' ? '#ffffff' : '#3b82f6'} />
             </button>
           )}
 
           {/* Unified Edit & Scrape Touch Button */}
           <button
             type="button"
-            className={`ds-tool-btn ${dsTab === 'manage' ? 'is-active' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'edit' ? 'gamepad-focused' : ''}`}
+            className={`ds-tool-btn ds-icon-btn ds-edit-tab-btn ${dsTab === 'manage' ? 'is-active' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'edit' ? 'gamepad-focused' : ''}`}
             onClick={() => {
               setDsTab(dsTab === 'manage' ? 'overview' : 'manage');
               sfx?.playTabSwitch?.();
             }}
-            title="Edit Game Metadata & Scrape Online Studio"
+            title="Edit Game Metadata & Scraper Studio"
+            aria-label="Edit & Scrape"
           >
-            <Pencil size={14} />
-            <span>Edit &amp; Scrape</span>
+            <Pencil size={16} color={dsTab === 'manage' ? '#ffffff' : 'currentColor'} />
           </button>
         </div>
 
         {/* =========================================================================
-            VIEW 1: OVERVIEW (Save Data Deck, Playtime Stats, Specs)
+            VIEW 1: OVERVIEW (Playtime Stats, Specs)
             ========================================================================= */}
         {dsTab === 'overview' && (
           <div className="ds-tab-pane animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-            {/* Save Data Status Notification Banner & 3 Square Action Boxes */}
-            {(() => {
-              const supportsBattery = selectedGame?.supportsBatterySaves !== false && selectedGame?.systemKey !== 'arcade' && selectedGame?.systemKey !== 'atari2600' && !selectedGame?.systemName?.toLowerCase().includes('arcade') && !selectedGame?.systemName?.toLowerCase().includes('atari 2600');
-
-              if (!supportsBattery) {
-                return (
-                  <div className="ds-save-section" style={{ display: 'flex', alignItems: 'stretch', gap: '0.4rem', width: '100%' }}>
-                    <div className="ds-save-status-badge" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.45rem 0.65rem', opacity: 0.75 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                        <Save size={15} color="#94a3b8" />
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
-                          <strong style={{ fontSize: '0.72rem', color: '#64748b' }}>NO BATTERY SAVE REQUIRED</strong>
-                          <span style={{ fontSize: '0.64rem', color: '#94a3b8' }}>Arcade session loop (Quick Saves supported)</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-
-              return (
-                <div className="ds-save-section" style={{ display: 'flex', alignItems: 'stretch', gap: '0.4rem', width: '100%' }}>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    accept=".sav,.srm,.state,.ram,.mcr,application/octet-stream"
-                    style={{ display: 'none' }}
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (file && onImportSave && selectedGame) {
-                        setSaveActionStatus('Importing...');
-                        const success = await onImportSave(file, selectedGame);
-                        if (success) {
-                          sfx?.playMenuConfirm?.();
-                          setSaveActionStatus('Imported!');
-                          setTimeout(() => setSaveActionStatus(''), 3000);
-                        } else {
-                          setSaveActionStatus('Failed');
-                          setTimeout(() => setSaveActionStatus(''), 3000);
-                        }
-                      }
-                      e.target.value = '';
-                    }}
-                  />
-
-                  {/* Main Status Badge on Left */}
-                  <div className={`ds-save-status-badge ${hasSaveData ? 'has-save' : ''}`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.45rem 0.65rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                      <Save size={15} color={hasSaveData ? '#10b981' : '#64748b'} />
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
-                        <strong style={{ fontSize: '0.74rem' }}>{hasSaveData ? 'SAVE DATA DETECTED' : 'NO SAVE DATA FOUND'}</strong>
-                        <span style={{ fontSize: '0.66rem', fontWeight: 500 }}>{saveActionStatus || (hasSaveData ? 'Saved battery RAM / state ready' : 'Start fresh or import .sav')}</span>
-                      </div>
-                    </div>
-                    {hasSaveData && <CheckCircle2 size={15} color="#10b981" />}
-                  </div>
-
-                  {/* 3 Square Action Boxes */}
-                  <div className="save-square-actions" style={{ display: 'flex', gap: '0.3rem' }}>
-                    {/* Import */}
-                    <button
-                      type="button"
-                      className="ds-save-square-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        fileInputRef.current?.click();
-                      }}
-                      title="Import .sav file"
-                      aria-label="Import .sav file"
-                    >
-                      <Upload size={14} />
-                      <span>Import</span>
-                    </button>
-
-                    {/* Export */}
-                    <button
-                      type="button"
-                      className={`ds-save-square-btn ${!hasSaveData ? 'is-disabled' : ''}`}
-                      disabled={!hasSaveData}
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        if (hasSaveData && onExportSave && selectedGame) {
-                          setSaveActionStatus('Exporting...');
-                          const success = await onExportSave(selectedGame);
-                          if (success) {
-                            sfx?.playNotification?.();
-                            setSaveActionStatus('Downloaded!');
-                            setTimeout(() => setSaveActionStatus(''), 3000);
-                          }
-                        }
-                      }}
-                      title={hasSaveData ? 'Export .sav file' : 'No save data to export'}
-                      aria-label="Export .sav file"
-                    >
-                      <Download size={14} />
-                      <span>Export</span>
-                    </button>
-
-                    {/* Delete */}
-                    <button
-                      type="button"
-                      className={`ds-save-square-btn is-delete ${!hasSaveData ? 'is-disabled' : ''}`}
-                      disabled={!hasSaveData}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (hasSaveData) {
-                          setShowDeleteConfirm(true);
-                          sfx?.playTileNav?.();
-                        }
-                      }}
-                      title={hasSaveData ? 'Delete save data' : 'No save data to delete'}
-                      aria-label="Delete save data"
-                    >
-                      <Trash2 size={14} />
-                      <span>Delete</span>
-                    </button>
-                  </div>
-                </div>
-              );
-            })()}
-
             {/* Playtime & Session Analytics Card */}
             <div className="ds-stats-card">
               <div className="ds-stats-row-3">
                 <div className="ds-stat-item">
-                  <div className="ds-stat-label-header">
-                    <span className="ds-stat-label"><Clock size={11} color="#3b82f6" /> Playtime</span>
+                  <div className="ds-stat-label">
+                    <Clock size={12} color="#3b82f6" />
+                    <span>Playtime</span>
+                  </div>
+                  <div className="ds-stat-val-group">
+                    <span className="ds-stat-val">{selectedStats?.playtimeFormatted || '< 1 min'}</span>
                     {onResetStats && (selectedStats?.totalSeconds > 0 || selectedStats?.launchCount > 0) && (
                       <button
-                        className="stat-reset-btn"
-                        style={{ fontSize: '0.6rem', padding: '1px 4px' }}
+                        className="ds-stat-reset-icon-btn"
                         onClick={(e) => {
                           e.stopPropagation();
                           onResetStats(selectedGame?.id || selectedGame?.title);
                         }}
                         title="Reset Playtime Stats"
+                        aria-label="Reset Playtime Stats"
                       >
-                        <RotateCcw size={8} /> Reset
+                        <RotateCcw size={10} />
                       </button>
                     )}
                   </div>
-                  <span className="ds-stat-val">{selectedStats?.playtimeFormatted || '< 1 min'}</span>
                 </div>
 
+                <div className="ds-stat-divider" />
+
                 <div className="ds-stat-item">
-                  <span className="ds-stat-label"><History size={11} color="#10b981" /> Sessions</span>
+                  <div className="ds-stat-label">
+                    <History size={12} color="#10b981" />
+                    <span>Sessions</span>
+                  </div>
                   <span className="ds-stat-val">{selectedStats?.launchCount || 0}</span>
                 </div>
 
+                <div className="ds-stat-divider" />
+
                 <div className="ds-stat-item">
-                  <span className="ds-stat-label"><Calendar size={11} color="#f59e0b" /> Last Played</span>
-                  <span className="ds-stat-val" style={{ fontSize: '0.78rem' }}>{selectedStats?.lastPlayedFormatted || 'Never'}</span>
+                  <div className="ds-stat-label">
+                    <Calendar size={12} color="#f59e0b" />
+                    <span>Last Played</span>
+                  </div>
+                  <span className="ds-stat-val ds-stat-date">{selectedStats?.lastPlayedFormatted || 'Never'}</span>
                 </div>
               </div>
             </div>
@@ -655,25 +575,116 @@ export default function DsView({
         )}
 
         {/* =========================================================================
-            VIEW 2: NINTENDO DS INTEGRATED STRATEGY GUIDES DECK (NO POPUP)
+            VIEW 2: IN-GAME SAVE & BATTERY RAM STUDIO (.SAV)
+            ========================================================================= */}
+        {dsTab === 'save' && (
+          <div className="ds-tab-pane ds-save-studio animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept=".sav,.srm,.state,.ram,.mcr,application/octet-stream"
+              style={{ display: 'none' }}
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (file && onImportSave && selectedGame) {
+                  setSaveActionStatus('Importing save...');
+                  const success = await onImportSave(file, selectedGame);
+                  if (success) {
+                    sfx?.playMenuConfirm?.();
+                    setSaveActionStatus('Save file imported successfully!');
+                    setTimeout(() => setSaveActionStatus(''), 4000);
+                  } else {
+                    setSaveActionStatus('Failed to import save file.');
+                    setTimeout(() => setSaveActionStatus(''), 4000);
+                  }
+                }
+                e.target.value = '';
+              }}
+            />
+
+            {saveActionStatus && (
+              <div className="ds-save-status-toast animate-fade-in">
+                <span>{saveActionStatus}</span>
+              </div>
+            )}
+
+            <div className="ds-save-tiles-group">
+              {/* Export Tile */}
+              <button
+                type="button"
+                className={`ds-save-action-tile ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'save-export' ? 'gamepad-focused' : ''}`}
+                onClick={async () => {
+                  if (onExportSave && selectedGame) {
+                    setSaveActionStatus('Exporting save...');
+                    const success = await onExportSave(selectedGame);
+                    if (success) {
+                      sfx?.playNotification?.();
+                      setSaveActionStatus('Downloaded .sav battery save file!');
+                      setTimeout(() => setSaveActionStatus(''), 4000);
+                    } else {
+                      setSaveActionStatus('No save data found yet. Save in-game first!');
+                      setTimeout(() => setSaveActionStatus(''), 4000);
+                    }
+                  }
+                }}
+              >
+                <div className="ds-save-tile-icon export">
+                  <Download size={16} />
+                </div>
+                <div className="ds-save-tile-content">
+                  <div className="ds-save-tile-title">Export Save (.sav)</div>
+                  <div className="ds-save-tile-sub">Download in-game save to your computer</div>
+                </div>
+              </button>
+
+              {/* Import Tile */}
+              <button
+                type="button"
+                className={`ds-save-action-tile ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'save-import' ? 'gamepad-focused' : ''}`}
+                onClick={() => {
+                  fileInputRef.current?.click();
+                }}
+              >
+                <div className="ds-save-tile-icon import">
+                  <Upload size={16} />
+                </div>
+                <div className="ds-save-tile-content">
+                  <div className="ds-save-tile-title">Import Save (.sav)</div>
+                  <div className="ds-save-tile-sub">Upload an existing .sav battery save</div>
+                </div>
+              </button>
+
+              {/* Delete Tile */}
+              <button
+                type="button"
+                className={`ds-save-action-tile is-delete ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'save-delete' ? 'gamepad-focused' : ''}`}
+                onClick={async () => {
+                  if (onDeleteSave && selectedGame) {
+                    setSaveActionStatus('Deleting save data...');
+                    await onDeleteSave(selectedGame);
+                    sfx?.playDelete?.();
+                    setSaveActionStatus('Save data & states erased!');
+                    setTimeout(() => setSaveActionStatus(''), 4000);
+                  }
+                }}
+              >
+                <div className="ds-save-tile-icon delete">
+                  <Trash2 size={16} />
+                </div>
+                <div className="ds-save-tile-content">
+                  <div className="ds-save-tile-title">Delete In-Game Save</div>
+                  <div className="ds-save-tile-sub">Erase saved data to restart the game fresh</div>
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            VIEW 3: NINTENDO DS INTEGRATED STRATEGY GUIDES DECK (NO POPUP)
             ========================================================================= */}
         {dsTab === 'guides' && (
           <div className="ds-tab-pane ds-guides-pane animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-            <div className="ds-guides-header-bar">
-              <button
-                type="button"
-                className="ds-back-tab-btn"
-                onClick={() => {
-                  setDsTab('overview');
-                  sfx?.playTileNav?.();
-                }}
-              >
-                <ArrowLeft size={13} />
-                <span>Back to Info</span>
-              </button>
-              <span className="ds-guides-title-tag">STRATEGY &amp; GUIDES</span>
-            </div>
-
             <div className="ds-guides-touch-list">
               {/* Channel 1: Written Strategy Guide */}
               {writtenGuideUrl && (
@@ -819,22 +830,6 @@ export default function DsView({
 
           return (
             <div className="ds-tab-pane ds-manage-pane animate-fade-in">
-              {/* Header Bar */}
-              <div className="ds-guides-header-bar">
-                <button
-                  type="button"
-                  className="ds-back-tab-btn"
-                  onClick={() => {
-                    setDsTab('overview');
-                    sfx?.playTileNav?.();
-                  }}
-                >
-                  <ArrowLeft size={13} />
-                  <span>Back to Info</span>
-                </button>
-                <span className="ds-guides-title-tag">EDIT &amp; SCRAPE STUDIO</span>
-              </div>
-
               <form onSubmit={handleSaveEdit} className="ds-inline-form-card">
                 {/* Header Game Identity */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '0.35rem', borderBottom: '1px solid var(--panel-border)' }}>
@@ -1080,24 +1075,6 @@ export default function DsView({
           );
         })()}
       </div>
-
-      <ConfirmModal
-        isOpen={showDeleteConfirm}
-        title={`Delete Save Data?`}
-        message={`Are you sure you want to permanently erase the saved battery RAM and save states for "${selectedGame?.title}"? This action cannot be undone.`}
-        confirmLabel="Delete Save"
-        cancelLabel="Cancel"
-        isDestructive={true}
-        onConfirm={async () => {
-          setShowDeleteConfirm(false);
-          if (onDeleteSave && selectedGame) {
-            await onDeleteSave(selectedGame);
-            sfx?.playDelete?.();
-          }
-        }}
-        onCancel={() => setShowDeleteConfirm(false)}
-        sfx={sfx}
-      />
     </div>
   );
 }

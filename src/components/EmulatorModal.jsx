@@ -30,7 +30,16 @@ import { detectSystemFromExtension } from '../utils/systemDetector';
 import { dbGet, dbSet, STORES } from '../services/db';
 import { resolveAssetPath } from '../utils/assetPath';
 
-export default function EmulatorModal({ game, gamepadConnected, activeProfileId = 'prof_default', sfx, onClose, onSessionEnd }) {
+export default function EmulatorModal({ 
+  game, 
+  gamepadConnected, 
+  activeProfileId = 'prof_default', 
+  sfx, 
+  onClose, 
+  onSessionEnd,
+  focusedTarget,
+  setFocusedTarget
+}) {
   const stageRef = useRef(null);
   const iframeRef = useRef(null);
   const [isLoadingGame, setIsLoadingGame] = useState(true);
@@ -716,8 +725,8 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
             window.EJS_player = '#game';
             window.EJS_volume = 1.0;
             window.EJS_gameUrl = ${JSON.stringify(absoluteRomUrl)};
-            window.EJS_gameID = ${JSON.stringify(currentGame.id || 'custom_game')};
-            window.EJS_gameId = ${JSON.stringify(currentGame.id || 'custom_game')};
+            window.EJS_gameID = ${JSON.stringify(`${activeProfileId}_${currentGame.id || 'custom_game'}`)};
+            window.EJS_gameId = ${JSON.stringify(`${activeProfileId}_${currentGame.id || 'custom_game'}`)};
             window.EJS_gameName = ${JSON.stringify(currentGame.title || 'Custom Game')};
             window.EJS_core = ${JSON.stringify(core)};
             window.EJS_pathtodata = ${JSON.stringify(initialDataPath)};
@@ -1275,6 +1284,17 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
                 _unlockAndEnforceAudio();
                 if (window.__INITIAL_SAVE_BASE64__) {
                   injectSaveData(window.__INITIAL_SAVE_BASE64__);
+                } else {
+                  try {
+                    const emu = window.EJS_emulator;
+                    if (emu && emu.gameManager && typeof emu.gameManager.getSaveFilePath === 'function') {
+                      const sp = emu.gameManager.getSaveFilePath();
+                      if (sp && emu.gameManager.FS && emu.gameManager.FS.analyzePath(sp).exists) {
+                        emu.gameManager.FS.unlink(sp);
+                        console.log('🧹 [CLEAN PROFILE BOOT] Cleared unlinked save in Emscripten FS for new profile session');
+                      }
+                    }
+                  } catch(e) {}
                 }
                 if (window.parent && window.parent !== window) {
                   window.parent.postMessage({ type: 'RETRO_PLAYER_CORE_RUNNING' }, '*');
@@ -1293,6 +1313,17 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
                 _unlockAndEnforceAudio();
                 if (window.__INITIAL_SAVE_BASE64__) {
                   injectSaveData(window.__INITIAL_SAVE_BASE64__);
+                } else {
+                  try {
+                    const emu = window.EJS_emulator;
+                    if (emu && emu.gameManager && typeof emu.gameManager.getSaveFilePath === 'function') {
+                      const sp = emu.gameManager.getSaveFilePath();
+                      if (sp && emu.gameManager.FS && emu.gameManager.FS.analyzePath(sp).exists) {
+                        emu.gameManager.FS.unlink(sp);
+                        console.log('🧹 [CLEAN PROFILE BOOT] Cleared unlinked save in Emscripten FS for new profile session');
+                      }
+                    }
+                  } catch(e) {}
                 }
                 if (window.parent && window.parent !== window) {
                   window.parent.postMessage({ type: 'RETRO_PLAYER_CORE_RUNNING' }, '*');
@@ -2165,14 +2196,6 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
         <div className="emulator-topbar-left">
           <Gamepad2 size={20} style={{ color: game.systemColor || '#00c6ff', flexShrink: 0 }} />
           <span className="emulator-game-title" title={game.title}>{game.title}</span>
-          <span className="tile-sys-badge emulator-sys-badge" style={{ '--sys-color': game.systemColor || '#00c6ff' }}>
-            {game.systemIcon ? (
-              <img src={resolveAssetPath(game.systemIcon)} alt="" className="tile-sys-badge-icon" />
-            ) : (
-              <span className="tile-sys-dot" />
-            )}
-            <span className="tile-sys-name">{game.systemName}</span>
-          </span>
           {isLocalOffline ? (
             <span className="emulator-status-tag tag-offline" title="Running with local offline emulator core">
               <WifiOff size={11} /> <span>OFFLINE</span>
@@ -2215,7 +2238,8 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
         {/* Center / Actions directly in topbar for Large Displays */}
         <div className="emulator-topbar-actions">
           <button 
-            className="emulator-topbar-action-btn" 
+            id="ingame-restart"
+            className={`emulator-topbar-action-btn ${focusedTarget?.zone === 'inGameBar' && focusedTarget?.id === 'restart' ? 'gamepad-focused' : ''}`}
             onClick={() => handleEmulatorAction('restart')} 
             title="Restart Game"
           >
@@ -2224,7 +2248,8 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
           </button>
 
           <button 
-            className="emulator-topbar-action-btn" 
+            id="ingame-pause"
+            className={`emulator-topbar-action-btn ${focusedTarget?.zone === 'inGameBar' && focusedTarget?.id === 'pause' ? 'gamepad-focused' : ''}`}
             onClick={() => handleEmulatorAction('pause')} 
             title={isGamePaused ? "Resume Game" : "Pause Game"}
           >
@@ -2233,7 +2258,8 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
           </button>
 
           <button 
-            className="emulator-topbar-action-btn" 
+            id="ingame-mute"
+            className={`emulator-topbar-action-btn ${focusedTarget?.zone === 'inGameBar' && focusedTarget?.id === 'mute' ? 'gamepad-focused' : ''}`}
             onClick={() => handleEmulatorAction('mute')} 
             title={isGameMuted ? "Unmute Audio" : "Mute Audio"}
           >
@@ -2242,7 +2268,8 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
           </button>
 
           <button 
-            className={`emulator-topbar-action-btn ${isRecording ? 'recording-active' : ''}`}
+            id="ingame-record"
+            className={`emulator-topbar-action-btn ${isRecording ? 'recording-active' : ''} ${focusedTarget?.zone === 'inGameBar' && focusedTarget?.id === 'record' ? 'gamepad-focused' : ''}`}
             onClick={handleToggleRecording}
             title={isRecording ? "Stop Screen Recording" : "Start 60 FPS Screen Recording"}
           >
@@ -2251,7 +2278,8 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
           </button>
 
           <button 
-            className="emulator-topbar-action-btn" 
+            id="ingame-speed"
+            className={`emulator-topbar-action-btn ${focusedTarget?.zone === 'inGameBar' && focusedTarget?.id === 'speed' ? 'gamepad-focused' : ''}`}
             onClick={() => {
               const nextIdx = (SPEED_PRESETS.indexOf(emulationSpeed) + 1) % SPEED_PRESETS.length;
               handleSpeedChange(SPEED_PRESETS[nextIdx]);
@@ -2263,7 +2291,8 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
           </button>
 
           <button 
-            className="emulator-topbar-action-btn" 
+            id="ingame-screenshot"
+            className={`emulator-topbar-action-btn ${focusedTarget?.zone === 'inGameBar' && focusedTarget?.id === 'screenshot' ? 'gamepad-focused' : ''}`}
             onClick={() => handleEmulatorAction('screenshot')} 
             title="Take Lossless Screenshot"
           >
@@ -2272,7 +2301,8 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
           </button>
 
           <button 
-            className="emulator-topbar-action-btn" 
+            id="ingame-shader"
+            className={`emulator-topbar-action-btn ${focusedTarget?.zone === 'inGameBar' && focusedTarget?.id === 'shader' ? 'gamepad-focused' : ''}`}
             onClick={() => {
               const sIdx = (SHADERS.indexOf(activeShader) + 1) % SHADERS.length;
               setActiveShader(SHADERS[sIdx]);
@@ -2285,7 +2315,8 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
           </button>
 
           <button 
-            className="emulator-topbar-action-btn" 
+            id="ingame-save"
+            className={`emulator-topbar-action-btn ${focusedTarget?.zone === 'inGameBar' && focusedTarget?.id === 'save' ? 'gamepad-focused' : ''}`}
             onClick={() => handleEmulatorAction('saveState')} 
             title="Quick Save State"
           >
@@ -2294,7 +2325,8 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
           </button>
 
           <button 
-            className="emulator-topbar-action-btn" 
+            id="ingame-load"
+            className={`emulator-topbar-action-btn ${focusedTarget?.zone === 'inGameBar' && focusedTarget?.id === 'load' ? 'gamepad-focused' : ''}`}
             onClick={() => handleEmulatorAction('loadState')} 
             title="Quick Load State"
           >
@@ -2306,7 +2338,8 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
         <div className="emulator-topbar-right">
           {/* Diagnostic Monitor Toggle Button */}
           <button
-            className={`emulator-diag-btn ${showDiagnostics ? 'active' : ''}`}
+            id="ingame-diagnostics"
+            className={`emulator-diag-btn ${showDiagnostics ? 'active' : ''} ${focusedTarget?.zone === 'inGameBar' && focusedTarget?.id === 'diagnostics' ? 'gamepad-focused' : ''}`}
             onClick={(e) => {
               e.stopPropagation();
               setShowDiagnostics(prev => !prev);
@@ -2326,7 +2359,12 @@ export default function EmulatorModal({ game, gamepadConnected, activeProfileId 
             <Menu size={18} />
           </button>
 
-          <button className="emulator-close-btn" onClick={handleClose} title="Close Game">
+          <button 
+            id="ingame-close"
+            className={`emulator-close-btn ${focusedTarget?.zone === 'inGameBar' && (focusedTarget?.id === 'close' || focusedTarget?.id === 'exit') ? 'gamepad-focused' : ''}`}
+            onClick={handleClose} 
+            title="Close Game"
+          >
             <X size={18} />
           </button>
         </div>

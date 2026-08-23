@@ -74,7 +74,39 @@ export function useProfileManager() {
       try {
         const dbProfiles = await dbGetAll(STORES.PROFILES);
         if (Array.isArray(dbProfiles) && dbProfiles.length > 0) {
-          const normalized = dbProfiles.map(normalizeProfile);
+          let normalized = dbProfiles.map(normalizeProfile);
+
+          // Deduplicate by ID
+          const seen = new Set();
+          normalized = normalized.filter(p => {
+            if (seen.has(p.id)) return false;
+            seen.add(p.id);
+            return true;
+          });
+
+          // If there are multiple duplicate "Player 1" profiles from previous onboarding, consolidate into one
+          const player1Profiles = normalized.filter(p => (p.name || '').trim().toLowerCase() === 'player 1');
+          if (player1Profiles.length > 1) {
+            const chosen = player1Profiles.find(p => p.id === activeProfileId)
+              || player1Profiles.find(p => p.id !== 'prof_default')
+              || player1Profiles[0];
+
+            for (const p of player1Profiles) {
+              if (p.id !== 'prof_default') {
+                await dbDelete(STORES.PROFILES, p.id);
+              }
+            }
+            const consolidated = {
+              ...chosen,
+              id: 'prof_default'
+            };
+            await dbSet(STORES.PROFILES, 'prof_default', consolidated);
+            normalized = [
+              consolidated,
+              ...normalized.filter(p => (p.name || '').trim().toLowerCase() !== 'player 1')
+            ];
+          }
+
           setProfiles(normalized);
           try {
             localStorage.setItem(PROFILES_KEY, JSON.stringify(normalized));

@@ -396,6 +396,7 @@ export default function App() {
             onDeleteSave={(game) => deleteSaveFile(game, activeProfileId)}
             hasSaveData={hasSaveData}
             scraper={scraper}
+            gamepadConnected={gamepadConnected}
           />
         </>
       )}
@@ -566,6 +567,13 @@ export default function App() {
         suggestedName={getNextPlayerName ? getNextPlayerName() : 'Player'}
         focusedTarget={focusedTarget}
         setFocusedTarget={setFocusedTarget}
+        canDelete={Boolean(editingProfile && profiles.length > 1 && editingProfile.id !== 'prof_default')}
+        onDelete={(id) => {
+          deleteProfile(id);
+          setShowProfileCreatorModal(false);
+          setEditingProfile(null);
+          setFocusedTarget({ zone: 'topbar', id: 'profile' });
+        }}
         onSave={(data) => {
           if (editingProfile) {
             updateProfile(editingProfile.id, data);
@@ -624,6 +632,8 @@ export default function App() {
           gamepadConnected={gamepadConnected}
           activeProfileId={activeProfileId}
           sfx={sfx}
+          focusedTarget={focusedTarget}
+          setFocusedTarget={setFocusedTarget}
           onClose={() => setActiveGame(null)}
           onSessionEnd={(gameId, elapsedSeconds) => {
             recordGameSession(gameId, elapsedSeconds);
@@ -641,11 +651,8 @@ export default function App() {
           }}
           activeProfile={activeProfile}
           onSaveCreatedProfile={(name, avatarSeed, favoriteColor) => {
-            if (activeProfile?.id) {
-              updateProfile(activeProfile.id, { name, avatarSeed, favoriteColor });
-            } else {
-              createProfile(name, avatarSeed, favoriteColor);
-            }
+            const targetId = activeProfile?.id || 'prof_default';
+            updateProfile(targetId, { name, avatarSeed, favoriteColor });
           }}
           sfx={sfx}
           pwa={pwa}
