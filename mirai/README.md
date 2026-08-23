@@ -1,8 +1,8 @@
 # 🔮 MIRAI (未来) — Master Roadmap & Specifications Index
 
 > **"Mirai" (未来)** is the Japanese word for **"Future"**. This document serves as the central directory and status index for all upcoming architectural specifications and roadmap milestones for **Retro Player**.
-> 
-> Detailed technical designs are decoupled into their respective domain specification files within this directory, **sorted below from Least Code Impact (Quick Wins / UI additions) to Most Code Impact (Complex distributed systems)**.
+>
+> **Nintendo DS Dual-Screen Touch Theme**: Features a top screen for game artwork, battery save indicators, and live specs, and a bottom touchscreen with search, game selection carousel, inline **Strategy Guides Deck** (written walkthroughs, video guides, QR codes), and unified **Edit & Scrape Studio** (cover asset manager, real-time Libretro/Wikipedia search logs terminal, sidecar export) without modal popups. Detailed technical designs are decoupled into their respective domain specification files within this directory, **sorted below from Least Code Impact (Quick Wins / UI additions) to Most Code Impact (Complex distributed systems)**.
 
 ---
 
@@ -10,7 +10,7 @@
 
 | # | Impact | Specification | Domain | Description | Status |
 | :---: | :---: | :--- | :--- | :--- | :--- |
-| 1 | 🟢 Low | **[Strategy Guides & Walkthrough Links Hub](walkthrough-links-hub.md)** | Curation & Tools | Zero-overhead smart outbound links (GameFAQs, StrategyWiki, Speedrun.com) in Game Detail modal + Phone Companion QR Code for TV mode. | 📋 Planned |
+| 1 | 🟢 Low | **[Strategy Guides & Walkthrough Links Hub](walkthrough-links-hub.md)** | Curation & Tools | Zero-overhead smart outbound links (GameFAQs, StrategyWiki, Speedrun.com) in Game Detail modal + Phone Companion QR Code for TV mode. | ✅ Implemented |
 | 2 | 🟢 Low-Med | **[Organic Achievements & Milestones](organic-achievements.md)** | Gamification & UX | Universal in-house organic achievements (first game played, multi-console exploration, quick quit / funny habits, marathon streaks) with toast banners, chiptune fanfare, and trophy cabinet. | 📋 Planned |
 | 3 | 🟡 Medium | **[3D Cartridge & Media Design Blueprint](cartridge-designs-spec.md)** | Theme Engine | Master geometric and CSS blueprint for all 10+ authentic physical cartridge shells (NES, SNES, N64, GBA, NDS, Genesis, GB, Game Gear, Atari, PS1) for future theme designs. | 📋 Planned |
 | 4 | 🟡 Medium | **[Settings & Library Management Hub](settings-hub.md)** | System Hub & Tools | Clean console-native settings redesign: ROM library administration, BGM track manager, and IndexedDB storage diagnostics (wires into existing server REST endpoints). | 📋 Planned |

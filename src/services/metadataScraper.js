@@ -677,6 +677,8 @@ async function scrapeCoverArt(game) {
   const sysDir = LIBRETRO_SYSTEM_MAP[game.systemKey];
   if (!sysDir) return null;
 
+  addScraperLog(`🔍 Searching Libretro CDN box arts for "${game.title}" (${sysDir})...`, 'scan', { gameId: game.id, title: game.title, systemKey: game.systemKey });
+
   const candidates = generateThumbnailCandidates(game);
   const types = ['Named_Boxarts', 'Named_Titles', 'Named_Snaps'];
   const githubRepoName = sysDir.replace(/\s+/g, '_');
@@ -718,7 +720,7 @@ async function scrapeCoverArt(game) {
     }
   }
 
-  addScraperLog(`ℹ️ No official box art in TheGamesDB / ScreenScraper / Libretro for "${game.title}"`, 'info', { gameId: game.id, title: game.title, systemKey: game.systemKey });
+  addScraperLog(`ℹ️ No box art match in Libretro CDN / GitHub mirror for "${game.title}"`, 'info', { gameId: game.id, title: game.title, systemKey: game.systemKey });
   return null;
 }
 
@@ -728,6 +730,8 @@ async function scrapeCoverArt(game) {
 async function scrapeWikipediaLastResort(game) {
   const cleanTitle = (game.title || '').replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').trim();
   const systemName = game.systemName || '';
+
+  addScraperLog(`🔍 Querying Wikipedia Open REST API for "${cleanTitle}"...`, 'scan', { gameId: game.id, title: game.title, systemKey: game.systemKey });
 
   try {
     const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(`"${cleanTitle}" video game`)}&format=json&origin=*`;
@@ -763,7 +767,13 @@ async function scrapeWikipediaLastResort(game) {
             // Wikipedia lead image as last resort cover
             const wikiCover = summaryData.thumbnail?.source || summaryData.originalimage?.source || null;
 
-            addScraperLog(`📖 [LAST RESORT] Fetched Wikipedia summary & year (${releaseYear || 'Classic'}) for "${game.title}"`, 'info', { gameId: game.id, title: game.title, systemKey: game.systemKey });
+            if (wikiCover) {
+              addScraperLog(`✨ Lead image retrieved from Wikipedia for "${game.title}"`, 'success', { gameId: game.id, title: game.title, systemKey: game.systemKey });
+            } else {
+              addScraperLog(`ℹ️ No lead cover image on Wikipedia for "${game.title}"`, 'info', { gameId: game.id, title: game.title, systemKey: game.systemKey });
+            }
+
+            addScraperLog(`📖 Fetched Wikipedia summary & year (${releaseYear || 'Classic'}) for "${game.title}"`, 'info', { gameId: game.id, title: game.title, systemKey: game.systemKey });
 
             return {
               description: summaryData.extract,
@@ -818,36 +828,47 @@ async function scrapeGameDetails(game) {
 /**
  * Main Scrape Method for a Single Game
  */
+/**
+ * Scrapes metadata and cover art for a single game.
+ * Strict Principle: NEVER replace or overwrite local files on disk. Only fill in missing gaps (e.g. missing cover or missing synopsis).
+ */
 export async function scrapeGame(game, force = false) {
   if (!game) return null;
   const id = game.id || `${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
 
-  const hasLocalSidecar = game.hasSidecar || game.sidecarMetadata || (game.coverUrl && !game.coverUrl.endsWith('.svg'));
+  // Check what local files exist on disk
+  const sidecar = game.sidecarMetadata || {};
+  const hasLocalSidecarJson = Boolean(game.hasSidecar || (game.sidecarMetadata && Object.keys(game.sidecarMetadata).length > 0));
+  const localCover = (game.coverUrl && !game.coverUrl.endsWith('.svg')) ? game.coverUrl : null;
+  const hasLocalCoverFile = Boolean(localCover);
 
   const cached = await getCachedMetadata(id);
-  if (cached) {
-    // 1. If user has manually edited metadata, preserve it unless force re-scrape is explicitly requested
-    if (cached.isManualOverride && !force) {
+  if (cached && !force) {
+    // 1. If user has manually edited metadata in-app, preserve it
+    if (cached.isManualOverride) {
       addScraperLog(`✏️ Loaded "${cached.title || game.title}" from manual override`, 'info', { gameId: id, title: game.title, systemKey: game.systemKey });
       return cached;
     }
-    // If we have a local companion sidecar/cover on disk, local files ALWAYS take precedence over previous online scraped cache
-    if (!hasLocalSidecar && !force) {
+
+    // 2. If cached metadata already has both details and a valid cover, use it
+    if ((cached.coverUrl || hasLocalCoverFile) && (cached.description || hasLocalSidecarJson)) {
       addScraperLog(`📦 Loaded "${game.title}" from IndexedDB cache`, 'info', { gameId: id, title: game.title, systemKey: game.systemKey });
       return cached;
     }
   }
 
-  // 2. Local Sidecar Priority: If local files / sidecar exist, local files ALWAYS override online scrapers and ZERO online network calls are made.
-  if (hasLocalSidecar && (!cached || !cached.isManualOverride || !force)) {
-    const sidecar = game.sidecarMetadata || {};
-    const sidecarCover = (game.coverUrl && !game.coverUrl.endsWith('.svg')) ? game.coverUrl : null;
-    const metadata = {
+  // Determine what is missing locally so we ONLY query online to fill gaps:
+  const needsCoverScrape = !hasLocalCoverFile && (!cached?.coverUrl || force);
+  const needsDetailsScrape = !hasLocalSidecarJson || force;
+
+  // If local files already contain both metadata JSON and cover image, skip all network queries
+  if (hasLocalSidecarJson && hasLocalCoverFile && !force) {
+    const fullLocalMeta = {
       id,
       title: sidecar.title || game.title,
       systemKey: game.systemKey,
-      coverUrl: sidecarCover || null,
-      hasCustomCover: !!sidecarCover,
+      coverUrl: localCover,
+      hasCustomCover: true,
       description: sidecar.description || `Experience ${game.title} on ${game.systemName}.`,
       releaseDate: sidecar.releaseYear ? `${sidecar.releaseYear}-01-01` : '2000-01-01',
       releaseYear: sidecar.releaseYear || 'Classic',
@@ -857,43 +878,64 @@ export async function scrapeGame(game, force = false) {
       walkthrough: sidecar.walkthrough || undefined,
       writtenWalkthroughUrl: sidecar.walkthrough?.written || undefined,
       videoWalkthroughUrl: sidecar.walkthrough?.video || undefined,
-      source: sidecar.source || 'Local Sidecar',
+      source: 'Local Files (JSON & WebP)',
       hasSidecar: true,
       scrapedAt: new Date().toISOString()
     };
-    await saveCachedMetadata(id, metadata);
-    addScraperLog(`📁 [LOCAL SIDECAR] Used local companion sidecar for "${game.title}" (Skipped online scraping)`, 'success', { gameId: id, title: game.title, systemKey: game.systemKey });
-    return metadata;
+    await saveCachedMetadata(id, fullLocalMeta);
+    addScraperLog(`📁 [LOCAL COMPLETE] Used local companion sidecar & cover image for "${game.title}" (Skipped online scraping)`, 'success', { gameId: id, title: game.title, systemKey: game.systemKey });
+    return fullLocalMeta;
   }
 
-  // 3. Online Scraping (Only performed when NO local sidecar is available)
-  addScraperLog(`🔍 Scraping assets for "${game.title}" [${game.systemName || game.systemKey}]...`, 'scan', { gameId: id, title: game.title, systemKey: game.systemKey });
-  console.log(`🔍 [ONLINE SCRAPER] Querying assets for "${game.title}" (${game.systemName})...`);
+  let scrapedCoverUrl = null;
+  let scrapedDetails = null;
 
-  // Step 1: Query Primary Game Databases (Libretro, TheGamesDB, ScreenScraper)
-  const coverUrl = await scrapeCoverArt(game);
-  let details = await scrapeGameDetails(game);
+  // 1. If cover is missing locally, query online box art (Libretro CDN, TheGamesDB, ScreenScraper)
+  if (needsCoverScrape) {
+    scrapedCoverUrl = await scrapeCoverArt(game);
+  }
 
-  // Final resolved cover (Libretro Boxart -> TheGamesDB -> ScreenScraper -> Last Resort Wikipedia)
-  const finalCoverUrl = coverUrl || details?.coverUrl || null;
+  // 2. If details/synopsis is missing locally, query online APIs (TheGamesDB, ScreenScraper, Wikipedia)
+  if (needsDetailsScrape) {
+    scrapedDetails = await scrapeGameDetails(game);
+  }
 
+  // If online details returned a lead image (e.g. Wikipedia) and we still had no cover:
+  const fallbackCover = scrapedCoverUrl || scrapedDetails?.coverUrl || null;
+  const finalCoverUrl = localCover || cached?.coverUrl || fallbackCover || null;
+
+  // Merge: Local sidecar & local cover ALWAYS take 100% precedence over online data
   const metadata = {
     id,
-    title: game.title,
+    title: sidecar.title || game.title,
     systemKey: game.systemKey,
-    coverUrl: finalCoverUrl, // NEVER assign systemIcon SVG as coverUrl!
-    hasCustomCover: !!finalCoverUrl,
-    description: details?.description || `Experience ${game.title} on ${game.systemName}.`,
-    releaseDate: details?.releaseDate || '2000-01-01',
-    releaseYear: details?.releaseYear || '2000',
-    developer: details?.developer || game.systemName || 'Classic',
-    publisher: details?.publisher || game.systemName || 'Classic',
-    genre: details?.genre || 'Retro Classic',
-    source: details?.source || 'Online Scraper',
+    coverUrl: finalCoverUrl,
+    hasCustomCover: Boolean(finalCoverUrl),
+    description: sidecar.description || scrapedDetails?.description || cached?.description || `Experience ${game.title} on ${game.systemName}.`,
+    releaseDate: (sidecar.releaseYear ? `${sidecar.releaseYear}-01-01` : null) || scrapedDetails?.releaseDate || cached?.releaseDate || '2000-01-01',
+    releaseYear: sidecar.releaseYear || scrapedDetails?.releaseYear || cached?.releaseYear || 'Classic',
+    developer: sidecar.developer || scrapedDetails?.developer || cached?.developer || game.systemName || 'Classic',
+    publisher: sidecar.publisher || scrapedDetails?.publisher || cached?.publisher || game.systemName || 'Classic',
+    genre: sidecar.genre || scrapedDetails?.genre || cached?.genre || 'Retro Classic',
+    walkthrough: sidecar.walkthrough || cached?.walkthrough || undefined,
+    writtenWalkthroughUrl: sidecar.walkthrough?.written || cached?.writtenWalkthroughUrl || undefined,
+    videoWalkthroughUrl: sidecar.walkthrough?.video || cached?.videoWalkthroughUrl || undefined,
+    source: hasLocalSidecarJson ? 'Local Sidecar (JSON)' : (scrapedDetails?.source || 'Online Scraper'),
+    hasSidecar: hasLocalSidecarJson,
     scrapedAt: new Date().toISOString()
   };
 
   await saveCachedMetadata(id, metadata);
-  addScraperLog(`✅ Saved metadata & art for "${game.title}" to database`, 'success', { gameId: id, title: game.title, systemKey: game.systemKey });
+
+  if (hasLocalSidecarJson && !hasLocalCoverFile && fallbackCover) {
+    addScraperLog(`✨ [HYBRID] Preserved local metadata.json & fetched missing box art online for "${game.title}"`, 'success', { gameId: id, title: game.title, systemKey: game.systemKey });
+  } else if (!hasLocalSidecarJson && hasLocalCoverFile) {
+    addScraperLog(`✨ [HYBRID] Preserved local cover image & fetched missing synopsis online for "${game.title}"`, 'success', { gameId: id, title: game.title, systemKey: game.systemKey });
+  } else if (hasLocalSidecarJson && !hasLocalCoverFile && !fallbackCover) {
+    addScraperLog(`📁 Preserved local metadata.json for "${game.title}". (No remote box art found online)`, 'info', { gameId: id, title: game.title, systemKey: game.systemKey });
+  } else {
+    addScraperLog(`✅ Saved metadata & box art for "${game.title}"`, 'success', { gameId: id, title: game.title, systemKey: game.systemKey });
+  }
+
   return metadata;
 }

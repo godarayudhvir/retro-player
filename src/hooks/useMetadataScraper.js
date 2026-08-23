@@ -156,8 +156,9 @@ export function useMetadataScraper(games = [], options = {}) {
       }
       const game = gameList[i];
       const id = game.id || `${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const isFullyLocal = Boolean((game.hasSidecar || game.sidecarMetadata) && (game.coverUrl && !game.coverUrl.endsWith('.svg')));
 
-      if (force || !metadataMap[id]) {
+      if (force || (!metadataMap[id] && !isFullyLocal)) {
         const meta = await scrapeGame(game, force);
         if (cancelRequestedRef.current) break;
         if (meta && isMountedRef.current) {
@@ -202,12 +203,12 @@ export function useMetadataScraper(games = [], options = {}) {
   }, [games, scrapeAll]);
 
   // Auto-scrape missing games in the background:
-  // Automatically runs when on Mobile UI or when enabled by user in settings (paused during active gameplay)
+  // Strictly respects user toggle (disabled by default, never runs without user opt-in, paused during active gameplay)
   useEffect(() => {
     if (isPlaying) return; // Never auto-scrape during active gameplay
-    const shouldAutoScrape = autoScrapeEnabled || isMobile;
+    const shouldAutoScrape = Boolean(autoScrapeEnabled);
     if (shouldAutoScrape && games && games.length > 0 && !activeScrapeQueueRef.current && !cancelRequestedRef.current) {
-      // Find games that have not been scraped yet and do NOT have local sidecars
+      // Find games that have not been scraped yet and do NOT have local sidecars or local covers
       const unscraped = games.filter(g => {
         const id = g.id || `${g.systemKey}-${g.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
         const hasLocalSidecar = g.hasSidecar || g.sidecarMetadata || (g.coverUrl && !g.coverUrl.endsWith('.svg'));
@@ -215,11 +216,10 @@ export function useMetadataScraper(games = [], options = {}) {
       });
 
       if (unscraped.length > 0) {
-        // Run background batch scrape only for titles needing online discovery
         scrapeAll(unscraped, false);
       }
     }
-  }, [autoScrapeEnabled, isMobile, isPlaying, games, metadataMap, scrapeAll]);
+  }, [autoScrapeEnabled, isPlaying, games, metadataMap, scrapeAll]);
 
   // Clear cache and reset
   const clearCache = useCallback(async () => {

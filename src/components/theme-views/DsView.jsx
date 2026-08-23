@@ -21,11 +21,15 @@ import {
   Smartphone,
   Globe,
   Check,
-  ArrowLeft
+  ArrowLeft,
+  Sparkles,
+  Image,
+  FileText
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { resolveAssetPath } from '../../utils/assetPath';
 import { getGameDescription, getReleaseDate } from '../../gameDescriptions';
+import { saveCachedMetadata } from '../../services/metadataScraper';
 import ConfirmModal from '../ConfirmModal';
 
 /**
@@ -35,7 +39,7 @@ import ConfirmModal from '../ConfirmModal';
  * - Left Side: 3-column beveled square buttons matrix with red focus box
  * - Center: Dual Screen Frame (Top: Snapshot Display; Bottom: Rich Synopsis & Play Button)
  * - Right Side: Integrated Direct Touch Action Stage (Favorite, Guides, Edit, Scrape, Save RAM, Specs)
- * - Zero Popup Dialogs: Strategy guides are fully integrated into the DS right touch panel!
+ * - Zero Popup Dialogs: Strategy guides, metadata editor, and live scraper are fully integrated into the DS right touch panel!
  */
 export default function DsView({
   filteredGames = [],
@@ -78,7 +82,7 @@ export default function DsView({
   const publisher = meta.publisher || selectedGame?.sidecarMetadata?.publisher || null;
   const genre = meta.genre || selectedGame?.sidecarMetadata?.genre || 'Retro Classic';
 
-  const [dsTab, setDsTab] = useState('overview'); // 'overview' | 'guides'
+  const [dsTab, setDsTab] = useState('overview'); // 'overview' | 'guides' | 'edit' | 'scrape'
   const [isLocalScraping, setIsLocalScraping] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [saveActionStatus, setSaveActionStatus] = useState('');
@@ -88,8 +92,23 @@ export default function DsView({
   const [qrDataUrl, setQrDataUrl] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
 
+  // Inline DS Metadata Editor Form State
+  const [editTitle, setEditTitle] = useState('');
+  const [editYear, setEditYear] = useState('');
+  const [editGenre, setEditGenre] = useState('');
+  const [editDeveloper, setEditDeveloper] = useState('');
+  const [editPublisher, setEditPublisher] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editWrittenGuide, setEditWrittenGuide] = useState('');
+  const [editVideoGuide, setEditVideoGuide] = useState('');
+  const [editCoverUrl, setEditCoverUrl] = useState('');
+  const [editSaveStatus, setEditSaveStatus] = useState('');
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+
   const fileInputRef = useRef(null);
+  const coverImageInputRef = useRef(null);
   const activeBtnRef = useRef(null);
+  const logsEndRef = useRef(null);
 
   // Walkthrough links from local sidecar metadata or metadataMap
   const walkthrough = selectedGame?.sidecarMetadata?.walkthrough || meta.walkthrough || {};
@@ -102,7 +121,22 @@ export default function DsView({
     setActiveQrType(null);
     setQrDataUrl('');
     setCopiedLink(false);
+    setEditSaveStatus('');
   }, [selectedGame?.id, selectedGame?.title]);
+
+  // Synchronize inline edit form values with currently selected game/meta
+  useEffect(() => {
+    if (!selectedGame) return;
+    setEditTitle(selectedMeta?.title || selectedGame?.title || '');
+    setEditYear(selectedMeta?.releaseYear || selectedGame?.sidecarMetadata?.releaseYear || (releaseYear !== 'Classic' ? releaseYear : ''));
+    setEditGenre(selectedMeta?.genre || selectedGame?.sidecarMetadata?.genre || (genre !== 'Retro Classic' ? genre : ''));
+    setEditDeveloper(selectedMeta?.developer || selectedGame?.sidecarMetadata?.developer || developer || '');
+    setEditPublisher(selectedMeta?.publisher || selectedGame?.sidecarMetadata?.publisher || publisher || '');
+    setEditDescription(selectedMeta?.description || selectedGame?.sidecarMetadata?.description || description || '');
+    setEditWrittenGuide(walkthrough.written || selectedMeta?.writtenWalkthroughUrl || '');
+    setEditVideoGuide(walkthrough.video || selectedMeta?.videoWalkthroughUrl || '');
+    setEditCoverUrl(selectedMeta?.coverUrl || (selectedGame?.coverUrl && !selectedGame?.coverUrl.endsWith('.svg') ? selectedGame.coverUrl : ''));
+  }, [selectedGame?.id, selectedGame?.title, selectedMeta, releaseYear, genre, developer, publisher, description]);
 
   useEffect(() => {
     if (activeBtnRef.current) {
@@ -111,12 +145,130 @@ export default function DsView({
   }, [focusedIndex]);
 
   const handleManualScrape = async () => {
-    if (onScrapeGame && selectedGame) {
-      setIsLocalScraping(true);
-      sfx?.playThemeSwitch?.();
-      await onScrapeGame(selectedGame, true);
-      setIsLocalScraping(false);
+    if (!selectedGame) return;
+    setIsLocalScraping(true);
+    sfx?.playThemeSwitch?.();
+    let result = null;
+    if (onScrapeGame) {
+      result = await onScrapeGame(selectedGame, true);
+    } else if (scraper?.scrapeSingleGame) {
+      result = await scraper.scrapeSingleGame(selectedGame, true);
     }
+    if (result) {
+      setEditTitle(result.title || selectedGame.title);
+      setEditYear(result.releaseYear || 'Classic');
+      setEditGenre(result.genre || 'Retro Classic');
+      setEditDeveloper(result.developer || 'Classic');
+      setEditPublisher(result.publisher || 'Classic');
+      setEditDescription(result.description || '');
+      if (result.coverUrl) {
+        setEditCoverUrl(result.coverUrl);
+      }
+    }
+    setIsLocalScraping(false);
+  };
+
+  const handleSaveEdit = async (e) => {
+    e?.preventDefault();
+    if (!selectedGame || isSavingEdit) return;
+    setIsSavingEdit(true);
+    try {
+      const id = selectedGame.id || `${selectedGame.systemKey}-${selectedGame.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const updatedData = {
+        id,
+        title: editTitle.trim() || selectedGame.title,
+        systemKey: selectedGame.systemKey,
+        releaseYear: editYear.trim() || 'Classic',
+        releaseDate: editYear.trim() ? `${editYear.trim()}-01-01` : '2000-01-01',
+        genre: editGenre.trim() || 'Retro Classic',
+        developer: editDeveloper.trim() || selectedGame.systemName || 'Classic',
+        publisher: editPublisher.trim() || selectedGame.systemName || 'Classic',
+        description: editDescription.trim() || `Experience ${selectedGame.title} on ${selectedGame.systemName}.`,
+        coverUrl: editCoverUrl.trim() || null,
+        hasCustomCover: Boolean(editCoverUrl.trim()),
+        walkthrough: {
+          written: editWrittenGuide.trim() || undefined,
+          video: editVideoGuide.trim() || undefined
+        },
+        writtenWalkthroughUrl: editWrittenGuide.trim() || undefined,
+        videoWalkthroughUrl: editVideoGuide.trim() || undefined,
+        isManualOverride: true,
+        source: 'Manual Edit',
+        scrapedAt: new Date().toISOString()
+      };
+
+      await saveCachedMetadata(id, updatedData);
+      scraper?.updateLocalMetadata?.(id, updatedData);
+      sfx?.playMenuConfirm?.();
+      setEditSaveStatus('Saved to Browser Storage!');
+      setTimeout(() => {
+        setEditSaveStatus('');
+        setDsTab('overview');
+      }, 1100);
+    } catch (err) {
+      console.error('Failed to save metadata:', err);
+      setEditSaveStatus('Save Failed');
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
+  const handleExportSidecar = () => {
+    if (!selectedGame) return;
+    const sidecarData = {
+      title: editTitle.trim() || selectedGame.title,
+      releaseYear: editYear.trim() || (releaseYear !== 'Classic' ? releaseYear : '2000'),
+      genre: editGenre.trim() || genre || 'Retro Classic',
+      developer: editDeveloper.trim() || developer || selectedGame.systemName || 'Classic',
+      publisher: editPublisher.trim() || publisher || selectedGame.systemName || 'Classic',
+      description: editDescription.trim() || description || `Experience ${selectedGame.title} on ${selectedGame.systemName}.`,
+      walkthrough: {
+        written: editWrittenGuide.trim() || undefined,
+        video: editVideoGuide.trim() || undefined
+      },
+      source: 'Retro Player Export'
+    };
+
+    const blob = new Blob([JSON.stringify(sidecarData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'metadata.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    sfx?.playNotification?.();
+  };
+
+  const handleCoverUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (file && selectedGame) {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const dataUrl = event.target?.result;
+        if (dataUrl) {
+          setEditCoverUrl(dataUrl);
+          const id = selectedGame.id || `${selectedGame.systemKey}-${selectedGame.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
+          const currentMeta = selectedMeta || {};
+          const updated = {
+            ...currentMeta,
+            id,
+            title: editTitle.trim() || currentMeta.title || selectedGame.title,
+            systemKey: selectedGame.systemKey,
+            coverUrl: dataUrl,
+            hasCustomCover: true,
+            isManualOverride: true,
+            scrapedAt: new Date().toISOString()
+          };
+          await saveCachedMetadata(id, updated);
+          scraper?.updateLocalMetadata?.(id, updated);
+          sfx?.playNotification?.();
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+    e.target.value = '';
   };
 
   const handleToggleQr = (type, url) => {
@@ -284,30 +436,18 @@ export default function DsView({
             </button>
           )}
 
+          {/* Unified Edit & Scrape Touch Button */}
           <button
             type="button"
-            className="ds-tool-btn"
+            className={`ds-tool-btn ${dsTab === 'manage' ? 'is-active' : ''}`}
             onClick={() => {
-              if (onEditMetadata && selectedGame) {
-                onEditMetadata(selectedGame, selectedMeta);
-                sfx?.playModalOpen?.();
-              }
+              setDsTab(dsTab === 'manage' ? 'overview' : 'manage');
+              sfx?.playTabSwitch?.();
             }}
-            title="Edit Game Metadata"
+            title="Edit Game Metadata & Scrape Online Studio"
           >
             <Pencil size={14} />
-            <span>Edit</span>
-          </button>
-
-          <button
-            type="button"
-            className={`ds-tool-btn ${isLocalScraping ? 'is-scraping' : ''}`}
-            onClick={handleManualScrape}
-            disabled={isLocalScraping}
-            title="Fetch Live Box Art & Metadata"
-          >
-            <RefreshCw size={14} className={isLocalScraping ? 'spin' : ''} />
-            <span>Scrape</span>
+            <span>Edit &amp; Scrape</span>
           </button>
         </div>
 
@@ -654,15 +794,287 @@ export default function DsView({
           </div>
         )}
 
-        {/* DS Touch Bottom-Right Watermark / Brand Badge */}
-        <div className="ds-bottom-right-brand">
-          <img src={resolveAssetPath('favicon.svg')} alt="Retro Player Logo" className="ds-brand-watermark-logo" />
-          <span className="ds-brand-watermark-text">
-            <span className="brand-retro">RETRO</span>
-            <span className="brand-player">PLAYER</span>
-          </span>
-        </div>
+        {/* Hidden permanent Cover Image Uploader input (always mounted) */}
+        <input
+          type="file"
+          ref={coverImageInputRef}
+          accept="image/png,image/jpeg,image/webp"
+          style={{ display: 'none' }}
+          onChange={handleCoverUpload}
+        />
 
+        {/* =========================================================================
+            VIEW 3: UNIFIED NINTENDO DS GAME CUSTOMIZER & SCRAPER STUDIO DECK
+            ========================================================================= */}
+        {dsTab === 'manage' && (() => {
+          const gameLogs = (scraper?.logs || []).filter(l => 
+            l.meta?.title === selectedGame?.title || 
+            l.meta?.gameId === selectedGame?.id || 
+            (selectedGame?.title && l.message?.toLowerCase().includes(selectedGame.title.toLowerCase()))
+          );
+
+          return (
+            <div className="ds-tab-pane ds-manage-pane animate-fade-in">
+              {/* Header Bar */}
+              <div className="ds-guides-header-bar">
+                <button
+                  type="button"
+                  className="ds-back-tab-btn"
+                  onClick={() => {
+                    setDsTab('overview');
+                    sfx?.playTileNav?.();
+                  }}
+                >
+                  <ArrowLeft size={13} />
+                  <span>Back to Info</span>
+                </button>
+                <span className="ds-guides-title-tag">EDIT &amp; SCRAPE STUDIO</span>
+              </div>
+
+              <form onSubmit={handleSaveEdit} className="ds-inline-form-card">
+                {/* Header Game Identity */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '0.35rem', borderBottom: '1px solid var(--panel-border)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                    <Sparkles size={15} color="#f59e0b" />
+                    <strong style={{ fontSize: '0.78rem', color: 'var(--text-main)' }}>{selectedGame?.title}</strong>
+                  </div>
+                  <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-sub)' }}>{selectedGame?.systemName}</span>
+                </div>
+
+                {/* Section 1: Cover Artwork Studio */}
+                <div className="ds-scrape-asset-card" style={{ padding: '0.45rem 0.55rem', background: 'rgba(100, 116, 139, 0.06)', borderRadius: '4px', border: '1px solid var(--panel-border)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <Image size={13} color="#3b82f6" />
+                      <span style={{ fontSize: '0.66rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-sub)' }}>Cover Artwork</span>
+                    </div>
+                    {coverSrc ? (
+                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                        <CheckCircle2 size={11} /> Box Art Available
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#f59e0b' }}>
+                        No Box Art on Remote DBs
+                      </span>
+                    )}
+                  </div>
+
+                  {coverSrc ? (
+                    <div style={{ display: 'flex', gap: '0.55rem', alignItems: 'center' }}>
+                      <img 
+                        src={coverSrc} 
+                        alt="Game Cover" 
+                        style={{ width: '42px', height: '42px', objectFit: 'cover', borderRadius: '4px', border: '1.5px solid var(--panel-border)' }} 
+                      />
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', flex: 1 }}>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                          {selectedMeta?.hasCustomCover ? 'Custom / Uploaded Cover' : (selectedGame?.hasSidecar ? 'Local Companion Sidecar' : 'Libretro CDN / ScreenScraper')}
+                        </span>
+                        <div style={{ display: 'flex', gap: '0.45rem' }}>
+                          <button
+                            type="button"
+                            className="ds-inline-btn-secondary"
+                            style={{ padding: '0.2rem 0.45rem', fontSize: '0.64rem' }}
+                            onClick={() => coverImageInputRef.current?.click()}
+                          >
+                            <Upload size={10} />
+                            <span>Replace Cover</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                      <p style={{ fontSize: '0.66rem', color: 'var(--text-sub)', margin: 0, lineHeight: 1.35 }}>
+                        Searched Libretro CDN, TheGamesDB &amp; Wikipedia (No official box art found on remote servers).
+                      </p>
+                      <button
+                        type="button"
+                        className="ds-inline-btn-secondary"
+                        style={{ width: 'fit-content', padding: '0.25rem 0.55rem', fontSize: '0.66rem' }}
+                        onClick={() => coverImageInputRef.current?.click()}
+                      >
+                        <Upload size={11} />
+                        <span>Upload Custom Cover</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Section 2: Online Scraper & Live Terminal Logs */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                      <FileText size={11} color="#64748b" />
+                      <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-sub)' }}>Online DB Search Logs</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="ds-inline-btn-secondary"
+                      style={{ padding: '0.2rem 0.5rem', fontSize: '0.65rem' }}
+                      onClick={handleManualScrape}
+                      disabled={isLocalScraping}
+                      title="Force live online re-scrape against Libretro CDN, ScreenScraper & Wikipedia"
+                    >
+                      <RefreshCw size={10} className={isLocalScraping ? 'spin' : ''} />
+                      <span>{isLocalScraping ? 'Searching DBs...' : 'Re-Fetch Online Data'}</span>
+                    </button>
+                  </div>
+
+                  <div className="ds-scraper-terminal-logs">
+                    {gameLogs.length > 0 ? (
+                      gameLogs.map((log, idx) => (
+                        <div key={log.id || idx} className={`ds-log-line log-${log.type}`}>
+                          <span className="log-time">{log.timestamp ? new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'LOG'}</span>
+                          <span className="log-msg">{log.message}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="ds-log-line log-info">
+                        <span className="log-msg">{isLocalScraping ? 'Starting network queries...' : 'Ready to search online databases. Click "Re-Fetch Online Data" to query.'}</span>
+                      </div>
+                    )}
+                    <div ref={logsEndRef} />
+                  </div>
+                </div>
+
+                {/* Section 3: Game Metadata Form Fields */}
+                <div className="ds-field-group">
+                  <label className="ds-field-label">Display Title</label>
+                  <input
+                    type="text"
+                    className="ds-field-input"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    placeholder="e.g. Super Mario Bros"
+                  />
+                </div>
+
+                <div className="ds-field-row-2">
+                  <div className="ds-field-group">
+                    <label className="ds-field-label">Release Year</label>
+                    <input
+                      type="text"
+                      className="ds-field-input"
+                      value={editYear}
+                      onChange={(e) => setEditYear(e.target.value)}
+                      placeholder="e.g. 1996"
+                    />
+                  </div>
+                  <div className="ds-field-group">
+                    <label className="ds-field-label">Genre</label>
+                    <input
+                      type="text"
+                      className="ds-field-input"
+                      value={editGenre}
+                      onChange={(e) => setEditGenre(e.target.value)}
+                      placeholder="e.g. Platformer"
+                    />
+                  </div>
+                </div>
+
+                <div className="ds-field-row-2">
+                  <div className="ds-field-group">
+                    <label className="ds-field-label">Developer</label>
+                    <input
+                      type="text"
+                      className="ds-field-input"
+                      value={editDeveloper}
+                      onChange={(e) => setEditDeveloper(e.target.value)}
+                      placeholder="e.g. Nintendo"
+                    />
+                  </div>
+                  <div className="ds-field-group">
+                    <label className="ds-field-label">Publisher</label>
+                    <input
+                      type="text"
+                      className="ds-field-input"
+                      value={editPublisher}
+                      onChange={(e) => setEditPublisher(e.target.value)}
+                      placeholder="e.g. Nintendo"
+                    />
+                  </div>
+                </div>
+
+                {/* Plot Synopsis / Overview */}
+                <div className="ds-field-group">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <label className="ds-field-label">Plot Synopsis / Overview</label>
+                    <span style={{ fontSize: '0.62rem', color: '#10b981', fontWeight: 700 }}>
+                      Source: {selectedMeta?.source || (selectedGame?.hasSidecar ? 'Local Sidecar' : 'Scraped Cache')}
+                    </span>
+                  </div>
+                  <textarea
+                    className="ds-field-textarea"
+                    rows={3}
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    placeholder="Enter game storyline, overview, or synopsis..."
+                  />
+                </div>
+
+                {/* Custom Cover URL */}
+                <div className="ds-field-group">
+                  <label className="ds-field-label">Cover Artwork Image URL</label>
+                  <input
+                    type="text"
+                    className="ds-field-input"
+                    value={editCoverUrl}
+                    onChange={(e) => setEditCoverUrl(e.target.value)}
+                    placeholder="https://..."
+                  />
+                </div>
+
+                {/* Strategy Guide URLs */}
+                <div className="ds-field-row-2">
+                  <div className="ds-field-group">
+                    <label className="ds-field-label">Written Guide URL</label>
+                    <input
+                      type="text"
+                      className="ds-field-input"
+                      value={editWrittenGuide}
+                      onChange={(e) => setEditWrittenGuide(e.target.value)}
+                      placeholder="https://strategywiki.org/..."
+                    />
+                  </div>
+                  <div className="ds-field-group">
+                    <label className="ds-field-label">Video Walkthrough URL</label>
+                    <input
+                      type="text"
+                      className="ds-field-input"
+                      value={editVideoGuide}
+                      onChange={(e) => setEditVideoGuide(e.target.value)}
+                      placeholder="https://youtube.com/watch?v=..."
+                    />
+                  </div>
+                </div>
+
+                {/* Section 4: Action Buttons */}
+                <div className="ds-inline-actions" style={{ borderTop: '1px solid var(--panel-border)', paddingTop: '0.45rem', marginTop: '0.3rem' }}>
+                  <button
+                    type="button"
+                    className="ds-inline-btn-secondary"
+                    onClick={handleExportSidecar}
+                    title="Export local metadata.json sidecar file"
+                  >
+                    <Download size={12} />
+                    <span>Export Sidecar (.json)</span>
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="ds-inline-btn-primary"
+                    disabled={isSavingEdit}
+                  >
+                    <Check size={13} />
+                    <span>{editSaveStatus || (isSavingEdit ? 'Saving...' : 'Save Changes')}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          );
+        })()}
       </div>
 
       <ConfirmModal

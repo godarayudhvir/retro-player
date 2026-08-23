@@ -91,7 +91,7 @@ export default function ProfileCreatorModal({
         <div className="profile-creator-footer">
           <button
             type="button"
-            className={`profile-btn-cancel ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'cancel' ? 'gamepad-focused' : ''}`}
+            className={`profile-btn-secondary profile-btn-cancel ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'cancel' ? 'gamepad-focused' : ''}`}
             onClick={onClose}
           >
             Cancel
@@ -99,7 +99,7 @@ export default function ProfileCreatorModal({
 
           <button
             type="button"
-            className={`profile-btn-save ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'save' ? 'gamepad-focused' : ''}`}
+            className={`profile-btn-primary profile-btn-save ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'save' ? 'gamepad-focused' : ''}`}
             style={{ backgroundColor: favoriteColor }}
             onClick={handleSubmit}
           >

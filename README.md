@@ -22,7 +22,7 @@
 <br />
 
 **A console-grade retro game launcher and library, delivered straight to any web browser.**  
-Featuring Nintendo DS dual-screen Touch architecture, Multiavatar Character Creation Studio with Archetype presets, real-time online metadata scraping, synthesized acoustic SFX, and **pure client-side WebAssembly execution**.
+Featuring Nintendo DS dual-screen Touch architecture, integrated zero-popup Strategy Guides & inline Metadata Editor/Scraper, Multiavatar Character Creation Studio with Archetype presets, real-time online metadata scraping, synthesized acoustic SFX, and **pure client-side WebAssembly execution**.
 
 <br />
 
@@ -78,7 +78,7 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 - 🎮 **100% Gamepad & Keyboard First**: Seamless spatial navigation across all shelves, search bars, modals, settings, and gameplay with on-screen virtual keyboard and gamepad battery telemetry.
 - ⚡ **Pure Client-Side WASM Emulation**: Hardware-accelerated emulation across 12 retro platforms powered by WebAssembly with ~0% host CPU overhead.
 - 📱 **Adaptive Cross-Device UI**: Tailored responsive layouts for Mobile Touch Feeds, Handhelds (Steam Deck/Switch), Desktop, and 10-Foot TV mode.
-- 🎨 **DS Touch Interface**: Nostalgic dual-screen styling, interactive action stage, official platform badges, and instant Light/Dark mode switching.
+- 🎨 **Nintendo DS Touch Experience**: Recreates authentic dual-screen hardware ergonomics with top-screen dynamic box art & spec sheets, and bottom touchscreen game selection grid with integrated inline **Edit & Scrape Studio** (cover asset manager, live Libretro/ScreenScraper/Wikipedia search terminal, sidecar export) and **Strategy Guides Deck** (written walkthroughs, video guides, and mobile QR pairing) with zero disruptive popup overlays.
 - 👤 **Multi-User Profiles**: Custom vector avatars via Multiavatar with profile-isolated game saves, favorites, and playtime tracking.
 - 💾 **Battery Saves & State Management**: Real-time auto-injection and management of `.sav`/`.srm` SRAM saves, quick snapshot states, and offline IndexedDB caching.
 - 🌐 **Automated Metadata & Cover Scraping**: Instant 3D box art from Libretro, Wikipedia synopses, and a built-in metadata editor.
