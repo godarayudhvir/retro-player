@@ -1,4 +1,4 @@
-# Cloud Save State Sync Architecture (`architecture/mirai/cloud-saves.md`)
+# Cloud Save State Sync Architecture (`mirai/cloud-saves.md`)
 
 ## 1. Description
 

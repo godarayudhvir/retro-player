@@ -24,8 +24,8 @@
 
 ## 🛠️ Specification Guidelines
 
-To add or update any specification in `architecture/mirai/`, adhere to the structure defined in [architecture/README.md](../README.md):
+To add or update any future feature specification in `mirai/`, structure every document with four core sections:
 1. **Description**: High-level problem statement and feature overview.
 2. **Detailed List of What It Will Do**: Comprehensive user-facing and system capabilities.
-3. **Detailed Logic Behind It**: Architecture diagram, data flows, APIs, and state handling.
+3. **Detailed Logic Behind It**: Architecture design, data flows, protocols, and state handling.
 4. **Detailed Guide of How to Set It Up**: Step-by-step developer integration instructions.

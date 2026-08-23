@@ -1,4 +1,4 @@
-# Settings & Library Management Hub (`architecture/mirai/settings-hub.md`)
+# Settings & Library Management Hub (`mirai/settings-hub.md`)
 
 ## 1. Description
 

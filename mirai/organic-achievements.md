@@ -1,4 +1,4 @@
-# Organic Achievements & Player Milestones Engine (`architecture/mirai/organic-achievements.md`)
+# Organic Achievements & Player Milestones Engine (`mirai/organic-achievements.md`)
 
 ## 1. Description
 

@@ -1,4 +1,4 @@
-# Bring-Your-Own-Storage (BYOS) Cloud Providers (`architecture/mirai/byos-cloud-storage.md`)
+# Bring-Your-Own-Storage (BYOS) Cloud Providers (`mirai/byos-cloud-storage.md`)
 
 ## 1. Description
 

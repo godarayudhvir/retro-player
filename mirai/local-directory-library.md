@@ -1,4 +1,4 @@
-# Local Directory Library & Client-Side Scraping (`architecture/mirai/local-directory-library.md`)
+# Local Directory Library & Client-Side Scraping (`mirai/local-directory-library.md`)
 
 ## 1. Description
 

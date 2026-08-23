@@ -1,4 +1,4 @@
-# Self-Hosted Docker Supabase Auth & Multi-User Admin (`architecture/mirai/self-hosted-user-management.md`)
+# Self-Hosted Docker Supabase Auth & Multi-User Admin (`mirai/self-hosted-user-management.md`)
 
 ## 1. Description
 

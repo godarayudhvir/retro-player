@@ -1,4 +1,4 @@
-# WebRTC Multiplayer & Peer-to-Peer Netplay Architecture (`architecture/mirai/multiplayer.md`)
+# WebRTC Multiplayer & Peer-to-Peer Netplay Architecture (`mirai/multiplayer.md`)
 
 ## 1. Description
 The WebRTC Multiplayer specification details the future architecture for real-time peer-to-peer online netplay and local multiplayer emulation in Retro Player.

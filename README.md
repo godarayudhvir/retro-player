@@ -75,25 +75,17 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 ## ✨ Key Highlights & Features
 
-- 🌟 **Modern Full-Screen Onboarding & Character Creation**: Streamlined 2-step outcome-first walkthrough for Desktop and Mobile with Multiavatar player passport setup.
-- 👤 **Multi-User Profiles & Multiavatar Studio**: Create personalized multicultural vector avatars via [Multiavatar](https://multiavatar.com/) with real-time morphing, dice randomize, curated presets, and signature accent colors; isolated game saves, playtime logs, favorites, and complete in-app player management.
-- 📱 **Dedicated Netflix-Style Mobile Streaming UI**: Custom mobile experience (<= 768px) with "Who's Playing?" profile selector, mobile topbar, smooth horizontal carousels, bottom sheet details drawer, 5-row virtual keyboard, and 100% controller spatial navigation.
-- 📱 **Progressive Web App (PWA) & Offline Standalone Installation**: Install Retro Player as a native desktop/handheld app across macOS, Windows, Linux, Steam Deck, Android, and iOS with landscape gaming display mode and Service Worker caching.
-- 📱 **Multi-Device Responsive Matrix & Zero-Overhead Viewport Engine**: Powered by native W3C `window.matchMedia` listeners with zero resize layout thrashing across Mobile Phones (<=640px), Tablets & Handhelds (Steam Deck, Nintendo Switch, iPad), Desktop PCs, and 10-Foot UI mode for Large 4K TVs. *(See [Hardware Compatibility Matrix](guides/compatibility.md))*.
-- 🎨 **Multi-Theme Console Studio & UI Display Mode Switcher**: Switch seamlessly between **Vanilla** (porcelain white / slate dark 3D cartridge shelf) and **DS Touch** (Nintendo DS dual-screen firmware with direct integrated action stage & graph paper styling) with persistent Light/Dark mode toggle, UI Display Mode selector (**Auto Responsive**, **Console / TV 10-Foot UI**, **Mobile Feed**), official platform vector badges, and full gamepad/keyboard navigation (`T` hotkey).
-- 🎵 **Background Music (BGM) Engine**: Auto-scanning and looping of BGM tracks with topbar controls, custom audio file manager, and **smart in-game auto-pause**.
-- ⚙️ **Nintendo Switch Style System Settings Hub**: Full-screen 2-column console management hub with dual bulk ROM batch uploader, recursive folder directory uploader (`webkitdirectory`), BGM manager, and storage diagnostics.
-- 💾 **In-Game Battery Save Manager (.sav / .srm / .mcr)**: Seamlessly import, export, and delete profile-isolated cartridge battery SRAM saves across GBA, DS, SNES, NES, N64, Genesis, PS1, and Game Boy with system awareness and custom in-app confirmation dialogs.
-- 🗄️ **Server-Backed Persistent Database & SRAM Injection**: Authoritative persistence in `/data/retroplayer_db.json` via REST API (`/api/db`) with auto-injection of saved battery RAM (`.sav`) into Emscripten VFS on game launch. Local **IndexedDB** (`RetroPlayerDB`) provides instant offline local caching.
-- 💬 **Universal In-App Modal Dialog System**: Zero native browser popups (`alert()`, `confirm()`, `prompt()`). All confirmations utilize clean, gamepad/keyboard navigable in-app modal dialogs.
-- 💾 **3D Physical Cartridge Engine**: Tactile cartridges with metallic sheens, grip textures, dynamic shadows, and title color heuristics.
-- 🌐 **Automated Online Metadata Scraper & In-App Editor**: Official 3D box art from **Libretro** & synopsis info from **Wikipedia** with intelligent demo-to-retail matching, 4-tier scope selection, Jellyfin-style local metadata editor (custom titles, year, genre, developer, publisher, cover upload, and manual written/video walkthrough links), adjacent re-scrape trigger button in detail drawers, and IndexedDB caching.
-- 📖 **Strategy Guides & Walkthroughs Hub + Phone Companion QR Code**: Quick-launch curated written strategy guides and video walkthroughs directly from game drawers with seamless options to open in a new tab or scan an on-screen QR code with your smartphone for dual-screen couch play.
-- 📹 **60 FPS Screen Video Recorder & Emulation Speed (1.0x–5.0x)**: Built-in native Web `MediaRecorder` 60 FPS gameplay capture with live `REC ● MM:SS` topbar HUD badge, instant auto-download, configurable emulation speed cycling (`1.0x`–`5.0x`), and live engine tuning toggles (VSync 60Hz lock, Multi-Threaded WASM, on-screen FPS display).
-- 🚀 **Hardware-Accelerated Web Emulation & Diagnostic HUD**: Low-latency dynamic audio sync and interactive **Diagnostic Performance HUD** (`D` hotkey).
-- 🔊 **Synthesized Pure Web Audio UI SFX**: Low-latency acoustic feedback synthesizer with zero external audio assets.
-- 🎮 **100% Gamepad & Keyboard Navigation**: Controller-first spatial navigation across desktop & mobile feeds, sequential single-step ROM library shelf navigation, 100% D-pad reachability across all Topbar controls (Profile, BGM, Scraper, SFX, Search, Install, Load ROM, Settings), full Game Detail & Profile modal navigation, dynamic emulator touch control auto-hiding on controller detection, on-screen virtual keyboard, live **Gamepad Battery % / Charging Telemetry Widget**, and **Low-Battery In-App Notification Alerts**. *(See [Controls & Keybindings Guide](guides/controls.md))*.
-- ⏱️ **Playtime Analytics & Smart Collections**: Session durations, total hours played, **Favorites ⭐**, and **Recently Played** queue.
+- 🎮 **100% Gamepad & Keyboard First**: Seamless spatial navigation across all shelves, search bars, modals, settings, and gameplay with on-screen virtual keyboard and gamepad battery telemetry.
+- ⚡ **Pure Client-Side WASM Emulation**: Hardware-accelerated emulation across 12 retro platforms powered by WebAssembly with ~0% host CPU overhead.
+- 📱 **Adaptive Cross-Device UI**: Tailored responsive layouts for Mobile Touch Feeds, Handhelds (Steam Deck/Switch), Desktop, and 10-Foot TV mode.
+- 🎨 **DS Touch Interface**: Nostalgic dual-screen styling, interactive action stage, official platform badges, and instant Light/Dark mode switching.
+- 👤 **Multi-User Profiles**: Custom vector avatars via Multiavatar with profile-isolated game saves, favorites, and playtime tracking.
+- 💾 **Battery Saves & State Management**: Real-time auto-injection and management of `.sav`/`.srm` SRAM saves, quick snapshot states, and offline IndexedDB caching.
+- 🌐 **Automated Metadata & Cover Scraping**: Instant 3D box art from Libretro, Wikipedia synopses, and a built-in metadata editor.
+- 🎵 **Dynamic BGM & Synthesized UI SFX**: Built-in background music engine with smart in-game pause, plus low-latency Web Audio API synthesized sound effects.
+- ⚙️ **Settings Hub & Library Management**: Console settings hub, batch ROM uploader, folder directory mounting, and storage diagnostics.
+- 📹 **60 FPS Video Recorder & Engine Controls**: In-browser gameplay screen recording, speed throttling (`1.0x`–`5.0x`), VSync toggle, and live diagnostic HUD (`D`).
+- 📱 **Installable PWA**: Progressive Web App with standalone full-screen execution and offline service worker caching.
 
 ---
 
@@ -160,25 +152,26 @@ Retro Player includes built-in AI agent skills and automated utility scripts und
 
 | Skill | Path | Description |
 | :--- | :--- | :--- |
+| **[Codebase Stats](.agents/skills/codebase-stats/SKILL.md)** | [`.agents/skills/codebase-stats/`](.agents/skills/codebase-stats/) | Analyzes and reports file extension counts, sizes, and summaries while filtering build/cache folders. |
 | **[Update ROMs](.agents/skills/update-roms/SKILL.md)** | [`.agents/skills/update-roms/`](.agents/skills/update-roms/) | Organizes ROM folders, handles version upgrades & custom screenshot replacements, converts covers to WebP, and generates/syncs `metadata.json` sidecars. |
 | **[ROM Cleanup](.agents/skills/rom-cleanup/SKILL.md)** | [`.agents/skills/rom-cleanup/`](.agents/skills/rom-cleanup/) | Deduplicates dated builds, prunes non-English regions, and filters obscure releases with structured keep/remove approval. |
 
 ---
 
-## 📚 Technical Architecture Specifications
+## 🔮 Future Roadmap (Mirai)
 
-Retro Player follows rigorous software engineering standards with full technical design specifications under [`architecture/`](architecture/README.md):
+Upcoming feature designs, technical blueprints, and step-by-step implementation guides are organized under [`mirai/`](mirai/README.md):
 
-- **[Core Entry & Bootstrap](architecture/core/index.md)**: Entry point, React mounting, Express production server & Docker containerization.
-- **[Application Shell Orchestrator](architecture/core/app.md)**: Hook lifecycle, state coordination, and modal management.
-- **[PWA & Offline Service Worker](architecture/modules/pwa-service-worker.md)**: Progressive Web App, PWABuilder compliance, standalone OS install & air-gapped caching.
-- **[Emulator Engine](architecture/modules/emulator.md)**: EmulatorJS iframe isolation, core fallback & battery SRAM detection.
-- **[Metadata Scraper](architecture/modules/metadata-scraper.md)**: Libretro & Wikipedia dynamic scraper with IndexedDB caching.
-- **[Synthesized Audio SFX](architecture/modules/audio-sfx.md)**: Pure Web Audio API acoustic synthesis.
-- **[Theme Engine](architecture/modules/theme-engine.md)**: Real-time CSS tokens and instant theme persistence.
-- **[Game Catalog Indexer](architecture/modules/game-catalog.md)**: Zero-config auto-scanning and persistent upload pipeline.
-- **[Live Demo Welcome Modal](architecture/components/demo-welcome-modal.md)**: Environment-aware GitHub Pages demo dialog and static showcase handler.
-- **[Mirai Master Vision & Roadmap](architecture/mirai/README.md)**: Deliverables checklist and multi-domain innovation roadmap.
+- **[Master Roadmap Index](mirai/README.md)**: Prioritized status index across all upcoming milestones.
+- **[3D Cartridge & Media Designs](mirai/cartridge-designs-spec.md)**: Master geometric specifications for authentic physical cartridge shells.
+- **[Local Directory Library Mount](mirai/local-directory-library.md)**: Direct filesystem folder mounting and client-side metadata scraping.
+- **[BYOS Cloud Storage](mirai/byos-cloud-storage.md)**: Bring-Your-Own-Storage streaming (Google Drive, AWS S3, Cloudflare R2).
+- **[Cross-Device Cloud Saves](mirai/cloud-saves.md)**: Cloud synchronization for quick saves and battery SRAM states.
+- **[Self-Hosted User Management](mirai/self-hosted-user-management.md)**: Multi-user auth, admin dashboard, and role permissions.
+- **[Organic Achievements & Trophies](mirai/organic-achievements.md)**: Universal gameplay milestones, trophies, and unlock toasts.
+- **[Walkthrough Links & QR Hub](mirai/walkthrough-links-hub.md)**: Curated guides and dual-screen companion QR code.
+- **[Settings Hub Redesign](mirai/settings-hub.md)**: Enhanced console library management and diagnostic tools.
+- **[WebRTC Netplay](mirai/multiplayer.md)**: Peer-to-peer online multiplayer with input rollback synchronization.
 
 ---
 

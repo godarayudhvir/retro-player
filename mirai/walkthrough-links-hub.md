@@ -1,4 +1,4 @@
-# Strategy Guides & Walkthroughs Hub (`architecture/mirai/walkthrough-links-hub.md`)
+# Strategy Guides & Walkthroughs Hub (`mirai/walkthrough-links-hub.md`)
 
 ## 1. Description
 
