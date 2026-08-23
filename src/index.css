@@ -13601,6 +13601,79 @@ button.status-pill:active {
 }
 
 /* ==========================================================================
+   DS TOUCH THEME: SCRAPER MODAL FIRMWARE OVERRIDES
+   ========================================================================== */
+
+[data-theme="ds"] .scraper-modal-container {
+  border-radius: 8px !important;
+  border: 3px solid var(--panel-border) !important;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.7),
+    0 12px 40px rgba(0, 0, 0, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  background: var(--panel-bg) !important;
+}
+
+[data-theme="ds"] .scraper-modal-header {
+  border-bottom: 2px solid var(--panel-border) !important;
+  background: var(--tile-bg) !important;
+}
+
+[data-theme="ds"] .scraper-icon-bubble {
+  border-radius: 4px !important;
+  border: 2px solid var(--panel-border);
+  background: rgba(225, 29, 72, 0.1) !important;
+}
+
+[data-theme="ds"] .scraper-scope-tabs {
+  background: var(--tile-bg) !important;
+  border-bottom: 2px solid var(--panel-border) !important;
+}
+
+[data-theme="ds"] .scraper-scope-tab {
+  border-radius: 4px !important;
+  border: 2px solid var(--panel-border) !important;
+  background: var(--tile-bg) !important;
+  color: var(--text-sub) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+  font-family: var(--font-iisu) !important;
+}
+
+[data-theme="ds"] .scraper-scope-tab:hover {
+  border-color: #e11d48 !important;
+  box-shadow: 0 0 8px rgba(225, 29, 72, 0.3) !important;
+  color: var(--text-main) !important;
+  transform: translateY(-1px);
+}
+
+[data-theme="ds"] .scraper-scope-tab.active {
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important;
+  color: #ffffff !important;
+  border-color: #e11d48 !important;
+  box-shadow: 0 0 12px rgba(225, 29, 72, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+}
+
+[data-theme="ds"] .scraper-modal-body {
+  background: var(--panel-bg) !important;
+}
+
+[data-theme="ds"] .scraper-scope-banner {
+  border-radius: 6px !important;
+  border: 2px solid var(--panel-border) !important;
+  background: var(--tile-bg) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+}
+
+[data-theme="ds"] .scraper-modal-footer {
+  border-top: 2px solid var(--panel-border) !important;
+  background: var(--tile-bg) !important;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .scraper-scope-tab.active {
+  background: linear-gradient(135deg, #e11d48 0%, #9f1239 100%) !important;
+}
+
+/* ==========================================================================
    VIEW LAYOUT: NINTENDO DS DUAL-SCREEN TOUCH FIRMWARE
    ========================================================================== */
 
