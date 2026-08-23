@@ -480,7 +480,7 @@ export default function MetadataEditModal({
             <div className="meta-edit-footer-right">
               <button
                 type="button"
-                className="meta-edit-cancel-btn"
+                className={`meta-edit-cancel-btn ${focusedTarget?.zone === 'metaEditModal' && focusedTarget?.id === 'cancel' ? 'gamepad-focused' : ''}`}
                 onClick={onClose}
               >
                 Cancel
@@ -488,7 +488,7 @@ export default function MetadataEditModal({
               <button
                 type="submit"
                 disabled={isSaving}
-                className="meta-edit-save-btn"
+                className={`meta-edit-save-btn ${focusedTarget?.zone === 'metaEditModal' && focusedTarget?.id === 'save' ? 'gamepad-focused' : ''}`}
               >
                 <Save size={16} />
                 <span>{isSaving ? 'Saving...' : 'Save Metadata'}</span>

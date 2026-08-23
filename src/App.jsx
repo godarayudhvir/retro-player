@@ -42,6 +42,14 @@ export default function App() {
   const [showScraperModal, setShowScraperModal] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [showVirtualKeyboard, setShowVirtualKeyboard] = useState(false);
+  const [oskConfig, setOskConfig] = useState({
+    title: 'SEARCH LIBRARY',
+    subtitle: null,
+    placeholder: 'Type game or system name...',
+    actionLabel: 'SEARCH',
+    target: 'search', // 'search', 'playerName', 'avatarSeed', 'scraperTitle'
+    initialValue: ''
+  });
   const [showProfileSelectModal, setShowProfileSelectModal] = useState(false);
   const [showProfileCreatorModal, setShowProfileCreatorModal] = useState(false);
   const [editingProfile, setEditingProfile] = useState(null);
@@ -169,6 +177,8 @@ export default function App() {
     setShowProfileCreatorModal,
     showVirtualKeyboard,
     setShowVirtualKeyboard,
+    oskConfig,
+    setOskConfig,
     oskPos,
     setOskPos,
     activeGame,
@@ -212,6 +222,8 @@ export default function App() {
       sfx.playGameLaunch();
       setActiveGame(game);
     },
+    showOnboarding,
+    setShowOnboarding,
     games
   });
 
@@ -436,11 +448,31 @@ export default function App() {
       {/* On-Screen Virtual Keyboard for Gamepad / Touch */}
       <OnScreenKeyboard
         isOpen={showVirtualKeyboard}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
+        title={oskConfig?.title || 'SEARCH LIBRARY'}
+        subtitle={oskConfig?.subtitle}
+        placeholder={oskConfig?.placeholder || 'Type text...'}
+        actionLabel={oskConfig?.actionLabel || 'DONE'}
+        icon={oskConfig?.icon}
+        searchQuery={
+          oskConfig?.target === 'search'
+            ? searchQuery
+            : (oskConfig?.currentValue !== undefined ? oskConfig.currentValue : '')
+        }
+        onSearchChange={(val) => {
+          if (oskConfig?.target === 'search') {
+            setSearchQuery(val);
+          } else {
+            setOskConfig(prev => ({ ...prev, currentValue: val }));
+            if (oskConfig?.onChange) oskConfig.onChange(val);
+          }
+        }}
         onClose={() => {
           setShowVirtualKeyboard(false);
-          setFocusedTarget({ zone: 'grid', index: 0 });
+          if (oskConfig?.onCloseTarget) {
+            setFocusedTarget(oskConfig.onCloseTarget);
+          } else if (oskConfig?.target === 'search') {
+            setFocusedTarget({ zone: 'grid', index: 0 });
+          }
           sfx.playModalClose();
         }}
         focusedPos={oskPos}
@@ -450,6 +482,7 @@ export default function App() {
         }}
         resultsCount={filteredGames.length}
         gamepadConnected={gamepadConnected}
+        isMobile={isMobile}
       />
 
       {/* User Profile Selector Modal */}
@@ -530,12 +563,15 @@ export default function App() {
         isOpen={showThemeModal}
         onClose={() => {
           setShowThemeModal(false);
+          setFocusedTarget({ zone: 'topbar', id: 'theme' });
           sfx.playModalClose();
         }}
         themeEngine={themeEngine}
         uiMode={uiMode}
         setUiMode={setUiMode}
         sfx={sfx}
+        focusedTarget={focusedTarget}
+        setFocusedTarget={setFocusedTarget}
       />
 
       {/* Active Game Emulator Sandbox */}
@@ -556,7 +592,10 @@ export default function App() {
       {showOnboarding && (
         <OnboardingScreen
           isOpen={showOnboarding}
-          onComplete={() => setShowOnboarding(false)}
+          onComplete={() => {
+            setShowOnboarding(false);
+            setFocusedTarget({ zone: 'grid', index: 0 });
+          }}
           activeProfile={activeProfile}
           onSaveCreatedProfile={(name, avatarSeed, favoriteColor) => {
             if (activeProfile?.id) {
@@ -567,6 +606,9 @@ export default function App() {
           }}
           sfx={sfx}
           pwa={pwa}
+          gamepadConnected={gamepadConnected}
+          focusedTarget={focusedTarget}
+          setFocusedTarget={setFocusedTarget}
         />
       )}
 

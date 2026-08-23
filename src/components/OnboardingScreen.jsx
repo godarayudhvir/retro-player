@@ -34,7 +34,10 @@ export default function OnboardingScreen({
   activeProfile,
   onSaveCreatedProfile,
   sfx,
-  pwa
+  pwa,
+  gamepadConnected = false,
+  focusedTarget,
+  setFocusedTarget
 }) {
   const [currentStep, setCurrentStep] = useState(0); // 0: Overview, 1: Exhaustive Character Creation
   const [copiedLink, setCopiedLink] = useState(false);
@@ -60,34 +63,25 @@ export default function OnboardingScreen({
     }
 
     if (!successful) {
+      const tempInput = document.createElement('textarea');
+      tempInput.value = currentUrl;
+      tempInput.style.position = 'fixed';
+      tempInput.style.opacity = '0';
+      document.body.appendChild(tempInput);
+      tempInput.focus();
+      tempInput.select();
       try {
-        const textArea = document.createElement('textarea');
-        textArea.value = currentUrl;
-        textArea.style.position = 'fixed';
-        textArea.style.top = '0';
-        textArea.style.left = '0';
-        textArea.style.width = '2em';
-        textArea.style.height = '2em';
-        textArea.style.padding = '0';
-        textArea.style.border = 'none';
-        textArea.style.outline = 'none';
-        textArea.style.boxShadow = 'none';
-        textArea.style.background = 'transparent';
-        textArea.setAttribute('readonly', '');
-        document.body.appendChild(textArea);
-        textArea.select();
-        textArea.setSelectionRange(0, currentUrl.length);
         successful = document.execCommand('copy');
-        document.body.removeChild(textArea);
       } catch (err) {
-        console.warn('Clipboard fallback copy error:', err);
+        successful = false;
       }
+      document.body.removeChild(tempInput);
     }
 
     if (successful) {
       setCopiedLink(true);
-      sfx?.playKeyTick?.();
-      setTimeout(() => setCopiedLink(false), 2800);
+      sfx?.playSaveDetected?.();
+      setTimeout(() => setCopiedLink(false), 3000);
     }
   };
 
@@ -121,6 +115,7 @@ export default function OnboardingScreen({
     }
 
     sfx?.playGameLaunch?.();
+    setFocusedTarget?.({ zone: 'grid', index: 0 });
     onComplete();
   };
 
@@ -137,10 +132,15 @@ export default function OnboardingScreen({
         </div>
 
         <button
-          className="onboarding-skip-btn"
+          className={`onboarding-skip-btn ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'skip' ? 'gamepad-focused' : ''}`}
           onClick={handleFinish}
-          title="Skip Onboarding & Explore Library"
+          title="Skip Onboarding & Explore Library (START Button)"
         >
+          {gamepadConnected && (
+            <span className="onboarding-btn-gamepad-badge">
+              <span className="gamepad-badge-key">START</span>
+            </span>
+          )}
           <span>Skip to Games</span>
           <ChevronRight size={16} />
         </button>
@@ -331,6 +331,9 @@ export default function OnboardingScreen({
               favoriteColor={favoriteColor}
               setFavoriteColor={setFavoriteColor}
               sfx={sfx}
+              focusedTarget={focusedTarget}
+              setFocusedTarget={setFocusedTarget}
+              focusZone="onboarding"
             />
           </div>
         )}
@@ -357,7 +360,7 @@ export default function OnboardingScreen({
         <div className="onboarding-footer-actions">
           {currentStep > 0 && (
             <button
-              className="onboarding-back-btn"
+              className={`onboarding-back-btn ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'back' ? 'gamepad-focused' : ''}`}
               onClick={handleBack}
               title="Previous Step"
             >
@@ -367,10 +370,15 @@ export default function OnboardingScreen({
           )}
 
           <button
-            className="onboarding-primary-btn"
+            className={`onboarding-primary-btn ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'next' ? 'gamepad-focused' : ''}`}
             onClick={handleNext}
-            title={currentStep === totalSteps - 1 ? 'Start Playing' : 'Continue to Character Studio'}
+            title={currentStep === totalSteps - 1 ? 'Start Playing (START Button)' : 'Continue to Character Studio'}
           >
+            {gamepadConnected && currentStep === totalSteps - 1 && (
+              <span className="onboarding-btn-gamepad-badge is-primary">
+                <span className="gamepad-badge-key">START</span>
+              </span>
+            )}
             <span>{currentStep === totalSteps - 1 ? 'Start Playing' : 'Continue to Studio'}</span>
             {currentStep === totalSteps - 1 ? <Play size={18} fill="#ffffff" /> : <ChevronRight size={18} />}
           </button>

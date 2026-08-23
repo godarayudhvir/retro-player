@@ -49,7 +49,7 @@ export default function CartridgeGrid({
           <div className="empty-action-group">
             <button
               type="button"
-              className="empty-primary-btn"
+              className={`empty-primary-btn ${focusedTarget?.zone === 'emptyGrid' && focusedTarget?.id === 'clearSearch' ? 'gamepad-focused' : ''}`}
               onClick={() => {
                 setSearchQuery('');
                 sfx?.playNavSelect?.();

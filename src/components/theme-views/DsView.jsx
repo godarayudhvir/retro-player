@@ -61,7 +61,11 @@ export default function DsView({
   scraper,
   sfx
 }) {
-  const focusedIndex = focusedTarget.zone === 'grid' ? (focusedTarget.index || 0) : 0;
+  const lastGridIndexRef = useRef(0);
+  if (focusedTarget?.zone === 'grid' && typeof focusedTarget.index === 'number') {
+    lastGridIndexRef.current = focusedTarget.index;
+  }
+  const focusedIndex = lastGridIndexRef.current >= 0 && lastGridIndexRef.current < filteredGames.length ? lastGridIndexRef.current : 0;
   const selectedGame = filteredGames[focusedIndex] || filteredGames[0];
   const selectedMeta = selectedGame ? (
     metadataMap[selectedGame.id] ||
@@ -386,7 +390,7 @@ export default function DsView({
           {/* Primary Big Nintendo Launch Button */}
           <button
             type="button"
-            className="ds-play-now-btn"
+            className={`ds-play-now-btn ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'play' ? 'gamepad-focused' : ''}`}
             onClick={() => {
               if (onPlayGame && selectedGame) {
                 onPlayGame(selectedGame);
@@ -407,7 +411,7 @@ export default function DsView({
         <div className="ds-action-toolbar">
           <button
             type="button"
-            className={`ds-tool-btn ${selectedFav ? 'is-favorited' : ''}`}
+            className={`ds-tool-btn ${selectedFav ? 'is-favorited' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'fav' ? 'gamepad-focused' : ''}`}
             onClick={() => {
               if (onToggleFavorite && selectedGame) {
                 const nextState = onToggleFavorite(selectedGame);
@@ -424,7 +428,7 @@ export default function DsView({
           {hasGuides && (
             <button
               type="button"
-              className={`ds-tool-btn ds-guide-btn ${dsTab === 'guides' ? 'is-active' : ''}`}
+              className={`ds-tool-btn ds-guide-btn ${dsTab === 'guides' ? 'is-active' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'guides' ? 'gamepad-focused' : ''}`}
               onClick={() => {
                 setDsTab(dsTab === 'guides' ? 'overview' : 'guides');
                 sfx?.playTabSwitch?.();
@@ -439,7 +443,7 @@ export default function DsView({
           {/* Unified Edit & Scrape Touch Button */}
           <button
             type="button"
-            className={`ds-tool-btn ${dsTab === 'manage' ? 'is-active' : ''}`}
+            className={`ds-tool-btn ${dsTab === 'manage' ? 'is-active' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'edit' ? 'gamepad-focused' : ''}`}
             onClick={() => {
               setDsTab(dsTab === 'manage' ? 'overview' : 'manage');
               sfx?.playTabSwitch?.();

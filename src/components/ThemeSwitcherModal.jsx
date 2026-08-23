@@ -12,7 +12,9 @@ export default function ThemeSwitcherModal({
   themeEngine,
   uiMode = 'auto',
   setUiMode,
-  sfx
+  sfx,
+  focusedTarget,
+  setFocusedTarget
 }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const modalRef = useRef(null);
@@ -173,7 +175,7 @@ export default function ThemeSwitcherModal({
 
             {/* Close Button */}
             <button 
-              className="theme-close-btn"
+              className={`theme-close-btn ${focusedTarget?.zone === 'themeModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`}
               onClick={() => {
                 sfx?.playModalClose?.();
                 onClose();
@@ -195,7 +197,7 @@ export default function ThemeSwitcherModal({
             return (
               <div
                 key={t.key}
-                className={`theme-preset-card ${isCurrent ? 'is-active-theme' : ''} ${isSelected ? 'is-keyboard-focus' : ''}`}
+                className={`theme-preset-card ${isCurrent ? 'is-active-theme' : ''} ${isSelected ? 'is-keyboard-focus' : ''} ${focusedTarget?.zone === 'themeModal' && focusedTarget?.id === `theme-${idx}` ? 'gamepad-focused' : ''}`}
                 onClick={() => {
                   setSelectedIndex(idx);
                   themeEngine?.setTheme?.(t.key);

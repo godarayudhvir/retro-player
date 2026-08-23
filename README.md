@@ -75,7 +75,7 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 ## ✨ Key Highlights & Features
 
-- 🎮 **100% Gamepad & Keyboard First**: Seamless spatial navigation across all shelves, search bars, modals, settings, and gameplay with on-screen virtual keyboard and gamepad battery telemetry.
+- 🎮 **Console-Grade Gamepad & Spatial Navigation**: 100% controller-driven library navigation (D-pad/analog sticks, A/B/X/Y, L1/R1 bumpers, Start/Select) with an adaptive 5-row On-Screen Virtual Keyboard for searching the library, naming player profiles, creating avatar seeds, and picking scraper titles without physical keyboards.
 - ⚡ **Pure Client-Side WASM Emulation**: Hardware-accelerated emulation across 12 retro platforms powered by WebAssembly with ~0% host CPU overhead.
 - 📱 **Adaptive Cross-Device UI**: Tailored responsive layouts for Mobile Touch Feeds, Handhelds (Steam Deck/Switch), Desktop, and 10-Foot TV mode.
 - 🎨 **Nintendo DS Touch Experience**: Recreates authentic dual-screen hardware ergonomics with top-screen dynamic box art & spec sheets, and bottom touchscreen game selection grid with integrated inline **Edit & Scrape Studio** (cover asset manager, live Libretro/ScreenScraper/Wikipedia search terminal, sidecar export) and **Strategy Guides Deck** (written walkthroughs, video guides, and mobile QR pairing) with zero disruptive popup overlays.

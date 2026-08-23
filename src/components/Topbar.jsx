@@ -203,7 +203,7 @@ export default function Topbar({
             }}
             title={scraper.isScraping 
               ? `Scraping art... (${scraper.scrapeProgress.current}/${scraper.scrapeProgress.total}) — Click to STOP` 
-              : "Choose Scraper Target Scope (System / Bunch / All / Single)"
+              : "Choose Scraper Target Scope (All Systems / Single System)"
             }
             aria-label={scraper.isScraping ? "Stop Metadata Scraper" : "Choose Scraper Target Scope"}
           >

@@ -9,22 +9,28 @@ export function useWebAudioSfx() {
     try {
       const saved = localStorage.getItem('retro_sfx_muted');
       if (saved !== null) return saved === 'true';
-      return true; // Off / muted by default
+      return false; // Enabled by default for rich retro console experience
     } catch {
-      return true;
+      return false;
     }
   });
 
   const audioCtxRef = useRef(null);
+  const masterGainRef = useRef(null);
 
-  // Initialize / resume AudioContext on user interaction
+  // Initialize / resume AudioContext with master gain bus
   const getAudioContext = useCallback(() => {
     if (typeof window === 'undefined') return null;
 
     if (!audioCtxRef.current) {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (AudioCtx) {
-        audioCtxRef.current = new AudioCtx();
+        const ctx = new AudioCtx();
+        const masterGain = ctx.createGain();
+        masterGain.gain.setValueAtTime(0.75, ctx.currentTime);
+        masterGain.connect(ctx.destination);
+        audioCtxRef.current = ctx;
+        masterGainRef.current = masterGain;
       }
     }
 
@@ -34,6 +40,29 @@ export function useWebAudioSfx() {
 
     return audioCtxRef.current;
   }, []);
+
+  // Proactively unlock Web Audio on any initial user gesture (click, keydown, gamepad)
+  useEffect(() => {
+    const unlockAudio = () => {
+      if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume().catch(() => {});
+      } else if (!audioCtxRef.current) {
+        getAudioContext();
+      }
+    };
+
+    window.addEventListener('click', unlockAudio, { passive: true });
+    window.addEventListener('keydown', unlockAudio, { passive: true });
+    window.addEventListener('touchstart', unlockAudio, { passive: true });
+    window.addEventListener('gamepadconnected', unlockAudio, { passive: true });
+
+    return () => {
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+      window.removeEventListener('touchstart', unlockAudio);
+      window.removeEventListener('gamepadconnected', unlockAudio);
+    };
+  }, [getAudioContext]);
 
   const toggleMute = useCallback(() => {
     setIsMuted(prev => {
@@ -45,8 +74,12 @@ export function useWebAudioSfx() {
     });
   }, []);
 
+  const getDestination = (ctx) => {
+    return masterGainRef.current || ctx.destination;
+  };
+
   /**
-   * Soft tactile tick for D-pad / tile cursor navigation.
+   * Crisp tactile tick for D-pad / tile cursor navigation.
    */
   const playTileNav = useCallback(() => {
     if (isMuted) return;
@@ -59,17 +92,17 @@ export function useWebAudioSfx() {
       const gain = ctx.createGain();
 
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(480, now);
-      osc.frequency.exponentialRampToValueAtTime(240, now + 0.04);
+      osc.frequency.setValueAtTime(560, now);
+      osc.frequency.exponentialRampToValueAtTime(280, now + 0.05);
 
-      gain.gain.setValueAtTime(0.08, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+      gain.gain.setValueAtTime(0.24, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
 
       osc.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(getDestination(ctx));
 
       osc.start(now);
-      osc.stop(now + 0.045);
+      osc.stop(now + 0.055);
     } catch (e) {
       console.debug('SFX error:', e);
     }
@@ -89,14 +122,14 @@ export function useWebAudioSfx() {
       const gain = ctx.createGain();
 
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(320, now);
-      osc.frequency.exponentialRampToValueAtTime(680, now + 0.07);
+      osc.frequency.setValueAtTime(360, now);
+      osc.frequency.exponentialRampToValueAtTime(820, now + 0.08);
 
-      gain.gain.setValueAtTime(0.12, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+      gain.gain.setValueAtTime(0.28, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
 
       osc.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(getDestination(ctx));
 
       osc.start(now);
       osc.stop(now + 0.075);
@@ -124,11 +157,11 @@ export function useWebAudioSfx() {
         osc.frequency.setValueAtTime(freq, time);
         osc.frequency.exponentialRampToValueAtTime(80, time + 0.025);
 
-        gain.gain.setValueAtTime(0.18, time);
+        gain.gain.setValueAtTime(0.35, time);
         gain.gain.exponentialRampToValueAtTime(0.001, time + 0.025);
 
         osc.connect(gain);
-        gain.connect(ctx.destination);
+        gain.connect(getDestination(ctx));
         osc.start(time);
         osc.stop(time + 0.03);
       };
@@ -152,11 +185,11 @@ export function useWebAudioSfx() {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, noteTime);
 
-        gain.gain.setValueAtTime(0.14, noteTime);
+        gain.gain.setValueAtTime(0.28, noteTime);
         gain.gain.exponentialRampToValueAtTime(0.001, noteTime + dur);
 
         osc.connect(gain);
-        gain.connect(ctx.destination);
+        gain.connect(getDestination(ctx));
 
         osc.start(noteTime);
         osc.stop(noteTime + dur + 0.01);
@@ -182,11 +215,11 @@ export function useWebAudioSfx() {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, now + (i * 0.025));
 
-        gain.gain.setValueAtTime(0.08, now + (i * 0.025));
+        gain.gain.setValueAtTime(0.2, now + (i * 0.025));
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
 
         osc.connect(gain);
-        gain.connect(ctx.destination);
+        gain.connect(getDestination(ctx));
 
         osc.start(now + (i * 0.025));
         osc.stop(now + 0.13);
@@ -213,11 +246,11 @@ export function useWebAudioSfx() {
       osc.frequency.setValueAtTime(440, now);
       osc.frequency.exponentialRampToValueAtTime(220, now + 0.07);
 
-      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.setValueAtTime(0.2, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
 
       osc.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(getDestination(ctx));
 
       osc.start(now);
       osc.stop(now + 0.075);
@@ -243,11 +276,11 @@ export function useWebAudioSfx() {
       osc.frequency.setValueAtTime(800, now);
       osc.frequency.exponentialRampToValueAtTime(600, now + 0.02);
 
-      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.setValueAtTime(0.18, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
 
       osc.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(getDestination(ctx));
 
       osc.start(now);
       osc.stop(now + 0.025);
@@ -273,11 +306,11 @@ export function useWebAudioSfx() {
         const start = now + (i * 0.06);
 
         osc.frequency.setValueAtTime(freq, start);
-        gain.gain.setValueAtTime(0.09, start);
+        gain.gain.setValueAtTime(0.22, start);
         gain.gain.exponentialRampToValueAtTime(0.001, start + 0.12);
 
         osc.connect(gain);
-        gain.connect(ctx.destination);
+        gain.connect(getDestination(ctx));
 
         osc.start(start);
         osc.stop(start + 0.13);
@@ -307,11 +340,11 @@ export function useWebAudioSfx() {
           const start = now + (i * 0.045);
 
           osc.frequency.setValueAtTime(freq, start);
-          gain.gain.setValueAtTime(0.12, start);
+          gain.gain.setValueAtTime(0.24, start);
           gain.gain.exponentialRampToValueAtTime(0.001, start + 0.14);
 
           osc.connect(gain);
-          gain.connect(ctx.destination);
+          gain.connect(getDestination(ctx));
 
           osc.start(start);
           osc.stop(start + 0.15);
@@ -324,11 +357,11 @@ export function useWebAudioSfx() {
         osc.frequency.setValueAtTime(520, now);
         osc.frequency.exponentialRampToValueAtTime(260, now + 0.08);
 
-        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.setValueAtTime(0.18, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
 
         osc.connect(gain);
-        gain.connect(ctx.destination);
+        gain.connect(getDestination(ctx));
 
         osc.start(now);
         osc.stop(now + 0.085);
@@ -355,11 +388,11 @@ export function useWebAudioSfx() {
       osc.frequency.setValueAtTime(280, now);
       osc.frequency.exponentialRampToValueAtTime(840, now + 0.09);
 
-      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.setValueAtTime(0.24, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
 
       osc.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(getDestination(ctx));
 
       osc.start(now);
       osc.stop(now + 0.095);
@@ -398,11 +431,11 @@ export function useWebAudioSfx() {
         osc.frequency.setValueAtTime(440, now + delay);
         osc.frequency.exponentialRampToValueAtTime(330, now + delay + 0.1);
 
-        gain.gain.setValueAtTime(0.09, now + delay);
+        gain.gain.setValueAtTime(0.22, now + delay);
         gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.1);
 
         osc.connect(gain);
-        gain.connect(ctx.destination);
+        gain.connect(getDestination(ctx));
 
         osc.start(now + delay);
         osc.stop(now + delay + 0.105);

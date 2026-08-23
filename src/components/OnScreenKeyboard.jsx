@@ -1,13 +1,23 @@
-import React from 'react';
-import { Search, Delete, Space, X, Check, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Delete, Space, Check, Trash2, ArrowBigUp, User, Sparkles } from 'lucide-react';
 
-export const KEYBOARD_ROWS = [
+export const KEYBOARD_ROWS_LOWER = [
+  ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '⌫'],
+  ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '-'],
+  ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', "'"],
+  ['SHIFT', 'z', 'x', 'c', 'v', 'b', 'n', 'm', '.'],
+  ['CLEAR', 'SPACE', 'DONE']
+];
+
+export const KEYBOARD_ROWS_UPPER = [
   ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '⌫'],
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '-'],
   ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', "'"],
-  ['Z', 'X', 'C', 'V', 'B', 'N', 'M', '.'],
+  ['SHIFT', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '.'],
   ['CLEAR', 'SPACE', 'DONE']
 ];
+
+export const KEYBOARD_ROWS = KEYBOARD_ROWS_UPPER;
 
 /**
  * Ergonomic 5-Row Glassmorphic Virtual On-Screen Keyboard.
@@ -15,29 +25,45 @@ export const KEYBOARD_ROWS = [
  */
 export default function OnScreenKeyboard({
   isOpen,
-  searchQuery,
+  searchQuery = '',
   onSearchChange,
   onClose,
   focusedPos = { row: 0, col: 0 },
   onKeyClick,
   resultsCount = 0,
-  gamepadConnected = false
+  gamepadConnected = false,
+  title = 'SEARCH LIBRARY',
+  subtitle = null,
+  placeholder = 'Type text...',
+  actionLabel = 'DONE',
+  icon: HeaderIcon,
+  isMobile = false
 }) {
-  if (!isOpen) return null;
+  const [isUppercase, setIsUppercase] = useState(false);
+
+  // Never show on screen keyboard on mobile devices, and only show if gamepad is connected
+  if (!isOpen || isMobile || !gamepadConnected) return null;
+
+  const ActiveIcon = HeaderIcon || (title.toLowerCase().includes('name') ? User : (title.toLowerCase().includes('seed') ? Sparkles : Search));
+  const currentRows = isUppercase ? KEYBOARD_ROWS_UPPER : KEYBOARD_ROWS_LOWER;
 
   const handleVirtualKey = (key) => {
     if (key === '⌫') {
-      onSearchChange(searchQuery.slice(0, -1));
+      onSearchChange((searchQuery || '').slice(0, -1));
     } else if (key === 'SPACE') {
-      onSearchChange(searchQuery + ' ');
+      onSearchChange((searchQuery || '') + ' ');
     } else if (key === 'CLEAR') {
       onSearchChange('');
+    } else if (key === 'SHIFT') {
+      setIsUppercase(prev => !prev);
     } else if (key === 'DONE') {
       onClose();
     } else {
-      onSearchChange(searchQuery + key);
+      onSearchChange((searchQuery || '') + key);
     }
   };
+
+  const displaySubtitle = subtitle !== null ? subtitle : (resultsCount === 1 ? '1 game found' : `${resultsCount} games found`);
 
   return (
     <div
@@ -51,50 +77,31 @@ export default function OnScreenKeyboard({
         <div className="osk-header">
           <div className="osk-title-group">
             <div className="osk-icon-badge">
-              <Search size={18} color="#3b82f6" />
+              <ActiveIcon size={18} color="#3b82f6" />
             </div>
             <div>
-              <h3 className="osk-title">SEARCH LIBRARY</h3>
-              <p className="osk-subtitle">
-                {resultsCount === 1 ? '1 game found' : `${resultsCount} games found`}
-              </p>
+              <h3 className="osk-title">{title}</h3>
+              {displaySubtitle ? <p className="osk-subtitle">{displaySubtitle}</p> : null}
             </div>
           </div>
-
-          <button
-            className="osk-close-btn"
-            onClick={onClose}
-            title="Close Search Keyboard (B / Esc)"
-          >
-            <X size={18} />
-          </button>
         </div>
 
-        {/* Live Search Query Display Bar */}
+        {/* Live Query Display Bar */}
         <div className="osk-query-bar">
-          <Search size={18} color="#3b82f6" className="osk-query-icon" />
+          <ActiveIcon size={18} color="#3b82f6" className="osk-query-icon" />
           <div className="osk-query-display">
             {searchQuery ? (
               <span className="osk-query-text">{searchQuery}</span>
             ) : (
-              <span className="osk-query-placeholder">Type game or system name...</span>
+              <span className="osk-query-placeholder">{placeholder}</span>
             )}
             <span className="osk-blinking-cursor"></span>
           </div>
-          {searchQuery && (
-            <button
-              className="osk-query-clear-btn"
-              onClick={() => onSearchChange('')}
-              title="Clear text"
-            >
-              <X size={14} />
-            </button>
-          )}
         </div>
 
         {/* Virtual Key Grid: 5 Rows */}
         <div className="osk-grid">
-          {KEYBOARD_ROWS.map((row, rIdx) => {
+          {currentRows.map((row, rIdx) => {
             const isBottomActionRow = rIdx === 4;
 
             return (
@@ -104,13 +111,14 @@ export default function OnScreenKeyboard({
               >
                 {row.map((key, cIdx) => {
                   const isFocused = focusedPos.row === rIdx && focusedPos.col === cIdx;
-                  const isSpecial = ['⌫', 'CLEAR', 'SPACE', 'DONE'].includes(key);
+                  const isSpecial = ['⌫', 'CLEAR', 'SPACE', 'DONE', 'SHIFT'].includes(key);
 
                   let specialClass = '';
                   if (key === 'SPACE') specialClass = 'osk-key-space';
                   else if (key === 'DONE') specialClass = 'osk-key-done';
                   else if (key === 'CLEAR') specialClass = 'osk-key-clear';
                   else if (key === '⌫') specialClass = 'osk-key-backspace';
+                  else if (key === 'SHIFT') specialClass = `osk-key-shift ${isUppercase ? 'is-active' : ''}`;
 
                   return (
                     <button
@@ -124,12 +132,14 @@ export default function OnScreenKeyboard({
                     >
                       {key === '⌫' ? (
                         <span className="osk-key-label"><Delete size={17} /></span>
+                      ) : key === 'SHIFT' ? (
+                        <span className="osk-key-label"><ArrowBigUp size={16} fill={isUppercase ? "currentColor" : "none"} /> {isUppercase ? 'CAPS' : 'caps'}</span>
                       ) : key === 'SPACE' ? (
                         <span className="osk-key-label"><Space size={17} /> SPACE</span>
                       ) : key === 'CLEAR' ? (
                         <span className="osk-key-label"><Trash2 size={15} /> CLEAR</span>
                       ) : key === 'DONE' ? (
-                        <span className="osk-key-label"><Check size={17} /> SEARCH</span>
+                        <span className="osk-key-label"><Check size={17} /> {actionLabel}</span>
                       ) : (
                         <span className="osk-key-label">{key}</span>
                       )}
