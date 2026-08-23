@@ -507,7 +507,6 @@ export default function MobileAppView({
           </div>
 
           <div className="mobile-profile-gate-body">
-            <div className="mobile-stage-badge">STAGE 1</div>
             <h1 className="mobile-profile-gate-title">Who&apos;s Playing?</h1>
             <p className="mobile-profile-gate-desc">
               Choose your profile to access your saves, favorite titles, and records.
@@ -612,7 +611,6 @@ export default function MobileAppView({
             <ArrowLeft size={16} />
             <span>{selectedSystem?.name || 'Consoles'}</span>
           </button>
-          <span className="mobile-stage-badge">STAGE 4</span>
         </header>
 
         {/* Game Detail Body */}
@@ -1336,8 +1334,6 @@ export default function MobileAppView({
             )}
             <span className="mobile-games-nav-title">{systemTitle}</span>
           </div>
-
-          <span className="mobile-stage-badge">STAGE 3</span>
         </header>
 
         {/* Game Content Grid */}
@@ -1690,7 +1686,6 @@ export default function MobileAppView({
         {/* Stage Header Banner */}
         <div className="mobile-systems-header">
           <div className="mobile-systems-header-left">
-            <span className="mobile-stage-badge">STAGE 2</span>
             <h2 className="mobile-systems-title">Choose System</h2>
           </div>
           <div className="mobile-total-games-badge">

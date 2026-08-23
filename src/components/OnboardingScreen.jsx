@@ -162,18 +162,14 @@ export default function OnboardingScreen({
             ========================================================= */}
         {currentStep === 0 && (
           <div className="onboarding-slide animate-slide-up">
-            <div className="onboarding-hero-badge">
-              <Gamepad2 size={16} />
-              <span>THE ZERO-OVERHEAD WEB EMULATION STATION</span>
+            <div className="onboarding-header-card">
+              <h1 className="onboarding-slide-title">
+                Play 12 Classic Consoles in Your Browser
+              </h1>
+              <p className="onboarding-slide-desc">
+                Console-grade retro gaming running locally in WebAssembly with low input latency, instant battery saves, and gamepad support.
+              </p>
             </div>
-
-            <h1 className="onboarding-slide-title">
-              Play 12 Classic Consoles in Your Browser
-            </h1>
-
-            <p className="onboarding-slide-desc">
-              Console-grade retro gaming running 100% locally in your browser sandbox with low input latency, instant battery saves, and USB/Bluetooth gamepad support.
-            </p>
 
             {/* 4 Feature Pillars Grid */}
             <div className="onboarding-pillars-grid">

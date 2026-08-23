@@ -36,6 +36,7 @@ export default function ScraperModal({
   games = [],
   scraper,
   sfx,
+  isMobile = false,
   gamepadConnected = false,
   focusedTarget,
   setFocusedTarget
@@ -172,6 +173,17 @@ export default function ScraperModal({
               </p>
             </div>
           </div>
+          {!isScraping && (
+            <button 
+              type="button" 
+              className="scraper-modal-close-btn"
+              onClick={handleClose}
+              title="Close Dialog"
+              aria-label="Close Dialog"
+            >
+              <X size={18} />
+            </button>
+          )}
         </header>
 
         {/* Scope Mode Selector Tabs (Visible when not actively scraping, no prompt, and no summary showing) */}
@@ -183,7 +195,7 @@ export default function ScraperModal({
               role="tab"
               aria-selected={activeTab === 'all'}
             >
-              {gamepadConnected && <span className="tab-bumper-key">L</span>}
+              {gamepadConnected && !isMobile && <span className="tab-bumper-key">L</span>}
               <Layers size={16} />
               <span>All Systems ({games.length})</span>
             </button>
@@ -194,7 +206,7 @@ export default function ScraperModal({
               role="tab"
               aria-selected={activeTab === 'single'}
             >
-              {gamepadConnected && <span className="tab-bumper-key">R</span>}
+              {gamepadConnected && !isMobile && <span className="tab-bumper-key">R</span>}
               <Disc size={16} />
               <span>Single System</span>
             </button>
@@ -489,7 +501,7 @@ export default function ScraperModal({
                   className={`settings-action-btn folder-btn ${focusedTarget?.zone === 'scraperModal' && focusedTarget?.id === 'scrape-again' ? 'gamepad-focused' : ''}`}
                   onClick={handleScrapeAgain}
                 >
-                  {gamepadConnected && <span className="osk-btn-badge badge-x">X</span>}
+                  {gamepadConnected && !isMobile && <span className="osk-btn-badge badge-x">X</span>}
                   <RotateCcw size={15} />
                   <span>Scrape Again</span>
                 </button>
@@ -497,7 +509,7 @@ export default function ScraperModal({
                   className={`settings-action-btn primary ${focusedTarget?.zone === 'scraperModal' && (focusedTarget?.id === 'done' || focusedTarget?.id === 'start') ? 'gamepad-focused' : ''}`}
                   onClick={handleClose}
                 >
-                  {gamepadConnected && <span className="osk-btn-badge badge-b">B</span>}
+                  {gamepadConnected && !isMobile && <span className="osk-btn-badge badge-b">B</span>}
                   <Check size={16} />
                   <span>Done</span>
                 </button>
@@ -526,7 +538,7 @@ export default function ScraperModal({
                     setFocusedTarget?.({ zone: 'scraperModal', id: 'start' });
                   }}
                 >
-                  {gamepadConnected && <span className="osk-btn-badge badge-b">B</span>}
+                  {gamepadConnected && !isMobile && <span className="osk-btn-badge badge-b">B</span>}
                   <ArrowLeft size={15} />
                   <span>Back</span>
                 </button>
@@ -534,7 +546,7 @@ export default function ScraperModal({
                   className={`settings-action-btn primary ${focusedTarget?.zone === 'scraperModal' && focusedTarget?.id === 'prompt-confirm' ? 'gamepad-focused' : ''}`}
                   onClick={handleConfirmScan}
                 >
-                  {gamepadConnected && <span className="osk-btn-badge badge-x">X</span>}
+                  {gamepadConnected && !isMobile && <span className="osk-btn-badge badge-x">X</span>}
                   <Play size={15} fill="currentColor" />
                   <span>Confirm & Start</span>
                 </button>
@@ -546,7 +558,7 @@ export default function ScraperModal({
                   className={`settings-action-btn folder-btn ${focusedTarget?.zone === 'scraperModal' && focusedTarget?.id === 'cancel' ? 'gamepad-focused' : ''}`} 
                   onClick={handleClose}
                 >
-                  {gamepadConnected && <span className="osk-btn-badge badge-b">B</span>}
+                  {gamepadConnected && !isMobile && <span className="osk-btn-badge badge-b">B</span>}
                   <span>Cancel</span>
                 </button>
                 <button
@@ -554,7 +566,7 @@ export default function ScraperModal({
                   disabled={targetCount === 0}
                   onClick={handleOpenPrompt}
                 >
-                  {gamepadConnected && <span className="osk-btn-badge badge-x">X</span>}
+                  {gamepadConnected && !isMobile && <span className="osk-btn-badge badge-x">X</span>}
                   <Sparkles size={16} />
                   <span>Start Scraping ({targetCount})</span>
                 </button>

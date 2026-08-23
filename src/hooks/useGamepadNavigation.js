@@ -171,6 +171,11 @@ export function useGamepadNavigation({
       searchQuery: curQuery
     } = stateRef.current;
 
+    // On mobile devices, gamepad input is reserved strictly for in-game play
+    if (curIsMobile && !curActiveGame) {
+      return;
+    }
+
     // 0. On-Screen Virtual Keyboard Navigation (5-Row Matrix - HIGHEST PRIORITY MODAL GUARD)
     if (isOskOpen) {
       const curConfig = stateRef.current.oskConfig || { target: 'search' };
@@ -2217,6 +2222,16 @@ export function useGamepadNavigation({
         const dpadDown = b[13]?.pressed || (gp.axes[1] > STICK_DEADZONE);
         const dpadLeft = b[14]?.pressed || (gp.axes[0] < -STICK_DEADZONE);
         const dpadRight = b[15]?.pressed || (gp.axes[0] > STICK_DEADZONE);
+
+        // On mobile devices, gamepad input is reserved strictly for in-game play
+        if (stateRef.current.isMobile && !stateRef.current.activeGame) {
+          prevButtonsRef.current = {
+            btnY, btnSelect, btnA, btnB, btnX, btnStart, shoulderL, shoulderR,
+            dpadUp, dpadDown, dpadLeft, dpadRight
+          };
+          animId = requestAnimationFrame(pollGamepad);
+          return;
+        }
 
         // Y button opens/toggles Search OSK when not in game and when OSK is not already open
         if (!stateRef.current.isMobile && !stateRef.current.activeGame && !stateRef.current.showInfoModal && !stateRef.current.showLoadRomModal && !stateRef.current.showVirtualKeyboard) {

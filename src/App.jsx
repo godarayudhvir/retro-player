@@ -618,6 +618,7 @@ export default function App() {
         games={games}
         scraper={scraper}
         sfx={sfx}
+        isMobile={isMobile}
         gamepadConnected={gamepadConnected}
         focusedTarget={focusedTarget}
         setFocusedTarget={setFocusedTarget}
