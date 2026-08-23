@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Save, RotateCcw, Upload, Image as ImageIcon, Sparkles, Tag, Calendar, User, Building, Film, Check, AlertCircle } from 'lucide-react';
+import { X, Save, RotateCcw, Upload, Image as ImageIcon, Sparkles, Tag, Calendar, User, Building, Film, Check, AlertCircle, BookOpen, Video } from 'lucide-react';
 import { resolveAssetPath } from '../utils/assetPath';
 import { saveManualMetadata, deleteManualMetadata } from '../services/metadataScraper';
 
@@ -21,12 +21,18 @@ export default function MetadataEditModal({
   if (!isOpen || !game) return null;
 
   const currentMeta = metadata || {};
-  const [title, setTitle] = useState(currentMeta.title || game.title || '');
-  const [description, setDescription] = useState(currentMeta.description || '');
-  const [releaseYear, setReleaseYear] = useState(currentMeta.releaseYear || (currentMeta.releaseDate ? currentMeta.releaseDate.split('-')[0] : '') || '');
-  const [developer, setDeveloper] = useState(currentMeta.developer || '');
-  const [publisher, setPublisher] = useState(currentMeta.publisher || '');
-  const [genre, setGenre] = useState(currentMeta.genre || '');
+  const [title, setTitle] = useState(currentMeta.title || game.sidecarMetadata?.title || game.title || '');
+  const [description, setDescription] = useState(currentMeta.description || game.sidecarMetadata?.description || '');
+  const [releaseYear, setReleaseYear] = useState(currentMeta.releaseYear || game.sidecarMetadata?.releaseYear || (currentMeta.releaseDate ? currentMeta.releaseDate.split('-')[0] : '') || '');
+  const [developer, setDeveloper] = useState(currentMeta.developer || game.sidecarMetadata?.developer || '');
+  const [publisher, setPublisher] = useState(currentMeta.publisher || game.sidecarMetadata?.publisher || '');
+  const [genre, setGenre] = useState(currentMeta.genre || game.sidecarMetadata?.genre || '');
+  const [writtenWalkthrough, setWrittenWalkthrough] = useState(
+    currentMeta.walkthrough?.written || currentMeta.writtenWalkthroughUrl || game.sidecarMetadata?.walkthrough?.written || ''
+  );
+  const [videoWalkthrough, setVideoWalkthrough] = useState(
+    currentMeta.walkthrough?.video || currentMeta.videoWalkthroughUrl || game.sidecarMetadata?.walkthrough?.video || ''
+  );
   const [coverUrl, setCoverUrl] = useState(currentMeta.coverUrl || game.coverUrl || '');
   const [previewError, setPreviewError] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -37,12 +43,18 @@ export default function MetadataEditModal({
 
   // Sync state when game changes
   useEffect(() => {
-    setTitle(currentMeta.title || game.title || '');
-    setDescription(currentMeta.description || '');
-    setReleaseYear(currentMeta.releaseYear || (currentMeta.releaseDate ? currentMeta.releaseDate.split('-')[0] : '') || '');
-    setDeveloper(currentMeta.developer || '');
-    setPublisher(currentMeta.publisher || '');
-    setGenre(currentMeta.genre || '');
+    setTitle(currentMeta.title || game.sidecarMetadata?.title || game.title || '');
+    setDescription(currentMeta.description || game.sidecarMetadata?.description || '');
+    setReleaseYear(currentMeta.releaseYear || game.sidecarMetadata?.releaseYear || (currentMeta.releaseDate ? currentMeta.releaseDate.split('-')[0] : '') || '');
+    setDeveloper(currentMeta.developer || game.sidecarMetadata?.developer || '');
+    setPublisher(currentMeta.publisher || game.sidecarMetadata?.publisher || '');
+    setGenre(currentMeta.genre || game.sidecarMetadata?.genre || '');
+    setWrittenWalkthrough(
+      currentMeta.walkthrough?.written || currentMeta.writtenWalkthroughUrl || game.sidecarMetadata?.walkthrough?.written || ''
+    );
+    setVideoWalkthrough(
+      currentMeta.walkthrough?.video || currentMeta.videoWalkthroughUrl || game.sidecarMetadata?.walkthrough?.video || ''
+    );
     setCoverUrl(currentMeta.coverUrl || game.coverUrl || '');
     setPreviewError(false);
     setSaveStatus(null);
@@ -101,6 +113,11 @@ export default function MetadataEditModal({
       let finalCoverUrl = coverUrl.trim() || null;
       let diskSaved = false;
 
+      const walkthroughObj = (writtenWalkthrough.trim() || videoWalkthrough.trim()) ? {
+        ...(writtenWalkthrough.trim() ? { written: writtenWalkthrough.trim() } : {}),
+        ...(videoWalkthrough.trim() ? { video: videoWalkthrough.trim() } : {})
+      } : undefined;
+
       // Try saving directly to disk backend via /api/metadata/save-sidecar
       try {
         const res = await fetch('/api/metadata/save-sidecar', {
@@ -116,6 +133,7 @@ export default function MetadataEditModal({
             developer: developer.trim() || game.systemName,
             publisher: publisher.trim() || game.systemName,
             genre: genre.trim() || 'Retro Classic',
+            walkthrough: walkthroughObj,
             coverDataUrl: coverUrl.startsWith('data:image/') ? coverUrl : null,
             coverUrl: !coverUrl.startsWith('data:image/') ? coverUrl : null
           })
@@ -145,7 +163,10 @@ export default function MetadataEditModal({
         coverUrl: finalCoverUrl,
         hasCustomCover: !!finalCoverUrl,
         systemKey: game.systemKey,
-        isSidecar: true
+        isSidecar: true,
+        walkthrough: walkthroughObj,
+        writtenWalkthroughUrl: writtenWalkthrough.trim() || null,
+        videoWalkthroughUrl: videoWalkthrough.trim() || null
       };
 
       const record = await saveManualMetadata(gameId, updatedData);
@@ -173,6 +194,11 @@ export default function MetadataEditModal({
   };
 
   const handleExportSidecar = () => {
+    const walkthroughObj = (writtenWalkthrough.trim() || videoWalkthrough.trim()) ? {
+      ...(writtenWalkthrough.trim() ? { written: writtenWalkthrough.trim() } : {}),
+      ...(videoWalkthrough.trim() ? { video: videoWalkthrough.trim() } : {})
+    } : undefined;
+
     const sidecarJson = {
       title: title.trim() || game.title,
       description: description.trim(),
@@ -181,8 +207,13 @@ export default function MetadataEditModal({
       year: releaseYear.trim(),
       genre: genre.trim() || 'Retro Classic',
       systemKey: game.systemKey,
+      walkthrough: walkthroughObj,
       updatedAt: new Date().toISOString()
     };
+
+    if (!sidecarJson.walkthrough) {
+      delete sidecarJson.walkthrough;
+    }
 
     const blob = new Blob([JSON.stringify(sidecarJson, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -390,6 +421,35 @@ export default function MetadataEditModal({
                   rows={4}
                   className="meta-edit-textarea"
                 />
+              </div>
+
+              {/* Grid 2-col: Walkthrough Links (Written & Video Guides) */}
+              <div className="meta-edit-row-2col">
+                <div className="meta-edit-field-group">
+                  <label className="meta-edit-label">
+                    <BookOpen size={14} /> Written Walkthrough URL
+                  </label>
+                  <input
+                    type="url"
+                    value={writtenWalkthrough}
+                    onChange={(e) => setWrittenWalkthrough(e.target.value)}
+                    placeholder="e.g. https://unboundwiki.com/walkthrough/"
+                    className="meta-edit-input"
+                  />
+                </div>
+
+                <div className="meta-edit-field-group">
+                  <label className="meta-edit-label">
+                    <Video size={14} /> Video Walkthrough URL
+                  </label>
+                  <input
+                    type="url"
+                    value={videoWalkthrough}
+                    onChange={(e) => setVideoWalkthrough(e.target.value)}
+                    placeholder="e.g. https://youtube.com/watch?v=..."
+                    className="meta-edit-input"
+                  />
+                </div>
               </div>
             </div>
           </div>

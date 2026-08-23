@@ -8,24 +8,21 @@ The `GameDetailModal` component (`.info-modal-backdrop` + `.game-card-modal-wrap
 
 ## 2. Detailed List of What It Does
 
-- **Rich Artwork & Details Presentation**: Displays game title, platform badge, release year, active EmulatorJS core, and summary description from `metadata.json` / `gameDescriptions.js`.
+- **Rich Artwork & Details Presentation**: Displays 3D game cartridge/cover showcase with physical sheen, platform badge, release year, active EmulatorJS core, and summary description from `metadata.json` / `gameDescriptions.js`.
+- **Integrated Strategy Guides & Walkthroughs Hub**:
+  - Seamlessly embedded Strategy & Walkthroughs tab directly in the modal (eliminating nested popup modals).
+  - Lists written strategy guides (e.g. `unboundwiki.com`) and video playthroughs (e.g. YouTube playlists) with 1-click browser tab launch and toggleable mobile companion QR code.
 - **Carousel Left/Right ROM Navigation**:
   - Floating circular left (`<ChevronLeft />`) and right (`<ChevronRight />`) navigation arrows allow players to browse between games in the active collection without closing and reopening the drawer.
-  - Interactive tooltips (`Previous ROM: Left Arrow / Q / A / L1` and `Next ROM: Right Arrow / E / D / R1`).
-  - Active position indicator pill in the header badge matrix displaying current ROM position (e.g. `4 / 27`).
-- **Full Keyboard & Gamepad Control**:
-  - **Keyboard**: Navigate between ROMs via **Left Arrow**, **Right Arrow**, **Q**, **E**, **A**, or **D**.
-  - **Gamepad**: Navigate between ROMs via **L1 / R1** shoulder bumpers, D-Pad Left/Right, or Left Stick.
-  - **Spatial Focus**: Seamless focus navigation across Left Arrow (`prevGame`), Right Arrow (`nextGame`), Close (`close`), `Play`, `Favorite` (`fav`), `Edit Metadata` (`editMeta`), and `Re-scrape Art` (`scrape`).
-- **Live Save Data Detection**:
-  - Displays green `SAVE DATA DETECTED` badge if existing battery SRAM or state saves are discovered in `localStorage` or `IndexedDB`.
-  - Displays neutral `NO SAVE DATA FOUND` badge for fresh game sessions.
+  - Keyboard hotkeys (`Left`/`Right` arrow, `Q`/`E`, `A`/`D`) and gamepad shoulder bumpers (`L1`/`R1`).
+- **Live Save Data Detection & SRAM Battery Memory Card Deck**:
+  - LED status indicator for persistent battery save detection.
+  - Direct actions to Import `.sav`, Export `.sav`, or Delete save data.
 - **Dynamic Action Button**: Adapts primary action label to either `CONTINUE / PLAY NOW` or `PLAY NOW`.
-- **Spacious & Balanced 2-Column Layout**: 820px max-width container with 260px box art showcase, glossy borders, and ample horizontal breathing room.
-- **Playtime & Session Stats Grid**: 3-column stats card showcasing total playtime duration (e.g. `1 hr 24 min`), launch session counts, and formatted last played dates.
-- **⭐ Favorite Action & Badge**: Direct **Favorite ⭐** icon-only toggle button with active star fill and tooltip indicators.
-- **Action Button Bar**: Balanced horizontal layout pairing the prominent **PLAY NOW** launcher button with circular icon-only buttons for **FAVORITE**, **EDIT METADATA** (Jellyfin style), and **RE-SCRAPE ART** immediately adjacent to each other.
-- **Mobile Responsive Breakpoints**: Gracefully shifts to a single column flow on screens `<= 640px` with a proportional 135px box art showcase, compact 3-metric analytics grid, side-by-side action bar, and vertical touch scrolling (`max-height: 88vh`) ensuring 100% visibility of all card elements on mobile devices.
+- **Bespoke 2-Column Console Chassis**: 890px max-width container with 270px 3D cartridge showcase, glossy borders, and ample horizontal breathing room.
+- **Playtime & Session Telemetry Deck**: 3-column stats card showcasing total playtime duration (with reset action), launch session counts, and formatted last played dates.
+- **Action Button Stage**: Balanced horizontal layout pairing the prominent **PLAY NOW** launcher button with **Guides** tab toggle, **FAVORITE ⭐**, **EDIT INFO ✏️**, and **RE-SCRAPE ART 🔄**.
+- **Mobile Responsive Breakpoints**: Gracefully shifts to a single column flow on screens `<= 640px` with proportional cartridge showcase, compact telemetry, and vertical scrolling ensuring 100% visibility on mobile devices.
 
 ---
 

@@ -1,13 +1,50 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Play, Save, Cpu, Calendar, CheckCircle2, Star, Clock, History, RotateCcw, RefreshCw, Tag, Terminal, ChevronDown, ChevronUp, Pencil, ChevronLeft, ChevronRight, Download, Upload, Trash2, BookOpen, Tv } from 'lucide-react';
+import { 
+  X, 
+  Play, 
+  Save, 
+  Cpu, 
+  Calendar, 
+  CheckCircle2, 
+  Star, 
+  Clock, 
+  History, 
+  RotateCcw, 
+  RefreshCw, 
+  Tag, 
+  Terminal, 
+  ChevronDown, 
+  ChevronUp, 
+  Pencil, 
+  ChevronLeft, 
+  ChevronRight, 
+  Download, 
+  Upload, 
+  Trash2, 
+  BookOpen, 
+  Tv, 
+  ExternalLink, 
+  Smartphone, 
+  Globe, 
+  Check, 
+  ArrowLeft,
+  Sparkles,
+  Layers,
+  HardDrive
+} from 'lucide-react';
+import QRCode from 'qrcode';
 import { getGameDescription, getReleaseDate } from '../gameDescriptions';
 import { resolveAssetPath } from '../utils/assetPath';
 import ConfirmModal from './ConfirmModal';
-import GuideModal from './GuideModal';
 
 /**
- * Game Detail Drawer Modal presenting rich scraped metadata, release dates, developer, publisher, genre tags,
- * live save data status, in-game battery save (.sav) manager, playtime stats, carousel navigation, and on-demand scraping.
+ * Completely Redesigned Console-Grade Game Detail Modal (Vanilla Theme)
+ * Features:
+ * - Deluxe 3D Cartridge / Box Art showcase with physical depth and dynamic system color accents
+ * - Fully integrated inline Strategy Guides & Walkthroughs Hub (no nested popup modals)
+ * - Built-in Phone Companion QR generator with 1-click link copying
+ * - Telemetry & In-Game SRAM Battery Save Memory Card suite
+ * - 100% spatial gamepad and keyboard navigation (Left/Right, Q/E, A/D, Escape)
  */
 export default function GameDetailModal({
   game,
@@ -37,27 +74,42 @@ export default function GameDetailModal({
   onPlay,
   sfx
 }) {
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'guides' | 'logs'
   const [imgError, setImgError] = useState(false);
   const [isLocalScraping, setIsLocalScraping] = useState(false);
-  const [showLogs, setShowLogs] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [saveActionStatus, setSaveActionStatus] = useState('');
-  const [activeGuide, setActiveGuide] = useState(null); // { type: 'written' | 'video', url: string }
+  
+  // Inline QR Code State for Strategy Guides
+  const [activeQrType, setActiveQrType] = useState(null); // 'written' | 'video' | null
+  const [qrDataUrl, setQrDataUrl] = useState('');
+  const [copiedLink, setCopiedLink] = useState(false);
+
   const fileInputRef = useRef(null);
   const logsContainerRef = useRef(null);
 
-  // Reset img error and local state when game changes
+  // Reset state on game change
   useEffect(() => {
+    setActiveTab('overview');
     setImgError(false);
     setIsLocalScraping(false);
-    setActiveGuide(null);
+    setActiveQrType(null);
+    setQrDataUrl('');
+    setCopiedLink(false);
   }, [game?.id, game?.title, game?.coverUrl]);
 
-  // Keyboard Arrow Left/Right / Q/E/A/D navigation
+  // Keyboard navigation for carousel and tab switching
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+      
       if (e.key === 'ArrowLeft' || e.key === 'q' || e.key === 'Q' || e.key === 'a' || e.key === 'A') {
+        if (activeTab === 'guides' && activeQrType) {
+          e.preventDefault();
+          setActiveQrType(null);
+          sfx?.playTileNav?.();
+          return;
+        }
         if (hasPrev && onPrevGame) {
           e.preventDefault();
           onPrevGame();
@@ -67,19 +119,24 @@ export default function GameDetailModal({
           e.preventDefault();
           onNextGame();
         }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        if (activeQrType) {
+          setActiveQrType(null);
+          sfx?.playTileNav?.();
+        } else if (activeTab !== 'overview') {
+          setActiveTab('overview');
+          sfx?.playTileNav?.();
+        } else {
+          onClose?.();
+          sfx?.playModalClose?.();
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [hasPrev, hasNext, onPrevGame, onNextGame]);
-
-  // Automatically scroll to logs when opened or when re-scraping
-  useEffect(() => {
-    if (showLogs && logsContainerRef.current) {
-      logsContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-  }, [showLogs]);
+  }, [hasPrev, hasNext, onPrevGame, onNextGame, activeTab, activeQrType, onClose, sfx]);
 
   if (!game) return null;
 
@@ -92,14 +149,52 @@ export default function GameDetailModal({
   const publisher = meta.publisher || game.sidecarMetadata?.publisher || game.systemName || 'Classic';
   const genre = meta.genre || game.sidecarMetadata?.genre || 'Retro Classic';
 
-  // Walkthrough links from local sidecar metadata or scraped metadata
+  // Walkthrough links
   const walkthrough = game.sidecarMetadata?.walkthrough || meta.walkthrough || {};
   const writtenGuideUrl = walkthrough.written || meta.writtenWalkthroughUrl || null;
   const videoGuideUrl = walkthrough.video || meta.videoWalkthroughUrl || null;
+  const hasGuides = Boolean(writtenGuideUrl || videoGuideUrl);
+  const guidesCount = (writtenGuideUrl ? 1 : 0) + (videoGuideUrl ? 1 : 0);
+
+  // Generate QR Code on demand
+  const handleToggleQr = (type, url) => {
+    if (activeQrType === type) {
+      setActiveQrType(null);
+      setQrDataUrl('');
+    } else {
+      setActiveQrType(type);
+      setCopiedLink(false);
+      sfx?.playTileNav?.();
+      QRCode.toDataURL(url, {
+        width: 320,
+        margin: 2,
+        color: { dark: '#0f172a', light: '#ffffff' }
+      })
+        .then((data) => setQrDataUrl(data))
+        .catch((err) => console.error('QR Generation Failed', err));
+    }
+  };
+
+  const handleCopyLink = (url) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url);
+      setCopiedLink(true);
+      sfx?.playNotification?.();
+      setTimeout(() => setCopiedLink(false), 2200);
+    }
+  };
+
+  const getDomain = (url) => {
+    try {
+      return new URL(url).hostname.replace('www.', '');
+    } catch (_) {
+      return 'web guide';
+    }
+  };
 
   const handleManualScrape = async () => {
     if (onScrapeGame) {
-      setShowLogs(true);
+      setActiveTab('logs');
       setIsLocalScraping(true);
       sfx?.playThemeSwitch?.();
       await onScrapeGame(game, true);
@@ -108,433 +203,591 @@ export default function GameDetailModal({
     }
   };
 
+  const systemColor = game.systemColor || '#ef4444';
+
   return (
-    <div className="info-modal-backdrop game-card-backdrop" onClick={onClose}>
-      <div className="game-card-modal-wrapper" onClick={(e) => e.stopPropagation()}>
-        {/* Left Floating ROM Nav Arrow */}
+    <div className="vanilla-detail-backdrop animate-fade-in" onClick={onClose}>
+      <div 
+        className="vanilla-detail-dialog animate-scale-in" 
+        onClick={(e) => e.stopPropagation()}
+        style={{ '--system-theme-color': systemColor }}
+      >
+        {/* Left ROM Carousel Arrow */}
         {hasPrev && (
           <button
-            className={`game-card-nav-arrow nav-arrow-left ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'prevGame' ? 'gamepad-focused' : ''}`}
+            className={`vanilla-carousel-arrow arrow-left ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'prevGame' ? 'gamepad-focused' : ''}`}
             onClick={(e) => {
               e.stopPropagation();
               sfx?.playTileNav?.();
               onPrevGame?.();
             }}
-            title="Previous ROM"
+            title="Previous ROM (Left Arrow / Q)"
             aria-label="Previous ROM"
           >
-            <ChevronLeft size={28} />
+            <ChevronLeft size={24} />
           </button>
         )}
 
-        <div className="game-card-modal-content">
+        {/* Right ROM Carousel Arrow */}
+        {hasNext && (
           <button
-            className={`game-card-close ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`}
-            onClick={onClose}
-            title="Close"
+            className={`vanilla-carousel-arrow arrow-right ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'nextGame' ? 'gamepad-focused' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              sfx?.playTileNav?.();
+              onNextGame?.();
+            }}
+            title="Next ROM (Right Arrow / E)"
+            aria-label="Next ROM"
           >
-            <X size={20} />
+            <ChevronRight size={24} />
           </button>
+        )}
 
-          <div className="game-card-grid">
-            <div className="game-card-cover-wrapper">
+        {/* Modal Close Button */}
+        <button
+          className="vanilla-detail-close-btn"
+          onClick={onClose}
+          title="Close (Esc)"
+          aria-label="Close"
+        >
+          <X size={18} />
+        </button>
+
+        {/* Main 2-Column Console Layout */}
+        <div className="vanilla-detail-chassis">
+          
+          {/* =========================================================================
+              LEFT PILLAR: 3D Physical Cartridge / Artwork Showcase
+              ========================================================================= */}
+          <div className="vanilla-detail-art-col">
+            <div className="vanilla-cartridge-frame">
               {coverSrc && !imgError ? (
                 <img
                   src={coverSrc}
                   alt={game.title}
-                  className="game-card-cover-img"
+                  className="vanilla-cartridge-cover-img"
                   onError={() => setImgError(true)}
                 />
               ) : (
-                <div className="tile-fallback" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', padding: '1.5rem', textAlign: 'center', background: 'var(--panel-bg, #f8fafc)' }}>
-                  <span className="fallback-console-pill" style={{ marginBottom: '0.75rem', fontSize: '0.8rem' }}>{game.systemName}</span>
-                  <span className="fallback-game-title" style={{ fontSize: '1rem', color: 'var(--text-main, #1e293b)' }}>{game.title}</span>
+                <div className="vanilla-cartridge-fallback">
+                  {game.systemIcon && (
+                    <img src={resolveAssetPath(game.systemIcon)} alt="" className="vanilla-fallback-icon" />
+                  )}
+                  <span className="vanilla-fallback-sys">{game.systemName}</span>
+                  <span className="vanilla-fallback-name">{game.title}</span>
                 </div>
               )}
 
+              {/* Physical Cartridge Gloss Sheen Overlay */}
+              <div className="vanilla-cartridge-sheen" />
+
+              {/* Favorite Ribbon */}
               {isFavorite && (
-                <div className="drawer-favorite-badge" title="Favorited Game">
-                  <Star size={16} fill="#fbbf24" color="#d97706" />
+                <div className="vanilla-favorite-ribbon" title="Favorited Game">
+                  <Star size={13} fill="#fbbf24" color="#d97706" />
                   <span>FAVORITE</span>
                 </div>
               )}
             </div>
 
-            <div className="game-card-details">
-              <div className="game-card-header-badge">
-                <span className="game-card-sys-tag" style={{ '--sys-color': game.systemColor || '#ef4444' }}>
-                  {game.systemIcon && (
-                    <img src={resolveAssetPath(game.systemIcon)} alt="" className="tile-sys-badge-icon" />
-                  )}
-                  <span>{game.systemName}</span>
-                </span>
-                <span className="game-card-core-tag">
-                  <Calendar size={14} /> {releaseYear}
-                </span>
-                <span className="game-card-core-tag">
-                  <Cpu size={14} /> {game.systemCore?.toUpperCase() || 'EMULATORJS'}
-                </span>
-              </div>
-
-            <h2 className="game-card-title">{game.title}</h2>
-
-            {/* Extra Metadata Row */}
-            <div className="game-card-meta-row">
-              <span className="meta-pill">
-                <Tag size={12} /> {genre}
+            {/* Quick System Tag Below Box Art */}
+            <div className="vanilla-art-meta-tag">
+              <span className="vanilla-sys-badge" style={{ backgroundColor: systemColor }}>
+                {game.systemName}
               </span>
-              {developer && (
-                <span className="meta-pill">
-                  <strong>Dev:</strong> {developer}
-                </span>
-              )}
+              <span className="vanilla-format-badge">
+                {game.filename ? game.filename.split('.').pop()?.toUpperCase() : 'ROM'}
+              </span>
+            </div>
+          </div>
+
+          {/* =========================================================================
+              RIGHT PILLAR: Console Hub & Interactive Content Deck
+              ========================================================================= */}
+          <div className="vanilla-detail-info-col">
+            
+            {/* Header Metadata Chips */}
+            <div className="vanilla-header-chips">
+              <span className="vanilla-chip year-chip">
+                <Calendar size={13} /> {releaseYear}
+              </span>
+              <span className="vanilla-chip genre-chip">
+                <Tag size={13} /> {genre}
+              </span>
+              <span className="vanilla-chip core-chip">
+                <Cpu size={13} /> {game.systemCore?.toUpperCase() || 'EMULATORJS'}
+              </span>
+            </div>
+
+            {/* Big Bold Game Title */}
+            <h1 className="vanilla-game-title">{game.title}</h1>
+
+            {/* Developer & Publisher Line */}
+            <div className="vanilla-credits-line">
+              <span className="credit-item"><strong>Developer:</strong> {developer}</span>
               {publisher && publisher !== developer && (
-                <span className="meta-pill">
-                  <strong>Pub:</strong> {publisher}
-                </span>
+                <span className="credit-item"><strong>Publisher:</strong> {publisher}</span>
               )}
             </div>
 
-            <p className="game-card-description">{description}</p>
+            {/* Navigation Tabs Header (Overview | Strategy Guides | Scraper Logs) */}
+            <div className="vanilla-tabs-nav">
+              <button
+                type="button"
+                className={`vanilla-tab-btn ${activeTab === 'overview' ? 'is-active' : ''}`}
+                onClick={() => {
+                  setActiveTab('overview');
+                  sfx?.playTabSwitch?.();
+                }}
+              >
+                <span>Overview</span>
+              </button>
 
-            {/* Playtime & Session Analytics Card */}
-            <div className="game-card-stats-grid">
-              <div className="stat-card">
-                <Clock size={15} color="#3b82f6" />
-                <div className="stat-info">
-                  <div className="stat-label-row">
-                    <span className="stat-label">PLAYTIME</span>
-                    {onResetStats && (gameStats.totalSeconds > 0 || gameStats.launchCount > 0) && (
-                      <button
-                        className="stat-reset-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onResetStats(game.id || game.title);
-                        }}
-                        title="Reset Playtime Stats"
-                      >
-                        <RotateCcw size={10} /> Reset
-                      </button>
-                    )}
-                  </div>
-                  <span className="stat-value">{gameStats.playtimeFormatted}</span>
-                </div>
-              </div>
-              <div className="stat-card">
-                <History size={15} color="#10b981" />
-                <div className="stat-info">
-                  <span className="stat-label">SESSIONS</span>
-                  <span className="stat-value">{gameStats.launchCount}</span>
-                </div>
-              </div>
-              <div className="stat-card">
-                <Calendar size={15} color="#f59e0b" />
-                <div className="stat-info">
-                  <span className="stat-label">LAST PLAYED</span>
-                  <span className="stat-value">{gameStats.lastPlayedFormatted}</span>
-                </div>
-              </div>
+              {hasGuides && (
+                <button
+                  type="button"
+                  className={`vanilla-tab-btn ${activeTab === 'guides' ? 'is-active' : ''}`}
+                  onClick={() => {
+                    setActiveTab('guides');
+                    sfx?.playTabSwitch?.();
+                  }}
+                >
+                  <BookOpen size={14} />
+                  <span>Strategy &amp; Guides</span>
+                </button>
+              )}
+
+              {(scraper?.logs?.length > 0 || isLocalScraping) && (
+                <button
+                  type="button"
+                  className={`vanilla-tab-btn ${activeTab === 'logs' ? 'is-active' : ''}`}
+                  onClick={() => {
+                    setActiveTab('logs');
+                    sfx?.playTabSwitch?.();
+                  }}
+                >
+                  <Terminal size={14} />
+                  <span>Scraper Logs</span>
+                </button>
+              )}
             </div>
 
-            {/* In-Game Battery Save Data Management Suite */}
-            {(() => {
-              const supportsBattery = game?.supportsBatterySaves !== false && game?.systemKey !== 'arcade' && game?.systemKey !== 'atari2600' && !game?.systemName?.toLowerCase().includes('arcade') && !game?.systemName?.toLowerCase().includes('atari 2600');
+            {/* =========================================================================
+                TAB 1: OVERVIEW (Synopsis, Telemetry Stats, Memory Card Save Suite)
+                ========================================================================= */}
+            {activeTab === 'overview' && (
+              <div className="vanilla-tab-content animate-fade-in">
+                {/* Synopsis Description */}
+                <p className="vanilla-synopsis-text">{description}</p>
 
-              if (!supportsBattery) {
-                return (
-                  <div className="save-status-container" style={{ display: 'flex', alignItems: 'stretch', gap: '0.5rem' }}>
-                    <div className="save-badge no-save" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.65rem 0.95rem', opacity: 0.75 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                        <Save size={16} color="#94a3b8" />
-                        <div className="save-text">
-                          <strong style={{ color: '#64748b' }}>NO BATTERY SAVE REQUIRED</strong>
-                          <span style={{ color: '#94a3b8' }}>Arcade session loop (Supports In-Game Quick Saves & Snapshots)</span>
+                {/* 3-Metric Console Telemetry Deck */}
+                <div className="vanilla-telemetry-grid">
+                  <div className="vanilla-telemetry-card">
+                    <div className="telemetry-icon-box" style={{ color: '#3b82f6' }}>
+                      <Clock size={16} />
+                    </div>
+                    <div className="telemetry-info">
+                      <div className="telemetry-header-row">
+                        <span className="telemetry-lbl">PLAYTIME</span>
+                        {onResetStats && (gameStats.totalSeconds > 0 || gameStats.launchCount > 0) && (
+                          <button
+                            type="button"
+                            className="telemetry-reset-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onResetStats(game.id || game.title);
+                              sfx?.playDelete?.();
+                            }}
+                            title="Reset Playtime"
+                          >
+                            <RotateCcw size={10} />
+                          </button>
+                        )}
+                      </div>
+                      <strong className="telemetry-val">{gameStats.playtimeFormatted || '< 1 min'}</strong>
+                    </div>
+                  </div>
+
+                  <div className="vanilla-telemetry-card">
+                    <div className="telemetry-icon-box" style={{ color: '#10b981' }}>
+                      <History size={16} />
+                    </div>
+                    <div className="telemetry-info">
+                      <span className="telemetry-lbl">SESSIONS</span>
+                      <strong className="telemetry-val">{gameStats.launchCount || 0} launches</strong>
+                    </div>
+                  </div>
+
+                  <div className="vanilla-telemetry-card">
+                    <div className="telemetry-icon-box" style={{ color: '#f59e0b' }}>
+                      <Calendar size={16} />
+                    </div>
+                    <div className="telemetry-info">
+                      <span className="telemetry-lbl">LAST ACTIVE</span>
+                      <strong className="telemetry-val">{gameStats.lastPlayedFormatted || 'Never'}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* In-Game Battery Save Memory Card Suite */}
+                {(() => {
+                  const supportsBattery = game?.supportsBatterySaves !== false && game?.systemKey !== 'arcade' && game?.systemKey !== 'atari2600' && !game?.systemName?.toLowerCase().includes('arcade') && !game?.systemName?.toLowerCase().includes('atari 2600');
+
+                  if (!supportsBattery) {
+                    return (
+                      <div className="vanilla-memory-card no-battery">
+                        <HardDrive size={16} color="#94a3b8" />
+                        <div className="memory-card-info">
+                          <strong>SESSION LOOP (NO BATTERY SRAM REQUIRED)</strong>
+                          <span>Quick saves &amp; live snapshots supported in-game</span>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                );
-              }
+                    );
+                  }
 
-              return (
-                <div className="save-status-container" style={{ display: 'flex', alignItems: 'stretch', gap: '0.5rem' }}>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    accept=".sav,.srm,.state,.ram,.mcr,application/octet-stream"
-                    style={{ display: 'none' }}
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (file && onImportSave) {
-                        setSaveActionStatus('Importing save...');
-                        const success = await onImportSave(file, game);
-                        if (success) {
-                          sfx?.playMenuConfirm?.();
-                          setSaveActionStatus('Save imported!');
-                          setTimeout(() => setSaveActionStatus(''), 3000);
-                        } else {
-                          setSaveActionStatus('Import failed');
-                          setTimeout(() => setSaveActionStatus(''), 3000);
-                        }
-                      }
-                      e.target.value = '';
-                    }}
-                  />
+                  return (
+                    <div className="vanilla-memory-card-wrapper">
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept=".sav,.srm,.state,.ram,.mcr,application/octet-stream"
+                        style={{ display: 'none' }}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file && onImportSave) {
+                            setSaveActionStatus('Importing save...');
+                            const success = await onImportSave(file, game);
+                            if (success) {
+                              sfx?.playMenuConfirm?.();
+                              setSaveActionStatus('Save imported!');
+                              setTimeout(() => setSaveActionStatus(''), 3000);
+                            } else {
+                              setSaveActionStatus('Import failed');
+                              setTimeout(() => setSaveActionStatus(''), 3000);
+                            }
+                          }
+                          e.target.value = '';
+                        }}
+                      />
 
-                  {/* Main Status Badge */}
-                  <div className={`save-badge ${hasSaveData ? 'has-save' : 'no-save'}`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.65rem 0.95rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                      <Save size={16} color={hasSaveData ? '#10b981' : '#64748b'} />
-                      <div className="save-text">
-                        <strong>{hasSaveData ? 'SAVE DATA DETECTED' : 'NO SAVE DATA FOUND'}</strong>
-                        <span>{saveActionStatus || (hasSaveData ? 'Saved battery RAM / state ready to resume' : 'Start fresh session or import existing .sav')}</span>
+                      <div className={`vanilla-memory-status ${hasSaveData ? 'is-saved' : 'is-fresh'}`}>
+                        <div className="memory-status-left">
+                          <div className="memory-led" />
+                          <div className="memory-status-text">
+                            <strong>{hasSaveData ? 'BATTERY SAVE DETECTED' : 'NO BATTERY SAVE FOUND'}</strong>
+                            <span>{saveActionStatus || (hasSaveData ? 'Persistent SRAM ready to resume' : 'Start fresh session or import existing .sav')}</span>
+                          </div>
+                        </div>
+                        {hasSaveData && <CheckCircle2 size={16} color="#10b981" />}
+                      </div>
+
+                      <div className="vanilla-memory-actions">
+                        <button
+                          type="button"
+                          className="memory-action-btn"
+                          onClick={() => fileInputRef.current?.click()}
+                          title="Import .sav file"
+                        >
+                          <Upload size={13} />
+                          <span>Import</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          className={`memory-action-btn ${!hasSaveData ? 'is-disabled' : ''}`}
+                          disabled={!hasSaveData}
+                          onClick={async () => {
+                            if (hasSaveData && onExportSave) {
+                              setSaveActionStatus('Exporting save...');
+                              const success = await onExportSave(game);
+                              if (success) {
+                                sfx?.playNotification?.();
+                                setSaveActionStatus('Save downloaded!');
+                                setTimeout(() => setSaveActionStatus(''), 3000);
+                              }
+                            }
+                          }}
+                          title={hasSaveData ? 'Export .sav file' : 'No save data to export'}
+                        >
+                          <Download size={13} />
+                          <span>Export</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          className={`memory-action-btn is-delete ${!hasSaveData ? 'is-disabled' : ''}`}
+                          disabled={!hasSaveData}
+                          onClick={() => {
+                            if (hasSaveData) {
+                              setShowDeleteConfirm(true);
+                              sfx?.playTileNav?.();
+                            }
+                          }}
+                          title={hasSaveData ? 'Delete save data' : 'No save data to delete'}
+                        >
+                          <Trash2 size={13} />
+                          <span>Delete</span>
+                        </button>
                       </div>
                     </div>
-                    {hasSaveData && <CheckCircle2 size={18} color="#10b981" />}
-                  </div>
-
-              {/* 3 Square Action Boxes of Same Height */}
-              <div className="save-square-actions" style={{ display: 'flex', gap: '0.35rem' }}>
-                {/* 1. Import Button (Always active) */}
-                <button
-                  type="button"
-                  className="save-square-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    fileInputRef.current?.click();
-                  }}
-                  title="Import .sav file"
-                  aria-label="Import .sav file"
-                >
-                  <Upload size={16} />
-                  <span>Import</span>
-                </button>
-
-                {/* 2. Export Button (Disabled / greyed out when no save) */}
-                <button
-                  type="button"
-                  className={`save-square-btn ${!hasSaveData ? 'is-disabled' : ''}`}
-                  disabled={!hasSaveData}
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    if (hasSaveData && onExportSave) {
-                      setSaveActionStatus('Exporting save...');
-                      const success = await onExportSave(game);
-                      if (success) {
-                        sfx?.playNotification?.();
-                        setSaveActionStatus('Save downloaded!');
-                        setTimeout(() => setSaveActionStatus(''), 3000);
-                      }
-                    }
-                  }}
-                  title={hasSaveData ? 'Export .sav file' : 'No save data to export'}
-                  aria-label="Export .sav file"
-                >
-                  <Download size={16} />
-                  <span>Export</span>
-                </button>
-
-                {/* 3. Delete Button (Disabled / greyed out when no save) */}
-                <button
-                  type="button"
-                  className={`save-square-btn is-delete ${!hasSaveData ? 'is-disabled' : ''}`}
-                  disabled={!hasSaveData}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (hasSaveData) {
-                      setShowDeleteConfirm(true);
-                      sfx?.playTileNav?.();
-                    }
-                  }}
-                  title={hasSaveData ? 'Delete save data' : 'No save data to delete'}
-                  aria-label="Delete save data"
-                >
-                  <Trash2 size={16} />
-                  <span>Delete</span>
-                </button>
+                  );
+                })()}
               </div>
-            </div>
-          );
-        })()}
+            )}
 
-            <ConfirmModal
-              isOpen={showDeleteConfirm}
-              title={`Delete Save Data?`}
-              message={`Are you sure you want to permanently erase the saved battery RAM and save states for "${game.title}"? This action cannot be undone.`}
-              confirmLabel="Delete Save"
-              cancelLabel="Cancel"
-              isDestructive={true}
-              onConfirm={async () => {
-                setShowDeleteConfirm(false);
-                if (onDeleteSave) {
-                  await onDeleteSave(game);
-                  sfx?.playDelete?.();
-                }
-              }}
-              onCancel={() => setShowDeleteConfirm(false)}
-              sfx={sfx}
-            />
+            {/* =========================================================================
+                TAB 2: INTEGRATED STRATEGY GUIDES & WALKTHROUGHS HUB
+                ========================================================================= */}
+            {activeTab === 'guides' && (
+              <div className="vanilla-tab-content vanilla-guides-hub-panel animate-fade-in">
+                <div className="guides-channel-list">
+                  {/* Channel 1: Written Strategy Guide */}
+                  {writtenGuideUrl && (
+                    <div className={`guide-item-card ${activeQrType === 'written' ? 'qr-expanded' : ''}`}>
+                      <div className="guide-item-main">
+                        <div className="guide-item-icon-box written">
+                          <BookOpen size={18} />
+                        </div>
+                        <div className="guide-item-meta">
+                          <div className="guide-item-title-row">
+                            <strong className="guide-item-title">Written Strategy Guide</strong>
+                            <span className="guide-domain-tag">{getDomain(writtenGuideUrl)}</span>
+                          </div>
+                          <span className="guide-item-desc">Step-by-step walkthroughs, maps &amp; checklists</span>
+                        </div>
+                        <div className="guide-item-actions">
+                          <button
+                            type="button"
+                            className="guide-primary-btn"
+                            onClick={() => window.open(writtenGuideUrl, '_blank', 'noopener,noreferrer')}
+                            title="Open Guide in Browser Tab"
+                          >
+                            <Globe size={13} />
+                            <span>Open Guide</span>
+                            <ExternalLink size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            className={`guide-qr-toggle-btn ${activeQrType === 'written' ? 'is-active' : ''}`}
+                            onClick={() => handleToggleQr('written', writtenGuideUrl)}
+                            title="Show Mobile Companion QR Code"
+                          >
+                            <Smartphone size={13} />
+                            <span>{activeQrType === 'written' ? 'Hide QR' : 'Phone QR'}</span>
+                          </button>
+                        </div>
+                      </div>
 
-            <div className="game-card-actions">
+                      {/* Inline QR Companion Frame */}
+                      {activeQrType === 'written' && (
+                        <div className="guide-inline-qr-drawer animate-fade-in">
+                          <div className="inline-qr-box">
+                            {qrDataUrl ? (
+                              <img src={qrDataUrl} alt="Strategy Guide QR" className="inline-qr-img" />
+                            ) : (
+                              <div className="inline-qr-loading">Generating QR...</div>
+                            )}
+                          </div>
+                          <div className="inline-qr-meta">
+                            <span className="inline-qr-heading">📱 READ ON MOBILE COMPANION</span>
+                            <p>Scan this QR code with your phone's camera to read the guide while playing on PC or TV.</p>
+                            <button
+                              type="button"
+                              className="inline-copy-btn"
+                              onClick={() => handleCopyLink(writtenGuideUrl)}
+                            >
+                              {copiedLink ? <Check size={13} color="#10b981" /> : <ExternalLink size={13} />}
+                              <span>{copiedLink ? 'Link Copied!' : 'Copy Direct Link'}</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Channel 2: Video Walkthrough */}
+                  {videoGuideUrl && (
+                    <div className={`guide-item-card ${activeQrType === 'video' ? 'qr-expanded' : ''}`}>
+                      <div className="guide-item-main">
+                        <div className="guide-item-icon-box video">
+                          <Tv size={18} />
+                        </div>
+                        <div className="guide-item-meta">
+                          <div className="guide-item-title-row">
+                            <strong className="guide-item-title">Video Playthrough &amp; Longplay</strong>
+                            <span className="guide-domain-tag">{getDomain(videoGuideUrl)}</span>
+                          </div>
+                          <span className="guide-item-desc">Full video walkthrough playlist &amp; secret guides</span>
+                        </div>
+                        <div className="guide-item-actions">
+                          <button
+                            type="button"
+                            className="guide-primary-btn video"
+                            onClick={() => window.open(videoGuideUrl, '_blank', 'noopener,noreferrer')}
+                            title="Watch Video Playthrough in New Tab"
+                          >
+                            <Globe size={13} />
+                            <span>Watch Video</span>
+                            <ExternalLink size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            className={`guide-qr-toggle-btn ${activeQrType === 'video' ? 'is-active' : ''}`}
+                            onClick={() => handleToggleQr('video', videoGuideUrl)}
+                            title="Show Mobile Companion QR Code"
+                          >
+                            <Smartphone size={13} />
+                            <span>{activeQrType === 'video' ? 'Hide QR' : 'Phone QR'}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Inline QR Companion Frame */}
+                      {activeQrType === 'video' && (
+                        <div className="guide-inline-qr-drawer animate-fade-in">
+                          <div className="inline-qr-box">
+                            {qrDataUrl ? (
+                              <img src={qrDataUrl} alt="Video Walkthrough QR" className="inline-qr-img" />
+                            ) : (
+                              <div className="inline-qr-loading">Generating QR...</div>
+                            )}
+                          </div>
+                          <div className="inline-qr-meta">
+                            <span className="inline-qr-heading">📱 WATCH ON MOBILE COMPANION</span>
+                            <p>Scan this QR code with your phone's camera to watch the video walkthrough while playing on PC or TV.</p>
+                            <button
+                              type="button"
+                              className="inline-copy-btn"
+                              onClick={() => handleCopyLink(videoGuideUrl)}
+                            >
+                              {copiedLink ? <Check size={13} color="#10b981" /> : <ExternalLink size={13} />}
+                              <span>{copiedLink ? 'Link Copied!' : 'Copy Direct Link'}</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* =========================================================================
+                TAB 3: SCRAPER LOGS TERMINAL
+                ========================================================================= */}
+            {activeTab === 'logs' && (
+              <div className="vanilla-tab-content vanilla-logs-terminal-panel animate-fade-in">
+                <div className="terminal-header-strip">
+                  <div className="terminal-title">
+                    <Terminal size={14} color="#3b82f6" />
+                    <span>Real-Time Scraper Console</span>
+                  </div>
+                  {isLocalScraping && <span className="terminal-scanning-pill">SCRAPING...</span>}
+                </div>
+                <div className="terminal-logs-window" ref={logsContainerRef}>
+                  {(() => {
+                    const gameLogs = (scraper?.logs || []).filter(l => 
+                      l.title === game.title || 
+                      l.gameId === game.id || 
+                      (l.message && l.message.includes(`"${game.title}"`))
+                    );
+
+                    if (gameLogs.length === 0) {
+                      return (
+                        <div className="terminal-empty-msg">
+                          <span>{isLocalScraping ? `Scraping artwork & metadata for "${game.title}"...` : `No scraper activity logs recorded yet. Click Re-scrape to fetch latest metadata.`}</span>
+                        </div>
+                      );
+                    }
+
+                    return gameLogs.map((log) => (
+                      <div key={log.id} className={`terminal-log-row log-${log.type}`}>
+                        <span className="terminal-log-time">[{log.time}]</span>
+                        <span className="terminal-log-text">{log.message}</span>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              </div>
+            )}
+
+            {/* =========================================================================
+                BOTTOM CONSOLE ACTION TOOLBAR
+                ========================================================================= */}
+            <div className="vanilla-detail-actions-stage">
+              {/* Primary Action Button (Play Now / Resume) */}
               <button
-                className={`play-now-btn ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'play' ? 'gamepad-focused' : ''}`}
+                type="button"
+                className={`vanilla-play-btn ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'play' ? 'gamepad-focused' : ''}`}
                 onClick={onPlay}
               >
                 <Play size={20} fill="#ffffff" />
                 <span>{hasSaveData ? 'CONTINUE / PLAY NOW' : 'PLAY NOW'}</span>
               </button>
 
-              {/* Walkthrough Guides Quick Launch Buttons */}
-              {writtenGuideUrl && (
-                <button
-                  className={`guide-launch-btn written-guide ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'writtenGuide' ? 'gamepad-focused' : ''}`}
-                  onClick={() => {
-                    sfx?.playTileNav?.();
-                    setActiveGuide({ type: 'written', url: writtenGuideUrl });
-                  }}
-                  title="Open Written Walkthrough & Strategy Guide"
-                  aria-label="Written Walkthrough"
-                >
-                  <BookOpen size={18} />
-                  <span>Guide</span>
-                </button>
-              )}
-
-              {videoGuideUrl && (
-                <button
-                  className={`guide-launch-btn video-guide ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'videoGuide' ? 'gamepad-focused' : ''}`}
-                  onClick={() => {
-                    sfx?.playTileNav?.();
-                    setActiveGuide({ type: 'video', url: videoGuideUrl });
-                  }}
-                  title="Open Video Walkthrough & Longplay"
-                  aria-label="Video Walkthrough"
-                >
-                  <Tv size={18} />
-                  <span>Video</span>
-                </button>
-              )}
-
+              {/* Favorite Toggle Button */}
               <button
-                className={`favorite-toggle-btn icon-only ${isFavorite ? 'active' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'fav' ? 'gamepad-focused' : ''}`}
+                type="button"
+                className={`vanilla-tool-btn ${isFavorite ? 'is-fav' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'fav' ? 'gamepad-focused' : ''}`}
                 onClick={() => {
                   if (onToggleFavorite) {
                     const nextState = onToggleFavorite(game);
                     sfx?.playFavoriteToggle?.(nextState);
                   }
                 }}
-                title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
-                aria-label={isFavorite ? "Favorited" : "Add Favorite"}
+                title={isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
               >
-                <Star size={20} fill={isFavorite ? '#fbbf24' : 'none'} color={isFavorite ? '#f59e0b' : 'currentColor'} />
+                <Star size={18} fill={isFavorite ? '#fbbf24' : 'none'} color={isFavorite ? '#f59e0b' : 'currentColor'} />
               </button>
 
               {/* Edit Metadata Button (Jellyfin Style) */}
               <button
-                className={`edit-metadata-btn icon-only ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'editMeta' ? 'gamepad-focused' : ''}`}
+                type="button"
+                className={`vanilla-tool-btn ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'editMeta' ? 'gamepad-focused' : ''}`}
                 onClick={() => {
                   sfx?.playThemeSwitch?.();
                   if (onEditMetadata) onEditMetadata(game, meta);
                 }}
-                title="Edit Game Metadata & Cover Art (Jellyfin Style)"
-                aria-label="Edit Metadata"
+                title="Edit Game Metadata & Cover Art"
               >
-                <Pencil size={18} />
+                <Pencil size={17} />
               </button>
 
               {/* Scrape Online Metadata Button */}
               <button
-                className={`scraper-refresh-btn icon-only ${showLogs ? 'active-logs' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'scrape' ? 'gamepad-focused' : ''}`}
+                type="button"
+                className={`vanilla-tool-btn ${isLocalScraping || isScraping ? 'is-spinning' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'scrape' ? 'gamepad-focused' : ''}`}
                 onClick={handleManualScrape}
                 disabled={isLocalScraping || isScraping}
                 title="Re-scrape 3D Box Art & Online Overview"
-                aria-label="Re-scrape Art & Metadata"
               >
-                <RefreshCw size={18} className={isLocalScraping ? 'spin' : ''} />
+                <RefreshCw size={17} className={isLocalScraping ? 'spin' : ''} />
               </button>
             </div>
 
-            {/* In-App Guide Choice & QR Code Modal */}
-            <GuideModal
-              isOpen={!!activeGuide}
-              gameTitle={game.title}
-              guideType={activeGuide?.type || 'written'}
-              guideUrl={activeGuide?.url}
-              onClose={() => setActiveGuide(null)}
-              sfx={sfx}
-            />
-
-            {/* Expandable Scraper Activity Logs Section */}
-            {(showLogs || isLocalScraping) && (
-              <div ref={logsContainerRef} className="game-detail-logs-section animate-fade-in">
-                <div className="game-detail-logs-header">
-                  <div className="logs-header-left">
-                    <Terminal size={14} color="#3b82f6" />
-                    <span>Scraper Activity Logs</span>
-                    {isLocalScraping && <span className="logs-live-badge">SCANNING...</span>}
-                  </div>
-                  <button 
-                    className="logs-toggle-btn"
-                    onClick={() => setShowLogs(!showLogs)}
-                    title="Toggle Log View"
-                  >
-                    <span>{showLogs ? 'Hide Logs' : 'Show Logs'}</span>
-                    {showLogs ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                  </button>
-                </div>
-
-                {showLogs && (
-                  <div className="scraper-terminal-view detail-modal-terminal">
-                    {(() => {
-                      const gameLogs = (scraper?.logs || []).filter(l => 
-                        l.title === game.title || 
-                        l.gameId === game.id || 
-                        (l.message && l.message.includes(`"${game.title}"`))
-                      );
-
-                      if (gameLogs.length === 0) {
-                        return (
-                          <div className="scraper-log-empty">
-                            <span>{isLocalScraping ? `Scraping assets for "${game.title}"...` : `No logs recorded yet for "${game.title}". Click the refresh button to re-scrape.`}</span>
-                          </div>
-                        );
-                      }
-
-                      return (
-                        <div className="scraper-logs-list">
-                          {gameLogs.map((log) => (
-                            <div key={log.id} className={`scraper-log-row log-${log.type}`}>
-                              <span className="log-time">[{log.time}]</span>
-                              <span className="log-msg">{log.message}</span>
-                            </div>
-                          ))}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
-      </div>
 
-      {/* Right Floating ROM Nav Arrow */}
-      {hasNext && (
-        <button
-          className={`game-card-nav-arrow nav-arrow-right ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'nextGame' ? 'gamepad-focused' : ''}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            sfx?.playTileNav?.();
-            onNextGame?.();
+        {/* Delete Save Confirmation Dialog */}
+        <ConfirmModal
+          isOpen={showDeleteConfirm}
+          title={`Delete Save Data?`}
+          message={`Are you sure you want to permanently erase the saved battery RAM and save states for "${game.title}"? This action cannot be undone.`}
+          confirmLabel="Delete Save"
+          cancelLabel="Cancel"
+          isDestructive={true}
+          onConfirm={async () => {
+            setShowDeleteConfirm(false);
+            if (onDeleteSave) {
+              await onDeleteSave(game);
+              sfx?.playDelete?.();
+            }
           }}
-          title="Next ROM"
-          aria-label="Next ROM"
-        >
-          <ChevronRight size={28} />
-        </button>
-      )}
+          onCancel={() => setShowDeleteConfirm(false)}
+          sfx={sfx}
+        />
+      </div>
     </div>
-  </div>
-);
+  );
 }

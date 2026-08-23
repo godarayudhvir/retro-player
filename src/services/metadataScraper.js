@@ -854,6 +854,9 @@ export async function scrapeGame(game, force = false) {
       developer: sidecar.developer || game.systemName || 'Classic',
       publisher: sidecar.publisher || game.systemName || 'Classic',
       genre: sidecar.genre || 'Retro Classic',
+      walkthrough: sidecar.walkthrough || undefined,
+      writtenWalkthroughUrl: sidecar.walkthrough?.written || undefined,
+      videoWalkthroughUrl: sidecar.walkthrough?.video || undefined,
       source: sidecar.source || 'Local Sidecar',
       hasSidecar: true,
       scrapedAt: new Date().toISOString()

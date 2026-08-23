@@ -26,11 +26,14 @@ import {
   Palette,
   Download,
   Upload,
-  RotateCcw
+  RotateCcw,
+  BookOpen,
+  Tv
 } from 'lucide-react';
 import MultiAvatar from './MultiAvatar';
 import CartridgeTile from './CartridgeTile';
 import ConfirmModal from './ConfirmModal';
+import GuideModal from './GuideModal';
 import { getReleaseDate, getGameDescription } from '../gameDescriptions';
 import { resolveAssetPath } from '../utils/assetPath';
 
@@ -93,6 +96,7 @@ export default function MobileAppView({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [saveActionStatus, setSaveActionStatus] = useState('');
+  const [activeGuide, setActiveGuide] = useState(null); // { type: 'written' | 'video', url: string }
 
   // Group games by platform / system
   const systemGamesMap = useMemo(() => {
@@ -288,6 +292,9 @@ export default function MobileAppView({
     const releaseYear = selectedMeta?.releaseYear || selectedMeta?.releaseDate?.split('-')[0] || (getReleaseDate(selectedGameForDetails) !== '2000-01-01' ? getReleaseDate(selectedGameForDetails).split('-')[0] : 'Classic');
     const developer = selectedMeta?.developer || selectedGameForDetails.systemName || 'Classic';
     const genre = selectedMeta?.genre || 'Retro Classic';
+    const walkthrough = selectedGameForDetails.sidecarMetadata?.walkthrough || selectedMeta?.walkthrough || {};
+    const writtenGuideUrl = walkthrough.written || selectedMeta?.writtenWalkthroughUrl || null;
+    const videoGuideUrl = walkthrough.video || selectedMeta?.videoWalkthroughUrl || null;
 
     return (
       <div className="mobile-app-root stage-detail-root">
@@ -384,6 +391,22 @@ export default function MobileAppView({
                 <Pencil size={15} />
                 <span>Edit Info</span>
               </button>
+
+              {/* Unified Strategy Guides & Walkthroughs Hub Button */}
+              {(writtenGuideUrl || videoGuideUrl) && (
+                <button
+                  type="button"
+                  className="mobile-detail-tool-btn"
+                  onClick={() => {
+                    sfx?.playTileNav?.();
+                    setActiveGuide(true);
+                  }}
+                  title="Open Strategy Guides & Walkthroughs Hub"
+                >
+                  <BookOpen size={15} color="#3b82f6" />
+                  <span>Guides</span>
+                </button>
+              )}
 
               <button
                 type="button"
@@ -570,6 +593,17 @@ export default function MobileAppView({
             </div>
           </div>
         </main>
+
+        {/* Strategy Guides & Walkthroughs Hub Modal */}
+        {activeGuide && (
+          <GuideModal
+            isOpen={!!activeGuide}
+            gameTitle={selectedGameForDetails.title}
+            walkthrough={{ written: writtenGuideUrl, video: videoGuideUrl }}
+            onClose={() => setActiveGuide(false)}
+            sfx={sfx}
+          />
+        )}
       </div>
     );
   }

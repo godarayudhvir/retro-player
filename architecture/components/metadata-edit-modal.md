@@ -15,13 +15,15 @@ The `MetadataEditModal` component is an in-app Jellyfin-style manual metadata ed
   - **Genre**: Text input for game genre classification.
   - **Developer**: Text input for the development studio name.
   - **Publisher**: Text input for the publisher name.
+  - **Written Walkthrough URL**: Direct URL link for written strategy guides and walkthroughs (e.g. Unbound Wiki, StrategyWiki, GameFAQs).
+  - **Video Walkthrough URL**: Direct URL link for video playthroughs and longplays (e.g. YouTube).
 
 - **Cover Art Override**:
   - **URL Input**: Direct URL field to specify a remote cover image.
   - **Local Upload**: File picker accepting PNG, WebP, JPG. Client-side canvas resizes and compresses the image (max 600×600px) and encodes it as a Base64 data URL for immediate preview and storage.
   - **Live Preview**: Real-time cover art preview rendered inline. Broken image triggers `previewError` state and hides the preview.
 
-- **Save to Server Sidecar**: `saveManualMetadata(game.id, payload)` via `POST /api/metadata/:id` (from `src/services/metadataScraper.js`). On success, triggers `onSaveSuccess(updatedRecord)` to update the live in-memory metadata map via `scraper.updateLocalMetadata`.
+- **Save to Server Sidecar**: `saveManualMetadata(game.id, payload)` via `POST /api/metadata/save-sidecar` (from `src/services/metadataScraper.js`). On success, triggers `onSaveSuccess(updatedRecord)` to update the live in-memory metadata map via `scraper.updateLocalMetadata`.
 
 - **Reset to Scraped Data**: "Reset" button calls `deleteManualMetadata(game.id)` to remove the manual override sidecar, restoring the next auto-scraped or cached record.
 
@@ -43,7 +45,7 @@ The `MetadataEditModal` component is an in-app Jellyfin-style manual metadata ed
 - `sfx` (Object): Web Audio synthesizer.
 
 ### Key Internal State
-- `title`, `description`, `releaseYear`, `developer`, `publisher`, `genre`, `coverUrl`: Controlled form field states, initialized from `metadata` on open and re-synced whenever `game` or `metadata` change via `useEffect`.
+- `title`, `description`, `releaseYear`, `developer`, `publisher`, `genre`, `writtenWalkthrough`, `videoWalkthrough`, `coverUrl`: Controlled form field states, initialized from `metadata` on open and re-synced whenever `game` or `metadata` change via `useEffect`.
 - `isSaving`: Boolean submit in-progress flag.
 - `saveStatus`: `{ type: 'success' | 'error', message: string }` feedback state.
 - `previewError`: Boolean — set to `true` when the cover art `<img>` `onError` fires.
@@ -57,9 +59,21 @@ The `MetadataEditModal` component is an in-app Jellyfin-style manual metadata ed
 
 ### Save Payload
 ```javascript
-{ title, description, releaseYear, developer, publisher, genre, coverUrl }
+{
+  title,
+  description,
+  releaseYear,
+  developer,
+  publisher,
+  genre,
+  coverUrl,
+  walkthrough: {
+    written: writtenWalkthrough,
+    video: videoWalkthrough
+  }
+}
 ```
-Sent via `POST /api/metadata/:id` (where `id` is `game.id`).
+Sent via `POST /api/metadata/save-sidecar` and cached in IndexedDB.
 
 ### Source Locations
 - Component: [src/components/MetadataEditModal.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/MetadataEditModal.jsx)

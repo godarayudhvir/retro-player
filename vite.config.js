@@ -197,6 +197,7 @@ function parseCompanionMetadata(dirPath, baseName, entries) {
             publisher: data.publisher || data.pub || null,
             genre: data.genre || data.category || null,
             cover: data.cover || data.image || data.boxart || null,
+            walkthrough: data.walkthrough || (data.writtenWalkthrough || data.videoWalkthrough ? { written: data.writtenWalkthrough, video: data.videoWalkthrough } : null),
             source: 'Local Sidecar (JSON)'
           };
         }

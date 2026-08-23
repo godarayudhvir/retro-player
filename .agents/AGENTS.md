@@ -8,4 +8,6 @@
 6. Always explain clearly what actions and changes you intend to perform first, and obtain the user's explicit permission/approval before proceeding with execution.
 7. Never execute `git commit` or `git push` unless the user specifically and explicitly requests you to commit or push in their prompt. Never push any commits without the user's explicit request and approval.
 8. Never use generic AI design clichés and tropes. Never include floating pill badges with sparkles/stars/emojis above headings (e.g. `✨ FEATURE NAME`, `✨ LIVE DEMO`, `✨ EMULATION STATION`), cheesy multi-color gradient buzzwords in headings, or generic SaaS marketing filler. Always build bespoke, authentic, human-crafted interfaces with clean typography, purposeful visual hierarchy, and genuine console-grade craftsmanship.
+9. Never execute `npm run build` or production bundling commands on your own unless the user explicitly requests you to build or validate via build in their prompt.
+
 

@@ -92,6 +92,9 @@ export function useMetadataScraper(games = [], options = {}) {
               developer: sidecar.developer || g.systemName || 'Classic',
               publisher: sidecar.publisher || g.systemName || 'Classic',
               genre: sidecar.genre || 'Retro Classic',
+              walkthrough: sidecar.walkthrough || undefined,
+              writtenWalkthroughUrl: sidecar.walkthrough?.written || undefined,
+              videoWalkthroughUrl: sidecar.walkthrough?.video || undefined,
               source: sidecar.source || 'Local Sidecar',
               hasSidecar: true,
               scrapedAt: new Date().toISOString()

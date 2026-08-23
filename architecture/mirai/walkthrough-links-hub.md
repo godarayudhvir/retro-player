@@ -11,27 +11,25 @@ Rather than relying on automated search link generators that often lead to broke
 ## 2. Detailed List of What It Will Do
 
 ### User Experience
-- **Dedicated Walkthrough Buttons in Game Detail Modal**:
-  - Displays **"Written Walkthrough"** (📖) and **"Video Walkthrough"** (📺) actions if links are configured in `metadata.json`.
-  - Seamlessly styled across all console themes, including **Nintendo DS Touch theme & retro vibe** (stylus-friendly touch targets, dual-screen aesthetic accents, tactile sound/click feedback).
-- **Interactive Action Choice Popover (Redirect or QR Scan)**:
-  - When the player clicks either "Written" or "Video" guide, an in-app console-styled modal dialog offers:
-    1. 🌐 **Open in Browser** (Direct redirect in new tab: `target="_blank" rel="noopener noreferrer"`).
-    2. 📱 **Scan QR on Mobile** (Displays an on-screen QR code for phone companion scanning without leaving fullscreen or TV mode).
+- **Zero-Popup Inline Strategy Guides Hub**:
+  - In **Vanilla Theme** (`GameDetailModal.jsx`), Strategy Guides are seamlessly integrated into the drawer's top navigation tab strip (`Strategy & Guides`), eliminating nested popups and double-backdrop clipping.
+  - In **Nintendo DS Touch Theme** (`DsView.jsx`), tapping the `Guides` touch button seamlessly displays the Strategy Guides touch deck directly within the bottom touch screen with authentic DS stylus navigation (`Back to Info`, `Open Guide`, and inline pixel-framed `Phone QR` view) without any popups.
+- **Inline Phone Companion QR Code View**:
+  - Displays a crisp client-side QR code directly inline for phone companion scanning to read or watch guides on your smartphone while playing on PC, handheld, or TV without leaving fullscreen mode.
 - **Full Controller & Keyboard Spatial Navigation**:
   - 100% controllable via D-Pad, Thumbsticks, Face Buttons (A to confirm, B to close/back), Arrow Keys, Enter, and Esc.
-- **Sidecar Metadata Integration**:
+- **Sidecar Metadata & Manual UI Editor Integration**:
   - Direct read from `metadata.json`:
     ```json
     {
       "walkthrough": {
-        "written": "https://gamefaqs.gamespot.com/gba/...",
+        "written": "https://unboundwiki.com/walkthrough/",
         "video": "https://www.youtube.com/watch?v=..."
       }
     }
     ```
-- **Update ROMs Skill Integration**:
-  - The `update-roms` skill queries online databases and search results to find curated written guides (GameFAQs, StrategyWiki) and verified video walkthroughs/longplays, writing them to `metadata.json`.
+- **Manual Curation & In-App Metadata Editor**:
+  - Walkthrough links are purely curated manually by users/developers via the in-app Metadata Editor (`MetadataEditModal.jsx`) or directly in companion `metadata.json` sidecars (never auto-scraped online).
 
 ---
 
@@ -54,14 +52,13 @@ Rather than relying on automated search link generators that often lead to broke
    - Zero native popups (`alert`, `confirm`).
    - Clean keyboard/gamepad focus traps with smooth escape handling.
 
----
-
 ## 4. Detailed Guide of How to Set It Up
 
-1. **Update `metadata.json` Schema & `update-roms` Skill**:
-   - Enhance `.agents/skills/update-roms/scripts/update_roms.js` to search and append `walkthrough.written` and `walkthrough.video`.
+1. **`metadata.json` Schema & In-App Manual Metadata Editor**:
+   - `metadata.json` sidecar supports optional `walkthrough: { written, video }` fields.
+   - `MetadataEditModal.jsx` provides manual inputs for Written Walkthrough URL and Video Walkthrough URL to easily curate links directly in the UI.
 2. **Create `GuideModal.jsx`**:
    - Component offering "Open Link" vs "Scan QR Code" with gamepad and DS touch support.
-3. **Integrate into `GameDetailModal.jsx`**:
+3. **Integrate into `GameDetailModal.jsx` & `DsView.jsx`**:
    - Mount walkthrough actions when `game.metadata?.walkthrough` properties exist.
 
