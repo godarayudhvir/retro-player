@@ -328,6 +328,15 @@ export default function App() {
           onResetStats={resetGameStats}
           hasSaveData={hasSaveData}
           scraper={scraper}
+          pwa={pwa}
+          gamepadConnected={gamepadConnected}
+          gamepadBattery={gamepadStatus}
+          time={time}
+          onOpenScraperModal={() => setShowScraperModal(true)}
+          showResetConfirm={showResetConfirm}
+          setShowResetConfirm={setShowResetConfirm}
+          setShowLoadRomModal={setShowLoadRomModal}
+          setShowVirtualKeyboard={setShowVirtualKeyboard}
         />
       ) : (
         <>
