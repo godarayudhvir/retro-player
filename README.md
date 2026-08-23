@@ -36,20 +36,6 @@ Featuring Nintendo DS dual-screen Touch architecture, integrated zero-popup Stra
 
 ---
 
-## 📸 Screenshots
-
-<div align="center">
-
-| DS Touch Library | Dual-Screen Details | Profile Selector |
-|---|---|---|
-| <img src="docs-screenshots/ds-view-game-detail.webp" width="280" alt="DS Touch console library" /> | <img src="docs-screenshots/ds-view-game-detail.webp" width="280" alt="DS Touch theme with dual-screen game detail" /> | <img src="docs-screenshots/profile-selector-who-is-playing.webp" width="280" alt="Who's Playing profile selector" /> |
-
-| Load Custom ROM | Profile Creator | NDS Emulation |
-|---|---|---|
-| <img src="docs-screenshots/load-custom-rom-modal.webp" width="280" alt="Load Custom ROM dialog" /> | <img src="docs-screenshots/profile-creator-edit.webp" width="280" alt="Multiavatar profile creator" /> | <img src="docs-screenshots/emulator-nds-gameplay.webp" width="280" alt="NDS emulator with virtual gamepad" /> |
-
-</div>
-
 ## ⚡ Why Retro Player? The WASM Advantage
 
 Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your server CPU, **Retro Player uses a modern Edge-WASM architecture**:
