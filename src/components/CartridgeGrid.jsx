@@ -1,11 +1,10 @@
 import React from 'react';
-import { FolderOpen, RefreshCw, Star, Clock, Search, Sparkles } from 'lucide-react';
-import VanillaView from './theme-views/VanillaView';
+import { FolderOpen, RefreshCw, Star, Clock, Search } from 'lucide-react';
 import DsView from './theme-views/DsView';
 
 /**
  * Viewport rendering the theme-specific layout architecture or tailored empty state prompts.
- * Routes dynamically to Vanilla, Adroit, Canvas, DS Touch, Modern, or PlayStation-X layouts.
+ * Routes dynamically based on the active console theme.
  */
 export default function CartridgeGrid({
   filteredGames = [],
@@ -34,16 +33,7 @@ export default function CartridgeGrid({
   hasSaveData,
   scraper
 }) {
-  const currentSystemName =
-    activeSystem === 'all'
-      ? 'All Games'
-      : activeSystem === 'favorites'
-      ? 'Favorites'
-      : activeSystem === 'recent'
-      ? 'Recently Played'
-      : filteredGames[0]?.systemName || activeSystem.toUpperCase();
-
-  const currentTheme = themeEngine?.theme || 'vanilla';
+  const currentTheme = themeEngine?.theme || 'ds';
 
   const renderEmptyState = () => {
     if (searchQuery && searchQuery.trim().length > 0) {
@@ -153,6 +143,7 @@ export default function CartridgeGrid({
   const renderThemeLayout = () => {
     switch (currentTheme) {
       case 'ds':
+      default:
         return (
           <DsView
             filteredGames={filteredGames}
@@ -173,20 +164,6 @@ export default function CartridgeGrid({
             hasSaveData={hasSaveData}
             scraper={scraper}
             sfx={sfx}
-          />
-        );
-      case 'vanilla':
-      default:
-        return (
-          <VanillaView
-            filteredGames={filteredGames}
-            metadataMap={metadataMap}
-            focusedTarget={focusedTarget}
-            setFocusedTarget={setFocusedTarget}
-            handleGameSelect={handleGameSelect}
-            isFavorite={isFavorite}
-            activeSystem={activeSystem}
-            currentSystemName={currentSystemName}
           />
         );
     }

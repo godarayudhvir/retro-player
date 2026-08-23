@@ -1,7 +1,7 @@
 # Mobile Experience Architecture Specification (`MobileAppView.jsx`)
 
 ## 1. Description
-The `MobileAppView` component delivers a clean, focused, **5-stage progressive mobile experience** specifically tailored for smartphones and compact touch devices (<= 768px in portrait). It features a streamlined topbar with circular action buttons (Search, Theme Studio, SFX, BGM, Load ROM), authentic vector console illustrations, neatly scaled 2-column 3D physical cartridges for Vanilla theme with zero cutouts, a 3-column square touch matrix for DS Touch theme, full app-level Light/Dark mode responsiveness, and full-screen detail stages.
+The `MobileAppView` component delivers a clean, focused, **5-stage progressive mobile experience** specifically tailored for smartphones and compact touch devices (<= 768px in portrait). It features a streamlined topbar with circular action buttons (Search, Theme Studio, SFX, BGM, Load ROM), authentic vector console illustrations, a 3-column square touch matrix for game browsing, full app-level Light/Dark mode responsiveness, and full-screen detail stages.
 
 ---
 
@@ -10,7 +10,7 @@ The `MobileAppView` component delivers a clean, focused, **5-stage progressive m
   - **Profile Icon** (left): Active Multiavatar avatar, opens Profile Switcher.
   - **Action Button Group** (right):
     - 🔍 **Search Button**: Toggles expandable search bar with instant query filtering.
-    - 🎨 **Theme Button**: Opens Theme Studio / Switcher Modal (Vanilla & DS Touch).
+    - 🎨 **Theme Button**: Opens Theme Studio / Switcher Modal.
     - 🔊/🔇 **SFX Button**: Toggles Web Audio synthesized tactile UI sound effects (**off by default**).
     - 🎵 **BGM Button**: Toggles retro background music playback (**off by default**).
     - 📂 **Load Button**: Minimized icon-only button triggering local file picker for custom ROMs.
@@ -25,8 +25,7 @@ The `MobileAppView` component delivers a clean, focused, **5-stage progressive m
   - Tapping any console transitions directly to Stage 3 for that platform.
 
 - **Stage 3: Choose Game**:
-  - **Vanilla Theme**: 2-column responsive cartridge grid (`.mobile-cartridges-2col-grid`) with fluid scaling constraints per console type (`max-width: 175px-185px`, `min-width: 0`, auto heights), guaranteeing zero clipping or cutouts of SNES, GBA, NES, N64, Genesis, GB/GBC, and NDS 3D cartridge molds, plastic ribs, and drop shadows.
-  - **DS Touch Theme**: 3-column square beveled touch buttons matrix (`.mobile-ds-buttons-grid` with `.ds-touch-btn`), displaying clean square cover artwork/titles and favorite stars with zero physical cartridges.
+  - **DS Touch Matrix**: 3-column square beveled touch buttons matrix (`.mobile-ds-buttons-grid` with `.ds-touch-btn`), displaying clean square cover artwork/titles and favorite stars.
   - Real-time instant search filter across all titles.
   - Tapping any game card opens Stage 4.
 
@@ -46,6 +45,5 @@ The `MobileAppView` component delivers a clean, focused, **5-stage progressive m
 ---
 
 ## 3. Theming & Color Modes
-- **Vanilla Theme**: Clean porcelain-white console layout with 2-column responsive 3D physical cartridge models.
 - **DS Touch Theme**: Nintendo DS touchscreen graph paper grid with silver beveled touch matrix buttons and dual-screen styling.
 - **Light / Dark Mode**: Full app-level synchronization applying dark slate/midnight backgrounds (`#090d16` / `#1e293b`) and high-contrast typography across all mobile stages, navigation bars, cards, and modal drawers.

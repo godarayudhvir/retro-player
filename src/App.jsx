@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import Topbar from './components/Topbar';
 import SystemRibbon from './components/SystemRibbon';
 import CartridgeGrid from './components/CartridgeGrid';
-import GameDetailModal from './components/GameDetailModal';
 import LoadRomModal from './components/LoadRomModal';
 import AboutInfoModal from './components/AboutInfoModal';
 import DropzoneOverlay from './components/DropzoneOverlay';
@@ -37,7 +36,6 @@ import { BatteryWarning, Zap, X } from 'lucide-react';
  */
 export default function App() {
   const [activeGame, setActiveGame] = useState(null);
-  const [selectedGameCard, setSelectedGameCard] = useState(null);
   const [focusedTarget, setFocusedTarget] = useState({ zone: 'grid', index: 0 });
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showLoadRomModal, setShowLoadRomModal] = useState(false);
@@ -114,27 +112,16 @@ export default function App() {
     deleteSaveFile
   } = useSaveDataManager();
 
-  // Selection Handler for opening Game Detail Drawer Modal
-  const handleGameSelect = useCallback(async (game, isNavigating = false) => {
-    if (themeEngine?.theme !== 'ds') {
-      setSelectedGameCard(game);
-      if (!isNavigating) {
-        sfx.playModalOpen();
-      } else {
-        sfx.playTileNav();
-      }
-    } else {
-      sfx.playTileNav();
-    }
+  // Selection Handler for game tile navigation & save detection
+  const handleGameSelect = useCallback(async (game) => {
+    sfx.playTileNav();
     const saveExists = await checkSaveData(game, activeProfileId);
     if (saveExists) {
       sfx.playSaveDetected();
     }
-  }, [checkSaveData, activeProfileId, sfx, themeEngine?.theme]);
+  }, [checkSaveData, activeProfileId, sfx]);
 
-  // Custom ROM Loaded: skip GameDetailModal, launch directly into emulator.
-  // Custom ROMs have no library entry, metadata, or save history — no reason to stop at a detail screen.
-  // Fixes: Vanilla showing GameDetailModal on load; DS Touch silently ignoring the ROM entirely.
+  // Custom ROM Loaded: launch directly into emulator
   const handleCustomRomLoaded = useCallback((customGame) => {
     recordGameLaunch(customGame);
     sfx.playGameLaunch();
@@ -158,30 +145,10 @@ export default function App() {
     handleDrop
   } = useRomManifest(handleCustomRomLoaded, { favorites, recentlyPlayed });
 
-  // Hook 7: Automated Online Metadata & Cover Art Scraper
+  // Automated Online Metadata & Cover Art Scraper
   const scraper = useMetadataScraper(games, { isMobile, isPlaying: !!activeGame });
 
-  // Calculate active index and prev/next handlers for Detailed View Carousel
-  const currentFilteredIndex = useMemo(() => {
-    if (!selectedGameCard || !filteredGames || filteredGames.length === 0) return -1;
-    return filteredGames.findIndex(g => (g.id && g.id === selectedGameCard.id) || g.title === selectedGameCard.title);
-  }, [selectedGameCard, filteredGames]);
-
-  const handlePrevGame = useCallback(() => {
-    if (!filteredGames || filteredGames.length <= 1 || currentFilteredIndex === -1) return;
-    const prevIdx = (currentFilteredIndex - 1 + filteredGames.length) % filteredGames.length;
-    const nextGame = filteredGames[prevIdx];
-    handleGameSelect(nextGame, true);
-  }, [filteredGames, currentFilteredIndex, handleGameSelect]);
-
-  const handleNextGame = useCallback(() => {
-    if (!filteredGames || filteredGames.length <= 1 || currentFilteredIndex === -1) return;
-    const nextIdx = (currentFilteredIndex + 1) % filteredGames.length;
-    const nextGame = filteredGames[nextIdx];
-    handleGameSelect(nextGame, true);
-  }, [filteredGames, currentFilteredIndex, handleGameSelect]);
-
-  // Hook 8: Progressive Web App (PWA) & Service Worker Cache Engine
+  // Progressive Web App (PWA) & Service Worker Cache Engine
   const pwa = usePwaInstall();
 
   // Hook 9: Unified Spatial Navigation Engine (Keyboard + Gamepad + Audio)
@@ -204,8 +171,6 @@ export default function App() {
     setShowVirtualKeyboard,
     oskPos,
     setOskPos,
-    selectedGameCard,
-    setSelectedGameCard,
     activeGame,
     setActiveGame,
     activeSystem,
@@ -220,8 +185,6 @@ export default function App() {
     setGamepadConnected,
     sfx,
     handleGameSelect,
-    onPrevGame: handlePrevGame,
-    onNextGame: handleNextGame,
     fetchGames,
     toggleFavorite,
     themeEngine,
@@ -284,10 +247,6 @@ export default function App() {
       focusedEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
     }
   }, [focusedTarget]);
-
-  const selectedGameMetadata = selectedGameCard
-    ? (scraper.metadataMap[selectedGameCard.id] || scraper.metadataMap[`${selectedGameCard.systemKey}-${selectedGameCard.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')])
-    : null;
 
   return (
     <div 
@@ -451,46 +410,6 @@ export default function App() {
           setFocusedTarget({ zone: 'topbar', id: 'info' });
           sfx.playModalClose();
         }}
-      />
-
-      {/* Game Detail Drawer Modal (Used for Vanilla Carousel shelf; DS Touch uses direct integrated stage) */}
-      <GameDetailModal
-        game={themeEngine?.theme === 'ds' ? null : selectedGameCard}
-        metadata={selectedGameMetadata}
-        hasSaveData={hasSaveData}
-        activeProfileId={activeProfileId}
-        isFavorite={isFavorite(selectedGameCard?.id || selectedGameCard?.title)}
-        onToggleFavorite={toggleFavorite}
-        onResetStats={resetGameStats}
-        onScrapeGame={scraper.scrapeSingleGame}
-        onEditMetadata={(game, meta) => setEditingMetadataGame({ game, metadata: meta })}
-        onExportSave={(game) => exportSaveFile(game, activeProfileId)}
-        onImportSave={(file, game) => importSaveFile(file, game, activeProfileId)}
-        onDeleteSave={(game) => deleteSaveFile(game, activeProfileId)}
-        onPrevGame={handlePrevGame}
-        onNextGame={handleNextGame}
-        hasPrev={filteredGames && filteredGames.length > 1}
-        hasNext={filteredGames && filteredGames.length > 1}
-        currentIndex={currentFilteredIndex}
-        totalGames={filteredGames?.length || 0}
-        isScraping={scraper.isScraping}
-        scraper={scraper}
-        gameStats={getGameStats(selectedGameCard?.id || selectedGameCard?.title)}
-        gamepadConnected={gamepadConnected}
-        focusedTarget={focusedTarget}
-        onClose={() => {
-          setSelectedGameCard(null);
-          setFocusedTarget({ zone: 'grid', index: focusedTarget?.index || 0 });
-          sfx.playModalClose();
-        }}
-        onPlay={() => {
-          const gameToLaunch = selectedGameCard;
-          setSelectedGameCard(null);
-          recordGameLaunch(gameToLaunch);
-          sfx.playGameLaunch();
-          setActiveGame(gameToLaunch);
-        }}
-        sfx={sfx}
       />
 
       {/* In-App Jellyfin-Style Metadata Editor */}

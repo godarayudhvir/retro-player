@@ -26,8 +26,6 @@ export function useGamepadNavigation({
   setShowVirtualKeyboard,
   oskPos,
   setOskPos,
-  selectedGameCard,
-  setSelectedGameCard,
   activeGame,
   setActiveGame,
   activeSystem,
@@ -41,8 +39,6 @@ export function useGamepadNavigation({
   setGamepadConnected,
   sfx,
   handleGameSelect,
-  onPrevGame,
-  onNextGame,
   fetchGames,
   toggleFavorite,
   themeEngine,
@@ -64,7 +60,8 @@ export function useGamepadNavigation({
   onSelectProfile,
   onCreateNewProfile,
   onPlayGame,
-  games = []
+  games = [],
+  onOpenThemeModal
 }) {
   const stateRef = useRef({});
   const lastInputTimeRef = useRef(0);
@@ -77,7 +74,6 @@ export function useGamepadNavigation({
       activeSystem,
       focusedTarget,
       activeGame,
-      selectedGameCard,
       showInfoModal,
       showLoadRomModal,
       showScraperModal,
@@ -96,8 +92,6 @@ export function useGamepadNavigation({
       pwa,
       bgm,
       onOpenScraperModal,
-      onPrevGame,
-      onNextGame,
       isMobile,
       selectedMobileGameForDetails,
       hasChosenProfileThisSession,
@@ -111,7 +105,6 @@ export function useGamepadNavigation({
     activeSystem,
     focusedTarget,
     activeGame,
-    selectedGameCard,
     showInfoModal,
     showLoadRomModal,
     showScraperModal,
@@ -146,7 +139,6 @@ export function useGamepadNavigation({
       showInfoModal: isInfoOpen,
       showLoadRomModal: isLoadRomOpen,
       showVirtualKeyboard: isOskOpen,
-      selectedGameCard: curCard,
       activeGame: curActiveGame,
       filteredGames: curGames,
       systems: curSystems,
@@ -826,82 +818,7 @@ export function useGamepadNavigation({
       return;
     }
 
-    // ==========================================
     // 4. DESKTOP CONSOLE SPATIAL NAVIGATION
-    // ==========================================
-    // 4.1 Selected Game Card Drawer Navigation
-    if (curCard) {
-      const cardButtons = ['prevGame', 'play', 'writtenGuide', 'videoGuide', 'fav', 'editMeta', 'scrape', 'nextGame'];
-      const curId = curTarget?.id || 'play';
-      const curIdx = cardButtons.indexOf(curId);
-
-      if (dir === 'BACK') {
-        setSelectedGameCard(null);
-        setFocusedTarget({ zone: 'grid', index: curTarget?.index || 0 });
-        sfx?.playModalClose?.();
-        return;
-      }
-      if (dir === 'UP') {
-        setFocusedTarget({ zone: 'cardModal', id: 'close' });
-        sfx?.playTileNav?.();
-      } else if (dir === 'DOWN') {
-        setFocusedTarget({ zone: 'cardModal', id: 'play' });
-        sfx?.playTileNav?.();
-      } else if (dir === 'LEFT') {
-        if (curId === 'prevGame') {
-          stateRef.current.onPrevGame?.();
-        } else if (curId === 'close') {
-          setFocusedTarget({ zone: 'cardModal', id: 'prevGame' });
-          sfx?.playTileNav?.();
-        } else if (curIdx > 0) {
-          const nextIdx = curIdx - 1;
-          setFocusedTarget({ zone: 'cardModal', id: cardButtons[nextIdx] });
-          sfx?.playTileNav?.();
-        } else {
-          stateRef.current.onPrevGame?.();
-        }
-      } else if (dir === 'RIGHT') {
-        if (curId === 'nextGame') {
-          stateRef.current.onNextGame?.();
-        } else if (curId === 'close') {
-          setFocusedTarget({ zone: 'cardModal', id: 'play' });
-          sfx?.playTileNav?.();
-        } else if (curIdx >= 0 && curIdx < cardButtons.length - 1) {
-          const nextIdx = curIdx + 1;
-          setFocusedTarget({ zone: 'cardModal', id: cardButtons[nextIdx] });
-          sfx?.playTileNav?.();
-        } else {
-          stateRef.current.onNextGame?.();
-        }
-      } else if (dir === 'SELECT') {
-        if (curId === 'prevGame') {
-          stateRef.current.onPrevGame?.();
-        } else if (curId === 'nextGame') {
-          stateRef.current.onNextGame?.();
-        } else if (curId === 'close') {
-          setSelectedGameCard(null);
-          setFocusedTarget({ zone: 'grid', index: curTarget?.index || 0 });
-          sfx?.playModalClose?.();
-        } else if (curId === 'fav') {
-          if (stateRef.current.toggleFavorite) {
-            const nextState = stateRef.current.toggleFavorite(curCard);
-            sfx?.playFavoriteToggle?.(nextState);
-          }
-        } else if (curId === 'editMeta') {
-          const editBtn = document.querySelector('.edit-metadata-btn');
-          if (editBtn) editBtn.click();
-        } else if (curId === 'scrape') {
-          const scrapeBtn = document.querySelector('.scraper-refresh-btn');
-          if (scrapeBtn) scrapeBtn.click();
-        } else if (curId === 'play') {
-          const playBtn = document.querySelector('.play-now-btn');
-          if (playBtn) playBtn.click();
-        }
-      }
-      return;
-    }
-
-    // 4.2 Main Desktop Dashboard Navigation
     const activeSysList = curSystems.filter(s => s.gameCount > 0);
     const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
     const allTabs = [{ key: 'all' }, { key: 'favorites' }, { key: 'recent' }, ...sortedSystems];
@@ -1058,67 +975,42 @@ export function useGamepadNavigation({
         return;
       }
 
-      const curTheme = stateRef.current.themeEngine?.theme || 'vanilla';
-
-      // 1. Nintendo DS Touch Dual-Screen (3-Column Buttons Grid)
-      if (curTheme === 'ds') {
-        let cols = 3;
-        const gridEl = document.querySelector('.ds-buttons-grid');
-        if (gridEl) {
-          try {
-            const computed = window.getComputedStyle(gridEl);
-            const gridTemplateCols = computed.getPropertyValue('grid-template-columns');
-            if (gridTemplateCols) {
-              const count = gridTemplateCols.split(' ').filter(Boolean).length;
-              if (count > 0) cols = count;
-            }
-          } catch {}
-        }
-
-        if (dir === 'RIGHT') {
-          const nextIdx = Math.min(curIndex + 1, curGames.length - 1);
-          setFocusedTarget({ zone: 'grid', index: nextIdx });
-          sfx?.playTileNav?.();
-        } else if (dir === 'LEFT') {
-          const prevIdx = Math.max(0, curIndex - 1);
-          setFocusedTarget({ zone: 'grid', index: prevIdx });
-          sfx?.playTileNav?.();
-        } else if (dir === 'DOWN') {
-          if (curIndex + cols < curGames.length) {
-            setFocusedTarget({ zone: 'grid', index: curIndex + cols });
-            sfx?.playTileNav?.();
-          } else if (curIndex < curGames.length - 1) {
-            setFocusedTarget({ zone: 'grid', index: curGames.length - 1 });
-            sfx?.playTileNav?.();
+      let cols = 3;
+      const gridEl = document.querySelector('.ds-buttons-grid') || document.querySelector('.mobile-ds-buttons-grid');
+      if (gridEl) {
+        try {
+          const computed = window.getComputedStyle(gridEl);
+          const gridTemplateCols = computed.getPropertyValue('grid-template-columns');
+          if (gridTemplateCols) {
+            const count = gridTemplateCols.split(' ').filter(Boolean).length;
+            if (count > 0) cols = count;
           }
-        } else if (dir === 'UP') {
-          if (curIndex - cols >= 0) {
-            setFocusedTarget({ zone: 'grid', index: curIndex - cols });
-            sfx?.playTileNav?.();
-          } else {
-            const sysIdx = allTabs.findIndex(t => t.key === curActiveSys);
-            setFocusedTarget({ zone: 'ribbon', index: sysIdx >= 0 ? sysIdx : 0 });
-            sfx?.playTileNav?.();
-          }
+        } catch {}
+      }
+
+      if (dir === 'RIGHT') {
+        const nextIdx = Math.min(curIndex + 1, curGames.length - 1);
+        setFocusedTarget({ zone: 'grid', index: nextIdx });
+        sfx?.playTileNav?.();
+      } else if (dir === 'LEFT') {
+        const prevIdx = Math.max(0, curIndex - 1);
+        setFocusedTarget({ zone: 'grid', index: prevIdx });
+        sfx?.playTileNav?.();
+      } else if (dir === 'DOWN') {
+        if (curIndex + cols < curGames.length) {
+          setFocusedTarget({ zone: 'grid', index: curIndex + cols });
+          sfx?.playTileNav?.();
+        } else if (curIndex < curGames.length - 1) {
+          setFocusedTarget({ zone: 'grid', index: curGames.length - 1 });
+          sfx?.playTileNav?.();
         }
-      } 
-      // 2. Horizontal Shelf Theme (Vanilla)
-      else {
-        if (dir === 'RIGHT') {
-          const nextIdx = Math.min(curIndex + 1, curGames.length - 1);
-          setFocusedTarget({ zone: 'grid', index: nextIdx });
+      } else if (dir === 'UP') {
+        if (curIndex - cols >= 0) {
+          setFocusedTarget({ zone: 'grid', index: curIndex - cols });
           sfx?.playTileNav?.();
-        } else if (dir === 'LEFT') {
-          const prevIdx = Math.max(0, curIndex - 1);
-          setFocusedTarget({ zone: 'grid', index: prevIdx });
-          sfx?.playTileNav?.();
-        } else if (dir === 'UP') {
+        } else {
           const sysIdx = allTabs.findIndex(t => t.key === curActiveSys);
           setFocusedTarget({ zone: 'ribbon', index: sysIdx >= 0 ? sysIdx : 0 });
-          sfx?.playTileNav?.();
-        } else if (dir === 'DOWN') {
-          const nextIdx = Math.min(curIndex + 1, curGames.length - 1);
-          setFocusedTarget({ zone: 'grid', index: nextIdx });
           sfx?.playTileNav?.();
         }
       }
@@ -1133,7 +1025,6 @@ export function useGamepadNavigation({
     setShowVirtualKeyboard,
     setFocusedTarget,
     setShowInfoModal,
-    setSelectedGameCard,
     setActiveGame,
     setActiveSystem,
     setSearchQuery,
@@ -1229,12 +1120,7 @@ export function useGamepadNavigation({
         case 'f':
         case 'F':
           e.preventDefault();
-          if (stateRef.current.selectedGameCard) {
-            if (stateRef.current.toggleFavorite) {
-              const nextState = stateRef.current.toggleFavorite(stateRef.current.selectedGameCard);
-              sfx?.playFavoriteToggle?.(nextState);
-            }
-          } else if (stateRef.current.selectedMobileGameForDetails) {
+          if (stateRef.current.selectedMobileGameForDetails) {
             if (stateRef.current.toggleFavorite) {
               const nextState = stateRef.current.toggleFavorite(stateRef.current.selectedMobileGameForDetails);
               sfx?.playFavoriteToggle?.(nextState);
@@ -1407,8 +1293,6 @@ export function useGamepadNavigation({
             let targetGame = null;
             if (stateRef.current.selectedMobileGameForDetails) {
               targetGame = stateRef.current.selectedMobileGameForDetails;
-            } else if (stateRef.current.selectedGameCard) {
-              targetGame = stateRef.current.selectedGameCard;
             } else if (stateRef.current.isMobile) {
               const mList = stateRef.current.mobileGamesList || stateRef.current.filteredGames || [];
               const mIdx = stateRef.current.focusedTarget?.index || 0;
@@ -1448,9 +1332,7 @@ export function useGamepadNavigation({
             navigateSpatial('BACK');
             moved = true;
           } else if (shoulderL && !prevButtonsRef.current.shoulderL) {
-            if (stateRef.current.selectedGameCard) {
-              stateRef.current.onPrevGame?.();
-            } else if (!stateRef.current.isMobile) {
+            if (!stateRef.current.isMobile) {
               const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
               const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
               const allSysKeys = ['all', 'favorites', 'recent', ...sortedSystems.map(s => s.key)];
@@ -1465,9 +1347,7 @@ export function useGamepadNavigation({
             }
             moved = true;
           } else if (shoulderR && !prevButtonsRef.current.shoulderR) {
-            if (stateRef.current.selectedGameCard) {
-              stateRef.current.onNextGame?.();
-            } else if (!stateRef.current.isMobile) {
+            if (!stateRef.current.isMobile) {
               const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
               const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
               const allSysKeys = ['all', 'favorites', 'recent', ...sortedSystems.map(s => s.key)];

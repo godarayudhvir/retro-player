@@ -18,7 +18,7 @@ export default function ThemeSwitcherModal({
   const modalRef = useRef(null);
 
   const availableThemes = themeEngine?.availableThemes || [];
-  const currentTheme = themeEngine?.theme || 'vanilla';
+  const currentTheme = themeEngine?.theme || 'ds';
   const colorMode = themeEngine?.colorMode || 'light';
 
   // Sync selected index with active theme on open

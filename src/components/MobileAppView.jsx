@@ -31,7 +31,6 @@ import {
   Tv
 } from 'lucide-react';
 import MultiAvatar from './MultiAvatar';
-import CartridgeTile from './CartridgeTile';
 import ConfirmModal from './ConfirmModal';
 import GuideModal from './GuideModal';
 import { getReleaseDate, getGameDescription } from '../gameDescriptions';
@@ -649,62 +648,34 @@ export default function MobileAppView({
         {/* Game Content Grid */}
         <main className="mobile-games-grid-body">
           {currentGamesList.length > 0 ? (
-            themeEngine?.theme === 'ds' ? (
-              /* DS Touch Theme: 3-Column Square Beveled Touch Button Matrix */
-              <div className="mobile-ds-buttons-grid">
-                {currentGamesList.map((game, idx) => {
-                  const meta = metadataMap[game.id] || metadataMap[`${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')];
-                  const isFav = isFavorite ? isFavorite(game.id || game.title) : false;
-                  const rawThumb = meta?.coverUrl || (game.coverUrl && !game.coverUrl.endsWith('.svg') ? game.coverUrl : null);
-                  const thumbSrc = rawThumb ? resolveAssetPath(rawThumb) : null;
+            <div className="mobile-ds-buttons-grid">
+              {currentGamesList.map((game, idx) => {
+                const meta = metadataMap[game.id] || metadataMap[`${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')];
+                const isFav = isFavorite ? isFavorite(game.id || game.title) : false;
+                const rawThumb = meta?.coverUrl || (game.coverUrl && !game.coverUrl.endsWith('.svg') ? game.coverUrl : null);
+                const thumbSrc = rawThumb ? resolveAssetPath(rawThumb) : null;
 
-                  return (
-                    <button
-                      key={game.id || idx}
-                      type="button"
-                      className={`ds-touch-btn ${isFav ? 'is-fav' : ''}`}
-                      onClick={() => {
-                        setSelectedGameForDetails(game);
-                        sfx?.playTileNav?.();
-                      }}
-                      title={game.title}
-                    >
-                      {thumbSrc ? (
-                        <img src={thumbSrc} alt={game.title} className="ds-btn-thumb" loading="lazy" />
-                      ) : (
-                        <span className="ds-btn-text">{game.title}</span>
-                      )}
-                      {isFav && <span className="ds-fav-dot">★</span>}
-                    </button>
-                  );
-                })}
-              </div>
-            ) : (
-              /* Vanilla Theme: 2-Column Responsive Physical Cartridges Grid */
-              <div className="mobile-cartridges-2col-grid">
-                {currentGamesList.map((game, idx) => {
-                  const meta = metadataMap[game.id] || metadataMap[`${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')];
-                  const isFav = isFavorite ? isFavorite(game.id || game.title) : false;
-                  const isCoverOnly = !selectedSystem || selectedSystem.key === 'all' || selectedSystem.key === 'favorites' || selectedSystem.key === 'recent';
-
-                  return (
-                    <div key={game.id || idx} className="mobile-cartridge-tile-cell">
-                      <CartridgeTile
-                        game={game}
-                        metadata={meta}
-                        isFocused={false}
-                        isFavorite={isFav}
-                        coverOnly={isCoverOnly}
-                        onClick={() => {
-                          setSelectedGameForDetails(game);
-                          sfx?.playTileNav?.();
-                        }}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            )
+                return (
+                  <button
+                    key={game.id || idx}
+                    type="button"
+                    className={`ds-touch-btn ${isFav ? 'is-fav' : ''}`}
+                    onClick={() => {
+                      setSelectedGameForDetails(game);
+                      sfx?.playTileNav?.();
+                    }}
+                    title={game.title}
+                  >
+                    {thumbSrc ? (
+                      <img src={thumbSrc} alt={game.title} className="ds-btn-thumb" loading="lazy" />
+                    ) : (
+                      <span className="ds-btn-text">{game.title}</span>
+                    )}
+                    {isFav && <span className="ds-fav-dot">★</span>}
+                  </button>
+                );
+              })}
+            </div>
           ) : (
             <div className="mobile-empty-catalog">
               <FolderOpen size={48} color="#64748b" />

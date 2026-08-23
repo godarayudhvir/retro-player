@@ -28,7 +28,7 @@ architecture/
 │   ├── audio-sfx.md        # Pure Web Audio API UI sound effects synthesizer (`useWebAudioSfx.js`)
 │   ├── bgm-engine.md       # Background Music (BGM) playback, track discovery & smart in-game pause (`useBgmEngine.js`)
 │   ├── user-profiles.md    # Multi-User profiles & Multiavatar studio system (`useProfileManager.js`, `MultiAvatar.jsx`, `ProfileCreatorModal.jsx`)
-│   ├── theme-engine.md     # Theme engine, Vanilla console styling & CSS custom properties (`useThemeEngine.js`, `index.css`)
+│   ├── theme-engine.md     # Theme engine, DS Touch console styling & CSS custom properties (`useThemeEngine.js`, `index.css`)
 │   ├── playtime-favorites.md # Smart Collections (Favorites & Recents) & Playtime analytics (`usePlaytimeAndFavorites.js`)
 │   ├── console-switcher.md # Console system switching, smart collections filtering & tab ribbon (`SystemRibbon.jsx`)
 │   ├── game-catalog.md     # Game database catalog, ROM path mapping & game descriptions (`gameDescriptions.js`, Vite API middleware)
@@ -36,14 +36,12 @@ architecture/
 │   └── pwa-service-worker.md # Progressive Web App (PWA), standalone installation & offline caching engine (`public/sw.js`, `usePwaInstall.js`)
 │
 ├── components/             # System Controls & UI Components
-│   ├── mobile-app-view.md  # Dedicated Netflix-style mobile feed & profile gateway (`MobileAppView.jsx`)
+│   ├── mobile-app-view.md  # Dedicated mobile touch feed, systems cards & DS buttons matrix (`MobileAppView.jsx`)
 │   ├── topbar.md           # Console header HUD, profile avatar, BGM controls, scraper, theme studio & search (`Topbar.jsx`)
 │   ├── confirm-modal.md    # Universal in-app confirmation dialog replacing native alerts & confirms (`ConfirmModal.jsx`)
 │   ├── load-rom-modal.md   # In-app Load Custom ROM modal with drag-drop and supported formats (`LoadRomModal.jsx`)
 │   ├── system-ribbon.md    # Category tab ribbon with dynamic game count sorting (`SystemRibbon.jsx`)
-│   ├── cartridge-tile.md   # Physical 3D game cartridge component with sheen and color heuristics (`CartridgeTile.jsx`)
-│   ├── cartridge-grid.md   # Theme-routing viewport: VanillaView shelf or DsView dual-screen layout (`CartridgeGrid.jsx`, `theme-views/`)
-│   ├── game-detail-modal.md # Game drawer modal with metadata & save data detection (`GameDetailModal.jsx`)
+│   ├── cartridge-grid.md   # Theme-routing viewport & DS Touch dual-screen layout (`CartridgeGrid.jsx`, `theme-views/`)
 │   ├── metadata-edit-modal.md # Jellyfin-style manual metadata editor for ROM hacks & homebrew (`MetadataEditModal.jsx`)
 │   ├── scraper-modal.md    # Granular scraper scope selector: All / Single / Multi / Title (`ScraperModal.jsx`)
 │   ├── theme-switcher-modal.md # Console Theme Studio: theme grid, light/dark switch, UI Display Mode picker (`ThemeSwitcherModal.jsx`)
@@ -57,6 +55,7 @@ architecture/
 │
 └── mirai/                  # Future features and upcoming roadmap specifications ("Mirai" - 未来)
     ├── README.md           # Master Roadmap & Specifications Index
+    ├── cartridge-designs-spec.md # Master 3D Cartridge & Media Design Blueprint for 10+ authentic console formats
     ├── local-directory-library.md # Local Directory Mount & Client-Side Scraping (100% GitHub Pages offline)
     ├── byos-cloud-storage.md # Bring-Your-Own-Storage Cloud Providers (Google Drive PKCE / AWS S3 / Cloudflare R2)
     ├── cloud-saves.md      # Cross-Device Quick Save & Battery RAM Cloud Synchronization

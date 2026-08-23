@@ -1,14 +1,14 @@
 # Main Application Shell & Orchestration (`architecture/core/app.md`)
 
 ## 1. Description
-The Main Application Shell ([App.jsx](file:///Users/godarayudhvir/Github/retro-player/src/App.jsx)) serves as the central root orchestrator of **Retro Player**. It coordinates specialized custom React hooks (`useWebAudioSfx`, `useThemeEngine`, `useDeviceDetection`, `useRomManifest`, `usePlaytimeAndFavorites`, `useGamepadStatus`, `useSaveDataManager`, `useGamepadNavigation`, `useProfileManager`, `useBgmEngine`, `useMetadataScraper`, `usePwaInstall`) and conditionally renders modular subcomponents across device form factors (`Topbar`, `SystemRibbon`, `CartridgeGrid`, `MobileAppView`, `GameDetailModal`, `MetadataEditModal`, `ScraperModal`, `ThemeSwitcherModal`, `LoadRomModal`, `AboutInfoModal`, `ProfileSelectModal`, `ProfileCreatorModal`, `DemoWelcomeModal`, `DropzoneOverlay`, `OnScreenKeyboard`, `EmulatorModal`, `OnboardingScreen`).
+The Main Application Shell ([App.jsx](file:///Users/godarayudhvir/Github/retro-player/src/App.jsx)) serves as the central root orchestrator of **Retro Player**. It coordinates specialized custom React hooks (`useWebAudioSfx`, `useThemeEngine`, `useDeviceDetection`, `useRomManifest`, `usePlaytimeAndFavorites`, `useGamepadStatus`, `useSaveDataManager`, `useGamepadNavigation`, `useProfileManager`, `useBgmEngine`, `useMetadataScraper`, `usePwaInstall`) and conditionally renders modular subcomponents across device form factors (`Topbar`, `SystemRibbon`, `CartridgeGrid`, `MobileAppView`, `MetadataEditModal`, `ScraperModal`, `ThemeSwitcherModal`, `LoadRomModal`, `AboutInfoModal`, `ProfileSelectModal`, `ProfileCreatorModal`, `DemoWelcomeModal`, `DropzoneOverlay`, `OnScreenKeyboard`, `EmulatorModal`, `OnboardingScreen`).
 
 ---
 
 ## 2. Detailed List of What It Does
-- **Modular Component Orchestration**: Composes dedicated subcomponents for topbar status HUD, system category ribbon, 3D cartridge grid, mobile streaming view, game drawer modal, Load ROM dialog, info modal, virtual keyboard, theme studio, and emulator modal.
+- **Modular Component Orchestration**: Composes dedicated subcomponents for topbar status HUD, system category ribbon, DS touch dual-screen grid, mobile streaming view, Load ROM dialog, info modal, virtual keyboard, theme studio, and emulator modal.
 - **Modern Device & Viewport Detection (`useDeviceDetection`)**: Employs native W3C `window.matchMedia` listeners to monitor responsive breakpoints (`(max-width: 768px) and (orientation: portrait)`) and pointer capabilities (`(hover: none) and (pointer: coarse)`) with zero resize event layout thrashing. Supports user UI Display Mode overrides (`auto`, `console`, `mobile`).
-- **Theme & Display Mode Studio (`useThemeEngine`, `ThemeSwitcherModal`)**: Manages console themes (Vanilla, DS Touch), global light/dark color modes, and interactive UI Display Mode switching (Auto, Console/TV 10-Foot UI, Mobile Feed) persisted in `localStorage`.
+- **Theme & Display Mode Studio (`useThemeEngine`, `ThemeSwitcherModal`)**: Manages console themes (DS Touch standard default, extensible for future themes), global light/dark color modes, and interactive UI Display Mode switching (Auto, Console/TV 10-Foot UI, Mobile Feed) persisted in `localStorage`.
 - **Smart Collections & Playtime Analytics (`usePlaytimeAndFavorites`)**: Manages persistent favorites, chronological recently played history, active gameplay session timing, and in-app stats resetting.
 - **Audio Synthesizer Coordination (`useWebAudioSfx`)**: Injects zero-latency synthesized tactile clicks, swooshes, modal chimes, and cartridge insertion audio throughout the UI.
 - **Dynamic Controller Connection Management (`useGamepadStatus`)**: Tracks active gamepad connectivity, battery percentage telemetry, and controller hardware ID.
@@ -33,14 +33,13 @@ The Main Application Shell ([App.jsx](file:///Users/godarayudhvir/Github/retro-p
 
 ### Component Hierarchy
 - `<DropzoneOverlay />`: Full-viewport drag-and-drop backdrop for custom ROM loading.
-- `<MobileAppView />`: Rendered when `isMobile` is active (portrait phone screens or manual Mobile Feed override); features Netflix-style carousels, bottom sheets, and chip navigation.
+- `<MobileAppView />`: Rendered when `isMobile` is active (portrait phone screens or manual Mobile Feed override); features systems cards, DS touch buttons matrix, and full-screen detail stages.
 - `<Topbar />`: System header, active profile avatar, BGM controls, theme studio launcher, scraper trigger, sound toggle, search bar, PWA install, and digital clock.
 - `<SystemRibbon />`: Horizontal category navigation with smart collections (Favorites, Recent).
-- `<CartridgeGrid />`: Theme-routing viewport — dispatches to `VanillaView` (3D cartridge shelf) or `DsView` (DS dual-screen firmware layout with inline game detail).
-- `<GameDetailModal />`: Selected game drawer modal with metadata, playtime analytics, and save detection. Suppressed when DS theme is active (inline in DsView instead).
+- `<CartridgeGrid />`: Viewport orchestrator — renders `DsView` (DS dual-screen firmware layout with integrated inline game detail).
 - `<MetadataEditModal />`: Jellyfin-style manual metadata override editor for title, synopsis, cover art, and technical details.
 - `<ScraperModal />`: Granular scraper scope selector (All / Single System / Multi-System / Individual Title) with force-overwrite toggle and live log panel.
-- `<ThemeSwitcherModal />`: Console Theme Studio with 2-theme grid, light/dark switch, and UI Display Mode picker (Auto / Console / Mobile).
+- `<ThemeSwitcherModal />`: Console Theme Studio with theme catalog, light/dark switch, and UI Display Mode picker (Auto / Console / Mobile).
 - `<LoadRomModal />`: In-app custom ROM loader with drag-drop dropzone and supported format reference chips.
 - `<AboutInfoModal />`: Project overview and capability details.
 - `<ProfileSelectModal />`: Full-screen "Who's Playing?" Netflix-style profile selector with Multiavatar avatars, add/edit/delete actions.

@@ -32,7 +32,7 @@ The **Smart Collections & Playtime Analytics** system enhances library navigatio
 - **Session Duration Tracking ([EmulatorModal.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/EmulatorModal.jsx))**:
   - Implements an active seconds timer (`activeSecondsRef`) that runs only when the browser tab is focused and active (`document.visibilityState === 'visible'`). Background tab idle time is automatically paused and ignored.
   - Utilizes a single-execution guard (`sessionReportedRef`) to ensure session durations are recorded exactly once per exit without double-counting on unmount.
-- **Stats Reset Capability ([GameDetailModal.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/GameDetailModal.jsx))**:
-  - Provides an inline reset trigger (`onResetStats`) within the Playtime card allowing users to reset corrupted or inflated stats for specific games.
+- **Stats Reset Capability ([DsView.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/theme-views/DsView.jsx))**:
+  - Provides an inline reset trigger (`onResetStats`) within the Playtime card allowing users to reset stats for specific games.
 - **Controller & Spatial Navigation ([useGamepadNavigation.js](file:///Users/godarayudhvir/Github/retro-player/src/hooks/useGamepadNavigation.js))**:
-  - Gamepad button 2 (`btnX`) and keyboard key `F` toggle favorite for `selectedGameCard` or the focused tile in `CartridgeGrid`.
+  - Gamepad button 2 (`btnX`) and keyboard key `F` toggle favorite for the focused tile in `DsView` or mobile stages.

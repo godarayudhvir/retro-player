@@ -5,14 +5,6 @@ const COLOR_MODE_STORAGE_KEY = 'retro_player_color_mode';
 
 export const THEMES = [
   {
-    key: 'vanilla',
-    name: 'Vanilla',
-    shortName: 'VANILLA',
-    icon: '🍦',
-    description: 'Clean porcelain-white console UI with vibrant accents',
-    accentColor: '#ef4444'
-  },
-  {
     key: 'ds',
     name: 'DS Touch',
     shortName: 'DS TOUCH',
@@ -36,7 +28,7 @@ export function useThemeEngine() {
     } catch (e) {
       console.error('Failed to load theme from localStorage:', e);
     }
-    return 'vanilla';
+    return 'ds';
   });
 
   const [colorMode, setColorModeState] = useState(() => {

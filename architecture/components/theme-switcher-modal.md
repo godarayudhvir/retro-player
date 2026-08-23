@@ -2,16 +2,15 @@
 
 ## 1. Description
 
-The `ThemeSwitcherModal` component is the Console Theme Studio dialog for Retro Player. Accessible from the Topbar theme button, via keyboard shortcut `T`, or from the mobile topbar theme button, it allows players to switch between the 2 available console themes (Vanilla and DS Touch), toggle Light/Dark mode, and select their preferred UI Display Mode (Auto Responsive, Console/TV 10-Foot UI, or Mobile Feed). All controls are fully navigable via keyboard and gamepad.
+The `ThemeSwitcherModal` component is the Console Theme Studio dialog for Retro Player. Accessible from the Topbar theme button, via keyboard shortcut `T`, or from the mobile topbar theme button, it allows players to select console themes, toggle Light/Dark mode, and select their preferred UI Display Mode (Auto Responsive, Console/TV 10-Foot UI, or Mobile Feed). All controls are fully navigable via keyboard and gamepad.
 
 ---
 
 ## 2. Detailed List of What It Does
 
-- **2-Theme Card Grid**:
+- **Theme Card Grid**:
   - Renders one card per available theme from `themeEngine.availableThemes`.
-  - **Vanilla**: Crisp porcelain-white console UI with 3D cartridge shelf and dot-matrix canvas background.
-  - **DS Touch**: Nintendo DS dual-screen graph paper firmware layout with beveled square button matrix and integrated game detail panel.
+  - **DS Touch** (Default): Nintendo DS dual-screen graph paper firmware layout with beveled square button matrix and integrated game detail panel.
   - Active theme card shows a green `✓ ACTIVE` badge.
   - Arrow keys / D-pad Left/Right cycle `selectedIndex` through themes.
   - `Enter` / `A` button applies the highlighted theme via `themeEngine.setTheme(key)`.
@@ -45,7 +44,7 @@ The `ThemeSwitcherModal` component is the Console Theme Studio dialog for Retro 
 - `onClose` (function): Closes modal.
 - `themeEngine` (Object): Theme engine instance from `useThemeEngine`. Exposes:
   - `availableThemes` (Array): `[{ key, label, description, icon }]`
-  - `theme` (string): Current active theme key (`'vanilla'` | `'ds'`).
+  - `theme` (string): Current active theme key (`'ds'`).
   - `colorMode` (string): Current color mode (`'light'` | `'dark'`).
   - `setTheme(key)`: Applies and persists theme.
   - `toggleColorMode()`: Flips color mode and persists.

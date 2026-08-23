@@ -9,8 +9,8 @@ The `CartridgeGrid` component (`<main className="console-viewport">`) is the pri
 ## 2. Detailed List of What It Does
 
 - **Theme-Based Layout Routing**: Reads `themeEngine.theme` and conditionally renders the matching theme-specific view component:
-  - `'vanilla'` (default): Routes to `VanillaView.jsx` — horizontal 3D cartridge shelf.
-  - `'ds'`: Routes to `DsView.jsx` — Nintendo DS dual-screen firmware layout with integrated inline game detail panel.
+  - `'ds'` (default): Routes to `DsView.jsx` — Nintendo DS dual-screen firmware layout with integrated inline game detail panel.
+  - Future themes register modularly into the layout router.
 
 - **Empty State Rendering**: When `filteredGames.length === 0`, renders a contextual empty state prompt:
   - **Search Empty**: `<Search>` icon, "No Matching Titles Found" with clear-filter button.
@@ -27,24 +27,18 @@ The `CartridgeGrid` component (`<main className="console-viewport">`) is the pri
 ### Theme Dispatch
 ```javascript
 switch (currentTheme) {
-  case 'ds':     return <DsView ... />;
-  case 'vanilla':
-  default:       return <VanillaView ... />;
+  case 'ds':
+  default:
+    return <DsView ... />;
 }
 ```
-
-### VanillaView (`src/components/theme-views/VanillaView.jsx`)
-- Renders the horizontal scrollable 3D cartridge shelf.
-- Passes `filteredGames`, `metadataMap`, `focusedTarget`, `handleGameSelect`, `isFavorite`, `activeSystem`, `currentSystemName` to `CartridgeTile` rows.
-- `GameDetailModal` is rendered **at the App.jsx level** (not inside VanillaView) and opened via `setSelectedGameCard(game)` when a cartridge is selected.
 
 ### DsView (`src/components/theme-views/DsView.jsx`)
 - Renders a 3-column console firmware layout:
   - **Left column**: Scrollable beveled square game button matrix (`ds-touch-btn` grid).
-  - **Center column**: Dual-screen preview (top screen: cover art hero; bottom screen: synopsis / metadata).
-  - **Right column**: 3D box art display + technical specifications card (core, system, save data).
-- The game detail drawer is **embedded inline** within DsView — `GameDetailModal` is **suppressed** at the App.jsx level when the DS theme is active (`game={themeEngine?.theme === 'ds' ? null : selectedGameCard}`).
-- All game actions (play, favorite, edit metadata, scrape, save import/export/delete) are available inline within the DsView panel.
+  - **Center column**: Dual-screen preview (top screen: cover art hero / screenshot; bottom screen: synopsis / metadata).
+  - **Right column**: Integrated Direct Touch Action Stage (Favorite, Strategy Guides with QR Code Companion, Edit Metadata, Re-Scrape, Save SRAM export/import/delete, specs).
+- All game actions (play, favorite, edit metadata, scrape, save import/export/delete) are available directly inline within the DsView panel with zero popup dialogs.
 
 ### Props Interface
 ```typescript
@@ -79,6 +73,5 @@ CartridgeGrid({
 
 ### Source Locations
 - Grid Router: [src/components/CartridgeGrid.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/CartridgeGrid.jsx)
-- Vanilla Theme View: [src/components/theme-views/VanillaView.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/theme-views/VanillaView.jsx)
 - DS Touch Theme View: [src/components/theme-views/DsView.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/theme-views/DsView.jsx)
-- Physical Cartridge Tile: [src/components/CartridgeTile.jsx](file:///Users/godarayudhvir/Github/retro-player/src/components/CartridgeTile.jsx)
+- Master 3D Cartridge Specification: [architecture/mirai/cartridge-designs-spec.md](file:///Users/godarayudhvir/Github/retro-player/architecture/mirai/cartridge-designs-spec.md)

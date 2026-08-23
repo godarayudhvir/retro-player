@@ -40,9 +40,9 @@ Featuring physical 3D cartridge rendering, real-time online metadata scraping, s
 
 <div align="center">
 
-| Vanilla Library | DS Touch Theme | Profile Selector |
+| DS Touch Library | Dual-Screen Details | Profile Selector |
 |---|---|---|
-| <img src="docs-screenshots/home-library-all-games.webp" width="280" alt="Vanilla home library with 3D cartridge shelf" /> | <img src="docs-screenshots/ds-view-game-detail.webp" width="280" alt="DS Touch theme with dual-screen game detail" /> | <img src="docs-screenshots/profile-selector-who-is-playing.webp" width="280" alt="Who's Playing profile selector" /> |
+| <img src="docs-screenshots/ds-view-game-detail.webp" width="280" alt="DS Touch console library" /> | <img src="docs-screenshots/ds-view-game-detail.webp" width="280" alt="DS Touch theme with dual-screen game detail" /> | <img src="docs-screenshots/profile-selector-who-is-playing.webp" width="280" alt="Who's Playing profile selector" /> |
 
 | Load Custom ROM | Profile Creator | NDS Emulation |
 |---|---|---|

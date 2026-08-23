@@ -437,7 +437,7 @@ export default function DsView({
               );
             })()}
 
-            {/* Playtime & Session Analytics Card matching Vanilla's 3-column stats */}
+            {/* Playtime & Session Analytics Card */}
             <div className="ds-stats-card">
               <div className="ds-stats-row-3">
                 <div className="ds-stat-item">
