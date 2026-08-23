@@ -34,7 +34,7 @@ Unlike external services that rely on emulator memory hacking or game-specific c
 
 #### 🎨 Customization & Profile
 - **"Identity Crisis"**: Change your profile avatar 3 times in the Multiavatar studio.
-- **"Chameleon"**: Switch between Vanilla and DS Touch themes or cycle light/dark modes 5 times.
+- **"Chameleon"**: Cycle between Light and Dark display modes 5 times.
 - **"Gold Star Curator"**: Add 5 or more games to your Favorites collection.
 
 ### UI & Audio Feedback

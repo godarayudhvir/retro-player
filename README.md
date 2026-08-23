@@ -73,19 +73,17 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 ---
 
-## ✨ Key Highlights & Features
+## Key Highlights & Features
 
-- 🎮 **Console-Grade Gamepad & Spatial Navigation**: 100% controller-driven library navigation (D-pad/analog sticks, A/B/X/Y, L1/R1 bumpers, `START` for quick launch, `SELECT` to toggle favorites) with an adaptive 5-row On-Screen Virtual Keyboard for searching the library, naming player profiles, creating avatar seeds, and picking scraper titles without physical keyboards.
-- ⚡ **Pure Client-Side WASM Emulation**: Hardware-accelerated emulation across 12 retro platforms powered by WebAssembly with ~0% host CPU overhead.
-- 📱 **Adaptive Cross-Device UI**: Tailored responsive layouts for Mobile Touch Feeds, Handhelds (Steam Deck/Switch), Desktop, and 10-Foot TV mode.
-- 🎨 **Nintendo DS Touch Experience**: Recreates authentic dual-screen hardware ergonomics with top-screen dynamic box art & spec sheets, and bottom touchscreen game selection grid with integrated inline **Save Data Studio** (`.sav` battery RAM import/export/erasure), **Strategy Guides Deck** (written walkthroughs, video guides, and mobile QR pairing), and **Edit & Scrape Studio** (cover asset manager, live Libretro/ScreenScraper/Wikipedia search terminal, sidecar export) with instant zero-click tab switching and zero disruptive popup overlays.
-- 👤 **Multi-User Profiles**: Custom vector avatars via Multiavatar with strictly isolated in-game battery saves (`.sav`/SRAM), quick save states (`.state`), favorites, recents, and playtime tracking across profiles.
-- 💾 **Battery Saves & State Management**: Profile-scoped auto-injection and management of `.sav`/`.srm` SRAM saves, snapshot states, and offline IndexedDB caching with zero cross-player bleed.
-- 🌐 **Automated Metadata & Cover Scraping**: Instant 3D box art from Libretro Thumbnails CDN, Wikipedia synopses, real-time active title progress bar telemetry, post-scan completion report cards with IndexedDB persistence, and built-in manual metadata editor.
-- 🎵 **Dynamic BGM & Synthesized UI SFX**: Built-in background music engine with smart in-game pause, plus low-latency Web Audio API synthesized sound effects.
-- ⚙️ **Settings Hub & Storage Diagnostics**: Console settings hub, batch ROM uploader, folder directory mounting, client-side factory reset & cache purge engine, and storage diagnostics.
-- 📹 **60 FPS Video Recorder & Engine Controls**: In-browser gameplay screen recording, speed throttling (`1.0x`–`5.0x`), VSync toggle, and live diagnostic HUD (`D`).
-- 📱 **Installable PWA**: Progressive Web App with standalone full-screen execution and offline service worker caching.
+- 🎮 **Console Gamepad & Spatial Navigation**: 100% controller-driven library navigation with an adaptive on-screen virtual keyboard.
+- ⚡ **Pure Client-Side WASM Emulation**: Hardware-accelerated WebAssembly execution across 12 retro platforms with ~0% host CPU usage.
+- 🎨 **Nintendo DS Touch Architecture**: Dual-screen layout featuring top-screen dynamic box art & specs, bottom touchscreen carousel, and inline tools.
+- 💾 **Profile-Scoped Battery Saves**: In-game battery RAM (`.sav`/SRAM) and quick save states strictly isolated per Multiavatar player profile.
+- 🌐 **Automated Metadata & Box Art Scraper**: Instant 3D covers from Libretro CDN, Wikipedia synopses, real-time scan telemetry, and manual editor.
+- 📖 **Curated Strategy Guides & QR Companion**: Direct written/video walkthroughs with mobile QR code pairing for couch play.
+- 🎵 **Dynamic BGM & Synthesized SFX**: Multi-track chiptune engine with smart in-game pause and low-latency Web Audio sound effects.
+- 📱 **Adaptive Cross-Device PWA**: Standalone installable app optimized across Mobile Touch Feeds, Steam Deck, Desktop, and 10-Foot TV mode.
+- 📹 **60 FPS Recorder & Engine Controls**: In-browser video capture, speed turbo throttling (`1.0x`–`5.0x`), VSync, and live diagnostic HUD.
 
 ---
 
@@ -103,7 +101,7 @@ Retro Player supports **12 classic retro gaming platforms** out of the box:
 
 ## 🎮 Bundled Demo Showcase & Compliance
 
-Retro Player includes a lightweight collection of **21 non-commercial demonstration ROMs and homebrew titles** across 12 console platforms to immediately verify core performance in your browser:
+Retro Player includes a lightweight collection of **41 non-commercial demonstration ROMs and homebrew titles** across 12 console platforms to immediately verify core performance in your browser:
 
 - 📑 **Full Demo Catalog & Inventory**: See **[guides/roms.md](guides/roms.md)** for the complete file-by-file inventory, system file sizes, and homebrew developer credits.
 - 🎯 **Strictly Non-Complete Software**: All pre-installed software consists of non-commercial prototypes, trade show trials, and aftermarket homebrew demos. **Zero full retail commercial games are bundled.**
@@ -169,7 +167,6 @@ Upcoming feature designs, technical blueprints, and step-by-step implementation 
 - **[Cross-Device Cloud Saves](mirai/cloud-saves.md)**: Cloud synchronization for quick saves and battery SRAM states.
 - **[Self-Hosted User Management](mirai/self-hosted-user-management.md)**: Multi-user auth, admin dashboard, and role permissions.
 - **[Organic Achievements & Trophies](mirai/organic-achievements.md)**: Universal gameplay milestones, trophies, and unlock toasts.
-- **[Walkthrough Links & QR Hub](mirai/walkthrough-links-hub.md)**: Curated guides and dual-screen companion QR code.
 - **[Settings Hub Redesign](mirai/settings-hub.md)**: Enhanced console library management and diagnostic tools.
 - **[WebRTC Netplay](mirai/multiplayer.md)**: Peer-to-peer online multiplayer with input rollback synchronization.
 

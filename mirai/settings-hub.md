@@ -9,7 +9,7 @@ The component was deliberately removed from the live application — the UI was 
 
 **All underlying server infrastructure remains intact** — the REST endpoints (`/api/upload-rom`, `/api/upload-bgm`, `DELETE /api/roms/:systemKey/:filename`, `DELETE /api/bgm/:filename`) and the client-side utility (`src/utils/storageCleaner.js`) are still fully operational. The system just has no UI surface to invoke them from.
 
-**Future Goal:** Redesign and reintroduce this as a premium-grade, console-native settings experience — aesthetically integrated with the Vanilla and DS Touch themes, accessible from the Topbar, and built to the same quality standard as the rest of the shell.
+**Future Goal:** Redesign and reintroduce this as a premium-grade, console-native settings experience — aesthetically integrated with the Nintendo DS Touch firmware theme, accessible from the Topbar, and built to the same quality standard as the rest of the shell.
 
 ---
 
@@ -37,9 +37,8 @@ A **3-tab split layout** navigable via keyboard (`Tab` / Arrow keys) and gamepad
 - **Future**: System information panel (emulator core versions, service worker cache status, last scrape timestamp).
 
 ### Design Requirements for Redesign
-- Must feel native to the Vanilla and DS Touch themes — not a generic modal overlay.
-- **Vanilla theme**: Full-width slide-in panel from the right edge (like a Nintendo Switch system settings), not a centered popup. Dark/light mode aware.
-- **DS Touch theme**: Bottom-screen system panel with proper graph paper styling.
+- Must feel native to the console Nintendo DS Touch theme with dark/light mode awareness — not a generic modal overlay.
+- **DS Touch theme**: Bottom-screen system panel with proper graph paper styling and responsive controls.
 - All destructive actions must use the existing `ConfirmModal` pattern — zero native browser popups.
 - 100% keyboard and gamepad navigable — focus ring consistent with the rest of the shell.
 - Accessible from a **Settings gear icon** in the Topbar (between the scraper button and the theme studio button).
@@ -89,7 +88,7 @@ The core logic was sound — only the visual layer needs a full redesign pass be
 ```
 src/components/SettingsHub.jsx   ← renamed from SettingsModal for clarity
 ```
-Design to theme spec above. Use the Vanilla/DS theme-aware CSS tokens already in `index.css`.
+Design to theme spec above. Use the DS Touch theme-aware CSS tokens already in `index.css`.
 
 ### Step 2 — Wire into App.jsx
 ```javascript
