@@ -21,46 +21,6 @@
 
 ---
 
-## 📅 Phased Implementation Roadmap (Least to Most Code Impact)
-
-```
-PHASE 1: Core Modularization & Refactoring [COMPLETED]
-├── Modularize App.jsx into subcomponents and custom hooks (DONE)
-├── Add Web Audio API synthesized UI sound effects (DONE)
-└── Add Local Core Offline Fallback (/public/emulatorjs/data/) (DONE)
-
-PHASE 2: Library, Themes & Scraper Enhancements [COMPLETED]
-├── Implement Favorites, Recently Played & Custom Tag Collections (DONE)
-├── Add Playtime Tracking Analytics & Stats Dashboard (DONE)
-├── Add Multi-Theme Engine (Vanilla shelf & DS Touch dual-screen view) (DONE)
-├── Implement Dedicated Mobile View (MobileAppView) & Touch Gamepad (DONE)
-├── In-App CRT & Visual Shader Filters (CRT Scanlines, LCD, Smoothing) (DONE)
-├── Local ROM Sidecars & In-App Manual Metadata Editor (DONE)
-├── Multi-User Profiles & Multiavatar Studio (DONE)
-└── Progressive Web App (PWA) Offline Handheld Installation (DONE)
-
-PHASE 3: Low-Impact Wins & In-App Polish (Low Impact)
-├── Task 3.1: Strategy Guides & Walkthrough Links Hub + Companion QR (walkthrough-links-hub.md)
-├── Task 3.2: Universal Organic Achievements & Trophy Cabinet (organic-achievements.md)
-└── Task 3.3: Console Settings & Library Management Hub Redesign (settings-hub.md)
-
-PHASE 4: Storage Autonomy & Offline Persistence (Medium Impact)
-├── Task 4.1: Local Directory Mount & Client-Side Scraping (local-directory-library.md)
-├── Task 4.2: In-Browser Archive Auto-Extraction (.zip, .7z)
-└── Task 4.3: Cross-Device Quick Save & SRAM Cloud Synchronization (cloud-saves.md)
-
-PHASE 5: BYOS Streaming & Cloud Infrastructure (Medium-High Impact)
-├── Task 5.1: Bring-Your-Own-Storage Cloud Providers (byos-cloud-storage.md)
-├── Task 5.2: Self-Hosted Docker Supabase Multi-User Auth & Super Admin Wizard (self-hosted-user-management.md)
-└── Task 5.3: Admin User Management Portal (Roles, Policies, Storage Metrics)
-
-PHASE 6: Complex Real-Time Networking & Integrations (High Impact)
-├── Task 6.1: WebRTC Peer-to-Peer Netplay & Multiplayer Lobby System (multiplayer.md)
-└── Task 6.2: Discord Rich Presence (DRP) Bridge
-```
-
----
-
 ## 🛠️ Specification Guidelines
 
 To add or update any specification in `architecture/mirai/`, adhere to the structure defined in [architecture/README.md](../README.md):
