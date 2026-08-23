@@ -56,11 +56,15 @@ architecture/
 │   └── retro-effects.md    # Custom Retro CSS effects, CRT scanlines, glassmorphism, background dots & UI animations (`index.css`)
 │
 └── mirai/                  # Future features and upcoming roadmap specifications ("Mirai" - 未来)
-    ├── README.md           # Master Vision, codebase audit, refactoring matrix & innovation catalog
-    ├── settings-hub.md     # Settings & Library Management Hub: removed UI, preserved server infra & full redesign spec
-    ├── local-sidecars-and-metadata-editor.md # Local companion sidecars (.nfo/.json/cover.webp) & in-app metadata editor
-    ├── multiplayer.md      # WebRTC Peer-to-Peer Netplay & local multiplayer emulation architecture
-    └── cloud-saves.md      # Cloud save state synchronization & cross-device backup architecture
+    ├── README.md           # Master Roadmap & Specifications Index
+    ├── local-directory-library.md # Local Directory Mount & Client-Side Scraping (100% GitHub Pages offline)
+    ├── byos-cloud-storage.md # Bring-Your-Own-Storage Cloud Providers (Google Drive PKCE / AWS S3 / Cloudflare R2)
+    ├── cloud-saves.md      # Cross-Device Quick Save & Battery RAM Cloud Synchronization
+    ├── self-hosted-user-management.md # Self-Hosted Docker Supabase Auth & Multi-User Admin
+    ├── organic-achievements.md # Universal Organic Achievements & Trophy Cabinet
+    ├── walkthrough-links-hub.md # Strategy Guides & Walkthrough Links Hub + Companion QR Code
+    ├── settings-hub.md     # Settings & Library Management Hub Redesign
+    └── multiplayer.md      # WebRTC Peer-to-Peer Netplay & local multiplayer emulation architecture
 ```
 
 > **Note**: For the overarching future vision, in-depth codebase audit, refactoring matrix, and master innovation catalog across 8 domains, see [mirai/README.md](mirai/README.md). For device tier variations (Mobile vs Handheld vs Desktop vs TV), see [guides/device-experience-matrix.md](../guides/device-experience-matrix.md). For the curated non-commercial demo catalog, file paths, and creator compliance policy, see [guides/roms.md](../guides/roms.md). For automated ROM organization, cover conversion, and metadata sidecar generation pipelines, see the [update-roms skill](../.agents/skills/update-roms/SKILL.md) and [rom-cleanup skill](../.agents/skills/rom-cleanup/SKILL.md).
