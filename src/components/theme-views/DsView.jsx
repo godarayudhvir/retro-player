@@ -654,6 +654,15 @@ export default function DsView({
           </div>
         )}
 
+        {/* DS Touch Bottom-Right Watermark / Brand Badge */}
+        <div className="ds-bottom-right-brand">
+          <img src={resolveAssetPath('favicon.svg')} alt="Retro Player Logo" className="ds-brand-watermark-logo" />
+          <span className="ds-brand-watermark-text">
+            <span className="brand-retro">RETRO</span>
+            <span className="brand-player">PLAYER</span>
+          </span>
+        </div>
+
       </div>
 
       <ConfirmModal

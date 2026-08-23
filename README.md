@@ -22,7 +22,7 @@
 <br />
 
 **A console-grade retro game launcher and library, delivered straight to any web browser.**  
-Featuring physical 3D cartridge rendering, real-time online metadata scraping, synthesized acoustic SFX, and **pure client-side WebAssembly execution**.
+Featuring Nintendo DS dual-screen Touch architecture, Multiavatar Character Creation Studio with Archetype presets, real-time online metadata scraping, synthesized acoustic SFX, and **pure client-side WebAssembly execution**.
 
 <br />
 

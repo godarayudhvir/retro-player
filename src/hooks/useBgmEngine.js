@@ -7,11 +7,11 @@ const BGM_TRACK_INDEX_KEY = 'retro_bgm_track_index';
 
 // Built-in fallback tracklist guaranteeing zero broken BGM on static hosts / GitHub Pages
 const DEFAULT_BGM_TRACKS = [
-  { id: 'bgm-track2', title: 'CHILL LOBBY', filename: 'track2.mp3', url: '/bgm/track2.mp3' },
-  { id: 'bgm-track3', title: 'PIXEL GROOVE', filename: 'track3.mp3', url: '/bgm/track3.mp3' },
-  { id: 'bgm-track4', title: 'RETRO WAVES', filename: 'track4.mp3', url: '/bgm/track4.mp3' },
-  { id: 'bgm-track5', title: 'MIDNIGHT SYNTH', filename: 'track5.mp3', url: '/bgm/track5.mp3' },
-  { id: 'bgm-track6', title: 'ARCADE DREAMS', filename: 'track6.mp3', url: '/bgm/track6.mp3' }
+  { id: 'bgm-track2', title: 'CHILL LOBBY', filename: 'track2.m4a', url: '/bgm/track2.m4a' },
+  { id: 'bgm-track3', title: 'PIXEL GROOVE', filename: 'track3.m4a', url: '/bgm/track3.m4a' },
+  { id: 'bgm-track4', title: 'RETRO WAVES', filename: 'track4.m4a', url: '/bgm/track4.m4a' },
+  { id: 'bgm-track5', title: 'MIDNIGHT SYNTH', filename: 'track5.m4a', url: '/bgm/track5.m4a' },
+  { id: 'bgm-track6', title: 'ARCADE DREAMS', filename: 'track6.m4a', url: '/bgm/track6.m4a' }
 ];
 
 /**

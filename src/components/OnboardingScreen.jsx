@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
 import { 
-  Sparkles, 
   Gamepad2, 
   ShieldCheck, 
   Download, 
   ChevronRight, 
   ArrowLeft, 
-  User, 
-  Dices, 
   Play, 
   Check, 
   Smartphone, 
@@ -15,21 +12,21 @@ import {
   Monitor, 
   Compass, 
   Copy, 
-  ExternalLink 
+  ExternalLink,
+  Layers,
+  Sparkles,
+  Volume2
 } from 'lucide-react';
-import MultiAvatar from './MultiAvatar';
-import { AVATAR_PRESETS, RANDOM_SEEDS } from '../hooks/useProfileManager';
+import CharacterStudio from './CharacterStudio';
+import { resolveAssetPath } from '../utils/assetPath';
 
 const isApplePlatform = typeof navigator !== 'undefined' && (/Macintosh|iPhone|iPad|iPod/i.test(navigator.userAgent || ''));
 const isSafariBrowser = typeof navigator !== 'undefined' && (/Safari/i.test(navigator.userAgent || '') && !/Chrome|Chromium|CriOS|FxiOS|Edg/i.test(navigator.userAgent || ''));
 
-const COLOR_PALETTE = ['#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#6366f1', '#a855f7', '#ec4899', '#334155'];
-
 /**
  * Modern Full-Screen Responsive Onboarding Experience for Desktop & Mobile.
- * Streamlined 2-Step Flow:
- * Step 1: Selling the Outcome / Value Proposition
- * Step 2: Multiavatar Player Passport & Profile Customization
+ * Step 1: Console Overview & Value Proposition (with PWA install & Safari guides)
+ * Step 2: Exhaustive Character Creation Studio & Profile Passport
  */
 export default function OnboardingScreen({
   isOpen,
@@ -39,16 +36,20 @@ export default function OnboardingScreen({
   sfx,
   pwa
 }) {
-  const [currentStep, setCurrentStep] = useState(0); // 0: Value, 1: Character Creation
+  const [currentStep, setCurrentStep] = useState(0); // 0: Overview, 1: Exhaustive Character Creation
   const [copiedLink, setCopiedLink] = useState(false);
   const totalSteps = 2;
+
+  // Multiavatar Profile Setup State
+  const [playerName, setPlayerName] = useState(() => activeProfile?.name || 'Player 1');
+  const [avatarSeed, setAvatarSeed] = useState(() => activeProfile?.avatarSeed || activeProfile?.name || 'RetroGamer');
+  const [favoriteColor, setFavoriteColor] = useState(() => activeProfile?.favoriteColor || '#ef4444');
 
   // 1-Click Robust Copy Current URL (Supports HTTP IP / Local Network & HTTPS)
   const handleCopySafariLink = async () => {
     const currentUrl = window.location.href;
     let successful = false;
 
-    // 1. Try modern Async Clipboard API
     if (navigator.clipboard && window.isSecureContext) {
       try {
         await navigator.clipboard.writeText(currentUrl);
@@ -58,7 +59,6 @@ export default function OnboardingScreen({
       }
     }
 
-    // 2. Fallback to execCommand('copy') for HTTP / local LAN IP addresses (192.168.x.x)
     if (!successful) {
       try {
         const textArea = document.createElement('textarea');
@@ -91,20 +91,6 @@ export default function OnboardingScreen({
     }
   };
 
-  // Multiavatar Profile Setup State
-  const [playerName, setPlayerName] = useState(() => activeProfile?.name || 'Player');
-  const [avatarSeed, setAvatarSeed] = useState(() => activeProfile?.avatarSeed || activeProfile?.name || 'RetroGamer');
-  const [favoriteColor, setFavoriteColor] = useState(() => activeProfile?.favoriteColor || '#ef4444');
-
-  // Randomize Avatar
-  const handleRandomizeAvatar = () => {
-    const randomSeed = RANDOM_SEEDS[Math.floor(Math.random() * RANDOM_SEEDS.length)] + Math.floor(Math.random() * 999);
-    const randomColor = COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)];
-    setAvatarSeed(randomSeed);
-    setFavoriteColor(randomColor);
-    sfx?.playFavoriteToggle?.(true);
-  };
-
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
       setCurrentStep(prev => prev + 1);
@@ -129,7 +115,7 @@ export default function OnboardingScreen({
 
     // Save customized profile
     if (onSaveCreatedProfile) {
-      const finalName = playerName.trim() || 'Player';
+      const finalName = playerName.trim() || 'Player 1';
       const finalSeed = avatarSeed.trim() || finalName;
       onSaveCreatedProfile(finalName, finalSeed, favoriteColor);
     }
@@ -145,6 +131,7 @@ export default function OnboardingScreen({
       {/* Top Header Bar: Skip & Brand */}
       <header className="onboarding-topbar">
         <div className="onboarding-brand">
+          <img src={resolveAssetPath('favicon.svg')} alt="Retro Player Logo" className="onboarding-brand-logo" />
           <span className="onboarding-brand-retro">RETRO</span>
           <span className="onboarding-brand-player">PLAYER</span>
         </div>
@@ -162,32 +149,35 @@ export default function OnboardingScreen({
       {/* Main Slide Carousel Body */}
       <main className="onboarding-body-viewport">
         {/* =========================================================
-            SLIDE 0: SELLING THE OUTCOME / VALUE PROPOSITION
+            SLIDE 0: CONSOLE OVERVIEW & SYSTEM VALUE PILLARS
             ========================================================= */}
         {currentStep === 0 && (
           <div className="onboarding-slide animate-slide-up">
+            <div className="onboarding-hero-badge">
+              <Gamepad2 size={16} />
+              <span>THE ZERO-OVERHEAD WEB EMULATION STATION</span>
+            </div>
+
             <h1 className="onboarding-slide-title">
               Play 12 Classic Consoles in Your Browser
             </h1>
 
             <p className="onboarding-slide-desc">
-              High-performance retro gaming running 100% locally in your browser sandbox with low input latency, instant battery saves, and USB/Bluetooth gamepad support.
+              Console-grade retro gaming running 100% locally in your browser sandbox with low input latency, instant battery saves, and USB/Bluetooth gamepad support.
             </p>
 
-            {/* 3 High-Impact Spacious Feature Cards */}
-            <div className="onboarding-cards-stack">
-              {/* Card 1: 12 Classic Systems & Embedded Platform Strip */}
-              <div className="onboarding-showcase-card">
-                <div className="onboarding-card-header">
-                  <div className="onboarding-card-icon-wrap" style={{ background: 'rgba(59, 130, 246, 0.12)', color: '#2563eb' }}>
-                    <Gamepad2 size={24} />
-                  </div>
-                  <div className="onboarding-card-heading">
-                    <strong>12 Handheld & Home Consoles</strong>
-                    <span>WASM emulation cores for Game Boy, SNES, N64, PS1, Sega, NDS & arcade classics.</span>
-                  </div>
+            {/* 4 Feature Pillars Grid */}
+            <div className="onboarding-pillars-grid">
+              {/* Card 1: 12 Consoles & Live Emulation */}
+              <div className="onboarding-pillar-card">
+                <div className="pillar-icon-wrap" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' }}>
+                  <Gamepad2 size={24} />
                 </div>
-                <div className="onboarding-card-tags-row">
+                <div className="pillar-text">
+                  <h3>12 Handheld & Home Consoles</h3>
+                  <p>Native WASM emulation cores for Game Boy, GBA, SNES, N64, PS1, Sega Genesis, NDS, Arcade, and Atari.</p>
+                </div>
+                <div className="pillar-system-tags">
                   <span className="system-pill" style={{ '--accent': '#7c3aed' }}>GBA</span>
                   <span className="system-pill" style={{ '--accent': '#ef4444' }}>SNES</span>
                   <span className="system-pill" style={{ '--accent': '#2563eb' }}>N64</span>
@@ -200,34 +190,50 @@ export default function OnboardingScreen({
                 </div>
               </div>
 
-              {/* Card 2: SRAM Battery Saves & Profiles */}
-              <div className="onboarding-showcase-card">
-                <div className="onboarding-card-header">
-                  <div className="onboarding-card-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#059669' }}>
-                    <ShieldCheck size={24} />
+              {/* Card 2: 100% Free & Open Source GitHub */}
+              <a 
+                href="https://github.com/godarayudhvir/retro-player" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="onboarding-pillar-card onboarding-github-card"
+                onClick={() => sfx?.playTileNav?.()}
+              >
+                <div className="pillar-icon-wrap" style={{ background: 'rgba(30, 41, 59, 0.15)', color: '#0f172a' }}>
+                  <ExternalLink size={24} />
+                </div>
+                <div className="pillar-text">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <h3>100% Free & Open Source</h3>
+                    <span className="github-live-chip">GITHUB</span>
                   </div>
-                  <div className="onboarding-card-heading">
-                    <strong>100% Private Client-Side Saves & Profiles</strong>
-                    <span>Real in-game battery RAM (.sav), quick save states, playtime analytics, and Multiavatar profiles.</span>
-                  </div>
+                  <p>Check out our repository at <strong>github.com/godarayudhvir/retro-player</strong> to star the project or contribute.</p>
+                </div>
+              </a>
+
+              {/* Card 3: 100% Private Client Saves */}
+              <div className="onboarding-pillar-card">
+                <div className="pillar-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
+                  <ShieldCheck size={24} />
+                </div>
+                <div className="pillar-text">
+                  <h3>100% Private Local Saves</h3>
+                  <p>Real in-game battery RAM (.sav), instant quick save states, and playtime statistics stored safely on your device.</p>
                 </div>
               </div>
 
-              {/* Card 3: Gamepad & Audio */}
-              <div className="onboarding-showcase-card">
-                <div className="onboarding-card-header">
-                  <div className="onboarding-card-icon-wrap" style={{ background: 'rgba(168, 85, 247, 0.12)', color: '#9333ea' }}>
-                    <Zap size={24} />
-                  </div>
-                  <div className="onboarding-card-heading">
-                    <strong>Universal Gamepad Navigation & Web Audio</strong>
-                    <span>Plug-and-play controller spatial navigation, synthesized acoustic SFX, and ambient BGM jukebox.</span>
-                  </div>
+              {/* Card 4: Gamepad & Acoustic Audio */}
+              <div className="onboarding-pillar-card">
+                <div className="pillar-icon-wrap" style={{ background: 'rgba(168, 85, 247, 0.15)', color: '#a855f7' }}>
+                  <Volume2 size={24} />
+                </div>
+                <div className="pillar-text">
+                  <h3>Spatial Gamepad & Web Audio</h3>
+                  <p>Plug-and-play controller spatial navigation, acoustic synthesized sound effects, and ambient lofi BGM tracks.</p>
                 </div>
               </div>
             </div>
 
-            {/* Standalone Install & Platform Guidance Cards (Only rendered if relevant) */}
+            {/* Standalone Install & Platform Guidance Cards */}
             {(pwa?.canInstall || (isSafariBrowser && isApplePlatform)) && (
               <div className="onboarding-pwa-cta-container">
                 {pwa?.canInstall ? (
@@ -246,6 +252,7 @@ export default function OnboardingScreen({
                       <strong>Install Standalone App</strong>
                       <span>Enjoy full-screen offline gaming with zero browser address bar distractions.</span>
                     </div>
+                    <ChevronRight size={18} className="install-arrow" />
                   </button>
                 ) : (
                   <div className="onboarding-apple-guidance-card animate-fade-in">
@@ -298,106 +305,33 @@ export default function OnboardingScreen({
         )}
 
         {/* =========================================================
-            SLIDE 1: MULTIAVATAR PLAYER PASSPORT & CUSTOMIZATION
+            SLIDE 1: EXHAUSTIVE CHARACTER CREATION STUDIO
             ========================================================= */}
         {currentStep === 1 && (
           <div className="onboarding-slide animate-slide-up">
+            <div className="onboarding-hero-badge">
+              <Zap size={16} />
+              <span>PLAYER PASSPORT & CHARACTER CUSTOMIZER</span>
+            </div>
+
             <h1 className="onboarding-slide-title">
               Create Your Player Character
             </h1>
 
             <p className="onboarding-slide-desc">
-              Set up your profile identity and customize your avatar with Multiavatar.
+              Choose an archetype, roll randomized styles, or customize your player handle and color.
             </p>
 
-            {/* Interactive Player Passport Card */}
-            <div className="onboarding-passport-card">
-              {/* Left Column: Live Avatar Preview */}
-              <div className="onboarding-passport-avatar-side">
-                <div 
-                  className="onboarding-passport-avatar-circle"
-                  style={{ borderColor: favoriteColor, boxShadow: `0 8px 24px ${favoriteColor}33` }}
-                >
-                  <MultiAvatar seed={avatarSeed || playerName || 'Player'} size={110} />
-                </div>
-                <button
-                  type="button"
-                  className="onboarding-randomize-btn"
-                  onClick={handleRandomizeAvatar}
-                  title="Randomize Character"
-                >
-                  <Dices size={16} />
-                  <span>Randomize</span>
-                </button>
-              </div>
-
-              {/* Right Column: Interactive Editor Controls */}
-              <div className="onboarding-passport-form-side">
-                {/* Player Name Input */}
-                <div className="onboarding-form-group">
-                  <label className="onboarding-form-label">Player Name</label>
-                  <input
-                    type="text"
-                    className="onboarding-name-input"
-                    value={playerName}
-                    onChange={(e) => {
-                      setPlayerName(e.target.value);
-                      if (!avatarSeed || avatarSeed === playerName) {
-                        setAvatarSeed(e.target.value);
-                      }
-                    }}
-                    placeholder="Enter your name..."
-                    maxLength={16}
-                  />
-                </div>
-
-                {/* Avatar Seed Presets */}
-                <div className="onboarding-form-group">
-                  <label className="onboarding-form-label">Avatar Presets</label>
-                  <div className="avatar-presets-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))' }}>
-                    {AVATAR_PRESETS.slice(0, 6).map((preset) => {
-                      const isSelected = avatarSeed === preset.avatarSeed;
-                      return (
-                        <button
-                          key={preset.id}
-                          type="button"
-                          className={`avatar-preset-chip ${isSelected ? 'is-active' : ''}`}
-                          onClick={() => {
-                            setAvatarSeed(preset.avatarSeed);
-                            setFavoriteColor(preset.favoriteColor);
-                            sfx?.playTileNav?.();
-                          }}
-                        >
-                          <MultiAvatar seed={preset.avatarSeed} size={24} />
-                          <span className="preset-name">{preset.name}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Favorite Color Palette */}
-                <div className="onboarding-form-group">
-                  <label className="onboarding-form-label">Profile Accent Color</label>
-                  <div className="color-swatch-row">
-                    {COLOR_PALETTE.map((col) => (
-                      <button
-                        key={col}
-                        type="button"
-                        className={`color-swatch-circle ${favoriteColor === col ? 'is-active' : ''}`}
-                        style={{ background: col }}
-                        onClick={() => {
-                          setFavoriteColor(col);
-                          sfx?.playTileNav?.();
-                        }}
-                      >
-                        {favoriteColor === col && <Check size={12} color="#ffffff" strokeWidth={3} />}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Exhaustive Character Studio Component */}
+            <CharacterStudio
+              playerName={playerName}
+              setPlayerName={setPlayerName}
+              avatarSeed={avatarSeed}
+              setAvatarSeed={setAvatarSeed}
+              favoriteColor={favoriteColor}
+              setFavoriteColor={setFavoriteColor}
+              sfx={sfx}
+            />
           </div>
         )}
       </main>
@@ -435,9 +369,9 @@ export default function OnboardingScreen({
           <button
             className="onboarding-primary-btn"
             onClick={handleNext}
-            title={currentStep === totalSteps - 1 ? 'Start Playing' : 'Continue to Next Step'}
+            title={currentStep === totalSteps - 1 ? 'Start Playing' : 'Continue to Character Studio'}
           >
-            <span>{currentStep === totalSteps - 1 ? 'Start Playing' : 'Continue'}</span>
+            <span>{currentStep === totalSteps - 1 ? 'Start Playing' : 'Continue to Studio'}</span>
             {currentStep === totalSteps - 1 ? <Play size={18} fill="#ffffff" /> : <ChevronRight size={18} />}
           </button>
         </div>

@@ -42,6 +42,6 @@ export function detectSystemFromExtension(filename) {
     case 'a26':
       return { key: 'atari2600',    core: 'atari2600',    name: 'Atari 2600',       color: '#d97706', icon: resolveAssetPath('assets/platforms/atari2600.svg'), supportsBatterySaves: false, saveExt: 'sav' };
     default:
-      return { key: 'nes',          core: 'nes',          name: 'Custom System',    color: '#64748b', icon: resolveAssetPath('assets/pokeball.png'), supportsBatterySaves: true, saveExt: 'sav' };
+      return { key: 'nes',          core: 'nes',          name: 'Custom System',    color: '#64748b', icon: resolveAssetPath('assets/platforms/custom.svg'), supportsBatterySaves: true, saveExt: 'sav' };
   }
 }

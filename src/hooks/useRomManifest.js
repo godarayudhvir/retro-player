@@ -92,7 +92,7 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
       systemColor: sys.color,
       romUrl: blobUrl,
       isCustomBlob: true,
-      coverUrl: sys.icon || resolveAssetPath('assets/pokeball.png')
+      coverUrl: sys.icon || resolveAssetPath('assets/platforms/custom.svg')
     };
 
     if (onCustomRomLoaded) {

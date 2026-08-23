@@ -195,6 +195,7 @@ export default function MobileAppView({
         <div className="mobile-profile-gate">
           <div className="mobile-profile-gate-header">
             <div className="mobile-app-brand">
+              <img src={resolveAssetPath('favicon.svg')} alt="Retro Player Logo" className="mobile-brand-logo" />
               <span className="mobile-brand-retro">RETRO</span>
               <span className="mobile-brand-player">PLAYER</span>
             </div>
@@ -702,18 +703,26 @@ export default function MobileAppView({
         accept=".zip,.7z,.nes,.sfc,.smc,.snes,.z64,.n64,.v64,.gba,.gbc,.gb,.nds,.bin,.iso,.pbp,.chd,.cue,.md,.smd,.gen,.gg,.sms,.pce,.ngp,.ngc,.ws,.wsc,.a26,.a78,.jag,.vec,.lynx"
       />
 
-      {/* Mobile Topbar: Profile --- Action Buttons Group */}
+      {/* Mobile Topbar: Brand & Profile --- Action Buttons Group */}
       <header className="mobile-topbar">
-        {/* Profile Avatar (Left) */}
-        <div 
-          className="mobile-topbar-profile"
-          onClick={() => {
-            setShowProfileSwitcher(true);
-            sfx?.playModalOpen?.();
-          }}
-          title="Switch Profile"
-        >
-          <MultiAvatar seed={activeProfile?.avatarSeed || activeProfile?.name || 'Player'} size={36} />
+        <div className="mobile-topbar-left-group">
+          {/* Profile Avatar */}
+          <div 
+            className="mobile-topbar-profile"
+            onClick={() => {
+              setShowProfileSwitcher(true);
+              sfx?.playModalOpen?.();
+            }}
+            title="Switch Profile"
+          >
+            <MultiAvatar seed={activeProfile?.avatarSeed || activeProfile?.name || 'Player'} size={34} />
+          </div>
+
+          <div className="mobile-topbar-brand">
+            <img src={resolveAssetPath('favicon.svg')} alt="Retro Player Logo" className="mobile-topbar-logo" />
+            <span className="mobile-brand-retro">RETRO</span>
+            <span className="mobile-brand-player">PLAYER</span>
+          </div>
         </div>
 
         {/* Right Icon Actions Group */}
