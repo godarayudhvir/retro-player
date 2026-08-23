@@ -30,6 +30,42 @@ import { detectSystemFromExtension } from '../utils/systemDetector';
 import { dbGet, dbSet, STORES } from '../services/db';
 import { resolveAssetPath } from '../utils/assetPath';
 
+// ─── Loading Hints (Skyrim-style rotating tips) ──────────────────────────────
+const LOADING_HINTS = [
+  { icon: '🕹️', label: 'TIP', text: 'Press L3 to open the in-game control menu.' },
+  { icon: '⏻',  label: 'TIP', text: 'Press L3 + R3 simultaneously to quit and return to the library.' },
+  { icon: '⏸',  label: 'TIP', text: 'Press L3 → Pause to freeze the game. Press again to resume.' },
+  { icon: '💾',  label: 'TIP', text: 'Use Quick Save anytime — your state is stored locally on your device.' },
+  { icon: '🎮',  label: 'TIP', text: 'A confirms, B goes back. D-Pad or analog stick navigates all menus.' },
+  { icon: '⚡',  label: 'TIP', text: 'Cycle emulation speed (1x → 1.5x → 2x) from the in-game menu.' },
+  { icon: '📷',  label: 'TIP', text: 'Capture a lossless PNG screenshot from the in-game menu anytime.' },
+  { icon: '🔇',  label: 'TIP', text: 'Mute audio instantly from the in-game menu without pausing.' },
+  { icon: '📺',  label: 'TIP', text: 'Cycle display filters (Pixel, CRT, LCD…) from the in-game menu.' },
+  { icon: '🔴',  label: 'TIP', text: 'Record gameplay at 60 FPS directly from the in-game menu.' },
+];
+
+function LoadingHints({ hintIndex, setHintIndex }) {
+  useEffect(() => {
+    const id = setInterval(() => {
+      setHintIndex(i => (i + 1) % LOADING_HINTS.length);
+    }, 4000);
+    return () => clearInterval(id);
+  }, [setHintIndex]);
+
+  const hint = LOADING_HINTS[hintIndex];
+  return (
+    <div className="emulator-loading-hints" aria-live="polite" aria-label="Loading tip">
+      <div className="elh-inner" key={hintIndex}>
+        <span className="elh-icon">{hint.icon}</span>
+        <div className="elh-body">
+          <span className="elh-label">{hint.label}</span>
+          <span className="elh-text">{hint.text}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function EmulatorModal({ 
   game, 
   gamepadConnected, 
@@ -53,6 +89,7 @@ export default function EmulatorModal({
   const [activeShader, setActiveShader] = useState('none');
   const [volume, setVolumeState] = useState(1.0);
   const [toastMessage, setToastMessage] = useState('');
+  const [loadingHintIndex, setLoadingHintIndex] = useState(0);
   const toastTimeoutRef = useRef(null);
 
   // Advanced In-Game Features: Speed, Recording, VSync, Threads, FPS
@@ -2418,7 +2455,8 @@ export default function EmulatorModal({
 
           {/* Mobile Collapsible Menu Button (hidden on large displays) */}
           <button
-            className={`emulator-menu-btn mobile-menu-btn ${showSubToolbar ? 'active' : ''}`}
+            id="ingame-menu"
+            className={`emulator-menu-btn mobile-menu-btn ${showSubToolbar ? 'active' : ''} ${focusedTarget?.zone === 'inGameBar' && focusedTarget?.id === 'menu' ? 'gamepad-focused' : ''}`}
             onClick={handleToggleEmulatorMenu}
             title="Toggle Emulator Menu"
           >
@@ -2439,35 +2477,39 @@ export default function EmulatorModal({
       {/* Mobile-only Dropdown Toolbar */}
       {showSubToolbar && (
         <div className="emulator-sub-toolbar mobile-sub-toolbar animate-slide-down" onClick={(e) => e.stopPropagation()}>
-          <button 
-            className="sub-toolbar-btn" 
-            onClick={() => handleEmulatorAction('restart')} 
+          <button
+            id="ingame-sub-restart"
+            className={`sub-toolbar-btn ${focusedTarget?.zone === 'inGameSubBar' && focusedTarget?.id === 'restart' ? 'gamepad-focused' : ''}`}
+            onClick={() => handleEmulatorAction('restart')}
             title="Restart Game"
           >
             <RotateCcw size={16} />
             <span>Restart</span>
           </button>
 
-          <button 
-            className="sub-toolbar-btn" 
-            onClick={() => handleEmulatorAction('pause')} 
+          <button
+            id="ingame-sub-pause"
+            className={`sub-toolbar-btn ${focusedTarget?.zone === 'inGameSubBar' && focusedTarget?.id === 'pause' ? 'gamepad-focused' : ''}`}
+            onClick={() => handleEmulatorAction('pause')}
             title={isGamePaused ? "Resume Game" : "Pause Game"}
           >
             {isGamePaused ? <Play size={16} color="#10b981" /> : <Pause size={16} />}
             <span>{isGamePaused ? "Resume" : "Pause"}</span>
           </button>
 
-          <button 
-            className="sub-toolbar-btn" 
-            onClick={() => handleEmulatorAction('mute')} 
+          <button
+            id="ingame-sub-mute"
+            className={`sub-toolbar-btn ${focusedTarget?.zone === 'inGameSubBar' && focusedTarget?.id === 'mute' ? 'gamepad-focused' : ''}`}
+            onClick={() => handleEmulatorAction('mute')}
             title={isGameMuted ? "Unmute Audio" : "Mute Audio"}
           >
             {isGameMuted ? <VolumeX size={16} color="#f87171" /> : <Volume2 size={16} />}
             <span>{isGameMuted ? "Unmute" : "Mute"}</span>
           </button>
 
-          <button 
-            className={`sub-toolbar-btn ${isRecording ? 'recording-active' : ''}`}
+          <button
+            id="ingame-sub-record"
+            className={`sub-toolbar-btn ${isRecording ? 'recording-active' : ''} ${focusedTarget?.zone === 'inGameSubBar' && focusedTarget?.id === 'record' ? 'gamepad-focused' : ''}`}
             onClick={handleToggleRecording}
             title={isRecording ? "Stop Screen Recording" : "Start 60 FPS Screen Recording"}
           >
@@ -2475,8 +2517,9 @@ export default function EmulatorModal({
             <span>{isRecording ? "Stop REC" : "Record"}</span>
           </button>
 
-          <button 
-            className="sub-toolbar-btn" 
+          <button
+            id="ingame-sub-speed"
+            className={`sub-toolbar-btn ${focusedTarget?.zone === 'inGameSubBar' && focusedTarget?.id === 'speed' ? 'gamepad-focused' : ''}`}
             onClick={() => {
               const nextIdx = (SPEED_PRESETS.indexOf(emulationSpeed) + 1) % SPEED_PRESETS.length;
               handleSpeedChange(SPEED_PRESETS[nextIdx]);
@@ -2487,17 +2530,19 @@ export default function EmulatorModal({
             <span>{emulationSpeed}x</span>
           </button>
 
-          <button 
-            className="sub-toolbar-btn" 
-            onClick={() => handleEmulatorAction('screenshot')} 
+          <button
+            id="ingame-sub-screenshot"
+            className={`sub-toolbar-btn ${focusedTarget?.zone === 'inGameSubBar' && focusedTarget?.id === 'screenshot' ? 'gamepad-focused' : ''}`}
+            onClick={() => handleEmulatorAction('screenshot')}
             title="Take Lossless In-Core Screenshot (PNG)"
           >
             <Camera size={16} />
             <span>Capture</span>
           </button>
 
-          <button 
-            className="sub-toolbar-btn" 
+          <button
+            id="ingame-sub-shader"
+            className={`sub-toolbar-btn ${focusedTarget?.zone === 'inGameSubBar' && focusedTarget?.id === 'shader' ? 'gamepad-focused' : ''}`}
             onClick={() => {
               const sIdx = (SHADERS.indexOf(activeShader) + 1) % SHADERS.length;
               setActiveShader(SHADERS[sIdx]);
@@ -2509,26 +2554,29 @@ export default function EmulatorModal({
             <span>{SHADER_LABELS[activeShader]}</span>
           </button>
 
-          <button 
-            className="sub-toolbar-btn" 
-            onClick={() => handleEmulatorAction('saveState')} 
+          <button
+            id="ingame-sub-save"
+            className={`sub-toolbar-btn ${focusedTarget?.zone === 'inGameSubBar' && focusedTarget?.id === 'save' ? 'gamepad-focused' : ''}`}
+            onClick={() => handleEmulatorAction('saveState')}
             title="Quick Save State"
           >
             <Save size={16} color="#10b981" />
             <span>Save</span>
           </button>
 
-          <button 
-            className="sub-toolbar-btn" 
-            onClick={() => handleEmulatorAction('loadState')} 
+          <button
+            id="ingame-sub-load"
+            className={`sub-toolbar-btn ${focusedTarget?.zone === 'inGameSubBar' && focusedTarget?.id === 'load' ? 'gamepad-focused' : ''}`}
+            onClick={() => handleEmulatorAction('loadState')}
             title="Quick Load State"
           >
             <RotateCcw size={16} color="#38bdf8" />
             <span>Load</span>
           </button>
 
-          <button 
-            className={`sub-toolbar-btn ${showDiagnostics ? 'diag-active' : ''}`}
+          <button
+            id="ingame-sub-diagnostics"
+            className={`sub-toolbar-btn ${showDiagnostics ? 'diag-active' : ''} ${focusedTarget?.zone === 'inGameSubBar' && focusedTarget?.id === 'diagnostics' ? 'gamepad-focused' : ''}`}
             onClick={(e) => {
               e.stopPropagation();
               setShowDiagnostics(prev => !prev);
@@ -2544,7 +2592,7 @@ export default function EmulatorModal({
 
       {/* In-App Toast Notification */}
       {toastMessage && (
-        <div className="emulator-toast-banner animate-fade-in">
+        <div className={`emulator-toast-banner animate-fade-in${showSubToolbar ? ' toast-below-subtoolbar' : ''}`}>
           <Sparkles size={14} />
           <span>{toastMessage}</span>
         </div>
@@ -2612,8 +2660,13 @@ export default function EmulatorModal({
       )}
 
       <div className={`emulator-stage filter-${activeShader}`} ref={stageRef} onClick={focusEmulator}>
-        {/* Isolated Engine */}
+        {/* Isolated Engine — DO NOT place React children here; EmulatorJS owns this DOM */}
       </div>
+
+      {/* Loading hints rendered OUTSIDE stageRef to avoid EmulatorJS innerHTML conflict */}
+      {isLoadingGame && (
+        <LoadingHints hintIndex={loadingHintIndex} setHintIndex={setLoadingHintIndex} />
+      )}
     </div>
   );
 }

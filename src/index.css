@@ -7097,6 +7097,12 @@ button.status-pill.status-scraper-pill {
   gap: 0.5rem;
   animation: diagSlideDown 0.2s ease-out;
   pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Push toast below the mobile sub-toolbar when it's open */
+.emulator-toast-banner.toast-below-subtoolbar {
+  top: 126px;
 }
 
 /* CRT & Display Shaders */
@@ -7136,6 +7142,82 @@ button.status-pill.status-scraper-pill {
   margin: 0;
   overflow: hidden;
   background: #000000;
+}
+
+/* ── Skyrim-style rotating loading hints ── */
+@keyframes elhFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.emulator-loading-hints {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  pointer-events: none;
+  width: calc(100% - 48px);
+  max-width: 560px;
+  display: flex;
+  justify-content: center;
+  /* Sibling of emulator-stage, overlays the canvas from outside the imperative DOM zone */
+}
+
+.elh-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(10, 15, 28, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 0.6rem 1.1rem;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+  animation: elhFadeIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  width: 100%;
+}
+
+.elh-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.elh-body {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.elh-label {
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #f59e0b;
+  flex-shrink: 0;
+}
+
+.elh-text {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #94a3b8;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+@media (max-width: 640px) {
+  .emulator-loading-hints {
+    bottom: 100px;
+    width: calc(100% - 24px);
+  }
+  .elh-text {
+    font-size: 0.75rem;
+  }
 }
 
 .emulator-stage iframe {
@@ -12724,6 +12806,38 @@ button.status-pill.status-scraper-pill {
   color: #94a3b8;
 }
 
+/* Step 2 Character Studio header badge */
+.onboarding-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.75rem 0.3rem 0.55rem;
+  background: rgba(234, 179, 8, 0.1);
+  border: 1.5px solid rgba(234, 179, 8, 0.35);
+  border-radius: 20px;
+  color: #92400e;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1;
+  margin-bottom: 0.1rem;
+}
+
+.onboarding-hero-badge svg {
+  color: #d97706;
+  flex-shrink: 0;
+}
+
+[data-color-mode="dark"] .onboarding-hero-badge {
+  background: rgba(251, 191, 36, 0.08);
+  border-color: rgba(251, 191, 36, 0.3);
+  color: #fbbf24;
+}
+
+[data-color-mode="dark"] .onboarding-hero-badge svg {
+  color: #fbbf24;
+}
 /* 4 Feature Pillars Grid — DS Beveled Panels */
 .onboarding-pillars-grid {
   display: grid;
@@ -12844,6 +12958,11 @@ button.status-pill.status-scraper-pill {
   width: 100%;
   max-width: 840px;
   margin-top: 0.4rem;
+}
+
+/* In-grid PWA install slot — visible only on mobile (overridden in <=640px breakpoint) */
+.onboarding-pwa-grid-item {
+  display: none;
 }
 
 .onboarding-install-card-btn {
@@ -13786,6 +13905,11 @@ button.status-pill.status-scraper-pill {
   .onboarding-pillars-grid {
     grid-template-columns: 1fr;
     gap: 0.75rem;
+  }
+
+  /* Show in-grid PWA install card on mobile only */
+  .onboarding-pwa-grid-item {
+    display: flex;
   }
 
   .onboarding-pillar-card {

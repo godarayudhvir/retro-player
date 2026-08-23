@@ -1184,7 +1184,10 @@ export function useGamepadNavigation({
 
     // 2.4 In-Game Topbar HUD Navigation
     if (curTarget?.zone === 'inGameBar') {
-      const topbarBtns = ['restart', 'pause', 'mute', 'record', 'speed', 'screenshot', 'shader', 'save', 'load', 'diagnostics', 'close'];
+      // On mobile (≤820px), individual action buttons are hidden — only diagnostics and close are visible
+      const topbarBtns = curIsMobile
+        ? ['diagnostics', 'close']
+        : ['restart', 'pause', 'mute', 'record', 'speed', 'screenshot', 'shader', 'save', 'load', 'diagnostics', 'close'];
       const curId = curTarget?.id || 'close';
       const curIdx = topbarBtns.indexOf(curId) >= 0 ? topbarBtns.indexOf(curId) : topbarBtns.length - 1;
 
@@ -1215,6 +1218,41 @@ export function useGamepadNavigation({
           if (el) el.click();
           sfx?.playMenuConfirm?.();
         }
+        return;
+      }
+      return;
+    }
+
+    // 2.4b Mobile Sub-Toolbar Navigation (opened via L3 on mobile)
+    if (curTarget?.zone === 'inGameSubBar') {
+      const subBtns = ['restart', 'pause', 'mute', 'record', 'speed', 'screenshot', 'shader', 'save', 'load', 'diagnostics'];
+      const curId = curTarget?.id || 'restart';
+      const curIdx = subBtns.indexOf(curId) >= 0 ? subBtns.indexOf(curId) : 0;
+
+      if (dir === 'BACK') {
+        // Close the sub-toolbar and return to gameplay
+        const menuBtn = document.getElementById('ingame-menu');
+        if (menuBtn) menuBtn.click();
+        setFocusedTarget({ zone: 'gameplay', id: 'canvas' });
+        sfx?.playModalClose?.();
+        return;
+      }
+      if (dir === 'LEFT') {
+        const nextIdx = (curIdx - 1 + subBtns.length) % subBtns.length;
+        setFocusedTarget({ zone: 'inGameSubBar', id: subBtns[nextIdx] });
+        sfx?.playTileNav?.();
+        return;
+      }
+      if (dir === 'RIGHT') {
+        const nextIdx = (curIdx + 1) % subBtns.length;
+        setFocusedTarget({ zone: 'inGameSubBar', id: subBtns[nextIdx] });
+        sfx?.playTileNav?.();
+        return;
+      }
+      if (dir === 'SELECT') {
+        const el = document.getElementById('ingame-sub-' + curId);
+        if (el) el.click();
+        sfx?.playMenuConfirm?.();
         return;
       }
       return;
@@ -2152,18 +2190,35 @@ export function useGamepadNavigation({
           // 2. Single L3 (when R3 is NOT pressed) toggles in-game Topbar HUD focus
           const isL3Single = l3Btn && !r3Btn;
           if (isL3Single && !prevButtonsRef.current.l3Single) {
-            if (stateRef.current.focusedTarget?.zone === 'inGameBar') {
+            const curZone = stateRef.current.focusedTarget?.zone;
+            if (curZone === 'inGameBar' || curZone === 'inGameSubBar') {
+              // Close sub-toolbar if it was opened via gamepad
+              if (curZone === 'inGameSubBar') {
+                const menuBtn = document.getElementById('ingame-menu');
+                if (menuBtn) menuBtn.click();
+              }
               setFocusedTarget({ zone: 'gameplay', id: 'canvas' });
               sfx?.playModalClose?.();
+            } else if (stateRef.current.isMobile) {
+              // On mobile: auto-open the sub-toolbar and focus first item
+              const menuBtn = document.getElementById('ingame-menu');
+              if (menuBtn) menuBtn.click();
+              // Small delay to let React re-render the sub-toolbar before focusing
+              setTimeout(() => {
+                setFocusedTarget({ zone: 'inGameSubBar', id: 'restart' });
+              }, 80);
+              sfx?.playModalOpen?.();
             } else {
+              // Desktop: focus the topbar HUD, landing on restart
               setFocusedTarget({ zone: 'inGameBar', id: 'restart' });
               sfx?.playModalOpen?.();
             }
             lastInputTimeRef.current = now;
           }
 
-          // 3. If inGameBar is focused, navigate the topbar controls
-          if (stateRef.current.focusedTarget?.zone === 'inGameBar') {
+          // 3. If inGameBar or inGameSubBar is focused, navigate the topbar/sub-toolbar controls
+          const activeInGameZone = stateRef.current.focusedTarget?.zone;
+          if (activeInGameZone === 'inGameBar' || activeInGameZone === 'inGameSubBar') {
             const btnA = b[0]?.pressed;
             const btnB = b[1]?.pressed;
             const dpadLeft = b[14]?.pressed || (gp.axes[0] < -STICK_DEADZONE);
@@ -2171,8 +2226,7 @@ export function useGamepadNavigation({
 
             if (now - lastInputTimeRef.current > COOLDOWN) {
               if (btnB && !prevButtonsRef.current.btnB) {
-                setFocusedTarget({ zone: 'gameplay', id: 'canvas' });
-                sfx?.playModalClose?.();
+                navigateSpatial('BACK');
                 lastInputTimeRef.current = now;
               } else if (btnA && !prevButtonsRef.current.btnA) {
                 navigateSpatial('SELECT');

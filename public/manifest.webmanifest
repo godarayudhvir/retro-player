@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Retro Player - High-Performance Web Emulation Station",
   "short_name": "Retro Player",
-  "description": "Console-grade retro game launcher and emulator station with physical 3D cartridges, Web Audio SFX, and offline WebAssembly cores.",
+  "description": "A console-grade retro game launcher and library delivered straight to any web browser. WebAssembly emulation cores, 3D cartridges, Multiavatar character studio, synthesized SFX, and pure client-side execution.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -87,17 +87,17 @@
   "screenshots": [
     {
       "src": "screenshots/desktop-1.webp",
-      "sizes": "1280x870",
+      "sizes": "1024x579",
       "type": "image/webp",
       "form_factor": "wide",
-      "label": "Retro Player 3D Cartridge Library on Desktop"
+      "label": "Retro Player — 3D Cartridge Library, Game Detail Panel, and Metadata Studio"
     },
     {
       "src": "screenshots/mobile-1.webp",
       "sizes": "450x800",
       "type": "image/webp",
       "form_factor": "narrow",
-      "label": "Retro Player Handheld Console Mode"
+      "label": "Retro Player Handheld Console Mode on Mobile"
     }
   ],
   "file_handlers": [

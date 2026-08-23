@@ -8,13 +8,11 @@ import {
   Play, 
   Check, 
   Smartphone, 
-  Zap, 
   Monitor, 
   Compass, 
   Copy, 
   ExternalLink,
   Layers,
-  Sparkles,
   Volume2
 } from 'lucide-react';
 import CharacterStudio from './CharacterStudio';
@@ -22,6 +20,7 @@ import { resolveAssetPath } from '../utils/assetPath';
 
 const isApplePlatform = typeof navigator !== 'undefined' && (/Macintosh|iPhone|iPad|iPod/i.test(navigator.userAgent || ''));
 const isSafariBrowser = typeof navigator !== 'undefined' && (/Safari/i.test(navigator.userAgent || '') && !/Chrome|Chromium|CriOS|FxiOS|Edg/i.test(navigator.userAgent || ''));
+const isMobileDevice = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent || '');
 
 /**
  * Modern Full-Screen Responsive Onboarding Experience for Desktop & Mobile.
@@ -215,6 +214,62 @@ export default function OnboardingScreen({
                 </div>
               </a>
 
+              {/* Mobile-only PWA card — always shown on mobile, adapts to browser capability */}
+              {isMobileDevice && !pwa?.isStandalone && (
+                pwa?.canInstall ? (
+                  // Chrome / Edge / Samsung: native install prompt available
+                  <button
+                    type="button"
+                    className="onboarding-install-card-btn onboarding-pwa-grid-item"
+                    onClick={() => {
+                      pwa.promptInstall();
+                      sfx?.playThemeSwitch?.();
+                    }}
+                  >
+                    <div className="onboarding-install-icon">
+                      <Download size={24} />
+                    </div>
+                    <div className="onboarding-install-text">
+                      <strong>Install Standalone App</strong>
+                      <span>Full-screen offline gaming, no browser bar.</span>
+                    </div>
+                    <ChevronRight size={18} className="install-arrow" />
+                  </button>
+                ) : isSafariBrowser && isApplePlatform ? (
+                  // Safari on iPhone / iPad / macOS
+                  <div className="onboarding-pillar-card onboarding-pwa-grid-item" style={{ gap: '0.6rem' }}>
+                    <div className="pillar-icon-wrap" style={{ background: 'rgba(2, 132, 199, 0.12)', color: '#0284c7' }}>
+                      <Compass size={24} />
+                    </div>
+                    <div className="pillar-text">
+                      <h3>Add to Home Screen</h3>
+                      <p>Tap <em>Share</em> → <em>"Add to Home Screen"</em> for fullscreen offline gaming with Metal hardware acceleration.</p>
+                    </div>
+                    <button
+                      type="button"
+                      className={`apple-copy-btn ${copiedLink ? 'is-copied' : ''}`}
+                      style={{ alignSelf: 'flex-start', marginTop: '0.25rem' }}
+                      onClick={(e) => { e.stopPropagation(); handleCopySafariLink(); }}
+                      title="Copy URL to paste in Safari"
+                    >
+                      {copiedLink ? <Check size={16} /> : <Copy size={16} />}
+                      <span>{copiedLink ? 'Copied!' : 'Copy Link'}</span>
+                    </button>
+                  </div>
+                ) : (
+                  // Any other mobile browser — generic Add to Home Screen tip
+                  <div className="onboarding-pillar-card onboarding-pwa-grid-item">
+                    <div className="pillar-icon-wrap" style={{ background: 'rgba(37, 99, 235, 0.12)', color: '#2563eb' }}>
+                      <Download size={24} />
+                    </div>
+                    <div className="pillar-text">
+                      <h3>Add to Home Screen</h3>
+                      <p>Open your browser menu and tap <em>"Add to Home Screen"</em> or <em>"Install App"</em> for fullscreen offline play.</p>
+                    </div>
+                  </div>
+                )
+              )}
+
               {/* Card 3: 100% Private Client Saves */}
               <div className="onboarding-pillar-card">
                 <div className="pillar-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
@@ -314,18 +369,15 @@ export default function OnboardingScreen({
             ========================================================= */}
         {currentStep === 1 && (
           <div className="onboarding-slide animate-slide-up">
-            <div className="onboarding-hero-badge">
-              <Zap size={16} />
-              <span>PLAYER PASSPORT & CHARACTER CUSTOMIZER</span>
+            <div className="onboarding-header-card">
+              <h1 className="onboarding-slide-title">
+                Create Your Player Character
+              </h1>
+
+              <p className="onboarding-slide-desc">
+                Choose an archetype, roll randomized styles, or customize your player handle and color.
+              </p>
             </div>
-
-            <h1 className="onboarding-slide-title">
-              Create Your Player Character
-            </h1>
-
-            <p className="onboarding-slide-desc">
-              Choose an archetype, roll randomized styles, or customize your player handle and color.
-            </p>
 
             {/* Exhaustive Character Studio Component */}
             <CharacterStudio
