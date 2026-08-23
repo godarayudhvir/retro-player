@@ -83,24 +83,28 @@ export function useMetadataScraper(games = [], options = {}) {
           if (hasLocalSidecar && (!merged[id] || (!merged[id].isManualOverride && merged[id].source !== 'Manual Override'))) {
             const sidecar = g.sidecarMetadata || {};
             const sidecarCover = (g.coverUrl && !g.coverUrl.endsWith('.svg')) ? g.coverUrl : null;
+            const cachedEntry = merged[id];
+            const cachedCover = (cachedEntry?.coverUrl && !cachedEntry.coverUrl.endsWith('.svg')) ? cachedEntry.coverUrl : null;
+            const resolvedCover = sidecarCover || cachedCover || null;
+
             const updatedMeta = {
               id,
-              title: sidecar.title || g.title,
+              title: sidecar.title || cachedEntry?.title || g.title,
               systemKey: g.systemKey,
-              coverUrl: sidecarCover || null,
-              hasCustomCover: !!sidecarCover,
-              description: sidecar.description || `Experience ${g.title} on ${g.systemName}.`,
-              releaseDate: sidecar.releaseYear ? `${sidecar.releaseYear}-01-01` : '2000-01-01',
-              releaseYear: sidecar.releaseYear || 'Classic',
-              developer: sidecar.developer || g.systemName || 'Classic',
-              publisher: sidecar.publisher || g.systemName || 'Classic',
-              genre: sidecar.genre || 'Retro Classic',
-              walkthrough: sidecar.walkthrough || undefined,
-              writtenWalkthroughUrl: sidecar.walkthrough?.written || undefined,
-              videoWalkthroughUrl: sidecar.walkthrough?.video || undefined,
-              source: sidecar.source || 'Local Sidecar',
+              coverUrl: resolvedCover,
+              hasCustomCover: Boolean(resolvedCover),
+              description: sidecar.description || cachedEntry?.description || `Experience ${g.title} on ${g.systemName}.`,
+              releaseDate: (sidecar.releaseYear ? `${sidecar.releaseYear}-01-01` : null) || cachedEntry?.releaseDate || '2000-01-01',
+              releaseYear: sidecar.releaseYear || cachedEntry?.releaseYear || 'Classic',
+              developer: sidecar.developer || cachedEntry?.developer || g.systemName || 'Classic',
+              publisher: sidecar.publisher || cachedEntry?.publisher || g.systemName || 'Classic',
+              genre: sidecar.genre || cachedEntry?.genre || 'Retro Classic',
+              walkthrough: sidecar.walkthrough || cachedEntry?.walkthrough || undefined,
+              writtenWalkthroughUrl: sidecar.walkthrough?.written || cachedEntry?.writtenWalkthroughUrl || undefined,
+              videoWalkthroughUrl: sidecar.walkthrough?.video || cachedEntry?.videoWalkthroughUrl || undefined,
+              source: (sidecar.description || sidecar.releaseYear) ? 'Local Sidecar' : (cachedEntry?.source || 'Local Companion'),
               hasSidecar: true,
-              scrapedAt: new Date().toISOString()
+              scrapedAt: cachedEntry?.scrapedAt || new Date().toISOString()
             };
             merged[id] = updatedMeta;
             // Persist companion cover updates into IndexedDB cache
@@ -173,17 +177,32 @@ export function useMetadataScraper(games = [], options = {}) {
       }
       const game = gameList[i];
       const id = game.id || `${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
-      const isFullyLocal = Boolean((game.hasSidecar || game.sidecarMetadata) && (game.coverUrl && !game.coverUrl.endsWith('.svg')));
+      const sidecar = game.sidecarMetadata || {};
+      const hasLocalSidecarJson = Boolean(game.hasSidecar || (game.sidecarMetadata && Object.keys(game.sidecarMetadata).length > 0));
+      const localCover = (game.coverUrl && !game.coverUrl.endsWith('.svg')) ? game.coverUrl : null;
+      const hasLocalCoverFile = Boolean(localCover);
+      const existing = metadataMap[id];
 
       if (isMountedRef.current) {
         setCurrentScrapeTitle(game.title);
         setCurrentScrapeSystem(game.systemName || game.systemKey);
       }
 
-      const hadExistingMetadata = Boolean(metadataMap[id] || isFullyLocal);
+      const isManual = Boolean(existing?.isManualOverride);
+      const isCompleteLocal = Boolean(hasLocalSidecarJson && hasLocalCoverFile);
+      const hasValidCover = Boolean(localCover || (existing?.coverUrl && !existing.coverUrl.endsWith('.svg')));
+      const hasValidDetails = Boolean(
+        (sidecar.description && sidecar.releaseYear) || 
+        (existing?.description && 
+         existing.description !== `Experience ${game.title} on ${game.systemName}.` && 
+         existing.description !== `Experience the classic adventure of ${game.title} for ${game.systemName}. Relive nostalgic challenges and timeless retro gameplay.`)
+      );
+
+      // In Smart Scan mode (force === false), only skip if fully populated
+      const isAlreadyComplete = !force && (isManual || isCompleteLocal || (hasValidCover && hasValidDetails));
 
       try {
-        if (force || !hadExistingMetadata) {
+        if (force || !isAlreadyComplete) {
           const meta = await scrapeGame(game, force);
           if (cancelRequestedRef.current) break;
           if (meta) {
@@ -203,10 +222,7 @@ export function useMetadataScraper(games = [], options = {}) {
         } else {
           alreadyCachedCount++;
           addScraperLog(`📦 [CACHE] Verified "${game.title}" (${game.systemName || game.systemKey}) from IndexedDB`, 'info', { gameId: id, title: game.title, systemKey: game.systemKey });
-          const existing = metadataMap[id];
-          if (existing?.coverUrl && !existing.coverUrl.endsWith('.svg')) {
-            coversFoundCount++;
-          } else if (game.coverUrl && !game.coverUrl.endsWith('.svg')) {
+          if (hasValidCover) {
             coversFoundCount++;
           }
         }
@@ -277,11 +293,14 @@ export function useMetadataScraper(games = [], options = {}) {
     if (isPlaying) return; // Never auto-scrape during active gameplay
     const shouldAutoScrape = Boolean(autoScrapeEnabled);
     if (shouldAutoScrape && games && games.length > 0 && !activeScrapeQueueRef.current && !cancelRequestedRef.current) {
-      // Find games that have not been scraped yet and do NOT have local sidecars or local covers
+      // Find games that are missing either covers or authentic details
       const unscraped = games.filter(g => {
         const id = g.id || `${g.systemKey}-${g.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
-        const hasLocalSidecar = g.hasSidecar || g.sidecarMetadata || (g.coverUrl && !g.coverUrl.endsWith('.svg'));
-        return !metadataMap[id] && !hasLocalSidecar;
+        const meta = metadataMap[id];
+        const hasLocalCover = Boolean(g.coverUrl && !g.coverUrl.endsWith('.svg'));
+        const hasCover = Boolean(hasLocalCover || (meta?.coverUrl && !meta.coverUrl.endsWith('.svg')));
+        const hasDetails = Boolean(g.sidecarMetadata?.description || meta?.description);
+        return !hasCover || !hasDetails;
       });
 
       if (unscraped.length > 0) {

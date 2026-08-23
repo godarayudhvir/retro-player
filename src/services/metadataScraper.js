@@ -851,7 +851,15 @@ export async function scrapeGame(game, force = false) {
     }
 
     // 2. If cached metadata already has both details and a valid cover, use it
-    if ((cached.coverUrl || hasLocalCoverFile) && (cached.description || hasLocalSidecarJson)) {
+    const hasValidCachedCover = Boolean(cached.coverUrl && !cached.coverUrl.endsWith('.svg'));
+    const hasValidCachedDetails = Boolean(
+      (sidecar.description && sidecar.releaseYear) || 
+      (cached.description && 
+       cached.description !== `Experience ${game.title} on ${game.systemName}.` && 
+       cached.description !== `Experience the classic adventure of ${game.title} for ${game.systemName}. Relive nostalgic challenges and timeless retro gameplay.`)
+    );
+
+    if ((hasValidCachedCover || hasLocalCoverFile) && (hasValidCachedDetails || hasLocalSidecarJson)) {
       addScraperLog(`📦 Loaded "${game.title}" from IndexedDB cache`, 'info', { gameId: id, title: game.title, systemKey: game.systemKey });
       return cached;
     }
@@ -901,8 +909,9 @@ export async function scrapeGame(game, force = false) {
   }
 
   // If online details returned a lead image (e.g. Wikipedia) and we still had no cover:
+  const cachedCover = (cached?.coverUrl && !cached.coverUrl.endsWith('.svg')) ? cached.coverUrl : null;
   const fallbackCover = scrapedCoverUrl || scrapedDetails?.coverUrl || null;
-  const finalCoverUrl = localCover || cached?.coverUrl || fallbackCover || null;
+  const finalCoverUrl = localCover || scrapedCoverUrl || cachedCover || fallbackCover || null;
 
   // Merge: Local sidecar & local cover ALWAYS take 100% precedence over online data
   const metadata = {
