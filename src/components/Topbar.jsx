@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Search, 
   FolderOpen, 
@@ -6,7 +6,8 @@ import {
   Volume2, 
   VolumeX, 
   Sparkles, 
-  RefreshCw, 
+  RefreshCw,
+  RotateCcw,
   Square, 
   Music, 
   SkipForward, 
@@ -20,6 +21,8 @@ import {
   Zap
 } from 'lucide-react';
 import MultiAvatar from './MultiAvatar';
+import ConfirmModal from './ConfirmModal';
+import { resetEntireApp } from '../utils/appReset';
 import { resolveAssetPath } from '../utils/assetPath';
 
 /**
@@ -42,11 +45,16 @@ export default function Topbar({
   setShowVirtualKeyboard,
   onOpenScraperModal,
   onOpenThemeModal,
+  showResetConfirm: externalShowResetConfirm,
+  setShowResetConfirm: externalSetShowResetConfirm,
   time,
   sfx,
   themeEngine,
   scraper
 }) {
+  const [internalShowResetConfirm, setInternalShowResetConfirm] = useState(false);
+  const showResetConfirm = externalShowResetConfirm !== undefined ? externalShowResetConfirm : internalShowResetConfirm;
+  const setShowResetConfirm = externalSetShowResetConfirm || setInternalShowResetConfirm;
   // Helper to render accurate battery icon and theme styling
   const renderBatteryIcon = () => {
     if (!gamepadBattery || !gamepadBattery.hasBatteryInfo) return null;
@@ -333,11 +341,44 @@ export default function Topbar({
           <FolderOpen size={18} color="#3b82f6" />
         </button>
 
+        {/* Reset App & Purge All Cache / DB */}
+        <button
+          className={`status-pill status-reset-app ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'resetApp' ? 'gamepad-focused' : ''}`}
+          onClick={() => {
+            setShowResetConfirm(true);
+            sfx?.playModalOpen?.();
+          }}
+          title="Factory Reset & Clear Cache (Wipe Storage, DB, Saves & Caches)"
+          aria-label="Factory Reset and Clear Cache"
+        >
+          <RotateCcw size={17} color="#ef4444" />
+        </button>
+
         {/* Real-time Clock */}
         <div className="status-pill status-clock">
           <span>{time}</span>
         </div>
       </div>
+
+      {/* Factory Reset Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showResetConfirm}
+        title="Reset Application & Clear Cache?"
+        message="This will permanently wipe all browser storage, cached metadata, box art, battery saves, save states, profiles, and service worker caches, then cleanly reload the application. No codebase or server files on disk will be touched."
+        confirmLabel="Reset & Reload"
+        cancelLabel="Cancel"
+        isDestructive={true}
+        onConfirm={async () => {
+          setShowResetConfirm(false);
+          sfx?.playDelete?.();
+          await resetEntireApp();
+        }}
+        onCancel={() => {
+          setShowResetConfirm(false);
+          sfx?.playModalClose?.();
+        }}
+        sfx={sfx}
+      />
     </header>
   );
 }

@@ -277,27 +277,93 @@ export function useSaveDataManager() {
     if (!game) return false;
     try {
       const isMasterProfile = activeProfileId === 'prof_default' || activeProfileId === 'default';
-      const scopedSaveKey = `save_${activeProfileId}_${game.id || game.title}`;
-      const legacySaveKey = `save_${game.id || game.title}`;
-      const scopedStateKey = `state_${activeProfileId}_${game.id || game.title}`;
-      const legacyStateKey = `state_${game.id || game.title}`;
+      const profilePrefixes = isMasterProfile
+        ? [activeProfileId, 'prof_default', 'default', '']
+        : [activeProfileId];
 
-      await dbDelete(STORES.GAME_SAVES, scopedSaveKey);
-      await dbDelete(STORES.SAVE_STATES, scopedStateKey);
+      const identifiers = [
+        game.id,
+        game.slug,
+        game.rawTitle,
+        game.filename,
+        game.title
+      ].filter(Boolean);
 
-      if (isMasterProfile) {
-        await dbDelete(STORES.GAME_SAVES, legacySaveKey);
-        await dbDelete(STORES.SAVE_STATES, legacyStateKey);
+      // 1. Direct keys delete across all identifiers and profile prefixes
+      for (const id of identifiers) {
+        for (const prof of profilePrefixes) {
+          const saveKey = prof ? `save_${prof}_${id}` : `save_${id}`;
+          const stateKey = prof ? `state_${prof}_${id}` : `state_${id}`;
+
+          await dbDelete(STORES.GAME_SAVES, saveKey);
+          await dbDelete(STORES.SAVE_STATES, stateKey);
+
+          try {
+            localStorage.removeItem(saveKey);
+            localStorage.removeItem(stateKey);
+          } catch (e) {}
+        }
       }
 
+      // 2. Scan and delete any matching records in DB for this profile
       try {
-        localStorage.removeItem(scopedSaveKey);
-        localStorage.removeItem(scopedStateKey);
-        if (isMasterProfile) {
-          localStorage.removeItem(legacySaveKey);
-          localStorage.removeItem(legacyStateKey);
+        const allSaves = await dbGetAll(STORES.GAME_SAVES);
+        for (const item of (allSaves || [])) {
+          if (!item) continue;
+          if (item.profileId && item.profileId !== activeProfileId) {
+            if (!isMasterProfile || (item.profileId !== 'prof_default' && item.profileId !== 'default')) continue;
+          }
+          const key = (item.id || item.key || '');
+          const gId = (item.gameId || '');
+          const idMatches = identifiers.some(id => {
+            const target = id.toLowerCase();
+            return gId.toLowerCase() === target || key.toLowerCase().includes(target);
+          });
+          if (idMatches) {
+            await dbDelete(STORES.GAME_SAVES, key);
+            try { localStorage.removeItem(key); } catch (e) {}
+          }
         }
-      } catch (e) {}
+
+        const allStates = await dbGetAll(STORES.SAVE_STATES);
+        for (const item of (allStates || [])) {
+          if (!item) continue;
+          if (item.profileId && item.profileId !== activeProfileId) {
+            if (!isMasterProfile || (item.profileId !== 'prof_default' && item.profileId !== 'default')) continue;
+          }
+          const key = (item.id || item.key || '');
+          const gId = (item.gameId || '');
+          const idMatches = identifiers.some(id => {
+            const target = id.toLowerCase();
+            return gId.toLowerCase() === target || key.toLowerCase().includes(target);
+          });
+          if (idMatches) {
+            await dbDelete(STORES.SAVE_STATES, key);
+            try { localStorage.removeItem(key); } catch (e) {}
+          }
+        }
+      } catch (scanErr) {
+        console.warn('⚠️ [SAVE SCAN PURGE ERROR]:', scanErr);
+      }
+
+      // 3. Purge Emscripten IDBFS databases to prevent virtual FS resurrection
+      const idbfsDbs = [
+        '/home/web_user/retroarch/userdata',
+        '/home/web_user/retroarch',
+        '/home/web_user',
+        '/retroarch',
+        '/data',
+        '/saves',
+        'emulatorjs',
+        'retroarch'
+      ];
+      for (const d of idbfsDbs) {
+        try {
+          if (typeof indexedDB !== 'undefined' && typeof indexedDB.deleteDatabase === 'function') {
+            indexedDB.deleteDatabase(d);
+          }
+        } catch (e) {}
+      }
 
       setHasSaveData(false);
       return true;

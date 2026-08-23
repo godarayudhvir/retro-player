@@ -79,11 +79,11 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 - ⚡ **Pure Client-Side WASM Emulation**: Hardware-accelerated emulation across 12 retro platforms powered by WebAssembly with ~0% host CPU overhead.
 - 📱 **Adaptive Cross-Device UI**: Tailored responsive layouts for Mobile Touch Feeds, Handhelds (Steam Deck/Switch), Desktop, and 10-Foot TV mode.
 - 🎨 **Nintendo DS Touch Experience**: Recreates authentic dual-screen hardware ergonomics with top-screen dynamic box art & spec sheets, and bottom touchscreen game selection grid with integrated inline **Save Data Studio** (`.sav` battery RAM import/export/erasure), **Strategy Guides Deck** (written walkthroughs, video guides, and mobile QR pairing), and **Edit & Scrape Studio** (cover asset manager, live Libretro/ScreenScraper/Wikipedia search terminal, sidecar export) with instant zero-click tab switching and zero disruptive popup overlays.
-- 👤 **Multi-User Profiles**: Custom vector avatars via Multiavatar with strictly isolated game saves, favorites, recents, and playtime tracking across profiles.
-- 💾 **Battery Saves & State Management**: Real-time auto-injection and management of `.sav`/`.srm` SRAM saves, quick snapshot states, and offline IndexedDB caching.
+- 👤 **Multi-User Profiles**: Custom vector avatars via Multiavatar with strictly isolated in-game battery saves (`.sav`/SRAM), quick save states (`.state`), favorites, recents, and playtime tracking across profiles.
+- 💾 **Battery Saves & State Management**: Profile-scoped auto-injection and management of `.sav`/`.srm` SRAM saves, snapshot states, and offline IndexedDB caching with zero cross-player bleed.
 - 🌐 **Automated Metadata & Cover Scraping**: Instant 3D box art from Libretro Thumbnails CDN, Wikipedia synopses, real-time active title progress bar telemetry, post-scan completion report cards with IndexedDB persistence, and built-in manual metadata editor.
 - 🎵 **Dynamic BGM & Synthesized UI SFX**: Built-in background music engine with smart in-game pause, plus low-latency Web Audio API synthesized sound effects.
-- ⚙️ **Settings Hub & Library Management**: Console settings hub, batch ROM uploader, folder directory mounting, and storage diagnostics.
+- ⚙️ **Settings Hub & Storage Diagnostics**: Console settings hub, batch ROM uploader, folder directory mounting, client-side factory reset & cache purge engine, and storage diagnostics.
 - 📹 **60 FPS Video Recorder & Engine Controls**: In-browser gameplay screen recording, speed throttling (`1.0x`–`5.0x`), VSync toggle, and live diagnostic HUD (`D`).
 - 📱 **Installable PWA**: Progressive Web App with standalone full-screen execution and offline service worker caching.
 

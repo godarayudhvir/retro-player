@@ -41,6 +41,7 @@ export default function App() {
   const [showLoadRomModal, setShowLoadRomModal] = useState(false);
   const [showScraperModal, setShowScraperModal] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showVirtualKeyboard, setShowVirtualKeyboard] = useState(false);
   const [oskConfig, setOskConfig] = useState({
     title: 'SEARCH LIBRARY',
@@ -171,6 +172,8 @@ export default function App() {
     setShowScraperModal,
     showThemeModal,
     setShowThemeModal,
+    showResetConfirm,
+    setShowResetConfirm,
     showProfileSelectModal,
     setShowProfileSelectModal,
     showProfileCreatorModal,
@@ -345,6 +348,8 @@ export default function App() {
             setShowVirtualKeyboard={setShowVirtualKeyboard}
             onOpenScraperModal={() => setShowScraperModal(true)}
             onOpenThemeModal={() => setShowThemeModal(true)}
+            showResetConfirm={showResetConfirm}
+            setShowResetConfirm={setShowResetConfirm}
             time={time}
             sfx={sfx}
             themeEngine={themeEngine}

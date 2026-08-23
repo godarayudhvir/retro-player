@@ -761,13 +761,27 @@ function multiConsoleScannerPlugin() {
         const store = urlParts[0];
         const key = urlParts[1];
 
+        res.setHeader('Content-Type', 'application/json');
+
+        if (store === 'reset' || (!store && req.method === 'DELETE')) {
+          const freshDb = {
+            profiles: [],
+            user_data: {},
+            game_saves: {},
+            save_states: {},
+            game_metadata: {}
+          };
+          writeDevDB(freshDb);
+          console.log('🧹 [DEV DB FACTORY RESET] Cleared all server DB stores (user_data, game_saves, save_states, profiles, game_metadata)');
+          res.end(JSON.stringify({ success: true, message: 'Server database reset successfully' }));
+          return;
+        }
+
         if (!store) {
           res.statusCode = 400;
           res.end(JSON.stringify({ error: 'Missing store name' }));
           return;
         }
-
-        res.setHeader('Content-Type', 'application/json');
 
         if (req.method === 'GET') {
           const db = readDevDB();

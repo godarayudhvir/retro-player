@@ -16,6 +16,8 @@ export function useGamepadNavigation({
   setShowScraperModal,
   showThemeModal,
   setShowThemeModal,
+  showResetConfirm,
+  setShowResetConfirm,
   showProfileSelectModal,
   setShowProfileSelectModal,
   showProfileCreatorModal,
@@ -83,6 +85,8 @@ export function useGamepadNavigation({
       showScraperModal,
       showThemeModal,
       setShowThemeModal,
+      showResetConfirm,
+      setShowResetConfirm,
       showProfileSelectModal,
       showProfileCreatorModal: showProfileCreatorModal || showMiiCreatorModal,
       showVirtualKeyboard,
@@ -117,6 +121,7 @@ export function useGamepadNavigation({
     showLoadRomModal,
     showScraperModal,
     showThemeModal,
+    showResetConfirm,
     showProfileSelectModal,
     showProfileCreatorModal,
     showMiiCreatorModal,
@@ -1590,6 +1595,7 @@ export function useGamepadNavigation({
       items.push('search');
       if (stateRef.current.pwa?.canInstall) items.push('install');
       items.push('loadRom');
+      items.push('resetApp');
       return items;
     };
 
@@ -1659,6 +1665,11 @@ export function useGamepadNavigation({
           setShowLoadRomModal(true);
           setFocusedTarget({ zone: 'loadRomModal', id: 'browse' });
           sfx?.playModalOpen?.();
+        } else if (curId === 'resetApp') {
+          if (stateRef.current.setShowResetConfirm) {
+            stateRef.current.setShowResetConfirm(true);
+            sfx?.playModalOpen?.();
+          }
         } else if (curId === 'info') {
           setShowInfoModal(true);
           setFocusedTarget({ zone: 'infoModal', id: 'ack' });

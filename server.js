@@ -766,9 +766,47 @@ function writeServerDB(db) {
   }
 }
 
+// 0. RESET all records across all stores
+app.post('/api/db/reset', (req, res) => {
+  const freshDb = {
+    profiles: [],
+    user_data: {},
+    game_saves: {},
+    save_states: {},
+    game_metadata: {}
+  };
+  writeServerDB(freshDb);
+  console.log('🧹 [SERVER DB FACTORY RESET] Cleared all server DB stores (user_data, game_saves, save_states, profiles, game_metadata)');
+  res.json({ success: true, message: 'Server database reset successfully' });
+});
+
+app.delete('/api/db', (req, res) => {
+  const freshDb = {
+    profiles: [],
+    user_data: {},
+    game_saves: {},
+    save_states: {},
+    game_metadata: {}
+  };
+  writeServerDB(freshDb);
+  console.log('🧹 [SERVER DB FACTORY RESET] Cleared all server DB stores (user_data, game_saves, save_states, profiles, game_metadata)');
+  res.json({ success: true, message: 'Server database reset successfully' });
+});
+
 // 1. GET all records in a store
 app.get('/api/db/:store', (req, res) => {
   const store = req.params.store;
+  if (store === 'reset') {
+    const freshDb = {
+      profiles: [],
+      user_data: {},
+      game_saves: {},
+      save_states: {},
+      game_metadata: {}
+    };
+    writeServerDB(freshDb);
+    return res.json({ success: true, message: 'Server database reset successfully' });
+  }
   const db = readServerDB();
   const storeData = db[store] || (store === 'profiles' ? [] : {});
   res.json({ success: true, store, data: storeData });

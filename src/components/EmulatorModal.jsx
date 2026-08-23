@@ -715,11 +715,52 @@ export default function EmulatorModal({
               }
             }, 80);
 
-            // Clear any lingering mute flags in storage to guarantee fresh unmuted startup
+            // Clear lingering flags and purge un-scoped Emscripten IDBFS databases
             try {
               localStorage.removeItem('ejs_muted');
               localStorage.removeItem('muted');
               localStorage.setItem('ejs_volume', '1');
+              const emscriptenDbs = [
+                '/home/web_user/retroarch/userdata',
+                '/home/web_user/retroarch',
+                '/home/web_user',
+                '/retroarch',
+                '/data',
+                '/saves',
+                'emulatorjs',
+                'retroarch'
+              ];
+              emscriptenDbs.forEach(d => {
+                try {
+                  if (window.indexedDB && typeof window.indexedDB.deleteDatabase === 'function') {
+                    window.indexedDB.deleteDatabase(d);
+                  }
+                } catch(e) {}
+              });
+
+              // Intercept IDBFS IndexedDB open so Emscripten cannot store or resurrect un-scoped global saves
+              const origIndexedDBOpen = window.indexedDB ? window.indexedDB.open.bind(window.indexedDB) : null;
+              if (origIndexedDBOpen) {
+                window.indexedDB.open = function(name, version) {
+                  if (emscriptenDbs.includes(name) || (typeof name === 'string' && (name.startsWith('/home') || name.startsWith('/') || name === 'emulatorjs'))) {
+                    const dummyReq = {
+                      readyState: 'done',
+                      result: null,
+                      error: new DOMException('IDBFS blocked for multi-profile isolation', 'AbortError'),
+                      addEventListener: () => {},
+                      removeEventListener: () => {},
+                      dispatchEvent: () => false
+                    };
+                    setTimeout(() => {
+                      if (typeof dummyReq.onerror === 'function') {
+                        dummyReq.onerror({ target: dummyReq });
+                      }
+                    }, 0);
+                    return dummyReq;
+                  }
+                  return origIndexedDBOpen(name, version);
+                };
+              }
             } catch(e) {}
 
             window.EJS_player = '#game';
@@ -734,6 +775,8 @@ export default function EmulatorModal({
             window.EJS_backgroundColor = '#000000';
             window.EJS_language = 'en-US';
             window.EJS_VirtualGamepad = ${isMobileTouch ? 'true' : 'false'};
+            window.EJS_disableDatabases = true;
+            window.EJS_disableLocalStorage = true;
             window.__INITIAL_SAVE_BASE64__ = ${JSON.stringify(initialSaveBase64)};
             window.__INITIAL_STATE_BASE64__ = ${JSON.stringify(initialStateBase64)};
             window.EJS_Buttons = {
@@ -1118,6 +1161,38 @@ export default function EmulatorModal({
               }
             }
 
+            function clearSaveData() {
+              try {
+                const emu = window.EJS_emulator;
+                if (!emu || !emu.gameManager || !emu.gameManager.FS) return;
+                const savePath = typeof emu.gameManager.getSaveFilePath === 'function' ? emu.gameManager.getSaveFilePath() : null;
+                if (savePath && emu.gameManager.FS.analyzePath(savePath).exists) {
+                  emu.gameManager.FS.unlink(savePath);
+                  console.log('🧹 [CLEAN PROFILE BOOT] Cleared save in Emscripten FS at', savePath);
+                }
+                const possibleDirs = ['/home/web_user/retroarch/userdata/saves', '/saves', '/data/saves', '/retroarch/userdata/saves'];
+                possibleDirs.forEach(dir => {
+                  try {
+                    if (emu.gameManager.FS.analyzePath(dir).exists) {
+                      const files = emu.gameManager.FS.readdir(dir);
+                      files.forEach(f => {
+                        if (f !== '.' && f !== '..') {
+                          try {
+                            emu.gameManager.FS.unlink(dir + '/' + f);
+                          } catch(e) {}
+                        }
+                      });
+                    }
+                  } catch(e) {}
+                });
+                if (typeof emu.gameManager.loadSaveFiles === 'function') {
+                  emu.gameManager.loadSaveFiles();
+                }
+              } catch (err) {
+                console.warn('⚠️ [CLEAR SAVE EXCEPTION]:', err);
+              }
+            }
+
             function extractCurrentSaveBase64() {
               try {
                 const emu = window.EJS_emulator;
@@ -1285,16 +1360,7 @@ export default function EmulatorModal({
                 if (window.__INITIAL_SAVE_BASE64__) {
                   injectSaveData(window.__INITIAL_SAVE_BASE64__);
                 } else {
-                  try {
-                    const emu = window.EJS_emulator;
-                    if (emu && emu.gameManager && typeof emu.gameManager.getSaveFilePath === 'function') {
-                      const sp = emu.gameManager.getSaveFilePath();
-                      if (sp && emu.gameManager.FS && emu.gameManager.FS.analyzePath(sp).exists) {
-                        emu.gameManager.FS.unlink(sp);
-                        console.log('🧹 [CLEAN PROFILE BOOT] Cleared unlinked save in Emscripten FS for new profile session');
-                      }
-                    }
-                  } catch(e) {}
+                  clearSaveData();
                 }
                 if (window.parent && window.parent !== window) {
                   window.parent.postMessage({ type: 'RETRO_PLAYER_CORE_RUNNING' }, '*');
@@ -1314,16 +1380,7 @@ export default function EmulatorModal({
                 if (window.__INITIAL_SAVE_BASE64__) {
                   injectSaveData(window.__INITIAL_SAVE_BASE64__);
                 } else {
-                  try {
-                    const emu = window.EJS_emulator;
-                    if (emu && emu.gameManager && typeof emu.gameManager.getSaveFilePath === 'function') {
-                      const sp = emu.gameManager.getSaveFilePath();
-                      if (sp && emu.gameManager.FS && emu.gameManager.FS.analyzePath(sp).exists) {
-                        emu.gameManager.FS.unlink(sp);
-                        console.log('🧹 [CLEAN PROFILE BOOT] Cleared unlinked save in Emscripten FS for new profile session');
-                      }
-                    }
-                  } catch(e) {}
+                  clearSaveData();
                 }
                 if (window.parent && window.parent !== window) {
                   window.parent.postMessage({ type: 'RETRO_PLAYER_CORE_RUNNING' }, '*');
@@ -1690,6 +1747,15 @@ export default function EmulatorModal({
           iframeRef.current.remove();
           iframeRef.current = null;
         }
+        // Cleanup un-scoped Emscripten IDBFS databases
+        const emscriptenDbs = ['/home/web_user/retroarch/userdata', '/home/web_user/retroarch', '/home/web_user', 'emulatorjs', 'retroarch'];
+        emscriptenDbs.forEach(d => {
+          try {
+            if (typeof indexedDB !== 'undefined' && typeof indexedDB.deleteDatabase === 'function') {
+              indexedDB.deleteDatabase(d);
+            }
+          } catch(e) {}
+        });
         onClose();
       }, 150);
       return;
