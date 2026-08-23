@@ -16,7 +16,8 @@ export default function ProfileCreatorModal({
   onClose,
   focusedTarget,
   setFocusedTarget,
-  sfx
+  sfx,
+  gamepadConnected = false
 }) {
   const [name, setName] = useState('');
   const [avatarSeed, setAvatarSeed] = useState(suggestedName);
@@ -84,6 +85,8 @@ export default function ProfileCreatorModal({
             sfx={sfx}
             focusedTarget={focusedTarget}
             setFocusedTarget={setFocusedTarget}
+            focusZone="profileModal"
+            gamepadConnected={gamepadConnected}
           />
         </div>
 

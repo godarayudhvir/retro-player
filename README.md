@@ -81,7 +81,7 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 - 🎨 **Nintendo DS Touch Experience**: Recreates authentic dual-screen hardware ergonomics with top-screen dynamic box art & spec sheets, and bottom touchscreen game selection grid with integrated inline **Edit & Scrape Studio** (cover asset manager, live Libretro/ScreenScraper/Wikipedia search terminal, sidecar export) and **Strategy Guides Deck** (written walkthroughs, video guides, and mobile QR pairing) with zero disruptive popup overlays.
 - 👤 **Multi-User Profiles**: Custom vector avatars via Multiavatar with profile-isolated game saves, favorites, and playtime tracking.
 - 💾 **Battery Saves & State Management**: Real-time auto-injection and management of `.sav`/`.srm` SRAM saves, quick snapshot states, and offline IndexedDB caching.
-- 🌐 **Automated Metadata & Cover Scraping**: Instant 3D box art from Libretro, Wikipedia synopses, and a built-in metadata editor.
+- 🌐 **Automated Metadata & Cover Scraping**: Instant 3D box art from Libretro Thumbnails CDN, Wikipedia synopses, real-time active title progress bar telemetry, post-scan completion report cards with IndexedDB persistence, and built-in manual metadata editor.
 - 🎵 **Dynamic BGM & Synthesized UI SFX**: Built-in background music engine with smart in-game pause, plus low-latency Web Audio API synthesized sound effects.
 - ⚙️ **Settings Hub & Library Management**: Console settings hub, batch ROM uploader, folder directory mounting, and storage diagnostics.
 - 📹 **60 FPS Video Recorder & Engine Controls**: In-browser gameplay screen recording, speed throttling (`1.0x`–`5.0x`), VSync toggle, and live diagnostic HUD (`D`).

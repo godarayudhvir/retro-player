@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Gamepad2, 
   ShieldCheck, 
@@ -85,10 +85,18 @@ export default function OnboardingScreen({
     }
   };
 
+  // Auto-focus Randomize Avatar button when entering Phase 2 (Character Studio)
+  useEffect(() => {
+    if (isOpen && currentStep === 1) {
+      setFocusedTarget?.({ zone: 'onboarding', id: 'random' });
+    }
+  }, [isOpen, currentStep, setFocusedTarget]);
+
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
       setCurrentStep(prev => prev + 1);
       sfx?.playTabSwitch?.();
+      setFocusedTarget?.({ zone: 'onboarding', id: 'random' });
     } else {
       handleFinish();
     }
@@ -98,6 +106,7 @@ export default function OnboardingScreen({
     if (currentStep > 0) {
       setCurrentStep(prev => prev - 1);
       sfx?.playTabSwitch?.();
+      setFocusedTarget?.({ zone: 'onboarding', id: 'next' });
     }
   };
 
@@ -334,6 +343,7 @@ export default function OnboardingScreen({
               focusedTarget={focusedTarget}
               setFocusedTarget={setFocusedTarget}
               focusZone="onboarding"
+              gamepadConnected={gamepadConnected}
             />
           </div>
         )}

@@ -15,6 +15,7 @@ export default function SystemRibbon({
   recentCount = 0,
   focusedTarget,
   setFocusedTarget,
+  gamepadConnected = false,
   sfx
 }) {
   const ribbonRef = useRef(null);
@@ -40,30 +41,44 @@ export default function SystemRibbon({
   ];
 
   return (
-    <nav className="system-ribbon" ref={ribbonRef}>
-      {allTabs.map((tab, idx) => (
-        <button
-          key={tab.key}
-          className={`system-tab ${activeSystem === tab.key ? 'active' : ''} ${focusedTarget.zone === 'ribbon' && focusedTarget.index === idx ? 'gamepad-focused' : ''}`}
-          onClick={() => {
-            setActiveSystem(tab.key);
-            setFocusedTarget({ zone: 'ribbon', index: idx });
-            sfx?.playTabSwitch?.();
-          }}
-          title={`${tab.name} (${tab.count || 0})`}
-          aria-label={tab.name}
-        >
-          <div className="tab-icon-wrapper">
-            {tab.isSpecialIcon ? (
-              tab.iconNode
-            ) : (
-              tab.icon && <img src={resolveAssetPath(tab.icon)} alt="" className="tab-icon" />
-            )}
-          </div>
-          <span className="tab-label">{tab.name}</span>
-        </button>
-      ))}
-    </nav>
+    <div className="system-ribbon-wrapper">
+      {gamepadConnected && (
+        <div className="ribbon-bumper-badge badge-left" title="Previous System (L1 / Left Bumper)">
+          <span className="osk-btn-badge badge-bumper">L</span>
+        </div>
+      )}
+
+      <nav className="system-ribbon" ref={ribbonRef}>
+        {allTabs.map((tab, idx) => (
+          <button
+            key={tab.key}
+            className={`system-tab ${activeSystem === tab.key ? 'active' : ''} ${focusedTarget.zone === 'ribbon' && focusedTarget.index === idx ? 'gamepad-focused' : ''}`}
+            onClick={() => {
+              setActiveSystem(tab.key);
+              setFocusedTarget({ zone: 'ribbon', index: idx });
+              sfx?.playTabSwitch?.();
+            }}
+            title={`${tab.name} (${tab.count || 0})`}
+            aria-label={tab.name}
+          >
+            <div className="tab-icon-wrapper">
+              {tab.isSpecialIcon ? (
+                tab.iconNode
+              ) : (
+                tab.icon && <img src={resolveAssetPath(tab.icon)} alt="" className="tab-icon" />
+              )}
+            </div>
+            <span className="tab-label">{tab.name}</span>
+          </button>
+        ))}
+      </nav>
+
+      {gamepadConnected && (
+        <div className="ribbon-bumper-badge badge-right" title="Next System (R1 / Right Bumper)">
+          <span className="osk-btn-badge badge-bumper">R</span>
+        </div>
+      )}
+    </div>
   );
 }
 

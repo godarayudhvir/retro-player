@@ -27,6 +27,8 @@ export default function OnScreenKeyboard({
   isOpen,
   searchQuery = '',
   onSearchChange,
+  onSubmit,
+  onCancel,
   onClose,
   focusedPos = { row: 0, col: 0 },
   onKeyClick,
@@ -35,7 +37,7 @@ export default function OnScreenKeyboard({
   title = 'SEARCH LIBRARY',
   subtitle = null,
   placeholder = 'Type text...',
-  actionLabel = 'DONE',
+  actionLabel = 'SUBMIT',
   icon: HeaderIcon,
   isMobile = false
 }) {
@@ -43,6 +45,16 @@ export default function OnScreenKeyboard({
 
   // Never show on screen keyboard on mobile devices, and only show if gamepad is connected
   if (!isOpen || isMobile || !gamepadConnected) return null;
+
+  const handleCancel = () => {
+    if (onCancel) onCancel();
+    else if (onClose) onClose();
+  };
+
+  const handleSubmit = () => {
+    if (onSubmit) onSubmit(searchQuery);
+    else if (onClose) onClose();
+  };
 
   const ActiveIcon = HeaderIcon || (title.toLowerCase().includes('name') ? User : (title.toLowerCase().includes('seed') ? Sparkles : Search));
   const currentRows = isUppercase ? KEYBOARD_ROWS_UPPER : KEYBOARD_ROWS_LOWER;
@@ -57,7 +69,7 @@ export default function OnScreenKeyboard({
     } else if (key === 'SHIFT') {
       setIsUppercase(prev => !prev);
     } else if (key === 'DONE') {
-      onClose();
+      handleSubmit();
     } else {
       onSearchChange((searchQuery || '') + key);
     }
@@ -69,7 +81,7 @@ export default function OnScreenKeyboard({
     <div
       className="osk-overlay animate-fade-in"
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget) handleCancel();
       }}
     >
       <div className="osk-modal animate-slide-up" role="dialog" aria-modal="true" aria-label="On Screen Keyboard">
@@ -84,6 +96,13 @@ export default function OnScreenKeyboard({
               {displaySubtitle ? <p className="osk-subtitle">{displaySubtitle}</p> : null}
             </div>
           </div>
+
+          {gamepadConnected && (
+            <button type="button" className="osk-header-gamepad-pill" onClick={handleCancel} title="Cancel & Dismiss (B / Esc)">
+              <span className="osk-btn-badge badge-b">B</span>
+              <span className="osk-header-pill-text">Back</span>
+            </button>
+          )}
         </div>
 
         {/* Live Query Display Bar */}
@@ -131,15 +150,30 @@ export default function OnScreenKeyboard({
                       type="button"
                     >
                       {key === '⌫' ? (
-                        <span className="osk-key-label"><Delete size={17} /></span>
+                        <span className="osk-key-label">
+                          <Delete size={17} />
+                          {gamepadConnected && <span className="osk-btn-badge badge-x">X</span>}
+                        </span>
                       ) : key === 'SHIFT' ? (
                         <span className="osk-key-label"><ArrowBigUp size={16} fill={isUppercase ? "currentColor" : "none"} /> {isUppercase ? 'CAPS' : 'caps'}</span>
                       ) : key === 'SPACE' ? (
-                        <span className="osk-key-label"><Space size={17} /> SPACE</span>
+                        <span className="osk-key-label">
+                          {gamepadConnected && <span className="osk-btn-badge badge-y">Y</span>}
+                          <Space size={16} />
+                          <span>SPACE</span>
+                        </span>
                       ) : key === 'CLEAR' ? (
-                        <span className="osk-key-label"><Trash2 size={15} /> CLEAR</span>
+                        <span className="osk-key-label">
+                          {gamepadConnected && <span className="osk-btn-badge badge-bumper">L</span>}
+                          <Trash2 size={15} />
+                          <span>CLEAR</span>
+                        </span>
                       ) : key === 'DONE' ? (
-                        <span className="osk-key-label"><Check size={17} /> {actionLabel}</span>
+                        <span className="osk-key-label">
+                          {gamepadConnected && <span className="osk-btn-badge badge-bumper">R</span>}
+                          <Check size={16} />
+                          <span>SUBMIT</span>
+                        </span>
                       ) : (
                         <span className="osk-key-label">{key}</span>
                       )}
@@ -150,6 +184,36 @@ export default function OnScreenKeyboard({
             );
           })}
         </div>
+
+        {/* Gamepad Quick Shortcuts Footer HUD */}
+        {gamepadConnected && (
+          <div className="osk-footer-hud">
+            <div className="osk-hud-item">
+              <span className="osk-btn-badge badge-bumper">L</span>
+              <span>Clear</span>
+            </div>
+            <span className="osk-hud-dot">•</span>
+            <div className="osk-hud-item">
+              <span className="osk-btn-badge badge-bumper">R</span>
+              <span>Submit</span>
+            </div>
+            <span className="osk-hud-dot">•</span>
+            <div className="osk-hud-item">
+              <span className="osk-btn-badge badge-x">X</span>
+              <span>Backspace</span>
+            </div>
+            <span className="osk-hud-dot">•</span>
+            <div className="osk-hud-item">
+              <span className="osk-btn-badge badge-y">Y</span>
+              <span>Space</span>
+            </div>
+            <span className="osk-hud-dot">•</span>
+            <div className="osk-hud-item">
+              <span className="osk-btn-badge badge-b">B</span>
+              <span>Back</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

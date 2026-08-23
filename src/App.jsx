@@ -361,6 +361,7 @@ export default function App() {
             recentCount={recentlyPlayed.length}
             focusedTarget={focusedTarget}
             setFocusedTarget={setFocusedTarget}
+            gamepadConnected={gamepadConnected}
             sfx={sfx}
           />
 
@@ -451,7 +452,7 @@ export default function App() {
         title={oskConfig?.title || 'SEARCH LIBRARY'}
         subtitle={oskConfig?.subtitle}
         placeholder={oskConfig?.placeholder || 'Type text...'}
-        actionLabel={oskConfig?.actionLabel || 'DONE'}
+        actionLabel={oskConfig?.actionLabel || 'SUBMIT'}
         icon={oskConfig?.icon}
         searchQuery={
           oskConfig?.target === 'search'
@@ -466,8 +467,48 @@ export default function App() {
             if (oskConfig?.onChange) oskConfig.onChange(val);
           }
         }}
+        onSubmit={(finalVal) => {
+          setShowVirtualKeyboard(false);
+          const valueToCommit = finalVal !== undefined ? finalVal : (oskConfig?.currentValue || '');
+          if (oskConfig?.onSubmit) {
+            oskConfig.onSubmit(valueToCommit);
+          } else if (oskConfig?.target !== 'search' && oskConfig?.onChange) {
+            oskConfig.onChange(valueToCommit);
+          }
+          if (oskConfig?.onCloseTarget) {
+            setFocusedTarget(oskConfig.onCloseTarget);
+          } else if (oskConfig?.target === 'search') {
+            setFocusedTarget({ zone: 'grid', index: 0 });
+          }
+          sfx.playMenuConfirm();
+        }}
+        onCancel={() => {
+          setShowVirtualKeyboard(false);
+          const initialVal = oskConfig?.initialValue !== undefined ? oskConfig.initialValue : '';
+          if (oskConfig?.target === 'search') {
+            setSearchQuery(initialVal);
+          } else if (oskConfig?.onCancel) {
+            oskConfig.onCancel(initialVal);
+          } else if (oskConfig?.onChange) {
+            oskConfig.onChange(initialVal);
+          }
+          if (oskConfig?.onCloseTarget) {
+            setFocusedTarget(oskConfig.onCloseTarget);
+          } else if (oskConfig?.target === 'search') {
+            setFocusedTarget({ zone: 'grid', index: 0 });
+          }
+          sfx.playModalClose();
+        }}
         onClose={() => {
           setShowVirtualKeyboard(false);
+          const initialVal = oskConfig?.initialValue !== undefined ? oskConfig.initialValue : '';
+          if (oskConfig?.target === 'search') {
+            setSearchQuery(initialVal);
+          } else if (oskConfig?.onCancel) {
+            oskConfig.onCancel(initialVal);
+          } else if (oskConfig?.onChange) {
+            oskConfig.onChange(initialVal);
+          }
           if (oskConfig?.onCloseTarget) {
             setFocusedTarget(oskConfig.onCloseTarget);
           } else if (oskConfig?.target === 'search') {
@@ -541,6 +582,7 @@ export default function App() {
           sfx.playModalClose();
         }}
         sfx={sfx}
+        gamepadConnected={gamepadConnected}
       />
 
       {/* Granular Scraper Scope Selector Modal */}
@@ -554,6 +596,7 @@ export default function App() {
         games={games}
         scraper={scraper}
         sfx={sfx}
+        gamepadConnected={gamepadConnected}
         focusedTarget={focusedTarget}
         setFocusedTarget={setFocusedTarget}
       />

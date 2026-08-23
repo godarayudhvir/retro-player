@@ -188,7 +188,7 @@ export default function Topbar({
         {/* Metadata Scraper Status / Trigger / Stop Button */}
         {scraper && (
           <button
-            className={`status-pill status-scraper ${scraper.isScraping ? 'is-active-scraping is-stoppable' : ''} ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'scraper' ? 'gamepad-focused' : ''}`}
+            className={`status-pill status-scraper-pill ${scraper.isScraping ? 'is-active-scraping is-stoppable' : ''} ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'scraper' ? 'gamepad-focused' : ''}`}
             onClick={() => {
               if (scraper.isScraping) {
                 scraper.stopScrape();
@@ -214,7 +214,11 @@ export default function Topbar({
                 <span className="scraper-stop-hover-text">STOP</span>
               </>
             ) : (
-              <Sparkles size={18} color="#f59e0b" />
+              <div className="status-scraper-inner">
+                {gamepadConnected && <span className="osk-btn-badge badge-x topbar-keycap">X</span>}
+                <Sparkles size={16} color="#f59e0b" />
+                <span className="pill-text status-scraper-label">SCRAPER</span>
+              </div>
             )}
           </button>
         )}
@@ -268,7 +272,11 @@ export default function Topbar({
             }
           }}
         >
-          <Search size={16} color="#64748b" />
+          {gamepadConnected ? (
+            <span className="osk-btn-badge badge-y topbar-keycap">Y</span>
+          ) : (
+            <Search size={16} color="#64748b" />
+          )}
           <input
             ref={searchInputRef}
             type="text"

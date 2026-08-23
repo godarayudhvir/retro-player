@@ -23,6 +23,9 @@ export function useMetadataScraper(games = [], options = {}) {
   const [metadataMap, setMetadataMap] = useState({});
   const [isScraping, setIsScraping] = useState(false);
   const [scrapeProgress, setScrapeProgress] = useState({ current: 0, total: 0 });
+  const [currentScrapeTitle, setCurrentScrapeTitle] = useState('');
+  const [currentScrapeSystem, setCurrentScrapeSystem] = useState('');
+  const [lastScrapeSummary, setLastScrapeSummary] = useState(null);
   const [logs, setLogs] = useState([]);
   const [autoScrapeEnabled, setAutoScrapeEnabledState] = useState(() => {
     try {
@@ -125,6 +128,11 @@ export function useMetadataScraper(games = [], options = {}) {
     }
   }, [isScraping]);
 
+  // Clear or reset summary
+  const clearScrapeSummary = useCallback(() => {
+    setLastScrapeSummary(null);
+  }, []);
+
   // Scrape single game on-demand
   const scrapeSingleGame = useCallback(async (game, force = false) => {
     if (!game) return null;
@@ -139,18 +147,27 @@ export function useMetadataScraper(games = [], options = {}) {
   }, []);
 
   // Scrape missing metadata for all games in the library
-  const scrapeAll = useCallback(async (gameList = games, force = false) => {
+  const scrapeAll = useCallback(async (gameList = games, force = false, scopeInfo = { targetScope: 'all', scopeName: 'All Systems' }) => {
     if (!gameList || gameList.length === 0 || activeScrapeQueueRef.current) return;
 
     cancelRequestedRef.current = false;
     activeScrapeQueueRef.current = true;
     setIsScraping(true);
     setScrapeProgress({ current: 0, total: gameList.length });
+    setCurrentScrapeTitle(gameList[0]?.title || '');
+    setCurrentScrapeSystem(gameList[0]?.systemName || '');
 
-    console.log(`🚀 [BATCH SCRAPER] Starting metadata scan for ${gameList.length} titles...`);
+    let newlyScrapedCount = 0;
+    let alreadyCachedCount = 0;
+    let coversFoundCount = 0;
+    let errorCount = 0;
+
+    addScraperLog(`🚀 Starting metadata scan for ${gameList.length} titles (${scopeInfo.scopeName})...`, 'scan');
+    console.log(`🚀 [BATCH SCRAPER] Starting metadata scan for ${gameList.length} titles (${scopeInfo.scopeName})...`);
 
     for (let i = 0; i < gameList.length; i++) {
       if (!isMountedRef.current || cancelRequestedRef.current) {
+        addScraperLog(`🛑 [STOPPED] Scan halted at ${i}/${gameList.length} titles.`, 'warning');
         console.log('🛑 [BATCH SCRAPER] Scan aborted by user or unmount.');
         break;
       }
@@ -158,15 +175,45 @@ export function useMetadataScraper(games = [], options = {}) {
       const id = game.id || `${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
       const isFullyLocal = Boolean((game.hasSidecar || game.sidecarMetadata) && (game.coverUrl && !game.coverUrl.endsWith('.svg')));
 
-      if (force || (!metadataMap[id] && !isFullyLocal)) {
-        const meta = await scrapeGame(game, force);
-        if (cancelRequestedRef.current) break;
-        if (meta && isMountedRef.current) {
-          setMetadataMap(prev => ({
-            ...prev,
-            [meta.id]: meta
-          }));
+      if (isMountedRef.current) {
+        setCurrentScrapeTitle(game.title);
+        setCurrentScrapeSystem(game.systemName || game.systemKey);
+      }
+
+      const hadExistingMetadata = Boolean(metadataMap[id] || isFullyLocal);
+
+      try {
+        if (force || !hadExistingMetadata) {
+          const meta = await scrapeGame(game, force);
+          if (cancelRequestedRef.current) break;
+          if (meta) {
+            newlyScrapedCount++;
+            if (meta.coverUrl && !meta.coverUrl.endsWith('.svg')) {
+              coversFoundCount++;
+            }
+            if (isMountedRef.current) {
+              setMetadataMap(prev => ({
+                ...prev,
+                [meta.id]: meta
+              }));
+            }
+          } else {
+            errorCount++;
+          }
+        } else {
+          alreadyCachedCount++;
+          addScraperLog(`📦 [CACHE] Verified "${game.title}" (${game.systemName || game.systemKey}) from IndexedDB`, 'info', { gameId: id, title: game.title, systemKey: game.systemKey });
+          const existing = metadataMap[id];
+          if (existing?.coverUrl && !existing.coverUrl.endsWith('.svg')) {
+            coversFoundCount++;
+          } else if (game.coverUrl && !game.coverUrl.endsWith('.svg')) {
+            coversFoundCount++;
+          }
         }
+      } catch (err) {
+        console.error('Error scraping game:', game.title, err);
+        addScraperLog(`⚠️ [ERROR] Failed lookup for "${game.title}": ${err?.message || 'Network issue'}`, 'error', { gameId: id, title: game.title, systemKey: game.systemKey });
+        errorCount++;
       }
 
       if (isMountedRef.current && !cancelRequestedRef.current) {
@@ -175,23 +222,45 @@ export function useMetadataScraper(games = [], options = {}) {
 
       if (cancelRequestedRef.current) break;
 
-      // Fast pacing between titles
+      // Pacing between titles
       await new Promise(r => setTimeout(r, 25));
     }
 
+    const wasCancelled = cancelRequestedRef.current;
+    const summary = {
+      total: gameList.length,
+      scraped: newlyScrapedCount,
+      alreadyCached: alreadyCachedCount,
+      coversFound: coversFoundCount,
+      errors: errorCount,
+      targetScope: scopeInfo.targetScope || 'all',
+      scopeName: scopeInfo.scopeName || 'All Systems',
+      status: wasCancelled ? 'stopped' : 'completed',
+      timestamp: Date.now()
+    };
+
     if (isMountedRef.current) {
+      setLastScrapeSummary(summary);
       setIsScraping(false);
+      setCurrentScrapeTitle('');
+      setCurrentScrapeSystem('');
       activeScrapeQueueRef.current = false;
     }
-    console.log(`✅ [BATCH SCRAPER] Finished library scan process.`);
+
+    if (!wasCancelled) {
+      addScraperLog(`✅ [COMPLETE] Scan finished: ${summary.total} processed (${summary.scraped} newly updated, ${summary.alreadyCached} verified from cache, ${summary.coversFound} covers verified)`, 'success');
+    }
+    console.log(`✅ [BATCH SCRAPER] Finished library scan process:`, summary);
+    return summary;
   }, [games, metadataMap]);
 
   // Scrape a specific single console system
   const scrapeSystem = useCallback(async (systemKey, force = false) => {
     if (!systemKey || !games) return;
     const systemGames = games.filter(g => g.systemKey === systemKey);
+    const scopeName = systemGames[0]?.systemName || systemKey.toUpperCase();
     console.log(`🎯 [SCRAPER] Scrape requested for single system: ${systemKey} (${systemGames.length} games)`);
-    await scrapeAll(systemGames, force);
+    return await scrapeAll(systemGames, force, { targetScope: systemKey, scopeName });
   }, [games, scrapeAll]);
 
   // Scrape a bunch / multi-selection of console systems
@@ -199,7 +268,7 @@ export function useMetadataScraper(games = [], options = {}) {
     if (!systemKeys || systemKeys.length === 0 || !games) return;
     const selectedGames = games.filter(g => systemKeys.includes(g.systemKey));
     console.log(`🎯 [SCRAPER] Scrape requested for ${systemKeys.length} systems (${selectedGames.length} games)`);
-    await scrapeAll(selectedGames, force);
+    return await scrapeAll(selectedGames, force, { targetScope: 'multi', scopeName: `${systemKeys.length} Systems` });
   }, [games, scrapeAll]);
 
   // Auto-scrape missing games in the background:
@@ -216,7 +285,7 @@ export function useMetadataScraper(games = [], options = {}) {
       });
 
       if (unscraped.length > 0) {
-        scrapeAll(unscraped, false);
+        scrapeAll(unscraped, false, { targetScope: 'unscraped', scopeName: 'Missing Titles' });
       }
     }
   }, [autoScrapeEnabled, isPlaying, games, metadataMap, scrapeAll]);
@@ -226,6 +295,7 @@ export function useMetadataScraper(games = [], options = {}) {
     await clearAllCachedMetadata();
     if (isMountedRef.current) {
       setMetadataMap({});
+      setLastScrapeSummary(null);
     }
   }, []);
 
@@ -250,6 +320,10 @@ export function useMetadataScraper(games = [], options = {}) {
     metadataMap,
     isScraping,
     scrapeProgress,
+    currentScrapeTitle,
+    currentScrapeSystem,
+    lastScrapeSummary,
+    clearScrapeSummary,
     logs,
     clearLogs: clearScraperLogs,
     autoScrapeEnabled,
@@ -268,5 +342,3 @@ export function useMetadataScraper(games = [], options = {}) {
     setApiKey: setScraperApiKey
   };
 }
-
-

@@ -17,7 +17,8 @@ export default function CharacterStudio({
   sfx,
   focusedTarget,
   setFocusedTarget,
-  focusZone = 'profileModal'
+  focusZone = 'profileModal',
+  gamepadConnected = false
 }) {
   const [activeTab, setActiveTab] = useState('archetypes'); // 'archetypes' | 'custom'
   const [activeCategory, setActiveCategory] = useState('heroes');
@@ -91,6 +92,9 @@ export default function CharacterStudio({
             className={`character-studio-tab ${activeTab === 'archetypes' ? 'is-active' : ''} ${(focusedTarget?.zone === focusZone || focusedTarget?.zone === 'profileModal') && focusedTarget?.id === 'archetypeTab' ? 'gamepad-focused' : ''}`}
             onClick={() => { setActiveTab('archetypes'); sfx?.playTabSwitch?.(); }}
           >
+            {gamepadConnected && (
+              <span className="tab-bumper-key">L</span>
+            )}
             <Gamepad2 size={15} />
             <span>Character Archetypes</span>
           </button>
@@ -100,6 +104,9 @@ export default function CharacterStudio({
             className={`character-studio-tab ${activeTab === 'custom' ? 'is-active' : ''} ${(focusedTarget?.zone === focusZone || focusedTarget?.zone === 'profileModal') && focusedTarget?.id === 'customTab' ? 'gamepad-focused' : ''}`}
             onClick={() => { setActiveTab('custom'); sfx?.playTabSwitch?.(); }}
           >
+            {gamepadConnected && (
+              <span className="tab-bumper-key">R</span>
+            )}
             <Tag size={15} />
             <span>Custom Name & Color</span>
           </button>

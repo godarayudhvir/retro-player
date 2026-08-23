@@ -172,6 +172,14 @@ export function useGamepadNavigation({
 
       if (dir === 'BACK') {
         setShowVirtualKeyboard(false);
+        const initialVal = curConfig.initialValue !== undefined ? curConfig.initialValue : '';
+        if (curConfig.target === 'search') {
+          setSearchQuery(initialVal);
+        } else if (curConfig.onCancel) {
+          curConfig.onCancel(initialVal);
+        } else if (curConfig.onChange) {
+          curConfig.onChange(initialVal);
+        }
         if (curConfig.onCloseTarget) {
           setFocusedTarget(curConfig.onCloseTarget);
         } else if (curIsMobile) {
@@ -240,6 +248,12 @@ export function useGamepadNavigation({
             sfx?.playKeyTick?.();
           } else if (key === 'DONE') {
             setShowVirtualKeyboard(false);
+            const valToCommit = curConfig.currentValue !== undefined ? curConfig.currentValue : '';
+            if (curConfig.onSubmit) {
+              curConfig.onSubmit(valToCommit);
+            } else if (curConfig.target !== 'search' && curConfig.onChange) {
+              curConfig.onChange(valToCommit);
+            }
             if (curConfig.onCloseTarget) {
               setFocusedTarget(curConfig.onCloseTarget);
             } else if (curIsMobile) {
@@ -247,7 +261,7 @@ export function useGamepadNavigation({
             } else {
               setFocusedTarget({ zone: 'grid', index: 0 });
             }
-            sfx?.playModalClose?.();
+            sfx?.playMenuConfirm?.();
           } else if (key) {
             updateVal(q => q + key);
             sfx?.playKeyTick?.();
@@ -459,8 +473,9 @@ export function useGamepadNavigation({
               title: 'PLAYER NAME',
               subtitle: 'Type your handle or gamer tag',
               placeholder: 'Enter player handle...',
-              actionLabel: 'SET NAME',
+              actionLabel: 'SUBMIT',
               target: 'playerName',
+              initialValue: currentVal,
               currentValue: currentVal,
               onCloseTarget: { zone: 'onboarding', id: 'nameInput' },
               onChange: (val) => {
@@ -491,8 +506,9 @@ export function useGamepadNavigation({
               title: 'CUSTOM AVATAR SEED',
               subtitle: 'Type any word, name, or code to generate unique avatar',
               placeholder: 'Type any word or code...',
-              actionLabel: 'SET SEED',
+              actionLabel: 'SUBMIT',
               target: 'avatarSeed',
+              initialValue: currentVal,
               currentValue: currentVal,
               onCloseTarget: { zone: 'onboarding', id: 'seedInput' },
               onChange: (val) => {
@@ -575,10 +591,18 @@ export function useGamepadNavigation({
     const { showScraperModal: isScraperOpen } = stateRef.current;
     if (isScraperOpen) {
       const scraperTabs = ['tab-all', 'tab-single'];
-      const scraperFooter = ['cancel', 'start'];
+      const scraperFooter = ['cancel', 'start', 'scrape-again', 'done', 'stop', 'prompt-back', 'prompt-confirm'];
       const curId = curTarget?.zone === 'scraperModal' ? (curTarget?.id || 'tab-all') : 'tab-all';
 
       if (dir === 'BACK') {
+        const modePromptEl = document.querySelector('.scraper-mode-prompt-pane');
+        if (modePromptEl) {
+          const backBtn = document.querySelector('.scraper-footer-actions .folder-btn');
+          if (backBtn) backBtn.click();
+          setFocusedTarget({ zone: 'scraperModal', id: 'start' });
+          sfx?.playModalClose?.();
+          return;
+        }
         setShowScraperModal(false);
         setFocusedTarget({ zone: 'topbar', id: 'scraper' });
         sfx?.playModalClose?.();
@@ -586,7 +610,16 @@ export function useGamepadNavigation({
       }
 
       if (dir === 'UP') {
-        if (scraperFooter.includes(curId)) {
+        if (curId === 'prompt-back' || curId === 'prompt-confirm') {
+          setFocusedTarget({ zone: 'scraperModal', id: 'mode-smart' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'done' || curId === 'scrape-again') {
+          const logsToggle = document.querySelector('.scraper-toggle-logs-btn');
+          if (logsToggle) {
+            setFocusedTarget({ zone: 'scraperModal', id: 'toggle-logs' });
+            sfx?.playTileNav?.();
+          }
+        } else if (scraperFooter.includes(curId)) {
           const contentItems = document.querySelectorAll('.scraper-sys-chip');
           if (contentItems.length > 0) {
             setFocusedTarget({ zone: 'scraperModal', id: 'content-0' });
@@ -597,15 +630,13 @@ export function useGamepadNavigation({
         } else if (curId.startsWith('content-')) {
           setFocusedTarget({ zone: 'scraperModal', id: 'tab-all' });
           sfx?.playTileNav?.();
-        } else if (curId === 'close') {
-          // already at top
-        } else {
-          setFocusedTarget({ zone: 'scraperModal', id: 'close' });
-          sfx?.playTileNav?.();
         }
       } else if (dir === 'DOWN') {
-        if (curId === 'close') {
-          setFocusedTarget({ zone: 'scraperModal', id: 'tab-all' });
+        if (curId === 'mode-smart' || curId === 'mode-force') {
+          setFocusedTarget({ zone: 'scraperModal', id: 'prompt-confirm' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'toggle-logs') {
+          setFocusedTarget({ zone: 'scraperModal', id: 'done' });
           sfx?.playTileNav?.();
         } else if (scraperTabs.includes(curId)) {
           const contentItems = document.querySelectorAll('.scraper-sys-chip');
@@ -625,6 +656,15 @@ export function useGamepadNavigation({
           const next = Math.max(0, idx - 1);
           setFocusedTarget({ zone: 'scraperModal', id: scraperTabs[next] });
           sfx?.playTabSwitch?.();
+        } else if (curId === 'mode-force') {
+          setFocusedTarget({ zone: 'scraperModal', id: 'mode-smart' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'prompt-confirm') {
+          setFocusedTarget({ zone: 'scraperModal', id: 'prompt-back' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'done') {
+          setFocusedTarget({ zone: 'scraperModal', id: 'scrape-again' });
+          sfx?.playTileNav?.();
         } else if (curId === 'start') {
           setFocusedTarget({ zone: 'scraperModal', id: 'cancel' });
           sfx?.playTileNav?.();
@@ -641,6 +681,15 @@ export function useGamepadNavigation({
           const next = Math.min(scraperTabs.length - 1, idx + 1);
           setFocusedTarget({ zone: 'scraperModal', id: scraperTabs[next] });
           sfx?.playTabSwitch?.();
+        } else if (curId === 'mode-smart') {
+          setFocusedTarget({ zone: 'scraperModal', id: 'mode-force' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'prompt-back') {
+          setFocusedTarget({ zone: 'scraperModal', id: 'prompt-confirm' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'scrape-again') {
+          setFocusedTarget({ zone: 'scraperModal', id: 'done' });
+          sfx?.playTileNav?.();
         } else if (curId === 'cancel') {
           setFocusedTarget({ zone: 'scraperModal', id: 'start' });
           sfx?.playTileNav?.();
@@ -653,9 +702,30 @@ export function useGamepadNavigation({
           }
         }
       } else if (dir === 'SELECT') {
-        if (curId === 'close' || curId === 'cancel') {
+        if (curId === 'close' || curId === 'cancel' || curId === 'done') {
           setShowScraperModal(false);
           setFocusedTarget({ zone: 'topbar', id: 'scraper' });
+          sfx?.playModalClose?.();
+        } else if (curId === 'prompt-back') {
+          const backBtn = document.querySelector('.scraper-footer-actions .folder-btn');
+          if (backBtn) backBtn.click();
+        } else if (curId === 'prompt-confirm') {
+          const confirmBtn = document.querySelector('.scraper-footer-actions .settings-action-btn.primary');
+          if (confirmBtn) confirmBtn.click();
+        } else if (curId === 'mode-smart' || curId === 'mode-force') {
+          const card = document.querySelector(curId === 'mode-smart' ? '.scraper-mode-card:nth-child(1)' : '.scraper-mode-card:nth-child(2)');
+          if (card) card.click();
+        } else if (curId === 'toggle-logs') {
+          const logsToggle = document.querySelector('.scraper-toggle-logs-btn');
+          if (logsToggle) logsToggle.click();
+        } else if (curId === 'scrape-again') {
+          const againBtn = document.querySelector('.scraper-footer-actions .folder-btn');
+          if (againBtn) againBtn.click();
+          setFocusedTarget({ zone: 'scraperModal', id: 'start' });
+          sfx?.playTabSwitch?.();
+        } else if (curId === 'stop') {
+          const stopBtn = document.querySelector('.scraper-footer-actions .settings-action-btn');
+          if (stopBtn) stopBtn.click();
           sfx?.playModalClose?.();
         } else if (curId === 'start') {
           const startBtn = document.querySelector('.settings-action-btn.primary');
@@ -961,8 +1031,9 @@ export function useGamepadNavigation({
               title: 'PLAYER NAME',
               subtitle: 'Type your handle or gamer tag',
               placeholder: 'Enter player handle...',
-              actionLabel: 'SET NAME',
+              actionLabel: 'SUBMIT',
               target: 'playerName',
+              initialValue: currentVal,
               currentValue: currentVal,
               onCloseTarget: { zone: 'profileModal', id: 'nameInput' },
               onChange: (val) => {
@@ -993,8 +1064,9 @@ export function useGamepadNavigation({
               title: 'CUSTOM AVATAR SEED',
               subtitle: 'Type any word, name, or code to generate unique avatar',
               placeholder: 'Type any word or code...',
-              actionLabel: 'SET SEED',
+              actionLabel: 'SUBMIT',
               target: 'avatarSeed',
+              initialValue: currentVal,
               currentValue: currentVal,
               onCloseTarget: { zone: 'profileModal', id: 'seedInput' },
               onChange: (val) => {
@@ -1990,15 +2062,15 @@ export function useGamepadNavigation({
         const dpadLeft = b[14]?.pressed || (gp.axes[0] < -STICK_DEADZONE);
         const dpadRight = b[15]?.pressed || (gp.axes[0] > STICK_DEADZONE);
 
-        // Y button or Select opens/toggles Search OSK when not in game (desktop/gamepad only)
-        if (!stateRef.current.isMobile && !stateRef.current.activeGame && !stateRef.current.showInfoModal && !stateRef.current.showLoadRomModal) {
+        // Y button or Select opens/toggles Search OSK when not in game and when OSK is not already open
+        if (!stateRef.current.isMobile && !stateRef.current.activeGame && !stateRef.current.showInfoModal && !stateRef.current.showLoadRomModal && !stateRef.current.showVirtualKeyboard) {
           if ((btnY && !prevButtonsRef.current.btnY) || (btnSelect && !prevButtonsRef.current.btnSelect)) {
             if (stateRef.current.setOskConfig) {
               stateRef.current.setOskConfig({
                 title: 'SEARCH LIBRARY',
                 subtitle: null,
                 placeholder: 'Type game or system name...',
-                actionLabel: 'SEARCH',
+                actionLabel: 'SUBMIT',
                 target: 'search',
                 initialValue: '',
                 onCloseTarget: { zone: 'grid', index: 0 }
@@ -2022,19 +2094,27 @@ export function useGamepadNavigation({
         if (stateRef.current.showVirtualKeyboard) {
           const curConfig = stateRef.current.oskConfig || { target: 'search' };
 
-          if (btnX && !prevButtonsRef.current.btnX) { // X button -> Space
+          const updateOskText = (updater) => {
             if (curConfig.target === 'search') {
-              setSearchQuery(q => q + ' ');
+              setSearchQuery(updater);
             } else {
               const currentStr = curConfig.currentValue || '';
-              const nextStr = currentStr + ' ';
+              const nextStr = updater(currentStr);
               if (stateRef.current.setOskConfig) stateRef.current.setOskConfig(prev => ({ ...prev, currentValue: nextStr }));
               if (curConfig.onChange) curConfig.onChange(nextStr);
             }
-            sfx?.playKeyTick?.();
-            lastInputTimeRef.current = now;
-          } else if (btnStart && !prevButtonsRef.current.btnStart) { // Start button -> Done
+          };
+
+          const cancelOsk = () => {
             setShowVirtualKeyboard(false);
+            const initialVal = curConfig.initialValue !== undefined ? curConfig.initialValue : '';
+            if (curConfig.target === 'search') {
+              setSearchQuery(initialVal);
+            } else if (curConfig.onCancel) {
+              curConfig.onCancel(initialVal);
+            } else if (curConfig.onChange) {
+              curConfig.onChange(initialVal);
+            }
             if (curConfig.onCloseTarget) {
               setFocusedTarget(curConfig.onCloseTarget);
             } else if (stateRef.current.isMobile) {
@@ -2044,6 +2124,52 @@ export function useGamepadNavigation({
             }
             sfx?.playModalClose?.();
             lastInputTimeRef.current = now;
+          };
+
+          const submitOsk = () => {
+            setShowVirtualKeyboard(false);
+            const valToCommit = curConfig.currentValue !== undefined ? curConfig.currentValue : '';
+            if (curConfig.onSubmit) {
+              curConfig.onSubmit(valToCommit);
+            } else if (curConfig.target !== 'search' && curConfig.onChange) {
+              curConfig.onChange(valToCommit);
+            }
+            if (curConfig.onCloseTarget) {
+              setFocusedTarget(curConfig.onCloseTarget);
+            } else if (stateRef.current.isMobile) {
+              setFocusedTarget(stateRef.current.searchQuery?.trim() ? { zone: 'mobileSearchGrid', index: 0 } : { zone: 'mobileChips', index: 0 });
+            } else {
+              setFocusedTarget({ zone: 'grid', index: 0 });
+            }
+            sfx?.playMenuConfirm?.();
+            lastInputTimeRef.current = now;
+          };
+
+          // 1. [L] Button (L1 Left Bumper) -> CLEAR ALL
+          if (shoulderL && !prevButtonsRef.current.shoulderL) {
+            updateOskText(() => '');
+            sfx?.playMenuConfirm?.();
+            lastInputTimeRef.current = now;
+          }
+          // 2. [R] Button (R1 Right Bumper) / START -> SUBMIT
+          else if ((shoulderR && !prevButtonsRef.current.shoulderR) || (btnStart && !prevButtonsRef.current.btnStart)) {
+            submitOsk();
+          }
+          // 3. [X] Button (Square / X) -> CLEAR CHARACTER (Backspace / ⌫)
+          else if (btnX && !prevButtonsRef.current.btnX) {
+            updateOskText(q => (q || '').slice(0, -1));
+            sfx?.playKeyTick?.();
+            lastInputTimeRef.current = now;
+          }
+          // 4. [Y] Button (Triangle / Y) -> SPACE
+          else if (btnY && !prevButtonsRef.current.btnY) {
+            updateOskText(q => (q || '') + ' ');
+            sfx?.playKeyTick?.();
+            lastInputTimeRef.current = now;
+          }
+          // 5. [B] Button (Circle / B) -> CANCEL / DISMISS / REVERT
+          else if (btnB && !prevButtonsRef.current.btnB) {
+            cancelOsk();
           }
         } else if (stateRef.current.showOnboarding) {
           // In Onboarding: Start button always directly skips / starts playing into the game UI
@@ -2057,24 +2183,27 @@ export function useGamepadNavigation({
             }
             lastInputTimeRef.current = now;
           }
-        } else if (!stateRef.current.activeGame && !stateRef.current.showInfoModal && !stateRef.current.showLoadRomModal) {
-          // X button (Button 2 / Square / X) toggles Favorite on focused game or modal card
+        } else if (!stateRef.current.activeGame && !stateRef.current.showVirtualKeyboard) {
+          // X button (Button 2 / Square / X) -> Opens Metadata Scraper from main UI, or triggers start/confirm/scrape-again when inside scraper modal
           if (btnX && !prevButtonsRef.current.btnX) {
-            let targetGame = null;
-            if (stateRef.current.selectedMobileGameForDetails) {
-              targetGame = stateRef.current.selectedMobileGameForDetails;
-            } else if (stateRef.current.isMobile) {
-              const mList = stateRef.current.mobileGamesList || stateRef.current.filteredGames || [];
-              const mIdx = stateRef.current.focusedTarget?.index || 0;
-              targetGame = mList[mIdx] || mList[0] || null;
-            } else {
-              const gList = stateRef.current.filteredGames || [];
-              const gIdx = stateRef.current.focusedTarget?.zone === 'grid' ? (stateRef.current.focusedTarget?.index || 0) : 0;
-              targetGame = gList[gIdx] || gList[0] || null;
-            }
-            if (targetGame && stateRef.current.toggleFavorite) {
-              const nextState = stateRef.current.toggleFavorite(targetGame);
-              sfx?.playFavoriteToggle?.(nextState);
+            if (stateRef.current.showScraperModal) {
+              if (document.querySelector('.scraper-completion-pane')) {
+                const btn = document.querySelector('.scraper-footer-actions .settings-action-btn.folder-btn');
+                if (btn) btn.click();
+              } else {
+                const btn = document.querySelector('.scraper-footer-actions .settings-action-btn.primary');
+                if (btn) btn.click();
+              }
+              sfx?.playThemeSwitch?.();
+            } else if (stateRef.current.showInfoModal) {
+              if (stateRef.current.toggleFavorite) {
+                const nextState = stateRef.current.toggleFavorite(stateRef.current.showInfoModal);
+                sfx?.playFavoriteToggle?.(nextState);
+              }
+            } else if (!stateRef.current.showThemeModal && !stateRef.current.showLoadRomModal && !stateRef.current.showProfileSelectModal && !stateRef.current.showProfileCreatorModal) {
+              setShowScraperModal(true);
+              setFocusedTarget({ zone: 'scraperModal', id: 'tab-all' });
+              sfx?.playModalOpen?.();
             }
             lastInputTimeRef.current = now;
           }
@@ -2103,14 +2232,26 @@ export function useGamepadNavigation({
             moved = true;
           } else if (shoulderL && !prevButtonsRef.current.shoulderL && !stateRef.current.showVirtualKeyboard) {
             if (stateRef.current.showScraperModal) {
-              const scraperTabs = ['tab-all', 'tab-single'];
-              const curId = stateRef.current.focusedTarget?.zone === 'scraperModal' ? (stateRef.current.focusedTarget?.id || 'tab-all') : 'tab-all';
-              const curIdx = scraperTabs.indexOf(curId) >= 0 ? scraperTabs.indexOf(curId) : 0;
-              const nextIdx = (curIdx - 1 + scraperTabs.length) % scraperTabs.length;
-              const allTabEls = document.querySelectorAll('.scraper-scope-tab');
-              if (allTabEls[nextIdx]) allTabEls[nextIdx].click();
-              setFocusedTarget({ zone: 'scraperModal', id: scraperTabs[nextIdx] });
-              sfx?.playTabSwitch?.();
+              const summaryEl = document.querySelector('.scraper-completion-pane');
+              if (summaryEl) {
+                const terminalEl = document.querySelector('.scraper-terminal-view');
+                const toggleLogsBtn = document.querySelector('.scraper-toggle-logs-btn');
+                if (!terminalEl && toggleLogsBtn) {
+                  // Toggle logs open
+                  toggleLogsBtn.click();
+                  setFocusedTarget({ zone: 'scraperModal', id: 'toggle-logs' });
+                  sfx?.playTileNav?.();
+                } else if (terminalEl) {
+                  // Scroll Up
+                  terminalEl.scrollBy({ top: -100, behavior: 'smooth' });
+                  sfx?.playTileNav?.();
+                }
+              } else {
+                const allTabEls = document.querySelectorAll('.scraper-scope-tab');
+                if (allTabEls[0]) allTabEls[0].click();
+                setFocusedTarget({ zone: 'scraperModal', id: 'tab-all' });
+                sfx?.playTabSwitch?.();
+              }
             } else if (stateRef.current.showProfileCreatorModal || stateRef.current.showMiiCreatorModal || stateRef.current.showOnboarding) {
               const zone = stateRef.current.showOnboarding ? 'onboarding' : 'profileModal';
               const tabs = document.querySelectorAll('.character-studio-tab');
@@ -2133,14 +2274,20 @@ export function useGamepadNavigation({
             moved = true;
           } else if (shoulderR && !prevButtonsRef.current.shoulderR && !stateRef.current.showVirtualKeyboard) {
             if (stateRef.current.showScraperModal) {
-              const scraperTabs = ['tab-all', 'tab-single'];
-              const curId = stateRef.current.focusedTarget?.zone === 'scraperModal' ? (stateRef.current.focusedTarget?.id || 'tab-all') : 'tab-all';
-              const curIdx = scraperTabs.indexOf(curId) >= 0 ? scraperTabs.indexOf(curId) : 0;
-              const nextIdx = (curIdx + 1) % scraperTabs.length;
-              const allTabEls = document.querySelectorAll('.scraper-scope-tab');
-              if (allTabEls[nextIdx]) allTabEls[nextIdx].click();
-              setFocusedTarget({ zone: 'scraperModal', id: scraperTabs[nextIdx] });
-              sfx?.playTabSwitch?.();
+              const summaryEl = document.querySelector('.scraper-completion-pane');
+              if (summaryEl) {
+                const terminalEl = document.querySelector('.scraper-terminal-view');
+                if (terminalEl) {
+                  // Scroll Down
+                  terminalEl.scrollBy({ top: 100, behavior: 'smooth' });
+                  sfx?.playTileNav?.();
+                }
+              } else {
+                const allTabEls = document.querySelectorAll('.scraper-scope-tab');
+                if (allTabEls[1]) allTabEls[1].click();
+                setFocusedTarget({ zone: 'scraperModal', id: 'tab-single' });
+                sfx?.playTabSwitch?.();
+              }
             } else if (stateRef.current.showProfileCreatorModal || stateRef.current.showMiiCreatorModal || stateRef.current.showOnboarding) {
               const zone = stateRef.current.showOnboarding ? 'onboarding' : 'profileModal';
               const tabs = document.querySelectorAll('.character-studio-tab');
