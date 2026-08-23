@@ -365,6 +365,7 @@ function parseCompanionMetadata(dirPath, baseName, entries) {
             publisher: data.publisher || data.pub || null,
             genre: data.genre || data.category || null,
             cover: data.cover || data.image || data.boxart || null,
+            walkthrough: data.walkthrough || (data.writtenWalkthrough || data.videoWalkthrough ? { written: data.writtenWalkthrough, video: data.videoWalkthrough } : null),
             source: 'Local Sidecar (JSON)'
           };
         }
@@ -892,8 +893,13 @@ app.post('/api/metadata/save-sidecar', express.json({ limit: '50mb' }), (req, re
       players: players || 1,
       systemKey: systemKey || '',
       cover: savedCoverRelativeUrl || data.coverUrl || '',
+      walkthrough: data.walkthrough || undefined,
       updatedAt: new Date().toISOString()
     };
+
+    if (!sidecarJson.walkthrough) {
+      delete sidecarJson.walkthrough;
+    }
 
     const sidecarPath = path.join(targetDir, `${baseFileName}.json`);
     fs.writeFileSync(sidecarPath, JSON.stringify(sidecarJson, null, 2), 'utf-8');

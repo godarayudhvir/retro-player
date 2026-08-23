@@ -48,83 +48,104 @@ export default function CartridgeGrid({
   const renderEmptyState = () => {
     if (searchQuery && searchQuery.trim().length > 0) {
       return (
-        <div className="console-empty">
-          <div className="empty-icon-circle">
-            <Search size={36} color="#64748b" />
+        <div className="console-empty-card">
+          <div className="empty-icon-capsule search-capsule-icon">
+            <Search size={38} className="empty-pulsing-icon" />
           </div>
-          <h3>No Matching Titles Found</h3>
-          <p>
-            No games found matching "<strong>{searchQuery}</strong>". Try clearing your search query or looking in another system.
+          <h3 className="empty-title">No Matching Titles Found</h3>
+          <p className="empty-subtitle">
+            No games found matching "<strong>{searchQuery}</strong>". Try clearing your search keyword or switching console categories.
           </p>
-          <button
-            className="nes-btn is-primary"
-            onClick={() => setSearchQuery('')}
-            style={{ margin: '1.5rem auto 0', cursor: 'pointer' }}
-          >
-            Clear Search Filter
-          </button>
+          <div className="empty-action-group">
+            <button
+              type="button"
+              className="empty-primary-btn"
+              onClick={() => {
+                setSearchQuery('');
+                sfx?.playNavSelect?.();
+              }}
+            >
+              <span>Clear Search Filter</span>
+            </button>
+          </div>
         </div>
       );
     }
 
     if (activeSystem === 'favorites') {
       return (
-        <div className="console-empty">
-          <div className="empty-icon-circle">
-            <Star size={36} color="#f59e0b" />
+        <div className="console-empty-card">
+          <div className="empty-icon-capsule favorite-capsule-icon">
+            <Star size={38} fill="#f59e0b" color="#f59e0b" className="empty-pulsing-icon" />
           </div>
-          <h3>No Favorites Starred Yet</h3>
-          <p>
-            Star games while browsing cartridges to pin your all-time favorites here.
+          <h3 className="empty-title">No Favorites Starred Yet</h3>
+          <p className="empty-subtitle">
+            Star your top titles while browsing the cartridge shelf to build your quick-access favorites showcase.
           </p>
-          <button
-            className="nes-btn is-primary"
-            onClick={() => setActiveSystem('all')}
-            style={{ margin: '1.5rem auto 0', cursor: 'pointer' }}
-          >
-            Browse All Games
-          </button>
+          <div className="empty-action-group">
+            <button
+              type="button"
+              className="empty-primary-btn"
+              onClick={() => {
+                setActiveSystem('all');
+                sfx?.playTabSwitch?.();
+              }}
+            >
+              <span>Browse All Games</span>
+            </button>
+          </div>
         </div>
       );
     }
 
     if (activeSystem === 'recent') {
       return (
-        <div className="console-empty">
-          <div className="empty-icon-circle">
-            <Clock size={36} color="#3b82f6" />
+        <div className="console-empty-card">
+          <div className="empty-icon-capsule recent-capsule-icon">
+            <Clock size={38} color="#3b82f6" className="empty-pulsing-icon" />
           </div>
-          <h3>No Play History Recorded</h3>
-          <p>
-            Games you launch will automatically appear here with recorded playtime, sessions, and battery save states.
+          <h3 className="empty-title">No Play History Recorded</h3>
+          <p className="empty-subtitle">
+            Titles you launch will automatically track session times, hours played, and battery save states here.
           </p>
-          <button
-            className="nes-btn is-primary"
-            onClick={() => setActiveSystem('all')}
-            style={{ margin: '1.5rem auto 0', cursor: 'pointer' }}
-          >
-            Browse All Games
-          </button>
+          <div className="empty-action-group">
+            <button
+              type="button"
+              className="empty-primary-btn"
+              onClick={() => {
+                setActiveSystem('all');
+                sfx?.playTabSwitch?.();
+              }}
+            >
+              <span>Browse All Games</span>
+            </button>
+          </div>
         </div>
       );
     }
 
     return (
-      <div className="console-empty">
-        <div className="empty-icon-circle">
-          <FolderOpen size={36} color="#64748b" />
+      <div className="console-empty-card">
+        <div className="empty-icon-capsule folder-capsule-icon">
+          <FolderOpen size={38} color="#64748b" className="empty-pulsing-icon" />
         </div>
-        <h3>No ROMs Found</h3>
-        <p>
-          No ROM files found in this category. Drop <code>.gba</code>, <code>.nes</code>, <code>.gbc</code>, <code>.nds</code>, or <code>.zip</code> ROMs directly into this window to load them.
+        <h3 className="empty-title">No ROMs Found</h3>
+        <p className="empty-subtitle">
+          No ROM files found in this category. Drag and drop <code>.gba</code>, <code>.nes</code>, <code>.gbc</code>, <code>.nds</code>, or <code>.zip</code> ROMs directly to play immediately.
         </p>
-        <button
-          className="nes-btn is-primary"
-          onClick={fetchGames}
-          style={{ margin: '1.5rem auto 0', cursor: 'pointer' }}
-        >
-          <RefreshCw size={16} className={loading ? 'spin' : ''} /> Rescan Channels
-        </button>
+        <div className="empty-action-group">
+          <button
+            type="button"
+            className="empty-primary-btn"
+            onClick={() => {
+              fetchGames?.();
+              sfx?.playThemeSwitch?.();
+            }}
+          >
+            <RefreshCw size={16} className={loading ? 'spin' : ''} />
+            <span>Rescan Library</span>
+          </button>
+        </div>
       </div>
     );
   };

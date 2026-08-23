@@ -293,6 +293,66 @@ async function queryWikipediaDynamic(cleanTitle, systemName) {
   return null;
 }
 
+// Dynamic Live Walkthrough Scraper (GameFAQs, StrategyWiki, YouTube Playthroughs)
+async function queryWalkthroughLinks(cleanTitle, systemName) {
+  let written = null;
+  let video = null;
+
+  try {
+    // 1. Search for Written Walkthrough (GameFAQs / StrategyWiki / IGN)
+    const writtenQuery = `${cleanTitle} walkthrough guide site:gamefaqs.gamespot.com OR site:strategywiki.org OR site:ign.com`;
+    const writtenUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(writtenQuery)}`;
+    const writtenHtml = await fetchHtml(writtenUrl);
+    
+    if (writtenHtml) {
+      const urlRegex = /<a class="result__url[^"]*"[^>]*href="([^"]+)"[^>]*>(.*?)<\/a>/g;
+      let match;
+      while ((match = urlRegex.exec(writtenHtml)) !== null) {
+        let rawLink = match[1] || match[2];
+        if (rawLink.includes('duckduckgo.com/l/?uddg=')) {
+          const m = rawLink.match(/uddg=([^&]+)/);
+          if (m) rawLink = decodeURIComponent(m[1]);
+        }
+        if (rawLink.startsWith('http') && (rawLink.includes('gamefaqs.gamespot.com') || rawLink.includes('strategywiki.org') || rawLink.includes('ign.com/wikis'))) {
+          written = rawLink;
+          break;
+        }
+      }
+    }
+
+    // 2. Search for Video Walkthrough / Longplay (YouTube)
+    const videoQuery = `${cleanTitle} ${systemName} full walkthrough gameplay longplay site:youtube.com`;
+    const videoUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(videoQuery)}`;
+    const videoHtml = await fetchHtml(videoUrl);
+
+    if (videoHtml) {
+      const urlRegex = /<a class="result__url[^"]*"[^>]*href="([^"]+)"[^>]*>(.*?)<\/a>/g;
+      let match;
+      while ((match = urlRegex.exec(videoHtml)) !== null) {
+        let rawLink = match[1] || match[2];
+        if (rawLink.includes('duckduckgo.com/l/?uddg=')) {
+          const m = rawLink.match(/uddg=([^&]+)/);
+          if (m) rawLink = decodeURIComponent(m[1]);
+        }
+        if (rawLink.startsWith('http') && (rawLink.includes('youtube.com/watch') || rawLink.includes('youtube.com/playlist'))) {
+          video = rawLink;
+          break;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn(`[WALKTHROUGH FETCH WARN] ${err.message}`);
+  }
+
+  if (written || video) {
+    const res = {};
+    if (written) res.written = written;
+    if (video) res.video = video;
+    return res;
+  }
+  return null;
+}
+
 // 2. Dynamic Live Web Search Scraper (For ROM Hacks, Homebrew & Fan Projects)
 async function queryDynamicWebSearch(rawTitle, cleanTitle, systemName) {
   const searchQueries = [
@@ -795,6 +855,9 @@ async function processRoms() {
             meta = await queryDynamicWebSearch(activeRomBase, cleanTitle, sysName);
           }
 
+          // Tier 3: Walkthrough Guides & Video Playthroughs
+          const walkthroughLinks = await queryWalkthroughLinks(cleanTitle, sysName);
+
           const libretroCoverUrl = !hasLocalCover ? await checkLibretroCover(sysKey, activeRomBase) : null;
 
           const metadataObj = {
@@ -805,6 +868,10 @@ async function processRoms() {
             publisher: meta?.publisher || sysName || 'Classic',
             genre: meta?.genre || 'Retro Classic'
           };
+
+          if (walkthroughLinks) {
+            metadataObj.walkthrough = walkthroughLinks;
+          }
 
           if (!isDryRun) {
             fs.writeFileSync(metaPath, JSON.stringify(metadataObj, null, 2));

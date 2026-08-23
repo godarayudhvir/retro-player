@@ -1,8 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Play, Star, Pencil, RefreshCw, Clock, History, Calendar, Cpu, Tag, Save, CheckCircle2, RotateCcw, Download, Upload, Trash2 } from 'lucide-react';
+import { Play, Star, Pencil, RefreshCw, Clock, History, Calendar, Cpu, Tag, Save, CheckCircle2, RotateCcw, Download, Upload, Trash2, BookOpen, Tv } from 'lucide-react';
 import { resolveAssetPath } from '../../utils/assetPath';
 import { getGameDescription, getReleaseDate } from '../../gameDescriptions';
 import ConfirmModal from '../ConfirmModal';
+import GuideModal from '../GuideModal';
 
 /**
  * DsView: Nintendo DS / DSi Dual-Screen Touchscreen Firmware Layout.
@@ -57,8 +58,18 @@ export default function DsView({
   const [isLocalScraping, setIsLocalScraping] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [saveActionStatus, setSaveActionStatus] = useState('');
+  const [activeGuide, setActiveGuide] = useState(null); // { type: 'written' | 'video', url: string }
   const fileInputRef = useRef(null);
   const activeBtnRef = useRef(null);
+
+  // Walkthrough links from local sidecar metadata or metadataMap
+  const walkthrough = selectedGame?.sidecarMetadata?.walkthrough || meta.walkthrough || {};
+  const writtenGuideUrl = walkthrough.written || meta.writtenWalkthroughUrl || null;
+  const videoGuideUrl = walkthrough.video || meta.videoWalkthroughUrl || null;
+
+  useEffect(() => {
+    setActiveGuide(null);
+  }, [selectedGame?.id, selectedGame?.title]);
 
   useEffect(() => {
     if (activeBtnRef.current) {
@@ -172,7 +183,7 @@ export default function DsView({
 
       {/* Right Column: Direct Integrated Action Stage, Metadata Badges & Specs */}
       <div className="ds-right-pane">
-        {/* Action Toolbar: Favorite, Edit, Scrape */}
+        {/* Action Toolbar: Favorite, Edit, Scrape, Walkthroughs */}
         <div className="ds-action-toolbar">
           <button
             type="button"
@@ -188,6 +199,38 @@ export default function DsView({
             <Star size={15} fill={selectedFav ? '#f59e0b' : 'none'} color={selectedFav ? '#d97706' : 'currentColor'} />
             <span>{selectedFav ? 'Favorited' : 'Favorite'}</span>
           </button>
+
+          {/* Written Walkthrough Touch Button */}
+          {writtenGuideUrl && (
+            <button
+              type="button"
+              className="ds-tool-btn ds-guide-btn"
+              onClick={() => {
+                sfx?.playTileNav?.();
+                setActiveGuide({ type: 'written', url: writtenGuideUrl });
+              }}
+              title="Read Written Strategy Guide"
+            >
+              <BookOpen size={14} color="#3b82f6" />
+              <span>Guide</span>
+            </button>
+          )}
+
+          {/* Video Walkthrough Touch Button */}
+          {videoGuideUrl && (
+            <button
+              type="button"
+              className="ds-tool-btn ds-guide-btn"
+              onClick={() => {
+                sfx?.playTileNav?.();
+                setActiveGuide({ type: 'video', url: videoGuideUrl });
+              }}
+              title="Watch Video Playthrough"
+            >
+              <Tv size={14} color="#10b981" />
+              <span>Video</span>
+            </button>
+          )}
 
           <button
             type="button"
@@ -215,6 +258,16 @@ export default function DsView({
             <span>Scrape</span>
           </button>
         </div>
+
+        {/* DS In-App Guide Choice & QR Modal */}
+        <GuideModal
+          isOpen={!!activeGuide}
+          gameTitle={selectedGame?.title}
+          guideType={activeGuide?.type || 'written'}
+          guideUrl={activeGuide?.url}
+          onClose={() => setActiveGuide(null)}
+          sfx={sfx}
+        />
 
         {/* Save Data Status Notification Banner & 3 Square Action Boxes */}
         {(() => {

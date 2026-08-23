@@ -1,9 +1,10 @@
 import React, { useEffect, useRef } from 'react';
-import { Star, Clock } from 'lucide-react';
+import { Star, Clock, Layers } from 'lucide-react';
 import { resolveAssetPath } from '../utils/assetPath';
 
 /**
- * Horizontal System Selection Ribbon with dynamic game count sorting, smart collections, and smooth auto-scrolling.
+ * Horizontal System Selection Ribbon with icon-first representation, dynamic label reveal on hover/active,
+ * smart collections, and zero-swipe full visibility.
  */
 export default function SystemRibbon({
   systems,
@@ -32,7 +33,7 @@ export default function SystemRibbon({
 
   // Unified list of all selectable tabs
   const allTabs = [
-    { key: 'all', name: 'All Games', count: totalGamesCount, icon: null, isSpecialIcon: false },
+    { key: 'all', name: 'All Games', count: totalGamesCount, iconNode: <Layers size={18} />, isSpecialIcon: true },
     { key: 'favorites', name: 'Favorites', count: favoritesCount, iconNode: <Star size={18} fill="currentColor" />, isSpecialIcon: true },
     { key: 'recent', name: 'Recent', count: recentCount, iconNode: <Clock size={18} />, isSpecialIcon: true },
     ...activeSysList.map(s => ({ key: s.key, name: s.name, count: s.gameCount, icon: s.icon, isSpecialIcon: false }))
@@ -43,23 +44,23 @@ export default function SystemRibbon({
       {allTabs.map((tab, idx) => (
         <button
           key={tab.key}
-          className={`system-tab ${activeSystem === tab.key ? 'active' : ''} ${focusedTarget.zone === 'ribbon' && focusedTarget.index === idx ? 'gamepad-focused' : ''} ${tab.key === 'favorites' ? 'tab-favorites tab-icon-only' : ''} ${tab.key === 'recent' ? 'tab-recent tab-icon-only' : ''}`}
+          className={`system-tab ${activeSystem === tab.key ? 'active' : ''} ${focusedTarget.zone === 'ribbon' && focusedTarget.index === idx ? 'gamepad-focused' : ''}`}
           onClick={() => {
             setActiveSystem(tab.key);
             setFocusedTarget({ zone: 'ribbon', index: idx });
             sfx?.playTabSwitch?.();
           }}
-          title={tab.name}
+          title={`${tab.name} (${tab.count || 0})`}
           aria-label={tab.name}
         >
-          {tab.isSpecialIcon ? (
-            tab.iconNode
-          ) : (
-            <>
-              {tab.icon && <img src={resolveAssetPath(tab.icon)} alt="" className="tab-icon" />}
-              <span>{tab.name}</span>
-            </>
-          )}
+          <div className="tab-icon-wrapper">
+            {tab.isSpecialIcon ? (
+              tab.iconNode
+            ) : (
+              tab.icon && <img src={resolveAssetPath(tab.icon)} alt="" className="tab-icon" />
+            )}
+          </div>
+          <span className="tab-label">{tab.name}</span>
         </button>
       ))}
     </nav>

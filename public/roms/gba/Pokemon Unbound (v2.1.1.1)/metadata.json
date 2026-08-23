@@ -4,5 +4,9 @@
   "developer": "Skeli & Unbound Team",
   "publisher": "Homebrew / PokeCommunity",
   "genre": "RPG / Romhack",
-  "description": "Expansive custom Pokémon adventure set in the Borrius region with dynamic missions, custom battle engine, Gen 1-8 roster, difficulty settings, and extensive post-game content."
+  "description": "Expansive custom Pokémon adventure set in the Borrius region with dynamic missions, custom battle engine, Gen 1-8 roster, difficulty settings, and extensive post-game content.",
+  "walkthrough": {
+    "written": "https://pokemonunbound.fandom.com/wiki/Walkthrough",
+    "video": "https://www.youtube.com/watch?v=Fj2F5gD4zXo"
+  }
 }

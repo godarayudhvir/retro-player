@@ -1,0 +1,25 @@
+# Retro Player
+
+> The High-Performance, Zero-Overhead Web Emulation Station. A console-grade retro game launcher and library running 12 classic systems directly in your browser with physical 3D cartridge rendering, client-side WebAssembly execution, real-time metadata scraping, battery save RAM (.sav), and universal gamepad navigation.
+
+## Live Demo & Source
+- [Live Web Demo](https://godarayudhvir.github.io/retro-player/): Play classic retro games directly in your browser with zero installation.
+- [GitHub Repository](https://github.com/godarayudhvir/retro-player): Source code, issues, Docker images, and community discussions.
+
+## Core Features & Highlights
+- **12 Emulated Consoles & Handhelds**: Game Boy Advance (GBA), Game Boy Color (GBC), Game Boy (GB), Sega Game Gear, Nintendo DS (NDS), Super Nintendo (SNES), NES, Nintendo 64 (N64), Sega Genesis, Atari 2600, PlayStation 1 (PS1), and Arcade (MAME).
+- **Zero-Overhead Edge-WASM Architecture**: Pure client-side WebAssembly execution; host server CPU/RAM usage is ~0%.
+- **3D Physical Cartridges & Multi-Theme Studio**: Interactive 3D cartridge shelf (Vanilla theme) and Nintendo DS Touch dual-screen firmware theme with dark/light mode toggles.
+- **Strategy Guides & Walkthroughs Hub**: Direct, curated access to written walkthroughs (GameFAQs, StrategyWiki) and video playthroughs (YouTube) with a companion mobile QR code scan modal for couch/TV play.
+- **100% Client-Side Battery Saves & Profiles**: In-game battery RAM (.sav / .srm / .mcr), quick save states, playtime analytics, Multiavatar player passports, and IndexedDB local caching.
+- **Universal Gamepad & Keyboard Navigation**: 100% controller spatial navigation across desktop & mobile feeds, telemetry widget with gamepad battery status and charging indicators.
+- **Progressive Web App (PWA) & Offline Mode**: Installable standalone app across macOS, Windows, Linux, Steam Deck, iOS, and Android.
+
+## Documentation & Guides
+- [Docker Deployment Guide](https://github.com/godarayudhvir/retro-player/blob/main/guides/docker.md): Full Docker Compose setup, container configurations, and auto-seeding.
+- [Cloud & Self-Hosting Guide](https://github.com/godarayudhvir/retro-player/blob/main/guides/hosting.md): Deployment instructions for Railway, Render, Fly.io, Coolify, Portainer, and NAS (Unraid/TrueNAS).
+- [Remote Access Guide](https://github.com/godarayudhvir/retro-player/blob/main/guides/remote-access.md): Anywhere play via Tailscale Mesh VPN and Cloudflare Tunnels.
+- [Controls & Keybindings](https://github.com/godarayudhvir/retro-player/blob/main/guides/controls.md): Complete controller button mappings, spatial navigation, hotkeys, and virtual keyboard.
+- [Save States & Battery Architecture](https://github.com/godarayudhvir/retro-player/blob/main/guides/save-states.md): Snapshot quick saves vs in-game cartridge battery saves (.sav) across all platforms.
+- [Hardware Compatibility Matrix](https://github.com/godarayudhvir/retro-player/blob/main/guides/compatibility.md): Smart TV (LG webOS, Samsung Tizen), Steam Deck, mobile, tablet, and browser matrix.
+- [Demo ROM Catalog & Compliance](https://github.com/godarayudhvir/retro-player/blob/main/guides/roms.md): 21 non-commercial prototypes, homebrew games, and legal compliance policy.

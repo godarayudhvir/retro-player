@@ -831,7 +831,7 @@ export function useGamepadNavigation({
     // ==========================================
     // 4.1 Selected Game Card Drawer Navigation
     if (curCard) {
-      const cardButtons = ['prevGame', 'play', 'fav', 'editMeta', 'scrape', 'nextGame'];
+      const cardButtons = ['prevGame', 'play', 'writtenGuide', 'videoGuide', 'fav', 'editMeta', 'scrape', 'nextGame'];
       const curId = curTarget?.id || 'play';
       const curIdx = cardButtons.indexOf(curId);
 

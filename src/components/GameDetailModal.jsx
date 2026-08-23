@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Play, Save, Cpu, Calendar, CheckCircle2, Star, Clock, History, RotateCcw, RefreshCw, Tag, Terminal, ChevronDown, ChevronUp, Pencil, ChevronLeft, ChevronRight, Download, Upload, Trash2 } from 'lucide-react';
+import { X, Play, Save, Cpu, Calendar, CheckCircle2, Star, Clock, History, RotateCcw, RefreshCw, Tag, Terminal, ChevronDown, ChevronUp, Pencil, ChevronLeft, ChevronRight, Download, Upload, Trash2, BookOpen, Tv } from 'lucide-react';
 import { getGameDescription, getReleaseDate } from '../gameDescriptions';
 import { resolveAssetPath } from '../utils/assetPath';
 import ConfirmModal from './ConfirmModal';
+import GuideModal from './GuideModal';
 
 /**
  * Game Detail Drawer Modal presenting rich scraped metadata, release dates, developer, publisher, genre tags,
@@ -41,6 +42,7 @@ export default function GameDetailModal({
   const [showLogs, setShowLogs] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [saveActionStatus, setSaveActionStatus] = useState('');
+  const [activeGuide, setActiveGuide] = useState(null); // { type: 'written' | 'video', url: string }
   const fileInputRef = useRef(null);
   const logsContainerRef = useRef(null);
 
@@ -48,6 +50,7 @@ export default function GameDetailModal({
   useEffect(() => {
     setImgError(false);
     setIsLocalScraping(false);
+    setActiveGuide(null);
   }, [game?.id, game?.title, game?.coverUrl]);
 
   // Keyboard Arrow Left/Right / Q/E/A/D navigation
@@ -88,6 +91,11 @@ export default function GameDetailModal({
   const developer = meta.developer || game.sidecarMetadata?.developer || game.systemName || 'Classic';
   const publisher = meta.publisher || game.sidecarMetadata?.publisher || game.systemName || 'Classic';
   const genre = meta.genre || game.sidecarMetadata?.genre || 'Retro Classic';
+
+  // Walkthrough links from local sidecar metadata or scraped metadata
+  const walkthrough = game.sidecarMetadata?.walkthrough || meta.walkthrough || {};
+  const writtenGuideUrl = walkthrough.written || meta.writtenWalkthroughUrl || null;
+  const videoGuideUrl = walkthrough.video || meta.videoWalkthroughUrl || null;
 
   const handleManualScrape = async () => {
     if (onScrapeGame) {
@@ -376,6 +384,37 @@ export default function GameDetailModal({
                 <span>{hasSaveData ? 'CONTINUE / PLAY NOW' : 'PLAY NOW'}</span>
               </button>
 
+              {/* Walkthrough Guides Quick Launch Buttons */}
+              {writtenGuideUrl && (
+                <button
+                  className={`guide-launch-btn written-guide ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'writtenGuide' ? 'gamepad-focused' : ''}`}
+                  onClick={() => {
+                    sfx?.playTileNav?.();
+                    setActiveGuide({ type: 'written', url: writtenGuideUrl });
+                  }}
+                  title="Open Written Walkthrough & Strategy Guide"
+                  aria-label="Written Walkthrough"
+                >
+                  <BookOpen size={18} />
+                  <span>Guide</span>
+                </button>
+              )}
+
+              {videoGuideUrl && (
+                <button
+                  className={`guide-launch-btn video-guide ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'videoGuide' ? 'gamepad-focused' : ''}`}
+                  onClick={() => {
+                    sfx?.playTileNav?.();
+                    setActiveGuide({ type: 'video', url: videoGuideUrl });
+                  }}
+                  title="Open Video Walkthrough & Longplay"
+                  aria-label="Video Walkthrough"
+                >
+                  <Tv size={18} />
+                  <span>Video</span>
+                </button>
+              )}
+
               <button
                 className={`favorite-toggle-btn icon-only ${isFavorite ? 'active' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'fav' ? 'gamepad-focused' : ''}`}
                 onClick={() => {
@@ -414,6 +453,16 @@ export default function GameDetailModal({
                 <RefreshCw size={18} className={isLocalScraping ? 'spin' : ''} />
               </button>
             </div>
+
+            {/* In-App Guide Choice & QR Code Modal */}
+            <GuideModal
+              isOpen={!!activeGuide}
+              gameTitle={game.title}
+              guideType={activeGuide?.type || 'written'}
+              guideUrl={activeGuide?.url}
+              onClose={() => setActiveGuide(null)}
+              sfx={sfx}
+            />
 
             {/* Expandable Scraper Activity Logs Section */}
             {(showLogs || isLocalScraping) && (

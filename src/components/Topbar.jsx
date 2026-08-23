@@ -95,30 +95,32 @@ export default function Topbar({
   return (
     <header className="console-topbar">
       <div className="topbar-left">
-        <div 
-          className={`avatar-badge profile-avatar-trigger ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'profile' ? 'gamepad-focused' : ''}`}
+        <button
+          type="button" 
+          className={`topbar-profile-pill ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'profile' ? 'gamepad-focused' : ''}`}
           onClick={() => {
             onOpenProfileSelect?.();
             sfx?.playModalOpen?.();
           }}
           title={`Profile: ${activeProfile?.name || 'Player 1'} (Click to switch)`}
-          aria-label="Switch User Profile"
+          aria-label={`Switch User Profile (Current: ${activeProfile?.name || 'Player 1'})`}
         >
-          <MultiAvatar 
-            seed={activeProfile?.avatarSeed || activeProfile?.name || 'Player 1'} 
-            size={36} 
-          />
-        </div>
-        <span 
-          className={`user-tag profile-name-tag ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'profile' ? 'gamepad-focused' : ''}`}
-          onClick={() => {
-            onOpenProfileSelect?.();
-            sfx?.playModalOpen?.();
-          }}
-          title="Switch User Profile"
-        >
-          {activeProfile?.name || 'RETRO PLAYER'}
-        </span>
+          <div 
+            className="topbar-profile-avatar"
+            style={{ 
+              borderColor: activeProfile?.favoriteColor || '#ef4444',
+              boxShadow: `0 2px 8px ${(activeProfile?.favoriteColor || '#ef4444')}40`
+            }}
+          >
+            <MultiAvatar 
+              seed={activeProfile?.avatarSeed || activeProfile?.name || 'Player 1'} 
+              size={32} 
+            />
+          </div>
+          <span className="topbar-profile-name">
+            {activeProfile?.name || 'Player 1'}
+          </span>
+        </button>
       </div>
 
       <div className="topbar-right">

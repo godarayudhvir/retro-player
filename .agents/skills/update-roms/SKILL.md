@@ -98,7 +98,11 @@ public/roms/
   "releaseYear": "1995",
   "developer": "Original Studio / Homebrew Author",
   "publisher": "Publisher / Homebrew Publisher",
-  "genre": "Action / Platformer / RPG"
+  "genre": "Action / Platformer / RPG",
+  "walkthrough": {
+    "written": "https://gamefaqs.gamespot.com/...",
+    "video": "https://www.youtube.com/watch?v=..."
+  }
 }
 ```
 
