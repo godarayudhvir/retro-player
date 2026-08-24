@@ -48,7 +48,7 @@ function LoadingHints({ hintIndex, setHintIndex }) {
   useEffect(() => {
     const id = setInterval(() => {
       setHintIndex(i => (i + 1) % LOADING_HINTS.length);
-    }, 4000);
+    }, 2000);
     return () => clearInterval(id);
   }, [setHintIndex]);
 
@@ -79,6 +79,8 @@ export default function EmulatorModal({
   const stageRef = useRef(null);
   const iframeRef = useRef(null);
   const [isLoadingGame, setIsLoadingGame] = useState(true);
+  const loadStartTimeRef = useRef(Date.now());
+  const loadDismissTimerRef = useRef(null);
   const [isLocalOffline, setIsLocalOffline] = useState(!navigator.onLine);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [showSubToolbar, setShowSubToolbar] = useState(false);
@@ -86,10 +88,11 @@ export default function EmulatorModal({
   const [isGameMuted, setIsGameMuted] = useState(false);
   const isGameMutedRef = useRef(false);
   const volumeRef = useRef(1.0);
+  const activeShaderRef = useRef('none');
   const [activeShader, setActiveShader] = useState('none');
   const [volume, setVolumeState] = useState(1.0);
   const [toastMessage, setToastMessage] = useState('');
-  const [loadingHintIndex, setLoadingHintIndex] = useState(0);
+  const [loadingHintIndex, setLoadingHintIndex] = useState(() => Math.floor(Math.random() * LOADING_HINTS.length));
   const toastTimeoutRef = useRef(null);
 
   // Advanced In-Game Features: Speed, Recording, VSync, Threads, FPS
@@ -359,6 +362,21 @@ export default function EmulatorModal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Safe loading completion helper guaranteeing at least 2 seconds of loading tip display
+  const finishLoading = useCallback(() => {
+    const elapsed = Date.now() - loadStartTimeRef.current;
+    const MIN_HINT_MS = 2000;
+    if (elapsed < MIN_HINT_MS) {
+      if (loadDismissTimerRef.current) clearTimeout(loadDismissTimerRef.current);
+      loadDismissTimerRef.current = setTimeout(() => {
+        setIsLoadingGame(false);
+        loadDismissTimerRef.current = null;
+      }, MIN_HINT_MS - elapsed);
+    } else {
+      setIsLoadingGame(false);
+    }
+  }, []);
+
   // Main Emulator Lifecycle - STRICTLY STABLE ON MOUNT
   useEffect(() => {
     if (!stageRef.current) return;
@@ -368,6 +386,13 @@ export default function EmulatorModal({
 
     const setupEmulator = async () => {
       stageRef.current.innerHTML = '';
+      loadStartTimeRef.current = Date.now();
+      if (loadDismissTimerRef.current) {
+        clearTimeout(loadDismissTimerRef.current);
+        loadDismissTimerRef.current = null;
+      }
+      setIsLoadingGame(true);
+      setLoadingHintIndex(Math.floor(Math.random() * LOADING_HINTS.length));
 
       let absoluteRomUrl = '';
       const currentGame = gameRef.current || game;
@@ -1574,9 +1599,9 @@ export default function EmulatorModal({
       // Safety fallback: ensure loading overlay auto-dismisses once core is initialized
       const safetyTimer = setTimeout(() => {
         if (!isCancelled) {
-          setIsLoadingGame(false);
+          finishLoading();
         }
-      }, 3500);
+      }, 15000);
 
       return () => {
         clearTimeout(safetyTimer);
@@ -1590,6 +1615,10 @@ export default function EmulatorModal({
 
   return () => {
     isCancelled = true;
+    if (loadDismissTimerRef.current) {
+      clearTimeout(loadDismissTimerRef.current);
+      loadDismissTimerRef.current = null;
+    }
     console.log(`🧹 [EMULATOR UNMOUNTING] Destroying emulator instance for "${gameRef.current?.title || game?.title}"`);
     reportSessionEnd();
     if (sessionBlobUrl) {
@@ -1681,7 +1710,7 @@ export default function EmulatorModal({
   useEffect(() => {
     const handleFrameMessage = async (e) => {
       if (e.data.type === 'RETRO_PLAYER_CORE_RUNNING' || e.data.type === 'RETRO_PLAYER_CORE_STARTED' || e.data.type === 'RETRO_PLAYER_FIRST_FRAME') {
-        setIsLoadingGame(false);
+        finishLoading();
         if (!isGameMutedRef.current) {
           ensureAudioUnlocked();
         }

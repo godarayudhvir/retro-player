@@ -83,6 +83,7 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 - 📖 **Curated Strategy Guides & QR Companion**: Direct written/video walkthroughs with mobile QR code pairing for couch play.
 - 🎵 **Dynamic BGM & Synthesized SFX**: Multi-track chiptune engine with smart in-game pause and low-latency Web Audio sound effects.
 - 📱 **Adaptive Cross-Device PWA**: Standalone installable app optimized across Mobile Touch Feeds, Steam Deck, Desktop, and 10-Foot TV mode.
+- 💡 **In-Game Rotating Tips**: Glassmorphic loading tips positioned directly below the loading dialog, revolving smoothly every 2 seconds with guaranteed minimum visibility.
 - 📹 **60 FPS Recorder & Engine Controls**: In-browser video capture, speed turbo throttling (`1.0x`–`5.0x`), VSync, and live diagnostic HUD.
 
 ---
