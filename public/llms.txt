@@ -1,4 +1,4 @@
-# Retro Player (v1.0.1)
+# Retro Player (v1.0.2)
 
 > The High-Performance, Zero-Overhead Web Emulation Station. A console-grade retro game launcher and library running 12 classic systems directly in your browser with physical 3D cartridge rendering, client-side WebAssembly execution, real-time metadata scraping, battery save RAM (.sav), and universal gamepad navigation.
 

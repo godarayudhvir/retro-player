@@ -1544,7 +1544,40 @@ export default function MobileAppView({
 
             {/* Drawer Content */}
             <div className="mobile-menu-content">
-              {/* Tool 1: Metadata Scraper Studio */}
+              {/* Tool 1: About & System Info */}
+              <div className="mobile-menu-card">
+                <div className="mobile-menu-card-header">
+                  <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#059669' }}>
+                    <Info size={18} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>About Retro Player</strong>
+                      <span className="info-version-badge" style={{ fontSize: '0.68rem', padding: '0.12rem 0.5rem' }}>v1.0.2</span>
+                    </div>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
+                      Emulation engines, GitHub repository, and system specifications
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mobile-menu-card-actions">
+                  <button
+                    type="button"
+                    className="mobile-menu-btn is-primary"
+                    onClick={() => {
+                      setIsHamburgerOpen(false);
+                      onOpenAboutModal?.();
+                      sfx?.playModalOpen?.();
+                    }}
+                  >
+                    <Info size={14} />
+                    <span>About &amp; Specifications</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Tool 2: Metadata Scraper Studio */}
               {scraper && (
                 <div className="mobile-menu-card">
                   <div className="mobile-menu-card-header">
@@ -1594,7 +1627,7 @@ export default function MobileAppView({
                 </div>
               )}
 
-              {/* Tool 2: PWA App Install (if available) */}
+              {/* Tool 3: PWA App Install (if available) */}
               {pwa?.canInstall && (
                 <div className="mobile-menu-card">
                   <div className="mobile-menu-card-header">
@@ -1623,39 +1656,6 @@ export default function MobileAppView({
                   </div>
                 </div>
               )}
-
-              {/* Tool 3: About & System Info */}
-              <div className="mobile-menu-card">
-                <div className="mobile-menu-card-header">
-                  <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#059669' }}>
-                    <Info size={18} />
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                      <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>About Retro Player</strong>
-                      <span className="info-version-badge" style={{ fontSize: '0.68rem', padding: '0.12rem 0.5rem' }}>v1.0.1</span>
-                    </div>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
-                      Emulation engines, input mappings, and system specifications
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mobile-menu-card-actions">
-                  <button
-                    type="button"
-                    className="mobile-menu-btn is-primary"
-                    onClick={() => {
-                      setIsHamburgerOpen(false);
-                      onOpenAboutModal?.();
-                      sfx?.playModalOpen?.();
-                    }}
-                  >
-                    <Info size={14} />
-                    <span>System Specifications</span>
-                  </button>
-                </div>
-              </div>
 
               {/* Tool 4: Factory Reset & Wipe Storage */}
               <div className="mobile-menu-card is-danger-card">

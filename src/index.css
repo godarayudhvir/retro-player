@@ -7444,12 +7444,116 @@ button.status-pill.status-scraper-pill {
   border-bottom: none;
 }
 
+.info-repo-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.85);
+  border: 2px solid #ffffff;
+  padding: 1rem 1.25rem;
+  border-radius: 18px;
+  box-shadow: 0 4px 14px rgba(160, 175, 205, 0.14);
+}
+
+.info-repo-icon-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+}
+
+.info-repo-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.info-repo-header-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.info-repo-heading {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.info-repo-desc {
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #475569;
+}
+
+.info-repo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ef4444;
+  text-decoration: none;
+  word-break: break-all;
+  margin-top: 0.15rem;
+  transition: color 0.2s ease;
+}
+
+.info-repo-link:hover {
+  color: #dc2626;
+  text-decoration: underline;
+}
+
 .info-modal-footer {
   padding: 1.1rem 1.75rem;
   border-top: 2px solid rgba(226, 232, 240, 0.8);
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
+}
+
+.info-repo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 0.65rem 1.15rem;
+  border-radius: 18px;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.22);
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.info-repo-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.32);
+  color: #ffffff;
+}
+
+.info-repo-btn.gamepad-focused {
+  outline: 2px solid #ffffff !important;
+  box-shadow: 0 0 0 3px #ffffff, 0 0 0 6.5px #3b82f6, 0 10px 24px rgba(59, 130, 246, 0.5) !important;
+  border-color: #3b82f6 !important;
+  transform: translateY(-2px) scale(1.06) !important;
+  z-index: 20 !important;
 }
 
 .info-ack-btn {
@@ -7469,6 +7573,14 @@ button.status-pill.status-scraper-pill {
 .info-ack-btn:hover {
   transform: translateY(-2px) scale(1.03);
   box-shadow: 0 12px 28px rgba(239, 68, 68, 0.5);
+}
+
+.info-ack-btn.gamepad-focused {
+  outline: 2px solid #ffffff !important;
+  box-shadow: 0 0 0 3px #ffffff, 0 0 0 6.5px #ef4444, 0 10px 24px rgba(239, 68, 68, 0.5) !important;
+  border-color: #ef4444 !important;
+  transform: translateY(-2px) scale(1.06) !important;
+  z-index: 20 !important;
 }
 
 /* Game Info Card Modal - Handheld Arcade Theme & Floating Carousel Nav */
@@ -10061,6 +10173,15 @@ button.status-pill.status-scraper-pill {
 
   .info-modal-footer {
     padding: 0.85rem 1.25rem;
+    flex-direction: column-reverse;
+    gap: 0.6rem;
+  }
+
+  .info-repo-btn,
+  .info-ack-btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
   }
 
   .info-table-wrapper {
@@ -14889,6 +15010,7 @@ button.status-pill.status-scraper-pill {
 [data-color-mode="dark"] .modal-content,
 [data-color-mode="dark"] .settings-modal-content,
 [data-color-mode="dark"] .about-modal-content,
+[data-color-mode="dark"] .info-modal-content,
 [data-color-mode="dark"] .load-rom-modal-content,
 [data-color-mode="dark"] .scraper-modal-content,
 [data-color-mode="dark"] .meta-edit-modal-content {
@@ -14899,9 +15021,27 @@ button.status-pill.status-scraper-pill {
 
 [data-color-mode="dark"] .drawer-detail-card,
 [data-color-mode="dark"] .scraper-log-terminal,
-[data-color-mode="dark"] .settings-content-pane {
+[data-color-mode="dark"] .settings-content-pane,
+[data-color-mode="dark"] .info-repo-card {
   background: #1e293b;
   border-color: #334155;
+}
+
+[data-color-mode="dark"] .info-repo-desc {
+  color: #94a3b8;
+}
+
+[data-color-mode="dark"] .info-repo-link {
+  color: #f87171;
+}
+
+[data-color-mode="dark"] .info-repo-link:hover {
+  color: #fca5a5;
+}
+
+[data-color-mode="dark"] .info-modal-footer {
+  border-top-color: #334155;
+  background: #0f172a;
 }
 
 /* ==========================================================================

@@ -556,16 +556,33 @@ export function useGamepadNavigation({
         sfx?.playModalClose?.();
         return;
       }
-      if (dir === 'LEFT' || dir === 'UP') {
+      if (dir === 'UP') {
         setFocusedTarget({ zone: 'infoModal', id: 'close' });
         sfx?.playTileNav?.();
-      } else if (dir === 'RIGHT' || dir === 'DOWN') {
-        setFocusedTarget({ zone: 'infoModal', id: 'ack' });
+      } else if (dir === 'DOWN') {
+        setFocusedTarget(prev => (prev?.id === 'close' ? { zone: 'infoModal', id: 'ack' } : { zone: 'infoModal', id: 'ack' }));
+        sfx?.playTileNav?.();
+      } else if (dir === 'LEFT') {
+        setFocusedTarget(prev => {
+          if (prev?.id === 'ack') return { zone: 'infoModal', id: 'github' };
+          return { zone: 'infoModal', id: 'close' };
+        });
+        sfx?.playTileNav?.();
+      } else if (dir === 'RIGHT') {
+        setFocusedTarget(prev => {
+          if (prev?.id === 'github' || prev?.id === 'close') return { zone: 'infoModal', id: 'ack' };
+          return { zone: 'infoModal', id: 'ack' };
+        });
         sfx?.playTileNav?.();
       } else if (dir === 'SELECT') {
-        setShowInfoModal(false);
-        setFocusedTarget({ zone: 'topbar', id: 'info' });
-        sfx?.playModalClose?.();
+        if (focusedTarget?.id === 'github') {
+          sfx?.playModalOpen?.();
+          window.open('https://github.com/godarayudhvir/retro-player', '_blank', 'noopener,noreferrer');
+        } else {
+          setShowInfoModal(false);
+          setFocusedTarget({ zone: 'topbar', id: 'info' });
+          sfx?.playModalClose?.();
+        }
       }
       return;
     }
