@@ -49,6 +49,24 @@ Featuring Nintendo DS dual-screen Touch architecture, integrated zero-popup Stra
 |---|---|
 | <img src="docs-screenshots/scraper-modal.webp" width="400" alt="Metadata & 3D Box Art Scraper" /> | <img src="docs-screenshots/load-rom-modal.webp" width="400" alt="Load Custom ROM dialog" /> |
 
+| Welcome & Onboarding | In-Game Emulation & HUD Controls |
+|---|---|
+| <img src="docs-screenshots/onboarding.webp" width="400" alt="Welcome and Onboarding Walkthrough" /> | <img src="docs-screenshots/ingame-ui.webp" width="400" alt="In-Game Emulation and HUD Controls" /> |
+
+</div>
+
+<div align="center">
+
+### 📱 Mobile & Touch Experience
+
+| Welcome Walkthrough | Character Studio | Console Hub | Game Library |
+|:---:|:---:|:---:|:---:|
+| <img src="docs-screenshots/mobile-onboarding.webp" width="200" alt="Mobile Onboarding" /> | <img src="docs-screenshots/mobile-character-studio.webp" width="200" alt="Mobile Character Studio" /> | <img src="docs-screenshots/mobile-console-selector.webp" width="200" alt="Mobile Console Selector" /> | <img src="docs-screenshots/mobile-game-grid.webp" width="200" alt="Mobile Game Grid" /> |
+
+| Game Overview | In-Game Touch Controls | 3D Box Art Scraper | Console Utilities |
+|:---:|:---:|:---:|:---:|
+| <img src="docs-screenshots/mobile-game-detail.webp" width="200" alt="Mobile Game Detail" /> | <img src="docs-screenshots/mobile-ingame-portrait.webp" width="200" alt="Mobile In-Game Emulation" /> | <img src="docs-screenshots/mobile-scraper-modal.webp" width="200" alt="Mobile Scraper Modal" /> | <img src="docs-screenshots/mobile-console-utilities.webp" width="200" alt="Mobile Console Utilities" /> |
+
 </div>
 
 ## ⚡ Why Retro Player? The WASM Advantage
