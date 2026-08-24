@@ -333,6 +333,7 @@ export default function App() {
           gamepadBattery={gamepadStatus}
           time={time}
           onOpenScraperModal={() => setShowScraperModal(true)}
+          onOpenAboutModal={() => setShowInfoModal(true)}
           showResetConfirm={showResetConfirm}
           setShowResetConfirm={setShowResetConfirm}
           setShowLoadRomModal={setShowLoadRomModal}
@@ -357,6 +358,7 @@ export default function App() {
             setShowVirtualKeyboard={setShowVirtualKeyboard}
             onOpenScraperModal={() => setShowScraperModal(true)}
             onOpenThemeModal={() => setShowThemeModal(true)}
+            onOpenAboutModal={() => setShowInfoModal(true)}
             showResetConfirm={showResetConfirm}
             setShowResetConfirm={setShowResetConfirm}
             time={time}

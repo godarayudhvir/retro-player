@@ -108,6 +108,22 @@ if (fs.existsSync(aboutModalPath)) {
   updatedCount++;
 }
 
+// 5b. src/components/MobileAppView.jsx (Mobile Drawer Badge)
+const mobileViewPath = path.join(ROOT_DIR, 'src/components/MobileAppView.jsx');
+if (fs.existsSync(mobileViewPath)) {
+  let mobileContent = fs.readFileSync(mobileViewPath, 'utf8');
+  const badgeRegex = /<span className="info-version-badge"[^>]*>[^<]+<\/span>/;
+  if (badgeRegex.test(mobileContent)) {
+    mobileContent = mobileContent.replace(
+      badgeRegex,
+      `<span className="info-version-badge" style={{ fontSize: '0.68rem', padding: '0.12rem 0.5rem' }}>${tagVer}</span>`
+    );
+    fs.writeFileSync(mobileViewPath, mobileContent, 'utf8');
+    console.log(`✅ Updated src/components/MobileAppView.jsx -> ${tagVer}`);
+    updatedCount++;
+  }
+}
+
 // 6. public/llms.txt
 const llmsPath = path.join(ROOT_DIR, 'public/llms.txt');
 if (fs.existsSync(llmsPath)) {

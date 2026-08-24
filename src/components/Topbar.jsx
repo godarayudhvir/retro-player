@@ -18,7 +18,8 @@ import {
   BatteryMedium,
   BatteryLow,
   BatteryWarning,
-  Zap
+  Zap,
+  Info
 } from 'lucide-react';
 import MultiAvatar from './MultiAvatar';
 import ConfirmModal from './ConfirmModal';
@@ -45,6 +46,7 @@ export default function Topbar({
   setShowVirtualKeyboard,
   onOpenScraperModal,
   onOpenThemeModal,
+  onOpenAboutModal,
   showResetConfirm: externalShowResetConfirm,
   setShowResetConfirm: externalSetShowResetConfirm,
   time,
@@ -328,6 +330,19 @@ export default function Topbar({
           aria-label="Factory Reset and Clear Cache"
         >
           <RotateCcw size={17} color="#ef4444" />
+        </button>
+
+        {/* About & System Info (v1.0.0) */}
+        <button
+          className={`status-pill status-info-app ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'info' ? 'gamepad-focused' : ''}`}
+          onClick={() => {
+            onOpenAboutModal?.();
+            sfx?.playModalOpen?.();
+          }}
+          title="About Retro Player & System Capabilities (v1.0.0)"
+          aria-label="About Retro Player"
+        >
+          <Info size={17} color="#059669" />
         </button>
 
         {/* Real-time Clock */}
