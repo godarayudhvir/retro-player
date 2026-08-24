@@ -6,7 +6,7 @@
  * External scraper probes (Libretro CDN, Wikipedia) are NEVER cached to prevent Chrome quota padding.
  */
 
-const CACHE_NAME = 'retro-player-v2';
+const CACHE_NAME = 'retro-player-v1.0.0';
 
 // Critical core assets to pre-cache on service worker installation
 const PRECACHE_ASSETS = [

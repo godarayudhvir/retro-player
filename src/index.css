@@ -7320,6 +7320,17 @@ button.status-pill.status-scraper-pill {
   letter-spacing: -0.02em;
 }
 
+.info-version-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.18rem 0.55rem;
+  border-radius: 9999px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  letter-spacing: 0.03em;
+}
+
 .info-close-btn {
   background: #f1f5f9;
   border: 2px solid #ffffff;

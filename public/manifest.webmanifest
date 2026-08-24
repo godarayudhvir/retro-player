@@ -111,13 +111,32 @@
         }
       ],
       "accept": {
-        "application/x-gba-rom": [".gba"],
-        "application/x-nes-rom": [".nes"],
-        "application/x-snes-rom": [".sfc", ".smc"],
-        "application/x-n64-rom": [".z64", ".n64", ".v64"],
-        "application/x-nds-rom": [".nds"],
-        "application/x-genesis-rom": [".gen", ".md", ".smd"],
-        "application/zip": [".zip"]
+        "application/x-gba-rom": [
+          ".gba"
+        ],
+        "application/x-nes-rom": [
+          ".nes"
+        ],
+        "application/x-snes-rom": [
+          ".sfc",
+          ".smc"
+        ],
+        "application/x-n64-rom": [
+          ".z64",
+          ".n64",
+          ".v64"
+        ],
+        "application/x-nds-rom": [
+          ".nds"
+        ],
+        "application/x-genesis-rom": [
+          ".gen",
+          ".md",
+          ".smd"
+        ],
+        "application/zip": [
+          ".zip"
+        ]
       }
     }
   ],
@@ -136,6 +155,6 @@
       "text": "text",
       "url": "url"
     }
-  }
+  },
+  "version": "1.0.0"
 }
-

@@ -7,6 +7,7 @@
 ### *The High-Performance, Zero-Overhead Web Emulation Station*
 
 [![Live Web Demo](https://img.shields.io/badge/Live%20Demo-godarayudhvir.github.io%2Fretro--player-emerald?style=for-the-badge&logo=githubpages&logoColor=white)](https://godarayudhvir.github.io/retro-player/)
+[![Version: v1.0.0](https://img.shields.io/badge/Version-v1.0.0-emerald?style=for-the-badge&logo=semver&logoColor=white)](https://github.com/godarayudhvir/retro-player)
 
 <br />
 
@@ -154,6 +155,7 @@ Retro Player includes built-in AI agent skills and automated utility scripts und
 | **[Codebase Stats](.agents/skills/codebase-stats/SKILL.md)** | [`.agents/skills/codebase-stats/`](.agents/skills/codebase-stats/) | Analyzes and reports file extension counts, sizes, and summaries while filtering build/cache folders. |
 | **[Update ROMs](.agents/skills/update-roms/SKILL.md)** | [`.agents/skills/update-roms/`](.agents/skills/update-roms/) | Organizes ROM folders, handles version upgrades & custom screenshot replacements, converts covers to WebP, and generates/syncs `metadata.json` sidecars. |
 | **[ROM Cleanup](.agents/skills/rom-cleanup/SKILL.md)** | [`.agents/skills/rom-cleanup/`](.agents/skills/rom-cleanup/) | Deduplicates dated builds, prunes non-English regions, and filters obscure releases with structured keep/remove approval. |
+| **[Release Version](.agents/skills/release-version/SKILL.md)** | [`.agents/skills/release-version/`](.agents/skills/release-version/) | Synchronizes app version across Service Worker caches, PWA manifest, package configs, in-app About modal, and documentation. |
 
 ---
 
