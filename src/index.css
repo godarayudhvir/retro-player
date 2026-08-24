@@ -12441,18 +12441,64 @@ button.status-pill.status-scraper-pill {
 }
 
 /* ==========================================================================
-   GAMEPAD BATTERY WIDGET & LOW BATTERY NOTIFICATIONS
+   GAMEPAD STATUS PILL & BATTERY WIDGET
    ========================================================================== */
+
+.status-gamepad {
+  width: auto;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 0.55rem;
+  justify-content: center;
+  box-sizing: border-box;
+  color: #64748b;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.status-gamepad.is-connected {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  border: 2px solid #34d399 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+}
+
+[data-color-mode="dark"] .status-gamepad.is-connected,
+[data-theme="ds"] .status-gamepad.is-connected {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  border-color: #34d399 !important;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+}
+
+.status-gamepad.is-connected.is-battery-low {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+  border-color: #fbbf24 !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.65) !important;
+  color: #ffffff !important;
+}
+
+.status-gamepad.is-connected.is-battery-critical {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  border-color: #f87171 !important;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.75) !important;
+  color: #ffffff !important;
+  animation: pulseGamepadCrit 1.2s infinite ease-in-out;
+}
+
+.status-gamepad.is-connected svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+}
 
 .status-gamepad .battery-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: rgba(0, 0, 0, 0.06);
+  background: rgba(0, 0, 0, 0.15);
   padding: 2px 7px;
   border-radius: 12px;
-  margin-left: 5px;
-  font-size: 0.78rem;
+  margin-left: 4px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.02em;
 }
@@ -12462,30 +12508,25 @@ button.status-pill.status-scraper-pill {
 }
 
 .status-gamepad .battery-icon.is-charging {
-  color: #10b981;
+  color: #ffffff;
   animation: pulse-charge 1.5s infinite ease-in-out;
 }
 
 .status-gamepad .battery-icon.is-full {
-  color: #10b981;
+  color: #ffffff;
 }
 
 .status-gamepad .battery-icon.is-medium {
-  color: #3b82f6;
+  color: #ffffff;
 }
 
 .status-gamepad .battery-icon.is-low {
-  color: #f59e0b;
+  color: #ffffff;
 }
 
 .status-gamepad .battery-icon.is-critical {
-  color: #ef4444;
+  color: #ffffff;
   animation: pulse-critical-battery 1s infinite alternate;
-}
-
-.status-gamepad.is-battery-low {
-  border-color: #f59e0b !important;
-  box-shadow: 0 0 14px rgba(245, 158, 11, 0.35) !important;
 }
 
 .status-gamepad .charging-tag {

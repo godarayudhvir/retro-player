@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Gamepad2, 
-  ShieldCheck, 
-  Download, 
-  ChevronRight, 
-  ArrowLeft, 
-  Play, 
-  Check, 
-  Smartphone, 
-  Monitor, 
-  Compass, 
-  Copy, 
+import {
+  Gamepad2,
+  ShieldCheck,
+  Download,
+  ChevronRight,
+  ArrowLeft,
+  Play,
+  Check,
+  Smartphone,
+  Monitor,
+  Compass,
+  Copy,
   ExternalLink,
   Layers,
   Volume2
@@ -113,7 +113,7 @@ export default function OnboardingScreen({
     try {
       localStorage.setItem('retro_onboarding_completed', 'true');
       localStorage.setItem('retro_demo_dismissed', 'true');
-    } catch {}
+    } catch { }
 
     // Save customized profile
     if (onSaveCreatedProfile) {
@@ -195,10 +195,10 @@ export default function OnboardingScreen({
               </div>
 
               {/* Card 2: 100% Free & Open Source GitHub */}
-              <a 
-                href="https://github.com/godarayudhvir/retro-player" 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <a
+                href="https://github.com/godarayudhvir/retro-player"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="onboarding-pillar-card onboarding-github-card"
                 onClick={() => sfx?.playTileNav?.()}
               >
@@ -310,7 +310,7 @@ export default function OnboardingScreen({
                     </div>
                     <div className="onboarding-install-text">
                       <strong>Install Standalone App</strong>
-                      <span>Enjoy full-screen offline gaming with zero browser address bar distractions.</span>
+                      <span> Enjoy full-screen offline gaming with zero browser address bar distractions.</span>
                     </div>
                     <ChevronRight size={18} className="install-arrow" />
                   </button>
