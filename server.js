@@ -908,17 +908,27 @@ app.post('/api/metadata/save-sidecar', express.json({ limit: '50mb' }), (req, re
     let savedCoverRelativeUrl = null;
 
     if (coverDataUrl && coverDataUrl.startsWith('data:image/')) {
-      const mimeMatch = coverDataUrl.match(/^data:image\/([a-zA-Z0-9+]+);base64,/);
-      const ext = mimeMatch ? (mimeMatch[1] === 'jpeg' ? 'jpg' : mimeMatch[1]) : 'webp';
       const base64Data = coverDataUrl.replace(/^data:image\/[a-zA-Z0-9+]+;base64,/, '');
       const imageBuffer = Buffer.from(base64Data, 'base64');
-      const coverFileName = `${baseFileName}.${ext}`;
+      const coverFileName = `${baseFileName}.webp`;
       const coverFilePath = path.join(targetDir, coverFileName);
 
       fs.writeFileSync(coverFilePath, imageBuffer);
       const relToPublic = path.relative(path.resolve(__dirname, 'public'), coverFilePath);
       savedCoverRelativeUrl = `/${relToPublic.split(path.sep).join('/')}`;
       console.log(`💾 [SERVER SIDECAR COVER SAVED] -> ${coverFilePath}`);
+
+      // Delete any existing non-webp image formats (.png, .jpg, .jpeg, .gif, .bmp) for this game
+      const obsoleteExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp'];
+      for (const obsExt of obsoleteExtensions) {
+        const obsPath = path.join(targetDir, `${baseFileName}${obsExt}`);
+        if (fs.existsSync(obsPath)) {
+          try {
+            fs.unlinkSync(obsPath);
+            console.log(`🧹 [PURGED OBSOLETE COVER] -> ${obsPath}`);
+          } catch (_) {}
+        }
+      }
     }
 
     const sidecarJson = {

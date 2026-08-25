@@ -5,6 +5,8 @@
  * Zero hardcoded game metadata in the repository.
  */
 
+import { convertRemoteImageToWebpDataUrl } from '../utils/imageConverter.js';
+
 const DB_NAME = 'RetroPlayerMetadataDB';
 const DB_VERSION = 3; // Bumped to 3 to invalidate old null cover cache
 const STORE_NAME = 'game_metadata';
@@ -994,7 +996,22 @@ export async function scrapeGame(game, force = false) {
   // If online details returned a lead image (e.g. Wikipedia) and we still had no cover:
   const cachedCover = (cached?.coverUrl && !cached.coverUrl.endsWith('.svg')) ? cached.coverUrl : null;
   const fallbackCover = scrapedCoverUrl || scrapedDetails?.coverUrl || null;
-  const finalCoverUrl = localCover || scrapedCoverUrl || cachedCover || fallbackCover || null;
+  let finalCoverUrl = localCover || scrapedCoverUrl || cachedCover || fallbackCover || null;
+
+  // Convert remote scraped image (PNG/JPG from Libretro CDN, ScreenScraper, Wikipedia) to optimized WebP DataURL
+  let webpConvertedDataUrl = null;
+  if (finalCoverUrl && (finalCoverUrl.startsWith('http://') || finalCoverUrl.startsWith('https://'))) {
+    try {
+      addScraperLog(`🖼️ Converting box art to WebP for "${game.title}"...`, 'scan', { gameId: id, title: game.title, systemKey: game.systemKey });
+      const converted = await convertRemoteImageToWebpDataUrl(finalCoverUrl, 600, 0.85);
+      if (converted && converted.startsWith('data:image/')) {
+        webpConvertedDataUrl = converted;
+        finalCoverUrl = converted;
+      }
+    } catch (e) {
+      console.warn('Could not transcode image to WebP:', e);
+    }
+  }
 
   // Merge: Local sidecar & local cover ALWAYS take 100% precedence over online data
   const metadata = {
@@ -1017,16 +1034,48 @@ export async function scrapeGame(game, force = false) {
     scrapedAt: new Date().toISOString()
   };
 
+  // If backend disk storage is available (/api/metadata/save-sidecar), save WebP cover & sidecar to host disk
+  if (webpConvertedDataUrl || (finalCoverUrl && !hasLocalCoverFile)) {
+    try {
+      fetch('/api/metadata/save-sidecar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gameId: id,
+          systemKey: game.systemKey,
+          romPath: game.romUrl || game.url,
+          title: metadata.title,
+          description: metadata.description,
+          releaseYear: metadata.releaseYear,
+          developer: metadata.developer,
+          publisher: metadata.publisher,
+          genre: metadata.genre,
+          walkthrough: metadata.walkthrough,
+          coverDataUrl: webpConvertedDataUrl || (finalCoverUrl.startsWith('data:image/') ? finalCoverUrl : null),
+          coverUrl: !finalCoverUrl.startsWith('data:image/') ? finalCoverUrl : null
+        })
+      }).then(res => res.ok ? res.json() : null)
+        .then(resData => {
+          if (resData?.savedCoverUrl) {
+            metadata.coverUrl = resData.savedCoverUrl;
+            metadata.hasSidecar = true;
+            saveCachedMetadata(id, metadata).catch(() => {});
+          }
+        })
+        .catch(() => {});
+    } catch (_) {}
+  }
+
   await saveCachedMetadata(id, metadata);
 
   if (hasLocalSidecarJson && !hasLocalCoverFile && fallbackCover) {
-    addScraperLog(`✨ [HYBRID] Preserved local metadata.json & fetched missing box art online for "${game.title}"`, 'success', { gameId: id, title: game.title, systemKey: game.systemKey });
+    addScraperLog(`✨ [HYBRID] Preserved local metadata.json & fetched missing box art online for "${game.title}" (WebP)`, 'success', { gameId: id, title: game.title, systemKey: game.systemKey });
   } else if (!hasLocalSidecarJson && hasLocalCoverFile) {
     addScraperLog(`✨ [HYBRID] Preserved local cover image & fetched missing synopsis online for "${game.title}"`, 'success', { gameId: id, title: game.title, systemKey: game.systemKey });
   } else if (hasLocalSidecarJson && !hasLocalCoverFile && !fallbackCover) {
     addScraperLog(`📁 Preserved local metadata.json for "${game.title}". (No remote box art found online)`, 'info', { gameId: id, title: game.title, systemKey: game.systemKey });
   } else {
-    addScraperLog(`✅ Saved metadata & box art for "${game.title}"`, 'success', { gameId: id, title: game.title, systemKey: game.systemKey });
+    addScraperLog(`✅ Saved metadata & WebP box art for "${game.title}"`, 'success', { gameId: id, title: game.title, systemKey: game.systemKey });
   }
 
   return metadata;

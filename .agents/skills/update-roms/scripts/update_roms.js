@@ -577,10 +577,20 @@ async function processRoms() {
             const tempImg = path.join(currentSubPath, `temp_boxart${ext}`);
             const downloaded = await downloadFile(coverUrl, tempImg);
             if (downloaded) {
-              convertImageToWebp(tempImg, webpPath);
+              const converted = convertImageToWebp(tempImg, webpPath);
               if (fs.existsSync(tempImg)) fs.unlinkSync(tempImg);
-              console.log(`    ✅ Downloaded box art to WebP`);
-              systemCoversGenerated++;
+              if (converted && fs.existsSync(webpPath)) {
+                // Purge any pre-existing .png, .jpg, .jpeg in game folder
+                const obsoleteExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp'];
+                for (const obsExt of obsoleteExtensions) {
+                  const obsPath = path.join(currentSubPath, `${activeRomBase}${obsExt}`);
+                  if (fs.existsSync(obsPath)) {
+                    try { fs.unlinkSync(obsPath); } catch (_) {}
+                  }
+                }
+                console.log(`    ✅ Downloaded box art to WebP`);
+                systemCoversGenerated++;
+              }
             }
           }
         }
