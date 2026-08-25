@@ -113,22 +113,25 @@ This pass is the most subjective. Use the criteria below to classify titles.
 
 | Category | Examples |
 |----------|---------|
-| Hardware/peripheral test programs | `Gesture Test for Power Pad`, any `(Program)` flagged ROM |
+| Hardware/peripheral test programs & BIOS | `Gesture Test for Power Pad`, any `(Program)` flagged ROM, `240p Test Suite`, `[BIOS]` dumps |
 | Tiny tech demos (< 5 KB) | Usually alphabet/sprite tests, minimal gameplay |
 | Seasonal/holiday releases with no standalone fame | Annual `8-BIT XMAS` series, `Santa's Magical Christmas Sleigh` |
-| Very early unfinished prototypes tagged `(Earlier)` or `(Proto)` with no follow-up | `Geminim (Earlier)` |
-| Pure joke/meme ROMs with minimal gameplay | `NES Matrix`, `Pixel Poops` |
-| Pirated hacks unless historically notable | `(Pirate)` tag |
+| Unreleased standalone prototypes & betas | Games tagged `(Proto)`, `(Beta)`, `(Sample)`, `(Earlier)` with no retail release |
+| Unlicensed pirate multi-carts | Multi-carts matching `\d+-in-1` or `\d+ Games` (e.g., `100-in-1`, `42 Games`) |
+| Pure joke/meme ROMs with minimal gameplay | `NES Matrix`, `Pixel Poops`, novelty hacks |
+| Generic aftermarket game jam demos | Random itch.io/NESDev game jam entries tagged `(Aftermarket)` / `(Unl)` unless famous |
 
 ### Keep criteria for homebrew titles
 
-A title is worth keeping if **any** of the following apply:
+Only keep `(Aftermarket)` or `(Unl)` titles if they are universally recognized, commercially published physical/digital games. Keep list includes:
 
-- Had a **commercial physical or digital release** (e.g., sold on Limited Run, Kickstarter, or itch.io)
-- Received **notable coverage** from gaming press (Kotaku, Eurogamer, Ars Technica, etc.)
-- Is frequently cited in **NESDev community** top lists or game-of-the-year posts
-- Was developed by a **recognized homebrew studio** (e.g., Morphcat, Second Dimension, Broke Studio)
-- Has **significant itch.io/Steam downloads** or community following
+- Morphcat releases (`Micro Mages`, `Böbl`)
+- Siren Games (`Battle Kid: Fortress of Peril`, `Battle Kid 2`)
+- Elden Pixels (`Alwa's Awakening - 8-Bit Edition`)
+- Rainwarrior / Brad Smith (`Lizard`)
+- Broke Studio (`Twin Dragons`, `Flea!`)
+- Mega Cat Studios (`Coffee Crisis`, `Little Medusa`, `Log Jammers`)
+- Sole Goose / 8-Bit Legit (`Full Quiet`, `Project Blue`, `Doodle World`)
 
 ### Common "always remove" homebrew categories for NES
 
@@ -136,41 +139,7 @@ A title is worth keeping if **any** of the following apply:
 - All `Byte-Off` contest entries that did not develop into a full/notable game
 - Single-screen puzzle demos with no story (`Babel Blox`, `Tic-Tac XO`, `Putt Putt`)
 - Games clearly named after real-world events with no replay value (`Escape from the Art Trail`)
-
----
-
-## Pass 4: Remove Sequels (When Original Is Present)
-
-When a collection contains **multiple installments from the same series**, keep only the
-**earliest / original entry** and remove the later sequels.
-
-### Rule
-
-- A **sequel** is any game whose title contains a numeral, subtitle implying continuation
-  (e.g., `2`, `3`, `II`, `III`, `Part 2`, `The Next Chapter`), or is widely known to be
-  a numbered follow-up.
-- **Only remove a sequel if an earlier entry from the same series is also present** in the
-  collection. Do not remove a sequel that is the sole representative of its franchise.
-- If both the original and a sequel exist, keep the **lowest-numbered / earliest** entry.
-- If only sequels are present (no original), **keep them all** — do not remove anything
-  from this pass.
-
-### Examples
-
-```
-Driver - You Are the Wheelman (USA) (Demo).zip   ← KEEP (original)
-Driver 2 (USA) (Demo).zip                        ← REMOVE (sequel, original present)
-
-Spyro the Dragon (USA) (Demo) (SCUS-94290).zip   ← KEEP (original)
-Spyro 2 - Ripto's Rage! (USA) (Demo).zip         ← REMOVE (sequel, original present)
-Spyro - Year of the Dragon (USA) (Demo).zip      ← REMOVE (sequel, original present)
-
-Mega Man Legends 2 (USA) (Demo).zip              ← KEEP (no Mega Man Legends 1 present)
-```
-
-### Reason label for the table
-
-- `sequel (original present)` — a numbered sequel when the original is also in the collection
+- Generic aftermarket shovelware / test carts (`CORGS Simulator`, `Total Extinction`, `Animal Clipper`)
 
 ---
 
@@ -191,8 +160,10 @@ Before running any deletions, always generate a markdown table split into two se
 - `non-English region` — not US/Europe/World
 - `test program` — hardware test, not a game
 - `very obscure` — no community recognition
+- `obscure homebrew/aftermarket` — uncurated game-jam, demo, or shovelware aftermarket ROM
+- `prototype/demo build` — unreleased standalone prototype or beta with no retail release
 - `seasonal demo` — holiday/event-only release
-- `pirate/hack` — unauthorized derivative
+- `pirate/hack` — unauthorized derivative or multi-cart (`100-in-1`, etc.)
 - `joke ROM` — minimal gameplay, novelty only
 
 Wait for the user to say **"yes"**, **"go ahead"**, or explicitly approve the
