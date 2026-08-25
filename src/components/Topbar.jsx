@@ -157,21 +157,23 @@ export default function Topbar({
           </div>
         )}
 
-        {/* Gamepad Connection & Battery Status Pill */}
-        <div 
-          className={`status-pill status-gamepad ${gamepadConnected ? 'is-connected' : ''} ${gamepadConnected && gamepadBattery?.hasBatteryInfo && gamepadBattery.batteryPercent <= 10 && !gamepadBattery.isCharging ? 'is-battery-critical' : gamepadConnected && gamepadBattery?.hasBatteryInfo && gamepadBattery.batteryPercent <= 20 && !gamepadBattery.isCharging ? 'is-battery-low' : ''}`} 
-          title={getGamepadTooltip()}
-          aria-label={getGamepadTooltip()}
-        >
-          <Gamepad2 size={18} />
-          {gamepadConnected && gamepadBattery?.hasBatteryInfo && (
-            <span className="battery-badge">
-              {renderBatteryIcon()}
-              <span className="battery-percent-text">{gamepadBattery.batteryPercent}%</span>
-              {gamepadBattery.isCharging && <span className="charging-tag">⚡</span>}
-            </span>
-          )}
-        </div>
+        {/* Gamepad Connection & Battery Status Pill (Shown only when connected) */}
+        {gamepadConnected && (
+          <div 
+            className={`status-pill status-gamepad is-connected ${gamepadBattery?.hasBatteryInfo && gamepadBattery.batteryPercent <= 10 && !gamepadBattery.isCharging ? 'is-battery-critical' : gamepadBattery?.hasBatteryInfo && gamepadBattery.batteryPercent <= 20 && !gamepadBattery.isCharging ? 'is-battery-low' : ''}`} 
+            title={getGamepadTooltip()}
+            aria-label={getGamepadTooltip()}
+          >
+            <Gamepad2 size={18} />
+            {gamepadBattery?.hasBatteryInfo && (
+              <span className="battery-badge">
+                {renderBatteryIcon()}
+                <span className="battery-percent-text">{gamepadBattery.batteryPercent}%</span>
+                {gamepadBattery.isCharging && <span className="charging-tag">⚡</span>}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Metadata Scraper Status / Trigger / Stop Button */}
         {scraper && (

@@ -1722,7 +1722,23 @@ export default function MobileAppView({
 
         {/* Right Icon Actions Group */}
         <div className="mobile-topbar-actions-group">
-          {/* 1. Search Icon Button */}
+          {/* 1. Gamepad & Battery Telemetry Pill (Shown only when connected, before search) */}
+          {gamepadConnected && (
+            <div 
+              className={`mobile-topbar-action-btn mobile-gamepad-pill is-connected ${gamepadBattery?.hasBatteryInfo && gamepadBattery.batteryPercent <= 10 && !gamepadBattery.isCharging ? 'is-battery-critical' : gamepadBattery?.hasBatteryInfo && gamepadBattery.batteryPercent <= 20 && !gamepadBattery.isCharging ? 'is-battery-low' : ''}`}
+              title={getGamepadTooltip()}
+            >
+              <Gamepad2 size={16} />
+              {gamepadBattery?.hasBatteryInfo && (
+                <span className="mobile-battery-indicator">
+                  {renderBatteryIcon()}
+                  <span style={{ fontSize: '0.66rem', fontWeight: 900 }}>{gamepadBattery.batteryPercent}%</span>
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* 2. Search Icon Button */}
           <button 
             type="button"
             className={`mobile-topbar-action-btn ${isSearchOpen || searchQuery ? 'is-active' : ''}`}
@@ -1736,7 +1752,7 @@ export default function MobileAppView({
             <Search size={16} />
           </button>
 
-          {/* 2. BGM Toggle Button & Skip Button */}
+          {/* 3. BGM Toggle Button & Skip Button */}
           {bgm && (
             <div className="mobile-bgm-group" style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
               <button 
@@ -1770,7 +1786,7 @@ export default function MobileAppView({
             </div>
           )}
 
-          {/* 3. SFX Toggle Button */}
+          {/* 4. SFX Toggle Button */}
           {sfx && (
             <button 
               type="button"
@@ -1784,20 +1800,6 @@ export default function MobileAppView({
               {sfx.isMuted ? <VolumeX size={16} color="#64748b" /> : <Volume2 size={16} color="#3b82f6" />}
             </button>
           )}
-
-          {/* 4. Gamepad & Battery Telemetry Pill */}
-          <div 
-            className={`mobile-topbar-action-btn mobile-gamepad-pill ${gamepadConnected ? 'is-connected' : ''} ${gamepadConnected && gamepadBattery?.hasBatteryInfo && gamepadBattery.batteryPercent <= 10 && !gamepadBattery.isCharging ? 'is-battery-critical' : gamepadConnected && gamepadBattery?.hasBatteryInfo && gamepadBattery.batteryPercent <= 20 && !gamepadBattery.isCharging ? 'is-battery-low' : ''}`}
-            title={getGamepadTooltip()}
-          >
-            <Gamepad2 size={16} />
-            {gamepadBattery?.hasBatteryInfo && (
-              <span className="mobile-battery-indicator">
-                {renderBatteryIcon()}
-                <span style={{ fontSize: '0.66rem', fontWeight: 900 }}>{gamepadBattery.batteryPercent}%</span>
-              </span>
-            )}
-          </div>
 
           {/* 5. Load Custom ROM Button */}
           <button 

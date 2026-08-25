@@ -17244,11 +17244,26 @@ button.status-pill.status-scraper-pill {
   border: 2px solid var(--panel-border, #cbd5e1) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 16px 36px rgba(0, 0, 0, 0.25) !important;
   max-width: 640px !important;
+  max-height: 88vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  padding: 0 !important;
 }
 
 [data-color-mode="dark"] .backup-modal-content {
   border-color: #334155 !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 16px 36px rgba(0, 0, 0, 0.5) !important;
+}
+
+.backup-modal-body {
+  padding: 0.85rem 1.25rem 1.25rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: calc(88vh - 72px);
+  box-sizing: border-box;
 }
 
 .backup-metric-card {

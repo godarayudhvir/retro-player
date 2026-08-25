@@ -256,188 +256,189 @@ export default function BackupModal({
           </button>
         </div>
 
-        {/* Persistence Status Banner */}
-        <div className="backup-persistence-banner" style={{
-          margin: '0.75rem 1.25rem 0.5rem',
-          padding: '0.75rem 1rem',
-          borderRadius: '8px',
-          background: isServerAvailable ? 'rgba(16, 185, 129, 0.08)' : 'rgba(59, 130, 246, 0.08)',
-          border: isServerAvailable ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid rgba(59, 130, 246, 0.25)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem'
-        }}>
-          <HardDrive size={20} style={{ color: isServerAvailable ? '#10b981' : '#3b82f6', flexShrink: 0 }} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <strong style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
-                {isServerAvailable ? 'Docker / Server Persistence Active' : 'Browser Offline / IndexedDB Storage'}
-              </strong>
-              <span style={{
-                fontSize: '0.68rem',
-                padding: '0.1rem 0.45rem',
-                borderRadius: '4px',
-                background: isServerAvailable ? '#10b981' : '#3b82f6',
-                color: '#fff',
-                fontWeight: 700
-              }}>
-                {isServerAvailable ? 'SERVER DISK' : 'LOCAL CACHE'}
-              </span>
-            </div>
-            <p style={{ fontSize: '0.74rem', color: 'var(--text-sub)', margin: '2px 0 0', lineHeight: 1.35 }}>
-              {isServerAvailable 
-                ? 'All profiles, SRAM saves, and save states automatically sync to data/retroplayer_db.json on the server.'
-                : 'Data is safely stored in browser IndexedDB. Export a JSON backup to transfer your saves to another device.'}
-            </p>
-          </div>
-        </div>
-
-        {/* Database Overview Metric Chips */}
-        {stats && (
-          <div className="backup-metrics-grid" style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
-            gap: '0.5rem',
-            margin: '0.5rem 1.25rem 1rem'
+        {/* Modal Scrollable Body */}
+        <div className="backup-modal-body">
+          {/* Persistence Status Banner */}
+          <div className="backup-persistence-banner" style={{
+            padding: '0.75rem 1rem',
+            borderRadius: '6px',
+            background: isServerAvailable ? 'rgba(16, 185, 129, 0.08)' : 'rgba(59, 130, 246, 0.08)',
+            border: isServerAvailable ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid rgba(59, 130, 246, 0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem'
           }}>
-            <div className="backup-metric-card">
-              <Users size={14} style={{ color: '#3b82f6' }} />
-              <span className="metric-count">{stats.profilesCount || 0}</span>
-              <span className="metric-label">Profiles</span>
-            </div>
-            <div className="backup-metric-card">
-              <Save size={14} style={{ color: '#10b981' }} />
-              <span className="metric-count">{stats.savesCount || 0}</span>
-              <span className="metric-label">Battery Saves</span>
-            </div>
-            <div className="backup-metric-card">
-              <Clock size={14} style={{ color: '#f59e0b' }} />
-              <span className="metric-count">{stats.statesCount || 0}</span>
-              <span className="metric-label">Save States</span>
-            </div>
-            <div className="backup-metric-card">
-              <Sliders size={14} style={{ color: '#8b5cf6' }} />
-              <span className="metric-count">{stats.userDataCount || 0}</span>
-              <span className="metric-label">User History</span>
-            </div>
-          </div>
-        )}
-
-        {/* Status Alerts */}
-        {statusMessage && (
-          <div className="backup-alert is-success" style={{ margin: '0 1.25rem 0.75rem' }}>
-            <CheckCircle2 size={16} />
-            <span>{statusMessage}</span>
-          </div>
-        )}
-        {errorMessage && (
-          <div className="backup-alert is-danger" style={{ margin: '0 1.25rem 0.75rem' }}>
-            <AlertCircle size={16} />
-            <span>{errorMessage}</span>
-          </div>
-        )}
-
-        {/* Modal Actions Body */}
-        <div className="backup-actions-container" style={{ padding: '0 1.25rem 1.25rem' }}>
-          
-          {/* Action 1: Export Full Database */}
-          <div className={`backup-action-card ${focusedSection === 0 ? 'is-focused' : ''}`}>
-            <div className="backup-card-info">
-              <div className="backup-card-icon" style={{ background: 'rgba(225, 29, 72, 0.1)', color: '#e11d48' }}>
-                <Download size={20} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)', display: 'block' }}>
-                  Export Database Snapshot
+            <HardDrive size={20} style={{ color: isServerAvailable ? '#10b981' : '#3b82f6', flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <strong style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
+                  {isServerAvailable ? 'Docker / Server Persistence Active' : 'Browser Offline / IndexedDB Storage'}
                 </strong>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>
-                  Download a full backup JSON file containing all profiles, playtime, favorites, and game saves.
+                <span style={{
+                  fontSize: '0.68rem',
+                  padding: '0.1rem 0.45rem',
+                  borderRadius: '4px',
+                  background: isServerAvailable ? '#10b981' : '#3b82f6',
+                  color: '#fff',
+                  fontWeight: 700
+                }}>
+                  {isServerAvailable ? 'SERVER DISK' : 'LOCAL CACHE'}
                 </span>
               </div>
+              <p style={{ fontSize: '0.74rem', color: 'var(--text-sub)', margin: '2px 0 0', lineHeight: 1.35 }}>
+                {isServerAvailable 
+                  ? 'All profiles, SRAM saves, and save states automatically sync to data/retroplayer_db.json on the server.'
+                  : 'Data is safely stored in browser IndexedDB. Export a JSON backup to transfer your saves to another device.'}
+              </p>
             </div>
-            <button
-              type="button"
-              className="backup-action-btn is-primary"
-              onClick={handleExportBackup}
-              disabled={isExporting}
-            >
-              {isExporting ? <RefreshCw size={15} className="animate-spin" /> : <Download size={15} />}
-              <span>{isExporting ? 'Exporting...' : 'Download Backup (.json)'}</span>
-            </button>
           </div>
 
-          {/* Action 2: Import / Restore Database */}
-          <div className={`backup-action-card ${focusedSection === 1 ? 'is-focused' : ''}`}>
-            <div className="backup-card-info">
-              <div className="backup-card-icon" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
-                <Upload size={20} />
+          {/* Database Overview Metric Chips */}
+          {stats && (
+            <div className="backup-metrics-grid" style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
+              gap: '0.5rem'
+            }}>
+              <div className="backup-metric-card">
+                <Users size={14} style={{ color: '#3b82f6' }} />
+                <span className="metric-count">{stats.profilesCount || 0}</span>
+                <span className="metric-label">Profiles</span>
               </div>
-              <div style={{ flex: 1 }}>
-                <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)', display: 'block' }}>
-                  Restore from JSON Backup
-                </strong>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>
-                  Load a previously exported backup file to restore or migrate data across devices.
-                </span>
+              <div className="backup-metric-card">
+                <Save size={14} style={{ color: '#10b981' }} />
+                <span className="metric-count">{stats.savesCount || 0}</span>
+                <span className="metric-label">Battery Saves</span>
+              </div>
+              <div className="backup-metric-card">
+                <Clock size={14} style={{ color: '#f59e0b' }} />
+                <span className="metric-count">{stats.statesCount || 0}</span>
+                <span className="metric-label">Save States</span>
+              </div>
+              <div className="backup-metric-card">
+                <Sliders size={14} style={{ color: '#8b5cf6' }} />
+                <span className="metric-count">{stats.userDataCount || 0}</span>
+                <span className="metric-label">User History</span>
               </div>
             </div>
+          )}
 
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              accept=".json,application/json" 
-              style={{ display: 'none' }} 
-              onChange={handleFileChange} 
-            />
+          {/* Status Alerts */}
+          {statusMessage && (
+            <div className="backup-alert is-success">
+              <CheckCircle2 size={16} />
+              <span>{statusMessage}</span>
+            </div>
+          )}
+          {errorMessage && (
+            <div className="backup-alert is-danger">
+              <AlertCircle size={16} />
+              <span>{errorMessage}</span>
+            </div>
+          )}
 
-            {!importPreview ? (
+          {/* Modal Actions Body */}
+          <div className="backup-actions-container">
+            
+            {/* Action 1: Export Full Database */}
+            <div className={`backup-action-card ${focusedSection === 0 ? 'is-focused' : ''}`}>
+              <div className="backup-card-info">
+                <div className="backup-card-icon" style={{ background: 'rgba(225, 29, 72, 0.1)', color: '#e11d48' }}>
+                  <Download size={20} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)', display: 'block' }}>
+                    Export Database Snapshot
+                  </strong>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>
+                    Download a full backup JSON file containing all profiles, playtime, favorites, and game saves.
+                  </span>
+                </div>
+              </div>
               <button
                 type="button"
-                className="backup-action-btn is-secondary"
-                onClick={() => fileInputRef.current?.click()}
+                className="backup-action-btn is-primary"
+                onClick={handleExportBackup}
+                disabled={isExporting}
               >
-                <FileText size={15} />
-                <span>Select Backup File...</span>
+                {isExporting ? <RefreshCw size={15} className="animate-spin" /> : <Download size={15} />}
+                <span>{isExporting ? 'Exporting...' : 'Download Backup (.json)'}</span>
               </button>
-            ) : (
-              <div className="backup-import-preview-box">
-                <div className="preview-header">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                    <CheckCircle2 size={16} style={{ color: '#10b981' }} />
-                    <strong style={{ fontSize: '0.82rem', color: 'var(--text-main)' }}>{importPreview.fileName}</strong>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)' }}>({importPreview.fileSize})</span>
-                  </div>
-                  <button 
-                    type="button" 
-                    className="preview-clear-btn" 
-                    onClick={() => setImportPreview(null)}
-                    aria-label="Clear selection"
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
+            </div>
 
-                <div className="preview-stats-row">
-                  <span>{importPreview.profilesCount} Profiles</span> • 
-                  <span>{importPreview.savesCount} Battery Saves</span> • 
-                  <span>{importPreview.statesCount} Save States</span>
+            {/* Action 2: Import / Restore Database */}
+            <div className={`backup-action-card ${focusedSection === 1 ? 'is-focused' : ''}`}>
+              <div className="backup-card-info">
+                <div className="backup-card-icon" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
+                  <Upload size={20} />
                 </div>
-
-                <div className="preview-actions-row">
-                  <button
-                    type="button"
-                    className="backup-action-btn is-success"
-                    onClick={handleExecuteImport}
-                    disabled={isImporting}
-                  >
-                    {isImporting ? <RefreshCw size={15} className="animate-spin" /> : <Upload size={15} />}
-                    <span>{isImporting ? 'Restoring Database...' : 'Confirm & Restore Backup'}</span>
-                  </button>
+                <div style={{ flex: 1 }}>
+                  <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)', display: 'block' }}>
+                    Restore from JSON Backup
+                  </strong>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>
+                    Load a previously exported backup file to restore or migrate data across devices.
+                  </span>
                 </div>
               </div>
-            )}
-          </div>
 
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                accept=".json,application/json" 
+                style={{ display: 'none' }} 
+                onChange={handleFileChange} 
+              />
+
+              {!importPreview ? (
+                <button
+                  type="button"
+                  className="backup-action-btn is-secondary"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <FileText size={15} />
+                  <span>Select Backup File...</span>
+                </button>
+              ) : (
+                <div className="backup-import-preview-box">
+                  <div className="preview-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <CheckCircle2 size={16} style={{ color: '#10b981' }} />
+                      <strong style={{ fontSize: '0.82rem', color: 'var(--text-main)' }}>{importPreview.fileName}</strong>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)' }}>({importPreview.fileSize})</span>
+                    </div>
+                    <button 
+                      type="button" 
+                      className="preview-clear-btn" 
+                      onClick={() => setImportPreview(null)}
+                      aria-label="Clear selection"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+
+                  <div className="preview-stats-row">
+                    <span>{importPreview.profilesCount} Profiles</span> • 
+                    <span>{importPreview.savesCount} Battery Saves</span> • 
+                    <span>{importPreview.statesCount} Save States</span>
+                  </div>
+
+                  <div className="preview-actions-row">
+                    <button
+                      type="button"
+                      className="backup-action-btn is-success"
+                      onClick={handleExecuteImport}
+                      disabled={isImporting}
+                    >
+                      {isImporting ? <RefreshCw size={15} className="animate-spin" /> : <Upload size={15} />}
+                      <span>{isImporting ? 'Restoring Database...' : 'Confirm & Restore Backup'}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+          </div>
         </div>
       </div>
     </div>
