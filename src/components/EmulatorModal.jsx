@@ -1338,13 +1338,13 @@ export default function EmulatorModal({
                 if (emu.gainNode && emu.gainNode.gain) {
                   emu.gainNode.gain.value = targetVol;
                 }
+                if (emu?.Module?.SDL2?.audio?.gainNode?.gain) {
+                  emu.Module.SDL2.audio.gainNode.gain.value = targetVol;
+                }
                 const audioCtx = emu?.Module?.AL?.currentCtx?.audioCtx || emu?.Module?.AL?.currentCtx || emu?.audioContext || window.AudioContext;
-                if (audioCtx) {
-                  if (isMuted && audioCtx.state === 'running') {
-                    audioCtx.suspend?.().catch(() => {});
-                  } else if (!isMuted && audioCtx.state === 'suspended') {
-                    audioCtx.resume?.().catch(() => {});
-                  }
+                // Only resume if unmuted and was suspended by browser autoplay policy; NEVER suspend on mute because it pauses the WebAssembly frame loop
+                if (audioCtx && !isMuted && audioCtx.state === 'suspended') {
+                  audioCtx.resume?.().catch(() => {});
                 }
               } catch(e) {}
             };
@@ -2127,10 +2127,10 @@ export default function EmulatorModal({
               emu.muted = nextMuted;
               if (typeof emu.setVolume === 'function') emu.setVolume(targetVol);
               if (emu.gainNode && emu.gainNode.gain) emu.gainNode.gain.value = targetVol;
+              if (emu?.Module?.SDL2?.audio?.gainNode?.gain) emu.Module.SDL2.audio.gainNode.gain.value = targetVol;
               const audioCtx = emu?.Module?.AL?.currentCtx?.audioCtx || emu?.Module?.AL?.currentCtx || emu?.audioContext || win?.AudioContext;
-              if (audioCtx) {
-                if (nextMuted && audioCtx.state === 'running') audioCtx.suspend?.().catch(() => {});
-                else if (!nextMuted && audioCtx.state === 'suspended') audioCtx.resume?.().catch(() => {});
+              if (audioCtx && !nextMuted && audioCtx.state === 'suspended') {
+                audioCtx.resume?.().catch(() => {});
               }
             }
           } catch(e) {}
@@ -2437,8 +2437,10 @@ export default function EmulatorModal({
             className={`emulator-topbar-action-btn ${focusedTarget?.zone === 'inGameBar' && focusedTarget?.id === 'shader' ? 'gamepad-focused' : ''}`}
             onClick={() => {
               const sIdx = (SHADERS.indexOf(activeShader) + 1) % SHADERS.length;
-              setActiveShader(SHADERS[sIdx]);
-              showToast(`Display Filter: ${SHADER_LABELS[SHADERS[sIdx]]}`);
+              const nextShader = SHADERS[sIdx];
+              activeShaderRef.current = nextShader;
+              setActiveShader(nextShader);
+              showToast(`Display Filter: ${SHADER_LABELS[nextShader]}`);
             }}
             title="Cycle Display Filters"
           >
@@ -2574,8 +2576,10 @@ export default function EmulatorModal({
             className={`sub-toolbar-btn ${focusedTarget?.zone === 'inGameSubBar' && focusedTarget?.id === 'shader' ? 'gamepad-focused' : ''}`}
             onClick={() => {
               const sIdx = (SHADERS.indexOf(activeShader) + 1) % SHADERS.length;
-              setActiveShader(SHADERS[sIdx]);
-              showToast(`Display Filter: ${SHADER_LABELS[SHADERS[sIdx]]}`);
+              const nextShader = SHADERS[sIdx];
+              activeShaderRef.current = nextShader;
+              setActiveShader(nextShader);
+              showToast(`Display Filter: ${SHADER_LABELS[nextShader]}`);
             }}
             title="Cycle Display Filters"
           >
