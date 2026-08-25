@@ -31,10 +31,15 @@ A **3-tab split layout** navigable via keyboard (`Tab` / Arrow keys) and gamepad
 - **Track List**: Scrollable list of all installed BGM tracks with filename and delete control.
 - **Per-Track Delete**: In-app `ConfirmModal` → `DELETE /api/bgm/:filename` → BGM engine rescan.
 
-#### Tab 3 — General / Storage
+#### Tab 3 — General / Storage & Audio
 - **Storage Diagnostics**: Reads `navigator.storage.estimate()` to display IndexedDB usage and quota.
+- **Audio & CRT Preferences**: Global master volume, BGM track shuffle mode, CRT scanline filter toggles, and fast-forward speed presets.
 - **Clear Browser Cache**: Calls `clearBrowserCacheAndData()` from `src/utils/storageCleaner.js` after `ConfirmModal` confirmation. Purges all emulator save states, favorites, playtime records, and scraper metadata cache from IndexedDB.
 - **Future**: System information panel (emulator core versions, service worker cache status, last scrape timestamp).
+
+#### 💾 Unified Backup & Migration Compatibility
+- **Database Persistence (`app_settings`)**: All configured preferences (audio levels, CRT filter modes, theme configuration, custom keybindings) must be persisted into the `app_settings` database store.
+- **Snapshot Inclusion**: Wire `app_settings` into `BackupModal.jsx` and `exportFullDatabase()` / `importFullDatabase()` in `src/services/db.js` so exporting a `.json` database snapshot restores all user settings across devices seamlessly upon import.
 
 ### Design Requirements for Redesign
 - Must feel native to the console Nintendo DS Touch theme with dark/light mode awareness — not a generic modal overlay.

@@ -818,13 +818,11 @@ function multiConsoleScannerPlugin() {
               userDataCount: Object.keys(db.user_data || {}).length,
               savesCount: Object.keys(db.game_saves || {}).length,
               statesCount: Object.keys(db.save_states || {}).length,
-              metadataCount: Object.keys(db.game_metadata || {}).length,
-              settingsCount: Object.keys(db.app_settings || {}).length
+              metadataCount: Object.keys(db.game_metadata || {}).length
             },
             database: {
               profiles: db.profiles || [],
               user_data: db.user_data || {},
-              app_settings: db.app_settings || {},
               game_saves: db.game_saves || {},
               save_states: db.save_states || {},
               game_metadata: db.game_metadata || {}
@@ -852,7 +850,6 @@ function multiConsoleScannerPlugin() {
               const mergedDb = {
                 profiles: Array.isArray(database.profiles) ? database.profiles : (currentDb.profiles || []),
                 user_data: typeof database.user_data === 'object' ? { ...currentDb.user_data, ...database.user_data } : (currentDb.user_data || {}),
-                app_settings: typeof database.app_settings === 'object' ? { ...currentDb.app_settings, ...database.app_settings } : (currentDb.app_settings || {}),
                 game_saves: typeof database.game_saves === 'object' ? { ...currentDb.game_saves, ...database.game_saves } : (currentDb.game_saves || {}),
                 save_states: typeof database.save_states === 'object' ? { ...currentDb.save_states, ...database.save_states } : (currentDb.save_states || {}),
                 game_metadata: typeof database.game_metadata === 'object' ? { ...currentDb.game_metadata, ...database.game_metadata } : (currentDb.game_metadata || {})
@@ -873,8 +870,7 @@ function multiConsoleScannerPlugin() {
                   profilesCount: Array.isArray(mergedDb.profiles) ? mergedDb.profiles.length : 0,
                   userDataCount: Object.keys(mergedDb.user_data).length,
                   savesCount: Object.keys(mergedDb.game_saves).length,
-                  statesCount: Object.keys(mergedDb.save_states).length,
-                  settingsCount: Object.keys(mergedDb.app_settings).length
+                  statesCount: Object.keys(mergedDb.save_states).length
                 }
               }));
             } catch (err) {

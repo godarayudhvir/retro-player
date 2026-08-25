@@ -328,7 +328,7 @@ export default function Topbar({
             onOpenBackupModal?.();
             sfx?.playModalOpen?.();
           }}
-          title="Database Backup & Restore (Export / Import Saves, Profiles & Settings)"
+          title="Database Backup & Restore (Export / Import Saves, Profiles & Stats)"
           aria-label="Database Backup and Restore"
         >
           <Database size={17} color="#e11d48" />
@@ -369,8 +369,8 @@ export default function Topbar({
       {/* Factory Reset Confirmation Modal */}
       <ConfirmModal
         isOpen={showResetConfirm}
-        title="Reset Application & Clear Cache?"
-        message="This will permanently wipe all browser storage, cached metadata, box art, battery saves, save states, profiles, and service worker caches, then cleanly reload the application. No codebase or server files on disk will be touched."
+        title="Factory Reset & Clear Storage?"
+        message="This will reset all player profiles, battery saves, save states, and browser caches back to defaults. Your ROM files and cover artwork on disk will not be deleted."
         confirmLabel="Reset & Reload"
         cancelLabel="Cancel"
         isDestructive={true}

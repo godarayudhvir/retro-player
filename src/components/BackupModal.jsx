@@ -179,7 +179,6 @@ export default function BackupModal({
           userDataCount: Object.keys(database.user_data || {}).length,
           savesCount: Object.keys(database.game_saves || {}).length,
           statesCount: Object.keys(database.save_states || {}).length,
-          settingsCount: Object.keys(database.app_settings || {}).length,
           payload: parsed
         };
 
@@ -243,7 +242,7 @@ export default function BackupModal({
             <Database size={22} className="theme-header-icon" style={{ color: 'var(--accent-red, #e11d48)' }} />
             <div>
               <h2>Database Backup &amp; Restore</h2>
-              <p>Export full game saves, profiles &amp; settings to disk or restore from JSON</p>
+              <p>Export full game saves, profiles &amp; stats to disk or restore from JSON</p>
             </div>
           </div>
 
@@ -439,17 +438,6 @@ export default function BackupModal({
             )}
           </div>
 
-        </div>
-
-        {/* Modal Footer */}
-        <div className="theme-switcher-footer">
-          <button 
-            type="button" 
-            className="theme-footer-btn" 
-            onClick={() => { onClose(); sfx?.playModalClose?.(); }}
-          >
-            <span>Close</span>
-          </button>
         </div>
       </div>
     </div>

@@ -424,13 +424,11 @@ export async function exportFullDatabase() {
         userDataCount: rawUserData.length,
         savesCount: rawSaves.length,
         statesCount: rawStates.length,
-        settingsCount: rawSettings.length,
         metadataCount: rawMetadata.length
       },
       database: {
         profiles: rawProfiles,
         user_data: convertKeyValStore(rawUserData),
-        app_settings: convertKeyValStore(rawSettings),
         game_saves: convertKeyValStore(rawSaves),
         save_states: convertKeyValStore(rawStates),
         game_metadata: convertKeyValStore(rawMetadata)
@@ -478,7 +476,6 @@ export async function importFullDatabase(backupPayload) {
     const storeMappings = [
       { name: STORES.PROFILES, raw: database.profiles, isArray: true },
       { name: STORES.USER_DATA, raw: database.user_data, isArray: false },
-      { name: STORES.SETTINGS, raw: database.app_settings, isArray: false },
       { name: STORES.GAME_SAVES, raw: database.game_saves, isArray: false },
       { name: STORES.SAVE_STATES, raw: database.save_states, isArray: false },
       { name: STORES.GAME_METADATA, raw: database.game_metadata, isArray: false }
