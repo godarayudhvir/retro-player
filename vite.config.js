@@ -989,7 +989,8 @@ function multiConsoleScannerPlugin() {
         req.on('end', async () => {
           try {
             const data = JSON.parse(body || '{}');
-            const { gameId, systemKey, romPath, title, description, developer, publisher, year, genre, players, coverDataUrl } = data;
+            const { gameId, systemKey, romPath, title, description, developer, publisher, year, releaseYear, genre, players, coverDataUrl } = data;
+            const effectiveYear = (releaseYear || year || '').toString();
 
             let targetDir = path.resolve(process.cwd(), 'public/roms', systemKey || '');
             let baseFileName = 'game';
@@ -1082,7 +1083,8 @@ function multiConsoleScannerPlugin() {
               description: description || '',
               developer: developer || '',
               publisher: publisher || '',
-              year: year || '',
+              releaseYear: effectiveYear,
+              year: effectiveYear,
               genre: genre || '',
               players: players || 1,
               systemKey: systemKey || '',

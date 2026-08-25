@@ -992,7 +992,8 @@ app.delete('/api/db/:store/:key', (req, res) => {
 app.post('/api/metadata/save-sidecar', express.json({ limit: '50mb' }), async (req, res) => {
   try {
     const data = req.body || {};
-    const { gameId, systemKey, romPath, title, description, developer, publisher, year, genre, players, coverDataUrl } = data;
+    const { gameId, systemKey, romPath, title, description, developer, publisher, year, releaseYear, genre, players, coverDataUrl } = data;
+    const effectiveYear = (releaseYear || year || '').toString();
 
     let targetDir = path.resolve(ROMS_DIR, systemKey || '');
     let baseFileName = 'game';
@@ -1085,7 +1086,8 @@ app.post('/api/metadata/save-sidecar', express.json({ limit: '50mb' }), async (r
       description: description || '',
       developer: developer || '',
       publisher: publisher || '',
-      year: year || '',
+      releaseYear: effectiveYear,
+      year: effectiveYear,
       genre: genre || '',
       players: players || 1,
       systemKey: systemKey || '',

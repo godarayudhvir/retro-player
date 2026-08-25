@@ -114,10 +114,10 @@ export default function DsView({
   const screenshotSrc = rawScreenshot ? resolveAssetPath(rawScreenshot) : null;
 
   const description = meta.description || selectedGame?.sidecarMetadata?.description || (selectedGame ? getGameDescription(selectedGame) : '');
-  const releaseYear = meta.releaseYear || selectedGame?.sidecarMetadata?.releaseYear || meta.releaseDate?.split('-')[0] || (selectedGame && getReleaseDate(selectedGame) !== '2000-01-01' ? getReleaseDate(selectedGame).split('-')[0] : 'Classic');
+  const releaseYear = meta.releaseYear || selectedGame?.sidecarMetadata?.releaseYear || meta.releaseDate?.split('-')[0] || (selectedGame && getReleaseDate(selectedGame) !== '2000-01-01' ? getReleaseDate(selectedGame).split('-')[0] : null);
   const developer = meta.developer || selectedGame?.sidecarMetadata?.developer || null;
   const publisher = meta.publisher || selectedGame?.sidecarMetadata?.publisher || null;
-  const genre = meta.genre || selectedGame?.sidecarMetadata?.genre || 'Retro Classic';
+  const genre = meta.genre || selectedGame?.sidecarMetadata?.genre || null;
 
   // Walkthrough links from local sidecar metadata or metadataMap
   const walkthrough = selectedGame?.sidecarMetadata?.walkthrough || meta.walkthrough || {};
@@ -757,40 +757,50 @@ export default function DsView({
             </div>
 
             {/* Specs Details Card */}
-            <div className="ds-specs-group">
-              {genre && (
-                <div className="ds-spec-card">
-                  <Tag size={12} color="#64748b" />
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)' }}>Genre:</span>
-                  <strong>{genre}</strong>
-                </div>
-              )}
+            {(genre || developer || publisher || releaseYear) ? (
+              <div className="ds-specs-group">
+                {genre && (
+                  <div className="ds-spec-card">
+                    <Tag size={12} color="#64748b" />
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)' }}>Genre:</span>
+                    <strong>{genre}</strong>
+                  </div>
+                )}
 
-              {developer && (
-                <div className="ds-spec-card">
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)' }}>Developer:</span>
-                  <strong>{developer}</strong>
-                </div>
-              )}
+                {developer && (
+                  <div className="ds-spec-card">
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)' }}>Developer:</span>
+                    <strong>{developer}</strong>
+                  </div>
+                )}
 
-              {publisher && publisher !== developer && (
-                <div className="ds-spec-card">
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)' }}>Publisher:</span>
-                  <strong>{publisher}</strong>
-                </div>
-              )}
+                {publisher && publisher !== developer && (
+                  <div className="ds-spec-card">
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)' }}>Publisher:</span>
+                    <strong>{publisher}</strong>
+                  </div>
+                )}
 
-              <div className="ds-spec-row-2">
-                <div className="ds-spec-card">
-                  <Calendar size={12} color="#64748b" />
-                  <span>{releaseYear}</span>
-                </div>
-                <div className="ds-spec-card">
-                  <Cpu size={12} color="#64748b" />
-                  <span>{selectedGame?.systemCore?.toUpperCase() || 'EMULATORJS'}</span>
+                <div className="ds-spec-row-2">
+                  {releaseYear && (
+                    <div className="ds-spec-card">
+                      <Calendar size={12} color="#64748b" />
+                      <span>{releaseYear}</span>
+                    </div>
+                  )}
+                  <div className="ds-spec-card" style={!releaseYear ? { gridColumn: 'span 2' } : {}}>
+                    <Cpu size={12} color="#64748b" />
+                    <span>{selectedGame?.systemCore?.toUpperCase() || 'EMULATORJS'}</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="ds-spec-card" style={{ marginTop: '0.2rem' }}>
+                <Cpu size={12} color="#64748b" />
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)' }}>Core:</span>
+                <strong>{selectedGame?.systemCore?.toUpperCase() || 'EMULATORJS'}</strong>
+              </div>
+            )}
           </div>
         )}
 
@@ -1171,7 +1181,7 @@ export default function DsView({
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                       <FileText size={11} color="#64748b" />
-                      <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-sub)' }}>Metadata &amp; Cover Search Logs</span>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-sub)' }}>Metadata / Cover Search</span>
                     </div>
 
                     <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
@@ -1181,7 +1191,7 @@ export default function DsView({
                         style={{ padding: '0.2rem 0.5rem', fontSize: '0.65rem' }}
                         onClick={handleManualScrape}
                         disabled={isLocalScraping}
-                        title="Force live online re-scrape against Libretro CDN & ScreenScraper"
+                        title="Search online databases (Libretro CDN & Game DB)"
                       >
                         <RefreshCw size={10} className={isLocalScraping ? 'spin' : ''} />
                         <span>{isLocalScraping ? 'Scraping...' : 'Scrape'}</span>
@@ -1200,21 +1210,23 @@ export default function DsView({
                     </div>
                   </div>
 
-                  <div className="ds-scraper-terminal-logs">
-                    {gameLogs.length > 0 ? (
-                      gameLogs.map((log, idx) => (
-                        <div key={log.id || idx} className={`ds-log-line log-${log.type}`}>
-                          <span className="log-time">{log.timestamp ? new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'LOG'}</span>
-                          <span className="log-msg">{log.message}</span>
+                  {(isLocalScraping || gameLogs.length > 0) && (
+                    <div className="ds-scraper-terminal-logs animate-fade-in">
+                      {gameLogs.length > 0 ? (
+                        gameLogs.map((log, idx) => (
+                          <div key={log.id || idx} className={`ds-log-line log-${log.type}`}>
+                            <span className="log-time">{log.timestamp ? new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'LOG'}</span>
+                            <span className="log-msg">{log.message}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="ds-log-line log-info">
+                          <span className="log-msg">Starting online database queries...</span>
                         </div>
-                      ))
-                    ) : (
-                      <div className="ds-log-line log-info">
-                        <span className="log-msg">{isLocalScraping ? 'Starting network queries...' : 'Ready to search online databases. Click "Re-Fetch Online Data" to query.'}</span>
-                      </div>
-                    )}
-                    <div ref={logsEndRef} />
-                  </div>
+                      )}
+                      <div ref={logsEndRef} />
+                    </div>
+                  )}
                 </div>
 
                 {/* Section 3: Game Metadata Form Fields */}
@@ -1289,18 +1301,6 @@ export default function DsView({
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
                     placeholder="Enter game storyline, overview, or synopsis..."
-                  />
-                </div>
-
-                {/* Custom Cover URL */}
-                <div className="ds-field-group">
-                  <label className="ds-field-label">Cover Artwork Image URL</label>
-                  <input
-                    type="text"
-                    className="ds-field-input"
-                    value={editCoverUrl}
-                    onChange={(e) => setEditCoverUrl(e.target.value)}
-                    placeholder="https://..."
                   />
                 </div>
 

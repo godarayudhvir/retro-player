@@ -822,7 +822,14 @@ const RAWG_PLATFORM_MAP = {
 async function scrapeRawg(game) {
   try {
     const rawTitle = game.title || '';
-    const cleanTitle = rawTitle.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').replace(/ - /g, ' ').replace(/-/g, ' ').trim();
+    let base = rawTitle.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').trim();
+    if (base.includes(', The')) {
+      base = 'The ' + base.replace(', The', '');
+    }
+    if (base.includes(', A')) {
+      base = 'A ' + base.replace(', A', '');
+    }
+    const cleanTitle = base.replace(/&/g, 'and').replace(/\s*-\s*/g, ' ').replace(/_/g, ' ').replace(/\bThe\s+The\b/gi, 'The').replace(/\s+/g, ' ').trim();
     if (!cleanTitle) return null;
 
     addScraperLog(`🎮 Querying Video Game Database for "${cleanTitle}"...`, 'scan', { gameId: game.id, title: game.title, systemKey: game.systemKey });
@@ -925,9 +932,9 @@ async function scrapeGameDetails(game) {
     coverUrl: null,
     releaseDate: null,
     releaseYear: null,
-    developer: systemName,
-    publisher: systemName,
-    genre: 'Retro Classic',
+    developer: null,
+    publisher: null,
+    genre: null,
     source: 'Dynamic Overview'
   };
 }
@@ -960,7 +967,7 @@ export async function scrapeGame(game, force = false) {
     // 2. If cached metadata already has both details and a valid cover, use it
     const hasValidCachedCover = Boolean(cached.coverUrl && !cached.coverUrl.endsWith('.svg'));
     const hasValidCachedDetails = Boolean(
-      (sidecar.description && sidecar.releaseYear) || 
+      (sidecar.description && (sidecar.releaseYear || sidecar.year)) || 
       (cached.description && 
        cached.description !== `Experience ${game.title} on ${game.systemName}.` && 
        cached.description !== `Experience the classic adventure of ${game.title} for ${game.systemName}. Relive nostalgic challenges and timeless retro gameplay.`)
@@ -985,11 +992,11 @@ export async function scrapeGame(game, force = false) {
       coverUrl: localCover,
       hasCustomCover: true,
       description: sidecar.description || `Experience ${game.title} on ${game.systemName}.`,
-      releaseDate: sidecar.releaseYear ? `${sidecar.releaseYear}-01-01` : '2000-01-01',
-      releaseYear: sidecar.releaseYear || 'Classic',
-      developer: sidecar.developer || game.systemName || 'Classic',
-      publisher: sidecar.publisher || game.systemName || 'Classic',
-      genre: sidecar.genre || 'Retro Classic',
+      releaseDate: sidecar.releaseYear ? `${sidecar.releaseYear}-01-01` : (sidecar.year ? `${sidecar.year}-01-01` : null),
+      releaseYear: sidecar.releaseYear || sidecar.year || null,
+      developer: sidecar.developer || null,
+      publisher: sidecar.publisher || null,
+      genre: sidecar.genre || null,
       walkthrough: sidecar.walkthrough || undefined,
       writtenWalkthroughUrl: sidecar.walkthrough?.written || undefined,
       videoWalkthroughUrl: sidecar.walkthrough?.video || undefined,
@@ -1010,17 +1017,16 @@ export async function scrapeGame(game, force = false) {
     scrapedCoverUrl = await scrapeCoverArt(game);
   }
 
-  // 2. If details/synopsis is missing locally, query online APIs (TheGamesDB, ScreenScraper, Wikipedia)
+  // 2. If details/synopsis is missing locally, query online APIs (TheGamesDB, ScreenScraper, Video Game DB)
   if (needsDetailsScrape) {
     scrapedDetails = await scrapeGameDetails(game);
   }
 
-  // If online details returned a lead image (e.g. Wikipedia) and we still had no cover:
   const cachedCover = (cached?.coverUrl && !cached.coverUrl.endsWith('.svg')) ? cached.coverUrl : null;
   const fallbackCover = scrapedCoverUrl || scrapedDetails?.coverUrl || null;
   let finalCoverUrl = localCover || scrapedCoverUrl || cachedCover || fallbackCover || null;
 
-  // Merge: Local sidecar & local cover ALWAYS take 100% precedence over online data
+  // Merge: Local sidecar & local cover ALWAYS take precedence over online data
   const metadata = {
     id,
     title: sidecar.title || game.title,
@@ -1028,11 +1034,11 @@ export async function scrapeGame(game, force = false) {
     coverUrl: finalCoverUrl,
     hasCustomCover: Boolean(finalCoverUrl),
     description: sidecar.description || scrapedDetails?.description || cached?.description || `Experience ${game.title} on ${game.systemName}.`,
-    releaseDate: (sidecar.releaseYear ? `${sidecar.releaseYear}-01-01` : null) || scrapedDetails?.releaseDate || cached?.releaseDate || '2000-01-01',
-    releaseYear: sidecar.releaseYear || scrapedDetails?.releaseYear || cached?.releaseYear || 'Classic',
-    developer: sidecar.developer || scrapedDetails?.developer || cached?.developer || game.systemName || 'Classic',
-    publisher: sidecar.publisher || scrapedDetails?.publisher || cached?.publisher || game.systemName || 'Classic',
-    genre: sidecar.genre || scrapedDetails?.genre || cached?.genre || 'Retro Classic',
+    releaseDate: (sidecar.releaseYear ? `${sidecar.releaseYear}-01-01` : (sidecar.year ? `${sidecar.year}-01-01` : null)) || scrapedDetails?.releaseDate || cached?.releaseDate || null,
+    releaseYear: sidecar.releaseYear || sidecar.year || scrapedDetails?.releaseYear || cached?.releaseYear || null,
+    developer: sidecar.developer || scrapedDetails?.developer || cached?.developer || null,
+    publisher: sidecar.publisher || scrapedDetails?.publisher || cached?.publisher || null,
+    genre: sidecar.genre || scrapedDetails?.genre || cached?.genre || null,
     walkthrough: sidecar.walkthrough || cached?.walkthrough || undefined,
     writtenWalkthroughUrl: sidecar.walkthrough?.written || cached?.writtenWalkthroughUrl || undefined,
     videoWalkthroughUrl: sidecar.walkthrough?.video || cached?.videoWalkthroughUrl || undefined,
@@ -1041,8 +1047,8 @@ export async function scrapeGame(game, force = false) {
     scrapedAt: new Date().toISOString()
   };
 
-  // If backend disk storage is available (/api/metadata/save-sidecar), sync cover & sidecar to host disk
-  if (finalCoverUrl && !hasLocalCoverFile) {
+  // If backend disk storage is available (/api/metadata/save-sidecar), sync sidecar & cover to host disk
+  if (scrapedDetails || (finalCoverUrl && !hasLocalCoverFile)) {
     try {
       const res = await fetch('/api/metadata/save-sidecar', {
         method: 'POST',
@@ -1058,16 +1064,16 @@ export async function scrapeGame(game, force = false) {
           publisher: metadata.publisher,
           genre: metadata.genre,
           walkthrough: metadata.walkthrough,
-          coverDataUrl: finalCoverUrl.startsWith('data:image/') ? finalCoverUrl : null,
-          coverUrl: !finalCoverUrl.startsWith('data:image/') ? finalCoverUrl : null
+          coverDataUrl: finalCoverUrl?.startsWith('data:image/') ? finalCoverUrl : null,
+          coverUrl: (!finalCoverUrl?.startsWith('data:image/') && !hasLocalCoverFile) ? finalCoverUrl : null
         })
       });
       if (res.ok) {
         const resData = await res.json();
         if (resData?.savedCoverUrl) {
           metadata.coverUrl = resData.savedCoverUrl;
-          metadata.hasSidecar = true;
         }
+        metadata.hasSidecar = true;
       }
     } catch (backendErr) {
       console.warn('Backend save-sidecar sync error:', backendErr);

@@ -228,10 +228,10 @@ export default function MobileAppView({
   const rawScreenshot = selectedMeta?.screenshotUrl;
   const screenshotSrc = rawScreenshot ? resolveAssetPath(rawScreenshot) : null;
   const description = selectedMeta?.description || selectedGameForDetails?.sidecarMetadata?.description || (selectedGameForDetails ? getGameDescription(selectedGameForDetails) : '');
-  const releaseYear = selectedMeta?.releaseYear || selectedMeta?.releaseDate?.split('-')[0] || (selectedGameForDetails && getReleaseDate(selectedGameForDetails) !== '2000-01-01' ? getReleaseDate(selectedGameForDetails).split('-')[0] : 'Classic');
-  const developer = selectedMeta?.developer || selectedGameForDetails?.sidecarMetadata?.developer || selectedGameForDetails?.systemName || 'Classic';
-  const publisher = selectedMeta?.publisher || selectedGameForDetails?.sidecarMetadata?.publisher || developer || 'Classic';
-  const genre = selectedMeta?.genre || selectedGameForDetails?.sidecarMetadata?.genre || 'Retro Classic';
+  const releaseYear = selectedMeta?.releaseYear || selectedMeta?.releaseDate?.split('-')[0] || (selectedGameForDetails && getReleaseDate(selectedGameForDetails) !== '2000-01-01' ? getReleaseDate(selectedGameForDetails).split('-')[0] : null);
+  const developer = selectedMeta?.developer || selectedGameForDetails?.sidecarMetadata?.developer || null;
+  const publisher = selectedMeta?.publisher || selectedGameForDetails?.sidecarMetadata?.publisher || null;
+  const genre = selectedMeta?.genre || selectedGameForDetails?.sidecarMetadata?.genre || null;
 
   const walkthrough = selectedGameForDetails?.sidecarMetadata?.walkthrough || selectedMeta?.walkthrough || {};
   const writtenGuideUrl = walkthrough.written || selectedMeta?.writtenWalkthroughUrl || null;
@@ -1405,7 +1405,7 @@ export default function MobileAppView({
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                       <FileText size={11} color="#64748b" />
-                      <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-sub)' }}>Metadata &amp; Cover Search Logs</span>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-sub)' }}>Metadata / Cover Search</span>
                     </div>
 
                     <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
@@ -1415,7 +1415,7 @@ export default function MobileAppView({
                         style={{ padding: '0.2rem 0.5rem', fontSize: '0.65rem' }}
                         onClick={handleManualScrape}
                         disabled={isLocalScraping}
-                        title="Force live online re-scrape against Libretro CDN & ScreenScraper"
+                        title="Search online databases (Libretro CDN & Game DB)"
                       >
                         <RefreshCw size={10} className={isLocalScraping ? 'spin' : ''} />
                         <span>{isLocalScraping ? 'Scraping...' : 'Scrape'}</span>
@@ -1434,21 +1434,23 @@ export default function MobileAppView({
                     </div>
                   </div>
 
-                  <div className="ds-scraper-terminal-logs">
-                    {gameLogs.length > 0 ? (
-                      gameLogs.map((log, idx) => (
-                        <div key={log.id || idx} className={`ds-log-line log-${log.type}`}>
-                          <span className="log-time">{log.timestamp ? new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'LOG'}</span>
-                          <span className="log-msg">{log.message}</span>
+                  {(isLocalScraping || gameLogs.length > 0) && (
+                    <div className="ds-scraper-terminal-logs animate-fade-in">
+                      {gameLogs.length > 0 ? (
+                        gameLogs.map((log, idx) => (
+                          <div key={log.id || idx} className={`ds-log-line log-${log.type}`}>
+                            <span className="log-time">{log.timestamp ? new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'LOG'}</span>
+                            <span className="log-msg">{log.message}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="ds-log-line log-info">
+                          <span className="log-msg">Starting online database queries...</span>
                         </div>
-                      ))
-                    ) : (
-                      <div className="ds-log-line log-info">
-                        <span className="log-msg">{isLocalScraping ? 'Starting network queries...' : 'Ready to search online databases. Tap "Re-Fetch Online Data" to query.'}</span>
-                      </div>
-                    )}
-                    <div ref={logsEndRef} />
-                  </div>
+                      )}
+                      <div ref={logsEndRef} />
+                    </div>
+                  )}
                 </div>
 
                 {/* Section 3: Metadata Form Fields */}
@@ -1517,17 +1519,6 @@ export default function MobileAppView({
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
                     placeholder="Enter game storyline, overview, or synopsis..."
-                  />
-                </div>
-
-                <div className="ds-field-group">
-                  <label className="ds-field-label">Cover Image URL</label>
-                  <input
-                    type="text"
-                    className="ds-field-input"
-                    value={editCoverUrl}
-                    onChange={(e) => setEditCoverUrl(e.target.value)}
-                    placeholder="https://..."
                   />
                 </div>
 
