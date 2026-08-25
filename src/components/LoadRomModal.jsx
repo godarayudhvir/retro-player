@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { X, FolderOpen, Upload, ShieldCheck, Sparkles } from 'lucide-react';
+import { X, FolderOpen, Upload, ShieldCheck, Gamepad2 } from 'lucide-react';
 import { resolveAssetPath } from '../utils/assetPath';
 
 /**
@@ -126,7 +126,7 @@ export default function LoadRomModal({
           {/* Supported Systems */}
           <div className="load-rom-section">
             <h3 className="load-rom-section-title">
-              <Sparkles size={16} /> Supported Console Formats
+              <Gamepad2 size={16} /> Supported Console Formats
             </h3>
             <div className="load-rom-platforms-grid">
               {supportedPlatforms.map((plat) => (

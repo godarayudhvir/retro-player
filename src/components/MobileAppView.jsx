@@ -1374,6 +1374,20 @@ export default function MobileAppView({
               <FolderOpen size={48} color="#64748b" />
               <h3>No Games Found</h3>
               <p>No ROM files found matching this filter.</p>
+              <div className="mobile-empty-actions" style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                <button
+                  type="button"
+                  className="mobile-ds-play-btn"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 18px', fontSize: '0.85rem', background: '#3b82f6', borderColor: '#2563eb' }}
+                  onClick={() => {
+                    setShowLoadRomModal?.(true);
+                    sfx?.playModalOpen?.();
+                  }}
+                >
+                  <FolderOpen size={16} />
+                  <span>Load Custom ROM</span>
+                </button>
+              </div>
             </div>
           )}
         </main>
@@ -1495,7 +1509,10 @@ export default function MobileAppView({
           <button 
             type="button"
             className="mobile-topbar-action-btn load-action-btn"
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => {
+              setShowLoadRomModal?.(true);
+              sfx?.playModalOpen?.();
+            }}
             title="Load Custom ROM"
             aria-label="Load Custom ROM"
           >
@@ -1553,7 +1570,7 @@ export default function MobileAppView({
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
                       <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>About Retro Player</strong>
-                      <span className="info-version-badge" style={{ fontSize: '0.68rem', padding: '0.12rem 0.5rem' }}>v1.0.2</span>
+                      <span className="info-version-badge" style={{ fontSize: '0.68rem', padding: '0.12rem 0.5rem' }}>v1.0.3</span>
                     </div>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
                       Emulation engines, GitHub repository, and system specifications
@@ -1730,6 +1747,47 @@ export default function MobileAppView({
         </div>
 
         {/* Quick Access Smart Categories */}
+        {games.length === 0 && (
+          <div className="mobile-empty-library-card" style={{
+            margin: '0.5rem 0 0.85rem 0',
+            padding: '1.1rem 1rem',
+            background: 'var(--panel-bg, #ffffff)',
+            border: '2px dashed var(--panel-border, #cbd5e1)',
+            borderRadius: '12px',
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <FolderOpen size={32} color="#3b82f6" />
+            <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main, #0f172a)' }}>No ROMs in Library</div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-sub, #64748b)', maxWidth: '280px', lineHeight: 1.4 }}>
+              Load ROM files (.gba, .nes, .gbc, .nds, .zip) from your device to start playing immediately.
+            </div>
+            <button
+              type="button"
+              className="mobile-ds-play-btn"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 16px',
+                fontSize: '0.82rem',
+                marginTop: '4px',
+                background: '#3b82f6',
+                borderColor: '#2563eb'
+              }}
+              onClick={() => {
+                setShowLoadRomModal?.(true);
+                sfx?.playModalOpen?.();
+              }}
+            >
+              <FolderOpen size={15} />
+              <span>Load Custom ROM</span>
+            </button>
+          </div>
+        )}
         <div className="mobile-quick-categories-row">
           <button
             type="button"

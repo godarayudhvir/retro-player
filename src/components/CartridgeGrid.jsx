@@ -32,7 +32,8 @@ export default function CartridgeGrid({
   onDeleteSave,
   hasSaveData,
   scraper,
-  gamepadConnected = false
+  gamepadConnected = false,
+  setShowLoadRomModal
 }) {
   const currentTheme = themeEngine?.theme || 'ds';
 
@@ -127,14 +128,15 @@ export default function CartridgeGrid({
         <div className="empty-action-group">
           <button
             type="button"
-            className="empty-primary-btn"
+            className={`empty-primary-btn ${focusedTarget?.zone === 'emptyGrid' ? 'gamepad-focused' : ''}`}
             onClick={() => {
-              fetchGames?.();
-              sfx?.playThemeSwitch?.();
+              setShowLoadRomModal?.(true);
+              setFocusedTarget?.({ zone: 'loadRomModal', id: 'browse' });
+              sfx?.playModalOpen?.();
             }}
           >
-            <RefreshCw size={16} className={loading ? 'spin' : ''} />
-            <span>Rescan Library</span>
+            <FolderOpen size={16} />
+            <span>Load ROM</span>
           </button>
         </div>
       </div>

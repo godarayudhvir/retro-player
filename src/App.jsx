@@ -413,6 +413,7 @@ export default function App() {
             hasSaveData={hasSaveData}
             scraper={scraper}
             gamepadConnected={gamepadConnected}
+            setShowLoadRomModal={setShowLoadRomModal}
           />
         </>
       )}

@@ -14,7 +14,7 @@ export default function AboutInfoModal({ isOpen, focusedTarget, onClose }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <Gamepad2 size={28} color="#ef4444" />
             <h2>Retro Player</h2>
-            <span className="info-version-badge">v1.0.2</span>
+            <span className="info-version-badge">v1.0.3</span>
           </div>
           <button
             className={`info-close-btn ${focusedTarget?.zone === 'infoModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`}

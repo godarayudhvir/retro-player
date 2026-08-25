@@ -1757,10 +1757,21 @@ export function useGamepadNavigation({
           }
         }
       } else if (curZone === 'emptyGrid') {
-        const emptyBtn = document.querySelector('.empty-primary-btn');
-        if (emptyBtn) emptyBtn.click();
-        setFocusedTarget({ zone: 'grid', index: 0 });
-        sfx?.playNavSelect?.();
+        const curId = curTarget?.id || (curQuery ? 'clearSearch' : 'loadRom');
+        if (curId === 'loadRom') {
+          setShowLoadRomModal(true);
+          setFocusedTarget({ zone: 'loadRomModal', id: 'browse' });
+          sfx?.playModalOpen?.();
+        } else if (curId === 'clearSearch') {
+          setSearchQuery('');
+          setFocusedTarget({ zone: 'grid', index: 0 });
+          sfx?.playNavSelect?.();
+        } else {
+          const emptyBtn = document.querySelector('.empty-primary-btn');
+          if (emptyBtn) emptyBtn.click();
+          setFocusedTarget({ zone: 'grid', index: 0 });
+          sfx?.playNavSelect?.();
+        }
       } else if (curZone === 'cardModal') {
         // Card detail panel: play, fav, guides, edit
         const curId = curTarget?.id || 'play';
@@ -1923,7 +1934,7 @@ export function useGamepadNavigation({
           setFocusedTarget({ zone: 'ribbon', index: sysIdx >= 0 ? sysIdx : 0 });
           sfx?.playTileNav?.();
         } else if (dir === 'DOWN') {
-          setFocusedTarget({ zone: 'emptyGrid', id: 'clearSearch' });
+          setFocusedTarget({ zone: 'emptyGrid', id: curQuery ? 'clearSearch' : 'loadRom' });
           sfx?.playTileNav?.();
         }
         return;
