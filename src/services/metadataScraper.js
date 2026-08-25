@@ -67,8 +67,30 @@ export function clearScraperLogs() {
   logListeners.forEach(fn => fn([]));
 }
 
+// Map internal system keys to human-readable names
+export const SYSTEM_NAMES = {
+  nes: 'Nintendo Entertainment System',
+  snes: 'Super Nintendo',
+  gba: 'Game Boy Advance',
+  gbc: 'Game Boy Color',
+  gb: 'Game Boy',
+  n64: 'Nintendo 64',
+  nds: 'Nintendo DS',
+  genesis: 'Sega Genesis',
+  megadrive: 'Sega Genesis',
+  sega_genesis: 'Sega Genesis',
+  playstation: 'PlayStation',
+  ps1: 'PlayStation',
+  psx: 'PlayStation',
+  arcade: 'Arcade (MAME)',
+  gamegear: 'Game Gear',
+  game_gear: 'Game Gear',
+  atari2600: 'Atari 2600',
+  atari_2600: 'Atari 2600'
+};
+
 // Map internal system keys to TheGamesDB platform IDs
-const THEGAMESDB_PLATFORM_MAP = {
+export const THEGAMESDB_PLATFORM_MAP = {
   nes: 7,
   snes: 6,
   gba: 5,
@@ -78,15 +100,19 @@ const THEGAMESDB_PLATFORM_MAP = {
   nds: 8,
   genesis: 18,
   megadrive: 18,
+  sega_genesis: 18,
   ps1: 10,
   psx: 10,
+  playstation: 10,
   arcade: 23,
   gamegear: 20,
-  atari2600: 22
+  game_gear: 20,
+  atari2600: 22,
+  atari_2600: 22
 };
 
 // Map internal system keys to ScreenScraper platform IDs
-const SCREENSCRAPER_PLATFORM_MAP = {
+export const SCREENSCRAPER_PLATFORM_MAP = {
   nes: 3,
   snes: 4,
   gba: 12,
@@ -96,15 +122,19 @@ const SCREENSCRAPER_PLATFORM_MAP = {
   nds: 15,
   genesis: 1,
   megadrive: 1,
+  sega_genesis: 1,
   ps1: 57,
   psx: 57,
+  playstation: 57,
   arcade: 75,
   gamegear: 21,
-  atari2600: 26
+  game_gear: 21,
+  atari2600: 26,
+  atari_2600: 26
 };
 
 // Map internal system keys to Libretro Thumbnails repository system directory names
-const LIBRETRO_SYSTEM_MAP = {
+export const LIBRETRO_SYSTEM_MAP = {
   nes: 'Nintendo - Nintendo Entertainment System',
   snes: 'Nintendo - Super Nintendo Entertainment System',
   gba: 'Nintendo - Game Boy Advance',
@@ -114,11 +144,15 @@ const LIBRETRO_SYSTEM_MAP = {
   nds: 'Nintendo - Nintendo DS',
   genesis: 'Sega - Mega Drive - Genesis',
   megadrive: 'Sega - Mega Drive - Genesis',
+  sega_genesis: 'Sega - Mega Drive - Genesis',
   ps1: 'Sony - PlayStation',
   psx: 'Sony - PlayStation',
+  playstation: 'Sony - PlayStation',
   arcade: 'FBNeo - Arcade Games',
   gamegear: 'Sega - Game Gear',
-  atari2600: 'Atari - 2600'
+  game_gear: 'Sega - Game Gear',
+  atari2600: 'Atari - 2600',
+  atari_2600: 'Atari - 2600'
 };
 
 // Open IndexedDB instance
@@ -382,7 +416,7 @@ export async function clearAllCachedMetadata() {
  * Format string for Libretro Thumbnails naming standards
  * (Replaces &, :, /, \, *, ?, ", <, >, | with _)
  */
-function formatLibretroName(str) {
+export function formatLibretroName(str) {
   if (!str) return '';
   return str
     .replace(/[&:/\\*?"<>|]/g, '_')
@@ -394,12 +428,47 @@ function formatLibretroName(str) {
  * Generate extensive candidate filenames for thumbnail scraping
  * Dynamically resolves demo/kiosk/aftermarket ROMs to their official retail box art.
  */
-function generateThumbnailCandidates(game) {
+export function generateThumbnailCandidates(game) {
   const candidates = [];
   const raw = game.rawTitle || game.title || '';
   const fileNoExt = (game.filename || '').replace(/\.[^/.]+$/, '');
   const cleanDisplay = (game.title || '').replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').trim();
 
+  const set = new Set();
+  function add(name) {
+    if (!name) return;
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const formatted = formatLibretroName(trimmed);
+
+    if (!set.has(trimmed)) {
+      set.add(trimmed);
+      candidates.push(trimmed);
+    }
+    if (formatted && !set.has(formatted)) {
+      set.add(formatted);
+      candidates.push(formatted);
+    }
+  }
+
+  // 1. Primary exact strings
+  if (raw) add(raw);
+  if (fileNoExt) add(fileNoExt);
+
+  // 2. Fallback 1: Strip auxiliary compilation/re-release/aftermarket tags while preserving region
+  const auxTagRegex = /\s*\((?:e-Reader|Evercade|Wii U Virtual Console|Virtual Console|Castlevania Anniversary Collection|Capcom Classics Mini Mix|Limited Run Games|SNK 40th Anniversary Collection|Namcot Collection|Namco Museum Archives Vol \d+|Contra Anniversary Collection|Collection of Mana|Hudson|Kemco|Mindscape|NESDev \d+|Kickstarter|Aftermarket|Unl|Demo(?:\s*\d+)?|Beta|Digital|Proto|SGB Enhanced|GB Compatible|Rumble Version)\)/gi;
+  const bracketTagRegex = /\s*\[.*?\]/g;
+
+  if (raw) {
+    const strippedAux = raw.replace(auxTagRegex, '').replace(bracketTagRegex, '').replace(/\s+/g, ' ').trim();
+    if (strippedAux && strippedAux !== raw) add(strippedAux);
+  }
+  if (fileNoExt) {
+    const strippedAuxFile = fileNoExt.replace(auxTagRegex, '').replace(bracketTagRegex, '').replace(/\s+/g, ' ').trim();
+    if (strippedAuxFile && strippedAuxFile !== fileNoExt) add(strippedAuxFile);
+  }
+
+  // 3. Fallback 2: Clean base titles with standard region variants
   const baseSet = new Set();
 
   function addBaseVariants(str) {
@@ -426,35 +495,25 @@ function generateThumbnailCandidates(game) {
     }
   }
 
-  // 1. Add clean display title and variants
   addBaseVariants(cleanDisplay);
 
-  // 2. Add raw title stripped of all tags in parentheses
-  const rawStripped = raw
-    .replace(/\(.*?\)/g, '')
-    .replace(/\[.*?\]/g, '')
-    .trim();
+  const rawStripped = raw.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').trim();
   addBaseVariants(rawStripped);
 
-  // 3. Add filename stripped of all tags in parentheses
-  const fileStripped = fileNoExt
-    .replace(/\(.*?\)/g, '')
-    .replace(/\[.*?\]/g, '')
-    .trim();
+  const fileStripped = fileNoExt.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').trim();
   addBaseVariants(fileStripped);
 
-  // 4. Exact raw strings (if the database happens to have exact demo name)
-  if (fileNoExt) candidates.push(formatLibretroName(fileNoExt));
-  if (raw) candidates.push(formatLibretroName(raw));
-
-  // 5. Region / Language / Flag variants for every base variant (top most common first)
+  // Region / Language / Flag variants for every base variant
   const regionTags = [
     '',
     ' (USA)',
     ' (USA, Europe)',
-    ' (Europe)',
     ' (World)',
     ' (Japan, USA)',
+    ' (Europe)',
+    ' (World) (Rev A)',
+    ' (USA) (Rev 1)',
+    ' (USA) (Rev A)',
     ' (Japan)',
     ' (USA) (Demo)',
     ' (USA) (Proto)'
@@ -462,17 +521,32 @@ function generateThumbnailCandidates(game) {
 
   for (const base of baseSet) {
     for (const reg of regionTags) {
-      candidates.push(formatLibretroName(`${base}${reg}`));
+      add(`${base}${reg}`);
     }
   }
 
-  return Array.from(new Set(candidates)).filter(Boolean);
+  return candidates;
 }
 
 /**
- * Test if an image exists and loads with a fast timeout
+ * Test if an image exists and loads with a fast timeout (Node.js & Browser universal)
  */
-function probeImageUrl(url, timeoutMs = 3000) {
+export function probeImageUrl(url, timeoutMs = 3000) {
+  if (typeof Image === 'undefined') {
+    // Node.js environment: use fetch HEAD request
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = setTimeout(() => controller?.abort(), timeoutMs);
+    return fetch(url, {
+      method: 'HEAD',
+      signal: controller?.signal,
+      headers: { 'User-Agent': 'RetroPlayerMetadataBot/2.0' }
+    })
+      .then(res => res.ok)
+      .catch(() => false)
+      .finally(() => clearTimeout(timer));
+  }
+
+  // Browser environment: DOM Image object
   return new Promise((resolve) => {
     let finished = false;
     const img = new Image();
@@ -720,9 +794,18 @@ async function scrapeCoverArt(game) {
     }
   }
 
-  addScraperLog(`ℹ️ No box art match in Libretro CDN / GitHub mirror for "${game.title}"`, 'info', { gameId: game.id, title: game.title, systemKey: game.systemKey });
+  // Priority 4: Wikipedia Open REST API Lead Image (Last Resort Fallback)
+  const wikiDetails = await scrapeWikipediaLastResort(game);
+  if (wikiDetails?.coverUrl) {
+    addScraperLog(`✨ Box art found on Wikipedia for "${game.title}"`, 'success', { gameId: game.id, title: game.title, systemKey: game.systemKey });
+    return wikiDetails.coverUrl;
+  }
+
+  addScraperLog(`ℹ️ No box art match in Libretro CDN / ScreenScraper / Wikipedia for "${game.title}"`, 'info', { gameId: game.id, title: game.title, systemKey: game.systemKey });
   return null;
 }
+
+export { scrapeCoverArt, scrapeGameDetails, scrapeWikipediaLastResort };
 
 /**
  * Scrapes specific game metadata from Wikipedia Open REST APIs (Strict Last Resort)

@@ -98,10 +98,10 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 - ⚡ **Pure Client-Side WASM Emulation**: Hardware-accelerated WebAssembly execution across 12 retro platforms with ~0% host CPU usage.
 - 🎨 **Nintendo DS Touch Architecture**: Dual-screen layout featuring top-screen dynamic box art & specs, bottom touchscreen carousel, and inline tools.
 - 💾 **Profile-Scoped Battery Saves**: In-game battery RAM (`.sav`/SRAM) and quick save states strictly isolated per Multiavatar player profile.
-- 🌐 **Automated Metadata & Box Art Scraper**: Instant 3D covers from Libretro CDN, Wikipedia synopses, real-time scan telemetry, and manual editor.
+- 🌐 **Unified Metadata & Box Art Scraper**: Universal multi-source scraping engine (Libretro CDN, ScreenScraper, TheGamesDB, Wikipedia) shared across Node CLI and browser UI with real-time scan telemetry, layered fallbacks, and manual editor.
 - 📖 **Curated Strategy Guides & QR Companion**: Direct written/video walkthroughs with mobile QR code pairing for couch play.
 - 🎵 **Dynamic BGM & Synthesized SFX**: Multi-track chiptune engine with smart in-game pause and low-latency Web Audio sound effects.
-- 📱 **Adaptive Cross-Device PWA**: Standalone installable app optimized across Mobile Touch Feeds, Steam Deck, Desktop, and 10-Foot TV mode.
+- 📱 **Adaptive Cross-Device PWA**: Standalone installable app optimized across Mobile Touch Feeds, Steam Deck, Desktop, and 10-Foot TV mode with 100% offline cover art caching.
 - 💡 **In-Game Rotating Tips**: Glassmorphic loading tips positioned directly below the loading dialog, revolving smoothly every 2 seconds with guaranteed minimum visibility.
 - 📹 **60 FPS Recorder & Engine Controls**: In-browser video capture, speed turbo throttling (`1.0x`–`5.0x`), VSync, and live diagnostic HUD.
 
@@ -171,7 +171,7 @@ Retro Player includes built-in AI agent skills and automated utility scripts und
 | Skill | Path | Description |
 | :--- | :--- | :--- |
 | **[Codebase Stats](.agents/skills/codebase-stats/SKILL.md)** | [`.agents/skills/codebase-stats/`](.agents/skills/codebase-stats/) | Analyzes and reports file extension counts, sizes, and summaries while filtering build/cache folders. |
-| **[Update ROMs](.agents/skills/update-roms/SKILL.md)** | [`.agents/skills/update-roms/`](.agents/skills/update-roms/) | Organizes ROM folders, handles version upgrades & custom screenshot replacements, converts covers to WebP, and generates/syncs `metadata.json` sidecars. |
+| **[Update ROMs](.agents/skills/update-roms/SKILL.md)** | [`.agents/skills/update-roms/`](.agents/skills/update-roms/) | High-throughput parallel ROM organizer and unified multi-source scraper with layered fallback matching and WebP conversion. |
 | **[ROM Cleanup](.agents/skills/rom-cleanup/SKILL.md)** | [`.agents/skills/rom-cleanup/`](.agents/skills/rom-cleanup/) | Deduplicates dated builds, prunes non-English regions, and filters obscure releases with structured keep/remove approval. |
 | **[Release Version](.agents/skills/release-version/SKILL.md)** | [`.agents/skills/release-version/`](.agents/skills/release-version/) | Synchronizes app version across Service Worker caches, PWA manifest, package configs, in-app About modal, and documentation. |
 

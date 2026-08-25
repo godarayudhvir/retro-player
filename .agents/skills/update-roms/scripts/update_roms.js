@@ -30,10 +30,48 @@ import path from 'path';
 import { execSync } from 'child_process';
 import https from 'https';
 import http from 'http';
+import zlib from 'zlib';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Helper for computing CRC32 of ROM files for fallback verification
+function calculateFileCrc32(filePath) {
+  try {
+    const buffer = fs.readFileSync(filePath);
+    const crc = zlib.crc32(buffer);
+    return crc.toString(16).padStart(8, '0').toUpperCase();
+  } catch (e) {
+    return null;
+  }
+}
+
+// Concurrency pool helper for running async tasks in parallel with a concurrency limit
+async function runConcurrent(items, limit, fn) {
+  const results = [];
+  const executing = new Set();
+  for (const item of items) {
+    const p = Promise.resolve().then(() => fn(item));
+    results.push(p);
+    executing.add(p);
+    const clean = () => executing.delete(p);
+    p.then(clean, clean);
+    if (executing.size >= limit) {
+      await Promise.race(executing);
+    }
+  }
+  return Promise.all(results);
+}
+
+import {
+  SYSTEM_NAMES,
+  LIBRETRO_SYSTEM_MAP,
+  formatLibretroName,
+  generateThumbnailCandidates,
+  scrapeCoverArt,
+  scrapeGameDetails
+} from '../../../../src/services/metadataScraper.js';
 
 // Supported Extension Mappings
 const EXTENSION_MAP = {
@@ -60,37 +98,6 @@ const EXTENSION_MAP = {
   '.a26': 'atari_2600',
   '.7z': 'atari_2600',
   '.zip': 'arcade'
-};
-
-const SYSTEM_NAMES = {
-  nes: 'Nintendo Entertainment System',
-  snes: 'Super Nintendo',
-  gba: 'Game Boy Advance',
-  gbc: 'Game Boy Color',
-  gb: 'Game Boy',
-  n64: 'Nintendo 64',
-  nds: 'Nintendo DS',
-  sega_genesis: 'Sega Genesis',
-  playstation: 'PlayStation',
-  arcade: 'Arcade (MAME)',
-  game_gear: 'Game Gear',
-  atari_2600: 'Atari 2600'
-};
-
-// Libretro GitHub Thumbnail repository system folder names
-const LIBRETRO_SYSTEM_MAP = {
-  nes: 'Nintendo - Nintendo Entertainment System',
-  snes: 'Nintendo - Super Nintendo Entertainment System',
-  gba: 'Nintendo - Game Boy Advance',
-  gbc: 'Nintendo - Game Boy Color',
-  gb: 'Nintendo - Game Boy',
-  n64: 'Nintendo - Nintendo 64',
-  nds: 'Nintendo - Nintendo DS',
-  sega_genesis: 'Sega - Mega Drive - Genesis',
-  playstation: 'Sony - PlayStation',
-  arcade: 'FBNeo - Arcade Games',
-  game_gear: 'Sega - Game Gear',
-  atari_2600: 'Atari - 2600'
 };
 
 // Parse CLI flags
@@ -126,6 +133,10 @@ for (let i = 0; i < args.length; i++) {
   }
 }
 
+const systemFilters = systemFilter
+  ? systemFilter.split(/[/,]+/).map(s => s.trim().toLowerCase()).filter(Boolean)
+  : null;
+
 if (!doOrganize && !doConvertCovers && !doFetchMetadata) {
   doOrganize = true;
   doConvertCovers = true;
@@ -133,6 +144,9 @@ if (!doOrganize && !doConvertCovers && !doFetchMetadata) {
 }
 
 console.log(`\n🎮 [UPDATE-ROMS] Target Directory: ${targetDir}`);
+if (systemFilters && systemFilters.length > 0) {
+  console.log(`🎯 [SYSTEMS] Filter: ${systemFilters.join(', ')}`);
+}
 console.log(`⚙️  [MODE] Source: Libretro CDN Only | Organize: ${doOrganize} | Convert Covers: ${doConvertCovers} | Fetch Metadata: ${doFetchMetadata} | Force Overwrite: ${doForce} | Dry Run: ${isDryRun}\n`);
 
 // Helper to sanitize title and fix inverted names
@@ -189,72 +203,37 @@ function downloadFile(url, destPath) {
   });
 }
 
-// Convert image to WebP using sips (macOS built-in) or sharp/cwebp
+// Convert image to WebP using cwebp, sips, or convert
 function convertImageToWebp(srcPath, destPath) {
   if (path.extname(srcPath).toLowerCase() === '.webp' && srcPath === destPath) {
     return true;
   }
 
-  // macOS built-in sips / cwebp
+  // 1. Try cwebp
   try {
-    if (process.platform === 'darwin') {
-      execSync(`sips -s format webp "${srcPath}" --out "${destPath}"`, { stdio: 'pipe' });
-      return true;
-    } else {
-      execSync(`cwebp -q 85 "${srcPath}" -o "${destPath}"`, { stdio: 'pipe' });
-      return true;
-    }
-  } catch (err) {
+    execSync(`cwebp -q 85 "${srcPath}" -o "${destPath}"`, { stdio: 'pipe' });
+    return true;
+  } catch (err1) {
+    // 2. Try sips on macOS
     try {
-      execSync(`convert "${srcPath}" -quality 85 "${destPath}"`, { stdio: 'pipe' });
-      return true;
-    } catch (e) {
-      console.warn(`[CONVERT WARN] Could not convert ${srcPath} to WebP:`, e.message);
-      return false;
+      if (process.platform === 'darwin') {
+        execSync(`sips -s format webp "${srcPath}" --out "${destPath}"`, { stdio: 'pipe' });
+        return true;
+      }
+    } catch (err2) {
+      // 3. Try ImageMagick
+      try {
+        execSync(`convert "${srcPath}" -quality 85 "${destPath}"`, { stdio: 'pipe' });
+        return true;
+      } catch (e) {
+        console.warn(`[CONVERT WARN] Could not convert ${srcPath} to WebP:`, e.message);
+        return false;
+      }
     }
   }
 }
 
-// Query Libretro Thumbnail CDN for exact matching Boxart or Title screen (Prioritized)
-async function checkLibretroCover(systemKey, rawTitle) {
-  const libretroSystem = LIBRETRO_SYSTEM_MAP[systemKey];
-  if (!libretroSystem) return null;
 
-  const cleanTitle = sanitizeTitle(rawTitle);
-
-  // Candidate title names to try on Libretro CDN
-  const candidateNames = [
-    rawTitle,
-    rawTitle.replace(/\s*\(Demo\).*/i, '').trim(),
-    cleanTitle
-  ];
-
-  for (const titleCandidate of candidateNames) {
-    const candidateUrls = [
-      `http://thumbnails.libretro.com/${encodeURIComponent(libretroSystem)}/Named_Boxarts/${encodeURIComponent(titleCandidate)}.png`,
-      `http://thumbnails.libretro.com/${encodeURIComponent(libretroSystem)}/Named_Titles/${encodeURIComponent(titleCandidate)}.png`,
-      `https://raw.githubusercontent.com/libretro-thumbnails/${encodeURIComponent(libretroSystem.replace(/\s+/g, '_'))}/master/Named_Boxarts/${encodeURIComponent(titleCandidate)}.png`,
-      `https://raw.githubusercontent.com/libretro-thumbnails/${encodeURIComponent(libretroSystem.replace(/\s+/g, '_'))}/master/Named_Titles/${encodeURIComponent(titleCandidate)}.png`
-    ];
-
-    for (const u of candidateUrls) {
-      const exists = await new Promise(resolve => {
-        const client = u.startsWith('https') ? https : http;
-        const req = client.request(u, { method: 'HEAD', headers: { 'User-Agent': 'RetroPlayerMetadataBot/2.0' } }, res => {
-          resolve(res.statusCode === 200);
-        });
-        req.on('error', () => resolve(false));
-        req.setTimeout(4000, () => {
-          req.abort();
-          resolve(false);
-        });
-        req.end();
-      });
-      if (exists) return u;
-    }
-  }
-  return null;
-}
 
 function matchImageToGame(imageName, allGames) {
   const normFile = normalizeTitleForMatching(path.parse(imageName).name);
@@ -454,7 +433,7 @@ async function processRoms() {
   // Iterate each system and process canonical game directories
   for (const sysDir of systemDirs) {
     const sysFolderName = sysDir.name;
-    if (systemFilter && sysFolderName.toLowerCase() !== systemFilter) {
+    if (systemFilters && systemFilters.length > 0 && !systemFilters.includes(sysFolderName.toLowerCase())) {
       continue;
     }
 
@@ -464,12 +443,18 @@ async function processRoms() {
     const currentSubfolders = fs.readdirSync(sysPath, { withFileTypes: true })
       .filter(d => d.isDirectory() && !d.name.startsWith('.'));
 
-    for (const sub of currentSubfolders) {
+    let systemGameCount = 0;
+    let systemCoversGenerated = 0;
+    let systemMetadataGenerated = 0;
+
+    await runConcurrent(currentSubfolders, 5, async (sub) => {
       const subPath = path.join(sysPath, sub.name);
       const subEntries = fs.readdirSync(subPath, { withFileTypes: true });
 
       const romFiles = subEntries.filter(e => e.isFile() && EXTENSION_MAP[path.extname(e.name).toLowerCase()]);
-      if (romFiles.length === 0) continue;
+      if (romFiles.length === 0) return;
+
+      systemGameCount++;
 
       let activeRom = romFiles[0];
       if (romFiles.length > 1) {
@@ -518,56 +503,51 @@ async function processRoms() {
       let activeRomBase = normalizedBaseName;
 
       // Rename ROM file if filename contained non-normalized characters
-      if (activeRom.name !== `${normalizedBaseName}${romExt}`) {
-        console.log(`    🏷️  Normalizing ROM filename: "${activeRom.name}" -> "${normalizedBaseName}${romExt}"`);
-        if (!isDryRun) {
-          const srcRom = path.join(currentSubPath, activeRom.name);
-          const dstRom = path.join(currentSubPath, `${normalizedBaseName}${romExt}`);
-          fs.renameSync(srcRom, dstRom);
-          activeRom.name = `${normalizedBaseName}${romExt}`;
-        }
+      if (rawActiveName !== normalizedBaseName && !isDryRun) {
+        const oldRomPath = path.join(subPath, activeRom.name);
+        const newRomPath = path.join(subPath, `${normalizedBaseName}${romExt}`);
+        fs.renameSync(oldRomPath, newRomPath);
+        console.log(`    ✏️  Renamed ROM: "${activeRom.name}" -> "${normalizedBaseName}${romExt}"`);
       }
 
-      // Fix folder / ROM filename mismatch
-      if (doOrganize && sub.name !== normalizedBaseName) {
+      // Ensure directory name strictly matches the normalized active ROM name
+      if (sub.name !== normalizedBaseName) {
         console.log(`    📁 Renaming folder to match active ROM: "${sub.name}" -> "${normalizedBaseName}"`);
         if (!isDryRun) {
-          const targetNewFolderPath = path.join(sysPath, normalizedBaseName);
-          if (fs.existsSync(targetNewFolderPath) && targetNewFolderPath !== currentSubPath) {
-            console.warn(`    ⚠️ Target folder already exists: ${targetNewFolderPath}`);
-          } else {
-            fs.renameSync(currentSubPath, targetNewFolderPath);
-            currentSubPath = targetNewFolderPath;
+          const newSubPath = path.join(sysPath, normalizedBaseName);
+          if (!fs.existsSync(newSubPath)) {
+            fs.renameSync(subPath, newSubPath);
+            currentSubPath = newSubPath;
           }
         }
       }
 
-      console.log(`  🎮 Active Game: "${normalizedBaseName}"`);
+      console.log(`  🎮 Active Game: "${activeRomBase}"`);
 
-      // Ingest / Convert PNG/JPG/custom screenshots in subfolder to standardized <Clean Title>.webp
+      // Ingest un-standardized screenshot/cover image inside folder (e.g. screenshot.png, cover.jpg, custom.png)
       if (doConvertCovers) {
-        const refreshedEntries = fs.existsSync(currentSubPath) ? fs.readdirSync(currentSubPath, { withFileTypes: true }) : [];
-        const imageFiles = refreshedEntries.filter(e => e.isFile() && ['.png', '.jpg', '.jpeg', '.webp'].includes(path.extname(e.name).toLowerCase()));
-        const targetWebpPath = path.join(currentSubPath, `${activeRomBase}.webp`);
+        const imageExtensions = ['.png', '.jpg', '.jpeg', '.webp'];
+        const innerFiles = fs.readdirSync(currentSubPath, { withFileTypes: true });
+        const looseImages = innerFiles.filter(e =>
+          e.isFile() &&
+          imageExtensions.includes(path.extname(e.name).toLowerCase()) &&
+          path.parse(e.name).name !== activeRomBase
+        );
 
-        for (const img of imageFiles) {
-          if (img.name === `${activeRomBase}.webp`) continue;
-
+        for (const img of looseImages) {
           const srcImgPath = path.join(currentSubPath, img.name);
-          console.log(`    🖼️  Converting & replacing cover "${img.name}" -> "${activeRomBase}.webp"`);
+          const destWebpPath = path.join(currentSubPath, `${activeRomBase}.webp`);
+          console.log(`    🖼️  Converting internal cover/screenshot: "${img.name}" -> "${activeRomBase}.webp"`);
           if (!isDryRun) {
-            if (fs.existsSync(targetWebpPath) && targetWebpPath !== srcImgPath) {
-              fs.unlinkSync(targetWebpPath);
-            }
-            const ok = convertImageToWebp(srcImgPath, targetWebpPath);
-            if (ok && srcImgPath !== targetWebpPath && fs.existsSync(srcImgPath)) {
-              fs.unlinkSync(srcImgPath);
+            const converted = convertImageToWebp(srcImgPath, destWebpPath);
+            if (converted && img.name !== `${activeRomBase}.webp`) {
+              try { fs.unlinkSync(srcImgPath); } catch (e) { }
             }
           }
         }
       }
 
-      // Fetch Libretro CDN cover & generate clean metadata.json sidecar
+      // Fetch official Libretro Boxart & Generate Companion Metadata Sidecar
       if (doFetchMetadata) {
         const metaPath = path.join(currentSubPath, 'metadata.json');
         const webpPath = path.join(currentSubPath, `${activeRomBase}.webp`);
@@ -582,38 +562,57 @@ async function processRoms() {
         const yearMatch = activeRomBase.match(/\b(19\d{2}|20\d{2})\b/);
         const releaseYear = yearMatch ? yearMatch[1] : 'Classic';
 
-        // 1. Download Libretro cover if no local cover exists or force overwrite is on
+        // 1. Download cover from unified scraper if missing or forced
         if ((!hasLocalCover || doForce) && !isDryRun) {
-          const libretroCoverUrl = await checkLibretroCover(sysKey, activeRomBase);
-          if (libretroCoverUrl) {
-            const tempPng = path.join(currentSubPath, `temp_boxart.png`);
-            const downloaded = await downloadFile(libretroCoverUrl, tempPng);
+          const gameObj = {
+            id: activeRomBase,
+            title: activeRomBase,
+            systemKey: sysKey,
+            systemName: sysName,
+            filename: activeRom.name
+          };
+          const coverUrl = await scrapeCoverArt(gameObj);
+          if (coverUrl) {
+            const ext = path.extname(new URL(coverUrl).pathname) || '.png';
+            const tempImg = path.join(currentSubPath, `temp_boxart${ext}`);
+            const downloaded = await downloadFile(coverUrl, tempImg);
             if (downloaded) {
-              convertImageToWebp(tempPng, webpPath);
-              if (fs.existsSync(tempPng)) fs.unlinkSync(tempPng);
-              console.log(`    ✅ Downloaded authentic Libretro CDN box art to WebP`);
+              convertImageToWebp(tempImg, webpPath);
+              if (fs.existsSync(tempImg)) fs.unlinkSync(tempImg);
+              console.log(`    ✅ Downloaded box art to WebP`);
+              systemCoversGenerated++;
             }
           }
         }
 
-        // 2. Create clean sidecar if missing or forced (Title strictly uses the exact filename)
+        // 2. Create clean sidecar if missing or forced (Title strictly uses exact filename)
         if (!hasLocalMeta || doForce) {
+          const gameObj = {
+            id: activeRomBase,
+            title: activeRomBase,
+            systemKey: sysKey,
+            systemName: sysName,
+            filename: activeRom.name
+          };
+          const details = await scrapeGameDetails(gameObj);
           const metadataObj = {
             title: activeRomBase,
-            description: `Authentic ${sysName} release of ${activeRomBase}.`,
-            releaseYear: releaseYear,
-            developer: sysName,
-            publisher: sysName,
-            genre: 'Retro Classic'
+            description: details?.description || `Authentic ${sysName} release of ${activeRomBase}.`,
+            releaseYear: details?.releaseYear || releaseYear,
+            developer: details?.developer || sysName,
+            publisher: details?.publisher || sysName,
+            genre: details?.genre || 'Retro Classic'
           };
 
           if (!isDryRun) {
             fs.writeFileSync(metaPath, JSON.stringify(metadataObj, null, 2));
             console.log(`    ✅ Generated clean metadata.json (Title: "${activeRomBase}")`);
+            systemMetadataGenerated++;
           }
         }
       }
-    }
+    });
+    console.log(`\n🏁 [SYSTEM COMPLETE] ${sysFolderName.toUpperCase()}: ${systemGameCount} games processed | ${systemCoversGenerated} covers updated | ${systemMetadataGenerated} sidecars created`);
   }
 
   console.log(`\n✨ [UPDATE-ROMS] Finished Libretro ROM processing successfully.\n`);

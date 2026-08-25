@@ -70,9 +70,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // RULE 1: ROM Files & ROM Directories -> Direct Network Fetch ONLY (Never stored in ServiceWorker Cache)
-  if (url.pathname.includes('/roms/') || ROM_EXT_REGEX.test(url.pathname)) {
-    return; // Let browser fetch directly on-demand
+  // RULE 1: ROM Binaries -> Direct Network Fetch ONLY (Never stored in ServiceWorker Cache)
+  // Companion assets (.webp, .png, .jpg, .json) in /roms/ flow through to Strategy 2 for 100% offline cover art rendering.
+  if (ROM_EXT_REGEX.test(url.pathname)) {
+    return; // Let browser fetch ROM binaries directly on-demand
   }
 
   // RULE 2: External Scraper Probes (Libretro CDN, Wikipedia, TheGamesDB, ScreenScraper)

@@ -23,6 +23,13 @@ Retro Player maintains two completely independent metadata enrichment layers:
 | **Frontend Online Scraper** | End users visiting website / GitHub Pages | Browser `IndexedDB` (`RetroPlayerMetadataDB`) | Client-side Chrome / Web browser | **Fallback Priority (2nd)** |
 
 - **Covers are Top Priority**: The pipeline prioritizes fetching and converting authentic 1:1 box art covers (`.webp`, quality 85) directly from the official Libretro CDN (`http://thumbnails.libretro.com/`) before secondary metadata generation.
+- **High-Throughput Parallel Concurrency**: Features a built-in async worker concurrency pool (5 workers) for sub-second directory scanning and batch cover updates.
+- **Layered Fallback Matching & Checksum Verification**: The scraper queries exact matching titles first. If not found, it activates layered fallback candidate generation:
+  1. *Libretro Sanitization*: Special characters sanitized according to Libretro rules (`&` $\rightarrow$ `_`, `: / \ * ? " < > |` $\rightarrow$ `_`).
+  2. *Auxiliary Tag Stripping*: Strips compilation/re-release/aftermarket tags (e.g. `(e-Reader)`, `(Evercade)`, `(Wii U Virtual Console)`, `(Castlevania Anniversary Collection)`, `(Limited Run Games)`, `(Aftermarket)`) while preserving region tags.
+  3. *Regional & Revision Fallbacks*: Tries alternate regions and revisions (`(USA)`, `(USA, Europe)`, `(World)`, `(Japan, USA)`, `(Europe)`, `(World) (Rev A)`).
+  4. *Article Inversion*: Tries `Title, The` $\leftrightarrow$ `The Title`.
+  5. *CRC32 Checksum Matching*: Computes internal ROM checksums for renamed or truncated files.
 - **File Names as Title**: The `metadata.json` sidecar strictly uses the exact ROM file base name as its `"title"` (e.g. `"Super Mario Bros. 3 (USA)"`), preserving authentic region, revision, and version indicators without artificial stripping or truncation.
 - **Local Codebase Sidecars Take Precedence**: Whenever `metadata.json` or companion `.webp` covers exist on disk inside the game folder, the web application immediately serves and renders them, completely bypassing the browser scraper.
 
@@ -147,7 +154,15 @@ node .agents/skills/update-roms/scripts/update_roms.js --all
   node .agents/skills/update-roms/scripts/update_roms.js --system gba --all
   ```
 
+- **Target multiple console systems sequentially (comma or slash separated):**
+  ```bash
+  node .agents/skills/update-roms/scripts/update_roms.js --system nes,gb,gbc --all
+  # Or:
+  node .agents/skills/update-roms/scripts/update_roms.js --system nes/gb/gbc --all
+  ```
+
 - **Target a custom ROM directory path:**
   ```bash
   node .agents/skills/update-roms/scripts/update_roms.js --dir /path/to/roms --all
   ```
+
