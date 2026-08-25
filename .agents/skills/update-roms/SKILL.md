@@ -19,11 +19,12 @@ Retro Player maintains two completely independent metadata enrichment layers:
 
 | Layer | Domain / Target | Storage Location | Execution Environment | Priority |
 | :--- | :--- | :--- | :--- | :--- |
-| **Backend `update-roms` Skill** | Codebase repository library maintainers | `public/roms/<system>/<Title>/metadata.json` + `.webp` | Local Node.js runtime in IDE (Libretro CDN only) | **Top Priority (1st)** |
+| **Backend `update-roms` Skill** | Codebase repository library maintainers | `public/roms/<system>/<Title>/<Title>.webp` + `metadata.json` | Local Node.js runtime in IDE (Libretro CDN only) | **Top Priority (1st)** |
 | **Frontend Online Scraper** | End users visiting website / GitHub Pages | Browser `IndexedDB` (`RetroPlayerMetadataDB`) | Client-side Chrome / Web browser | **Fallback Priority (2nd)** |
 
+- **Covers are Top Priority**: The pipeline prioritizes fetching and converting authentic 1:1 box art covers (`.webp`, quality 85) directly from the official Libretro CDN (`http://thumbnails.libretro.com/`) before secondary metadata generation.
+- **File Names as Title**: The `metadata.json` sidecar strictly uses the exact ROM file base name as its `"title"` (e.g. `"Super Mario Bros. 3 (USA)"`), preserving authentic region, revision, and version indicators without artificial stripping or truncation.
 - **Local Codebase Sidecars Take Precedence**: Whenever `metadata.json` or companion `.webp` covers exist on disk inside the game folder, the web application immediately serves and renders them, completely bypassing the browser scraper.
-- **Frontend Scraper is Isolated**: The client-side scraper is strictly designed for web users uploading ROMs in RAM without backend access.
 
 ---
 
@@ -38,11 +39,10 @@ Whenever a new game or cover is added:
    node .agents/skills/update-roms/scripts/update_roms.js --all
    ```
 4. **The script automatically**:
-   - Detects the console type from the file extension and creates the canonical subdirectory: `public/roms/<system>/<Clean Title>/`.
+   - Detects the console type from the file extension and creates the canonical subdirectory: `public/roms/<system>/<Exact Title>/`.
    - Moves the ROM file into its subfolder and standardizes its filename.
-   - Matches loose screenshot/cover drops to the game, converts them to `<Clean Title>.webp` (quality 85), and removes the loose source image.
-   - Queries the official Libretro CDN thumbnail database to download authentic 1:1 box art covers.
-   - Generates clean local companion `metadata.json` sidecars directly in the game's directory.
+   - **(Priority 1 - Covers)**: Ingests loose screenshots or queries the official Libretro Thumbnail CDN (`http://thumbnails.libretro.com/`) to download authentic 1:1 box art covers, converting them to `<Exact Title>.webp` (quality 85).
+   - **(Priority 2 - Metadata)**: Generates clean local companion `metadata.json` sidecars strictly using the exact ROM file name as the `"title"`.
 
 ### 2. In-Folder ROM Version Upgrade & Custom Screenshot Replacement Workflow
 Whenever an existing game receives an updated ROM version or a new custom screenshot inside its existing folder (e.g. `public/roms/gba/Pokemon Heart & Soul (v1.2.1)`):
@@ -54,9 +54,9 @@ Whenever an existing game receives an updated ROM version or a new custom screen
    ```
 4. **The script automatically**:
    - Compares ROM version numbers/dates within the folder, selects the latest active ROM, and safely purges obsolete superseded ROMs.
-   - Converts the new custom screenshot to the standardized `<Clean Title>.webp` and cleans up old covers and source PNG/JPG files.
+   - Converts the new custom screenshot to the standardized `<Exact Title>.webp` and cleans up old covers and source PNG/JPG files.
    - Renames the parent folder and ROM file to match the clean canonical active title and version tag.
-   - Synchronizes `metadata.json` so the title version tag matches the updated ROM.
+   - Synchronizes `metadata.json` so the title strictly matches the exact updated ROM filename.
 
 ### 3. Staging Drop-In Folders Workflow (`/roms/new/`, `/roms/drops/`, `/roms/staging/`)
 Whenever one or more ROMs and screenshots are placed inside staging folders like `public/roms/new/`:
@@ -68,9 +68,9 @@ Whenever one or more ROMs and screenshots are placed inside staging folders like
 3. **The script automatically**:
    - Recursively inspects staging folders, detecting console systems from file extensions (e.g. `.gba` -> `gba`).
    - Normalizes game titles to canonical formatting (e.g. `Pokemon Recharged Emerald (v2.2.5)`).
-   - Routes ROMs into `public/roms/<system>/<Canonical Title>/`.
-   - Converts companion staging screenshots/covers to `<Canonical Title>.webp` (quality 85) in the game directory and removes the source images.
-   - Generates or enriches companion `metadata.json` sidecars.
+   - Routes ROMs into `public/roms/<system>/<Exact Title>/`.
+   - Converts companion staging screenshots/covers to `<Exact Title>.webp` (quality 85) in the game directory and removes the source images.
+   - Generates companion `metadata.json` sidecars with the exact filename as title.
    - Cleans up and deletes the staging folder when complete.
 
 ---
@@ -80,10 +80,10 @@ Whenever one or more ROMs and screenshots are placed inside staging folders like
 ```text
 public/roms/
 └── <system_folder>/                      # e.g., gba, snes, nes, genesis, ps1, arcade
-    └── <Clean Title (Flags)>/            # Subdirectory named exactly after the ROM release
-        ├── <Clean Title (Flags)>.<ext>   # ROM file (extension: .gba, .sfc, .nes, .iso, etc.)
-        ├── <Clean Title (Flags)>.webp    # Companion WebP cover image
-        └── metadata.json                 # Companion metadata sidecar
+    └── <Exact Title (Flags)>/            # Subdirectory named exactly after the ROM release
+        ├── <Exact Title (Flags)>.<ext>   # ROM file (extension: .gba, .sfc, .nes, .iso, etc.)
+        ├── <Exact Title (Flags)>.webp    # Companion WebP cover image (1st Priority)
+        └── metadata.json                 # Companion metadata sidecar (Title = Filename)
 ```
 
 ### Companion Cover Format
@@ -91,18 +91,15 @@ public/roms/
 - WebP format (quality 85) provides fast loading times and crisp display on retro cartridges and HUD carousels.
 
 ### Companion Sidecar (`metadata.json`) Format
+The `title` property strictly uses the exact ROM file base name:
 ```json
 {
-  "title": "Clean Display Title",
-  "description": "Engaging plot summary and background overview of the game.",
-  "releaseYear": "1995",
-  "developer": "Original Studio / Homebrew Author",
-  "publisher": "Publisher / Homebrew Publisher",
-  "genre": "Action / Platformer / RPG",
-  "walkthrough": {
-    "written": "https://gamefaqs.gamespot.com/...",
-    "video": "https://www.youtube.com/watch?v=..."
-  }
+  "title": "Super Mario Bros. 3 (USA)",
+  "description": "Authentic Nintendo Entertainment System release of Super Mario Bros. 3 (USA).",
+  "releaseYear": "1990",
+  "developer": "Nintendo Entertainment System",
+  "publisher": "Nintendo Entertainment System",
+  "genre": "Retro Classic"
 }
 ```
 

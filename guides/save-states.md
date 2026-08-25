@@ -59,3 +59,13 @@ Retro Player maintains a dual-tier save persistence layer strictly namespaced by
 | **PlayStation 1 (`playstation`)** | ✅ Supported (Memory Card) | ✅ Supported | `.mcr` / `.sav` |
 | **Atari 2600 (`atari_2600`)** | N/A (Cartridge ROM) | ✅ Supported | `.state` |
 | **Arcade MAME (`arcade`)** | ✅ Supported (NVRAM) | ✅ Supported | `.nv` / `.state` |
+
+---
+
+## 🌐 Storage by Deployment Environment
+
+| Deployment Environment | Primary Storage Location | Persistence & Sync Mechanism | Backup Procedure |
+| :--- | :--- | :--- | :--- |
+| **GitHub Pages / Static Web (`*.github.io`)** | Browser `IndexedDB` (`RetroPlayerDB`) | **100% Client-Side**: Saves and states are stored directly in the user's browser sandbox on that specific device. Zero server dependency. | Click the **Export Save** button on any game's cartridge/drawer to download the raw `.sav` file. |
+| **Docker / Self-Hosted Server** | Host Disk: `/data/retroplayer_db.json` | **Dual-Sync**: Writes to local `IndexedDB` instantly and syncs to the server API (`/api/db/*`). Saves follow user profiles across any device connected to the server. | Copy the single `retroplayer_db.json` file located in your host machine's mounted `/data` volume directory. |
+

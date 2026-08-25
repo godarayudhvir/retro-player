@@ -215,7 +215,7 @@ function convertImageToWebp(srcPath, destPath) {
   }
 }
 
-// Query Libretro Thumbnail CDN for exact matching Boxart or Title screen
+// Query Libretro Thumbnail CDN for exact matching Boxart or Title screen (Prioritized)
 async function checkLibretroCover(systemKey, rawTitle) {
   const libretroSystem = LIBRETRO_SYSTEM_MAP[systemKey];
   if (!libretroSystem) return null;
@@ -231,13 +231,16 @@ async function checkLibretroCover(systemKey, rawTitle) {
 
   for (const titleCandidate of candidateNames) {
     const candidateUrls = [
-      `https://raw.githubusercontent.com/libretro-thumbnails/${encodeURIComponent(libretroSystem)}/master/Named_Boxarts/${encodeURIComponent(titleCandidate)}.png`,
-      `https://raw.githubusercontent.com/libretro-thumbnails/${encodeURIComponent(libretroSystem)}/master/Named_Titles/${encodeURIComponent(titleCandidate)}.png`
+      `http://thumbnails.libretro.com/${encodeURIComponent(libretroSystem)}/Named_Boxarts/${encodeURIComponent(titleCandidate)}.png`,
+      `http://thumbnails.libretro.com/${encodeURIComponent(libretroSystem)}/Named_Titles/${encodeURIComponent(titleCandidate)}.png`,
+      `https://raw.githubusercontent.com/libretro-thumbnails/${encodeURIComponent(libretroSystem.replace(/\s+/g, '_'))}/master/Named_Boxarts/${encodeURIComponent(titleCandidate)}.png`,
+      `https://raw.githubusercontent.com/libretro-thumbnails/${encodeURIComponent(libretroSystem.replace(/\s+/g, '_'))}/master/Named_Titles/${encodeURIComponent(titleCandidate)}.png`
     ];
 
     for (const u of candidateUrls) {
       const exists = await new Promise(resolve => {
-        const req = https.request(u, { method: 'HEAD', headers: { 'User-Agent': 'RetroPlayerMetadataBot/2.0' } }, res => {
+        const client = u.startsWith('https') ? https : http;
+        const req = client.request(u, { method: 'HEAD', headers: { 'User-Agent': 'RetroPlayerMetadataBot/2.0' } }, res => {
           resolve(res.statusCode === 200);
         });
         req.on('error', () => resolve(false));
@@ -593,11 +596,11 @@ async function processRoms() {
           }
         }
 
-        // 2. Create clean sidecar if missing or forced
+        // 2. Create clean sidecar if missing or forced (Title strictly uses the exact filename)
         if (!hasLocalMeta || doForce) {
           const metadataObj = {
-            title: cleanTitle || activeRomBase,
-            description: `Authentic ${sysName} release of ${cleanTitle}.`,
+            title: activeRomBase,
+            description: `Authentic ${sysName} release of ${activeRomBase}.`,
             releaseYear: releaseYear,
             developer: sysName,
             publisher: sysName,
@@ -606,7 +609,7 @@ async function processRoms() {
 
           if (!isDryRun) {
             fs.writeFileSync(metaPath, JSON.stringify(metadataObj, null, 2));
-            console.log(`    ✅ Generated clean metadata.json`);
+            console.log(`    ✅ Generated clean metadata.json (Title: "${activeRomBase}")`);
           }
         }
       }
