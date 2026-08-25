@@ -15,7 +15,7 @@ Complete collection of deployment, configuration, controls, platform compatibili
 | **[💾 Save States & In-Game Save Architecture](save-states.md)** | Snapshot quick saves vs in-game battery saves (`.sav`) breakdown across all 12 console platforms. | Quick Saves, Battery SRAM, Memory Cards, Persistence |
 | **[📱 Cross-Device Experience Matrix](device-experience-matrix.md)** | Adaptive UI/UX breakdown across Mobile, Handheld, Desktop, and 10-Foot TV mode. | iOS, Android, Steam Deck, Switch, PCs, Smart TVs |
 | **[🌐 Hardware & Platform Compatibility](compatibility.md)** | Device compatibility matrix across Desktops, Mobile, Handhelds, Smart TVs, and Consoles. | Chrome, Safari, Steam Deck, Android, iOS, webOS, Tizen |
-| **[🎮 Bundled ROMs Catalog & Compliance](roms.md)** | Curated demo inventory, system file sizes, and legal takedown compliance statement. | Pre-packaged showcase ROMs, Legal compliance |
+| **[🎮 ROM Management & Sidecar Metadata](roms.md)** | Directory organization, folder mounting, and local companion sidecars (`.nfo`, `.json`, `cover.webp`) guide. | Self-Hosters, Romhacks, Offline Collections |
 
 ---
 

@@ -28,31 +28,22 @@ Retro Player supports configuration via environment variables in `docker-compose
 | Variable | Default | Description |
 | :--- | :--- | :--- |
 | `PORT` | `3000` | HTTP port the server listens on inside the container. |
-| `ROMS_DIR` | `/roms` | Path where custom mounted ROMs and user uploads are stored. |
+| `ROMS_DIR` | `/roms` | Path where mounted host ROMs and user uploads are stored and indexed. |
 | `BGM_DIR` | `/bgm` | Path where custom background audio tracks are stored. |
 | `DATA_DIR` | `/data` | Path where user profiles, playtime, favorites, and controller mappings are saved. |
-| `INCLUDE_DEMO_ROMS` | `true` | Set to `true` to include bundled showcase demo ROMs (41 titles); set to `false` for purely your own library. |
 | `INCLUDE_DEMO_BGM` | `true` | Set to `true` to include bundled 8-bit chiptune audio; set to `false` for purely your own audio. |
-| `AUTO_SEED_DEMOS` | `false` | Set to `true` to automatically copy bundled demo ROMs & BGM into your mounted host folders on first launch. |
 
 ---
 
-### 🎮 Demo ROMs & BGM Setup Scenarios
+### 🎮 Library Storage & Setup Scenarios
 
-#### Scenario 1: Default / Out-of-the-Box (Recommended)
-- **Settings**: `INCLUDE_DEMO_ROMS=true`, `INCLUDE_DEMO_BGM=true`, `AUTO_SEED_DEMOS=false`
-- **UI Experience**: Instant access to all 41 curated showcase demo ROMs and chiptune BGM tracks. Any custom games you drop in `./roms/` are automatically merged into your library.
-- **Host Disk Impact**: Zero extra host disk space. Your host `./roms/` and `./bgm/` folders remain completely clean and empty (demo files stay inside the Docker image).
+#### Scenario 1: Local Host Folder Mount (Recommended for HomeLabs/NAS)
+- **Settings**: Mount `./roms:/roms`, `./bgm:/bgm`, and `./data:/data`.
+- **UI Experience**: Any games you place into `./roms/<system>/` are automatically indexed and displayed in your console dashboard. You can also upload games directly through the web UI, which are saved to host disk.
 
-#### Scenario 2: 100% Clean Slate / Private Library Only
-- **Settings**: `INCLUDE_DEMO_ROMS=false`, `INCLUDE_DEMO_BGM=false`, `AUTO_SEED_DEMOS=false`
-- **UI Experience**: All bundled demo games and music are hidden. The UI **only** displays games and music you explicitly place into `./roms/` and `./bgm/`. If `./roms/` is empty, your catalog starts at 0 games.
-- **Host Disk Impact**: Your host folders remain clean & empty.
-
-#### Scenario 3: Seed Demos to Host Storage
-- **Settings**: `INCLUDE_DEMO_ROMS=true`, `INCLUDE_DEMO_BGM=true`, `AUTO_SEED_DEMOS=true`
-- **UI Experience**: All games and music are available.
-- **Host Disk Impact**: On first startup, Docker copies the 41 demo ROM files and BGM tracks directly onto your host disk inside `./roms/` and `./bgm/`, allowing you to inspect, organize, or edit the raw files locally.
+#### Scenario 2: Pure Client-Side Drag-and-Drop
+- **Settings**: No host volume mounts needed.
+- **UI Experience**: Drop `.gba`, `.sfc`, `.nes`, `.nds`, or `.zip` files directly into your browser window or use **"Load Custom ROM"**. Games execute 100% in browser RAM with saves persisted to your browser's IndexedDB.
 
 ---
 
@@ -69,9 +60,7 @@ docker run -d \
   -e ROMS_DIR=/roms \
   -e BGM_DIR=/bgm \
   -e DATA_DIR=/data \
-  -e INCLUDE_DEMO_ROMS=true \
   -e INCLUDE_DEMO_BGM=true \
-  -e AUTO_SEED_DEMOS=false \
   -v $(pwd)/roms:/roms \
   -v $(pwd)/bgm:/bgm \
   -v $(pwd)/data:/data \

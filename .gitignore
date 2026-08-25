@@ -41,10 +41,10 @@ data/
 # Exclude server-mounted root /roms/ directory
 /roms/
 
-# All bundled public showcase ROMs (3-5 curated titles per system across all 12 systems)
-# are fully included and tracked in Git without large-file exceptions.
+# Exclude all local ROMs, ISOs, sidecar metadata, and covers from Git
+public/roms/**
 !public/roms/
-!public/roms/**
+!public/roms/*/.gitkeep
 
 # -----------------------------------------------------------------------------
 # Background Music (BGM)
@@ -70,6 +70,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # -----------------------------------------------------------------------------
 # OS & Editor Artifacts
 # -----------------------------------------------------------------------------
+marketing/
 .DS_Store
 .idea/
 *.suo

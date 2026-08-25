@@ -119,14 +119,14 @@ Retro Player supports **12 classic retro gaming platforms** out of the box:
 
 ---
 
-## 🎮 Bundled Demo Showcase & Compliance
+## 🎮 Bring-Your-Own-ROM (BYOR) Architecture & Privacy
 
-Retro Player includes a lightweight collection of **41 non-commercial demonstration ROMs and homebrew titles** across 12 console platforms to immediately verify core performance in your browser:
+Retro Player follows a strict **Bring-Your-Own-ROM (BYOR)** architecture designed for maximum privacy, zero server overhead, and complete copyright compliance:
 
-- 📑 **Full Demo Catalog & Inventory**: See **[guides/roms.md](guides/roms.md)** for the complete file-by-file inventory, system file sizes, and homebrew developer credits.
-- 🎯 **Strictly Non-Complete Software**: All pre-installed software consists of non-commercial prototypes, trade show trials, and aftermarket homebrew demos. **Zero full retail commercial games are bundled.**
-- ⚖️ **Compliance & Immediate Removal Policy**: If you are a rights holder or creator and would like any sample removed, open an issue/PR and **we will immediately comply**.
-- 🔒 **100% Private Custom ROM Loading**: To play personal game dumps, use **"Load Custom ROM"** or drag-and-drop—files run 100% in local browser memory with zero network uploads.
+- 🔒 **100% Private Client-Side Execution**: Load personal game dumps and ROM hacks via **"Load Custom ROM"** or direct drag-and-drop. Files are parsed strictly in local browser RAM with zero server uploads.
+- 📁 **Local Host & Docker Storage**: Self-hosters can mount their private `./roms/` collection directly into the container with automatic console sorting, persistence, and local library scanning.
+- 🎨 **Universal Local Sidecars**: Automatically detects and renders local companion covers (`cover.webp`, `cover.png`) and Kodi/Jellyfin `.nfo` or `.json` metadata files.
+- 📑 **ROM Organization & Sidecar Specs**: See **[guides/roms.md](guides/roms.md)** for directory structures, naming conventions, and sidecar metadata schemas.
 
 ---
 
@@ -143,7 +143,7 @@ docker compose up -d
 Open `http://localhost:3000` in your browser!
 
 > [!TIP]
-> **Docker Customization**: You can customize volumes (`./roms`, `./bgm`, `./data`) and environment flags (`INCLUDE_DEMO_ROMS`, `INCLUDE_DEMO_BGM`, `AUTO_SEED_DEMOS`) directly in [`docker-compose.yml`](docker-compose.yml). See the **[Docker Deployment Guide](guides/docker.md)** for full details.
+> **Docker Customization**: You can customize volumes (`./roms`, `./bgm`, `./data`) directly in [`docker-compose.yml`](docker-compose.yml). See the **[Docker Deployment Guide](guides/docker.md)** for full details.
 
 ---
 
@@ -160,7 +160,7 @@ Explore dedicated, step-by-step documentation located in the [`guides/`](guides/
 | **[💾 Save States & In-Game Save Architecture](guides/save-states.md)** | Snapshot quick saves vs in-game battery saves (`.sav`) breakdown across all 12 console platforms. |
 | **[🌐 Hardware & Platform Compatibility Matrix](guides/compatibility.md)** | Browser, OS, Smart TV (LG webOS, Samsung Tizen, Fire TV), Handheld (Steam Deck), and Console compatibility breakdown. |
 | **[📱 Cross-Device Experience Matrix](guides/device-experience-matrix.md)** | Feature sets, UI density, input modes, and admin capabilities compared across Mobile, Handheld, PC, and TV. |
-| **[🎮 Bundled ROMs Catalog & Compliance Policy](guides/roms.md)** | Curated demo inventory, legal compliance, and local companion sidecars (`.nfo`, `.json`, `cover.webp`) guide. |
+| **[🎮 ROM Management & Sidecar Metadata](guides/roms.md)** | Directory organization, folder mounting, and local companion sidecars (`.nfo`, `.json`, `cover.webp`) guide. |
 
 ---
 

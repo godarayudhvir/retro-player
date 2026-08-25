@@ -3,8 +3,8 @@ name: update-roms
 description: >-
   Organizes ROM directory structures, standardizes folder and file names, ingests
   loose screenshots/cover drops, converts PNG/JPG box art covers to optimized WebP format,
-  and dynamically queries live online sources (Wikipedia, PokeCommunity, ROMhacking, Web)
-  to generate local metadata.json sidecar files for retro game collections.
+  and queries the official Libretro CDN database to fetch authentic 1:1 box art covers
+  and generate local metadata.json sidecar files for retro game collections.
 ---
 
 # Update ROMs Skill
@@ -19,7 +19,7 @@ Retro Player maintains two completely independent metadata enrichment layers:
 
 | Layer | Domain / Target | Storage Location | Execution Environment | Priority |
 | :--- | :--- | :--- | :--- | :--- |
-| **Backend `update-roms` Skill** | Codebase repository library maintainers | `public/roms/<system>/<Title>/metadata.json` + `.webp` | Local Node.js runtime in IDE | **Top Priority (1st)** |
+| **Backend `update-roms` Skill** | Codebase repository library maintainers | `public/roms/<system>/<Title>/metadata.json` + `.webp` | Local Node.js runtime in IDE (Libretro CDN only) | **Top Priority (1st)** |
 | **Frontend Online Scraper** | End users visiting website / GitHub Pages | Browser `IndexedDB` (`RetroPlayerMetadataDB`) | Client-side Chrome / Web browser | **Fallback Priority (2nd)** |
 
 - **Local Codebase Sidecars Take Precedence**: Whenever `metadata.json` or companion `.webp` covers exist on disk inside the game folder, the web application immediately serves and renders them, completely bypassing the browser scraper.
@@ -40,9 +40,9 @@ Whenever a new game or cover is added:
 4. **The script automatically**:
    - Detects the console type from the file extension and creates the canonical subdirectory: `public/roms/<system>/<Clean Title>/`.
    - Moves the ROM file into its subfolder and standardizes its filename.
-   - Matches the loose screenshot/cover to the game via fuzzy title normalization, converts it to `<Clean Title>.webp` (quality 85), and removes the loose source image.
-   - Dynamically queries online databases (Wikipedia Full-Text Open Search, PokeCommunity, ROMhacking, and Open Web Search) to extract authentic plot descriptions, developer/author names, release years, and genres without any hardcoded lists.
-   - Generates the local companion `metadata.json` sidecar directly in the game's directory.
+   - Matches loose screenshot/cover drops to the game, converts them to `<Clean Title>.webp` (quality 85), and removes the loose source image.
+   - Queries the official Libretro CDN thumbnail database to download authentic 1:1 box art covers.
+   - Generates clean local companion `metadata.json` sidecars directly in the game's directory.
 
 ### 2. In-Folder ROM Version Upgrade & Custom Screenshot Replacement Workflow
 Whenever an existing game receives an updated ROM version or a new custom screenshot inside its existing folder (e.g. `public/roms/gba/Pokemon Heart & Soul (v1.2.1)`):
