@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { X, Save, RotateCcw, Upload, Image as ImageIcon, Sparkles, Tag, Calendar, User, Building, Film, Check, AlertCircle, BookOpen, Video } from 'lucide-react';
 import { resolveAssetPath } from '../utils/assetPath';
 import { saveManualMetadata, deleteManualMetadata } from '../services/metadataScraper';
+import { convertRemoteImageToWebpDataUrl } from '../utils/imageConverter';
 
 /**
  * Jellyfin-Style In-App Manual Metadata Editor
@@ -23,7 +24,7 @@ export default function MetadataEditModal({
   const currentMeta = metadata || {};
   const [title, setTitle] = useState(currentMeta.title || game.sidecarMetadata?.title || game.title || '');
   const [description, setDescription] = useState(currentMeta.description || game.sidecarMetadata?.description || '');
-  const [releaseYear, setReleaseYear] = useState(currentMeta.releaseYear || game.sidecarMetadata?.releaseYear || (currentMeta.releaseDate ? currentMeta.releaseDate.split('-')[0] : '') || '');
+  const [releaseYear, setReleaseYear] = useState(currentMeta.releaseYear || game.sidecarMetadata?.year || '');
   const [developer, setDeveloper] = useState(currentMeta.developer || game.sidecarMetadata?.developer || '');
   const [publisher, setPublisher] = useState(currentMeta.publisher || game.sidecarMetadata?.publisher || '');
   const [genre, setGenre] = useState(currentMeta.genre || game.sidecarMetadata?.genre || '');
@@ -43,19 +44,20 @@ export default function MetadataEditModal({
 
   // Sync state when game changes
   useEffect(() => {
-    setTitle(currentMeta.title || game.sidecarMetadata?.title || game.title || '');
-    setDescription(currentMeta.description || game.sidecarMetadata?.description || '');
-    setReleaseYear(currentMeta.releaseYear || game.sidecarMetadata?.releaseYear || (currentMeta.releaseDate ? currentMeta.releaseDate.split('-')[0] : '') || '');
-    setDeveloper(currentMeta.developer || game.sidecarMetadata?.developer || '');
-    setPublisher(currentMeta.publisher || game.sidecarMetadata?.publisher || '');
-    setGenre(currentMeta.genre || game.sidecarMetadata?.genre || '');
+    const meta = metadata || {};
+    setTitle(meta.title || game.sidecarMetadata?.title || game.title || '');
+    setDescription(meta.description || game.sidecarMetadata?.description || '');
+    setReleaseYear(meta.releaseYear || game.sidecarMetadata?.year || '');
+    setDeveloper(meta.developer || game.sidecarMetadata?.developer || '');
+    setPublisher(meta.publisher || game.sidecarMetadata?.publisher || '');
+    setGenre(meta.genre || game.sidecarMetadata?.genre || '');
     setWrittenWalkthrough(
-      currentMeta.walkthrough?.written || currentMeta.writtenWalkthroughUrl || game.sidecarMetadata?.walkthrough?.written || ''
+      meta.walkthrough?.written || meta.writtenWalkthroughUrl || game.sidecarMetadata?.walkthrough?.written || ''
     );
     setVideoWalkthrough(
-      currentMeta.walkthrough?.video || currentMeta.videoWalkthroughUrl || game.sidecarMetadata?.walkthrough?.video || ''
+      meta.walkthrough?.video || meta.videoWalkthroughUrl || game.sidecarMetadata?.walkthrough?.video || ''
     );
-    setCoverUrl(currentMeta.coverUrl || game.coverUrl || '');
+    setCoverUrl(meta.coverUrl || game.coverUrl || '');
     setPreviewError(false);
     setSaveStatus(null);
   }, [game, metadata]);
@@ -118,6 +120,17 @@ export default function MetadataEditModal({
         ...(videoWalkthrough.trim() ? { video: videoWalkthrough.trim() } : {})
       } : undefined;
 
+      // Prepare cover data URL (convert remote URLs to WebP data URL so server can write .webp to disk)
+      let payloadCoverDataUrl = coverUrl.startsWith('data:image/') ? coverUrl : null;
+      if (!payloadCoverDataUrl && coverUrl && (coverUrl.startsWith('http://') || coverUrl.startsWith('https://'))) {
+        try {
+          const converted = await convertRemoteImageToWebpDataUrl(coverUrl);
+          if (converted && converted.startsWith('data:image/')) {
+            payloadCoverDataUrl = converted;
+          }
+        } catch (_) {}
+      }
+
       // Try saving directly to disk backend via /api/metadata/save-sidecar
       try {
         const res = await fetch('/api/metadata/save-sidecar', {
@@ -134,8 +147,8 @@ export default function MetadataEditModal({
             publisher: publisher.trim() || game.systemName,
             genre: genre.trim() || 'Retro Classic',
             walkthrough: walkthroughObj,
-            coverDataUrl: coverUrl.startsWith('data:image/') ? coverUrl : null,
-            coverUrl: !coverUrl.startsWith('data:image/') ? coverUrl : null
+            coverDataUrl: payloadCoverDataUrl,
+            coverUrl: !payloadCoverDataUrl ? coverUrl : null
           })
         });
 

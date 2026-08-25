@@ -710,9 +710,29 @@ app.post('/api/delete-rom', express.json(), (req, res) => {
       return res.status(404).json({ error: 'ROM file not found on disk' });
     }
 
-    fs.unlinkSync(targetPath);
-    console.log(`🗑️ [API ROM DELETE] Successfully deleted ROM: ${targetPath}`);
-    res.json({ success: true, message: 'ROM deleted successfully' });
+    const parentDir = path.dirname(targetPath);
+    const systemDir = systemKey ? path.join(ROMS_DIR, systemKey) : null;
+    const isDedicatedFolder = parentDir !== ROMS_DIR && (!systemDir || parentDir !== systemDir);
+
+    if (isDedicatedFolder && fs.existsSync(parentDir)) {
+      fs.rmSync(parentDir, { recursive: true, force: true });
+      console.log(`🗑️ [API ROM DELETE] Successfully deleted entire game directory: ${parentDir}`);
+    } else {
+      const baseName = path.parse(targetPath).name;
+      const companionExts = ['.webp', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.json', '.nfo'];
+      for (const ext of companionExts) {
+        const companionPath = path.join(parentDir, `${baseName}${ext}`);
+        if (fs.existsSync(companionPath)) {
+          try { fs.unlinkSync(companionPath); } catch (_) {}
+        }
+      }
+      if (fs.existsSync(targetPath)) {
+        fs.unlinkSync(targetPath);
+      }
+      console.log(`🗑️ [API ROM DELETE] Successfully deleted ROM and companion sidecars: ${targetPath}`);
+    }
+
+    res.json({ success: true, message: 'Game deleted successfully' });
   } catch (err) {
     console.error('🚨 [API ROM DELETE ERROR]:', err);
     res.status(500).json({ error: err.message });
@@ -771,12 +791,13 @@ app.post('/api/db/reset', (req, res) => {
   const freshDb = {
     profiles: [],
     user_data: {},
+    app_settings: {},
     game_saves: {},
     save_states: {},
     game_metadata: {}
   };
   writeServerDB(freshDb);
-  console.log('🧹 [SERVER DB FACTORY RESET] Cleared all server DB stores (user_data, game_saves, save_states, profiles, game_metadata)');
+  console.log('🧹 [SERVER DB FACTORY RESET] Cleared all server DB stores (user_data, game_saves, save_states, profiles, app_settings, game_metadata)');
   res.json({ success: true, message: 'Server database reset successfully' });
 });
 
@@ -784,12 +805,99 @@ app.delete('/api/db', (req, res) => {
   const freshDb = {
     profiles: [],
     user_data: {},
+    app_settings: {},
     game_saves: {},
     save_states: {},
     game_metadata: {}
   };
   writeServerDB(freshDb);
-  console.log('🧹 [SERVER DB FACTORY RESET] Cleared all server DB stores (user_data, game_saves, save_states, profiles, game_metadata)');
+  console.log('🧹 [SERVER DB FACTORY RESET] Cleared all server DB stores (user_data, game_saves, save_states, profiles, app_settings, game_metadata)');
+  res.json({ success: true, message: 'Server database reset successfully' });
+});
+
+// 0.1 EXPORT full database payload
+app.get('/api/db/export', (req, res) => {
+  const db = readServerDB();
+  const exportPayload = {
+    app: 'RetroPlayer',
+    version: '1.0.3',
+    schemaVersion: 2,
+    exportedAt: new Date().toISOString(),
+    stats: {
+      profilesCount: Array.isArray(db.profiles) ? db.profiles.length : Object.keys(db.profiles || {}).length,
+      userDataCount: Object.keys(db.user_data || {}).length,
+      savesCount: Object.keys(db.game_saves || {}).length,
+      statesCount: Object.keys(db.save_states || {}).length,
+      metadataCount: Object.keys(db.game_metadata || {}).length,
+      settingsCount: Object.keys(db.app_settings || {}).length
+    },
+    database: {
+      profiles: db.profiles || [],
+      user_data: db.user_data || {},
+      app_settings: db.app_settings || {},
+      game_saves: db.game_saves || {},
+      save_states: db.save_states || {},
+      game_metadata: db.game_metadata || {}
+    }
+  };
+  res.json({ success: true, ...exportPayload });
+});
+
+// 0.2 IMPORT full database payload
+app.post('/api/db/import', express.json({ limit: '100mb' }), (req, res) => {
+  try {
+    const importPayload = req.body || {};
+    const database = importPayload.database || importPayload;
+
+    if (!database || typeof database !== 'object') {
+      return res.status(400).json({ error: 'Invalid database payload structure' });
+    }
+
+    const currentDb = readServerDB();
+    const mergedDb = {
+      profiles: Array.isArray(database.profiles) ? database.profiles : (currentDb.profiles || []),
+      user_data: typeof database.user_data === 'object' ? { ...currentDb.user_data, ...database.user_data } : (currentDb.user_data || {}),
+      app_settings: typeof database.app_settings === 'object' ? { ...currentDb.app_settings, ...database.app_settings } : (currentDb.app_settings || {}),
+      game_saves: typeof database.game_saves === 'object' ? { ...currentDb.game_saves, ...database.game_saves } : (currentDb.game_saves || {}),
+      save_states: typeof database.save_states === 'object' ? { ...currentDb.save_states, ...database.save_states } : (currentDb.save_states || {}),
+      game_metadata: typeof database.game_metadata === 'object' ? { ...currentDb.game_metadata, ...database.game_metadata } : (currentDb.game_metadata || {})
+    };
+
+    const writeSuccess = writeServerDB(mergedDb);
+    if (!writeSuccess) {
+      return res.status(500).json({ error: 'Failed to write imported database to disk' });
+    }
+
+    console.log('📥 [SERVER DB IMPORT] Successfully imported database payload to filesystem');
+    res.json({
+      success: true,
+      message: 'Database imported successfully',
+      stats: {
+        profilesCount: Array.isArray(mergedDb.profiles) ? mergedDb.profiles.length : 0,
+        userDataCount: Object.keys(mergedDb.user_data).length,
+        savesCount: Object.keys(mergedDb.game_saves).length,
+        statesCount: Object.keys(mergedDb.save_states).length,
+        settingsCount: Object.keys(mergedDb.app_settings).length
+      }
+    });
+  } catch (err) {
+    console.error('🚨 [SERVER DB IMPORT ERROR]:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 0.3 RESET server database
+app.all('/api/db/reset', (req, res) => {
+  const freshDb = {
+    profiles: [],
+    user_data: {},
+    app_settings: {},
+    game_saves: {},
+    save_states: {},
+    game_metadata: {}
+  };
+  writeServerDB(freshDb);
+  console.log('🧹 [SERVER DB FACTORY RESET] Cleared all server DB stores (profiles, user_data, app_settings, game_saves, save_states, game_metadata)');
   res.json({ success: true, message: 'Server database reset successfully' });
 });
 
@@ -800,6 +908,7 @@ app.get('/api/db/:store', (req, res) => {
     const freshDb = {
       profiles: [],
       user_data: {},
+      app_settings: {},
       game_saves: {},
       save_states: {},
       game_metadata: {}
@@ -880,7 +989,7 @@ app.delete('/api/db/:store/:key', (req, res) => {
 });
 
 // 5. POST Save companion sidecar metadata & cover artwork to disk
-app.post('/api/metadata/save-sidecar', express.json({ limit: '50mb' }), (req, res) => {
+app.post('/api/metadata/save-sidecar', express.json({ limit: '50mb' }), async (req, res) => {
   try {
     const data = req.body || {};
     const { gameId, systemKey, romPath, title, description, developer, publisher, year, genre, players, coverDataUrl } = data;
@@ -907,27 +1016,67 @@ app.post('/api/metadata/save-sidecar', express.json({ limit: '50mb' }), (req, re
 
     let savedCoverRelativeUrl = null;
 
-    if (coverDataUrl && coverDataUrl.startsWith('data:image/')) {
+    if (data.deleteCover) {
+      const coverExts = ['.webp', '.png', '.jpg', '.jpeg', '.gif', '.bmp'];
+      for (const ext of coverExts) {
+        const coverPath = path.join(targetDir, `${baseFileName}${ext}`);
+        if (fs.existsSync(coverPath)) {
+          try { fs.unlinkSync(coverPath); } catch (_) {}
+        }
+        const genericPath = path.join(targetDir, `cover${ext}`);
+        if (fs.existsSync(genericPath)) {
+          try { fs.unlinkSync(genericPath); } catch (_) {}
+        }
+      }
+      savedCoverRelativeUrl = '';
+      console.log(`🧹 [COVER DELETED FROM DISK] -> in ${targetDir}`);
+    } else if (coverDataUrl && coverDataUrl.startsWith('data:image/')) {
+      const match = coverDataUrl.match(/^data:image\/([a-zA-Z0-9+]+);base64,/);
+      let ext = '.webp';
+      if (match && match[1]) {
+        const mimeSub = match[1].toLowerCase();
+        if (mimeSub === 'png') ext = '.png';
+        else if (mimeSub === 'jpeg' || mimeSub === 'jpg') ext = '.jpg';
+        else if (mimeSub === 'webp') ext = '.webp';
+      }
       const base64Data = coverDataUrl.replace(/^data:image\/[a-zA-Z0-9+]+;base64,/, '');
       const imageBuffer = Buffer.from(base64Data, 'base64');
-      const coverFileName = `${baseFileName}.webp`;
+      const coverFileName = `${baseFileName}${ext}`;
       const coverFilePath = path.join(targetDir, coverFileName);
 
       fs.writeFileSync(coverFilePath, imageBuffer);
       const relToPublic = path.relative(path.resolve(__dirname, 'public'), coverFilePath);
       savedCoverRelativeUrl = `/${relToPublic.split(path.sep).join('/')}`;
-      console.log(`💾 [SERVER SIDECAR COVER SAVED] -> ${coverFilePath}`);
+      console.log(`💾 [SERVER COVER SAVED] -> ${coverFilePath}`);
+    } else if (data.coverUrl && (data.coverUrl.startsWith('http://') || data.coverUrl.startsWith('https://'))) {
+      try {
+        const remoteRes = await fetch(data.coverUrl);
+        if (remoteRes.ok) {
+          const arrayBuffer = await remoteRes.arrayBuffer();
+          const imageBuffer = Buffer.from(arrayBuffer);
 
-      // Delete any existing non-webp image formats (.png, .jpg, .jpeg, .gif, .bmp) for this game
-      const obsoleteExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp'];
-      for (const obsExt of obsoleteExtensions) {
-        const obsPath = path.join(targetDir, `${baseFileName}${obsExt}`);
-        if (fs.existsSync(obsPath)) {
-          try {
-            fs.unlinkSync(obsPath);
-            console.log(`🧹 [PURGED OBSOLETE COVER] -> ${obsPath}`);
-          } catch (_) {}
+          let ext = '.png';
+          const lowerUrl = data.coverUrl.toLowerCase();
+          if (lowerUrl.includes('.jpg') || lowerUrl.includes('.jpeg')) ext = '.jpg';
+          else if (lowerUrl.includes('.webp')) ext = '.webp';
+          else if (lowerUrl.includes('.png')) ext = '.png';
+          else {
+            const ct = remoteRes.headers.get('content-type') || '';
+            if (ct.includes('jpeg')) ext = '.jpg';
+            else if (ct.includes('webp')) ext = '.webp';
+            else if (ct.includes('png')) ext = '.png';
+          }
+
+          const coverFileName = `${baseFileName}${ext}`;
+          const coverFilePath = path.join(targetDir, coverFileName);
+
+          fs.writeFileSync(coverFilePath, imageBuffer);
+          const relToPublic = path.relative(path.resolve(__dirname, 'public'), coverFilePath);
+          savedCoverRelativeUrl = `/${relToPublic.split(path.sep).join('/')}`;
+          console.log(`💾 [REMOTE COVER DOWNLOADED & SAVED] -> ${coverFilePath}`);
         }
+      } catch (dlErr) {
+        console.warn(`[REMOTE COVER FETCH FAILED]: ${data.coverUrl}`, dlErr.message);
       }
     }
 
@@ -961,6 +1110,111 @@ app.post('/api/metadata/save-sidecar', express.json({ limit: '50mb' }), (req, re
     });
   } catch (err) {
     console.error('[SERVER SIDE CAR SAVE ERROR]', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 6. POST Delete companion sidecar metadata from disk
+app.post('/api/metadata/delete-sidecar', express.json(), (req, res) => {
+  try {
+    const data = req.body || {};
+    const { systemKey, romPath, title } = data;
+
+    let targetDir = path.resolve(ROMS_DIR, systemKey || '');
+    let baseFileName = 'game';
+
+    if (romPath) {
+      const decodedPath = decodeURIComponent(romPath).replace(/^\/roms\//, '');
+      const fullRomPath = path.resolve(ROMS_DIR, decodedPath);
+      if (fs.existsSync(fullRomPath)) {
+        targetDir = path.dirname(fullRomPath);
+        baseFileName = path.parse(fullRomPath).name;
+      } else {
+        baseFileName = path.parse(decodedPath).name || (title ? title.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'game');
+      }
+    } else if (title) {
+      baseFileName = title.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    }
+
+    const sidecarPath = path.join(targetDir, `${baseFileName}.json`);
+    if (fs.existsSync(sidecarPath)) {
+      try { fs.unlinkSync(sidecarPath); } catch (_) {}
+    }
+    const legacyPath = path.join(targetDir, 'metadata.json');
+    if (fs.existsSync(legacyPath)) {
+      try { fs.unlinkSync(legacyPath); } catch (_) {}
+    }
+
+    console.log(`🧹 [SERVER SIDECAR JSON DELETED] -> from ${targetDir}`);
+    res.json({ success: true, message: 'Sidecar JSON deleted from disk' });
+  } catch (err) {
+    console.error('[SERVER SIDE CAR DELETE ERROR]', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Proxy for TheGamesDB.net
+app.get('/api/proxy-thegamesdb', (req, res) => {
+  try {
+    const targetPath = req.query.endpoint;
+    if (!targetPath) {
+      return res.status(400).json({ error: 'Missing endpoint parameter' });
+    }
+    const targetUrl = `https://api.thegamesdb.net/v1/${targetPath}`;
+    https.get(targetUrl, {
+      headers: { 'User-Agent': 'RetroPlayer/1.0 (Web; Node)' }
+    }, (upstreamRes) => {
+      res.status(upstreamRes.statusCode || 200);
+      res.setHeader('Content-Type', 'application/json');
+      upstreamRes.pipe(res);
+    }).on('error', (e) => {
+      res.status(502).json({ error: e.message });
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Proxy for ScreenScraper.fr
+app.get('/api/proxy-screenscraper', (req, res) => {
+  try {
+    const query = req.query.query || '';
+    const targetUrl = `https://www.screenscraper.fr/api2/jeuInfos.php?${query}`;
+    https.get(targetUrl, {
+      headers: { 'User-Agent': 'RetroPlayer/1.0 (Web; Node)' }
+    }, (upstreamRes) => {
+      res.status(upstreamRes.statusCode || 200);
+      res.setHeader('Content-Type', 'application/json');
+      upstreamRes.pipe(res);
+    }).on('error', (e) => {
+      res.status(502).json({ error: e.message });
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Proxy for Keyless Video Game Database (RAWG.io)
+app.get('/api/proxy-rawg', (req, res) => {
+  try {
+    const targetPath = req.query.endpoint;
+    if (!targetPath) {
+      return res.status(400).json({ error: 'Missing endpoint parameter' });
+    }
+    const defaultKey = 'c542e67aec3a4340908f9de9e86038af';
+    const sep = targetPath.includes('?') ? '&' : '?';
+    const finalPath = targetPath.includes('key=') ? targetPath : `${targetPath}${sep}key=${defaultKey}`;
+    const targetUrl = `https://api.rawg.io/api/${finalPath}`;
+    https.get(targetUrl, {
+      headers: { 'User-Agent': 'RetroPlayer/2.0 (Web; VideoGameDatabaseBot)' }
+    }, (upstreamRes) => {
+      res.status(upstreamRes.statusCode || 200);
+      res.setHeader('Content-Type', 'application/json');
+      upstreamRes.pipe(res);
+    }).on('error', (e) => {
+      res.status(502).json({ error: e.message });
+    });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });

@@ -16,6 +16,8 @@ export function useGamepadNavigation({
   setShowScraperModal,
   showThemeModal,
   setShowThemeModal,
+  showBackupModal,
+  setShowBackupModal,
   showResetConfirm,
   setShowResetConfirm,
   showProfileSelectModal,
@@ -85,6 +87,8 @@ export function useGamepadNavigation({
       showScraperModal,
       showThemeModal,
       setShowThemeModal,
+      showBackupModal,
+      setShowBackupModal,
       showResetConfirm,
       setShowResetConfirm,
       showProfileSelectModal,
@@ -121,6 +125,7 @@ export function useGamepadNavigation({
     showLoadRomModal,
     showScraperModal,
     showThemeModal,
+    showBackupModal,
     showResetConfirm,
     showProfileSelectModal,
     showProfileCreatorModal,
@@ -818,6 +823,20 @@ export function useGamepadNavigation({
           themeCards[curThemeIdx].click();
           sfx?.playThemeSwitch?.();
         }
+      }
+      return;
+    }
+
+    // 2.1b2 Backup Modal Navigation
+    const { showBackupModal: isBackupOpen, setShowBackupModal } = stateRef.current;
+    if (isBackupOpen) {
+      if (dir === 'BACK') {
+        if (setShowBackupModal) {
+          setShowBackupModal(false);
+          setFocusedTarget({ zone: 'topbar', id: 'backup' });
+          sfx?.playModalClose?.();
+        }
+        return;
       }
       return;
     }

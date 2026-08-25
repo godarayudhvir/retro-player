@@ -97,7 +97,8 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 - 🎮 **Console Gamepad & Spatial Navigation**: 100% controller-driven library navigation with an adaptive on-screen virtual keyboard.
 - ⚡ **Pure Client-Side WASM Emulation**: Hardware-accelerated WebAssembly execution across 12 retro platforms with ~0% host CPU usage.
 - 🎨 **Nintendo DS Touch Architecture**: Dual-screen layout featuring top-screen dynamic box art & specs, bottom touchscreen carousel, and inline tools.
-- 💾 **Profile-Scoped Battery Saves**: In-game battery RAM (`.sav`/SRAM) and quick save states strictly isolated per Multiavatar player profile.
+- 💾 **Profile-Scoped Battery Saves & States**: In-game battery RAM (`.sav`/SRAM) and quick save states strictly isolated per Multiavatar player profile with auto-injection and virtual memory cards.
+- 🗄️ **Centralized Database & 1-Click Backup**: Single JSON document database (`retroplayer_db.json`) on Docker disk with 1-click in-app backup export and drag-and-drop restore studio.
 - 🌐 **Unified Metadata & Box Art Scraper**: Universal multi-source scraping engine (Libretro CDN, ScreenScraper, TheGamesDB, Wikipedia) shared across Node CLI and browser UI with real-time scan telemetry, layered fallbacks, and manual editor.
 - 📖 **Curated Strategy Guides & QR Companion**: Direct written/video walkthroughs with mobile QR code pairing for couch play.
 - 🎵 **Dynamic BGM & Synthesized SFX**: Multi-track chiptune engine with smart in-game pause and low-latency Web Audio sound effects.

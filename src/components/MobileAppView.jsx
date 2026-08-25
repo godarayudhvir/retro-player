@@ -45,7 +45,8 @@ import {
   BatteryWarning, 
   Square,
   Edit3,
-  Info
+  Info,
+  Database
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import MultiAvatar from './MultiAvatar';
@@ -53,6 +54,7 @@ import ConfirmModal from './ConfirmModal';
 import { resolveAssetPath } from '../utils/assetPath';
 import { getReleaseDate, getGameDescription } from '../gameDescriptions';
 import { saveCachedMetadata } from '../services/metadataScraper';
+import { convertRemoteImageToWebpDataUrl } from '../utils/imageConverter';
 import { resetEntireApp } from '../utils/appReset';
 
 /**
@@ -106,6 +108,7 @@ export default function MobileAppView({
   onExportSave,
   onImportSave,
   onDeleteSave,
+  onDeleteGame,
   onResetStats,
   hasSaveData,
   scraper,
@@ -115,6 +118,7 @@ export default function MobileAppView({
   time,
   onOpenScraperModal,
   onOpenAboutModal,
+  onOpenBackupModal,
   showResetConfirm: externalShowResetConfirm,
   setShowResetConfirm: externalSetShowResetConfirm,
   setShowLoadRomModal,
@@ -123,6 +127,7 @@ export default function MobileAppView({
   const fileInputRef = useRef(null);
   const saveFileInputRef = useRef(null);
   const coverImageInputRef = useRef(null);
+  const sidecarInputRef = useRef(null);
   const logsEndRef = useRef(null);
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -131,7 +136,9 @@ export default function MobileAppView({
   const showResetConfirm = externalShowResetConfirm !== undefined ? externalShowResetConfirm : internalShowResetConfirm;
   const setShowResetConfirm = externalSetShowResetConfirm || setInternalShowResetConfirm;
 
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteSaveConfirm, setShowDeleteSaveConfirm] = useState(false);
+  const [showDeleteGameConfirm, setShowDeleteGameConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [saveActionStatus, setSaveActionStatus] = useState('');
 
   // DS Detail Tabs: 'overview' | 'save' | 'guides' | 'manage'
@@ -216,7 +223,7 @@ export default function MobileAppView({
   const selectedStats = selectedGameForDetails && getGameStats ? getGameStats(selectedGameForDetails.id || selectedGameForDetails.title) : null;
   const isSelectedFav = selectedGameForDetails && isFavorite ? isFavorite(selectedGameForDetails.id || selectedGameForDetails.title) : false;
 
-  const rawCover = selectedMeta?.coverUrl || (selectedGameForDetails?.coverUrl && !selectedGameForDetails?.coverUrl.endsWith('.svg') ? selectedGameForDetails.coverUrl : null);
+  const rawCover = (dsTab === 'manage' && editCoverUrl) ? editCoverUrl : (selectedMeta?.coverUrl || (selectedGameForDetails?.coverUrl && !selectedGameForDetails?.coverUrl.endsWith('.svg') ? selectedGameForDetails.coverUrl : null));
   const coverSrc = rawCover ? resolveAssetPath(rawCover) : null;
   const rawScreenshot = selectedMeta?.screenshotUrl;
   const screenshotSrc = rawScreenshot ? resolveAssetPath(rawScreenshot) : null;
@@ -295,6 +302,59 @@ export default function MobileAppView({
     setIsSavingEdit(true);
     try {
       const id = selectedGameForDetails.id || `${selectedGameForDetails.systemKey}-${selectedGameForDetails.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      let finalCoverUrl = editCoverUrl.trim() || null;
+      let diskSaved = false;
+
+      const walkthroughObj = (editWrittenGuide.trim() || editVideoGuide.trim()) ? {
+        ...(editWrittenGuide.trim() ? { written: editWrittenGuide.trim() } : {}),
+        ...(editVideoGuide.trim() ? { video: editVideoGuide.trim() } : {})
+      } : undefined;
+
+      // Convert remote URLs to WebP Data URL for disk persistence
+      let payloadCoverDataUrl = editCoverUrl.startsWith('data:image/') ? editCoverUrl : null;
+      if (!payloadCoverDataUrl && editCoverUrl && (editCoverUrl.startsWith('http://') || editCoverUrl.startsWith('https://'))) {
+        try {
+          const converted = await convertRemoteImageToWebpDataUrl(editCoverUrl);
+          if (converted && converted.startsWith('data:image/')) {
+            payloadCoverDataUrl = converted;
+          }
+        } catch (_) {}
+      }
+
+      // Try saving directly to disk backend via /api/metadata/save-sidecar
+      try {
+        const res = await fetch('/api/metadata/save-sidecar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            gameId: id,
+            systemKey: selectedGameForDetails.systemKey,
+            romPath: selectedGameForDetails.romUrl || selectedGameForDetails.url,
+            title: editTitle.trim() || selectedGameForDetails.title,
+            description: editDescription.trim(),
+            releaseYear: editYear.trim(),
+            developer: editDeveloper.trim() || selectedGameForDetails.systemName,
+            publisher: editPublisher.trim() || selectedGameForDetails.systemName,
+            genre: editGenre.trim() || 'Retro Classic',
+            walkthrough: walkthroughObj,
+            coverDataUrl: payloadCoverDataUrl,
+            coverUrl: !payloadCoverDataUrl ? editCoverUrl : null
+          })
+        });
+
+        if (res.ok) {
+          const result = await res.json();
+          if (result.success) {
+            diskSaved = true;
+            if (result.savedCoverUrl) {
+              finalCoverUrl = result.savedCoverUrl;
+            }
+          }
+        }
+      } catch (backendErr) {
+        console.warn('Backend disk write unavailable, saving to IndexedDB:', backendErr);
+      }
+
       const updatedData = {
         id,
         title: editTitle.trim() || selectedGameForDetails.title,
@@ -305,23 +365,20 @@ export default function MobileAppView({
         developer: editDeveloper.trim() || selectedGameForDetails.systemName || 'Classic',
         publisher: editPublisher.trim() || selectedGameForDetails.systemName || 'Classic',
         description: editDescription.trim() || `Experience ${selectedGameForDetails.title} on ${selectedGameForDetails.systemName}.`,
-        coverUrl: editCoverUrl.trim() || null,
-        hasCustomCover: Boolean(editCoverUrl.trim()),
-        walkthrough: {
-          written: editWrittenGuide.trim() || undefined,
-          video: editVideoGuide.trim() || undefined
-        },
+        coverUrl: finalCoverUrl,
+        hasCustomCover: Boolean(finalCoverUrl),
+        walkthrough: walkthroughObj,
         writtenWalkthroughUrl: editWrittenGuide.trim() || undefined,
         videoWalkthroughUrl: editVideoGuide.trim() || undefined,
         isManualOverride: true,
-        source: 'Manual Edit',
+        source: diskSaved ? 'Local Sidecar (Disk)' : 'Manual Edit',
         scrapedAt: new Date().toISOString()
       };
 
       await saveCachedMetadata(id, updatedData);
       scraper?.updateLocalMetadata?.(id, updatedData);
       sfx?.playMenuConfirm?.();
-      setEditSaveStatus('Saved to Browser Storage!');
+      setEditSaveStatus(diskSaved ? 'Saved to Server Disk & Sidecar!' : 'Saved to Browser Storage!');
       setTimeout(() => {
         setEditSaveStatus('');
         setDsTab('overview');
@@ -363,35 +420,198 @@ export default function MobileAppView({
     sfx?.playNotification?.();
   };
 
-  // Upload custom cover image handler
-  const handleCoverUpload = async (e) => {
+  const handleImportSidecar = (e) => {
     const file = e.target.files?.[0];
-    if (file && selectedGameForDetails) {
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        const dataUrl = event.target?.result;
-        if (dataUrl) {
-          setEditCoverUrl(dataUrl);
-          const id = selectedGameForDetails.id || `${selectedGameForDetails.systemKey}-${selectedGameForDetails.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
-          const currentMeta = selectedMeta || {};
-          const updated = {
-            ...currentMeta,
-            id,
-            title: editTitle.trim() || currentMeta.title || selectedGameForDetails.title,
-            systemKey: selectedGameForDetails.systemKey,
-            coverUrl: dataUrl,
-            hasCustomCover: true,
-            isManualOverride: true,
-            scrapedAt: new Date().toISOString()
-          };
-          await saveCachedMetadata(id, updated);
-          scraper?.updateLocalMetadata?.(id, updated);
-          sfx?.playNotification?.();
-        }
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target?.result || '{}');
+        if (json.title) setEditTitle(json.title);
+        if (json.year || json.releaseYear) setEditYear(json.year || json.releaseYear);
+        if (json.genre) setEditGenre(json.genre);
+        if (json.developer) setEditDeveloper(json.developer);
+        if (json.publisher) setEditPublisher(json.publisher);
+        if (json.description) setEditDescription(json.description);
+        if (json.cover) setEditCoverUrl(json.cover);
+        if (json.walkthrough?.written || json.writtenWalkthroughUrl) setEditWrittenGuide(json.walkthrough?.written || json.writtenWalkthroughUrl);
+        if (json.walkthrough?.video || json.videoWalkthroughUrl) setEditVideoGuide(json.walkthrough?.video || json.videoWalkthroughUrl);
+        sfx?.playNotification?.();
+        setEditSaveStatus('Imported Sidecar Data!');
+        setTimeout(() => setEditSaveStatus(''), 2500);
+      } catch (err) {
+        console.error('Failed to parse sidecar JSON:', err);
+      }
+    };
+    reader.readAsText(file);
     e.target.value = '';
+  };
+
+  const handleConfirmDeleteGame = async () => {
+    if (!selectedGameForDetails || !onDeleteGame) return;
+    setIsDeleting(true);
+    try {
+      const success = await onDeleteGame(selectedGameForDetails);
+      if (success) {
+        sfx?.playMenuConfirm?.();
+        setShowDeleteGameConfirm(false);
+        setSelectedGameForDetails(null);
+      }
+    } catch (err) {
+      console.error('Failed to delete game:', err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCoverUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedGameForDetails) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const dataUrl = event.target?.result;
+      if (!dataUrl) return;
+
+      // 1. Instantly update local preview
+      setEditCoverUrl(dataUrl);
+
+      const id = selectedGameForDetails.id || `${selectedGameForDetails.systemKey}-${selectedGameForDetails.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const currentMeta = selectedMeta || {};
+      let finalCover = dataUrl;
+      let diskSaved = false;
+
+      // 2. Persist directly to host disk sidecar
+      try {
+        const res = await fetch('/api/metadata/save-sidecar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            gameId: id,
+            systemKey: selectedGameForDetails.systemKey,
+            romPath: selectedGameForDetails.romUrl || selectedGameForDetails.url,
+            title: editTitle.trim() || currentMeta.title || selectedGameForDetails.title,
+            description: editDescription.trim(),
+            releaseYear: editYear.trim(),
+            developer: editDeveloper.trim() || selectedGameForDetails.systemName,
+            publisher: editPublisher.trim() || selectedGameForDetails.systemName,
+            genre: editGenre.trim() || 'Retro Classic',
+            coverDataUrl: dataUrl
+          })
+        });
+        if (res.ok) {
+          const resData = await res.json();
+          if (resData.success) {
+            diskSaved = true;
+            if (resData.savedCoverUrl) {
+              finalCover = `${resData.savedCoverUrl}?t=${Date.now()}`;
+              setEditCoverUrl(finalCover);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Cover upload backend write err:', err);
+      }
+
+      // 3. Save to database and cache
+      const updated = {
+        ...currentMeta,
+        id,
+        title: editTitle.trim() || currentMeta.title || selectedGameForDetails.title,
+        systemKey: selectedGameForDetails.systemKey,
+        coverUrl: finalCover,
+        hasCustomCover: true,
+        isManualOverride: true,
+        source: diskSaved ? 'Local Sidecar (Disk)' : 'Manual Edit',
+        scrapedAt: new Date().toISOString()
+      };
+      await saveCachedMetadata(id, updated);
+      scraper?.updateLocalMetadata?.(id, updated);
+      sfx?.playNotification?.();
+      setEditSaveStatus(diskSaved ? 'Cover Uploaded & Saved!' : 'Cover Saved in Browser!');
+      setTimeout(() => setEditSaveStatus(''), 2000);
+    };
+
+    reader.onerror = (err) => {
+      console.error('Failed reading selected image file:', err);
+    };
+
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleDeleteCover = async () => {
+    if (!selectedGameForDetails) return;
+    setEditCoverUrl('');
+    const id = selectedGameForDetails.id || `${selectedGameForDetails.systemKey}-${selectedGameForDetails.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const updatedData = {
+      ...(selectedMeta || {}),
+      id,
+      title: editTitle.trim() || selectedGameForDetails.title,
+      systemKey: selectedGameForDetails.systemKey,
+      coverUrl: null,
+      hasCustomCover: false,
+      isManualOverride: true,
+      scrapedAt: new Date().toISOString()
+    };
+
+    try {
+      await fetch('/api/metadata/save-sidecar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gameId: id,
+          title: editTitle.trim() || selectedGameForDetails.title,
+          systemKey: selectedGameForDetails.systemKey,
+          romPath: selectedGameForDetails.romUrl || selectedGameForDetails.url,
+          deleteCover: true
+        })
+      }).catch(() => {});
+    } catch (_) {}
+
+    await saveCachedMetadata(id, updatedData);
+    scraper?.updateLocalMetadata?.(id, updatedData);
+    sfx?.playDelete?.();
+    setEditSaveStatus('Cover Deleted!');
+    setTimeout(() => setEditSaveStatus(''), 2000);
+  };
+
+  const handleDeleteMetadata = async () => {
+    if (!selectedGameForDetails) return;
+    const id = selectedGameForDetails.id || `${selectedGameForDetails.systemKey}-${selectedGameForDetails.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    
+    // 1. Reset all fields to clean defaults
+    setEditTitle(selectedGameForDetails.rawTitle || selectedGameForDetails.title);
+    setEditYear('');
+    setEditGenre('');
+    setEditDeveloper('');
+    setEditPublisher('');
+    setEditDescription('');
+    setEditCoverUrl('');
+    setEditWrittenGuide('');
+    setEditVideoGuide('');
+    
+    // 2. Delete sidecar on backend disk
+    try {
+      await fetch('/api/metadata/delete-sidecar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gameId: id,
+          systemKey: selectedGameForDetails.systemKey,
+          romPath: selectedGameForDetails.romUrl || selectedGameForDetails.url,
+          title: selectedGameForDetails.title
+        })
+      }).catch(() => {});
+    } catch (_) {}
+
+    // 3. Clear IndexedDB / Server DB and update local cache
+    await deleteManualMetadata(id);
+    scraper?.updateLocalMetadata?.(id, null);
+    scraper?.clearLogs?.();
+    sfx?.playDelete?.();
+    setEditSaveStatus('Metadata Deleted & Reset!');
+    setTimeout(() => setEditSaveStatus(''), 2000);
   };
 
   // Toggle QR Code Companion handler
@@ -883,7 +1103,7 @@ export default function MobileAppView({
                   disabled={!hasSaveData}
                   onClick={() => {
                     if (hasSaveData) {
-                      setShowDeleteConfirm(true);
+                      setShowDeleteSaveConfirm(true);
                       sfx?.playTileNav?.();
                     }
                   }}
@@ -900,14 +1120,14 @@ export default function MobileAppView({
 
               {/* Delete Save Confirmation Modal */}
               <ConfirmModal
-                isOpen={showDeleteConfirm}
+                isOpen={showDeleteSaveConfirm}
                 title="Delete Save Data?"
                 message={`Are you sure you want to permanently erase the saved battery RAM and save states for "${selectedGameForDetails?.title}"? This action cannot be undone.`}
                 confirmLabel="Delete Save"
                 cancelLabel="Cancel"
                 isDestructive={true}
                 onConfirm={async () => {
-                  setShowDeleteConfirm(false);
+                  setShowDeleteSaveConfirm(false);
                   if (onDeleteSave && selectedGameForDetails) {
                     await onDeleteSave(selectedGameForDetails);
                     sfx?.playDelete?.();
@@ -915,7 +1135,7 @@ export default function MobileAppView({
                     setTimeout(() => setSaveActionStatus(''), 4000);
                   }
                 }}
-                onCancel={() => setShowDeleteConfirm(false)}
+                onCancel={() => setShowDeleteSaveConfirm(false)}
                 sfx={sfx}
               />
             </div>
@@ -1059,6 +1279,15 @@ export default function MobileAppView({
             onChange={handleCoverUpload}
           />
 
+          {/* Hidden Sidecar JSON Upload Input */}
+          <input
+            type="file"
+            ref={sidecarInputRef}
+            accept=".json,application/json"
+            style={{ display: 'none' }}
+            onChange={handleImportSidecar}
+          />
+
           {/* =========================================================================
               VIEW 4: METADATA CUSTOMIZER & ONLINE SCRAPER STUDIO
               ========================================================================= */}
@@ -1103,21 +1332,34 @@ export default function MobileAppView({
                         <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-main)' }}>
                           {selectedMeta?.hasCustomCover ? 'Custom / Uploaded Cover' : (selectedGameForDetails.hasSidecar ? 'Local Companion Sidecar' : 'Libretro CDN / ScreenScraper')}
                         </span>
-                        <button
-                          type="button"
-                          className="ds-inline-btn-secondary"
-                          style={{ padding: '0.2rem 0.45rem', fontSize: '0.64rem', width: 'fit-content' }}
-                          onClick={() => coverImageInputRef.current?.click()}
-                        >
-                          <Upload size={10} />
-                          <span>Replace Cover</span>
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.45rem' }}>
+                          <button
+                            type="button"
+                            className="ds-inline-btn-secondary"
+                            style={{ padding: '0.2rem 0.45rem', fontSize: '0.64rem' }}
+                            onClick={() => coverImageInputRef.current?.click()}
+                          >
+                            <Upload size={10} />
+                            <span>Replace Cover</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className="ds-inline-btn-danger"
+                            style={{ padding: '0.2rem 0.45rem', fontSize: '0.64rem' }}
+                            onClick={handleDeleteCover}
+                            title="Delete Box Art cover"
+                          >
+                            <Trash2 size={10} />
+                            <span>Delete Cover</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                       <p style={{ fontSize: '0.66rem', color: 'var(--text-sub)', margin: 0, lineHeight: 1.35 }}>
-                        Searched Libretro CDN, TheGamesDB &amp; Wikipedia (No official box art found on remote servers).
+                        Searched Libretro CDN &amp; TheGamesDB (No official box art found on remote servers).
                       </p>
                       <button
                         type="button"
@@ -1132,25 +1374,64 @@ export default function MobileAppView({
                   )}
                 </div>
 
-                {/* Section 2: Online Scraper & Live Terminal Logs */}
+                {/* Section 2: Top Actions (Save Changes & Delete Game) */}
+                <div style={{ display: 'flex', gap: '0.45rem', width: '100%' }}>
+                  <button
+                    type="submit"
+                    className="ds-inline-btn-primary"
+                    style={{ flex: 1, justifyContent: 'center' }}
+                    disabled={isSavingEdit}
+                  >
+                    {isSavingEdit ? <RefreshCw size={13} className="spin" /> : <Save size={13} />}
+                    <span>{editSaveStatus || (isSavingEdit ? 'Saving...' : 'Save Changes')}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="ds-inline-btn-danger"
+                    style={{ flex: 1, justifyContent: 'center' }}
+                    onClick={() => {
+                      setShowDeleteGameConfirm(true);
+                      sfx?.playModalOpen?.();
+                    }}
+                  >
+                    <Trash2 size={13} />
+                    <span>Delete Game</span>
+                  </button>
+                </div>
+
+                {/* Section 3: Online Scraper & Live Terminal Logs */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                       <FileText size={11} color="#64748b" />
-                      <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-sub)' }}>Online DB Search Logs</span>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-sub)' }}>Metadata &amp; Cover Search Logs</span>
                     </div>
 
-                    <button
-                      type="button"
-                      className="ds-inline-btn-secondary"
-                      style={{ padding: '0.2rem 0.5rem', fontSize: '0.65rem' }}
-                      onClick={handleManualScrape}
-                      disabled={isLocalScraping}
-                      title="Force live online re-scrape against Libretro CDN, ScreenScraper & Wikipedia"
-                    >
-                      <RefreshCw size={10} className={isLocalScraping ? 'spin' : ''} />
-                      <span>{isLocalScraping ? 'Searching DBs...' : 'Re-Fetch Online Data'}</span>
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                      <button
+                        type="button"
+                        className="ds-inline-btn-secondary"
+                        style={{ padding: '0.2rem 0.5rem', fontSize: '0.65rem' }}
+                        onClick={handleManualScrape}
+                        disabled={isLocalScraping}
+                        title="Force live online re-scrape against Libretro CDN & ScreenScraper"
+                      >
+                        <RefreshCw size={10} className={isLocalScraping ? 'spin' : ''} />
+                        <span>{isLocalScraping ? 'Scraping...' : 'Scrape'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className="ds-inline-btn-danger"
+                        style={{ padding: '0.2rem 0.45rem', fontSize: '0.65rem' }}
+                        onClick={handleDeleteMetadata}
+                        title="Delete metadata sidecar, reset all fields below, and clear search logs"
+                      >
+                        <Trash2 size={10} />
+                        <span>Delete</span>
+                      </button>
+                    </div>
                   </div>
 
                   <div className="ds-scraper-terminal-logs">
@@ -1273,31 +1554,47 @@ export default function MobileAppView({
                   </div>
                 </div>
 
-                {/* Section 4: Action Buttons */}
-                <div className="ds-inline-actions" style={{ borderTop: '1px solid var(--panel-border)', paddingTop: '0.45rem', marginTop: '0.3rem' }}>
+                {/* Section 4: Sidecar JSON Import & Export Actions */}
+                <div className="ds-inline-actions" style={{ borderTop: '1px solid var(--panel-border)', paddingTop: '0.45rem', marginTop: '0.3rem', display: 'flex', gap: '0.45rem' }}>
+                  <button
+                    type="button"
+                    className="ds-inline-btn-secondary"
+                    onClick={() => sidecarInputRef.current?.click()}
+                    title="Import metadata.json sidecar file"
+                    style={{ flex: 1 }}
+                  >
+                    <Upload size={12} />
+                    <span>Import Sidecar</span>
+                  </button>
+
                   <button
                     type="button"
                     className="ds-inline-btn-secondary"
                     onClick={handleExportSidecar}
                     title="Export local metadata.json sidecar file"
+                    style={{ flex: 1 }}
                   >
                     <Download size={12} />
                     <span>Export Sidecar</span>
-                  </button>
-
-                  <button
-                    type="submit"
-                    className="ds-inline-btn-primary"
-                    disabled={isSavingEdit}
-                  >
-                    <Check size={13} />
-                    <span>{editSaveStatus || (isSavingEdit ? 'Saving...' : 'Save Changes')}</span>
                   </button>
                 </div>
               </form>
             </div>
           )}
         </main>
+
+        {/* Delete Game Confirmation Modal */}
+        <ConfirmModal
+          isOpen={showDeleteGameConfirm}
+          title="Delete Game?"
+          message={`Are you sure you want to delete "${selectedGameForDetails?.title}"? This will permanently remove the ROM and metadata sidecars from your collection.`}
+          confirmLabel={isDeleting ? 'Deleting...' : 'Delete Game'}
+          cancelLabel="Cancel"
+          isDestructive={true}
+          onConfirm={handleConfirmDeleteGame}
+          onCancel={() => setShowDeleteGameConfirm(false)}
+          sfx={sfx}
+        />
       </div>
     );
   }
@@ -1604,7 +1901,7 @@ export default function MobileAppView({
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
                       <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Metadata Scraper Studio</strong>
                       <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
-                        {scraper.isScraping ? `Scraping in progress: ${scraper.scrapeProgress.current} / ${scraper.scrapeProgress.total} games...` : 'Fetch official covers, metadata & game synopses from Libretro & Wikipedia'}
+                        {scraper.isScraping ? `Scraping in progress: ${scraper.scrapeProgress.current} / ${scraper.scrapeProgress.total} games...` : 'Fetch official 3D box art & metadata from Libretro CDN'}
                       </span>
                     </div>
                   </div>
@@ -1644,7 +1941,37 @@ export default function MobileAppView({
                 </div>
               )}
 
-              {/* Tool 3: PWA App Install (if available) */}
+              {/* Tool 3: Database Backup & Restore */}
+              <div className="mobile-menu-card">
+                <div className="mobile-menu-card-header">
+                  <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(225, 29, 72, 0.15)', color: '#e11d48' }}>
+                    <Database size={18} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+                    <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Database Backup &amp; Restore</strong>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
+                      Export full game saves, profiles &amp; settings to JSON or restore from backup
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mobile-menu-card-actions">
+                  <button
+                    type="button"
+                    className="mobile-menu-btn is-primary"
+                    onClick={() => {
+                      setIsHamburgerOpen(false);
+                      onOpenBackupModal?.();
+                      sfx?.playModalOpen?.();
+                    }}
+                  >
+                    <Database size={14} />
+                    <span>Open Backup Studio</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Tool 4: PWA App Install (if available) */}
               {pwa?.canInstall && (
                 <div className="mobile-menu-card">
                   <div className="mobile-menu-card-header">
@@ -1674,7 +2001,7 @@ export default function MobileAppView({
                 </div>
               )}
 
-              {/* Tool 4: Factory Reset & Wipe Storage */}
+              {/* Tool 5: Factory Reset & Wipe Storage */}
               <div className="mobile-menu-card is-danger-card">
                 <div className="mobile-menu-card-header">
                   <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444' }}>

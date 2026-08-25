@@ -30,6 +30,7 @@ export default function CartridgeGrid({
   onExportSave,
   onImportSave,
   onDeleteSave,
+  onDeleteGame,
   hasSaveData,
   scraper,
   gamepadConnected = false,
@@ -164,6 +165,7 @@ export default function CartridgeGrid({
             onExportSave={onExportSave}
             onImportSave={onImportSave}
             onDeleteSave={onDeleteSave}
+            onDeleteGame={onDeleteGame}
             hasSaveData={hasSaveData}
             scraper={scraper}
             sfx={sfx}

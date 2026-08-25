@@ -15,6 +15,7 @@ import ScraperModal from './components/ScraperModal';
 import MobileAppView from './components/MobileAppView';
 import MetadataEditModal from './components/MetadataEditModal';
 import ThemeSwitcherModal from './components/ThemeSwitcherModal';
+import BackupModal from './components/BackupModal';
 
 import { useWebAudioSfx } from './hooks/useWebAudioSfx';
 import { useGamepadStatus } from './hooks/useGamepadStatus';
@@ -28,6 +29,7 @@ import { useProfileManager } from './hooks/useProfileManager';
 import { useBgmEngine } from './hooks/useBgmEngine';
 import { useDeviceDetection } from './hooks/useDeviceDetection';
 import { usePwaInstall } from './hooks/usePwaInstall';
+import { syncAllStoresFromBackend } from './services/db';
 import { BatteryWarning, Zap, X } from 'lucide-react';
 
 /**
@@ -41,6 +43,7 @@ export default function App() {
   const [showLoadRomModal, setShowLoadRomModal] = useState(false);
   const [showScraperModal, setShowScraperModal] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [showBackupModal, setShowBackupModal] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showVirtualKeyboard, setShowVirtualKeyboard] = useState(false);
   const [oskConfig, setOskConfig] = useState({
@@ -92,6 +95,11 @@ export default function App() {
 
   // Hook 3: Multi-Theme Engine
   const themeEngine = useThemeEngine();
+
+  // Startup Database Cold Boot Synchronization
+  useEffect(() => {
+    syncAllStoresFromBackend();
+  }, []);
 
   // Hook 4: Background Music (BGM) Engine with smart in-game pause
   const bgm = useBgmEngine({ activeGame });
@@ -149,6 +157,8 @@ export default function App() {
     isDraggingOver,
     fetchGames,
     processCustomRomFile,
+    uploadRomAndScrape,
+    deleteGame,
     handleDragOver,
     handleDragLeave,
     handleDrop
@@ -172,6 +182,8 @@ export default function App() {
     setShowScraperModal,
     showThemeModal,
     setShowThemeModal,
+    showBackupModal,
+    setShowBackupModal,
     showResetConfirm,
     setShowResetConfirm,
     showProfileSelectModal,
@@ -334,10 +346,12 @@ export default function App() {
           time={time}
           onOpenScraperModal={() => setShowScraperModal(true)}
           onOpenAboutModal={() => setShowInfoModal(true)}
+          onOpenBackupModal={() => setShowBackupModal(true)}
           showResetConfirm={showResetConfirm}
           setShowResetConfirm={setShowResetConfirm}
           setShowLoadRomModal={setShowLoadRomModal}
           setShowVirtualKeyboard={setShowVirtualKeyboard}
+          onDeleteGame={deleteGame}
         />
       ) : (
         <>
@@ -359,6 +373,7 @@ export default function App() {
             onOpenScraperModal={() => setShowScraperModal(true)}
             onOpenThemeModal={() => setShowThemeModal(true)}
             onOpenAboutModal={() => setShowInfoModal(true)}
+            onOpenBackupModal={() => setShowBackupModal(true)}
             showResetConfirm={showResetConfirm}
             setShowResetConfirm={setShowResetConfirm}
             time={time}
@@ -410,6 +425,7 @@ export default function App() {
             onExportSave={(game) => exportSaveFile(game, activeProfileId)}
             onImportSave={(file, game) => importSaveFile(file, game, activeProfileId)}
             onDeleteSave={(game) => deleteSaveFile(game, activeProfileId)}
+            onDeleteGame={deleteGame}
             hasSaveData={hasSaveData}
             scraper={scraper}
             gamepadConnected={gamepadConnected}
@@ -427,9 +443,16 @@ export default function App() {
           setFocusedTarget({ zone: 'topbar', id: 'loadRom' });
           sfx.playModalClose();
         }}
-        onFileLoaded={(file) => {
+        onQuickPlay={(file) => {
           processCustomRomFile(file);
         }}
+        onUploadToLibrary={async (file, systemKey, onProgress) => {
+          const game = await uploadRomAndScrape(file, systemKey, onProgress);
+          if (game && scraper?.scrapeSingleGame) {
+            await scraper.scrapeSingleGame(game);
+          }
+        }}
+        sfx={sfx}
       />
 
       {/* About Project Info Dialog */}
@@ -641,6 +664,20 @@ export default function App() {
         sfx={sfx}
         focusedTarget={focusedTarget}
         setFocusedTarget={setFocusedTarget}
+      />
+
+      {/* Database Backup & Restore Studio Modal */}
+      <BackupModal
+        isOpen={showBackupModal}
+        onClose={() => {
+          setShowBackupModal(false);
+          setFocusedTarget({ zone: 'topbar', id: 'backup' });
+          sfx.playModalClose();
+        }}
+        sfx={sfx}
+        focusedTarget={focusedTarget}
+        setFocusedTarget={setFocusedTarget}
+        onDataRestored={() => window.location.reload()}
       />
 
       {/* Active Game Emulator Sandbox */}

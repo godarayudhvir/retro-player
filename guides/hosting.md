@@ -10,12 +10,13 @@ Step-by-step instructions to host **Retro Player** on Railway, Render, Fly.io, C
 
 1. Go to **[Railway](https://railway.com/new)** $\rightarrow$ Click **Deploy from GitHub repo**.
 2. Select `godarayudhvir/retro-player` (or your personal fork).
-3. **Attach a Persistent Volume** *(crucial for saving ROMs)*:
-   - Click the service $\rightarrow$ Navigate to **Volumes** $\rightarrow$ **Add Volume**.
-   - Set **Mount Path**: `/roms`.
+3. **Attach Persistent Volumes**:
+   - **ROMs Volume**: Mount Path: `/roms` *(for games, covers & sidecars)*.
+   - **Data Volume**: Mount Path: `/data` *(for saves, profiles & settings)*.
 4. **Set Environment Variables**:
    - `PORT`: `3000`
    - `ROMS_DIR`: `/roms`
+   - `DATA_DIR`: `/data`
 5. **Generate Public Domain**:
    - Under **Settings** $\rightarrow$ **Networking** $\rightarrow$ **Generate Domain**.
 6. Railway builds the multi-stage Dockerfile and deploys your portal!
@@ -42,19 +43,25 @@ Deploy globally on Fly.io edge infrastructure:
    ```bash
    fly launch --image ghcr.io/godarayudhvir/retro-player:latest
    ```
-2. **Create persistent volume**:
+2. **Create persistent volumes**:
    ```bash
    fly volumes create roms_data --size 10 -r <your-region>
+   fly volumes create app_data --size 3 -r <your-region>
    ```
 3. **Configure `fly.toml`**:
    ```toml
    [env]
      PORT = "3000"
      ROMS_DIR = "/roms"
+     DATA_DIR = "/data"
 
-   [mounts]
+   [[mounts]]
      source = "roms_data"
      destination = "/roms"
+
+   [[mounts]]
+     source = "app_data"
+     destination = "/data"
    ```
 4. **Deploy**:
    ```bash
@@ -68,8 +75,9 @@ Deploy globally on Fly.io edge infrastructure:
 1. In your Coolify dashboard, select **Projects** $\rightarrow$ **Add Resource** $\rightarrow$ **Docker Compose**.
 2. Use image `ghcr.io/godarayudhvir/retro-player:latest`.
 3. Under **Persistent Storage**, map:
-   - Host path: `/data/retro-player/roms`
-   - Mount path: `/roms`
+   - Host path: `/data/retro-player/roms` $\rightarrow$ Mount path: `/roms`
+   - Host path: `/data/retro-player/data` $\rightarrow$ Mount path: `/data`
+   - Host path: `/data/retro-player/bgm` $\rightarrow$ Mount path: `/bgm`
 4. Set Exposed Port to `3000` and deploy.
 
 ---
@@ -79,9 +87,12 @@ Deploy globally on Fly.io edge infrastructure:
 - **Image**: `ghcr.io/godarayudhvir/retro-player:latest`
 - **Port Mapping**: `3000:3000` (or `8080:3000`)
 - **Volume Mapping**:
-  - Host Path: `/mnt/user/appdata/retro-player/roms` (Unraid) or `/docker/retro-player/roms` (Synology)
-  - Container Path: `/roms`
-  - Mode: `Read/Write (rw)`
+  - Host Path: `/mnt/user/appdata/retro-player/roms` $\rightarrow$ `/roms` (Mode: `rw`)
+  - Host Path: `/mnt/user/appdata/retro-player/data` $\rightarrow$ `/data` (Mode: `rw`)
+  - Host Path: `/mnt/user/appdata/retro-player/bgm` $\rightarrow$ `/bgm` (Mode: `rw`)
 - **Environment Variables**:
   - `PORT=3000`
   - `ROMS_DIR=/roms`
+  - `DATA_DIR=/data`
+  - `BGM_DIR=/bgm`
+

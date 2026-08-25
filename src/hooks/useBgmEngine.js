@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { resolveAssetPath } from '../utils/assetPath';
+import { dbGet, dbSet, STORES } from '../services/db';
 
 const BGM_VOLUME_KEY = 'retro_bgm_volume';
 const BGM_MUTED_KEY = 'retro_bgm_muted';
@@ -46,6 +47,22 @@ export function useBgmEngine({ activeGame = null } = {}) {
       return 0.35;
     }
   });
+
+  // Async load from database on startup
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const saved = await dbGet(STORES.SETTINGS, 'bgm_config');
+        if (saved && isMounted) {
+          if (typeof saved.volume === 'number') setVolume(saved.volume);
+          if (typeof saved.muted === 'boolean') setIsMuted(saved.muted);
+          if (typeof saved.trackIndex === 'number') setCurrentTrackIndex(saved.trackIndex);
+        }
+      } catch (e) {}
+    })();
+    return () => { isMounted = false; };
+  }, []);
 
   const audioRef = useRef(null);
   const wasPlayingBeforeGameRef = useRef(false);
@@ -210,10 +227,11 @@ export function useBgmEngine({ activeGame = null } = {}) {
       const next = (prev - 1 + tracks.length) % tracks.length;
       try {
         localStorage.setItem(BGM_TRACK_INDEX_KEY, String(next));
+        dbSet(STORES.SETTINGS, 'bgm_config', { volume, muted: isMuted, trackIndex: next });
       } catch {}
       return next;
     });
-  }, [tracks]);
+  }, [tracks, volume, isMuted]);
 
   // Play specific track by index
   const playTrack = useCallback((index) => {
@@ -223,8 +241,9 @@ export function useBgmEngine({ activeGame = null } = {}) {
     setIsPlaying(true);
     try {
       localStorage.setItem(BGM_TRACK_INDEX_KEY, String(safeIdx));
+      dbSet(STORES.SETTINGS, 'bgm_config', { volume, muted: isMuted, trackIndex: safeIdx });
     } catch {}
-  }, [tracks]);
+  }, [tracks, volume, isMuted]);
 
   // Change volume
   const setBgmVolume = useCallback((val) => {
@@ -232,8 +251,9 @@ export function useBgmEngine({ activeGame = null } = {}) {
     setVolume(clamped);
     try {
       localStorage.setItem(BGM_VOLUME_KEY, String(clamped));
+      dbSet(STORES.SETTINGS, 'bgm_config', { volume: clamped, muted: isMuted, trackIndex: currentTrackIndex });
     } catch {}
-  }, []);
+  }, [isMuted, currentTrackIndex]);
 
   const currentTrack = tracks.length > 0 ? tracks[currentTrackIndex % tracks.length] : null;
 
@@ -254,6 +274,7 @@ export function useBgmEngine({ activeGame = null } = {}) {
       setIsMuted(muted);
       try {
         localStorage.setItem(BGM_MUTED_KEY, String(muted));
+        dbSet(STORES.SETTINGS, 'bgm_config', { volume, muted, trackIndex: currentTrackIndex });
       } catch {}
     }
   };

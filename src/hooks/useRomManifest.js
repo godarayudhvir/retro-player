@@ -2,6 +2,13 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { getReleaseDate } from '../gameDescriptions';
 import { detectSystemFromExtension } from '../utils/systemDetector';
 import { resolveAssetPath } from '../utils/assetPath';
+import { scrapeGame, deleteManualMetadata } from '../services/metadataScraper';
+import { 
+  checkServerDbStatus, 
+  saveCustomRomToLocalDb, 
+  getAllCustomRomsFromLocalDb, 
+  deleteCustomRomFromLocalDb 
+} from '../services/db';
 
 /**
  * Hook to manage ROM catalog manifest, search filtering, system categories, and custom ROM uploads.
@@ -20,49 +27,55 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
     const apiUrl = (import.meta.env.BASE_URL || './') + 'api/roms';
     console.log(`📡 [CLIENT FETCH] Requesting ROM manifest from ${apiUrl}...`);
     try {
-      const res = await fetch(apiUrl);
-      if (res.ok) {
-        const data = await res.json();
-        console.log(`✅ [CLIENT FETCH SUCCESS] Indexed ${data.games?.length || 0} games.`);
-        const loadedGames = data.games || [];
-        const uniqueGames = [];
-        const seenIds = new Set();
-        for (const g of loadedGames) {
-          const id = g.id || `${g.systemKey}-${g.title}`;
-          if (!seenIds.has(id)) {
-            seenIds.add(id);
-            uniqueGames.push(g);
-          }
-        }
-        console.log(`✅ [CLIENT FETCH SUCCESS] Indexed ${uniqueGames.length} unique games.`);
-        setGames(uniqueGames);
+      let loadedGames = [];
 
-        // If backend provided systems array with gameCount, use it, or derive from uniqueGames
-        if (data.systems && data.systems.length > 0) {
-          setSystems(data.systems);
-        } else {
-          const sysMap = {};
-          uniqueGames.forEach(g => {
-            if (!g.systemKey) return;
-            if (!sysMap[g.systemKey]) {
-              sysMap[g.systemKey] = {
-                key: g.systemKey,
-                name: g.systemName || g.systemKey.toUpperCase(),
-                core: g.systemCore,
-                color: g.systemColor,
-                icon: g.systemIcon,
-                gameCount: 0
-              };
-            }
-            sysMap[g.systemKey].gameCount++;
-          });
-          setSystems(Object.values(sysMap));
+      try {
+        const res = await fetch(apiUrl);
+        if (res.ok) {
+          const data = await res.json();
+          loadedGames = data.games || [];
         }
-      } else {
-        console.error(`🚨 [CLIENT FETCH API ERROR] Server responded with HTTP status ${res.status}: ${res.statusText}`);
+      } catch (networkErr) {
+        console.warn('Backend /api/roms fetch error (static/offline mode):', networkErr);
       }
+
+      // Also retrieve locally stored custom ROMs from IndexedDB (for GitHub Pages & standalone PWAs)
+      const localCustomGames = await getAllCustomRomsFromLocalDb();
+      if (localCustomGames && localCustomGames.length > 0) {
+        loadedGames = [...loadedGames, ...localCustomGames];
+      }
+
+      const uniqueGames = [];
+      const seenIds = new Set();
+      for (const g of loadedGames) {
+        const id = g.id || `${g.systemKey}-${g.title}`;
+        if (!seenIds.has(id)) {
+          seenIds.add(id);
+          uniqueGames.push(g);
+        }
+      }
+      console.log(`✅ [CLIENT FETCH SUCCESS] Indexed ${uniqueGames.length} unique games (including ${localCustomGames.length} local IndexedDB ROMs).`);
+      setGames(uniqueGames);
+
+      // Recalculate systems with accurate game counts
+      const sysMap = {};
+      uniqueGames.forEach(g => {
+        if (!g.systemKey) return;
+        if (!sysMap[g.systemKey]) {
+          sysMap[g.systemKey] = {
+            key: g.systemKey,
+            name: g.systemName || g.systemKey.toUpperCase(),
+            core: g.systemCore,
+            color: g.systemColor,
+            icon: g.systemIcon,
+            gameCount: 0
+          };
+        }
+        sysMap[g.systemKey].gameCount++;
+      });
+      setSystems(Object.values(sysMap));
     } catch (err) {
-      console.error('🚨 [CLIENT FETCH NETWORK ERROR] Failed fetching games from server:', err);
+      console.error('🚨 [CLIENT FETCH ERROR] Failed indexing games:', err);
     } finally {
       setLoading(false);
     }
@@ -99,6 +112,96 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
       onCustomRomLoaded(customGame);
     }
   }, [onCustomRomLoaded]);
+
+  const uploadRomAndScrape = useCallback(async (file, systemKey, onProgress) => {
+    if (!file) return null;
+    try {
+      const isServer = checkServerDbStatus();
+      const safeSystemKey = systemKey || detectSystemFromExtension(file.name)?.key || 'nes';
+      const sys = detectSystemFromExtension(file.name);
+      const cleanTitle = file.name
+        .replace(/\.[^/.]+$/, "")
+        .replace(/\(.*?\)/g, '')
+        .replace(/\[.*?\]/g, '')
+        .replace(/_/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const rawTitle = file.name.replace(/\.[^/.]+$/, "");
+
+      let targetGame = null;
+
+      if (isServer) {
+        // 1. Docker / Localhost Server Flow
+        if (onProgress) onProgress({ step: 'uploading', message: `Saving "${file.name}" to server library...` });
+
+        const res = await fetch('/api/upload-rom', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/octet-stream',
+            'x-filename': encodeURIComponent(file.name),
+            'x-system-key': safeSystemKey
+          },
+          body: file
+        });
+
+        if (!res.ok) {
+          const errorJson = await res.json().catch(() => ({}));
+          throw new Error(errorJson.error || `Upload failed (HTTP ${res.status})`);
+        }
+
+        const json = await res.json();
+        if (!json.success || !json.game) {
+          throw new Error('Server did not return game record');
+        }
+
+        targetGame = json.game;
+      } else {
+        // 2. Client-Side IndexedDB Flow (GitHub Pages / Offline PWA)
+        if (onProgress) onProgress({ step: 'saving_local', message: `Saving "${file.name}" to browser storage...` });
+
+        const gameId = `local_${safeSystemKey}_${rawTitle.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+        const blobUrl = URL.createObjectURL(file);
+
+        targetGame = {
+          id: gameId,
+          title: cleanTitle || rawTitle,
+          rawTitle: rawTitle,
+          filename: file.name,
+          systemKey: safeSystemKey,
+          systemName: sys.name,
+          systemCore: sys.core,
+          systemColor: sys.color,
+          systemIcon: sys.icon,
+          romUrl: blobUrl,
+          coverUrl: sys.icon,
+          isCustomBlob: true,
+          isLocalDbRom: true
+        };
+
+        await saveCustomRomToLocalDb(targetGame, file);
+      }
+
+      if (onProgress) onProgress({ step: 'scraping', message: `Scraping 3D box art & metadata for "${targetGame.title}"...` });
+
+      // Automatically scrape metadata and save sidecars / cache
+      try {
+        await scrapeGame(targetGame, true);
+      } catch (scrapeErr) {
+        console.warn('Auto-scrape warning for uploaded ROM:', scrapeErr);
+      }
+
+      if (onProgress) onProgress({ step: 'refreshing', message: 'Updating game library...' });
+
+      // Reload games manifest
+      await fetchGames();
+
+      if (onProgress) onProgress({ step: 'done', message: `Successfully added "${targetGame.title}" to library!` });
+      return targetGame;
+    } catch (err) {
+      console.error('🚨 [ROM UPLOAD ERROR]:', err);
+      throw err;
+    }
+  }, [fetchGames]);
 
   const handleCustomRomSelect = useCallback((e) => {
     const file = e.target.files?.[0];
@@ -194,6 +297,31 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
     return result;
   }, [games, searchQuery, activeSystem, favorites, recentlyPlayed]);
 
+  const deleteGame = useCallback(async (game) => {
+    if (!game) return false;
+    try {
+      if (game.isCustom) {
+        await deleteCustomRomFromLocalDb(game.id);
+      } else {
+        await fetch('/api/delete-rom', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            systemKey: game.systemKey,
+            filename: game.filename,
+            relativePath: game.romUrl || game.url
+          })
+        }).catch(() => {});
+      }
+      await deleteManualMetadata(game.id);
+      await fetchGames();
+      return true;
+    } catch (err) {
+      console.error('Failed to delete game:', err);
+      return false;
+    }
+  }, [fetchGames]);
+
   return {
     games,
     systems,
@@ -206,6 +334,9 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
     isDraggingOver,
     fetchGames,
     processCustomRomFile,
+    uploadRomAndScrape,
+    deleteGame,
+    deleteCustomRom: deleteCustomRomFromLocalDb,
     handleCustomRomSelect,
     handleDragOver,
     handleDragLeave,

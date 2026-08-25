@@ -19,7 +19,8 @@ import {
   BatteryLow,
   BatteryWarning,
   Zap,
-  Info
+  Info,
+  Database
 } from 'lucide-react';
 import MultiAvatar from './MultiAvatar';
 import ConfirmModal from './ConfirmModal';
@@ -47,6 +48,7 @@ export default function Topbar({
   onOpenScraperModal,
   onOpenThemeModal,
   onOpenAboutModal,
+  onOpenBackupModal,
   showResetConfirm: externalShowResetConfirm,
   setShowResetConfirm: externalSetShowResetConfirm,
   time,
@@ -319,6 +321,19 @@ export default function Topbar({
           <FolderOpen size={18} color="#3b82f6" />
         </button>
 
+        {/* Database Backup & Restore */}
+        <button
+          className={`status-pill status-backup-app ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'backup' ? 'gamepad-focused' : ''}`}
+          onClick={() => {
+            onOpenBackupModal?.();
+            sfx?.playModalOpen?.();
+          }}
+          title="Database Backup & Restore (Export / Import Saves, Profiles & Settings)"
+          aria-label="Database Backup and Restore"
+        >
+          <Database size={17} color="#e11d48" />
+        </button>
+
         {/* Reset App & Purge All Cache / DB */}
         <button
           className={`status-pill status-reset-app ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'resetApp' ? 'gamepad-focused' : ''}`}
@@ -332,14 +347,14 @@ export default function Topbar({
           <RotateCcw size={17} color="#ef4444" />
         </button>
 
-        {/* About & System Info (v1.0.0) */}
+        {/* About & System Info (v1.0.3) */}
         <button
           className={`status-pill status-info-app ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'info' ? 'gamepad-focused' : ''}`}
           onClick={() => {
             onOpenAboutModal?.();
             sfx?.playModalOpen?.();
           }}
-          title="About Retro Player & System Capabilities (v1.0.0)"
+          title="About Retro Player & System Capabilities (v1.0.3)"
           aria-label="About Retro Player"
         >
           <Info size={17} color="#059669" />

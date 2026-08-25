@@ -49,6 +49,7 @@ export async function resetEntireApp() {
     try {
       const knownDbs = [
         'RetroPlayerDB',
+        'RetroPlayerMetadataDB',
         'emulatorjs',
         'localforage',
         'keyval-store',

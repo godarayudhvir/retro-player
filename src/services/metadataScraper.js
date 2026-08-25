@@ -796,89 +796,130 @@ async function scrapeCoverArt(game) {
     }
   }
 
-  // Priority 4: Wikipedia Open REST API Lead Image (Last Resort Fallback)
-  const wikiDetails = await scrapeWikipediaLastResort(game);
-  if (wikiDetails?.coverUrl) {
-    addScraperLog(`✨ Box art found on Wikipedia for "${game.title}"`, 'success', { gameId: game.id, title: game.title, systemKey: game.systemKey });
-    return wikiDetails.coverUrl;
-  }
-
-  addScraperLog(`ℹ️ No box art match in Libretro CDN / ScreenScraper / Wikipedia for "${game.title}"`, 'info', { gameId: game.id, title: game.title, systemKey: game.systemKey });
+  addScraperLog(`ℹ️ No box art match in Libretro CDN / ScreenScraper for "${game.title}"`, 'info', { gameId: game.id, title: game.title, systemKey: game.systemKey });
   return null;
 }
 
-export { scrapeCoverArt, scrapeGameDetails, scrapeWikipediaLastResort };
+const RAWG_PLATFORM_MAP = {
+  nds: ['nintendo-ds'],
+  gba: ['game-boy-advance'],
+  gbc: ['game-boy-color'],
+  gb: ['game-boy'],
+  snes: ['snes'],
+  nes: ['nes'],
+  n64: ['nintendo-64'],
+  sega_genesis: ['genesis', 'sega-genesis'],
+  playstation: ['playstation', 'ps1'],
+  ps1: ['playstation', 'ps1'],
+  game_gear: ['game-gear'],
+  arcade: ['arcade', 'neogeo'],
+  atari_2600: ['atari-2600']
+};
 
 /**
- * Scrapes specific game metadata from Wikipedia Open REST APIs (Strict Last Resort)
+ * Scrapes RAWG Video Games Database (Free, Keyless, 500k+ titles, 100% Gaming Dedicated)
  */
-async function scrapeWikipediaLastResort(game) {
+async function scrapeRawg(game) {
+  try {
+    const rawTitle = game.title || '';
+    const cleanTitle = rawTitle.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').replace(/ - /g, ' ').replace(/-/g, ' ').trim();
+    if (!cleanTitle) return null;
+
+    addScraperLog(`🎮 Querying Video Game Database for "${cleanTitle}"...`, 'scan', { gameId: game.id, title: game.title, systemKey: game.systemKey });
+
+    const defaultKey = 'c542e67aec3a4340908f9de9e86038af';
+    const isNode = typeof window === 'undefined';
+    const searchEndpoint = `games?search=${encodeURIComponent(cleanTitle)}&page_size=6`;
+    const searchUrl = isNode
+      ? `https://api.rawg.io/api/${searchEndpoint}&key=${defaultKey}`
+      : `/api/proxy-rawg?endpoint=${encodeURIComponent(searchEndpoint)}`;
+
+    const res = await fetch(searchUrl);
+    if (!res.ok) {
+      addScraperLog(`ℹ️ Video Game DB returned HTTP ${res.status}`, 'info', { gameId: game.id, title: game.title, systemKey: game.systemKey });
+      return null;
+    }
+
+    const data = await res.json();
+    const results = data.results || [];
+    if (results.length === 0) {
+      addScraperLog(`ℹ️ No match found on Video Game DB for "${cleanTitle}"`, 'info', { gameId: game.id, title: game.title, systemKey: game.systemKey });
+      return null;
+    }
+
+    const expectedPlatforms = RAWG_PLATFORM_MAP[game.systemKey] || [];
+    let bestMatch = results.find(r => {
+      if (!r.platforms || expectedPlatforms.length === 0) return false;
+      return r.platforms.some(p => expectedPlatforms.includes(p.platform?.slug));
+    });
+
+    if (!bestMatch) {
+      bestMatch = results[0];
+    }
+
+    if (!bestMatch || !bestMatch.id) return null;
+
+    // Fetch detailed game specifications (developer, publisher, clean overview)
+    const detailEndpoint = `games/${bestMatch.id}`;
+    const detailUrl = isNode
+      ? `https://api.rawg.io/api/${detailEndpoint}?key=${defaultKey}`
+      : `/api/proxy-rawg?endpoint=${encodeURIComponent(detailEndpoint)}`;
+
+    const detailRes = await fetch(detailUrl);
+    const details = detailRes.ok ? await detailRes.json() : bestMatch;
+
+    const releaseYear = details.released ? details.released.substring(0, 4) : (bestMatch.released ? bestMatch.released.substring(0, 4) : null);
+    const developer = details.developers?.[0]?.name || null;
+    const publisher = details.publishers?.[0]?.name || null;
+    const genre = details.genres?.[0]?.name || bestMatch.genres?.[0]?.name || 'Retro Classic';
+    const rawDesc = details.description_raw || details.description || '';
+    const description = rawDesc.replace(/<[^>]*>?/gm, '').trim();
+
+    addScraperLog(`✨ [GAME DB FOUND] "${details.name || cleanTitle}" (${releaseYear || 'Classic'}) by ${developer || 'Developer'}`, 'success', { gameId: game.id, title: game.title, systemKey: game.systemKey });
+
+    return {
+      title: details.name || cleanTitle,
+      description: description || null,
+      releaseDate: details.released || bestMatch.released || null,
+      releaseYear: releaseYear || null,
+      developer: developer,
+      publisher: publisher,
+      genre: genre,
+      source: 'Video Game Database'
+    };
+  } catch (err) {
+    console.warn('[Video Game DB Fetch Error]', err);
+    addScraperLog(`⚠️ Video Game DB error: ${err.message}`, 'warning', { gameId: game.id, title: game.title, systemKey: game.systemKey });
+    return null;
+  }
+}
+
+export { scrapeCoverArt, scrapeGameDetails };
+
+/**
+ * Scrapes metadata with Priority Order:
+ * 1. TheGamesDB (Gaming DB) if user configured key
+ * 2. ScreenScraper.fr (Gaming DB) if user configured credentials
+ * 3. Video Game Database (Free, Keyless, 500k+ Retro Titles)
+ * 4. Dynamic Overview Fallback
+ */
+async function scrapeGameDetails(game) {
   const cleanTitle = (game.title || '').replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').trim();
   const systemName = game.systemName || '';
 
-  addScraperLog(`🔍 Querying Wikipedia Open REST API for "${cleanTitle}"...`, 'scan', { gameId: game.id, title: game.title, systemKey: game.systemKey });
+  // 1. TheGamesDB (Gaming DB)
+  const tgdbRes = await scrapeTheGamesDB(game);
+  if (tgdbRes && tgdbRes.description) return tgdbRes;
 
-  try {
-    const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(`"${cleanTitle}" video game`)}&format=json&origin=*`;
-    const searchRes = await fetch(searchUrl);
+  // 2. ScreenScraper.fr (Gaming DB)
+  const ssRes = await scrapeScreenScraper(game);
+  if (ssRes && ssRes.description) return ssRes;
 
-    if (searchRes.ok) {
-      const searchData = await searchRes.json();
-      const results = searchData.query?.search || [];
+  // 3. Keyless Video Game Database
+  const rawgRes = await scrapeRawg(game);
+  if (rawgRes && (rawgRes.description || rawgRes.developer || rawgRes.releaseYear)) return rawgRes;
 
-      // Filter out broad overview franchise pages
-      let targetResult = results.find(r => {
-        const titleLower = r.title.toLowerCase();
-        const cleanLower = cleanTitle.toLowerCase();
-        if (titleLower === 'pokémon' || titleLower === 'pokemon' || titleLower.startsWith('list of')) return false;
-        const tokens = cleanLower.split(/\s+/).filter(t => t.length > 2 && t !== 'version' && t !== 'the' && t !== 'game');
-        return tokens.every(token => titleLower.includes(token));
-      });
-
-      if (!targetResult) {
-        targetResult = results.find(r => !['pokémon', 'pokemon'].includes(r.title.toLowerCase()) && !r.title.toLowerCase().startsWith('list of')) || results[0];
-      }
-
-      if (targetResult && targetResult.title) {
-        const summaryUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(targetResult.title)}`;
-        const summaryRes = await fetch(summaryUrl);
-
-        if (summaryRes.ok) {
-          const summaryData = await summaryRes.json();
-          if (summaryData.extract && summaryData.type !== 'disambiguation') {
-            const yearMatch = summaryData.extract.match(/\b(198\d|199\d|200\d|201\d|202\d)\b/);
-            const releaseYear = yearMatch ? yearMatch[1] : null;
-
-            // Wikipedia lead image as last resort cover
-            const wikiCover = summaryData.thumbnail?.source || summaryData.originalimage?.source || null;
-
-            if (wikiCover) {
-              addScraperLog(`✨ Lead image retrieved from Wikipedia for "${game.title}"`, 'success', { gameId: game.id, title: game.title, systemKey: game.systemKey });
-            } else {
-              addScraperLog(`ℹ️ No lead cover image on Wikipedia for "${game.title}"`, 'info', { gameId: game.id, title: game.title, systemKey: game.systemKey });
-            }
-
-            addScraperLog(`📖 Fetched Wikipedia summary & year (${releaseYear || 'Classic'}) for "${game.title}"`, 'info', { gameId: game.id, title: game.title, systemKey: game.systemKey });
-
-            return {
-              description: summaryData.extract,
-              coverUrl: wikiCover,
-              releaseDate: releaseYear ? `${releaseYear}-01-01` : null,
-              releaseYear: releaseYear || null,
-              developer: summaryData.description || `${systemName} Classic`,
-              publisher: systemName,
-              genre: 'Retro Classic',
-              source: 'Wikipedia (Last Resort)'
-            };
-          }
-        }
-      }
-    }
-  } catch (err) {
-    console.warn(`⚠️ [METADATA SCRAPER] Wikipedia last-resort fetch error for "${cleanTitle}":`, err);
-  }
-
-  // Dynamic fallback
+  // 4. Dynamic Overview Fallback
   return {
     description: `Experience the classic adventure of ${cleanTitle} for ${systemName}. Relive nostalgic challenges and timeless retro gameplay.`,
     coverUrl: null,
@@ -889,25 +930,6 @@ async function scrapeWikipediaLastResort(game) {
     genre: 'Retro Classic',
     source: 'Dynamic Overview'
   };
-}
-
-/**
- * Scrapes metadata with Priority Order:
- * 1. TheGamesDB (Gaming DB)
- * 2. ScreenScraper.fr (Gaming DB)
- * 3. Wikipedia Open REST API (Strict Last Resort)
- */
-async function scrapeGameDetails(game) {
-  // 1. TheGamesDB (Gaming DB)
-  const tgdbRes = await scrapeTheGamesDB(game);
-  if (tgdbRes && tgdbRes.description) return tgdbRes;
-
-  // 2. ScreenScraper.fr (Gaming DB)
-  const ssRes = await scrapeScreenScraper(game);
-  if (ssRes && ssRes.description) return ssRes;
-
-  // 3. Wikipedia Open REST API (Strict Last Resort)
-  return await scrapeWikipediaLastResort(game);
 }
 
 /**
@@ -998,21 +1020,6 @@ export async function scrapeGame(game, force = false) {
   const fallbackCover = scrapedCoverUrl || scrapedDetails?.coverUrl || null;
   let finalCoverUrl = localCover || scrapedCoverUrl || cachedCover || fallbackCover || null;
 
-  // Convert remote scraped image (PNG/JPG from Libretro CDN, ScreenScraper, Wikipedia) to optimized WebP DataURL
-  let webpConvertedDataUrl = null;
-  if (finalCoverUrl && (finalCoverUrl.startsWith('http://') || finalCoverUrl.startsWith('https://'))) {
-    try {
-      addScraperLog(`🖼️ Converting box art to WebP for "${game.title}"...`, 'scan', { gameId: id, title: game.title, systemKey: game.systemKey });
-      const converted = await convertRemoteImageToWebpDataUrl(finalCoverUrl, 600, 0.85);
-      if (converted && converted.startsWith('data:image/')) {
-        webpConvertedDataUrl = converted;
-        finalCoverUrl = converted;
-      }
-    } catch (e) {
-      console.warn('Could not transcode image to WebP:', e);
-    }
-  }
-
   // Merge: Local sidecar & local cover ALWAYS take 100% precedence over online data
   const metadata = {
     id,
@@ -1034,10 +1041,10 @@ export async function scrapeGame(game, force = false) {
     scrapedAt: new Date().toISOString()
   };
 
-  // If backend disk storage is available (/api/metadata/save-sidecar), save WebP cover & sidecar to host disk
-  if (webpConvertedDataUrl || (finalCoverUrl && !hasLocalCoverFile)) {
+  // If backend disk storage is available (/api/metadata/save-sidecar), sync cover & sidecar to host disk
+  if (finalCoverUrl && !hasLocalCoverFile) {
     try {
-      fetch('/api/metadata/save-sidecar', {
+      const res = await fetch('/api/metadata/save-sidecar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1051,32 +1058,35 @@ export async function scrapeGame(game, force = false) {
           publisher: metadata.publisher,
           genre: metadata.genre,
           walkthrough: metadata.walkthrough,
-          coverDataUrl: webpConvertedDataUrl || (finalCoverUrl.startsWith('data:image/') ? finalCoverUrl : null),
+          coverDataUrl: finalCoverUrl.startsWith('data:image/') ? finalCoverUrl : null,
           coverUrl: !finalCoverUrl.startsWith('data:image/') ? finalCoverUrl : null
         })
-      }).then(res => res.ok ? res.json() : null)
-        .then(resData => {
-          if (resData?.savedCoverUrl) {
-            metadata.coverUrl = resData.savedCoverUrl;
-            metadata.hasSidecar = true;
-            saveCachedMetadata(id, metadata).catch(() => {});
-          }
-        })
-        .catch(() => {});
-    } catch (_) {}
+      });
+      if (res.ok) {
+        const resData = await res.json();
+        if (resData?.savedCoverUrl) {
+          metadata.coverUrl = resData.savedCoverUrl;
+          metadata.hasSidecar = true;
+        }
+      }
+    } catch (backendErr) {
+      console.warn('Backend save-sidecar sync error:', backendErr);
+    }
   }
 
   await saveCachedMetadata(id, metadata);
 
   if (hasLocalSidecarJson && !hasLocalCoverFile && fallbackCover) {
-    addScraperLog(`✨ [HYBRID] Preserved local metadata.json & fetched missing box art online for "${game.title}" (WebP)`, 'success', { gameId: id, title: game.title, systemKey: game.systemKey });
+    addScraperLog(`✨ [HYBRID] Preserved local metadata.json & fetched missing box art for "${game.title}"`, 'success', { gameId: id, title: game.title, systemKey: game.systemKey });
   } else if (!hasLocalSidecarJson && hasLocalCoverFile) {
-    addScraperLog(`✨ [HYBRID] Preserved local cover image & fetched missing synopsis online for "${game.title}"`, 'success', { gameId: id, title: game.title, systemKey: game.systemKey });
+    addScraperLog(`✨ [HYBRID] Preserved local cover image & fetched missing synopsis for "${game.title}"`, 'success', { gameId: id, title: game.title, systemKey: game.systemKey });
   } else if (hasLocalSidecarJson && !hasLocalCoverFile && !fallbackCover) {
     addScraperLog(`📁 Preserved local metadata.json for "${game.title}". (No remote box art found online)`, 'info', { gameId: id, title: game.title, systemKey: game.systemKey });
   } else {
-    addScraperLog(`✅ Saved metadata & WebP box art for "${game.title}"`, 'success', { gameId: id, title: game.title, systemKey: game.systemKey });
+    addScraperLog(`✅ Saved metadata & box art for "${game.title}"`, 'success', { gameId: id, title: game.title, systemKey: game.systemKey });
   }
 
   return metadata;
 }
+
+export { scrapeGame as scrapeGameMetadata };

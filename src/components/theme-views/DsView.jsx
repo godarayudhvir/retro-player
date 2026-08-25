@@ -30,6 +30,8 @@ import QRCode from 'qrcode';
 import { resolveAssetPath } from '../../utils/assetPath';
 import { getGameDescription, getReleaseDate } from '../../gameDescriptions';
 import { saveCachedMetadata } from '../../services/metadataScraper';
+import { convertRemoteImageToWebpDataUrl } from '../../utils/imageConverter';
+import ConfirmModal from '../ConfirmModal';
 
 /**
  * DsView: Nintendo DS / DSi Dual-Screen Touchscreen Firmware Layout.
@@ -56,39 +58,24 @@ export default function DsView({
   onExportSave,
   onImportSave,
   onDeleteSave,
+  onDeleteGame,
   hasSaveData,
   scraper,
   sfx,
   gamepadConnected = false
 }) {
   const lastGridIndexRef = useRef(0);
-  if (focusedTarget?.zone === 'grid' && typeof focusedTarget.index === 'number') {
-    lastGridIndexRef.current = focusedTarget.index;
-  }
-  const focusedIndex = lastGridIndexRef.current >= 0 && lastGridIndexRef.current < filteredGames.length ? lastGridIndexRef.current : 0;
-  const selectedGame = filteredGames[focusedIndex] || filteredGames[0];
-  const selectedMeta = selectedGame ? (
-    metadataMap[selectedGame.id] ||
-    metadataMap[`${selectedGame.systemKey}-${selectedGame.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')]
-  ) : null;
-  const selectedStats = selectedGame && getGameStats ? getGameStats(selectedGame.id || selectedGame.title) : null;
-  const selectedFav = selectedGame && isFavorite ? isFavorite(selectedGame.id || selectedGame.title) : false;
-
-  const meta = selectedMeta || {};
-  const rawCover = meta.coverUrl || (selectedGame?.coverUrl && !selectedGame?.coverUrl.endsWith('.svg') ? selectedGame.coverUrl : null);
-  const coverSrc = rawCover ? resolveAssetPath(rawCover) : null;
-  const rawScreenshot = meta.screenshotUrl;
-  const screenshotSrc = rawScreenshot ? resolveAssetPath(rawScreenshot) : null;
-
-  const description = meta.description || selectedGame?.sidecarMetadata?.description || (selectedGame ? getGameDescription(selectedGame) : '');
-  const releaseYear = meta.releaseYear || selectedGame?.sidecarMetadata?.releaseYear || meta.releaseDate?.split('-')[0] || (selectedGame && getReleaseDate(selectedGame) !== '2000-01-01' ? getReleaseDate(selectedGame).split('-')[0] : 'Classic');
-  const developer = meta.developer || selectedGame?.sidecarMetadata?.developer || null;
-  const publisher = meta.publisher || selectedGame?.sidecarMetadata?.publisher || null;
-  const genre = meta.genre || selectedGame?.sidecarMetadata?.genre || 'Retro Classic';
+  const fileInputRef = useRef(null);
+  const coverImageInputRef = useRef(null);
+  const sidecarInputRef = useRef(null);
+  const activeBtnRef = useRef(null);
+  const logsEndRef = useRef(null);
 
   const [dsTab, setDsTab] = useState('overview'); // 'overview' | 'guides' | 'edit' | 'scrape'
   const [isLocalScraping, setIsLocalScraping] = useState(false);
   const [saveActionStatus, setSaveActionStatus] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Inline DS Strategy Guides QR Companion State
   const [activeQrType, setActiveQrType] = useState(null); // 'written' | 'video' | null
@@ -108,10 +95,29 @@ export default function DsView({
   const [editSaveStatus, setEditSaveStatus] = useState('');
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
-  const fileInputRef = useRef(null);
-  const coverImageInputRef = useRef(null);
-  const activeBtnRef = useRef(null);
-  const logsEndRef = useRef(null);
+  if (focusedTarget?.zone === 'grid' && typeof focusedTarget.index === 'number') {
+    lastGridIndexRef.current = focusedTarget.index;
+  }
+  const focusedIndex = lastGridIndexRef.current >= 0 && lastGridIndexRef.current < filteredGames.length ? lastGridIndexRef.current : 0;
+  const selectedGame = filteredGames[focusedIndex] || filteredGames[0];
+  const selectedMeta = selectedGame ? (
+    metadataMap[selectedGame.id] ||
+    metadataMap[`${selectedGame.systemKey}-${selectedGame.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')]
+  ) : null;
+  const selectedStats = selectedGame && getGameStats ? getGameStats(selectedGame.id || selectedGame.title) : null;
+  const selectedFav = selectedGame && isFavorite ? isFavorite(selectedGame.id || selectedGame.title) : false;
+
+  const meta = selectedMeta || {};
+  const rawCover = (dsTab === 'manage' && editCoverUrl) ? editCoverUrl : (meta.coverUrl || (selectedGame?.coverUrl && !selectedGame?.coverUrl.endsWith('.svg') ? selectedGame.coverUrl : null));
+  const coverSrc = rawCover ? resolveAssetPath(rawCover) : null;
+  const rawScreenshot = meta.screenshotUrl;
+  const screenshotSrc = rawScreenshot ? resolveAssetPath(rawScreenshot) : null;
+
+  const description = meta.description || selectedGame?.sidecarMetadata?.description || (selectedGame ? getGameDescription(selectedGame) : '');
+  const releaseYear = meta.releaseYear || selectedGame?.sidecarMetadata?.releaseYear || meta.releaseDate?.split('-')[0] || (selectedGame && getReleaseDate(selectedGame) !== '2000-01-01' ? getReleaseDate(selectedGame).split('-')[0] : 'Classic');
+  const developer = meta.developer || selectedGame?.sidecarMetadata?.developer || null;
+  const publisher = meta.publisher || selectedGame?.sidecarMetadata?.publisher || null;
+  const genre = meta.genre || selectedGame?.sidecarMetadata?.genre || 'Retro Classic';
 
   // Walkthrough links from local sidecar metadata or metadataMap
   const walkthrough = selectedGame?.sidecarMetadata?.walkthrough || meta.walkthrough || {};
@@ -191,6 +197,59 @@ export default function DsView({
     setIsSavingEdit(true);
     try {
       const id = selectedGame.id || `${selectedGame.systemKey}-${selectedGame.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      let finalCoverUrl = editCoverUrl.trim() || null;
+      let diskSaved = false;
+
+      const walkthroughObj = (editWrittenGuide.trim() || editVideoGuide.trim()) ? {
+        ...(editWrittenGuide.trim() ? { written: editWrittenGuide.trim() } : {}),
+        ...(editVideoGuide.trim() ? { video: editVideoGuide.trim() } : {})
+      } : undefined;
+
+      // Convert remote URLs to WebP Data URL for disk persistence
+      let payloadCoverDataUrl = editCoverUrl.startsWith('data:image/') ? editCoverUrl : null;
+      if (!payloadCoverDataUrl && editCoverUrl && (editCoverUrl.startsWith('http://') || editCoverUrl.startsWith('https://'))) {
+        try {
+          const converted = await convertRemoteImageToWebpDataUrl(editCoverUrl);
+          if (converted && converted.startsWith('data:image/')) {
+            payloadCoverDataUrl = converted;
+          }
+        } catch (_) {}
+      }
+
+      // Try saving directly to disk backend via /api/metadata/save-sidecar
+      try {
+        const res = await fetch('/api/metadata/save-sidecar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            gameId: id,
+            systemKey: selectedGame.systemKey,
+            romPath: selectedGame.romUrl || selectedGame.url,
+            title: editTitle.trim() || selectedGame.title,
+            description: editDescription.trim(),
+            releaseYear: editYear.trim(),
+            developer: editDeveloper.trim() || selectedGame.systemName,
+            publisher: editPublisher.trim() || selectedGame.systemName,
+            genre: editGenre.trim() || 'Retro Classic',
+            walkthrough: walkthroughObj,
+            coverDataUrl: payloadCoverDataUrl,
+            coverUrl: !payloadCoverDataUrl ? editCoverUrl : null
+          })
+        });
+
+        if (res.ok) {
+          const result = await res.json();
+          if (result.success) {
+            diskSaved = true;
+            if (result.savedCoverUrl) {
+              finalCoverUrl = result.savedCoverUrl;
+            }
+          }
+        }
+      } catch (backendErr) {
+        console.warn('Backend disk write unavailable, saving to IndexedDB:', backendErr);
+      }
+
       const updatedData = {
         id,
         title: editTitle.trim() || selectedGame.title,
@@ -201,23 +260,20 @@ export default function DsView({
         developer: editDeveloper.trim() || selectedGame.systemName || 'Classic',
         publisher: editPublisher.trim() || selectedGame.systemName || 'Classic',
         description: editDescription.trim() || `Experience ${selectedGame.title} on ${selectedGame.systemName}.`,
-        coverUrl: editCoverUrl.trim() || null,
-        hasCustomCover: Boolean(editCoverUrl.trim()),
-        walkthrough: {
-          written: editWrittenGuide.trim() || undefined,
-          video: editVideoGuide.trim() || undefined
-        },
+        coverUrl: finalCoverUrl,
+        hasCustomCover: Boolean(finalCoverUrl),
+        walkthrough: walkthroughObj,
         writtenWalkthroughUrl: editWrittenGuide.trim() || undefined,
         videoWalkthroughUrl: editVideoGuide.trim() || undefined,
         isManualOverride: true,
-        source: 'Manual Edit',
+        source: diskSaved ? 'Local Sidecar (Disk)' : 'Manual Edit',
         scrapedAt: new Date().toISOString()
       };
 
       await saveCachedMetadata(id, updatedData);
       scraper?.updateLocalMetadata?.(id, updatedData);
       sfx?.playMenuConfirm?.();
-      setEditSaveStatus('Saved to Browser Storage!');
+      setEditSaveStatus(diskSaved ? 'Saved to Server Disk & Sidecar!' : 'Saved to Browser Storage!');
       setTimeout(() => {
         setEditSaveStatus('');
         setDsTab('overview');
@@ -258,34 +314,198 @@ export default function DsView({
     sfx?.playNotification?.();
   };
 
-  const handleCoverUpload = async (e) => {
+  const handleImportSidecar = (e) => {
     const file = e.target.files?.[0];
-    if (file && selectedGame) {
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        const dataUrl = event.target?.result;
-        if (dataUrl) {
-          setEditCoverUrl(dataUrl);
-          const id = selectedGame.id || `${selectedGame.systemKey}-${selectedGame.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
-          const currentMeta = selectedMeta || {};
-          const updated = {
-            ...currentMeta,
-            id,
-            title: editTitle.trim() || currentMeta.title || selectedGame.title,
-            systemKey: selectedGame.systemKey,
-            coverUrl: dataUrl,
-            hasCustomCover: true,
-            isManualOverride: true,
-            scrapedAt: new Date().toISOString()
-          };
-          await saveCachedMetadata(id, updated);
-          scraper?.updateLocalMetadata?.(id, updated);
-          sfx?.playNotification?.();
-        }
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target?.result || '{}');
+        if (json.title) setEditTitle(json.title);
+        if (json.year || json.releaseYear) setEditYear(json.year || json.releaseYear);
+        if (json.genre) setEditGenre(json.genre);
+        if (json.developer) setEditDeveloper(json.developer);
+        if (json.publisher) setEditPublisher(json.publisher);
+        if (json.description) setEditDescription(json.description);
+        if (json.cover) setEditCoverUrl(json.cover);
+        if (json.walkthrough?.written || json.writtenWalkthroughUrl) setEditWrittenGuide(json.walkthrough?.written || json.writtenWalkthroughUrl);
+        if (json.walkthrough?.video || json.videoWalkthroughUrl) setEditVideoGuide(json.walkthrough?.video || json.videoWalkthroughUrl);
+        sfx?.playNotification?.();
+        setEditSaveStatus('Imported Sidecar Data!');
+        setTimeout(() => setEditSaveStatus(''), 2500);
+      } catch (err) {
+        console.error('Failed to parse sidecar JSON:', err);
+      }
+    };
+    reader.readAsText(file);
     e.target.value = '';
+  };
+
+  const handleConfirmDeleteGame = async () => {
+    if (!selectedGame || !onDeleteGame) return;
+    setIsDeleting(true);
+    try {
+      const success = await onDeleteGame(selectedGame);
+      if (success) {
+        sfx?.playMenuConfirm?.();
+        setShowDeleteConfirm(false);
+        setDsTab('overview');
+      }
+    } catch (err) {
+      console.error('Failed to delete game:', err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCoverUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedGame) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const dataUrl = event.target?.result;
+      if (!dataUrl) return;
+
+      // 1. Instantly update local preview
+      setEditCoverUrl(dataUrl);
+
+      const id = selectedGame.id || `${selectedGame.systemKey}-${selectedGame.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const currentMeta = selectedMeta || {};
+      let finalCover = dataUrl;
+      let diskSaved = false;
+
+      // 2. Persist directly to host disk sidecar
+      try {
+        const res = await fetch('/api/metadata/save-sidecar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            gameId: id,
+            systemKey: selectedGame.systemKey,
+            romPath: selectedGame.romUrl || selectedGame.url,
+            title: editTitle.trim() || currentMeta.title || selectedGame.title,
+            description: editDescription.trim(),
+            releaseYear: editYear.trim(),
+            developer: editDeveloper.trim() || selectedGame.systemName,
+            publisher: editPublisher.trim() || selectedGame.systemName,
+            genre: editGenre.trim() || 'Retro Classic',
+            coverDataUrl: dataUrl
+          })
+        });
+        if (res.ok) {
+          const resData = await res.json();
+          if (resData.success) {
+            diskSaved = true;
+            if (resData.savedCoverUrl) {
+              finalCover = `${resData.savedCoverUrl}?t=${Date.now()}`;
+              setEditCoverUrl(finalCover);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Cover upload backend write err:', err);
+      }
+
+      // 3. Save to database and cache
+      const updated = {
+        ...currentMeta,
+        id,
+        title: editTitle.trim() || currentMeta.title || selectedGame.title,
+        systemKey: selectedGame.systemKey,
+        coverUrl: finalCover,
+        hasCustomCover: true,
+        isManualOverride: true,
+        source: diskSaved ? 'Local Sidecar (Disk)' : 'Manual Edit',
+        scrapedAt: new Date().toISOString()
+      };
+      await saveCachedMetadata(id, updated);
+      scraper?.updateLocalMetadata?.(id, updated);
+      sfx?.playNotification?.();
+      setEditSaveStatus(diskSaved ? 'Cover Uploaded & Saved!' : 'Cover Saved in Browser!');
+      setTimeout(() => setEditSaveStatus(''), 2000);
+    };
+
+    reader.onerror = (err) => {
+      console.error('Failed reading selected image file:', err);
+    };
+
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleDeleteCover = async () => {
+    if (!selectedGame) return;
+    setEditCoverUrl('');
+    const id = selectedGame.id || `${selectedGame.systemKey}-${selectedGame.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const updatedData = {
+      ...(selectedMeta || {}),
+      id,
+      title: editTitle.trim() || selectedGame.title,
+      systemKey: selectedGame.systemKey,
+      coverUrl: null,
+      hasCustomCover: false,
+      isManualOverride: true,
+      scrapedAt: new Date().toISOString()
+    };
+
+    try {
+      await fetch('/api/metadata/save-sidecar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gameId: id,
+          title: editTitle.trim() || selectedGame.title,
+          systemKey: selectedGame.systemKey,
+          romPath: selectedGame.romUrl,
+          deleteCover: true
+        })
+      }).catch(() => {});
+    } catch (_) {}
+
+    await saveCachedMetadata(id, updatedData);
+    scraper?.updateLocalMetadata?.(id, updatedData);
+    sfx?.playDelete?.();
+    setEditSaveStatus('Cover Deleted!');
+    setTimeout(() => setEditSaveStatus(''), 2000);
+  };
+
+  const handleDeleteMetadata = async () => {
+    if (!selectedGame) return;
+    const id = selectedGame.id || `${selectedGame.systemKey}-${selectedGame.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    
+    // 1. Reset all fields to clean defaults
+    setEditTitle(selectedGame.rawTitle || selectedGame.title);
+    setEditYear('');
+    setEditGenre('');
+    setEditDeveloper('');
+    setEditPublisher('');
+    setEditDescription('');
+    setEditCoverUrl('');
+    setEditWrittenGuide('');
+    setEditVideoGuide('');
+    
+    // 2. Delete sidecar on backend disk
+    try {
+      await fetch('/api/metadata/delete-sidecar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gameId: id,
+          systemKey: selectedGame.systemKey,
+          romPath: selectedGame.romUrl,
+          title: selectedGame.title
+        })
+      }).catch(() => {});
+    } catch (_) {}
+
+    // 3. Clear IndexedDB / Server DB and update local cache
+    await deleteManualMetadata(id);
+    scraper?.updateLocalMetadata?.(id, null);
+    scraper?.clearLogs?.();
+    sfx?.playDelete?.();
+    setEditSaveStatus('Metadata Deleted & Reset!');
+    setTimeout(() => setEditSaveStatus(''), 2000);
   };
 
   const handleToggleQr = (type, url) => {
@@ -818,6 +1038,15 @@ export default function DsView({
           onChange={handleCoverUpload}
         />
 
+        {/* Hidden permanent Sidecar JSON Uploader input */}
+        <input
+          type="file"
+          ref={sidecarInputRef}
+          accept=".json,application/json"
+          style={{ display: 'none' }}
+          onChange={handleImportSidecar}
+        />
+
         {/* =========================================================================
             VIEW 3: UNIFIED NINTENDO DS GAME CUSTOMIZER & SCRAPER STUDIO DECK
             ========================================================================= */}
@@ -879,13 +1108,24 @@ export default function DsView({
                             <Upload size={10} />
                             <span>Replace Cover</span>
                           </button>
+
+                          <button
+                            type="button"
+                            className="ds-inline-btn-danger"
+                            style={{ padding: '0.2rem 0.45rem', fontSize: '0.64rem' }}
+                            onClick={handleDeleteCover}
+                            title="Delete Box Art cover"
+                          >
+                            <Trash2 size={10} />
+                            <span>Delete Cover</span>
+                          </button>
                         </div>
                       </div>
                     </div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                       <p style={{ fontSize: '0.66rem', color: 'var(--text-sub)', margin: 0, lineHeight: 1.35 }}>
-                        Searched Libretro CDN, TheGamesDB &amp; Wikipedia (No official box art found on remote servers).
+                        Searched Libretro CDN &amp; TheGamesDB (No official box art found on remote servers).
                       </p>
                       <button
                         type="button"
@@ -900,25 +1140,64 @@ export default function DsView({
                   )}
                 </div>
 
-                {/* Section 2: Online Scraper & Live Terminal Logs */}
+                {/* Section 2: Top Actions (Save Changes & Delete Game) */}
+                <div style={{ display: 'flex', gap: '0.45rem', width: '100%' }}>
+                  <button
+                    type="submit"
+                    className="ds-inline-btn-primary"
+                    style={{ flex: 1, justifyContent: 'center' }}
+                    disabled={isSavingEdit}
+                  >
+                    {isSavingEdit ? <RefreshCw size={13} className="spin" /> : <Save size={13} />}
+                    <span>{editSaveStatus || (isSavingEdit ? 'Saving...' : 'Save Changes')}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="ds-inline-btn-danger"
+                    style={{ flex: 1, justifyContent: 'center' }}
+                    onClick={() => {
+                      setShowDeleteConfirm(true);
+                      sfx?.playModalOpen?.();
+                    }}
+                  >
+                    <Trash2 size={13} />
+                    <span>Delete Game</span>
+                  </button>
+                </div>
+
+                {/* Section 3: Online Scraper & Live Terminal Logs */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                       <FileText size={11} color="#64748b" />
-                      <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-sub)' }}>Online DB Search Logs</span>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-sub)' }}>Metadata &amp; Cover Search Logs</span>
                     </div>
 
-                    <button
-                      type="button"
-                      className="ds-inline-btn-secondary"
-                      style={{ padding: '0.2rem 0.5rem', fontSize: '0.65rem' }}
-                      onClick={handleManualScrape}
-                      disabled={isLocalScraping}
-                      title="Force live online re-scrape against Libretro CDN, ScreenScraper & Wikipedia"
-                    >
-                      <RefreshCw size={10} className={isLocalScraping ? 'spin' : ''} />
-                      <span>{isLocalScraping ? 'Searching DBs...' : 'Re-Fetch Online Data'}</span>
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                      <button
+                        type="button"
+                        className="ds-inline-btn-secondary"
+                        style={{ padding: '0.2rem 0.5rem', fontSize: '0.65rem' }}
+                        onClick={handleManualScrape}
+                        disabled={isLocalScraping}
+                        title="Force live online re-scrape against Libretro CDN & ScreenScraper"
+                      >
+                        <RefreshCw size={10} className={isLocalScraping ? 'spin' : ''} />
+                        <span>{isLocalScraping ? 'Scraping...' : 'Scrape'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className="ds-inline-btn-danger"
+                        style={{ padding: '0.2rem 0.45rem', fontSize: '0.65rem' }}
+                        onClick={handleDeleteMetadata}
+                        title="Delete metadata sidecar, reset all fields below, and clear search logs"
+                      >
+                        <Trash2 size={10} />
+                        <span>Delete</span>
+                      </button>
+                    </div>
                   </div>
 
                   <div className="ds-scraper-terminal-logs">
@@ -1049,25 +1328,28 @@ export default function DsView({
                   </div>
                 </div>
 
-                {/* Section 4: Action Buttons */}
-                <div className="ds-inline-actions" style={{ borderTop: '1px solid var(--panel-border)', paddingTop: '0.45rem', marginTop: '0.3rem' }}>
+                {/* Section 4: Sidecar JSON Import & Export Actions */}
+                <div className="ds-inline-actions" style={{ borderTop: '1px solid var(--panel-border)', paddingTop: '0.45rem', marginTop: '0.3rem', display: 'flex', gap: '0.45rem' }}>
+                  <button
+                    type="button"
+                    className="ds-inline-btn-secondary"
+                    onClick={() => sidecarInputRef.current?.click()}
+                    title="Import metadata.json sidecar file"
+                    style={{ flex: 1 }}
+                  >
+                    <Upload size={12} />
+                    <span>Import Sidecar</span>
+                  </button>
+
                   <button
                     type="button"
                     className="ds-inline-btn-secondary"
                     onClick={handleExportSidecar}
                     title="Export local metadata.json sidecar file"
+                    style={{ flex: 1 }}
                   >
                     <Download size={12} />
-                    <span>Export Sidecar (.json)</span>
-                  </button>
-
-                  <button
-                    type="submit"
-                    className="ds-inline-btn-primary"
-                    disabled={isSavingEdit}
-                  >
-                    <Check size={13} />
-                    <span>{editSaveStatus || (isSavingEdit ? 'Saving...' : 'Save Changes')}</span>
+                    <span>Export Sidecar</span>
                   </button>
                 </div>
               </form>
@@ -1075,6 +1357,19 @@ export default function DsView({
           );
         })()}
       </div>
+
+      {/* In-App Delete Game Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        title="Delete Game?"
+        message={`Are you sure you want to delete "${selectedGame?.title}"? This will permanently remove the ROM and metadata sidecars from your collection.`}
+        confirmLabel={isDeleting ? 'Deleting...' : 'Delete Game'}
+        cancelLabel="Cancel"
+        isDestructive={true}
+        onConfirm={handleConfirmDeleteGame}
+        onCancel={() => setShowDeleteConfirm(false)}
+        sfx={sfx}
+      />
     </div>
   );
 }

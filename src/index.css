@@ -15821,6 +15821,42 @@ button.status-pill.status-scraper-pill {
   border-color: #64748b;
 }
 
+.ds-inline-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 4px;
+  border: 1.5px solid rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ds-inline-btn-danger:hover {
+  background: #ef4444;
+  border-color: #dc2626;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
+  transform: translateY(-1px);
+}
+
+[data-color-mode="dark"] .ds-inline-btn-danger {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #f87171;
+}
+
+[data-color-mode="dark"] .ds-inline-btn-danger:hover {
+  background: #ef4444;
+  border-color: #dc2626;
+  color: #ffffff;
+}
+
 /* DS Live Scraper Terminal Console */
 .ds-scraper-terminal-logs {
   background: #090f1d;
@@ -17176,3 +17212,403 @@ button.status-pill.status-scraper-pill {
 [data-theme="ds"][data-color-mode="dark"] .profile-btn-primary:hover {
   background: #15803d;
 }
+
+/* ==========================================================================
+   BACKUP & RESTORE MODAL (DS Touch Theme & Universal Responsive Styles)
+   ========================================================================== */
+
+.backup-modal-content {
+  max-width: 640px !important;
+}
+
+.backup-metric-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(148, 163, 184, 0.08);
+  border: 1.5px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
+  padding: 0.6rem 0.4rem;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+[data-theme="ds"] .backup-metric-card {
+  background: linear-gradient(180deg, #f8fafc 0%, #edf2f7 100%);
+  border: 2px solid #cbd5e1;
+  box-shadow: inset 0 1px 0 #ffffff, 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="ds"][data-color-mode="dark"] .backup-metric-card {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border: 2px solid #334155;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.backup-metric-card .metric-count {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--text-main);
+  margin-top: 0.15rem;
+  letter-spacing: -0.02em;
+}
+
+.backup-metric-card .metric-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-top: 0.1rem;
+}
+
+.backup-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.backup-alert.is-success {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #059669;
+}
+
+[data-color-mode="dark"] .backup-alert.is-success {
+  color: #34d399;
+}
+
+.backup-alert.is-danger {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #dc2626;
+}
+
+[data-color-mode="dark"] .backup-alert.is-danger {
+  color: #f87171;
+}
+
+.backup-actions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.backup-action-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: rgba(148, 163, 184, 0.06);
+  border: 1.5px solid rgba(148, 163, 184, 0.2);
+  border-radius: 14px;
+  padding: 1rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="ds"] .backup-action-card {
+  background: #f8fafc;
+  border: 2px solid #cbd5e1;
+  box-shadow: inset 0 1px 0 #ffffff, 0 2px 5px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="ds"][data-color-mode="dark"] .backup-action-card {
+  background: #1e293b;
+  border: 2px solid #334155;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.backup-action-card.is-focused {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+.backup-card-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.backup-card-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.backup-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.1rem;
+  border-radius: 10px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+
+.backup-action-btn.is-primary {
+  background: #e11d48;
+  color: #ffffff;
+  border-color: #be123c;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 4px rgba(225, 29, 72, 0.3);
+}
+
+.backup-action-btn.is-primary:hover:not(:disabled) {
+  background: #be123c;
+  transform: translateY(-1px);
+}
+
+.backup-action-btn.is-secondary {
+  background: #ffffff;
+  color: #0f172a;
+  border-color: #cbd5e1;
+  box-shadow: inset 0 1px 0 #ffffff, 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+[data-color-mode="dark"] .backup-action-btn.is-secondary {
+  background: #0f172a;
+  color: #f8fafc;
+  border-color: #475569;
+}
+
+.backup-action-btn.is-secondary:hover:not(:disabled) {
+  border-color: #3b82f6;
+  color: #2563eb;
+}
+
+.backup-action-btn.is-success {
+  background: #16a34a;
+  color: #ffffff;
+  border-color: #15803d;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 4px rgba(22, 163, 74, 0.3);
+}
+
+.backup-action-btn.is-success:hover:not(:disabled) {
+  background: #15803d;
+  transform: translateY(-1px);
+}
+
+.backup-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.backup-import-preview-box {
+  background: rgba(16, 185, 129, 0.06);
+  border: 1.5px solid rgba(16, 185, 129, 0.3);
+  border-radius: 10px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+[data-color-mode="dark"] .backup-import-preview-box {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.backup-import-preview-box .preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.backup-import-preview-box .preview-clear-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-sub);
+  cursor: pointer;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.backup-import-preview-box .preview-stats-row {
+  font-size: 0.74rem;
+  color: var(--text-sub);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.backup-import-preview-box .preview-actions-row {
+  margin-top: 0.35rem;
+}
+
+@media (max-width: 640px) {
+  .backup-modal-content {
+    max-height: 95vh;
+    padding: 1.25rem 1rem !important;
+  }
+
+  .backup-actions-container {
+    padding: 0 0.5rem 0.75rem !important;
+  }
+
+  .backup-persistence-banner {
+    margin: 0.5rem 0.5rem 0.5rem !important;
+  }
+
+  .backup-metrics-grid {
+    margin: 0.5rem 0.5rem 0.75rem !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* ROM Ingestion Card & Review Styles */
+.rom-ingestion-card {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="ds"] .rom-ingestion-card {
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  border: 2px solid #cbd5e1 !important;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.9), 0 3px 10px rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-color-mode="dark"] .rom-ingestion-card {
+  background: rgba(30, 41, 59, 0.85) !important;
+  border: 2px solid rgba(71, 85, 105, 0.6) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 3px 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-color-mode="dark"] .rom-ingestion-progress-box {
+  background: rgba(225, 29, 72, 0.15) !important;
+  border-color: rgba(225, 29, 72, 0.4) !important;
+}
+
+.rom-ingestion-choices-grid .backup-action-card {
+  margin: 0 !important;
+}
+
+/* ==========================================================================
+   DS TOUCH & MOBILE METADATA QUICK ACTIONS ICON TOOLBAR
+   ========================================================================== */
+.ds-edit-icon-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.5rem;
+  background: var(--panel-bg, #f8fafc);
+  border: 1px solid var(--panel-border, #cbd5e1);
+  border-radius: 6px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.ds-icon-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 30px;
+  border-radius: 4px;
+  border: 1px solid var(--panel-border, #cbd5e1);
+  background: #ffffff;
+  color: var(--text-main, #334155);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.ds-icon-action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.ds-icon-action-btn:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.ds-icon-action-btn.is-save {
+  background: #10b981;
+  border-color: #059669;
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 3px rgba(16, 185, 129, 0.3);
+}
+
+.ds-icon-action-btn.is-save:hover {
+  background: #059669;
+  border-color: #047857;
+}
+
+.ds-icon-action-btn.is-delete {
+  background: #ef4444;
+  border-color: #dc2626;
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 3px rgba(239, 68, 68, 0.3);
+}
+
+.ds-icon-action-btn.is-delete:hover {
+  background: #dc2626;
+  border-color: #b91c1c;
+}
+
+.ds-icon-action-btn.is-import {
+  background: #3b82f6;
+  border-color: #2563eb;
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 3px rgba(59, 130, 246, 0.3);
+}
+
+.ds-icon-action-btn.is-import:hover {
+  background: #2563eb;
+  border-color: #1d4ed8;
+}
+
+.ds-icon-action-btn.is-export {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+.ds-icon-action-btn.is-export:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.ds-edit-status-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #10b981;
+  margin-left: auto;
+  padding: 0.15rem 0.45rem;
+  background: rgba(16, 185, 129, 0.12);
+  border-radius: 3px;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+/* Dark mode adjustments */
+[data-color-mode="dark"] .ds-edit-icon-toolbar {
+  background: rgba(15, 23, 42, 0.85);
+  border-color: #334155;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+[data-color-mode="dark"] .ds-icon-action-btn.is-export {
+  background: #1e293b;
+  border-color: #475569;
+  color: #cbd5e1;
+}
+
+[data-color-mode="dark"] .ds-icon-action-btn.is-export:hover {
+  background: #334155;
+  color: #f8fafc;
+}
+
+

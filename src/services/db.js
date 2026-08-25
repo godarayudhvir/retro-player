@@ -5,14 +5,16 @@
  */
 
 const DB_NAME = 'RetroPlayerDB';
-const DB_VERSION = 2;
+const DB_VERSION = 4;
 
 const STORES = {
   PROFILES: 'profiles',
   USER_DATA: 'user_data',       // Favorites, Recents, Playtime scoped by profile
-  SETTINGS: 'app_settings',     // Global settings, theme, volume
+  SETTINGS: 'app_settings',     // Global settings, theme, volume, ui_mode, active_profile
   GAME_SAVES: 'game_saves',     // In-game battery SRAM (.sav) mapped by game.id
-  SAVE_STATES: 'save_states'    // Real-time snapshot states (.state) mapped by game.id
+  SAVE_STATES: 'save_states',   // Real-time snapshot states (.state) mapped by game.id
+  GAME_METADATA: 'game_metadata', // Custom / scraped metadata cached locally
+  CUSTOM_ROMS: 'custom_roms'    // Persistent client-side ROM binaries for GitHub Pages / offline PWA
 };
 
 let dbInstance = null;
@@ -62,6 +64,16 @@ export function getDB() {
       // 5. Game Save States (.state) Store: keyPath: 'key'
       if (!db.objectStoreNames.contains(STORES.SAVE_STATES)) {
         db.createObjectStore(STORES.SAVE_STATES, { keyPath: 'key' });
+      }
+
+      // 6. Game Metadata Store: keyPath: 'key'
+      if (!db.objectStoreNames.contains(STORES.GAME_METADATA)) {
+        db.createObjectStore(STORES.GAME_METADATA, { keyPath: 'key' });
+      }
+
+      // 7. Custom ROMs Store: keyPath: 'id'
+      if (!db.objectStoreNames.contains(STORES.CUSTOM_ROMS)) {
+        db.createObjectStore(STORES.CUSTOM_ROMS, { keyPath: 'id' });
       }
     };
 
@@ -295,4 +307,323 @@ export async function dbGetAllKeys(storeName) {
   }
 }
 
+/**
+ * Synchronize all stores from Server DB to local IndexedDB (Cold Boot Sync).
+ */
+export async function syncAllStoresFromBackend() {
+  if (!isServerDbAvailable) return false;
+
+  try {
+    const res = await fetch('/api/db/export');
+    if (!res.ok) return false;
+    const json = await res.json();
+    if (!json.success || !json.database) return false;
+
+    const db = await getDB();
+    if (!db) return false;
+
+    const data = json.database;
+    const storeMappings = [
+      { name: STORES.PROFILES, raw: data.profiles, isArray: true },
+      { name: STORES.USER_DATA, raw: data.user_data, isArray: false },
+      { name: STORES.SETTINGS, raw: data.app_settings, isArray: false },
+      { name: STORES.GAME_SAVES, raw: data.game_saves, isArray: false },
+      { name: STORES.SAVE_STATES, raw: data.save_states, isArray: false },
+      { name: STORES.GAME_METADATA, raw: data.game_metadata, isArray: false }
+    ];
+
+    for (const mapping of storeMappings) {
+      if (!mapping.raw) continue;
+      try {
+        const tx = db.transaction([mapping.name], 'readwrite');
+        const store = tx.objectStore(mapping.name);
+
+        if (mapping.isArray && Array.isArray(mapping.raw)) {
+          for (const item of mapping.raw) {
+            if (item && item.id) store.put(item);
+          }
+        } else if (typeof mapping.raw === 'object') {
+          for (const [key, value] of Object.entries(mapping.raw)) {
+            store.put({ key, value });
+          }
+        }
+      } catch (err) {
+        console.warn(`[COLD BOOT SYNC] Warning syncing store ${mapping.name}:`, err);
+      }
+    }
+
+    console.log('⚡ [COLD BOOT SYNC] Local IndexedDB successfully synchronized from server filesystem');
+    return true;
+  } catch (err) {
+    console.warn('[COLD BOOT SYNC] Backend sync unavailable:', err.message);
+    return false;
+  }
+}
+
+/**
+ * Export full database across all stores (Server DB + Local IndexedDB).
+ */
+export async function exportFullDatabase() {
+  // 1. Try server DB endpoint first
+  if (isServerDbAvailable) {
+    try {
+      const res = await fetch('/api/db/export');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.database) {
+          return json;
+        }
+      }
+    } catch (e) {}
+  }
+
+  // 2. Local IndexedDB fallback (GitHub Pages / Offline)
+  try {
+    const db = await getDB();
+    if (!db) throw new Error('IndexedDB unavailable');
+
+    const dumpStore = (storeName) => {
+      return new Promise((resolve) => {
+        try {
+          const tx = db.transaction([storeName], 'readonly');
+          const store = tx.objectStore(storeName);
+          const req = store.getAll();
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => resolve([]);
+        } catch (e) {
+          resolve([]);
+        }
+      });
+    };
+
+    const rawProfiles = await dumpStore(STORES.PROFILES);
+    const rawUserData = await dumpStore(STORES.USER_DATA);
+    const rawSettings = await dumpStore(STORES.SETTINGS);
+    const rawSaves = await dumpStore(STORES.GAME_SAVES);
+    const rawStates = await dumpStore(STORES.SAVE_STATES);
+    const rawMetadata = await dumpStore(STORES.GAME_METADATA);
+
+    const convertKeyValStore = (items) => {
+      const map = {};
+      for (const item of items) {
+        if (item && item.key) {
+          map[item.key] = item.value !== undefined ? item.value : item;
+        }
+      }
+      return map;
+    };
+
+    return {
+      success: true,
+      app: 'RetroPlayer',
+      version: '1.0.3',
+      schemaVersion: 2,
+      exportedAt: new Date().toISOString(),
+      stats: {
+        profilesCount: rawProfiles.length,
+        userDataCount: rawUserData.length,
+        savesCount: rawSaves.length,
+        statesCount: rawStates.length,
+        settingsCount: rawSettings.length,
+        metadataCount: rawMetadata.length
+      },
+      database: {
+        profiles: rawProfiles,
+        user_data: convertKeyValStore(rawUserData),
+        app_settings: convertKeyValStore(rawSettings),
+        game_saves: convertKeyValStore(rawSaves),
+        save_states: convertKeyValStore(rawStates),
+        game_metadata: convertKeyValStore(rawMetadata)
+      }
+    };
+  } catch (err) {
+    console.error('🚨 [EXPORT ERROR]:', err);
+    throw err;
+  }
+}
+
+/**
+ * Import full database into Server DB and hydrate local IndexedDB.
+ */
+export async function importFullDatabase(backupPayload) {
+  if (!backupPayload || typeof backupPayload !== 'object') {
+    throw new Error('Invalid backup file: Missing database payload');
+  }
+
+  const database = backupPayload.database || backupPayload;
+
+  // 1. Post to Server DB API if available
+  let serverImportSuccess = false;
+  if (isServerDbAvailable) {
+    try {
+      const res = await fetch('/api/db/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(backupPayload)
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) serverImportSuccess = true;
+      }
+    } catch (e) {
+      console.warn('Server import failed, applying to local IndexedDB only:', e);
+    }
+  }
+
+  // 2. Commit to local IndexedDB
+  try {
+    const db = await getDB();
+    if (!db) throw new Error('IndexedDB unavailable');
+
+    const storeMappings = [
+      { name: STORES.PROFILES, raw: database.profiles, isArray: true },
+      { name: STORES.USER_DATA, raw: database.user_data, isArray: false },
+      { name: STORES.SETTINGS, raw: database.app_settings, isArray: false },
+      { name: STORES.GAME_SAVES, raw: database.game_saves, isArray: false },
+      { name: STORES.SAVE_STATES, raw: database.save_states, isArray: false },
+      { name: STORES.GAME_METADATA, raw: database.game_metadata, isArray: false }
+    ];
+
+    for (const mapping of storeMappings) {
+      if (!mapping.raw) continue;
+      try {
+        const tx = db.transaction([mapping.name], 'readwrite');
+        const store = tx.objectStore(mapping.name);
+
+        if (mapping.isArray && Array.isArray(mapping.raw)) {
+          for (const item of mapping.raw) {
+            if (item && item.id) store.put(item);
+          }
+        } else if (typeof mapping.raw === 'object') {
+          for (const [key, value] of Object.entries(mapping.raw)) {
+            store.put({ key, value });
+          }
+        }
+      } catch (err) {
+        console.warn(`Error writing to local store ${mapping.name}:`, err);
+      }
+    }
+
+    return {
+      success: true,
+      serverImportSuccess,
+      message: 'Database imported successfully'
+    };
+  } catch (err) {
+    console.error('🚨 [IMPORT ERROR]:', err);
+    throw err;
+  }
+}
+
+/**
+ * Saves a custom ROM binary + metadata record to local IndexedDB (STORES.CUSTOM_ROMS).
+ * Enables permanent offline library persistence for GitHub Pages and standalone PWAs.
+ */
+export async function saveCustomRomToLocalDb(gameRecord, fileBlob) {
+  try {
+    const db = await getDB();
+    if (!db) throw new Error('IndexedDB unavailable');
+
+    const entry = {
+      id: gameRecord.id,
+      title: gameRecord.title,
+      rawTitle: gameRecord.rawTitle || gameRecord.title,
+      filename: gameRecord.filename || `${gameRecord.title}.bin`,
+      systemKey: gameRecord.systemKey,
+      systemName: gameRecord.systemName,
+      systemCore: gameRecord.systemCore,
+      systemColor: gameRecord.systemColor,
+      systemIcon: gameRecord.systemIcon,
+      coverUrl: gameRecord.coverUrl || null,
+      fileBlob: fileBlob, // Stored as Blob in IndexedDB
+      fileSize: fileBlob?.size || 0,
+      addedAt: Date.now()
+    };
+
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction([STORES.CUSTOM_ROMS], 'readwrite');
+      const store = tx.objectStore(STORES.CUSTOM_ROMS);
+      const req = store.put(entry);
+      req.onsuccess = () => resolve(entry);
+      req.onerror = (e) => reject(e.target.error);
+    });
+  } catch (err) {
+    console.error('🚨 [SAVE CUSTOM ROM ERROR]:', err);
+    throw err;
+  }
+}
+
+/**
+ * Retrieves all locally saved custom ROMs from IndexedDB and instantiates active Blob URLs.
+ */
+export async function getAllCustomRomsFromLocalDb() {
+  try {
+    const db = await getDB();
+    if (!db) return [];
+
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction([STORES.CUSTOM_ROMS], 'readonly');
+      const store = tx.objectStore(STORES.CUSTOM_ROMS);
+      const req = store.getAll();
+
+      req.onsuccess = () => {
+        const records = req.result || [];
+        const games = records.map(rec => {
+          let romUrl = '';
+          if (rec.fileBlob) {
+            try {
+              romUrl = URL.createObjectURL(rec.fileBlob);
+            } catch (_) {}
+          }
+          return {
+            id: rec.id,
+            title: rec.title,
+            rawTitle: rec.rawTitle,
+            filename: rec.filename,
+            systemKey: rec.systemKey,
+            systemName: rec.systemName,
+            systemCore: rec.systemCore,
+            systemColor: rec.systemColor,
+            systemIcon: rec.systemIcon,
+            coverUrl: rec.coverUrl,
+            romUrl: romUrl,
+            file: rec.fileBlob,
+            isCustomBlob: true,
+            isLocalDbRom: true,
+            addedAt: rec.addedAt
+          };
+        });
+        resolve(games);
+      };
+
+      req.onerror = (e) => reject(e.target.error);
+    });
+  } catch (err) {
+    console.warn('Could not read custom ROMs from local DB:', err);
+    return [];
+  }
+}
+
+/**
+ * Removes a custom ROM from local IndexedDB.
+ */
+export async function deleteCustomRomFromLocalDb(gameId) {
+  try {
+    const db = await getDB();
+    if (!db) return false;
+
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction([STORES.CUSTOM_ROMS], 'readwrite');
+      const store = tx.objectStore(STORES.CUSTOM_ROMS);
+      const req = store.delete(gameId);
+      req.onsuccess = () => resolve(true);
+      req.onerror = (e) => reject(e.target.error);
+    });
+  } catch (err) {
+    console.error('🚨 [DELETE CUSTOM ROM ERROR]:', err);
+    return false;
+  }
+}
+
 export { STORES };
+

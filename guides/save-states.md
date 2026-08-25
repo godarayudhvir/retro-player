@@ -66,6 +66,6 @@ Retro Player maintains a dual-tier save persistence layer strictly namespaced by
 
 | Deployment Environment | Primary Storage Location | Persistence & Sync Mechanism | Backup Procedure |
 | :--- | :--- | :--- | :--- |
-| **GitHub Pages / Static Web (`*.github.io`)** | Browser `IndexedDB` (`RetroPlayerDB`) | **100% Client-Side**: Saves and states are stored directly in the user's browser sandbox on that specific device. Zero server dependency. | Click the **Export Save** button on any game's cartridge/drawer to download the raw `.sav` file. |
-| **Docker / Self-Hosted Server** | Host Disk: `/data/retroplayer_db.json` | **Dual-Sync**: Writes to local `IndexedDB` instantly and syncs to the server API (`/api/db/*`). Saves follow user profiles across any device connected to the server. | Copy the single `retroplayer_db.json` file located in your host machine's mounted `/data` volume directory. |
+| **GitHub Pages / Static Web (`*.github.io`)** | Browser `IndexedDB` (`RetroPlayerDB`) | **100% Client-Side**: Saves and states are stored directly in the user's browser sandbox on that specific device. Zero server dependency. | Click **Database Backup & Restore** in the UI to download a full `retroplayer-backup.json` snapshot, or click **Export Save** on any specific game drawer for the raw `.sav` file. |
+| **Docker / Self-Hosted Server** | Host Disk: `/data/retroplayer_db.json` | **Dual-Sync**: Writes to local `IndexedDB` instantly and syncs to the server API (`/api/db/*`). Saves follow user profiles across any device connected to the server. | Either copy the single `data/retroplayer_db.json` file on the host machine, or click **Database Backup & Restore** in the UI to export a `.json` snapshot. |
 

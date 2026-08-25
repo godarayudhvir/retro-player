@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { dbGet, dbSet, STORES } from '../services/db';
 
 const MOBILE_PORTRAIT_QUERY = '(max-width: 768px) and (orientation: portrait)';
 const TOUCH_PRIMARY_QUERY = '(hover: none) and (pointer: coarse)';
@@ -18,6 +19,20 @@ export function useDeviceDetection() {
       return 'auto';
     }
   });
+
+  // Async load from database on startup
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const saved = await dbGet(STORES.SETTINGS, 'ui_mode');
+        if (saved && isMounted && (saved === 'auto' || saved === 'console' || saved === 'mobile')) {
+          setUiModeState(saved);
+        }
+      } catch (e) {}
+    })();
+    return () => { isMounted = false; };
+  }, []);
 
   const [isMediaMobile, setIsMediaMobile] = useState(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return false;
@@ -73,6 +88,7 @@ export function useDeviceDetection() {
     try {
       if (typeof window !== 'undefined') {
         localStorage.setItem(UI_MODE_STORAGE_KEY, mode);
+        dbSet(STORES.SETTINGS, 'ui_mode', mode);
       }
     } catch (e) {
       console.error('Failed to save UI mode preference:', e);

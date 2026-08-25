@@ -415,7 +415,7 @@ export default function ScraperModal({
                   <div className="mode-card-body">
                     <h4 className="mode-card-title">Force Re-fetch</h4>
                     <p className="mode-card-desc">
-                      Forces a fresh scan from remote Libretro CDN and Wikipedia APIs to update your IndexedDB cache, while safely preserving local companion covers and metadata in <code>/roms/</code>.
+                      Forces a fresh scan from remote Libretro CDN to update your database cache, while safely preserving local companion covers and metadata in <code>/roms/</code>.
                     </p>
                   </div>
                   {scanMode === 'force' && <Check size={18} className="mode-card-check" />}
@@ -434,7 +434,7 @@ export default function ScraperModal({
                     <Layers size={32} color="#3b82f6" />
                     <div>
                       <h4>Full Library Scan</h4>
-                      <p>Scan authentic Libretro 3D box art and Wikipedia metadata across all <strong>{games.length} titles</strong> in all <strong>{activeSystems.length} active platforms</strong>.</p>
+                      <p>Scan authentic Libretro 3D box art across all <strong>{games.length} titles</strong> in all <strong>{activeSystems.length} active platforms</strong>.</p>
                     </div>
                   </div>
                 </div>

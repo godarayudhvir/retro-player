@@ -125,5 +125,5 @@ Place a `.nfo` or `.json` file alongside the ROM to define custom metadata (titl
 
 ## 🔍 In-App Scraper & Metadata Editor
 
-1. **Automated 3D Box Art Scraper**: Press `[X]` on gamepad (or `M` on keyboard) to open the Metadata Scraper. Scrapes official 3D box art from Libretro CDN and synopses from Wikipedia in real time.
-2. **In-App Manual Metadata Editor**: Open any game's detail drawer and click the **Pencil icon (Edit Metadata)** to modify titles, descriptions, release years, or upload custom cover artwork directly in the UI. Overrides persist locally to IndexedDB and sync to `data/retroplayer_db.json`.
+1. **Automated 3D Box Art Scraper**: Press `[X]` on gamepad (or `M` on keyboard) to open the Metadata Scraper. Scrapes official 1:1 box art from the Libretro CDN and retrieves authentic synopses, developers, and release years from dedicated video game databases in real time.
+2. **In-App Manual Metadata Editor**: Open any game's detail drawer and access the **Game Details Pane** to modify titles, descriptions, release years, developers, publishers, strategy guide links, or upload/delete custom cover artwork directly in the UI. Overrides persist locally to IndexedDB, update disk sidecars, and sync to `data/retroplayer_db.json`.

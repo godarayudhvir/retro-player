@@ -76,12 +76,11 @@ self.addEventListener('fetch', (event) => {
     return; // Let browser fetch ROM binaries directly on-demand
   }
 
-  // RULE 2: External Scraper Probes (Libretro CDN, Wikipedia, TheGamesDB, ScreenScraper)
+  // RULE 2: External Scraper Probes (Libretro CDN, TheGamesDB, ScreenScraper)
   // NEVER cache external cross-origin probes in SW to prevent Chromium 7MB opaque quota padding
   if (
     url.hostname.includes('thumbnails.libretro.com') ||
     url.hostname.includes('raw.githubusercontent.com') ||
-    url.hostname.includes('wikipedia.org') ||
     url.hostname.includes('thegamesdb.net') ||
     url.hostname.includes('screenscraper.fr')
   ) {

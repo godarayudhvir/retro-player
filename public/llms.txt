@@ -12,6 +12,7 @@
 - **Nintendo DS Touch Experience**: Authentic dual-screen firmware theme with top-screen dynamic box art & spec sheets, and bottom touchscreen game selection grid with integrated inline Save Data Studio, Strategy Guides Deck, Edit & Scrape Studio, and dark/light mode toggles.
 - **Strategy Guides & Walkthroughs Hub**: Direct, curated access to written walkthroughs (GameFAQs, StrategyWiki) and video playthroughs (YouTube) with a companion mobile QR code scan modal for couch/TV play.
 - **100% Client-Side Battery Saves & Profiles**: In-game battery RAM (.sav / .srm / .mcr), quick save states, playtime analytics, Multiavatar player passports, and IndexedDB local caching.
+- **Centralized Filesystem DB & 1-Click Backup**: Single JSON document database (`data/retroplayer_db.json`) syncing profiles, saves, and settings to host disk, with 1-click JSON backup export and restore studio.
 - **Universal Gamepad & Keyboard Navigation**: 100% controller spatial navigation across desktop & mobile feeds, telemetry widget with gamepad battery status and charging indicators.
 - **Progressive Web App (PWA) & Offline Mode**: Installable standalone app across macOS, Windows, Linux, Steam Deck, iOS, and Android.
 

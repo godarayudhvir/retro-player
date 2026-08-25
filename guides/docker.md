@@ -28,10 +28,11 @@ Retro Player supports configuration via environment variables in `docker-compose
 | Variable | Default | Description |
 | :--- | :--- | :--- |
 | `PORT` | `3000` | HTTP port the server listens on inside the container. |
-| `ROMS_DIR` | `/roms` | Path where mounted host ROMs and user uploads are stored and indexed. |
+| `ROMS_DIR` | `/roms` | Path where mounted host ROMs, companion covers, sidecars, and uploads are stored. |
 | `BGM_DIR` | `/bgm` | Path where custom background audio tracks are stored. |
-| `DATA_DIR` | `/data` | Path where user profiles, playtime, favorites, and controller mappings are saved. |
+| `DATA_DIR` | `/data` | Path where the central JSON document database (`retroplayer_db.json`) is stored. |
 | `INCLUDE_DEMO_BGM` | `true` | Set to `true` to include bundled 8-bit chiptune audio; set to `false` for purely your own audio. |
+| `AUTO_SEED_DEMOS` | `false` | When set to `true`, auto-seeds bundled demo games/music into external mounted volumes. |
 
 ---
 
@@ -39,11 +40,30 @@ Retro Player supports configuration via environment variables in `docker-compose
 
 #### Scenario 1: Local Host Folder Mount (Recommended for HomeLabs/NAS)
 - **Settings**: Mount `./roms:/roms`, `./bgm:/bgm`, and `./data:/data`.
-- **UI Experience**: Any games you place into `./roms/<system>/` are automatically indexed and displayed in your console dashboard. You can also upload games directly through the web UI, which are saved to host disk.
+- **UI Experience**: All profiles, in-game battery RAM (`.sav`), snapshot save states (`.state`), favorites, recents, playtime metrics, and settings are written directly to `./data/retroplayer_db.json`. Any games placed into `./roms/<system>/` (along with `<game>.webp` covers and `<game>.json` sidecars) are instantly indexed.
 
 #### Scenario 2: Pure Client-Side Drag-and-Drop
 - **Settings**: No host volume mounts needed.
-- **UI Experience**: Drop `.gba`, `.sfc`, `.nes`, `.nds`, or `.zip` files directly into your browser window or use **"Load Custom ROM"**. Games execute 100% in browser RAM with saves persisted to your browser's IndexedDB.
+- **UI Experience**: Drop `.gba`, `.sfc`, `.nes`, `.nds`, or `.zip` files directly into your browser window or use **"Load Custom ROM"**. Games execute 100% in browser RAM with saves persisted to your browser's IndexedDB and exportable to JSON at any time.
+
+---
+
+## 💾 Backing Up & Migrating Your Data
+
+Retro Player provides two zero-friction backup methods:
+
+### Method A: Host Filesystem Backup (Automated / NAS)
+Simply copy the three mounted directories:
+```bash
+# Create a timestamped archive of all ROMs, media, and saves
+tar -czvf retroplayer-backup-$(date +%F).tar.gz ./data ./roms ./bgm
+```
+To restore on a new server or container, extract the archive into your project directory before running `docker compose up -d`.
+
+### Method B: In-App 1-Click Database Export & Import (Web UI)
+1. In the Retro Player topbar or mobile hamburger drawer, click **Database Backup & Restore**.
+2. Click **Download Backup (.json)** to save your entire database (all profiles, battery saves, save states, history, and settings).
+3. To restore on any device or fresh instance, open the modal, select/drop your backup `.json` file, and click **Confirm & Restore Backup**.
 
 ---
 
@@ -82,9 +102,13 @@ retro-player/
 │   └── custom_track.mp3
 └── roms/
     ├── gba/
-    │   └── Pokemon Emerald.gba
+    │   ├── Pokemon Emerald.gba
+    │   ├── Pokemon Emerald.json
+    │   └── Pokemon Emerald.webp
     ├── snes/
-    │   └── Super Mario World.sfc
+    │   ├── Super Mario World.sfc
+    │   ├── Super Mario World.json
+    │   └── Super Mario World.webp
     ├── n64/
     │   └── Super Mario 64.z64
     ├── nds/
@@ -113,7 +137,7 @@ docker image prune -f
 ```bash
 docker stop retro-player && docker rm retro-player
 docker pull ghcr.io/godarayudhvir/retro-player:latest
-docker run -d --name retro-player --restart unless-stopped -p 3000:3000 -v $(pwd)/roms:/roms ghcr.io/godarayudhvir/retro-player:latest
+docker run -d --name retro-player --restart unless-stopped -p 3000:3000 -v $(pwd)/roms:/roms -v $(pwd)/bgm:/bgm -v $(pwd)/data:/data ghcr.io/godarayudhvir/retro-player:latest
 ```
 
 ---
@@ -131,6 +155,7 @@ docker logs -f retro-player
 ```bash
 docker exec -it retro-player ls -lah /roms
 docker exec -it retro-player ls -lah /bgm
+docker exec -it retro-player ls -lah /data
 ```
 
 ### Fix Linux Permissions (If Docker needs root or volume access)
@@ -141,7 +166,7 @@ sudo usermod -aG docker $USER
 newgrp docker
 
 # Fix host directory permissions for uploads
-chmod -R a+rwX ./roms ./bgm
+chmod -R a+rwX ./roms ./bgm ./data
 ```
 
 ### Clean Factory Reset

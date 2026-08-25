@@ -1,6 +1,12 @@
 # Project Rules & Guidelines
 
-1. Update [README.md](file:///Users/godarayudhvir/Github/retro-player/README.md) based strictly on what is being committed to git whenever preparing or executing a git commit requested by the user. Do NOT add completed features to `mirai/` — `mirai/` is strictly a backlog for future/planned milestones. Whenever a feature from `mirai/` is implemented and committed, remove it from `mirai/README.md` and delete its completed spec from `mirai/`.
+1. Whenever preparing or executing a git commit requested by the user, cross-check and update all relevant markdown documentation based strictly on the committed code changes:
+   - Save / Battery SRAM / Save State changes -> update [guides/save-states.md](file:///Users/godarayudhvir/Github/retro-player/guides/save-states.md)
+   - Docker / Server / Deployment changes -> update [guides/docker.md](file:///Users/godarayudhvir/Github/retro-player/guides/docker.md) and [guides/hosting.md](file:///Users/godarayudhvir/Github/retro-player/guides/hosting.md)
+   - ROM Ingestion / Scraping / Sidecar metadata changes -> update [guides/roms.md](file:///Users/godarayudhvir/Github/retro-player/guides/roms.md)
+   - Input / Controller / Hotkey / Keyboard changes -> update [guides/controls.md](file:///Users/godarayudhvir/Github/retro-player/guides/controls.md)
+   - General features, highlights, and platform stats -> update [README.md](file:///Users/godarayudhvir/Github/retro-player/README.md) and [public/llms.txt](file:///Users/godarayudhvir/Github/retro-player/public/llms.txt)
+   - Completed `mirai/` roadmap features -> remove completed items from [mirai/README.md](file:///Users/godarayudhvir/Github/retro-player/mirai/README.md) and delete their completed spec files from `mirai/`. Do NOT add completed features to `mirai/` — `mirai/` is strictly a backlog for future/planned milestones.
 2. Never use automated browser testing tools like Playwright or subagent browser execution for testing. The user will handle all manual browser testing personally.
 3. Ensure the entire application (every view, modal, wizard, button, and interactive component) is 100% navigable and controllable via both keyboard navigation (Arrow keys, Enter, Esc, Tab, Hotkeys) and USB/Bluetooth gamepads (D-Pad, Analog sticks, A/B/X/Y, L1/R1, Start/Select).
 4. Never use native browser dialog popups (`alert()`, `confirm()`, `prompt()`). All user confirmations, alerts, warnings, and prompts MUST use custom styled in-app modal dialogs or status banners that match the console theme and support 100% keyboard and gamepad spatial navigation.

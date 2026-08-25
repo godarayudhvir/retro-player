@@ -203,33 +203,17 @@ function downloadFile(url, destPath) {
   });
 }
 
-// Convert image to WebP using cwebp, sips, or convert
-function convertImageToWebp(srcPath, destPath) {
-  if (path.extname(srcPath).toLowerCase() === '.webp' && srcPath === destPath) {
+// Standardize cover image filename in game directory (preserving authentic image format)
+function standardizeCover(srcPath, destPath) {
+  if (srcPath === destPath) {
     return true;
   }
-
-  // 1. Try cwebp
   try {
-    execSync(`cwebp -q 85 "${srcPath}" -o "${destPath}"`, { stdio: 'pipe' });
+    fs.copyFileSync(srcPath, destPath);
     return true;
-  } catch (err1) {
-    // 2. Try sips on macOS
-    try {
-      if (process.platform === 'darwin') {
-        execSync(`sips -s format webp "${srcPath}" --out "${destPath}"`, { stdio: 'pipe' });
-        return true;
-      }
-    } catch (err2) {
-      // 3. Try ImageMagick
-      try {
-        execSync(`convert "${srcPath}" -quality 85 "${destPath}"`, { stdio: 'pipe' });
-        return true;
-      } catch (e) {
-        console.warn(`[CONVERT WARN] Could not convert ${srcPath} to WebP:`, e.message);
-        return false;
-      }
-    }
+  } catch (e) {
+    console.warn(`[COVER WARN] Could not copy ${srcPath} to ${destPath}:`, e.message);
+    return false;
   }
 }
 
@@ -348,9 +332,10 @@ async function processRoms() {
           });
 
           if (matchedImg) {
-            const destWebp = path.join(targetGameFolder, `${rawBase}.webp`);
-            console.log(`🖼️  Converting staging cover: "${matchedImg.name}" -> "${rawBase}.webp"`);
-            convertImageToWebp(matchedImg.fullPath, destWebp);
+            const ext = path.extname(matchedImg.name).toLowerCase() || '.png';
+            const destCover = path.join(targetGameFolder, `${rawBase}${ext}`);
+            console.log(`🖼️  Standardizing staging cover: "${matchedImg.name}" -> "${rawBase}${ext}"`);
+            standardizeCover(matchedImg.fullPath, destCover);
           }
         }
       }
@@ -397,10 +382,11 @@ async function processRoms() {
       const matchedGame = matchImageToGame(img.name, allKnownGames);
       if (matchedGame) {
         const srcPath = path.join(targetDir, img.name);
-        const destWebp = path.join(matchedGame.dirPath, `${matchedGame.folderName}.webp`);
-        console.log(`🖼️  Ingesting loose screenshot/cover: "${img.name}" -> "${matchedGame.system}/${matchedGame.folderName}/${matchedGame.folderName}.webp"`);
+        const ext = path.extname(img.name).toLowerCase() || '.png';
+        const destCover = path.join(matchedGame.dirPath, `${matchedGame.folderName}${ext}`);
+        console.log(`🖼️  Ingesting loose cover: "${img.name}" -> "${matchedGame.system}/${matchedGame.folderName}/${matchedGame.folderName}${ext}"`);
         if (!isDryRun) {
-          const ok = convertImageToWebp(srcPath, destWebp);
+          const ok = standardizeCover(srcPath, destCover);
           if (ok) {
             fs.unlinkSync(srcPath);
           }
@@ -417,10 +403,11 @@ async function processRoms() {
         const matchedGame = matchImageToGame(img.name, allKnownGames.filter(g => g.system === sDir.name));
         if (matchedGame) {
           const srcPath = path.join(sPath, img.name);
-          const destWebp = path.join(matchedGame.dirPath, `${matchedGame.folderName}.webp`);
-          console.log(`🖼️  Ingesting system loose cover: "${img.name}" -> "${matchedGame.system}/${matchedGame.folderName}/${matchedGame.folderName}.webp"`);
+          const ext = path.extname(img.name).toLowerCase() || '.png';
+          const destCover = path.join(matchedGame.dirPath, `${matchedGame.folderName}${ext}`);
+          console.log(`🖼️  Ingesting system loose cover: "${img.name}" -> "${matchedGame.system}/${matchedGame.folderName}/${matchedGame.folderName}${ext}"`);
           if (!isDryRun) {
-            const ok = convertImageToWebp(srcPath, destWebp);
+            const ok = standardizeCover(srcPath, destCover);
             if (ok) {
               fs.unlinkSync(srcPath);
             }
@@ -536,11 +523,12 @@ async function processRoms() {
 
         for (const img of looseImages) {
           const srcImgPath = path.join(currentSubPath, img.name);
-          const destWebpPath = path.join(currentSubPath, `${activeRomBase}.webp`);
-          console.log(`    🖼️  Converting internal cover/screenshot: "${img.name}" -> "${activeRomBase}.webp"`);
+          const ext = path.extname(img.name).toLowerCase() || '.png';
+          const destCoverPath = path.join(currentSubPath, `${activeRomBase}${ext}`);
+          console.log(`    🖼️  Standardizing internal cover: "${img.name}" -> "${activeRomBase}${ext}"`);
           if (!isDryRun) {
-            const converted = convertImageToWebp(srcImgPath, destWebpPath);
-            if (converted && img.name !== `${activeRomBase}.webp`) {
+            const converted = standardizeCover(srcImgPath, destCoverPath);
+            if (converted && img.name !== `${activeRomBase}${ext}`) {
               try { fs.unlinkSync(srcImgPath); } catch (e) { }
             }
           }
@@ -550,9 +538,9 @@ async function processRoms() {
       // Fetch official Libretro Boxart & Generate Companion Metadata Sidecar
       if (doFetchMetadata) {
         const metaPath = path.join(currentSubPath, 'metadata.json');
-        const webpPath = path.join(currentSubPath, `${activeRomBase}.webp`);
+        const imageExtensions = ['.png', '.webp', '.jpg', '.jpeg'];
+        const hasLocalCover = imageExtensions.some(ext => fs.existsSync(path.join(currentSubPath, `${activeRomBase}${ext}`)));
         const hasLocalMeta = fs.existsSync(metaPath);
-        const hasLocalCover = fs.existsSync(webpPath);
 
         const sysKey = EXTENSION_MAP[romExt] || sysFolderName;
         const sysName = SYSTEM_NAMES[sysKey] || sysFolderName;
@@ -574,23 +562,11 @@ async function processRoms() {
           const coverUrl = await scrapeCoverArt(gameObj);
           if (coverUrl) {
             const ext = path.extname(new URL(coverUrl).pathname) || '.png';
-            const tempImg = path.join(currentSubPath, `temp_boxart${ext}`);
-            const downloaded = await downloadFile(coverUrl, tempImg);
-            if (downloaded) {
-              const converted = convertImageToWebp(tempImg, webpPath);
-              if (fs.existsSync(tempImg)) fs.unlinkSync(tempImg);
-              if (converted && fs.existsSync(webpPath)) {
-                // Purge any pre-existing .png, .jpg, .jpeg in game folder
-                const obsoleteExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp'];
-                for (const obsExt of obsoleteExtensions) {
-                  const obsPath = path.join(currentSubPath, `${activeRomBase}${obsExt}`);
-                  if (fs.existsSync(obsPath)) {
-                    try { fs.unlinkSync(obsPath); } catch (_) {}
-                  }
-                }
-                console.log(`    ✅ Downloaded box art to WebP`);
-                systemCoversGenerated++;
-              }
+            const destCoverPath = path.join(currentSubPath, `${activeRomBase}${ext}`);
+            const downloaded = await downloadFile(coverUrl, destCoverPath);
+            if (downloaded && fs.existsSync(destCoverPath)) {
+              console.log(`    ✅ Downloaded authentic box art: "${activeRomBase}${ext}"`);
+              systemCoversGenerated++;
             }
           }
         }

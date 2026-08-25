@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { dbGet, dbSet, STORES } from '../services/db';
 
 const THEME_STORAGE_KEY = 'retro_player_theme';
 const COLOR_MODE_STORAGE_KEY = 'retro_player_color_mode';
@@ -43,6 +44,25 @@ export function useThemeEngine() {
     return 'light';
   });
 
+  // Async load from database on startup
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const saved = await dbGet(STORES.SETTINGS, 'theme_config');
+        if (saved && isMounted) {
+          if (saved.theme && THEMES.some(t => t.key === saved.theme)) {
+            setThemeState(saved.theme);
+          }
+          if (saved.colorMode === 'light' || saved.colorMode === 'dark') {
+            setColorModeState(saved.colorMode);
+          }
+        }
+      } catch (e) {}
+    })();
+    return () => { isMounted = false; };
+  }, []);
+
   // Synchronize document data-theme and data-color-mode attributes
   useEffect(() => {
     try {
@@ -50,6 +70,7 @@ export function useThemeEngine() {
       document.documentElement.setAttribute('data-color-mode', colorMode);
       localStorage.setItem(THEME_STORAGE_KEY, theme);
       localStorage.setItem(COLOR_MODE_STORAGE_KEY, colorMode);
+      dbSet(STORES.SETTINGS, 'theme_config', { theme, colorMode });
     } catch (e) {
       console.error('Failed to persist theme & color mode:', e);
     }

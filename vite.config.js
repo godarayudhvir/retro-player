@@ -472,9 +472,16 @@ function multiConsoleScannerPlugin() {
 
       // API Endpoint for ROM list
       server.middlewares.use('/api/roms', (req, res) => {
-        const romsData = getRomsManifest(romsBaseDir);
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify(romsData));
+        try {
+          const romsData = getRomsManifest(romsBaseDir);
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify(romsData));
+        } catch (err) {
+          console.error('🚨 [API ROMS ERROR]:', err);
+          res.statusCode = 500;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: err.message, games: [], systems: [] }));
+        }
       });
 
       // API Endpoint for Uploading ROMs in development
@@ -676,10 +683,30 @@ function multiConsoleScannerPlugin() {
               return;
             }
 
-            fs.unlinkSync(targetPath);
-            console.log(`🗑️ [DEV ROM DELETE] Deleted ROM: ${targetPath}`);
+            const parentDir = path.dirname(targetPath);
+            const systemDir = systemKey ? path.join(romsBaseDir, systemKey) : null;
+            const isDedicatedFolder = parentDir !== romsBaseDir && (!systemDir || parentDir !== systemDir);
+
+            if (isDedicatedFolder && fs.existsSync(parentDir)) {
+              fs.rmSync(parentDir, { recursive: true, force: true });
+              console.log(`🗑️ [DEV ROM DELETE] Successfully deleted entire game directory: ${parentDir}`);
+            } else {
+              const baseName = path.parse(targetPath).name;
+              const companionExts = ['.webp', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.json', '.nfo'];
+              for (const ext of companionExts) {
+                const companionPath = path.join(parentDir, `${baseName}${ext}`);
+                if (fs.existsSync(companionPath)) {
+                  try { fs.unlinkSync(companionPath); } catch (_) {}
+                }
+              }
+              if (fs.existsSync(targetPath)) {
+                fs.unlinkSync(targetPath);
+              }
+              console.log(`🗑️ [DEV ROM DELETE] Successfully deleted ROM and companion sidecars: ${targetPath}`);
+            }
+
             res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ success: true, message: 'ROM deleted successfully' }));
+            res.end(JSON.stringify({ success: true, message: 'Game deleted successfully' }));
           } catch (e) {
             res.statusCode = 500;
             res.end(JSON.stringify({ error: e.message }));
@@ -767,13 +794,93 @@ function multiConsoleScannerPlugin() {
           const freshDb = {
             profiles: [],
             user_data: {},
+            app_settings: {},
             game_saves: {},
             save_states: {},
             game_metadata: {}
           };
           writeDevDB(freshDb);
-          console.log('🧹 [DEV DB FACTORY RESET] Cleared all server DB stores (user_data, game_saves, save_states, profiles, game_metadata)');
+          console.log('🧹 [DEV DB FACTORY RESET] Cleared all server DB stores (user_data, game_saves, save_states, profiles, app_settings, game_metadata)');
           res.end(JSON.stringify({ success: true, message: 'Server database reset successfully' }));
+          return;
+        }
+
+        if (store === 'export' && req.method === 'GET') {
+          const db = readDevDB();
+          const exportPayload = {
+            app: 'RetroPlayer',
+            version: '1.0.3',
+            schemaVersion: 2,
+            exportedAt: new Date().toISOString(),
+            stats: {
+              profilesCount: Array.isArray(db.profiles) ? db.profiles.length : Object.keys(db.profiles || {}).length,
+              userDataCount: Object.keys(db.user_data || {}).length,
+              savesCount: Object.keys(db.game_saves || {}).length,
+              statesCount: Object.keys(db.save_states || {}).length,
+              metadataCount: Object.keys(db.game_metadata || {}).length,
+              settingsCount: Object.keys(db.app_settings || {}).length
+            },
+            database: {
+              profiles: db.profiles || [],
+              user_data: db.user_data || {},
+              app_settings: db.app_settings || {},
+              game_saves: db.game_saves || {},
+              save_states: db.save_states || {},
+              game_metadata: db.game_metadata || {}
+            }
+          };
+          res.end(JSON.stringify({ success: true, ...exportPayload }));
+          return;
+        }
+
+        if (store === 'import' && (req.method === 'POST' || req.method === 'PUT')) {
+          let body = '';
+          req.on('data', chunk => { body += chunk; });
+          req.on('end', () => {
+            try {
+              const importPayload = JSON.parse(body || '{}');
+              const database = importPayload.database || importPayload;
+
+              if (!database || typeof database !== 'object') {
+                res.statusCode = 400;
+                res.end(JSON.stringify({ error: 'Invalid database payload structure' }));
+                return;
+              }
+
+              const currentDb = readDevDB();
+              const mergedDb = {
+                profiles: Array.isArray(database.profiles) ? database.profiles : (currentDb.profiles || []),
+                user_data: typeof database.user_data === 'object' ? { ...currentDb.user_data, ...database.user_data } : (currentDb.user_data || {}),
+                app_settings: typeof database.app_settings === 'object' ? { ...currentDb.app_settings, ...database.app_settings } : (currentDb.app_settings || {}),
+                game_saves: typeof database.game_saves === 'object' ? { ...currentDb.game_saves, ...database.game_saves } : (currentDb.game_saves || {}),
+                save_states: typeof database.save_states === 'object' ? { ...currentDb.save_states, ...database.save_states } : (currentDb.save_states || {}),
+                game_metadata: typeof database.game_metadata === 'object' ? { ...currentDb.game_metadata, ...database.game_metadata } : (currentDb.game_metadata || {})
+              };
+
+              const writeSuccess = writeDevDB(mergedDb);
+              if (!writeSuccess) {
+                res.statusCode = 500;
+                res.end(JSON.stringify({ error: 'Failed to write imported database to disk' }));
+                return;
+              }
+
+              console.log('📥 [DEV DB IMPORT] Successfully imported database payload to filesystem');
+              res.end(JSON.stringify({
+                success: true,
+                message: 'Database imported successfully',
+                stats: {
+                  profilesCount: Array.isArray(mergedDb.profiles) ? mergedDb.profiles.length : 0,
+                  userDataCount: Object.keys(mergedDb.user_data).length,
+                  savesCount: Object.keys(mergedDb.game_saves).length,
+                  statesCount: Object.keys(mergedDb.save_states).length,
+                  settingsCount: Object.keys(mergedDb.app_settings).length
+                }
+              }));
+            } catch (err) {
+              res.statusCode = 500;
+              res.end(JSON.stringify({ error: err.message }));
+            }
+          });
           return;
         }
 
@@ -906,18 +1013,68 @@ function multiConsoleScannerPlugin() {
 
             let savedCoverRelativeUrl = null;
 
-            if (coverDataUrl && coverDataUrl.startsWith('data:image/')) {
-              const mimeMatch = coverDataUrl.match(/^data:image\/([a-zA-Z0-9+]+);base64,/);
-              const ext = mimeMatch ? (mimeMatch[1] === 'jpeg' ? 'jpg' : mimeMatch[1]) : 'webp';
+            if (data.deleteCover) {
+              const coverExts = ['.webp', '.png', '.jpg', '.jpeg', '.gif', '.bmp'];
+              for (const ext of coverExts) {
+                const coverPath = path.join(targetDir, `${baseFileName}${ext}`);
+                if (fs.existsSync(coverPath)) {
+                  try { fs.unlinkSync(coverPath); } catch (_) {}
+                }
+                const genericPath = path.join(targetDir, `cover${ext}`);
+                if (fs.existsSync(genericPath)) {
+                  try { fs.unlinkSync(genericPath); } catch (_) {}
+                }
+              }
+              savedCoverRelativeUrl = '';
+              console.log(`🧹 [DEV COVER DELETED FROM DISK] -> in ${targetDir}`);
+            } else if (coverDataUrl && coverDataUrl.startsWith('data:image/')) {
+              const match = coverDataUrl.match(/^data:image\/([a-zA-Z0-9+]+);base64,/);
+              let ext = '.webp';
+              if (match && match[1]) {
+                const mimeSub = match[1].toLowerCase();
+                if (mimeSub === 'png') ext = '.png';
+                else if (mimeSub === 'jpeg' || mimeSub === 'jpg') ext = '.jpg';
+                else if (mimeSub === 'webp') ext = '.webp';
+              }
               const base64Data = coverDataUrl.replace(/^data:image\/[a-zA-Z0-9+]+;base64,/, '');
               const imageBuffer = Buffer.from(base64Data, 'base64');
-              const coverFileName = `${baseFileName}.${ext}`;
+              const coverFileName = `${baseFileName}${ext}`;
               const coverFilePath = path.join(targetDir, coverFileName);
 
               fs.writeFileSync(coverFilePath, imageBuffer);
               const relToPublic = path.relative(path.resolve(process.cwd(), 'public'), coverFilePath);
               savedCoverRelativeUrl = `/${relToPublic.split(path.sep).join('/')}`;
-              console.log(`💾 [SIDECAR COVER SAVED] -> ${coverFilePath}`);
+              console.log(`💾 [DEV COVER SAVED] -> ${coverFilePath}`);
+            } else if (data.coverUrl && (data.coverUrl.startsWith('http://') || data.coverUrl.startsWith('https://'))) {
+              try {
+                const remoteRes = await fetch(data.coverUrl);
+                if (remoteRes.ok) {
+                  const arrayBuffer = await remoteRes.arrayBuffer();
+                  const imageBuffer = Buffer.from(arrayBuffer);
+
+                  let ext = '.png';
+                  const lowerUrl = data.coverUrl.toLowerCase();
+                  if (lowerUrl.includes('.jpg') || lowerUrl.includes('.jpeg')) ext = '.jpg';
+                  else if (lowerUrl.includes('.webp')) ext = '.webp';
+                  else if (lowerUrl.includes('.png')) ext = '.png';
+                  else {
+                    const ct = remoteRes.headers.get('content-type') || '';
+                    if (ct.includes('jpeg')) ext = '.jpg';
+                    else if (ct.includes('webp')) ext = '.webp';
+                    else if (ct.includes('png')) ext = '.png';
+                  }
+
+                  const coverFileName = `${baseFileName}${ext}`;
+                  const coverFilePath = path.join(targetDir, coverFileName);
+
+                  fs.writeFileSync(coverFilePath, imageBuffer);
+                  const relToPublic = path.relative(path.resolve(process.cwd(), 'public'), coverFilePath);
+                  savedCoverRelativeUrl = `/${relToPublic.split(path.sep).join('/')}`;
+                  console.log(`💾 [DEV REMOTE COVER DOWNLOADED & SAVED] -> ${coverFilePath}`);
+                }
+              } catch (dlErr) {
+                console.warn(`[DEV REMOTE COVER FETCH FAILED]: ${data.coverUrl}`, dlErr.message);
+              }
             }
 
             const sidecarJson = {
@@ -937,6 +1094,14 @@ function multiConsoleScannerPlugin() {
             fs.writeFileSync(sidecarPath, JSON.stringify(sidecarJson, null, 2), 'utf-8');
             console.log(`💾 [SIDECAR JSON SAVED] -> ${sidecarPath}`);
 
+            // If a generic metadata.json exists in target directory, keep it in sync as well
+            const legacyMetaPath = path.join(targetDir, 'metadata.json');
+            if (fs.existsSync(legacyMetaPath)) {
+              try {
+                fs.writeFileSync(legacyMetaPath, JSON.stringify(sidecarJson, null, 2), 'utf-8');
+              } catch (_) {}
+            }
+
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify({
               success: true,
@@ -946,6 +1111,57 @@ function multiConsoleScannerPlugin() {
             }));
           } catch (err) {
             console.error('[SIDE CAR SAVE ERROR]', err);
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: err.message }));
+          }
+        });
+      });
+
+      // API Endpoint for deleting companion sidecar metadata from disk in development
+      server.middlewares.use('/api/metadata/delete-sidecar', (req, res) => {
+        if (req.method !== 'POST') {
+          res.statusCode = 405;
+          res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+          return;
+        }
+
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', () => {
+          try {
+            const data = JSON.parse(body || '{}');
+            const { systemKey, romPath, title } = data;
+
+            let targetDir = path.resolve(process.cwd(), 'public/roms', systemKey || '');
+            let baseFileName = 'game';
+
+            if (romPath) {
+              const decodedPath = decodeURIComponent(romPath).replace(/^\/roms\//, '');
+              const fullRomPath = path.resolve(process.cwd(), 'public/roms', decodedPath);
+              if (fs.existsSync(fullRomPath)) {
+                targetDir = path.dirname(fullRomPath);
+                baseFileName = path.parse(fullRomPath).name;
+              } else {
+                baseFileName = path.parse(decodedPath).name || (title ? title.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'game');
+              }
+            } else if (title) {
+              baseFileName = title.toLowerCase().replace(/[^a-z0-9]/g, '-');
+            }
+
+            const sidecarPath = path.join(targetDir, `${baseFileName}.json`);
+            if (fs.existsSync(sidecarPath)) {
+              try { fs.unlinkSync(sidecarPath); } catch (_) {}
+            }
+            const legacyPath = path.join(targetDir, 'metadata.json');
+            if (fs.existsSync(legacyPath)) {
+              try { fs.unlinkSync(legacyPath); } catch (_) {}
+            }
+
+            console.log(`🧹 [DEV SIDECAR JSON DELETED] -> from ${targetDir}`);
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ success: true, message: 'Sidecar JSON deleted from disk' }));
+          } catch (err) {
+            console.error('[DEV SIDE CAR DELETE ERROR]', err);
             res.statusCode = 500;
             res.end(JSON.stringify({ error: err.message }));
           }
@@ -987,6 +1203,36 @@ function multiConsoleScannerPlugin() {
           const targetUrl = `https://www.screenscraper.fr/api2/jeuInfos.php?${query}`;
           https.get(targetUrl, {
             headers: { 'User-Agent': 'RetroPlayer/1.0 (Web; Node)' }
+          }, (upstreamRes) => {
+            res.statusCode = upstreamRes.statusCode || 200;
+            res.setHeader('Content-Type', 'application/json');
+            upstreamRes.pipe(res);
+          }).on('error', (e) => {
+            res.statusCode = 502;
+            res.end(JSON.stringify({ error: e.message }));
+          });
+        } catch (err) {
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: err.message }));
+        }
+      });
+
+      // Proxy for Keyless Video Game Database (RAWG.io)
+      server.middlewares.use('/api/proxy-rawg', (req, res) => {
+        try {
+          const urlObj = new URL(req.url, 'http://localhost');
+          const targetPath = urlObj.searchParams.get('endpoint');
+          if (!targetPath) {
+            res.statusCode = 400;
+            res.end(JSON.stringify({ error: 'Missing endpoint parameter' }));
+            return;
+          }
+          const defaultKey = 'c542e67aec3a4340908f9de9e86038af';
+          const sep = targetPath.includes('?') ? '&' : '?';
+          const finalPath = targetPath.includes('key=') ? targetPath : `${targetPath}${sep}key=${defaultKey}`;
+          const targetUrl = `https://api.rawg.io/api/${finalPath}`;
+          https.get(targetUrl, {
+            headers: { 'User-Agent': 'RetroPlayer/2.0 (Web; VideoGameDatabaseBot)' }
           }, (upstreamRes) => {
             res.statusCode = upstreamRes.statusCode || 200;
             res.setHeader('Content-Type', 'application/json');
