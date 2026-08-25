@@ -115,9 +115,15 @@ export default function DsView({
 
   const description = meta.description || selectedGame?.sidecarMetadata?.description || (selectedGame ? getGameDescription(selectedGame) : '');
   const releaseYear = meta.releaseYear || selectedGame?.sidecarMetadata?.releaseYear || meta.releaseDate?.split('-')[0] || (selectedGame && getReleaseDate(selectedGame) !== '2000-01-01' ? getReleaseDate(selectedGame).split('-')[0] : null);
-  const developer = meta.developer || selectedGame?.sidecarMetadata?.developer || null;
-  const publisher = meta.publisher || selectedGame?.sidecarMetadata?.publisher || null;
-  const genre = meta.genre || selectedGame?.sidecarMetadata?.genre || null;
+  
+  const rawDeveloper = meta.developer || selectedGame?.sidecarMetadata?.developer || null;
+  const rawPublisher = meta.publisher || selectedGame?.sidecarMetadata?.publisher || null;
+  const rawGenre = meta.genre || selectedGame?.sidecarMetadata?.genre || null;
+
+  const isDummyName = (str) => !str || str === 'Classic' || str === selectedGame?.systemName || str === selectedGame?.systemKey || str === 'Game Boy' || str === 'Game Boy Advance' || str === 'Game Boy Color' || str === 'Nintendo DS' || str === 'Super Nintendo' || str === 'Nintendo (NES)' || str === 'Nintendo 64' || str === 'Sega Genesis' || str === 'Sega Game Gear' || str === 'Sony PlayStation' || str === 'Arcade' || str === 'Atari 2600';
+  const developer = isDummyName(rawDeveloper) ? null : rawDeveloper;
+  const publisher = isDummyName(rawPublisher) ? null : rawPublisher;
+  const genre = (!rawGenre || rawGenre === 'Retro Classic') ? null : rawGenre;
 
   // Walkthrough links from local sidecar metadata or metadataMap
   const walkthrough = selectedGame?.sidecarMetadata?.walkthrough || meta.walkthrough || {};

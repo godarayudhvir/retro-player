@@ -229,9 +229,15 @@ export default function MobileAppView({
   const screenshotSrc = rawScreenshot ? resolveAssetPath(rawScreenshot) : null;
   const description = selectedMeta?.description || selectedGameForDetails?.sidecarMetadata?.description || (selectedGameForDetails ? getGameDescription(selectedGameForDetails) : '');
   const releaseYear = selectedMeta?.releaseYear || selectedMeta?.releaseDate?.split('-')[0] || (selectedGameForDetails && getReleaseDate(selectedGameForDetails) !== '2000-01-01' ? getReleaseDate(selectedGameForDetails).split('-')[0] : null);
-  const developer = selectedMeta?.developer || selectedGameForDetails?.sidecarMetadata?.developer || null;
-  const publisher = selectedMeta?.publisher || selectedGameForDetails?.sidecarMetadata?.publisher || null;
-  const genre = selectedMeta?.genre || selectedGameForDetails?.sidecarMetadata?.genre || null;
+  
+  const rawDeveloper = selectedMeta?.developer || selectedGameForDetails?.sidecarMetadata?.developer || null;
+  const rawPublisher = selectedMeta?.publisher || selectedGameForDetails?.sidecarMetadata?.publisher || null;
+  const rawGenre = selectedMeta?.genre || selectedGameForDetails?.sidecarMetadata?.genre || null;
+
+  const isDummyName = (str) => !str || str === 'Classic' || str === selectedGameForDetails?.systemName || str === selectedGameForDetails?.systemKey || str === 'Game Boy' || str === 'Game Boy Advance' || str === 'Game Boy Color' || str === 'Nintendo DS' || str === 'Super Nintendo' || str === 'Nintendo (NES)' || str === 'Nintendo 64' || str === 'Sega Genesis' || str === 'Sega Game Gear' || str === 'Sony PlayStation' || str === 'Arcade' || str === 'Atari 2600';
+  const developer = isDummyName(rawDeveloper) ? null : rawDeveloper;
+  const publisher = isDummyName(rawPublisher) ? null : rawPublisher;
+  const genre = (!rawGenre || rawGenre === 'Retro Classic') ? null : rawGenre;
 
   const walkthrough = selectedGameForDetails?.sidecarMetadata?.walkthrough || selectedMeta?.walkthrough || {};
   const writtenGuideUrl = walkthrough.written || selectedMeta?.writtenWalkthroughUrl || null;
