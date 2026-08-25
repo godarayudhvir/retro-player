@@ -78,9 +78,10 @@ export function useMetadataScraper(games = [], options = {}) {
       if (games && games.length > 0) {
         games.forEach(g => {
           const id = g.id || `${g.systemKey}-${g.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
-          const hasLocalSidecar = g.hasSidecar || g.sidecarMetadata || (g.coverUrl && !g.coverUrl.endsWith('.svg'));
-          // Local sidecar takes precedence unless user created an explicit manual override
-          if (hasLocalSidecar && (!merged[id] || (!merged[id].isManualOverride && merged[id].source !== 'Manual Override'))) {
+          const hasLocalSidecar = Boolean(g.sidecarMetadata && Object.keys(g.sidecarMetadata).length > 0);
+          const hasLocalCover = Boolean(g.coverUrl && !g.coverUrl.endsWith('.svg'));
+          // Local sidecar/cover takes precedence unless user created an explicit manual override
+          if ((hasLocalSidecar || hasLocalCover) && (!merged[id] || (!merged[id].isManualOverride && merged[id].source !== 'Manual Override'))) {
             const sidecar = g.sidecarMetadata || {};
             const sidecarCover = (g.coverUrl && !g.coverUrl.endsWith('.svg')) ? g.coverUrl : null;
             const cachedEntry = merged[id];
@@ -102,8 +103,8 @@ export function useMetadataScraper(games = [], options = {}) {
               walkthrough: sidecar.walkthrough || cachedEntry?.walkthrough || undefined,
               writtenWalkthroughUrl: sidecar.walkthrough?.written || cachedEntry?.writtenWalkthroughUrl || undefined,
               videoWalkthroughUrl: sidecar.walkthrough?.video || cachedEntry?.videoWalkthroughUrl || undefined,
-              source: (sidecar.description || sidecar.releaseYear) ? 'Local Sidecar' : (cachedEntry?.source || 'Local Companion'),
-              hasSidecar: true,
+              source: (sidecar.description || sidecar.releaseYear || sidecar.developer) ? 'Local Sidecar' : (cachedEntry?.source || 'Local Companion'),
+              hasSidecar: hasLocalSidecar,
               scrapedAt: cachedEntry?.scrapedAt || new Date().toISOString()
             };
             merged[id] = updatedMeta;
@@ -178,7 +179,7 @@ export function useMetadataScraper(games = [], options = {}) {
       const game = gameList[i];
       const id = game.id || `${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
       const sidecar = game.sidecarMetadata || {};
-      const hasLocalSidecarJson = Boolean(game.hasSidecar || (game.sidecarMetadata && Object.keys(game.sidecarMetadata).length > 0));
+      const hasLocalSidecarJson = Boolean(game.sidecarMetadata && Object.keys(game.sidecarMetadata).length > 0);
       const localCover = (game.coverUrl && !game.coverUrl.endsWith('.svg')) ? game.coverUrl : null;
       const hasLocalCoverFile = Boolean(localCover);
       const existing = metadataMap[id];
@@ -189,16 +190,14 @@ export function useMetadataScraper(games = [], options = {}) {
       }
 
       const isManual = Boolean(existing?.isManualOverride);
-      const isCompleteLocal = Boolean(hasLocalSidecarJson && hasLocalCoverFile);
+      const isCompleteLocal = Boolean(hasLocalSidecarJson && sidecar.developer && hasLocalCoverFile);
       const hasValidCover = Boolean(localCover || (existing?.coverUrl && !existing.coverUrl.endsWith('.svg')));
       const hasValidDetails = Boolean(
-        (sidecar.description && sidecar.releaseYear) || 
-        (existing?.description && 
-         existing.description !== `Experience ${game.title} on ${game.systemName}.` && 
-         existing.description !== `Experience the classic adventure of ${game.title} for ${game.systemName}. Relive nostalgic challenges and timeless retro gameplay.`)
+        (sidecar.developer && (sidecar.releaseYear || sidecar.year)) || 
+        (existing?.developer && existing?.releaseYear && existing.developer !== (game.systemName || 'Classic') && existing.developer !== 'Classic')
       );
 
-      // In Smart Scan mode (force === false), only skip if fully populated
+      // In Smart Scan mode (force === false), only skip if fully populated with developer & releaseYear
       const isAlreadyComplete = !force && (isManual || isCompleteLocal || (hasValidCover && hasValidDetails));
 
       try {

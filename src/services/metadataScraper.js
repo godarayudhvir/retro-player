@@ -952,7 +952,7 @@ export async function scrapeGame(game, force = false) {
 
   // Check what local files exist on disk
   const sidecar = game.sidecarMetadata || {};
-  const hasLocalSidecarJson = Boolean(game.hasSidecar || (game.sidecarMetadata && Object.keys(game.sidecarMetadata).length > 0));
+  const hasLocalSidecarJson = Boolean(game.sidecarMetadata && Object.keys(game.sidecarMetadata).length > 0);
   const localCover = (game.coverUrl && !game.coverUrl.endsWith('.svg')) ? game.coverUrl : null;
   const hasLocalCoverFile = Boolean(localCover);
 
@@ -967,13 +967,11 @@ export async function scrapeGame(game, force = false) {
     // 2. If cached metadata already has both details and a valid cover, use it
     const hasValidCachedCover = Boolean(cached.coverUrl && !cached.coverUrl.endsWith('.svg'));
     const hasValidCachedDetails = Boolean(
-      (sidecar.description && (sidecar.releaseYear || sidecar.year)) || 
-      (cached.description && 
-       cached.description !== `Experience ${game.title} on ${game.systemName}.` && 
-       cached.description !== `Experience the classic adventure of ${game.title} for ${game.systemName}. Relive nostalgic challenges and timeless retro gameplay.`)
+      (sidecar.developer && (sidecar.releaseYear || sidecar.year)) || 
+      (cached.developer && cached.releaseYear && cached.developer !== (game.systemName || 'Classic') && cached.developer !== 'Classic')
     );
 
-    if ((hasValidCachedCover || hasLocalCoverFile) && (hasValidCachedDetails || hasLocalSidecarJson)) {
+    if ((hasValidCachedCover || hasLocalCoverFile) && (hasValidCachedDetails || (hasLocalSidecarJson && sidecar.developer))) {
       addScraperLog(`📦 Loaded "${game.title}" from IndexedDB cache`, 'info', { gameId: id, title: game.title, systemKey: game.systemKey });
       return cached;
     }
@@ -981,7 +979,7 @@ export async function scrapeGame(game, force = false) {
 
   // Determine what is missing locally so we ONLY query online to fill gaps:
   const needsCoverScrape = !hasLocalCoverFile && (!cached?.coverUrl || force);
-  const needsDetailsScrape = !hasLocalSidecarJson || force;
+  const needsDetailsScrape = !hasLocalSidecarJson || !sidecar.developer || force;
 
   // If local files already contain both metadata JSON and cover image, skip all network queries
   if (hasLocalSidecarJson && hasLocalCoverFile && !force) {

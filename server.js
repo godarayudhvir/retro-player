@@ -481,7 +481,8 @@ app.get('/api/roms', (req, res) => {
               romUrl,
               coverUrl: companionCover || null,
               sidecarMetadata: sidecarMeta || null,
-              hasSidecar: !!(sidecarMeta || companionCover)
+              hasSidecar: !!sidecarMeta,
+              hasCover: !!companionCover
             };
 
             if (gameMap.has(gameId)) {

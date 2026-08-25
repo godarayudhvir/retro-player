@@ -318,7 +318,8 @@ function getRomsManifest(romsBaseDir) {
             romUrl,
             coverUrl: companionCover || null,
             sidecarMetadata: sidecarMeta || null,
-            hasSidecar: !!(sidecarMeta || companionCover)
+            hasSidecar: !!sidecarMeta,
+            hasCover: !!companionCover
           };
 
           // If entry already exists, prioritize the one with companion cover/sidecar metadata
