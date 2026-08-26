@@ -117,6 +117,7 @@ This pass is the most subjective. Use the criteria below to classify titles.
 | Tiny tech demos (< 5 KB) | Usually alphabet/sprite tests, minimal gameplay |
 | Seasonal/holiday releases with no standalone fame | Annual `8-BIT XMAS` series, `Santa's Magical Christmas Sleigh` |
 | Unreleased standalone prototypes & betas | Games tagged `(Proto)`, `(Beta)`, `(Sample)`, `(Earlier)` with no retail release |
+| Pirate dumps & unlicensed counterfeit ROMs | Games tagged `(Pirate)` or `[Pirate]` |
 | Unlicensed pirate multi-carts | Multi-carts matching `\d+-in-1` or `\d+ Games` (e.g., `100-in-1`, `42 Games`) |
 | Pure joke/meme ROMs with minimal gameplay | `NES Matrix`, `Pixel Poops`, novelty hacks |
 | Generic aftermarket game jam demos | Random itch.io/NESDev game jam entries tagged `(Aftermarket)` / `(Unl)` unless famous |

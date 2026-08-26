@@ -953,20 +953,6 @@ export default function MobileAppView({
                     </div>
                     <div className="ds-stat-val-group">
                       <span className="ds-stat-val">{selectedStats?.playtimeFormatted || '< 1 min'}</span>
-                      {onResetStats && (selectedStats?.totalSeconds > 0 || selectedStats?.launchCount > 0) && (
-                        <button
-                          className="ds-stat-reset-icon-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onResetStats(selectedGameForDetails);
-                            sfx?.playDelete?.();
-                          }}
-                          title="Reset Playtime Stats"
-                          aria-label="Reset Playtime Stats"
-                        >
-                          <RotateCcw size={10} />
-                        </button>
-                      )}
                     </div>
                   </div>
 
