@@ -115,6 +115,7 @@ export function useGamepadNavigation({
       selectedMobileSystem,
       profiles,
       activeProfileId,
+      onPlayGame,
       games
     };
   }, [
@@ -151,6 +152,7 @@ export function useGamepadNavigation({
     selectedMobileSystem,
     profiles,
     activeProfileId,
+    onPlayGame,
     games
   ]);
 
@@ -551,74 +553,6 @@ export function useGamepadNavigation({
       return;
     }
 
-
-
-    // 1. Info Modal Navigation
-    if (isInfoOpen) {
-      if (dir === 'BACK') {
-        setShowInfoModal(false);
-        setFocusedTarget({ zone: 'topbar', id: 'info' });
-        sfx?.playModalClose?.();
-        return;
-      }
-      if (dir === 'UP') {
-        setFocusedTarget({ zone: 'infoModal', id: 'close' });
-        sfx?.playTileNav?.();
-      } else if (dir === 'DOWN') {
-        setFocusedTarget(prev => (prev?.id === 'close' ? { zone: 'infoModal', id: 'ack' } : { zone: 'infoModal', id: 'ack' }));
-        sfx?.playTileNav?.();
-      } else if (dir === 'LEFT') {
-        setFocusedTarget(prev => {
-          if (prev?.id === 'ack') return { zone: 'infoModal', id: 'github' };
-          return { zone: 'infoModal', id: 'close' };
-        });
-        sfx?.playTileNav?.();
-      } else if (dir === 'RIGHT') {
-        setFocusedTarget(prev => {
-          if (prev?.id === 'github' || prev?.id === 'close') return { zone: 'infoModal', id: 'ack' };
-          return { zone: 'infoModal', id: 'ack' };
-        });
-        sfx?.playTileNav?.();
-      } else if (dir === 'SELECT') {
-        if (focusedTarget?.id === 'github') {
-          sfx?.playModalOpen?.();
-          window.open('https://github.com/godarayudhvir/retro-player', '_blank', 'noopener,noreferrer');
-        } else {
-          setShowInfoModal(false);
-          setFocusedTarget({ zone: 'topbar', id: 'info' });
-          sfx?.playModalClose?.();
-        }
-      }
-      return;
-    }
-
-    // 2. Load ROM Modal Navigation
-    if (isLoadRomOpen) {
-      if (dir === 'BACK') {
-        setShowLoadRomModal(false);
-        setFocusedTarget({ zone: 'topbar', id: 'loadRom' });
-        sfx?.playModalClose?.();
-        return;
-      }
-      if (dir === 'LEFT' || dir === 'UP') {
-        setFocusedTarget({ zone: 'loadRomModal', id: 'cancel' });
-        sfx?.playTileNav?.();
-      } else if (dir === 'RIGHT' || dir === 'DOWN') {
-        setFocusedTarget({ zone: 'loadRomModal', id: 'browse' });
-        sfx?.playTileNav?.();
-      } else if (dir === 'SELECT') {
-        if (curTarget?.id === 'cancel' || curTarget?.id === 'close') {
-          setShowLoadRomModal(false);
-          setFocusedTarget({ zone: 'topbar', id: 'loadRom' });
-          sfx?.playModalClose?.();
-        } else {
-          const inputEl = document.querySelector('.modal-dropzone input[type="file"]');
-          if (inputEl) inputEl.click();
-        }
-      }
-      return;
-    }
-
     // 2.1a Scraper Modal Navigation
     const { showScraperModal: isScraperOpen } = stateRef.current;
     if (isScraperOpen) {
@@ -823,20 +757,6 @@ export function useGamepadNavigation({
           themeCards[curThemeIdx].click();
           sfx?.playThemeSwitch?.();
         }
-      }
-      return;
-    }
-
-    // 2.1b2 Backup Modal Navigation
-    const { showBackupModal: isBackupOpen, setShowBackupModal } = stateRef.current;
-    if (isBackupOpen) {
-      if (dir === 'BACK') {
-        if (setShowBackupModal) {
-          setShowBackupModal(false);
-          setFocusedTarget({ zone: 'topbar', id: 'backup' });
-          sfx?.playModalClose?.();
-        }
-        return;
       }
       return;
     }
@@ -1673,9 +1593,6 @@ export function useGamepadNavigation({
       }
       items.push('search');
       if (stateRef.current.pwa?.canInstall) items.push('install');
-      items.push('loadRom');
-      items.push('backup');
-      items.push('info');
       return items;
     };
 
@@ -1741,19 +1658,6 @@ export function useGamepadNavigation({
             stateRef.current.pwa.promptInstall();
             sfx?.playThemeSwitch?.();
           }
-        } else if (curId === 'loadRom') {
-          setShowLoadRomModal(true);
-          setFocusedTarget({ zone: 'loadRomModal', id: 'browse' });
-          sfx?.playModalOpen?.();
-        } else if (curId === 'backup') {
-          if (stateRef.current.onOpenBackupModal) {
-            stateRef.current.onOpenBackupModal();
-            sfx?.playModalOpen?.();
-          }
-        } else if (curId === 'info') {
-          setShowInfoModal(true);
-          setFocusedTarget({ zone: 'infoModal', id: 'ack' });
-          sfx?.playModalOpen?.();
         }
       } else if (curZone === 'ribbon') {
         if (allTabs[curIndex]) {
@@ -1777,12 +1681,7 @@ export function useGamepadNavigation({
           }
         }
       } else if (curZone === 'emptyGrid') {
-        const curId = curTarget?.id || (curQuery ? 'clearSearch' : 'loadRom');
-        if (curId === 'loadRom') {
-          setShowLoadRomModal(true);
-          setFocusedTarget({ zone: 'loadRomModal', id: 'browse' });
-          sfx?.playModalOpen?.();
-        } else if (curId === 'clearSearch') {
+        if (curQuery?.trim()) {
           setSearchQuery('');
           setFocusedTarget({ zone: 'grid', index: 0 });
           sfx?.playNavSelect?.();
@@ -1814,10 +1713,6 @@ export function useGamepadNavigation({
         } else if (curId === 'guides') {
           const guidesBtn = document.querySelector('.ds-guide-btn');
           if (guidesBtn) guidesBtn.click();
-          sfx?.playTabSwitch?.();
-        } else if (curId === 'edit') {
-          const editBtn = document.querySelector('.ds-action-toolbar .ds-tool-btn:last-child');
-          if (editBtn) editBtn.click();
           sfx?.playTabSwitch?.();
         } else if (curId === 'save-export') {
           const exportBtn = document.querySelector('.ds-save-action-tile:nth-child(1)');
@@ -1867,7 +1762,7 @@ export function useGamepadNavigation({
         setFocusedTarget({ zone: 'ribbon', index: nextIdx });
         sfx?.playTabSwitch?.();
       } else if (dir === 'UP') {
-        setFocusedTarget({ zone: 'topbar', id: curIndex === 0 ? 'profile' : (curIndex < allTabs.length / 2 ? 'search' : 'loadRom') });
+        setFocusedTarget({ zone: 'topbar', id: curIndex === 0 ? 'profile' : 'search' });
         sfx?.playTileNav?.();
       } else if (dir === 'DOWN') {
         setFocusedTarget({ zone: 'grid', index: 0 });
@@ -1877,8 +1772,8 @@ export function useGamepadNavigation({
       // Navigation within the DS game detail card panel
       const curId = curTarget?.id || 'play';
       const hasGuides = Boolean(document.querySelector('.ds-guide-btn'));
-      // Tab order: fav -> save -> (guides) -> edit (top toolbar), play (bottom)
-      const toolbarItems = hasGuides ? ['fav', 'save', 'guides', 'edit'] : ['fav', 'save', 'edit'];
+      // Tab order: fav -> save -> (guides) (top toolbar), play (bottom)
+      const toolbarItems = hasGuides ? ['fav', 'save', 'guides'] : ['fav', 'save'];
       const isSavePaneOpen = Boolean(document.querySelector('.ds-save-studio'));
       const saveTiles = ['save-export', 'save-import', 'save-delete'];
 
@@ -2510,8 +2405,8 @@ export function useGamepadNavigation({
               if (stateRef.current.selectedMobileGameForDetails && stateRef.current.onPlayGame) {
                 stateRef.current.onPlayGame(stateRef.current.selectedMobileGameForDetails);
                 sfx?.playGameLaunch?.();
-              } else if (stateRef.current.focusedTarget?.zone === 'grid') {
-                const curGame = stateRef.current.filteredGames?.[stateRef.current.focusedTarget?.index || 0];
+              } else if (stateRef.current.focusedTarget?.zone === 'grid' || stateRef.current.focusedTarget?.zone === 'cardModal') {
+                const curGame = stateRef.current.filteredGames?.[stateRef.current.focusedTarget?.index || 0] || stateRef.current.filteredGames?.[0];
                 if (curGame && stateRef.current.onPlayGame) {
                   stateRef.current.onPlayGame(curGame);
                   sfx?.playGameLaunch?.();

@@ -697,7 +697,7 @@ export default function DsView({
           {/* Unified Edit & Scrape Touch Button */}
           <button
             type="button"
-            className={`ds-tool-btn ds-icon-btn ds-edit-tab-btn ${dsTab === 'manage' ? 'is-active' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'edit' ? 'gamepad-focused' : ''}`}
+            className={`ds-tool-btn ds-icon-btn ds-edit-tab-btn ${dsTab === 'manage' ? 'is-active' : ''}`}
             onClick={() => {
               setDsTab(dsTab === 'manage' ? 'overview' : 'manage');
               sfx?.playTabSwitch?.();

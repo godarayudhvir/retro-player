@@ -17,7 +17,7 @@ export default function AboutInfoModal({ isOpen, focusedTarget, onClose }) {
             <span className="info-version-badge">v1.0.3</span>
           </div>
           <button
-            className={`info-close-btn ${focusedTarget?.zone === 'infoModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`}
+            className="info-close-btn"
             onClick={onClose}
             aria-label="Close modal"
           >
@@ -72,14 +72,14 @@ export default function AboutInfoModal({ isOpen, focusedTarget, onClose }) {
             href="https://github.com/godarayudhvir/retro-player"
             target="_blank"
             rel="noopener noreferrer"
-            className={`info-repo-btn ${focusedTarget?.zone === 'infoModal' && focusedTarget?.id === 'github' ? 'gamepad-focused' : ''}`}
+            className="info-repo-btn"
           >
             <Github size={18} />
             <span>GitHub Repository</span>
             <ExternalLink size={14} />
           </a>
           <button
-            className={`info-ack-btn ${focusedTarget?.zone === 'infoModal' && focusedTarget?.id === 'ack' ? 'gamepad-focused' : ''}`}
+            className="info-ack-btn"
             onClick={onClose}
           >
             Got It!

@@ -303,10 +303,9 @@ export default function Topbar({
 
         {/* Load Custom ROM */}
         <button
-          className={`status-pill status-loadrom ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'loadRom' ? 'gamepad-focused' : ''}`}
+          className="status-pill status-loadrom"
           onClick={() => {
             setShowLoadRomModal(true);
-            setFocusedTarget({ zone: 'loadRomModal', id: 'browse' });
             sfx?.playModalOpen?.();
           }}
           title="Open Load Custom ROM dialog"
@@ -317,7 +316,7 @@ export default function Topbar({
 
         {/* Storage & Database Management Studio (Backup, Restore & Reset) */}
         <button
-          className={`status-pill status-backup-app ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'backup' ? 'gamepad-focused' : ''}`}
+          className="status-pill status-backup-app"
           onClick={() => {
             onOpenBackupModal?.();
             sfx?.playModalOpen?.();
@@ -330,7 +329,7 @@ export default function Topbar({
 
         {/* About & System Info (v1.0.3) */}
         <button
-          className={`status-pill status-info-app ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'info' ? 'gamepad-focused' : ''}`}
+          className="status-pill status-info-app"
           onClick={() => {
             onOpenAboutModal?.();
             sfx?.playModalOpen?.();
