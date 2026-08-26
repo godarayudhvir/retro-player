@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { 
   X, 
   Gamepad2, 
@@ -94,6 +94,18 @@ export default function EmulatorModal({
   const [toastMessage, setToastMessage] = useState('');
   const [loadingHintIndex, setLoadingHintIndex] = useState(() => Math.floor(Math.random() * LOADING_HINTS.length));
   const toastTimeoutRef = useRef(null);
+
+  // Dual-Slot Auto-Resume State (Slot 1)
+  const [showResumePrompt, setShowResumePrompt] = useState(false);
+  const [resumeStateData, setResumeStateData] = useState(null);
+  const resumeTimerRef = useRef(null);
+  const [resumeCountdown, setResumeCountdown] = useState(10);
+
+  const isArcadeMachine = useMemo(() => {
+    const sysKey = (game?.systemKey || '').toLowerCase();
+    const sysCore = (game?.systemCore || '').toLowerCase();
+    return ['arcade', 'mame', 'cps1', 'cps2', 'cps3', 'neogeo'].includes(sysKey) || ['arcade', 'mame', 'cps1', 'cps2', 'cps3', 'neogeo'].includes(sysCore);
+  }, [game?.systemKey, game?.systemCore]);
 
   // Advanced In-Game Features: Speed, Recording, VSync, Threads, FPS
   const [isRecording, setIsRecording] = useState(false);
@@ -366,14 +378,20 @@ export default function EmulatorModal({
   const finishLoading = useCallback(() => {
     const elapsed = Date.now() - loadStartTimeRef.current;
     const MIN_HINT_MS = 2000;
+    const onFinished = () => {
+      setIsLoadingGame(false);
+      loadDismissTimerRef.current = null;
+      if (resumeStateDataRef.current) {
+        setShowResumePrompt(true);
+        setResumeCountdown(10);
+      }
+    };
+
     if (elapsed < MIN_HINT_MS) {
       if (loadDismissTimerRef.current) clearTimeout(loadDismissTimerRef.current);
-      loadDismissTimerRef.current = setTimeout(() => {
-        setIsLoadingGame(false);
-        loadDismissTimerRef.current = null;
-      }, MIN_HINT_MS - elapsed);
+      loadDismissTimerRef.current = setTimeout(onFinished, MIN_HINT_MS - elapsed);
     } else {
-      setIsLoadingGame(false);
+      onFinished();
     }
   }, []);
 
@@ -416,41 +434,89 @@ export default function EmulatorModal({
       let initialStateBase64 = null;
       try {
         const isMasterProfile = activeProfileId === 'prof_default' || activeProfileId === 'default';
-        const scopedSaveKey = `save_${activeProfileId}_${currentGame.id}`;
-        const legacySaveKey = `save_${currentGame.id}`;
-        let dbSave = await dbGet(STORES.GAME_SAVES, scopedSaveKey);
-        if (!dbSave && isMasterProfile) dbSave = await dbGet(STORES.GAME_SAVES, legacySaveKey);
+        const identifiers = [
+          currentGame.id,
+          currentGame.slug,
+          currentGame.rawTitle,
+          currentGame.filename,
+          currentGame.title
+        ].filter(Boolean);
 
-        if (dbSave && dbSave.data) {
-          initialSaveBase64 = typeof dbSave.data === 'string' ? dbSave.data : (dbSave.data.save || null);
-        }
-        if (!initialSaveBase64) {
-          const lsSave = localStorage.getItem(scopedSaveKey) || (isMasterProfile ? localStorage.getItem(legacySaveKey) : null);
-          if (lsSave) {
-            const parsed = JSON.parse(lsSave);
-            if (parsed && parsed.data) {
-              initialSaveBase64 = typeof parsed.data === 'string' ? parsed.data : (parsed.data.save || null);
+        const profilePrefixes = isMasterProfile
+          ? [activeProfileId, 'prof_default', 'default', '']
+          : [activeProfileId];
+
+        // 1. In-game Battery RAM lookup across all identifiers
+        for (const id of identifiers) {
+          for (const prof of profilePrefixes) {
+            const saveKey = prof ? `save_${prof}_${id}` : `save_${id}`;
+            let dbSave = await dbGet(STORES.GAME_SAVES, saveKey);
+            if (dbSave && dbSave.data) {
+              initialSaveBase64 = typeof dbSave.data === 'string' ? dbSave.data : (dbSave.data.save || dbSave.data.data || null);
+              if (initialSaveBase64) break;
             }
+            const lsSave = localStorage.getItem(saveKey);
+            if (lsSave) {
+              try {
+                const parsed = JSON.parse(lsSave);
+                if (parsed && parsed.data) {
+                  initialSaveBase64 = typeof parsed.data === 'string' ? parsed.data : (parsed.data.save || parsed.data.data || null);
+                  if (initialSaveBase64) break;
+                }
+              } catch(e) {}
+            }
+          }
+          if (initialSaveBase64) break;
+        }
+
+        // 2. Slot 0 Quick Save lookup across all identifiers
+        for (const id of identifiers) {
+          for (const prof of profilePrefixes) {
+            const stateKey = prof ? `state_${prof}_${id}` : `state_${id}`;
+            let dbState = await dbGet(STORES.SAVE_STATES, stateKey);
+            if (dbState && dbState.data) {
+              initialStateBase64 = typeof dbState.data === 'string' ? dbState.data : (dbState.data.state || dbState.data.data || null);
+              if (initialStateBase64) break;
+            }
+            const lsState = localStorage.getItem(stateKey);
+            if (lsState) {
+              try {
+                const parsed = JSON.parse(lsState);
+                if (parsed && parsed.data) {
+                  initialStateBase64 = typeof parsed.data === 'string' ? parsed.data : (parsed.data.state || parsed.data.data || null);
+                  if (initialStateBase64) break;
+                }
+              } catch(e) {}
+            }
+          }
+          if (initialStateBase64) break;
+        }
+
+        // Slot 1: Auto-Resume Snapshot (captured automatically on exit)
+        const gameKey = currentGame.id || currentGame.title;
+        const autoResumeKey = `state_auto_${activeProfileId}_${gameKey}`;
+        let autoResumeState = await dbGet(STORES.SAVE_STATES, autoResumeKey);
+        if (!autoResumeState && currentGame.title) {
+          autoResumeState = await dbGet(STORES.SAVE_STATES, `state_auto_${activeProfileId}_${currentGame.title}`);
+        }
+        let autoResumeB64 = autoResumeState?.data || null;
+        if (!autoResumeB64) {
+          const lsAuto = localStorage.getItem(autoResumeKey) || localStorage.getItem(`state_auto_${activeProfileId}_${currentGame.title}`);
+          if (lsAuto) {
+            try {
+              const parsed = JSON.parse(lsAuto);
+              autoResumeB64 = parsed?.data || null;
+            } catch(e) {}
           }
         }
 
-        const scopedStateKey = `state_${activeProfileId}_${currentGame.id}`;
-        const legacyStateKey = `state_${currentGame.id}`;
-        let dbState = await dbGet(STORES.SAVE_STATES, scopedStateKey);
-        if (!dbState && isMasterProfile) dbState = await dbGet(STORES.SAVE_STATES, legacyStateKey);
+        const isAutoResumeEnabled = localStorage.getItem('retro_auto_resume_enabled') !== 'false';
+        if (autoResumeB64 && isAutoResumeEnabled) {
+          setResumeStateData(autoResumeB64);
+        } else {
+          setResumeStateData(null);
+        }
 
-        if (dbState && dbState.data) {
-          initialStateBase64 = typeof dbState.data === 'string' ? dbState.data : (dbState.data.state || null);
-        }
-        if (!initialStateBase64) {
-          const lsState = localStorage.getItem(scopedStateKey) || (isMasterProfile ? localStorage.getItem(legacyStateKey) : null);
-          if (lsState) {
-            const parsed = JSON.parse(lsState);
-            if (parsed && parsed.data) {
-              initialStateBase64 = typeof parsed.data === 'string' ? parsed.data : (parsed.data.state || null);
-            }
-          }
-        }
         if (initialSaveBase64) {
           console.log(`💾 [SAVE DATA PRELOADED] Found saved battery RAM for "${currentGame.title}" (Profile: ${activeProfileId})`);
         }
@@ -1063,7 +1129,8 @@ export default function EmulatorModal({
                     emu.gamepad.updateGamepadState();
                   }
 
-                  const activeGps = (emu.gamepad.gamepads || []).filter(g => g && g.id);
+                  const rawGps = Array.isArray(emu.gamepad.gamepads) ? emu.gamepad.gamepads : (typeof emu.gamepad.gamepads === 'object' && emu.gamepad.gamepads !== null ? Object.values(emu.gamepad.gamepads) : []);
+                  const activeGps = rawGps.filter(g => g && typeof g === 'object' && g.id);
                   if (!Array.isArray(emu.gamepadSelection) || emu.gamepadSelection.length === 0) {
                     emu.gamepadSelection = ['', '', '', ''];
                   }
@@ -1411,27 +1478,20 @@ export default function EmulatorModal({
             });
 
             window.EJS_ready = function() {
-              console.log('🎮 [EMULATORJS READY] Emulation Ready');
+              console.log('🎮 [EMULATORJS READY] Emulation Core Initialized');
               try {
                 window.focus();
-                const el = document.querySelector('canvas') || document.querySelector('#game canvas') || document.querySelector('#game');
-                if (el) el.focus();
                 syncAllGamepads();
                 autoBindGamepadsToPlayers();
                 _unlockAndEnforceAudio();
                 if (window.__INITIAL_SAVE_BASE64__) {
                   injectSaveData(window.__INITIAL_SAVE_BASE64__);
-                } else {
-                  clearSaveData();
-                }
-                if (window.parent && window.parent !== window) {
-                  window.parent.postMessage({ type: 'RETRO_PLAYER_CORE_RUNNING' }, '*');
                 }
               } catch(e) {}
             };
 
             window.EJS_onGameStart = function() {
-              console.log('🎮 [GAME STARTED] Emulation canvas active');
+              console.log('🎮 [GAME STARTED] ROM decompressed & emulation active');
               try {
                 window.focus();
                 const el = document.querySelector('canvas') || document.querySelector('#game canvas') || document.querySelector('#game');
@@ -1441,25 +1501,23 @@ export default function EmulatorModal({
                 _unlockAndEnforceAudio();
                 if (window.__INITIAL_SAVE_BASE64__) {
                   injectSaveData(window.__INITIAL_SAVE_BASE64__);
-                } else {
-                  clearSaveData();
                 }
                 if (window.parent && window.parent !== window) {
-                  window.parent.postMessage({ type: 'RETRO_PLAYER_CORE_RUNNING' }, '*');
+                  window.parent.postMessage({ type: 'RETRO_PLAYER_GAME_ACTIVE' }, '*');
                 }
               } catch(e) {}
             };
 
-            // Loop checker to signal parent as soon as first canvas frame is active
+            // Loop checker to signal parent strictly when canvas has rendered actual game frame (width > 64)
             let _canvasSignaled = false;
             function _pollCanvasReady() {
               if (_canvasSignaled) return;
               const cv = document.querySelector('canvas');
-              if (cv && cv.width > 0 && cv.height > 0) {
+              if (cv && cv.width > 64 && cv.height > 64) {
                 _canvasSignaled = true;
                 try {
                   if (window.parent && window.parent !== window) {
-                    window.parent.postMessage({ type: 'RETRO_PLAYER_CORE_RUNNING' }, '*');
+                    window.parent.postMessage({ type: 'RETRO_PLAYER_GAME_ACTIVE' }, '*');
                   }
                 } catch(e) {}
                 return;
@@ -1634,6 +1692,39 @@ export default function EmulatorModal({
           if (typeof win.flushSaveToDB === 'function') {
             win.flushSaveToDB();
           }
+
+          // Capture Slot 1 Auto-Resume snapshot on unmount (swipe-back or close)
+          const emu = win.EJS_emulator;
+          let stateBytes = null;
+          if (typeof emu?.gameManager?.getState === 'function') {
+            stateBytes = emu.gameManager.getState();
+          } else if (typeof emu?.saveState === 'function') {
+            stateBytes = emu.saveState();
+          } else if (typeof emu?.gameManager?.functions?.saveState === 'function') {
+            stateBytes = emu.gameManager.functions.saveState();
+          }
+
+          const targetGame = gameRef.current || game;
+          if (stateBytes && stateBytes.byteLength > 100 && targetGame) {
+            let binary = '';
+            const len = stateBytes.byteLength;
+            for (let i = 0; i < len; i++) {
+              binary += String.fromCharCode(stateBytes[i]);
+            }
+            const b64 = btoa(binary);
+            const autoResumeKey = `state_auto_${activeProfileId}_${targetGame.id || targetGame.title}`;
+            const payload = {
+              gameId: targetGame.id || targetGame.title,
+              profileId: activeProfileId,
+              timestamp: Date.now(),
+              data: b64,
+              isAutoResume: true
+            };
+            dbSet(STORES.SAVE_STATES, autoResumeKey, payload).catch(() => {});
+            try { localStorage.setItem(autoResumeKey, JSON.stringify(payload)); } catch(e) {}
+            console.log(`💾 [AUTO-RESUME UNMOUNT] Saved snapshot for "${targetGame.title}"`);
+          }
+
           if (win.EJS_emulator && typeof win.EJS_emulator.destroy === 'function') {
             win.EJS_emulator.destroy();
           }
@@ -1706,10 +1797,15 @@ export default function EmulatorModal({
     };
   }, [ensureAudioUnlocked]);
 
+  const resumeStateDataRef = useRef(resumeStateData);
+  useEffect(() => {
+    resumeStateDataRef.current = resumeStateData;
+  }, [resumeStateData]);
+
   // Listen for Controller Exit triggers & Save Sync posted from within the active emulator iframe
   useEffect(() => {
     const handleFrameMessage = async (e) => {
-      if (e.data.type === 'RETRO_PLAYER_CORE_RUNNING' || e.data.type === 'RETRO_PLAYER_CORE_STARTED' || e.data.type === 'RETRO_PLAYER_FIRST_FRAME') {
+      if (e.data.type === 'RETRO_PLAYER_GAME_ACTIVE') {
         finishLoading();
         if (!isGameMutedRef.current) {
           ensureAudioUnlocked();
@@ -1762,7 +1858,15 @@ export default function EmulatorModal({
       }
     };
     window.addEventListener('message', handleFrameMessage);
-    return () => window.removeEventListener('message', handleFrameMessage);
+    const handleGlobalExitRequest = () => {
+      console.log('📱 [MOBILE SWIPE / EXIT REQUEST] Graceful emulator exit triggered with auto-save flush.');
+      handleClose();
+    };
+    window.addEventListener('RETRO_PLAYER_REQUEST_EXIT', handleGlobalExitRequest);
+    return () => {
+      window.removeEventListener('message', handleFrameMessage);
+      window.removeEventListener('RETRO_PLAYER_REQUEST_EXIT', handleGlobalExitRequest);
+    };
   }, [onClose, activeProfileId, ensureAudioUnlocked]);
 
   const focusEmulator = (e) => {
@@ -1788,17 +1892,54 @@ export default function EmulatorModal({
       try {
         const win = iframeRef.current.contentWindow;
         if (win) {
+          // 1. Flush in-game Battery RAM (SRAM)
           if (typeof win.flushSaveToDB === 'function') {
             win.flushSaveToDB();
           } else if (win.EJS_emulator && typeof win.EJS_emulator.saveSave === 'function') {
             win.EJS_emulator.saveSave();
+          }
+
+          // 2. Extract and persist Slot 1 (Auto-Resume State) on Exit (Safely guarded for cores like MAME that throw on unsupported state size)
+          const emu = win.EJS_emulator;
+          let stateBytes = null;
+          try {
+            if (typeof emu?.gameManager?.getState === 'function') {
+              stateBytes = emu.gameManager.getState();
+            } else if (typeof emu?.saveState === 'function') {
+              stateBytes = emu.saveState();
+            } else if (typeof emu?.gameManager?.functions?.saveState === 'function') {
+              stateBytes = emu.gameManager.functions.saveState();
+            }
+          } catch(stateErr) {
+            // Core does not support save states (e.g. MAME arcade discrete PCB)
+            stateBytes = null;
+          }
+
+          if (stateBytes && stateBytes.byteLength > 100) {
+            let binary = '';
+            const len = stateBytes.byteLength;
+            for (let i = 0; i < len; i++) {
+              binary += String.fromCharCode(stateBytes[i]);
+            }
+            const b64 = btoa(binary);
+            const autoResumeKey = `state_auto_${activeProfileId}_${game.id || game.title}`;
+            const payload = {
+              gameId: game.id || game.title,
+              profileId: activeProfileId,
+              timestamp: Date.now(),
+              data: b64,
+              isAutoResume: true
+            };
+            dbSet(STORES.SAVE_STATES, autoResumeKey, payload).catch(() => {});
+            try { localStorage.setItem(autoResumeKey, JSON.stringify(payload)); } catch(e) {}
+            console.log(`💾 [AUTO-RESUME SAVED] Created Slot 1 Auto-Resume snapshot for "${game.title}" (Profile: ${activeProfileId})`);
           }
         }
       } catch (e) {
         console.warn('⚠️ [SAVE FLUSH ON CLOSE WARN]:', e);
       }
 
-      // Small 150ms buffer to allow IndexedDB async transaction to finalize
+      // Robust 450ms buffer to allow heavy WebAssembly cores (like NDS DeSmuME/MelonDS) to complete filesystem state serialization and commit to IndexedDB
       setTimeout(() => {
         if (iframeRef.current) {
           try {
@@ -1813,17 +1954,8 @@ export default function EmulatorModal({
           iframeRef.current.remove();
           iframeRef.current = null;
         }
-        // Cleanup un-scoped Emscripten IDBFS databases
-        const emscriptenDbs = ['/home/web_user/retroarch/userdata', '/home/web_user/retroarch', '/home/web_user', 'emulatorjs', 'retroarch'];
-        emscriptenDbs.forEach(d => {
-          try {
-            if (typeof indexedDB !== 'undefined' && typeof indexedDB.deleteDatabase === 'function') {
-              indexedDB.deleteDatabase(d);
-            }
-          } catch(e) {}
-        });
         onClose();
-      }, 150);
+      }, 450);
       return;
     }
     onClose();
@@ -2322,6 +2454,134 @@ export default function EmulatorModal({
     } catch (e) {}
   };
 
+  // Auto-Resume Timer Countdown & Auto-Dismiss
+  useEffect(() => {
+    if (!showResumePrompt) return;
+    setResumeCountdown(10);
+    const timer = setInterval(() => {
+      setResumeCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setShowResumePrompt(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [showResumePrompt]);
+
+  const handleApplyResumeState = useCallback(() => {
+    if (!resumeStateDataRef.current) return;
+    try {
+      const win = iframeRef.current?.contentWindow;
+      const emu = win?.EJS_emulator;
+      const binary = atob(resumeStateDataRef.current);
+      const len = binary.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+
+      let loaded = false;
+      if (typeof emu?.gameManager?.loadState === 'function') {
+        emu.gameManager.loadState(bytes);
+        loaded = true;
+      } else if (typeof emu?.loadState === 'function') {
+        emu.loadState(bytes);
+        loaded = true;
+      } else if (typeof emu?.gameManager?.functions?.loadState === 'function') {
+        emu.gameManager.functions.loadState(bytes);
+        loaded = true;
+      } else if (emu?.Module && typeof emu.Module._cmd_loadstate === 'function') {
+        emu.Module._cmd_loadstate();
+        loaded = true;
+      }
+
+      // If emulator core is paused or waiting for a user input kick to resume rendering loop
+      try {
+        if (emu?.gameManager?.resume) emu.gameManager.resume();
+        if (emu?.resume) emu.resume();
+        if (win?.focus) win.focus();
+        const canvas = win?.document?.querySelector('canvas');
+        if (canvas) canvas.focus();
+      } catch(e) {}
+
+      resumeStateDataRef.current = null;
+      setResumeStateData(null);
+      setShowResumePrompt(false);
+      sfx?.playGameLaunch?.();
+      showToast('⚡ Resumed where you left off!');
+    } catch(e) {
+      console.warn('Auto-resume load error:', e);
+      resumeStateDataRef.current = null;
+      setResumeStateData(null);
+      setShowResumePrompt(false);
+      showToast('Auto-resume failed');
+    }
+  }, [sfx]);
+
+  const handleDismissResumePrompt = useCallback(() => {
+    resumeStateDataRef.current = null;
+    setResumeStateData(null);
+    setShowResumePrompt(false);
+    sfx?.playNavBack?.();
+  }, [sfx]);
+
+  // Keyboard shortcut listener for Auto-Resume banner: Enter to Resume, Esc to Dismiss
+  useEffect(() => {
+    if (!showResumePrompt) return;
+    const handleResumeKeys = (e) => {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'a' || e.key === 'A') {
+        e.preventDefault();
+        e.stopPropagation();
+        handleApplyResumeState();
+      } else if (e.key === 'Escape' || e.key === 'Esc' || e.key === 'b' || e.key === 'B') {
+        e.preventDefault();
+        e.stopPropagation();
+        handleDismissResumePrompt();
+      }
+    };
+    window.addEventListener('keydown', handleResumeKeys, { capture: true });
+    return () => window.removeEventListener('keydown', handleResumeKeys, { capture: true });
+  }, [showResumePrompt, handleApplyResumeState, handleDismissResumePrompt]);
+
+  // Gamepad listener for Auto-Resume banner: Button 0 (A) to Resume, Button 1 (B) to Dismiss
+  useEffect(() => {
+    if (!showResumePrompt) return;
+    let animId = null;
+    let lastButtonState = { a: false, b: false };
+
+    const pollGamepadResume = () => {
+      try {
+        const gamepads = typeof navigator.getGamepads === 'function' ? navigator.getGamepads() : [];
+        for (let i = 0; i < gamepads.length; i++) {
+          const gp = gamepads[i];
+          if (!gp) continue;
+          const aPressed = Boolean(gp.buttons[0]?.pressed);
+          const bPressed = Boolean(gp.buttons[1]?.pressed);
+
+          if (aPressed && !lastButtonState.a) {
+            handleApplyResumeState();
+            return;
+          }
+          if (bPressed && !lastButtonState.b) {
+            handleDismissResumePrompt();
+            return;
+          }
+
+          lastButtonState = { a: aPressed, b: bPressed };
+        }
+      } catch(e) {}
+      animId = requestAnimationFrame(pollGamepadResume);
+    };
+
+    animId = requestAnimationFrame(pollGamepadResume);
+    return () => {
+      if (animId) cancelAnimationFrame(animId);
+    };
+  }, [showResumePrompt, handleApplyResumeState, handleDismissResumePrompt]);
+
   return (
     <div className="emulator-backdrop-iisu" onClick={focusEmulator}>
       <header className="emulator-topbar">
@@ -2448,25 +2708,29 @@ export default function EmulatorModal({
             <span>{SHADER_LABELS[activeShader]}</span>
           </button>
 
-          <button 
-            id="ingame-save"
-            className={`emulator-topbar-action-btn ${focusedTarget?.zone === 'inGameBar' && focusedTarget?.id === 'save' ? 'gamepad-focused' : ''}`}
-            onClick={() => handleEmulatorAction('saveState')} 
-            title="Quick Save State"
-          >
-            <Save size={14} color="#10b981" />
-            <span>Save</span>
-          </button>
+          {!isArcadeMachine && (
+            <>
+              <button 
+                id="ingame-save"
+                className={`emulator-topbar-action-btn ${focusedTarget?.zone === 'inGameBar' && focusedTarget?.id === 'save' ? 'gamepad-focused' : ''}`}
+                onClick={() => handleEmulatorAction('saveState')} 
+                title="Quick Save State"
+              >
+                <Save size={14} color="#10b981" />
+                <span>Save</span>
+              </button>
 
-          <button 
-            id="ingame-load"
-            className={`emulator-topbar-action-btn ${focusedTarget?.zone === 'inGameBar' && focusedTarget?.id === 'load' ? 'gamepad-focused' : ''}`}
-            onClick={() => handleEmulatorAction('loadState')} 
-            title="Quick Load State"
-          >
-            <RotateCcw size={14} color="#38bdf8" />
-            <span>Load</span>
-          </button>
+              <button 
+                id="ingame-load"
+                className={`emulator-topbar-action-btn ${focusedTarget?.zone === 'inGameBar' && focusedTarget?.id === 'load' ? 'gamepad-focused' : ''}`}
+                onClick={() => handleEmulatorAction('loadState')} 
+                title="Quick Load State"
+              >
+                <RotateCcw size={14} color="#38bdf8" />
+                <span>Load</span>
+              </button>
+            </>
+          )}
         </div>
 
         <div className="emulator-topbar-right">
@@ -2587,25 +2851,29 @@ export default function EmulatorModal({
             <span>{SHADER_LABELS[activeShader]}</span>
           </button>
 
-          <button
-            id="ingame-sub-save"
-            className={`sub-toolbar-btn ${focusedTarget?.zone === 'inGameSubBar' && focusedTarget?.id === 'save' ? 'gamepad-focused' : ''}`}
-            onClick={() => handleEmulatorAction('saveState')}
-            title="Quick Save State"
-          >
-            <Save size={16} color="#10b981" />
-            <span>Save</span>
-          </button>
+          {!isArcadeMachine && (
+            <>
+              <button
+                id="ingame-sub-save"
+                className={`sub-toolbar-btn ${focusedTarget?.zone === 'inGameSubBar' && focusedTarget?.id === 'save' ? 'gamepad-focused' : ''}`}
+                onClick={() => handleEmulatorAction('saveState')}
+                title="Quick Save State"
+              >
+                <Save size={16} color="#10b981" />
+                <span>Save</span>
+              </button>
 
-          <button
-            id="ingame-sub-load"
-            className={`sub-toolbar-btn ${focusedTarget?.zone === 'inGameSubBar' && focusedTarget?.id === 'load' ? 'gamepad-focused' : ''}`}
-            onClick={() => handleEmulatorAction('loadState')}
-            title="Quick Load State"
-          >
-            <RotateCcw size={16} color="#38bdf8" />
-            <span>Load</span>
-          </button>
+              <button
+                id="ingame-sub-load"
+                className={`sub-toolbar-btn ${focusedTarget?.zone === 'inGameSubBar' && focusedTarget?.id === 'load' ? 'gamepad-focused' : ''}`}
+                onClick={() => handleEmulatorAction('loadState')}
+                title="Quick Load State"
+              >
+                <RotateCcw size={16} color="#38bdf8" />
+                <span>Load</span>
+              </button>
+            </>
+          )}
 
           <button
             id="ingame-sub-diagnostics"
@@ -2690,6 +2958,38 @@ export default function EmulatorModal({
             <p className="diag-health-desc">{perfStats.diagnosticTip}</p>
           </div>
         </aside>
+      )}
+
+      {/* Auto-Resume Prompt Banner (Slot 1) */}
+      {showResumePrompt && !isLoadingGame && (
+        <div className="emulator-resume-prompt-banner animate-slide-down" onClick={(e) => e.stopPropagation()}>
+          <div className="erp-icon-wrap">
+            <Zap size={18} color="#f59e0b" />
+          </div>
+          <div className="erp-content">
+            <div className="erp-title">Resume where you left off?</div>
+            <div className="erp-sub">Auto-Save snapshot available from your last session</div>
+          </div>
+          <div className="erp-actions">
+            <button
+              type="button"
+              className="erp-btn is-resume"
+              onClick={handleApplyResumeState}
+              title="Restore previous session snapshot (Enter / A)"
+            >
+              <Zap size={13} />
+              <span>Resume ({resumeCountdown}s)</span>
+            </button>
+            <button
+              type="button"
+              className="erp-btn is-dismiss"
+              onClick={handleDismissResumePrompt}
+              title="Start from title screen (Esc / B)"
+            >
+              <span>Dismiss</span>
+            </button>
+          </div>
+        </div>
       )}
 
       <div className={`emulator-stage filter-${activeShader}`} ref={stageRef} onClick={focusEmulator}>

@@ -48,7 +48,10 @@ When a game is running in the emulator core:
 | Gesture / Shortcut | Action | Description |
 | :--- | :--- | :--- |
 | **`L3` (Left Stick Click)** | **Toggle Topbar HUD** | Opens the in-game action menu starting at **`Restart`**. Use D-Pad to select options. |
-| **`L3 + R3` (Thumbstick Clicks)** | **Exit Game** | Exits the running game immediately and returns to the cartridge shelf. |
+| **`L3 + R3` (Thumbstick Clicks)** | **Exit Game** | Flushes battery save, captures Slot 1 auto-resume state, and returns to library. |
+| **Mobile Left Edge-Swipe** | **Exit Game (Mobile)** | Triggers the graceful 450ms flush & exit sequence with automatic save persistence. |
+| **`[A]` Button / `Enter`** (on Resume Prompt) | **Auto-Resume** | Instantly restores Slot 1 snapshot state where you left off. |
+| **`[B]` Button / `Esc`** (on Resume Prompt) | **Dismiss Prompt** | Starts the game from the intro/title screen. |
 | **`[A]` Button** (in HUD) | **Activate Option** | Triggers the selected HUD action (**Restart**, **Pause**, **Mute**, **Record**, **Speed**, **Capture**, **Filter**, **Save**, **Load**, **Diagnostics**, **Exit**). |
 | **`[B]` / `L3`** (in HUD) | **Resume Gameplay** | Dismisses the topbar and restores focus to gameplay. |
 | **`Select` & `Start`** | **Game Inputs** | Untouched and reserved exclusively for games (e.g. Pause, Inventory, Coin insert). |

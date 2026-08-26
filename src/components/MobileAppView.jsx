@@ -42,12 +42,13 @@ import {
   BatteryFull, 
   BatteryMedium, 
   BatteryLow, 
-  BatteryWarning, 
+  BatteryWarning,
   Square,
   Edit3,
   Info,
   Database,
-  Users
+  Users,
+  Zap
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import MultiAvatar from './MultiAvatar';
@@ -139,6 +140,15 @@ export default function MobileAppView({
   const [showDeleteGameConfirm, setShowDeleteGameConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [saveActionStatus, setSaveActionStatus] = useState('');
+
+  // Setting: Auto-Resume on Game Launch
+  const [isAutoResumeEnabled, setIsAutoResumeEnabled] = useState(() => {
+    try {
+      return localStorage.getItem('retro_auto_resume_enabled') !== 'false';
+    } catch {
+      return true;
+    }
+  });
 
   // DS Detail Tabs: 'overview' | 'save' | 'guides' | 'manage'
   const [dsTab, setDsTab] = useState('overview');
@@ -881,19 +891,21 @@ export default function MobileAppView({
               <Star size={16} fill={isSelectedFav ? '#f59e0b' : 'none'} color={isSelectedFav ? '#d97706' : 'currentColor'} />
             </button>
 
-            {/* Save RAM Touch Tab */}
-            <button
-              type="button"
-              className={`ds-tool-btn ds-icon-btn ds-save-tab-btn ${dsTab === 'save' ? 'is-active' : ''}`}
-              onClick={() => {
-                setDsTab(dsTab === 'save' ? 'overview' : 'save');
-                sfx?.playTabSwitch?.();
-              }}
-              title="In-Game Save Data & Battery RAM (.sav)"
-              aria-label="Save Data"
-            >
-              <Save size={16} color={dsTab === 'save' ? '#ffffff' : '#10b981'} />
-            </button>
+            {/* Save RAM Touch Tab (Hidden for Arcade / MAME machines) */}
+            {selectedGameForDetails && !['arcade', 'mame', 'cps1', 'cps2', 'cps3', 'neogeo'].includes(selectedGameForDetails.systemKey?.toLowerCase()) && !['arcade', 'mame', 'cps1', 'cps2', 'cps3', 'neogeo'].includes(selectedGameForDetails.systemCore?.toLowerCase()) && (
+              <button
+                type="button"
+                className={`ds-tool-btn ds-icon-btn ds-save-tab-btn ${dsTab === 'save' ? 'is-active' : ''}`}
+                onClick={() => {
+                  setDsTab(dsTab === 'save' ? 'overview' : 'save');
+                  sfx?.playTabSwitch?.();
+                }}
+                title="In-Game Save Data & Battery RAM (.sav)"
+                aria-label="Save Data"
+              >
+                <Save size={16} color={dsTab === 'save' ? '#ffffff' : '#10b981'} />
+              </button>
+            )}
 
             {/* Guides Touch Tab */}
             {hasGuides && (
@@ -2046,6 +2058,62 @@ export default function MobileAppView({
                   </div>
                 </div>
               )}
+
+              {/* Tool 2: Emulation Preferences & Auto-Resume Settings */}
+              <div className="mobile-menu-card">
+                <div className="mobile-menu-card-header">
+                  <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>
+                    <Zap size={18} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Auto-Resume on Launch</strong>
+                      <button
+                        type="button"
+                        className={`ds-toggle-switch ${isAutoResumeEnabled ? 'is-active' : ''}`}
+                        style={{
+                          width: '42px',
+                          height: '24px',
+                          borderRadius: '12px',
+                          background: isAutoResumeEnabled ? '#10b981' : '#64748b',
+                          border: 'none',
+                          cursor: 'pointer',
+                          position: 'relative',
+                          transition: 'background 0.2s ease',
+                          padding: 0
+                        }}
+                        onClick={() => {
+                          const nextVal = !isAutoResumeEnabled;
+                          setIsAutoResumeEnabled(nextVal);
+                          try {
+                            localStorage.setItem('retro_auto_resume_enabled', nextVal ? 'true' : 'false');
+                          } catch(e) {}
+                          sfx?.playTabSwitch?.();
+                        }}
+                        aria-label="Toggle Auto-Resume"
+                      >
+                        <span
+                          style={{
+                            display: 'block',
+                            width: '18px',
+                            height: '18px',
+                            borderRadius: '50%',
+                            background: '#ffffff',
+                            position: 'absolute',
+                            top: '3px',
+                            left: isAutoResumeEnabled ? '21px' : '3px',
+                            transition: 'left 0.2s ease',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                          }}
+                        />
+                      </button>
+                    </div>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
+                      {isAutoResumeEnabled ? 'Automatically prompts to resume your last session upon opening a game' : 'Always boot to game title screen (loads battery save normally)'}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
               {/* Tool 3: Storage & Database Management Studio (Backup, Restore & Reset) */}
               <div className="mobile-menu-card">

@@ -29,6 +29,7 @@ import { useProfileManager } from './hooks/useProfileManager';
 import { useBgmEngine } from './hooks/useBgmEngine';
 import { useDeviceDetection } from './hooks/useDeviceDetection';
 import { usePwaInstall } from './hooks/usePwaInstall';
+import { useMobileHistoryNavigation } from './hooks/useMobileHistoryNavigation';
 import { syncAllStoresFromBackend } from './services/db';
 import { BatteryWarning, Zap, X } from 'lucide-react';
 
@@ -261,6 +262,38 @@ export default function App() {
     showOnboarding,
     setShowOnboarding,
     games
+  });
+
+  // Hook 10: PWA & Mobile History Navigation & Swipe-Back Gestures
+  useMobileHistoryNavigation({
+    activeGame,
+    setActiveGame,
+    selectedMobileGameForDetails,
+    setSelectedMobileGameForDetails,
+    selectedMobileSystem,
+    setSelectedMobileSystem,
+    showProfileSwitcher,
+    setShowProfileSwitcher,
+    showOnboarding,
+    setShowOnboarding,
+    showInfoModal,
+    setShowInfoModal,
+    showLoadRomModal,
+    setShowLoadRomModal,
+    showScraperModal,
+    setShowScraperModal,
+    showThemeModal,
+    setShowThemeModal,
+    showBackupModal,
+    setShowBackupModal,
+    showProfileSelectModal,
+    setShowProfileSelectModal,
+    showProfileCreatorModal,
+    setShowProfileCreatorModal,
+    showVirtualKeyboard,
+    setShowVirtualKeyboard,
+    isMobile,
+    sfx
   });
 
   // Digital clock tick

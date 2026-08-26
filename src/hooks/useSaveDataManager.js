@@ -274,7 +274,71 @@ export function useSaveDataManager() {
   }, []);
 
   /**
-   * Export quick save snapshot (.state)
+   * Export Slot 1 Auto-Resume snapshot (.state)
+   */
+  const exportAutoResumeSave = useCallback(async (game, activeProfileId = 'prof_default') => {
+    if (!game) return false;
+    try {
+      const isMasterProfile = activeProfileId === 'prof_default' || activeProfileId === 'default';
+      const profilePrefixes = isMasterProfile
+        ? [activeProfileId, 'prof_default', 'default', '']
+        : [activeProfileId];
+
+      const identifiers = [
+        game.id,
+        game.slug,
+        game.rawTitle,
+        game.filename,
+        game.title
+      ].filter(Boolean);
+
+      let autoBase64 = null;
+
+      for (const id of identifiers) {
+        for (const prof of profilePrefixes) {
+          const autoKey = prof ? `state_auto_${prof}_${id}` : `state_auto_${id}`;
+          const dbState = await dbGet(STORES.SAVE_STATES, autoKey);
+          if (dbState && dbState.data) {
+            autoBase64 = typeof dbState.data === 'string' ? dbState.data : (dbState.data.save || dbState.data.data || null);
+            break;
+          }
+          try {
+            const lsState = localStorage.getItem(autoKey);
+            if (lsState) {
+              const parsed = JSON.parse(lsState);
+              if (parsed && parsed.data) {
+                autoBase64 = typeof parsed.data === 'string' ? parsed.data : (parsed.data.save || parsed.data.data || null);
+                break;
+              }
+            }
+          } catch (e) {}
+        }
+        if (autoBase64) break;
+      }
+
+      if (!autoBase64) return false;
+
+      const normalized = (game.title || 'RetroGame')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9\s-_]/g, ' ')
+        .trim()
+        .replace(/\s+/g, '_')
+        .replace(/_+/g, '_');
+      const d = new Date();
+      const pad = (n) => n.toString().padStart(2, '0');
+      const timeStamp = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+      const stateFileName = `${normalized}_AutoResume_Slot1_${timeStamp}.state`;
+
+      return triggerDownload(autoBase64, stateFileName);
+    } catch (err) {
+      console.warn('⚠️ [AUTO RESUME EXPORT ERROR]:', err);
+      return false;
+    }
+  }, []);
+
+  /**
+   * Export quick save snapshot (.state) - exports Slot 0 and Slot 1 if both exist
    */
   const exportQuickSave = useCallback(async (game, activeProfileId = 'prof_default') => {
     if (!game) return false;
@@ -294,7 +358,7 @@ export function useSaveDataManager() {
 
       let stateBase64 = null;
 
-      // 1. Direct key search across profile prefixes & identifiers
+      // 1. Direct key search for Slot 0 (Manual Quick Save)
       for (const id of identifiers) {
         for (const prof of profilePrefixes) {
           const stateKey = prof ? `state_${prof}_${id}` : `state_${id}`;
@@ -317,30 +381,6 @@ export function useSaveDataManager() {
         if (stateBase64) break;
       }
 
-      // 2. Comprehensive Store Scan fallback
-      if (!stateBase64) {
-        try {
-          const allStates = await dbGetAll(STORES.SAVE_STATES);
-          const match = (allStates || []).find(item => {
-            if (!item) return false;
-            if (item.profileId && item.profileId !== activeProfileId) {
-              if (!isMasterProfile || (item.profileId !== 'prof_default' && item.profileId !== 'default')) return false;
-            }
-            const key = (item.id || item.key || '').toLowerCase();
-            const gId = (item.gameId || '').toLowerCase();
-            return identifiers.some(id => {
-              const target = id.toLowerCase();
-              return gId === target || key.includes(target);
-            });
-          });
-          if (match && match.data) {
-            stateBase64 = typeof match.data === 'string' ? match.data : (match.data.save || match.data.data || null);
-          }
-        } catch (e) {}
-      }
-
-      if (!stateBase64) return false;
-
       const normalized = (game.title || 'RetroGame')
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
@@ -351,17 +391,25 @@ export function useSaveDataManager() {
       const d = new Date();
       const pad = (n) => n.toString().padStart(2, '0');
       const timeStamp = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-      const stateFileName = `${normalized}_QuickSave_${timeStamp}.state`;
 
-      return triggerDownload(stateBase64, stateFileName);
+      let downloadedSlot0 = false;
+      if (stateBase64) {
+        const stateFileName = `${normalized}_QuickSave_Slot0_${timeStamp}.state`;
+        downloadedSlot0 = triggerDownload(stateBase64, stateFileName);
+      }
+
+      // Also check and export Slot 1 Auto-Resume snapshot if it exists
+      const okAuto = await exportAutoResumeSave(game, activeProfileId);
+
+      return downloadedSlot0 || okAuto;
     } catch (err) {
       console.warn('⚠️ [QUICK SAVE EXPORT ERROR]:', err);
       return false;
     }
-  }, []);
+  }, [exportAutoResumeSave]);
 
   /**
-   * Export both in-game battery RAM (.sav) and quick save snapshots (.state)
+   * Export both in-game battery RAM (.sav) and all quick save snapshots (.state)
    */
   const exportSaveFile = useCallback(async (game, activeProfileId = 'prof_default') => {
     if (!game) return false;
@@ -370,7 +418,7 @@ export function useSaveDataManager() {
     if (okBattery) {
       setTimeout(async () => {
         await exportQuickSave(game, activeProfileId);
-      }, 350);
+      }, 400);
     } else {
       okState = await exportQuickSave(game, activeProfileId);
     }
@@ -395,30 +443,89 @@ export function useSaveDataManager() {
       const fileNameLower = (file.name || '').toLowerCase();
       const isStateFile = fileNameLower.endsWith('.state');
 
+      const isAutoResume = fileNameLower.includes('autoresume') || fileNameLower.includes('slot1');
+      const identifiers = [
+        game.id,
+        game.slug,
+        game.rawTitle,
+        game.filename,
+        game.title
+      ].filter(Boolean);
+
+      const isMasterProfile = activeProfileId === 'prof_default' || activeProfileId === 'default';
+      const targetId = game.id || game.title;
+
       if (isStateFile) {
-        // Quick Save State Snapshot
-        const scopedKey = `state_${activeProfileId}_${game.id || game.title}`;
+        // Quick Save State Snapshot: overwrite Slot 0 or Slot 1 specifically, plus legacy keys
+        const prefix = isAutoResume ? 'state_auto' : 'state';
+        const primaryKey = `${prefix}_${activeProfileId}_${targetId}`;
         const payload = {
-          id: scopedKey,
-          gameId: game.id || game.title,
+          id: primaryKey,
+          gameId: targetId,
           profileId: activeProfileId,
           timestamp: Date.now(),
-          data: b64
+          data: b64,
+          isAutoResume: isAutoResume
         };
-        await dbSet(STORES.SAVE_STATES, scopedKey, payload);
-        try { localStorage.setItem(scopedKey, JSON.stringify(payload)); } catch (e) {}
+
+        await dbSet(STORES.SAVE_STATES, primaryKey, payload);
+        try { localStorage.setItem(primaryKey, JSON.stringify(payload)); } catch (e) {}
+
+        // Overwrite aliases to guarantee seamless immediate pickup
+        for (const id of identifiers) {
+          const scopedKey = `${prefix}_${activeProfileId}_${id}`;
+          await dbSet(STORES.SAVE_STATES, scopedKey, payload);
+          try { localStorage.setItem(scopedKey, JSON.stringify(payload)); } catch (e) {}
+          if (isMasterProfile) {
+            const legacyKey = `${prefix}_${id}`;
+            await dbSet(STORES.SAVE_STATES, legacyKey, payload);
+            try { localStorage.setItem(legacyKey, JSON.stringify(payload)); } catch (e) {}
+          }
+        }
       } else {
-        // In-game Battery RAM (.sav, .srm, .ram, .mcr)
-        const scopedKey = `save_${activeProfileId}_${game.id || game.title}`;
+        // In-game Battery RAM (.sav, .srm, .ram, .mcr): overwrite scoped and legacy keys
+        const primaryKey = `save_${activeProfileId}_${targetId}`;
         const payload = {
-          id: scopedKey,
-          gameId: game.id || game.title,
+          id: primaryKey,
+          gameId: targetId,
           profileId: activeProfileId,
           timestamp: Date.now(),
           data: b64
         };
-        await dbSet(STORES.GAME_SAVES, scopedKey, payload);
-        try { localStorage.setItem(scopedKey, JSON.stringify(payload)); } catch (e) {}
+
+        await dbSet(STORES.GAME_SAVES, primaryKey, payload);
+        try { localStorage.setItem(primaryKey, JSON.stringify(payload)); } catch (e) {}
+
+        // Overwrite aliases
+        for (const id of identifiers) {
+          const scopedKey = `save_${activeProfileId}_${id}`;
+          await dbSet(STORES.GAME_SAVES, scopedKey, payload);
+          try { localStorage.setItem(scopedKey, JSON.stringify(payload)); } catch (e) {}
+          if (isMasterProfile) {
+            const legacyKey = `save_${id}`;
+            await dbSet(STORES.GAME_SAVES, legacyKey, payload);
+            try { localStorage.setItem(legacyKey, JSON.stringify(payload)); } catch (e) {}
+          }
+        }
+
+        // Purge Emscripten IDBFS caches so the newly imported battery save is loaded fresh without stale memory FS override
+        const idbfsDbs = [
+          '/home/web_user/retroarch/userdata',
+          '/home/web_user/retroarch',
+          '/home/web_user',
+          '/retroarch',
+          '/data',
+          '/saves',
+          'emulatorjs',
+          'retroarch'
+        ];
+        for (const d of idbfsDbs) {
+          try {
+            if (typeof indexedDB !== 'undefined' && typeof indexedDB.deleteDatabase === 'function') {
+              indexedDB.deleteDatabase(d);
+            }
+          } catch (e) {}
+        }
       }
 
       setHasSaveData(true);
@@ -453,13 +560,16 @@ export function useSaveDataManager() {
         for (const prof of profilePrefixes) {
           const saveKey = prof ? `save_${prof}_${id}` : `save_${id}`;
           const stateKey = prof ? `state_${prof}_${id}` : `state_${id}`;
+          const autoKey = prof ? `state_auto_${prof}_${id}` : `state_auto_${id}`;
 
           await dbDelete(STORES.GAME_SAVES, saveKey);
           await dbDelete(STORES.SAVE_STATES, stateKey);
+          await dbDelete(STORES.SAVE_STATES, autoKey);
 
           try {
             localStorage.removeItem(saveKey);
             localStorage.removeItem(stateKey);
+            localStorage.removeItem(autoKey);
           } catch (e) {}
         }
       }

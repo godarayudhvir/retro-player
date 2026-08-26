@@ -37,26 +37,28 @@ Retro Player maintains a dual-tier save persistence layer strictly namespaced by
 - **Dedicated Export (`.sav`)**: Dedicated button to download the in-game cartridge SRAM save file (`<Game>_Save_<Date>.sav`) to mobile or desktop devices.
 - **Import Support**: Drag & drop or upload existing `.sav` / `.srm` battery saves directly into the active player's profile.
 
-### 2. Snapshot Save States (`.state` / Quick Save)
+### 2. Dual-Slot Snapshot Save States (`.state`)
 - **Profile Scoping**: Stored under `state_${activeProfileId}_${gameId}` in `STORES.SAVE_STATES`.
-- **Real-Time Snapshots**: Full RAM and CPU register state capture via Quick Save (`F2` / Gamepad Quick Save) and instant restore via Quick Load (`F4` / Gamepad Quick Load).
-- **Universal Compatibility**: Available across **all emulation cores and systems** (including Arcade, Atari, Vectrex, and non-battery platforms).
-- **Dedicated Export (`.state`)**: Dedicated button to download emulator snapshot state files (`<Game>_QuickSave_<Date>.state`).
-- **Import Support**: Upload `.state` snapshot files directly into the active profile.
-- **Isolation**: Completely decoupled across player profiles; Player 2 cannot overwrite or load Player 1's quick save state.
+- **Slot 0 (Manual Quick Save)**: Created manually via the in-game Topbar / Sub-Toolbar (`Save` / `Load` or `F2` / `F4`). Instant save and restore.
+- **Slot 1 (Automatic Resume State)**: Created automatically whenever you close the game (via topbar `✕`, controller `L3+R3`, or mobile edge swipe-back). Stored under `state_auto_${activeProfileId}_${gameId}`. On next game launch, an interactive 10-second countdown prompt offers one-click resume directly back to the exact frame where you left off.
+- **450ms Graceful Exit Buffer**: Heavy WebAssembly cores (e.g. Nintendo DS DeSmuME/MelonDS, PS1) are provided a 450ms graceful buffer on exit to flush Emscripten virtual memory to IndexedDB before unmounting the iframe.
+- **Mobile Swipe-Back Auto-Save**: Left-edge swipe gesture on mobile routes through the graceful exit sequence, ensuring full save state synchronization before returning to the library.
+- **Dedicated Dual-Slot Export (`.state`)**: Exporting quick saves downloads both Slot 0 (`..._QuickSave_Slot0_...state`) and Slot 1 (`..._AutoResume_Slot1_...state`) if present.
+- **Import Support**: Uploading any `.state` snapshot file targets the appropriate slot and updates all aliases.
+- **Arcade/MAME Machine Handling**: Classic discrete arcade PCB hardware without snapshot support automatically hides Save/Load controls from the Game Detail tab and in-game HUDs to prevent false state traps.
 
 ### 3. Integrated Save Studio Controls
 Within both Desktop (Nintendo DS View) and Mobile (Game Details Sheet), the Save Studio provides:
 - **📥 Export Battery Save (.sav)**: Download in-game cartridge SRAM save file.
-- **📥 Export Quick Save (.state)**: Download emulator snapshot state file.
+- **📥 Export Quick Save (.state)**: Download emulator snapshot state files (Slot 0 Quick Save and Slot 1 Auto-Resume).
 - **📤 Import Save / State (.sav / .state)**: Upload `.sav` battery saves or `.state` snapshots with auto-routing.
-- **🗑️ Delete All Saved Data**: Erase both in-game battery RAM and quick save states for a complete game reset.
+- **🗑️ Delete All Saved Data**: Erase both in-game battery RAM and quick save states (Slot 0 + Slot 1) for a complete game reset.
 
 ---
 
 ## 🕹️ System Compatibility Matrix
 
-| Platform | In-Game Battery Saves (`.sav` / SRAM) | Snapshot Save States (Quick Save) | Native File Extension |
+| Platform | In-Game Battery Saves (`.sav` / SRAM) | Snapshot Save States (Quick Save & Auto-Resume) | Native File Extension |
 | :--- | :---: | :---: | :---: |
 | **Game Boy Advance (`gba`)** | ✅ Supported | ✅ Supported | `.sav` / `.srm` |
 | **Game Boy Color (`gbc`)** | ✅ Supported | ✅ Supported | `.sav` / `.srm` |
@@ -69,7 +71,7 @@ Within both Desktop (Nintendo DS View) and Mobile (Game Details Sheet), the Save
 | **Sega Game Gear (`game_gear`)** | ✅ Supported | ✅ Supported | `.sav` / `.srm` |
 | **PlayStation 1 (`playstation`)** | ✅ Supported (Memory Card) | ✅ Supported | `.mcr` / `.sav` |
 | **Atari 2600 (`atari_2600`)** | N/A (Cartridge ROM) | ✅ Supported | `.state` |
-| **Arcade MAME (`arcade`)** | ✅ Supported (NVRAM) | ✅ Supported | `.nv` / `.state` |
+| **Arcade MAME (`arcade`)** | ✅ Supported (NVRAM) | Driver Dependent (Attract Mode Boot) | `.nv` / `.state` |
 
 ---
 

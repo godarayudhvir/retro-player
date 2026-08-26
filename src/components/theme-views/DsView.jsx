@@ -666,19 +666,21 @@ export default function DsView({
             <Star size={16} fill={selectedFav ? '#f59e0b' : 'none'} color={selectedFav ? '#d97706' : 'currentColor'} />
           </button>
 
-          {/* Dedicated In-Game Save Data Touch Tab */}
-          <button
-            type="button"
-            className={`ds-tool-btn ds-icon-btn ds-save-tab-btn ${dsTab === 'save' ? 'is-active' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'save' ? 'gamepad-focused' : ''}`}
-            onClick={() => {
-              setDsTab(dsTab === 'save' ? 'overview' : 'save');
-              sfx?.playTabSwitch?.();
-            }}
-            title="In-Game Save Data & Battery RAM (.sav)"
-            aria-label="Save Data"
-          >
-            <Save size={16} color={dsTab === 'save' ? '#ffffff' : '#10b981'} />
-          </button>
+          {/* Dedicated In-Game Save Data Touch Tab (Hidden for Arcade / MAME machines) */}
+          {selectedGame && !['arcade', 'mame', 'cps1', 'cps2', 'cps3', 'neogeo'].includes(selectedGame.systemKey?.toLowerCase()) && !['arcade', 'mame', 'cps1', 'cps2', 'cps3', 'neogeo'].includes(selectedGame.systemCore?.toLowerCase()) && (
+            <button
+              type="button"
+              className={`ds-tool-btn ds-icon-btn ds-save-tab-btn ${dsTab === 'save' ? 'is-active' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'save' ? 'gamepad-focused' : ''}`}
+              onClick={() => {
+                setDsTab(dsTab === 'save' ? 'overview' : 'save');
+                sfx?.playTabSwitch?.();
+              }}
+              title="In-Game Save Data & Battery RAM (.sav)"
+              aria-label="Save Data"
+            >
+              <Save size={16} color={dsTab === 'save' ? '#ffffff' : '#10b981'} />
+            </button>
+          )}
 
           {/* Guides Touch Button (Toggles between Overview and Strategy Guides inside DS pane) */}
           {hasGuides && (
