@@ -238,9 +238,6 @@ export default function BackupModal({
         onClick={(e) => e.stopPropagation()}
         ref={modalRef}
       >
-        {/* Mobile Sheet Drag Handle Bar */}
-        <div className="theme-sheet-handle-bar"></div>
-
         {/* Modal Header */}
         <div className="backup-modal-header">
           <div className="backup-modal-title">

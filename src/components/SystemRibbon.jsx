@@ -36,7 +36,7 @@ export default function SystemRibbon({
   const allTabs = [
     { key: 'all', name: 'All Games', count: totalGamesCount, iconNode: <Layers size={18} />, isSpecialIcon: true },
     { key: 'favorites', name: 'Favorites', count: favoritesCount, iconNode: <Star size={18} fill="currentColor" />, isSpecialIcon: true },
-    { key: 'recent', name: 'Recent', count: recentCount, iconNode: <Clock size={18} />, isSpecialIcon: true },
+    { key: 'recent', name: 'Recent', iconNode: <Clock size={18} />, isSpecialIcon: true },
     ...activeSysList.map(s => ({ key: s.key, name: s.name, count: s.gameCount, icon: s.icon, isSpecialIcon: false }))
   ];
 
@@ -58,7 +58,7 @@ export default function SystemRibbon({
               setFocusedTarget({ zone: 'ribbon', index: idx });
               sfx?.playTabSwitch?.();
             }}
-            title={`${tab.name} (${tab.count || 0})`}
+            title={tab.count > 0 ? `${tab.name} (${tab.count})` : tab.name}
             aria-label={tab.name}
           >
             <div className="tab-icon-wrapper">
@@ -68,7 +68,12 @@ export default function SystemRibbon({
                 tab.icon && <img src={resolveAssetPath(tab.icon)} alt="" className="tab-icon" />
               )}
             </div>
-            <span className="tab-label">{tab.name}</span>
+            <span className="tab-label">
+              {tab.name}
+              {tab.count > 0 && (
+                <span className="tab-count-badge">{tab.count}</span>
+              )}
+            </span>
           </button>
         ))}
       </nav>

@@ -2170,7 +2170,6 @@ export default function MobileAppView({
             <Layers size={18} color="#e11d48" />
             <div className="mobile-quick-cat-text">
               <strong>All Games</strong>
-              <span>{games.length} Titles</span>
             </div>
             <ChevronRight size={16} className="mobile-quick-arrow" />
           </button>
@@ -2205,7 +2204,6 @@ export default function MobileAppView({
               <Clock size={18} color="#10b981" />
               <div className="mobile-quick-cat-text">
                 <strong>Recent</strong>
-                <span>{recentGames.length} Titles</span>
               </div>
               <ChevronRight size={16} className="mobile-quick-arrow" />
             </button>
