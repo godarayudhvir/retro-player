@@ -614,11 +614,9 @@ export default function EmulatorModal({
 
             .ejs_virtualGamepad_parent {
               position: fixed !important;
-              bottom: 0 !important;
-              left: 0 !important;
-              right: 0 !important;
+              inset: 0 !important;
               width: 100% !important;
-              height: 280px !important;
+              height: 100% !important;
               pointer-events: none !important;
               z-index: 99999 !important;
               display: block !important;
@@ -633,7 +631,93 @@ export default function EmulatorModal({
               pointer-events: auto !important;
             }
 
-            /* Natural thumb ergonomics: elevated 52px-64px above screen bottom */
+            /* System-Specific Controller Layout Optimization */
+            ${core === 'n64' ? `
+            /* N64 Specific Button & Trigger Ergonomics */
+            .ejs_virtualGamepad_left {
+              position: absolute !important;
+              bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important;
+              left: 16px !important;
+              width: 132px !important;
+              height: 132px !important;
+              z-index: 100000 !important;
+            }
+
+            .ejs_virtualGamepad_right {
+              position: absolute !important;
+              bottom: calc(140px + env(safe-area-inset-bottom, 0px)) !important;
+              right: 16px !important;
+              width: 136px !important;
+              height: 136px !important;
+              z-index: 100000 !important;
+            }
+
+            .ejs_virtualGamepad_top {
+              position: absolute !important;
+              bottom: calc(290px + env(safe-area-inset-bottom, 0px)) !important;
+              top: auto !important;
+              left: 0 !important;
+              width: 100% !important;
+              height: 48px !important;
+              z-index: 100000 !important;
+              pointer-events: none !important;
+            }
+
+            #l {
+              position: absolute !important;
+              left: 16px !important;
+              top: 0px !important;
+              width: 50px !important;
+              height: 44px !important;
+              border-radius: 12px !important;
+              font-weight: 800 !important;
+            }
+
+            #z {
+              position: absolute !important;
+              left: 74px !important;
+              top: 0px !important;
+              width: 50px !important;
+              height: 44px !important;
+              border-radius: 12px !important;
+              background: rgba(71, 85, 105, 0.85) !important;
+              border: 1.5px solid rgba(203, 213, 225, 0.8) !important;
+              color: #ffffff !important;
+              font-weight: 800 !important;
+            }
+
+            #r {
+              position: absolute !important;
+              right: 16px !important;
+              left: auto !important;
+              top: 0px !important;
+              width: 50px !important;
+              height: 44px !important;
+              border-radius: 12px !important;
+              font-weight: 800 !important;
+            }
+
+            #cu, #cd, #cl, #cr {
+              background: rgba(234, 179, 8, 0.85) !important;
+              border: 1.5px solid rgba(254, 240, 138, 0.9) !important;
+              color: #000000 !important;
+              font-weight: 800 !important;
+              font-size: 14px !important;
+            }
+
+            #a {
+              background: rgba(37, 99, 235, 0.85) !important;
+              border: 1.5px solid rgba(147, 197, 253, 0.9) !important;
+              color: #ffffff !important;
+            }
+
+            #b {
+              background: rgba(22, 163, 74, 0.85) !important;
+              border: 1.5px solid rgba(134, 239, 172, 0.9) !important;
+              color: #ffffff !important;
+            }
+            ` : `
+            /* Default Ergonomics for GB, GBA, NES, SNES, Genesis, PS1, Arcade */
             .ejs_virtualGamepad_left {
               position: absolute !important;
               bottom: calc(54px + env(safe-area-inset-bottom, 0px)) !important;
@@ -652,33 +736,17 @@ export default function EmulatorModal({
               z-index: 100000 !important;
             }
 
-            .ejs_virtualGamepad_bottom {
+            .ejs_virtualGamepad_top {
               position: absolute !important;
-              bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
-              left: 50% !important;
-              transform: translateX(-50%) !important;
-              margin-left: 0 !important;
-              height: 34px !important;
-              width: 140px !important;
-              display: flex !important;
-              align-items: center !important;
-              justify-content: center !important;
-              gap: 12px !important;
+              bottom: calc(195px + env(safe-area-inset-bottom, 0px)) !important;
+              top: auto !important;
+              left: 0 !important;
+              width: 100% !important;
+              height: 48px !important;
               z-index: 100000 !important;
+              pointer-events: none !important;
             }
-
-            .ejs_virtualGamepad_button {
-              background: rgba(30, 41, 59, 0.85) !important;
-              border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
-              color: #ffffff !important;
-              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6) !important;
-              touch-action: none !important;
-            }
-
-            .ejs_virtualGamepad_button_down {
-              background: rgba(59, 130, 246, 0.9) !important;
-              transform: scale(0.92) !important;
-            }
+            `}
 
             .ejs_dpad_main {
               opacity: 0.95 !important;

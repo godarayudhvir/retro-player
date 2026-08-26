@@ -59,6 +59,18 @@ When a game is running in the emulator core:
 
 ---
 
+## 📱 Mobile On-Screen Virtual Controls
+
+For touch-screen devices, Retro Player renders system-adaptive, zero-latency virtual gamepads:
+
+- **Nintendo 64 (N64)**: Features dedicated ergonomic clusters elevated in the lower black letterbox area:
+  - **Left Cluster**: Dual analog thumbstick and D-pad.
+  - **Triggers**: Split `L` and `Z` triggers on the left bumper deck with `R` on the right bumper deck.
+  - **Right Cluster**: Yellow C-buttons (`CU, CD, CL, CR`) positioned above primary `A` (blue) and `B` (green) action buttons.
+- **Classic Systems (GB, GBA, NES, SNES, Genesis, PS1, NDS, Arcade)**: Standard low-profile dual/quad button ergonomics tailored for thumb reach.
+
+---
+
 ## ⌨️ On-Screen Virtual Keyboard (OSK)
 
 When searching or typing character handles with a controller:
