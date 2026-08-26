@@ -147,17 +147,20 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 ## Key Highlights & Features
 
-- 🎮 **Console Gamepad & Spatial Navigation**: 100% controller-driven library navigation with an adaptive on-screen virtual keyboard.
-- ⚡ **Pure Client-Side WASM Emulation**: Hardware-accelerated WebAssembly execution across 12 retro platforms with ~0% host CPU usage.
-- 🎨 **Nintendo DS Touch Architecture**: Dual-screen layout featuring top-screen dynamic box art & specs, bottom touchscreen carousel, and inline tools.
-- 💾 **Profile-Scoped Battery Saves & States**: In-game battery RAM (`.sav`/SRAM) and quick save states strictly isolated per Multiavatar player profile with auto-injection and virtual memory cards.
-- 🗄️ **Centralized Database & 1-Click Backup**: Single JSON document database (`retroplayer_db.json`) on Docker disk with 1-click in-app backup export and drag-and-drop restore studio.
-- 🌐 **Unified Metadata & Box Art Scraper**: Universal multi-source scraping engine (Libretro CDN, ScreenScraper, TheGamesDB, Wikipedia) shared across Node CLI and browser UI with real-time scan telemetry, layered fallbacks, and manual editor.
-- 📖 **Curated Strategy Guides & QR Companion**: Direct written/video walkthroughs with mobile QR code pairing for couch play.
+- ⚡ **Pure Client-Side WASM Emulation**: Hardware-accelerated WebAssembly execution across 12 retro platforms with ~0% host server CPU usage.
+- 🎨 **Nintendo DS Dual-Screen Touch UI**: Dynamic top-screen box art & specs, bottom touchscreen carousel, and grid density toggles (`S`–`XXL`).
+- 🎮 **Universal Gamepad & Spatial Navigation**: 100% controller-driven library navigation, live DualShock visualizer, battery telemetry, and on-screen virtual keyboard.
+- ⏱️ **Auto-Resume & Save State Engine**: Automatic state extraction on game exit with instant countdown auto-resume and dedicated quick save state studio.
+- 💾 **Profile-Scoped Battery Saves (`.sav`)**: In-game cartridge battery saves and SRAM isolated per Multiavatar profile with auto-injection.
+- 👤 **Multiavatar Character Creation Studio**: Custom retro player profiles with randomized avatar generators and 4 archetype presets.
+- 🕹️ **Authentic 3D Cartridge & Jewel Cases**: Console-authentic 3D physical cartridge models and dark obsidian PS1 CD cases with dynamic tilt.
+- 🗄️ **Centralized Database & 1-Click Backup**: Single JSON document database (`data/retroplayer_db.json`) on disk with 1-click backup export and restore studio.
+- 🌐 **Unified Metadata & Box Art Scraper**: Automated multi-source scraper (Libretro CDN, ScreenScraper, TheGamesDB, Wikipedia) with an inline metadata editor.
+- 📖 **Curated Strategy Guides & QR Companion**: Integrated written walkthroughs and video playthroughs with mobile QR code pairing for couch play.
+- 📁 **Drag-and-Drop Auto-Sorting**: Drop any `.zip`, `.iso`, or ROM binary directly onto the browser for automatic console sorting and host disk persistence.
 - 🎵 **Dynamic BGM & Synthesized SFX**: Multi-track chiptune engine with smart in-game pause and low-latency Web Audio sound effects.
-- 📱 **Adaptive Cross-Device PWA**: Standalone installable app optimized across Mobile Touch Feeds, Steam Deck, Desktop, and 10-Foot TV mode with 100% offline cover art caching.
-- 💡 **In-Game Rotating Tips**: Glassmorphic loading tips positioned directly below the loading dialog, revolving smoothly every 2 seconds with guaranteed minimum visibility.
-- 📹 **60 FPS Recorder & Engine Controls**: In-browser video capture, speed turbo throttling (`1.0x`–`5.0x`), VSync, and live diagnostic HUD.
+- 📱 **Adaptive Cross-Device PWA**: Installable standalone app optimized for Mobile Touch Feeds, Steam Deck, Desktop, and 10-Foot TV mode.
+- 📹 **60 FPS Recorder & Engine Controls**: In-browser video capture, speed turbo throttling (`1.0x`–`5.0x`), VSync, CRT/pixel shaders, and live diagnostic HUD.
 
 ---
 
