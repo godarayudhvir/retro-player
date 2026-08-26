@@ -1,6 +1,8 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import http from 'http';
+import https from 'https';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -544,18 +546,20 @@ app.post('/api/upload-rom', express.raw({ type: 'application/octet-stream', limi
 
     const safeFilename = path.basename(decodeURIComponent(filenameHeader));
     const ext = path.extname(safeFilename).toLowerCase();
+    const rawTitle = path.parse(safeFilename).name;
 
     let systemKey = (systemKeyHeader || '').toLowerCase();
     if (!systemKey || !SYSTEM_MAP[systemKey]) {
       systemKey = EXTENSION_MAP[ext] || 'nes';
     }
 
-    const targetSystemDir = path.join(ROMS_DIR, systemKey);
-    if (!fs.existsSync(targetSystemDir)) {
-      fs.mkdirSync(targetSystemDir, { recursive: true });
+    const systemInfo = SYSTEM_MAP[systemKey] || SYSTEM_MAP['nes'];
+    const targetGameDir = path.join(ROMS_DIR, systemKey, rawTitle);
+    if (!fs.existsSync(targetGameDir)) {
+      fs.mkdirSync(targetGameDir, { recursive: true });
     }
 
-    const targetFilePath = path.join(targetSystemDir, safeFilename);
+    const targetFilePath = path.join(targetGameDir, safeFilename);
     console.log(`📥 [API UPLOADER] Saving ROM: ${safeFilename} to ${targetFilePath} (${req.body.length} bytes)`);
 
     const writeStream = fs.createWriteStream(targetFilePath);
@@ -565,32 +569,105 @@ app.post('/api/upload-rom', express.raw({ type: 'application/octet-stream', limi
     writeStream.on('finish', () => {
       console.log(`✅ [API UPLOADER SUCCESS] Successfully wrote: ${safeFilename}`);
       
-      const systemInfo = SYSTEM_MAP[systemKey] || SYSTEM_MAP['nes'];
-      const rawTitle = path.parse(safeFilename).name;
       const cleanDisplayTitle = rawTitle
         .replace(/\(.*?\)/g, '')
         .replace(/\[.*?\]/g, '')
         .replace(/_/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
-      const romUrl = `/roms/${systemKey}/${encodeURIComponent(safeFilename)}`;
+      const romUrl = `/roms/${systemKey}/${encodeURIComponent(rawTitle)}/${encodeURIComponent(safeFilename)}`;
 
-      const gameRecord = {
-        id: `${systemKey}-${rawTitle}`.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-        title: cleanDisplayTitle || rawTitle,
-        rawTitle: rawTitle,
-        filename: safeFilename,
-        systemKey,
-        systemName: systemInfo.name,
-        systemCore: systemInfo.core,
-        systemColor: systemInfo.color,
-        systemIcon: systemInfo.icon,
-        category: systemInfo.category,
-        romUrl,
-        coverUrl: null
+      // Check if companion box art exists, if not, query Libretro CDN
+      const libretroSystemName = {
+        nes: 'Nintendo - Nintendo Entertainment System',
+        snes: 'Nintendo - Super Nintendo Entertainment System',
+        gba: 'Nintendo - Game Boy Advance',
+        gbc: 'Nintendo - Game Boy Color',
+        gb: 'Nintendo - Game Boy',
+        n64: 'Nintendo - Nintendo 64',
+        nds: 'Nintendo - Nintendo DS',
+        genesis: 'Sega - Mega Drive - Genesis',
+        megadrive: 'Sega - Mega Drive - Genesis',
+        sega_genesis: 'Sega - Mega Drive - Genesis',
+        playstation: 'Sony - PlayStation',
+        ps1: 'Sony - PlayStation',
+        psx: 'Sony - PlayStation',
+        arcade: 'FBNeo - Arcade Games',
+        gamegear: 'Sega - Game Gear',
+        game_gear: 'Sega - Game Gear',
+        atari2600: 'Atari - 2600',
+        atari_2600: 'Atari - 2600'
+      }[systemKey];
+
+      const existingCovers = fs.readdirSync(targetGameDir).filter(f => /\.(webp|png|jpg|jpeg)$/i.test(f));
+      
+      const finalizeUpload = (coverUrl = null) => {
+        const gameRecord = {
+          id: `${systemKey}-${rawTitle}`.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+          title: cleanDisplayTitle || rawTitle,
+          rawTitle: rawTitle,
+          filename: safeFilename,
+          systemKey,
+          systemName: systemInfo.name,
+          systemCore: systemInfo.core,
+          systemColor: systemInfo.color,
+          systemIcon: systemInfo.icon,
+          category: systemInfo.category,
+          romUrl,
+          coverUrl: coverUrl || (existingCovers.length > 0 ? `/roms/${systemKey}/${encodeURIComponent(rawTitle)}/${encodeURIComponent(existingCovers[0])}` : null)
+        };
+        res.status(200).json({ success: true, game: gameRecord });
       };
 
-      res.status(200).json({ success: true, game: gameRecord });
+      if (existingCovers.length === 0 && libretroSystemName) {
+        // Attempt to fetch box art from Libretro CDN
+        const formatName = (str) => str.replace(/&/g, '_').replace(/[:/\\*?"<>|]/g, '_').trim();
+        const candidateNames = [
+          rawTitle,
+          formatName(rawTitle),
+          cleanDisplayTitle,
+          `${cleanDisplayTitle} (USA)`,
+          `${cleanDisplayTitle} (USA, Europe)`,
+          `${cleanDisplayTitle} (World)`
+        ];
+
+        const tryDownload = async () => {
+          for (const cand of candidateNames) {
+            if (!cand) continue;
+            const destCoverPath = path.join(targetGameDir, `${rawTitle}.png`);
+            const encodedSys = encodeURIComponent(libretroSystemName);
+            const encodedName = encodeURIComponent(cand);
+            const cdnUrl = `https://thumbnails.libretro.com/${encodedSys}/Named_Boxarts/${encodedName}.png`;
+            
+            try {
+              const ok = await new Promise((resolve) => {
+                https.get(cdnUrl, { headers: { 'User-Agent': 'RetroPlayerMetadataBot/2.0' }, timeout: 4000 }, (r) => {
+                  if (r.statusCode === 200) {
+                    const fileStream = fs.createWriteStream(destCoverPath);
+                    r.pipe(fileStream);
+                    fileStream.on('finish', () => { fileStream.close(); resolve(true); });
+                    fileStream.on('error', () => resolve(false));
+                  } else {
+                    resolve(false);
+                  }
+                }).on('error', () => resolve(false));
+              });
+
+              if (ok && fs.existsSync(destCoverPath) && fs.statSync(destCoverPath).size > 0) {
+                console.log(`🖼️ [API UPLOADER] Fetched companion cover for "${rawTitle}" from Libretro CDN`);
+                return `/roms/${systemKey}/${encodeURIComponent(rawTitle)}/${encodeURIComponent(path.basename(destCoverPath))}`;
+              }
+            } catch (_) {}
+          }
+          return null;
+        };
+
+        tryDownload().then((fetchedCover) => {
+          finalizeUpload(fetchedCover);
+        });
+      } else {
+        finalizeUpload();
+      }
     });
 
     writeStream.on('error', (err) => {

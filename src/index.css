@@ -7886,41 +7886,90 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 }
 
 .drag-drop-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 245, 249, 0.95) 100%);
-  border: 3px dashed #3b82f6;
+  background: var(--panel-bg, linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 245, 249, 0.95) 100%));
+  border: 3px dashed var(--poke-red, #3b82f6);
   padding: 3.5rem 4rem;
-  border-radius: 32px;
+  border-radius: 28px;
   text-align: center;
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1.25rem;
   transform: scale(0.95);
   animation: pulseCard 1.5s infinite alternate ease-in-out;
+  color: var(--text-main, #0f172a);
 }
 
 .drag-drop-icon {
-  color: #3b82f6;
+  color: var(--poke-red, #3b82f6);
   animation: bounceIcon 1s infinite alternate cubic-bezier(0.28, 0.84, 0.42, 1);
 }
 
 .drag-drop-card h2 {
   font-size: 1.75rem;
   font-weight: 800;
-  color: #1e293b;
+  color: var(--text-main, #1e293b);
   letter-spacing: 0.04em;
+  margin: 0;
 }
 
 .drag-drop-card p {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-sub, #64748b);
+  margin: 0;
+}
+
+/* Dark Mode Tokens Override */
+[data-color-mode="dark"] .drag-drop-card {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: #e11d48;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
+}
+
+[data-color-mode="dark"] .drag-drop-icon {
+  color: #e11d48;
+}
+
+[data-color-mode="dark"] .drag-drop-card h2 {
+  color: #f8fafc;
+}
+
+[data-color-mode="dark"] .drag-drop-card p {
+  color: #94a3b8;
+}
+
+/* DS Touch Theme Overrides */
+[data-theme="ds"] .drag-drop-card {
+  font-family: var(--font-iisu, 'Nunito', sans-serif);
+  border-radius: 16px !important;
+  border: 3px dashed var(--panel-border, #94a3b8) !important;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.6),
+    0 16px 40px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="ds"][data-color-mode="light"] .drag-drop-card {
+  background: var(--tile-bg, linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%)) !important;
+  border-color: #e11d48 !important;
+}
+
+[data-theme="ds"][data-color-mode="dark"] .drag-drop-card {
+  background: var(--tile-bg, linear-gradient(180deg, #2d3748 0%, #1a202c 100%)) !important;
+  border-color: #e11d48 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 16px 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="ds"] .drag-drop-icon {
+  color: var(--poke-red, #e11d48) !important;
 }
 
 @keyframes pulseCard {
-  0% { transform: scale(0.96); box-shadow: 0 16px 36px rgba(59, 130, 246, 0.3); }
-  100% { transform: scale(1.02); box-shadow: 0 28px 56px rgba(59, 130, 246, 0.5); }
+  0% { transform: scale(0.96); box-shadow: 0 16px 36px rgba(225, 29, 72, 0.3); }
+  100% { transform: scale(1.02); box-shadow: 0 28px 56px rgba(225, 29, 72, 0.55); }
 }
 
 @keyframes bounceIcon {
