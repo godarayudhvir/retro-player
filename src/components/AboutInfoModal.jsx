@@ -30,7 +30,7 @@ export default function AboutInfoModal({ isOpen, focusedTarget, onClose, sfx }) 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <Gamepad2 size={28} color="#ef4444" />
             <h2>Retro Player</h2>
-            <span className="info-version-badge">v1.0.4</span>
+            <span className="info-version-badge">v1.0.5</span>
           </div>
           <button
             className="info-close-btn"
