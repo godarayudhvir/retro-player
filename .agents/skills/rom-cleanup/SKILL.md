@@ -28,7 +28,7 @@ user for approval** before running any `rm` commands.
 
 ---
 
-## Pass 1: Deduplicate (Keep Latest Version)
+## Pass 1: Deduplicate (Keep Latest Revision & Best English Version)
 
 ### How to identify duplicates
 
@@ -40,24 +40,35 @@ Game Title (Region) (Version or Date) (Flags...).ext
 
 A game is a **duplicate** if the same base title appears more than once with:
 - Different **dates** — e.g., `(2019-03-11)`, `(2021-05-05)`
-- Different **build tags** — e.g., `(Byte-Off 2019)`, `(Kickstarter)`, `(NESDev 2017)`, `(Recalbox)`, `(Digital)`
-- Different **revision tags** — e.g., `(Rev 1)`, `(Earlier)`, `(Enhanced)`
+- Different **build / demo tags** — e.g., `(Demo) (Kiosk)`, `(Kickstarter)`, `(Byte-Off 2019)`, `(Recalbox)`, `(Digital)`
+- Different **revision tags** — e.g., `(Rev 1)`, `(Rev 2)`, `(Earlier)`, `(Enhanced)`
+- Different **regional releases** of the same game — e.g., `(USA)` vs `(Europe) (En,Fr,De,Es,It)` vs `(USA, Australia)`
+- Multi-pack duplicates where identical sub-games are present both in multi-packs and separate standalone releases.
 
-### Decision rule
+### Decision rules
 
-- **Keep** the entry with the latest date or most complete build.
-- If one version is clearly the commercial/Kickstarter release and another is
-  an older demo, keep the commercial release.
-- If two files differ only by **mapper or hardware variant** (e.g., `UNROM 512`
-  vs. `GTROM`), keep **both** — they are not true duplicates.
+1. **Latest Revision**: Keep `(Rev 2)` over `(Rev 1)`, and `(Rev 1)` over base release without revision.
+2. **Retail vs Demo/Kiosk**: If a full retail commercial release is present (e.g. `(USA)`), **always remove** kiosk demos (e.g. `(USA) (Demo) (Kiosk)`).
+3. **Region Priority for English Releases**:
+   - Priority Order: **`(USA, Australia)` / `(USA, Europe)` / `(World)` / `(USA)` > `(Europe)`**
+   - If both `(USA)` and `(Europe) (En,Fr,De,Es,It)` exist for the exact same game, **keep the USA/Global release** and remove the European duplicate to avoid double library entries.
+4. **Hardware/Mapper Variants**: If two files differ only by **mapper or hardware variant** (e.g., `UNROM 512` vs. `GTROM`), keep **both** — they are not true duplicates.
 
 ### Example
 
 ```
-Flea! (World) (Demo) (Byte-Off 2019) ← REMOVE
-Flea! (World) (Demo) (2020-02-23)    ← REMOVE
-Flea! (World) (Demo) (2020-09-19)    ← REMOVE
-Flea! (World) (Demo) (2021-02-19)    ← KEEP (latest)
+Mario & Luigi - Superstar Saga (USA) (Demo) (Kiosk)            ← REMOVE (kiosk demo)
+Mario & Luigi - Superstar Saga (USA)                           ← KEEP (retail release)
+
+Pokemon Mystery Dungeon - Red Rescue Team (USA) (Demo) (Kiosk) ← REMOVE (kiosk demo)
+Pokemon Mystery Dungeon - Red Rescue Team (Europe)             ← REMOVE (regional duplicate)
+Pokemon Mystery Dungeon - Red Rescue Team (USA, Australia)     ← KEEP (definitive English release)
+
+Pokemon Pinball - Ruby & Sapphire (Europe) (En,Fr,De,Es,It)    ← REMOVE (regional duplicate)
+Pokemon Pinball - Ruby & Sapphire (USA)                        ← KEEP (USA release)
+
+2 Games in 1 - Dr. Mario + Puzzle League (Europe)              ← REMOVE (regional duplicate)
+2 Games in One! - Dr. Mario + Puzzle League (USA)              ← KEEP (USA release)
 ```
 
 ---

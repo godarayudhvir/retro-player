@@ -24,7 +24,12 @@ import {
   ArrowLeft,
   Sparkles,
   Image,
-  FileText
+  FileText,
+  Grid,
+  LayoutGrid,
+  Maximize2,
+  Minimize2,
+  SlidersHorizontal
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { resolveAssetPath } from '../../utils/assetPath';
@@ -78,6 +83,53 @@ export default function DsView({
   const [saveActionStatus, setSaveActionStatus] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Density & View Expansion State (stored in localStorage)
+  const [gridDensity, setGridDensity] = useState(() => {
+    try {
+      return localStorage.getItem('retro_ds_grid_density') || '3';
+    } catch {
+      return '3';
+    }
+  });
+  const [isWideGrid, setIsWideGrid] = useState(() => {
+    try {
+      return localStorage.getItem('retro_ds_wide_grid') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const handleToggleDensity = () => {
+    setGridDensity(prev => {
+      let next;
+      if (isWideGrid) {
+        // Wide Mode sequence: S -> M -> L -> XL -> XXL -> S
+        const order = ['5', '4', '3', 'xl', 'xxl'];
+        const curIdx = order.indexOf(prev);
+        next = curIdx >= 0 ? order[(curIdx + 1) % order.length] : '4';
+      } else {
+        // Split Dual-Screen Mode sequence: S ('5') -> M ('4') -> L ('3') -> S
+        next = prev === '5' ? '4' : prev === '4' ? '3' : '5';
+      }
+      try {
+        localStorage.setItem('retro_ds_grid_density', next);
+      } catch {}
+      sfx?.playTileNav?.();
+      return next;
+    });
+  };
+
+  const handleToggleWideGrid = () => {
+    setIsWideGrid(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem('retro_ds_wide_grid', String(next));
+      } catch {}
+      sfx?.playTabSwitch?.();
+      return next;
+    });
+  };
   
   // Inline DS Strategy Guides QR Companion State
   const [activeQrType, setActiveQrType] = useState(null); // 'written' | 'video' | null
@@ -552,49 +604,94 @@ export default function DsView({
   };
 
   return (
-    <div className="ds-theme-container">
-      {/* Left Column: 3-Column Beveled Touchscreen Buttons Matrix */}
+    <div className={`ds-theme-container ${isWideGrid ? 'ds-wide-grid-layout' : ''}`}>
+      {/* Left Column: ROMs Matrix with Density & Panoramic View Switcher */}
       <div className="ds-buttons-pane">
-        <div className="ds-buttons-grid">
-          {filteredGames.map((game, idx) => {
-            const isFocused = focusedTarget.zone === 'grid' && focusedTarget.index === idx;
-            const isFav = isFavorite ? isFavorite(game.id || game.title) : false;
-            const gameMeta =
-              metadataMap[game.id] ||
-              metadataMap[`${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')];
-            const rawThumb = gameMeta?.coverUrl || (game.coverUrl && !game.coverUrl.endsWith('.svg') ? game.coverUrl : null);
-            const thumbSrc = rawThumb ? resolveAssetPath(rawThumb) : null;
+        {/* ROM Rail Top Header Control Bar */}
+        <div className="ds-rail-header">
+          <span className="ds-rail-count-badge">
+            {filteredGames.length} {filteredGames.length === 1 ? 'Game' : 'Games'}
+          </span>
+          <div className="ds-rail-controls">
+            <button
+              type="button"
+              className="ds-rail-action-btn"
+              onClick={handleToggleDensity}
+              title={`Tile Size: ${
+                gridDensity === '5' ? 'Small (S)' :
+                gridDensity === '4' ? 'Medium (M)' :
+                gridDensity === '3' ? 'Large (L)' :
+                gridDensity === 'xl' ? 'Extra Large (XL)' :
+                gridDensity === 'xxl' ? 'Giant (XXL)' : 'Medium (M)'
+              } - Click to cycle`}
+              aria-label="Toggle Tile Size"
+            >
+              <SlidersHorizontal size={13} />
+              <span>
+                {
+                  gridDensity === '5' ? 'S' :
+                  gridDensity === '4' ? 'M' :
+                  gridDensity === '3' ? 'L' :
+                  gridDensity === 'xl' ? 'XL' :
+                  gridDensity === 'xxl' ? 'XXL' : 'M'
+                }
+              </span>
+            </button>
+            <button
+              type="button"
+              className={`ds-rail-action-btn ${isWideGrid ? 'is-active-wide' : ''}`}
+              onClick={handleToggleWideGrid}
+              title={isWideGrid ? 'Collapse to Split Dual-Screen Mode' : 'Expand to Full-Width ROMs Wall'}
+              aria-label="Toggle Full-Width ROMs Wall"
+            >
+              {isWideGrid ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+              <span>{isWideGrid ? 'Dual Screen' : 'Wide Grid'}</span>
+            </button>
+          </div>
+        </div>
 
-            return (
-              <button
-                key={game.id || idx}
-                ref={isFocused ? activeBtnRef : null}
-                type="button"
-                className={`ds-touch-btn ${isFocused ? 'ds-btn-focused' : ''} ${isFav ? 'is-fav' : ''}`}
-                onClick={() => {
-                  setFocusedTarget({ zone: 'grid', index: idx });
-                  if (handleGameSelect) {
-                    handleGameSelect(game);
-                  }
-                }}
-                onDoubleClick={() => {
-                  if (onPlayGame) {
-                    onPlayGame(game);
-                  }
-                }}
-                title={game.title}
-              >
-                {thumbSrc ? (
-                  <img src={thumbSrc} alt={game.title} className="ds-btn-thumb" loading="lazy" />
-                ) : (
-                  <span className="ds-btn-text">{game.title}</span>
-                )}
-                {isFav && (
-                  <span className="ds-fav-dot">★</span>
-                )}
-              </button>
-            );
-          })}
+        <div className="ds-buttons-scroll-area">
+          <div className={`ds-buttons-grid ds-density-${gridDensity} ${isWideGrid ? 'is-wide' : ''}`}>
+            {filteredGames.map((game, idx) => {
+              const isFocused = focusedTarget.zone === 'grid' && focusedTarget.index === idx;
+              const isFav = isFavorite ? isFavorite(game.id || game.title) : false;
+              const gameMeta =
+                metadataMap[game.id] ||
+                metadataMap[`${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')];
+              const rawThumb = gameMeta?.coverUrl || (game.coverUrl && !game.coverUrl.endsWith('.svg') ? game.coverUrl : null);
+              const thumbSrc = rawThumb ? resolveAssetPath(rawThumb) : null;
+
+              return (
+                <button
+                  key={game.id || idx}
+                  ref={isFocused ? activeBtnRef : null}
+                  type="button"
+                  className={`ds-touch-btn ${isFocused ? 'ds-btn-focused' : ''} ${isFav ? 'is-fav' : ''}`}
+                  onClick={() => {
+                    setFocusedTarget({ zone: 'grid', index: idx });
+                    if (handleGameSelect) {
+                      handleGameSelect(game);
+                    }
+                  }}
+                  onDoubleClick={() => {
+                    if (onPlayGame) {
+                      onPlayGame(game);
+                    }
+                  }}
+                  title={game.title}
+                >
+                  {thumbSrc ? (
+                    <img src={thumbSrc} alt={game.title} className="ds-btn-thumb" loading="lazy" />
+                  ) : (
+                    <span className="ds-btn-text">{game.title}</span>
+                  )}
+                  {isFav && (
+                    <span className="ds-fav-dot">★</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
