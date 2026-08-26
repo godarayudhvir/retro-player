@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Check, Edit2, Trash2, X, Sparkles, Gamepad2 } from 'lucide-react';
 import MultiAvatar from './MultiAvatar';
 import ConfirmModal from './ConfirmModal';
@@ -22,11 +22,22 @@ export default function ProfileSelectModal({
   const [isManaging, setIsManaging] = useState(false);
   const [pendingDeleteProfile, setPendingDeleteProfile] = useState(null);
 
+  // Automatically reset manage mode whenever the modal opens or closes
+  useEffect(() => {
+    setIsManaging(false);
+    setPendingDeleteProfile(null);
+  }, [isOpen]);
+
   if (!isOpen) return null;
+
+  const handleClose = () => {
+    setIsManaging(false);
+    onClose?.();
+  };
 
   return (
     <>
-      <div className="profile-select-backdrop animate-fade-in" onClick={onClose}>
+      <div className="profile-select-backdrop animate-fade-in" onClick={handleClose}>
         <div className="profile-select-modal" onClick={(e) => e.stopPropagation()}>
           <div className="profile-modal-header">
             <div className="profile-modal-title">
@@ -36,7 +47,7 @@ export default function ProfileSelectModal({
             {onClose && (
               <button 
                 className={`profile-close-btn ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`} 
-                onClick={onClose} 
+                onClick={handleClose} 
                 aria-label="Close Profile Selector"
               >
                 <X size={20} />
@@ -58,6 +69,7 @@ export default function ProfileSelectModal({
                   className={`profile-card ${isActive ? 'active' : ''} ${isManaging ? 'managing' : ''} ${isFocused ? 'gamepad-focused' : ''}`}
                   onClick={() => {
                     if (isManaging) {
+                      setIsManaging(false);
                       onEditProfile?.(profile);
                     } else {
                       onSelectProfile?.(profile.id);
@@ -75,6 +87,11 @@ export default function ProfileSelectModal({
                         <Check size={16} strokeWidth={3} />
                       </div>
                     )}
+                    {isManaging && (
+                      <div className="profile-active-check" style={{ background: '#3b82f6' }}>
+                        <Edit2 size={15} strokeWidth={2.5} />
+                      </div>
+                    )}
                   </div>
 
                   <span className="profile-card-name">{profile.name}</span>
@@ -86,6 +103,7 @@ export default function ProfileSelectModal({
             <div
               className={`profile-card add-profile-card ${focusedTarget?.zone === 'profileModal' && focusedTarget?.index === profiles.length ? 'gamepad-focused' : ''}`}
               onClick={() => {
+                setIsManaging(false);
                 onCreateNewProfile?.();
               }}
               tabIndex={0}

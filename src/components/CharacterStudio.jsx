@@ -56,30 +56,28 @@ export default function CharacterStudio({
             </span>
           </div>
 
-          {/* Live Dynamic Multiavatar */}
-          <div 
-            className="character-avatar-portal"
-            style={{ borderColor: favoriteColor }}
-          >
-            <MultiAvatar seed={avatarSeed || playerName || suggestedName || 'Player'} size={120} />
-          </div>
-
-          {/* Player Identity Details */}
-          <div className="character-passport-meta">
-            <div className="character-passport-name">{playerName || suggestedName || 'Player'}</div>
-          </div>
-
-          {/* Single Clear Randomizer Action */}
-          <div className="character-quick-actions">
-            <button
-              type="button"
-              className={`character-dice-btn avatar-random-btn ${(focusedTarget?.zone === focusZone || focusedTarget?.zone === 'profileModal') && focusedTarget?.id === 'random' ? 'gamepad-focused' : ''}`}
-              onClick={handleRollDice}
-              title="Roll Random Character"
+          <div className="character-passport-body">
+            {/* Live Dynamic Multiavatar */}
+            <div 
+              className="character-avatar-portal"
+              style={{ borderColor: favoriteColor }}
             >
-              <Dices size={16} />
-              <span>Randomize Avatar</span>
-            </button>
+              <MultiAvatar seed={avatarSeed || playerName || suggestedName || 'Player'} size={120} />
+            </div>
+
+            {/* Player Identity Details & Randomizer */}
+            <div className="character-passport-meta">
+              <div className="character-passport-name">{playerName || suggestedName || 'Player'}</div>
+              <button
+                type="button"
+                className={`character-dice-btn avatar-random-btn ${gamepadConnected && focusedTarget?.zone === focusZone && focusedTarget?.id === 'random' ? 'gamepad-focused' : ''}`}
+                onClick={handleRollDice}
+                title="Roll Random Character"
+              >
+                <Dices size={15} />
+                <span>Randomize</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -90,7 +88,7 @@ export default function CharacterStudio({
         <div className="character-studio-tabs" role="tablist">
           <button
             type="button"
-            className={`character-studio-tab ${activeTab === 'archetypes' ? 'is-active' : ''} ${(focusedTarget?.zone === focusZone || focusedTarget?.zone === 'profileModal') && focusedTarget?.id === 'archetypeTab' ? 'gamepad-focused' : ''}`}
+            className={`character-studio-tab ${activeTab === 'archetypes' ? 'is-active' : ''} ${gamepadConnected && focusedTarget?.zone === focusZone && focusedTarget?.id === 'archetypeTab' ? 'gamepad-focused' : ''}`}
             onClick={() => { setActiveTab('archetypes'); sfx?.playTabSwitch?.(); }}
           >
             {gamepadConnected && (
@@ -102,7 +100,7 @@ export default function CharacterStudio({
 
           <button
             type="button"
-            className={`character-studio-tab ${activeTab === 'custom' ? 'is-active' : ''} ${(focusedTarget?.zone === focusZone || focusedTarget?.zone === 'profileModal') && focusedTarget?.id === 'customTab' ? 'gamepad-focused' : ''}`}
+            className={`character-studio-tab ${activeTab === 'custom' ? 'is-active' : ''} ${gamepadConnected && focusedTarget?.zone === focusZone && focusedTarget?.id === 'customTab' ? 'gamepad-focused' : ''}`}
             onClick={() => { setActiveTab('custom'); sfx?.playTabSwitch?.(); }}
           >
             {gamepadConnected && (
