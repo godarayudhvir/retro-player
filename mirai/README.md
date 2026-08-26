@@ -17,7 +17,8 @@
 | 5 | 🟠 Med-High | **[Cross-Device Cloud Save Sync](cloud-saves.md)** | Save States & Sync | Bi-directional synchronization of single Quick Save / SRAM battery saves (`.sav`) to user Google Drive, S3/R2, or Supabase with conflict resolution dialog. | 📋 Planned |
 | 6 | 🟠 Med-High | **[BYOS Cloud Storage Providers](byos-cloud-storage.md)** | Cloud & Streaming | Bring-Your-Own-Storage: Google Drive (OAuth2 PKCE) and Cloudflare R2 / AWS S3 client-side bucket streaming with zero server hosting or API costs. | 📋 Planned |
 | 7 | 🔴 High | **[Self-Hosted Supabase & Multi-User Admin](self-hosted-user-management.md)** | Self-Hosted / Auth | Docker Supabase multi-user auth, first-run Super Admin onboarding wizard, and user role management portal (ROMs excluded from DB). | 📋 Planned |
-| 8 | 🔴 High | **[WebRTC Netplay & P2P Multiplayer](multiplayer.md)** | Multiplayer & Social | Peer-to-peer online multiplayer room creation, low-latency DataChannels, and real-time input rollback synchronization. | 📋 Planned |
+| 8 | 🔴 High | **[Hardware 3D WebGL2 Upscaling](hardware-3d-upscaling.md)** | Core Rendering | Hardware-accelerated WebAssembly WebGL2 multi-core pipeline (melonDS HW, Beetle PSX HW, GlideN64, PPSSPP) with internal resolution scaling and PGXP geometry. | 📋 Planned |
+| 9 | 🔴 High | **[WebRTC Netplay & P2P Multiplayer](multiplayer.md)** | Multiplayer & Social | Peer-to-peer online multiplayer room creation, low-latency DataChannels, and real-time input rollback synchronization. | 📋 Planned |
 
 ---
 
