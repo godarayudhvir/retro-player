@@ -95,9 +95,13 @@ Featuring Nintendo DS dual-screen Touch architecture, integrated zero-popup Stra
 |:---:|
 | <img src="docs-screenshots/auto-resume-ingame.webp" width="700" alt="In-Game Auto-Resume Prompt in Action" /> |
 
-### 🕹️ In-Game Emulation & HUD Controls
+### 🕹️ Pre-Launch Controls (24 Views) & 12-System In-Game Emulation
 
-<img src="docs-screenshots/ingame-ui.webp" width="600" alt="In-Game Emulation and HUD Controls" />
+| Controls Splash | Gameplay Sandbox | Controls Splash | Gameplay Sandbox |
+|:---:|:---:|:---:|:---:|
+| **Super Nintendo (SNES)**<br /><img src="docs-screenshots/keyboard-controls-modal.webp" width="225" alt="Super Nintendo Pre-Launch Controls Modal" /> | **Super Mario World (SNES)**<br /><img src="docs-screenshots/ingame-snes.webp" width="225" alt="Super Mario World SNES Gameplay Sandbox" /> | **Game Boy Advance (GBA)**<br /><img src="docs-screenshots/keyboard-controls-gba.webp" width="225" alt="Game Boy Advance Pre-Launch Controls Modal" /> | **Pokémon Sapphire (GBA)**<br /><img src="docs-screenshots/ingame-gba.webp" width="225" alt="Pokemon Sapphire GBA Gameplay Sandbox" /> |
+| **Nintendo (NES)**<br /><img src="docs-screenshots/keyboard-controls-nes.webp" width="225" alt="Nintendo NES Pre-Launch Controls Modal" /> | **Super Mario Bros. (NES)**<br /><img src="docs-screenshots/ingame-nes.webp" width="225" alt="Super Mario Bros NES Gameplay Sandbox" /> | **Game Boy (GB)**<br /><img src="docs-screenshots/keyboard-controls-gb.webp" width="225" alt="Game Boy Pre-Launch Controls Modal" /> | **Tetris (Game Boy)**<br /><img src="docs-screenshots/ingame-gb.webp" width="225" alt="Tetris Game Boy Gameplay Sandbox" /> |
+| **Nintendo 64 (N64)**<br /><img src="docs-screenshots/keyboard-controls-n64.webp" width="225" alt="Nintendo 64 Pre-Launch Controls Modal" /> | **Super Mario 64 (N64)**<br /><img src="docs-screenshots/ingame-n64.webp" width="225" alt="Super Mario 64 N64 Gameplay Sandbox" /> | **Game Boy Color (GBC)**<br /><img src="docs-screenshots/keyboard-controls-gbc.webp" width="225" alt="Game Boy Color Pre-Launch Controls Modal" /> | **Pokémon Crystal (GBC)**<br /><img src="docs-screenshots/ingame-gbc.webp" width="225" alt="Pokemon Crystal GBC Gameplay Sandbox" /> |
 
 </div>
 
