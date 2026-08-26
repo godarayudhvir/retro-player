@@ -27,7 +27,7 @@ export function useWebAudioSfx() {
       if (AudioCtx) {
         const ctx = new AudioCtx();
         const masterGain = ctx.createGain();
-        masterGain.gain.setValueAtTime(0.75, ctx.currentTime);
+        masterGain.gain.setValueAtTime(0.8625, ctx.currentTime); // 15% increase (0.75 -> 0.8625)
         masterGain.connect(ctx.destination);
         audioCtxRef.current = ctx;
         masterGainRef.current = masterGain;
