@@ -160,4 +160,15 @@ if (fs.existsSync(readmePath)) {
   updatedCount++;
 }
 
+// 8. Sync Cover Showcase Image (home.webp -> public/og-image.webp & public/screenshots/desktop-1.webp)
+const homeImgPath = path.join(ROOT_DIR, 'home.webp');
+if (fs.existsSync(homeImgPath)) {
+  const ogImgPath = path.join(ROOT_DIR, 'public/og-image.webp');
+  const desktopImgPath = path.join(ROOT_DIR, 'public/screenshots/desktop-1.webp');
+  fs.copyFileSync(homeImgPath, ogImgPath);
+  fs.copyFileSync(homeImgPath, desktopImgPath);
+  console.log(`✅ Synchronized cover image (home.webp -> og-image.webp & screenshots/desktop-1.webp)`);
+  updatedCount++;
+}
+
 console.log(`\n🎉 Successfully synchronized ${updatedCount} files to ${tagVer}!\n`);

@@ -23,6 +23,7 @@ When a version release is triggered, this skill updates all version touchpoints 
 | **PWA Web Manifest** | `public/manifest.webmanifest` | Updates `"version": "x.y.z"` |
 | **In-App About Dialog** | `src/components/AboutInfoModal.jsx` | Updates the displayed `vx.y.z` version badge |
 | **AI LLM Context** | `public/llms.txt` | Updates release version header |
+| **Cover Showcase Images** | `home.webp` -> `public/og-image.webp` & `public/screenshots/desktop-1.webp` | Syncs latest README cover image to SEO Open Graph and PWA installation screenshots |
 | **Project Documentation** | `README.md` | Updates release status badge & documentation highlights |
 
 > [!NOTE]
