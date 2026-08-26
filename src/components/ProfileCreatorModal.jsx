@@ -64,15 +64,16 @@ export default function ProfileCreatorModal({
           {/* Header */}
           <div className="profile-creator-header">
             <div className="profile-creator-title">
-              <User size={22} color={favoriteColor} />
+              <User size={20} color={favoriteColor} />
               <h2>{initialProfile ? 'Edit Character Profile' : 'Character Creation Studio'}</h2>
             </div>
             <button 
-              className={`profile-close-btn ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`} 
-              onClick={onClose}
+              type="button" 
+              className={`info-close-btn profile-close-btn ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`} 
+              onClick={() => { onClose(); sfx?.playModalClose?.(); }}
               aria-label="Close"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
           </div>
 
@@ -95,7 +96,7 @@ export default function ProfileCreatorModal({
           </div>
 
           {/* Footer Actions */}
-          <div className="profile-creator-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="profile-creator-footer">
             {canDelete && onDelete && (
               <button
                 type="button"
@@ -107,13 +108,15 @@ export default function ProfileCreatorModal({
                     sfx?.playModalClose?.();
                   }
                 }}
+                title="Delete Profile"
+                aria-label="Delete Profile"
               >
-                <Trash2 size={16} />
-                <span>Delete Profile</span>
+                <Trash2 size={15} />
+                <span>Delete</span>
               </button>
             )}
 
-            <div style={{ display: 'flex', gap: '0.5rem', marginLeft: 'auto' }}>
+            <div className="profile-footer-right-actions" style={{ display: 'flex', gap: '0.5rem', marginLeft: 'auto' }}>
               <button
                 type="button"
                 className={`profile-btn-secondary profile-btn-cancel ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'cancel' ? 'gamepad-focused' : ''}`}
@@ -128,7 +131,7 @@ export default function ProfileCreatorModal({
                 style={{ backgroundColor: favoriteColor }}
                 onClick={handleSubmit}
               >
-                <Check size={18} />
+                <Check size={16} />
                 <span>{initialProfile ? 'Save Changes' : 'Create Profile'}</span>
               </button>
             </div>

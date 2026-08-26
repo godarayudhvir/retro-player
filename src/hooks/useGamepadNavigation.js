@@ -1674,7 +1674,8 @@ export function useGamepadNavigation({
       items.push('search');
       if (stateRef.current.pwa?.canInstall) items.push('install');
       items.push('loadRom');
-      items.push('resetApp');
+      items.push('backup');
+      items.push('info');
       return items;
     };
 
@@ -1744,9 +1745,9 @@ export function useGamepadNavigation({
           setShowLoadRomModal(true);
           setFocusedTarget({ zone: 'loadRomModal', id: 'browse' });
           sfx?.playModalOpen?.();
-        } else if (curId === 'resetApp') {
-          if (stateRef.current.setShowResetConfirm) {
-            stateRef.current.setShowResetConfirm(true);
+        } else if (curId === 'backup') {
+          if (stateRef.current.onOpenBackupModal) {
+            stateRef.current.onOpenBackupModal();
             sfx?.playModalOpen?.();
           }
         } else if (curId === 'info') {

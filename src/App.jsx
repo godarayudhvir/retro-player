@@ -44,7 +44,6 @@ export default function App() {
   const [showScraperModal, setShowScraperModal] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [showBackupModal, setShowBackupModal] = useState(false);
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showVirtualKeyboard, setShowVirtualKeyboard] = useState(false);
   const [oskConfig, setOskConfig] = useState({
     title: 'SEARCH LIBRARY',
@@ -184,8 +183,6 @@ export default function App() {
     setShowThemeModal,
     showBackupModal,
     setShowBackupModal,
-    showResetConfirm,
-    setShowResetConfirm,
     showProfileSelectModal,
     setShowProfileSelectModal,
     showProfileCreatorModal,
@@ -347,8 +344,6 @@ export default function App() {
           onOpenScraperModal={() => setShowScraperModal(true)}
           onOpenAboutModal={() => setShowInfoModal(true)}
           onOpenBackupModal={() => setShowBackupModal(true)}
-          showResetConfirm={showResetConfirm}
-          setShowResetConfirm={setShowResetConfirm}
           setShowLoadRomModal={setShowLoadRomModal}
           setShowVirtualKeyboard={setShowVirtualKeyboard}
           onDeleteGame={deleteGame}
@@ -374,8 +369,6 @@ export default function App() {
             onOpenThemeModal={() => setShowThemeModal(true)}
             onOpenAboutModal={() => setShowInfoModal(true)}
             onOpenBackupModal={() => setShowBackupModal(true)}
-            showResetConfirm={showResetConfirm}
-            setShowResetConfirm={setShowResetConfirm}
             time={time}
             sfx={sfx}
             themeEngine={themeEngine}

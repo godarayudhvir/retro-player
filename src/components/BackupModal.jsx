@@ -15,13 +15,17 @@ import {
   Sliders, 
   Layers,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  RotateCcw,
+  AlertTriangle
 } from 'lucide-react';
+import ConfirmModal from './ConfirmModal';
+import { resetEntireApp } from '../utils/appReset';
 import { exportFullDatabase, importFullDatabase, checkServerDbStatus } from '../services/db';
 
 /**
- * BackupModal: Centralized Filesystem Database Backup & Restore Studio.
- * Allows 1-click JSON database snapshot export and drag-and-drop import.
+ * BackupModal: Centralized Filesystem Database & Storage Management Studio.
+ * Allows 1-click JSON snapshot export, drag-and-drop restore, and factory reset.
  * Styled with authentic DS Touch theme aesthetics and full keyboard/gamepad accessibility.
  */
 export default function BackupModal({
@@ -36,10 +40,11 @@ export default function BackupModal({
   const [isLoading, setIsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [importPreview, setImportPreview] = useState(null);
   const [statusMessage, setStatusMessage] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
-  const [focusedSection, setFocusedSection] = useState(0); // 0: Export, 1: Import, 2: Close
+  const [focusedSection, setFocusedSection] = useState(0); // 0: Export, 1: Import, 2: Reset
   const fileInputRef = useRef(null);
   const modalRef = useRef(null);
   const isServerAvailable = checkServerDbStatus();
@@ -50,6 +55,7 @@ export default function BackupModal({
       setImportPreview(null);
       setStatusMessage(null);
       setErrorMessage(null);
+      setShowResetConfirm(false);
       return;
     }
 
@@ -72,7 +78,7 @@ export default function BackupModal({
 
   // Keyboard navigation
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || showResetConfirm) return;
 
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
@@ -101,15 +107,15 @@ export default function BackupModal({
             fileInputRef.current?.click();
           }
         } else if (focusedSection === 2) {
-          sfx?.playModalClose?.();
-          onClose();
+          setShowResetConfirm(true);
+          sfx?.playModalOpen?.();
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, focusedSection, importPreview, sfx, onClose]);
+  }, [isOpen, showResetConfirm, focusedSection, importPreview, sfx, onClose]);
 
   // Trigger export download
   const handleExportBackup = async () => {
@@ -228,27 +234,26 @@ export default function BackupModal({
   return (
     <div className="theme-modal-backdrop animate-fade-in" onClick={onClose} role="dialog" aria-modal="true">
       <div 
-        className="theme-switcher-modal-content backup-modal-content" 
+        className="backup-modal-content animate-fade-in" 
         onClick={(e) => e.stopPropagation()}
         ref={modalRef}
-        style={{ maxWidth: '640px' }}
       >
         {/* Mobile Sheet Drag Handle Bar */}
         <div className="theme-sheet-handle-bar"></div>
 
         {/* Modal Header */}
-        <div className="theme-switcher-header">
-          <div className="theme-switcher-title">
-            <Database size={22} className="theme-header-icon" style={{ color: 'var(--accent-red, #e11d48)' }} />
+        <div className="backup-modal-header">
+          <div className="backup-modal-title">
+            <Database size={20} className="backup-header-icon" />
             <div>
-              <h2>Database Backup &amp; Restore</h2>
-              <p>Export full game saves, profiles &amp; stats to disk or restore from JSON</p>
+              <h2>Storage &amp; Database Management</h2>
+              <p>Export full game saves &amp; stats, restore backups, or factory reset storage</p>
             </div>
           </div>
 
           <button 
             type="button" 
-            className="theme-close-btn" 
+            className="info-close-btn" 
             onClick={() => { onClose(); sfx?.playModalClose?.(); }}
             aria-label="Close modal"
           >
@@ -343,7 +348,7 @@ export default function BackupModal({
             {/* Action 1: Export Full Database */}
             <div className={`backup-action-card ${focusedSection === 0 ? 'is-focused' : ''}`}>
               <div className="backup-card-info">
-                <div className="backup-card-icon" style={{ background: 'rgba(225, 29, 72, 0.1)', color: '#e11d48' }}>
+                <div className="backup-card-icon" style={{ background: 'rgba(37, 99, 235, 0.1)', color: '#2563eb', borderColor: 'rgba(37, 99, 235, 0.25)' }}>
                   <Download size={20} />
                 </div>
                 <div style={{ flex: 1 }}>
@@ -357,7 +362,7 @@ export default function BackupModal({
               </div>
               <button
                 type="button"
-                className="backup-action-btn is-primary"
+                className="backup-action-btn is-export"
                 onClick={handleExportBackup}
                 disabled={isExporting}
               >
@@ -438,9 +443,69 @@ export default function BackupModal({
               )}
             </div>
 
+            {/* Action 3: Factory Reset & Wipe Storage (Danger Zone) */}
+            <div className={`backup-action-card is-danger-card ${focusedSection === 2 ? 'is-focused' : ''}`}>
+              <div className="backup-card-info">
+                <div className="backup-card-icon" style={{ background: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)' }}>
+                  <RotateCcw size={20} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                    <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>
+                      Factory Reset &amp; Clear Storage
+                    </strong>
+                    <span style={{
+                      fontSize: '0.65rem',
+                      padding: '0.1rem 0.4rem',
+                      borderRadius: '4px',
+                      background: '#ef4444',
+                      color: '#fff',
+                      fontWeight: 800
+                    }}>
+                      DANGER ZONE
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)', lineHeight: 1.4, display: 'block', marginTop: '2px' }}>
+                    Reset all profiles, battery saves, save states, and browser caches back to defaults. ROMs and covers on disk will not be deleted.
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="backup-action-btn is-danger"
+                onClick={() => {
+                  setShowResetConfirm(true);
+                  sfx?.playModalOpen?.();
+                }}
+              >
+                <RotateCcw size={15} />
+                <span>Factory Reset &amp; Clear Storage...</span>
+              </button>
+            </div>
+
           </div>
         </div>
       </div>
+
+      {/* Factory Reset Nested Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showResetConfirm}
+        title="Factory Reset & Clear Storage?"
+        message="This will reset all player profiles, battery saves, save states, and browser caches back to defaults. Your ROM files and cover artwork on disk will not be deleted."
+        confirmLabel="Reset & Reload"
+        cancelLabel="Cancel"
+        isDestructive={true}
+        onConfirm={async () => {
+          setShowResetConfirm(false);
+          sfx?.playDelete?.();
+          await resetEntireApp();
+        }}
+        onCancel={() => {
+          setShowResetConfirm(false);
+          sfx?.playModalClose?.();
+        }}
+        sfx={sfx}
+      />
     </div>
   );
 }

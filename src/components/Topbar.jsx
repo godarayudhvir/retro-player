@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Search, 
   FolderOpen, 
@@ -6,8 +6,7 @@ import {
   Volume2, 
   VolumeX, 
   Sparkles, 
-  RefreshCw,
-  RotateCcw,
+  RefreshCw, 
   Square, 
   Music, 
   SkipForward, 
@@ -23,8 +22,6 @@ import {
   Database
 } from 'lucide-react';
 import MultiAvatar from './MultiAvatar';
-import ConfirmModal from './ConfirmModal';
-import { resetEntireApp } from '../utils/appReset';
 import { resolveAssetPath } from '../utils/assetPath';
 
 /**
@@ -49,16 +46,11 @@ export default function Topbar({
   onOpenThemeModal,
   onOpenAboutModal,
   onOpenBackupModal,
-  showResetConfirm: externalShowResetConfirm,
-  setShowResetConfirm: externalSetShowResetConfirm,
   time,
   sfx,
   themeEngine,
   scraper
 }) {
-  const [internalShowResetConfirm, setInternalShowResetConfirm] = useState(false);
-  const showResetConfirm = externalShowResetConfirm !== undefined ? externalShowResetConfirm : internalShowResetConfirm;
-  const setShowResetConfirm = externalSetShowResetConfirm || setInternalShowResetConfirm;
   // Helper to render accurate battery icon and theme styling
   const renderBatteryIcon = () => {
     if (!gamepadBattery || !gamepadBattery.hasBatteryInfo) return null;
@@ -323,30 +315,17 @@ export default function Topbar({
           <FolderOpen size={18} color="#3b82f6" />
         </button>
 
-        {/* Database Backup & Restore */}
+        {/* Storage & Database Management Studio (Backup, Restore & Reset) */}
         <button
           className={`status-pill status-backup-app ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'backup' ? 'gamepad-focused' : ''}`}
           onClick={() => {
             onOpenBackupModal?.();
             sfx?.playModalOpen?.();
           }}
-          title="Database Backup & Restore (Export / Import Saves, Profiles & Stats)"
-          aria-label="Database Backup and Restore"
+          title="Storage & Database Studio (Backup, Restore & Reset Storage)"
+          aria-label="Storage and Database Studio"
         >
-          <Database size={17} color="#e11d48" />
-        </button>
-
-        {/* Reset App & Purge All Cache / DB */}
-        <button
-          className={`status-pill status-reset-app ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'resetApp' ? 'gamepad-focused' : ''}`}
-          onClick={() => {
-            setShowResetConfirm(true);
-            sfx?.playModalOpen?.();
-          }}
-          title="Factory Reset & Clear Cache (Wipe Storage, DB, Saves & Caches)"
-          aria-label="Factory Reset and Clear Cache"
-        >
-          <RotateCcw size={17} color="#ef4444" />
+          <Database size={17} color="#2563eb" />
         </button>
 
         {/* About & System Info (v1.0.3) */}
@@ -367,26 +346,6 @@ export default function Topbar({
           <span>{time}</span>
         </div>
       </div>
-
-      {/* Factory Reset Confirmation Modal */}
-      <ConfirmModal
-        isOpen={showResetConfirm}
-        title="Factory Reset & Clear Storage?"
-        message="This will reset all player profiles, battery saves, save states, and browser caches back to defaults. Your ROM files and cover artwork on disk will not be deleted."
-        confirmLabel="Reset & Reload"
-        cancelLabel="Cancel"
-        isDestructive={true}
-        onConfirm={async () => {
-          setShowResetConfirm(false);
-          sfx?.playDelete?.();
-          await resetEntireApp();
-        }}
-        onCancel={() => {
-          setShowResetConfirm(false);
-          sfx?.playModalClose?.();
-        }}
-        sfx={sfx}
-      />
     </header>
   );
 }

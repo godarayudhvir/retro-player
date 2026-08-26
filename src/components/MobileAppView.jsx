@@ -46,7 +46,8 @@ import {
   Square,
   Edit3,
   Info,
-  Database
+  Database,
+  Users
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import MultiAvatar from './MultiAvatar';
@@ -119,8 +120,6 @@ export default function MobileAppView({
   onOpenScraperModal,
   onOpenAboutModal,
   onOpenBackupModal,
-  showResetConfirm: externalShowResetConfirm,
-  setShowResetConfirm: externalSetShowResetConfirm,
   setShowLoadRomModal,
   setShowVirtualKeyboard
 }) {
@@ -132,9 +131,6 @@ export default function MobileAppView({
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
-  const [internalShowResetConfirm, setInternalShowResetConfirm] = useState(false);
-  const showResetConfirm = externalShowResetConfirm !== undefined ? externalShowResetConfirm : internalShowResetConfirm;
-  const setShowResetConfirm = externalSetShowResetConfirm || setInternalShowResetConfirm;
 
   const [showDeleteSaveConfirm, setShowDeleteSaveConfirm] = useState(false);
   const [showDeleteGameConfirm, setShowDeleteGameConfirm] = useState(false);
@@ -759,48 +755,16 @@ export default function MobileAppView({
                       style={{ borderColor: p.favoriteColor || '#e11d48' }}
                     >
                       <MultiAvatar seed={p.avatarSeed || p.name || 'Player'} size={68} />
-                    </div>
-                    <span className="mobile-profile-name">{p.name}</span>
-
-                    <div className="mobile-profile-actions-mini" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        className="mobile-prof-btn"
-                        onClick={() => onEditProfile?.(p)}
-                        title={`Edit ${p.name}'s Avatar`}
-                        aria-label={`Edit ${p.name}'s Avatar`}
-                      >
-                        <Edit3 size={13} />
-                      </button>
-                      {profiles.length > 1 && (
-                        <button
-                          className="mobile-prof-btn is-delete"
-                          onClick={() => onDeleteProfile?.(p.id)}
-                          title={`Delete ${p.name}`}
-                          aria-label={`Delete ${p.name}`}
-                        >
-                          <Trash2 size={13} />
-                        </button>
+                      {isActive && (
+                        <div className="mobile-profile-active-badge">
+                          <Check size={12} strokeWidth={3} />
+                        </div>
                       )}
                     </div>
+                    <span className="mobile-profile-name">{p.name}</span>
                   </div>
                 );
               })}
-
-              {/* Add Profile Card */}
-              <div
-                className="mobile-profile-item mobile-add-profile"
-                onClick={() => {
-                  onCreateNewProfile?.();
-                  setHasChosenProfileThisSession(true);
-                  setShowProfileSwitcher(false);
-                  sfx?.playModalOpen?.();
-                }}
-              >
-                <div className="mobile-profile-avatar-wrap add-circle">
-                  <Plus size={32} color="#64748b" />
-                </div>
-                <span className="mobile-profile-name">Add Player</span>
-              </div>
             </div>
           </div>
         </div>
@@ -1857,35 +1821,110 @@ export default function MobileAppView({
 
             {/* Drawer Content */}
             <div className="mobile-menu-content">
-              {/* Tool 1: About & System Info */}
+              {/* Tool 1: Player Profiles & Account Management */}
               <div className="mobile-menu-card">
                 <div className="mobile-menu-card-header">
-                  <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#059669' }}>
-                    <Info size={18} />
+                  <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(99, 102, 241, 0.15)', color: '#6366f1' }}>
+                    <Users size={18} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                      <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>About Retro Player</strong>
-                      <span className="info-version-badge" style={{ fontSize: '0.68rem', padding: '0.12rem 0.5rem' }}>v1.0.3</span>
+                      <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Player Profiles</strong>
+                      <span style={{ fontSize: '0.68rem', padding: '0.1rem 0.45rem', borderRadius: '4px', background: 'rgba(99, 102, 241, 0.12)', color: '#6366f1', fontWeight: 700 }}>
+                        {profiles.length} {profiles.length === 1 ? 'Profile' : 'Profiles'}
+                      </span>
                     </div>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
-                      Emulation engines, GitHub repository, and system specifications
+                      Create new players, customize avatars &amp; colors, or manage profiles
                     </span>
                   </div>
                 </div>
 
-                <div className="mobile-menu-card-actions">
+                {/* Profiles List with Active / Edit / Delete */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginTop: '0.4rem' }}>
+                  {profiles.map(p => {
+                    const isActive = p.id === activeProfileId;
+                    return (
+                      <div 
+                        key={p.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '0.4rem 0.6rem',
+                          borderRadius: '6px',
+                          background: isActive ? 'rgba(99, 102, 241, 0.08)' : 'rgba(148, 163, 184, 0.06)',
+                          border: isActive ? '1.5px solid rgba(99, 102, 241, 0.35)' : '1px solid rgba(148, 163, 184, 0.18)'
+                        }}
+                      >
+                        <div 
+                          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', flex: 1 }}
+                          onClick={() => {
+                            if (!isActive) {
+                              onSelectProfile?.(p.id);
+                              sfx?.playProfileSelect?.();
+                            }
+                          }}
+                        >
+                          <div style={{ width: '26px', height: '26px', borderRadius: '50%', overflow: 'hidden', border: `1.5px solid ${p.favoriteColor || '#6366f1'}` }}>
+                            <MultiAvatar seed={p.avatarSeed || p.name || 'Player'} size={26} />
+                          </div>
+                          <span style={{ fontSize: '0.82rem', fontWeight: isActive ? 800 : 600, color: 'var(--text-main)' }}>
+                            {p.name}
+                          </span>
+                          {isActive && (
+                            <span style={{ fontSize: '0.6rem', fontWeight: 800, padding: '0.06rem 0.3rem', borderRadius: '3px', background: '#6366f1', color: '#fff' }}>
+                              ACTIVE
+                            </span>
+                          )}
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <button
+                            type="button"
+                            className="mobile-prof-btn"
+                            onClick={() => {
+                              setIsHamburgerOpen(false);
+                              onEditProfile?.(p);
+                              sfx?.playModalOpen?.();
+                            }}
+                            title={`Edit ${p.name}`}
+                            aria-label={`Edit ${p.name}`}
+                          >
+                            <Edit3 size={12} />
+                          </button>
+                          {profiles.length > 1 && (
+                            <button
+                              type="button"
+                              className="mobile-prof-btn is-delete"
+                              onClick={() => {
+                                onDeleteProfile?.(p.id);
+                                sfx?.playDelete?.();
+                              }}
+                              title={`Delete ${p.name}`}
+                              aria-label={`Delete ${p.name}`}
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="mobile-menu-card-actions" style={{ marginTop: '0.45rem' }}>
                   <button
                     type="button"
-                    className="mobile-menu-btn is-primary"
+                    className="mobile-menu-btn is-secondary"
                     onClick={() => {
                       setIsHamburgerOpen(false);
-                      onOpenAboutModal?.();
+                      onCreateNewProfile?.();
                       sfx?.playModalOpen?.();
                     }}
                   >
-                    <Info size={14} />
-                    <span>About &amp; Specifications</span>
+                    <Plus size={14} />
+                    <span>Create New Profile</span>
                   </button>
                 </div>
               </div>
@@ -1940,16 +1979,16 @@ export default function MobileAppView({
                 </div>
               )}
 
-              {/* Tool 3: Database Backup & Restore */}
+              {/* Tool 3: Storage & Database Management Studio (Backup, Restore & Reset) */}
               <div className="mobile-menu-card">
                 <div className="mobile-menu-card-header">
-                  <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(225, 29, 72, 0.15)', color: '#e11d48' }}>
+                  <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(37, 99, 235, 0.15)', color: '#2563eb' }}>
                     <Database size={18} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
-                    <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Database Backup &amp; Restore</strong>
+                    <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Storage &amp; Database Studio</strong>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
-                      Export full game saves, profiles &amp; settings to JSON or restore from backup
+                      Export full game saves &amp; stats, restore backups, or factory reset storage
                     </span>
                   </div>
                 </div>
@@ -1965,7 +2004,7 @@ export default function MobileAppView({
                     }}
                   >
                     <Database size={14} />
-                    <span>Open Backup Studio</span>
+                    <span>Open Storage Studio</span>
                   </button>
                 </div>
               </div>
@@ -2000,30 +2039,35 @@ export default function MobileAppView({
                 </div>
               )}
 
-              {/* Tool 5: Factory Reset & Wipe Storage */}
-              <div className="mobile-menu-card is-danger-card">
+              {/* Tool 5: About & System Info */}
+              <div className="mobile-menu-card">
                 <div className="mobile-menu-card-header">
-                  <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444' }}>
-                    <RotateCcw size={18} />
+                  <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#059669' }}>
+                    <Info size={18} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
-                    <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: '#ef4444' }}>Factory Reset &amp; Clear Data</strong>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>Wipe all local battery saves, custom profiles, and cached media</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>About Retro Player</strong>
+                      <span className="info-version-badge" style={{ fontSize: '0.68rem', padding: '0.12rem 0.5rem' }}>v1.0.3</span>
+                    </div>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
+                      Emulation engines, GitHub repository, and system specifications
+                    </span>
                   </div>
                 </div>
 
                 <div className="mobile-menu-card-actions">
                   <button
                     type="button"
-                    className="mobile-menu-btn is-danger"
+                    className="mobile-menu-btn is-primary"
                     onClick={() => {
                       setIsHamburgerOpen(false);
-                      setShowResetConfirm(true);
+                      onOpenAboutModal?.();
                       sfx?.playModalOpen?.();
                     }}
                   >
-                    <RotateCcw size={14} />
-                    <span>Reset Application</span>
+                    <Info size={14} />
+                    <span>About &amp; Specifications</span>
                   </button>
                 </div>
               </div>
@@ -2208,26 +2252,6 @@ export default function MobileAppView({
           })}
         </div>
       </main>
-
-      {/* Factory Reset Confirmation Modal */}
-      <ConfirmModal
-        isOpen={showResetConfirm}
-        title="Reset Application & Clear Cache?"
-        message="This will permanently wipe all browser storage, cached metadata, box art, battery saves, save states, profiles, and service worker caches, then cleanly reload the application. No codebase or server files on disk will be touched."
-        confirmLabel="Reset & Reload"
-        cancelLabel="Cancel"
-        isDestructive={true}
-        onConfirm={async () => {
-          setShowResetConfirm(false);
-          sfx?.playDelete?.();
-          await resetEntireApp();
-        }}
-        onCancel={() => {
-          setShowResetConfirm(false);
-          sfx?.playModalClose?.();
-        }}
-        sfx={sfx}
-      />
     </div>
   );
 }
