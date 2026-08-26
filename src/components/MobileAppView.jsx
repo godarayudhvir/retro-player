@@ -107,8 +107,11 @@ export default function MobileAppView({
   onEditMetadata,
   onScrapeGame,
   onExportSave,
+  onExportBatterySave,
+  onExportQuickSave,
   onImportSave,
   onDeleteSave,
+  checkSaveData,
   onDeleteGame,
   onResetStats,
   hasSaveData,
@@ -189,27 +192,30 @@ export default function MobileAppView({
 
   // Filtered games for current view
   const currentGamesList = useMemo(() => {
+    let baseList = [];
+    if (selectedSystem) {
+      if (selectedSystem.key === 'favorites') {
+        baseList = favoriteGames;
+      } else if (selectedSystem.key === 'recent') {
+        baseList = recentGames;
+      } else if (selectedSystem.key === 'all') {
+        baseList = games;
+      } else {
+        baseList = systemGamesMap[selectedSystem.key] || [];
+      }
+    } else {
+      baseList = games;
+    }
+
     if (searchQuery.trim().length > 0) {
       const q = searchQuery.toLowerCase().trim();
-      return games.filter(g => 
+      return baseList.filter(g => 
         g.title.toLowerCase().includes(q) || 
         (g.systemName && g.systemName.toLowerCase().includes(q))
       );
     }
 
-    if (!selectedSystem) return [];
-
-    if (selectedSystem.key === 'favorites') {
-      return favoriteGames;
-    }
-    if (selectedSystem.key === 'recent') {
-      return recentGames;
-    }
-    if (selectedSystem.key === 'all') {
-      return games;
-    }
-
-    return systemGamesMap[selectedSystem.key] || [];
+    return baseList;
   }, [selectedSystem, searchQuery, games, favoriteGames, recentGames, systemGamesMap]);
 
   // Selected game metadata details
@@ -240,14 +246,23 @@ export default function MobileAppView({
   const videoGuideUrl = walkthrough.video || selectedMeta?.videoWalkthroughUrl || null;
   const hasGuides = Boolean(writtenGuideUrl || videoGuideUrl);
 
-  // Reset tab on switching game
+  const checkSaveDataRef = useRef(checkSaveData);
   useEffect(() => {
-    setDsTab('overview');
-    setActiveQrType(null);
-    setQrDataUrl('');
-    setCopiedLink(false);
-    setEditSaveStatus('');
-  }, [selectedGameForDetails?.id, selectedGameForDetails?.title]);
+    checkSaveDataRef.current = checkSaveData;
+  }, [checkSaveData]);
+
+  // Reset tab only on switching to a different game and check save presence
+  const activeGameKey = selectedGameForDetails ? (selectedGameForDetails.id || selectedGameForDetails.title) : null;
+  useEffect(() => {
+    if (activeGameKey && selectedGameForDetails) {
+      setDsTab('overview');
+      setActiveQrType(null);
+      setQrDataUrl('');
+      setCopiedLink(false);
+      setEditSaveStatus('');
+      checkSaveDataRef.current?.(selectedGameForDetails);
+    }
+  }, [activeGameKey]);
 
   // Synchronize form fields with active selected game
   useEffect(() => {
@@ -703,7 +718,7 @@ export default function MobileAppView({
   // Stage 2: System Selection
   const isStageProfile = (!hasChosenProfileThisSession && profiles.length > 1) || showProfileSwitcher;
   const isStageDetail = !isStageProfile && !!selectedGameForDetails;
-  const isStageGames = !isStageProfile && !isStageDetail && (!!selectedSystem || searchQuery.trim().length > 0);
+  const isStageGames = !isStageProfile && !isStageDetail && !!selectedSystem;
   const isStageSystems = !isStageProfile && !isStageDetail && !isStageGames;
 
   // =========================================================================
@@ -1009,34 +1024,23 @@ export default function MobileAppView({
                 </div>
               )}
 
-              {/* Status Header Badge */}
-              <div className={`ds-save-status-badge ${hasSaveData ? 'has-save' : ''}`}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Save size={16} color={hasSaveData ? '#10b981' : '#64748b'} />
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <strong>{hasSaveData ? 'BATTERY SAVE DETECTED' : 'NO SAVE DATA FOUND'}</strong>
-                    <span style={{ fontSize: '0.68rem', color: 'var(--text-sub)' }}>
-                      {!supportsBattery ? 'Arcade session loop (Quick Saves supported)' : (hasSaveData ? 'Saved battery RAM ready' : 'Auto-saves or import .sav')}
-                    </span>
-                  </div>
-                </div>
-                {hasSaveData && <CheckCircle2 size={16} color="#10b981" />}
-              </div>
-
               {/* Save Action Tiles */}
               <div className="ds-save-tiles-group">
-                {/* Export Tile */}
+                {/* Export Battery Save (.sav) */}
                 <button
                   type="button"
-                  className={`ds-save-action-tile ${!hasSaveData ? 'is-disabled' : ''}`}
-                  disabled={!hasSaveData}
+                  className="ds-save-action-tile"
                   onClick={async () => {
-                    if (onExportSave && selectedGameForDetails && hasSaveData) {
-                      setSaveActionStatus('Exporting save...');
-                      const success = await onExportSave(selectedGameForDetails);
+                    if (selectedGameForDetails) {
+                      setSaveActionStatus('Exporting battery save (.sav)...');
+                      const fn = onExportBatterySave || onExportSave;
+                      const success = await fn(selectedGameForDetails);
                       if (success) {
                         sfx?.playNotification?.();
-                        setSaveActionStatus('Downloaded .sav battery save file!');
+                        setSaveActionStatus('Downloaded .sav battery save!');
+                        setTimeout(() => setSaveActionStatus(''), 4000);
+                      } else {
+                        setSaveActionStatus('No .sav battery save found. Save in-game first!');
                         setTimeout(() => setSaveActionStatus(''), 4000);
                       }
                     }
@@ -1046,8 +1050,37 @@ export default function MobileAppView({
                     <Download size={16} />
                   </div>
                   <div className="ds-save-tile-content">
-                    <div className="ds-save-tile-title">Export Save (.sav)</div>
-                    <div className="ds-save-tile-sub">Download in-game save to your device</div>
+                    <div className="ds-save-tile-title">Export Battery Save (.sav)</div>
+                    <div className="ds-save-tile-sub">Download in-game cartridge SRAM save file</div>
+                  </div>
+                </button>
+
+                {/* Export Quick Save (.state) */}
+                <button
+                  type="button"
+                  className="ds-save-action-tile"
+                  onClick={async () => {
+                    if (selectedGameForDetails) {
+                      setSaveActionStatus('Exporting quick save (.state)...');
+                      const fn = onExportQuickSave || onExportSave;
+                      const success = await fn(selectedGameForDetails);
+                      if (success) {
+                        sfx?.playNotification?.();
+                        setSaveActionStatus('Downloaded .state quick save snapshot!');
+                        setTimeout(() => setSaveActionStatus(''), 4000);
+                      } else {
+                        setSaveActionStatus('No .state quick save found. Press Quick Save first!');
+                        setTimeout(() => setSaveActionStatus(''), 4000);
+                      }
+                    }
+                  }}
+                >
+                  <div className="ds-save-tile-icon export" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' }}>
+                    <Download size={16} />
+                  </div>
+                  <div className="ds-save-tile-content">
+                    <div className="ds-save-tile-title">Export Quick Save (.state)</div>
+                    <div className="ds-save-tile-sub">Download emulator snapshot state file</div>
                   </div>
                 </button>
 
@@ -1061,29 +1094,26 @@ export default function MobileAppView({
                     <Upload size={16} />
                   </div>
                   <div className="ds-save-tile-content">
-                    <div className="ds-save-tile-title">Import Save (.sav)</div>
-                    <div className="ds-save-tile-sub">Upload an existing .sav battery save</div>
+                    <div className="ds-save-tile-title">Import Save / State (.sav / .state)</div>
+                    <div className="ds-save-tile-sub">Upload an existing .sav battery save or .state snapshot</div>
                   </div>
                 </button>
 
                 {/* Delete Tile */}
                 <button
                   type="button"
-                  className={`ds-save-action-tile is-delete ${!hasSaveData ? 'is-disabled' : ''}`}
-                  disabled={!hasSaveData}
+                  className="ds-save-action-tile is-delete"
                   onClick={() => {
-                    if (hasSaveData) {
-                      setShowDeleteSaveConfirm(true);
-                      sfx?.playTileNav?.();
-                    }
+                    setShowDeleteSaveConfirm(true);
+                    sfx?.playTileNav?.();
                   }}
                 >
                   <div className="ds-save-tile-icon delete">
                     <Trash2 size={16} />
                   </div>
                   <div className="ds-save-tile-content">
-                    <div className="ds-save-tile-title">Delete In-Game Save</div>
-                    <div className="ds-save-tile-sub">Erase saved data to restart the game fresh</div>
+                    <div className="ds-save-tile-title">Delete All Saved Data</div>
+                    <div className="ds-save-tile-sub">Erase in-game saves & quick save states</div>
                   </div>
                 </button>
               </div>
@@ -1091,9 +1121,9 @@ export default function MobileAppView({
               {/* Delete Save Confirmation Modal */}
               <ConfirmModal
                 isOpen={showDeleteSaveConfirm}
-                title="Delete Save Data?"
-                message={`Are you sure you want to permanently erase the saved battery RAM and save states for "${selectedGameForDetails?.title}"? This action cannot be undone.`}
-                confirmLabel="Delete Save"
+                title="Delete All Saved Data?"
+                message={`Are you sure you want to permanently erase the saved battery RAM (.sav) and quick save states (.state) for "${selectedGameForDetails?.title}"? This action cannot be undone.`}
+                confirmLabel="Delete All Saves"
                 cancelLabel="Cancel"
                 isDestructive={true}
                 onConfirm={async () => {
@@ -1564,9 +1594,7 @@ export default function MobileAppView({
   // STAGE 3: CHOOSE GAME (3-Column Square Beveled DS Button Grid)
   // =========================================================================
   if (isStageGames) {
-    const systemTitle = searchQuery.trim().length > 0 
-      ? `Search: "${searchQuery}"`
-      : selectedSystem?.name || 'All Games';
+    const systemTitle = selectedSystem?.name || 'All Games';
 
     return (
       <div className="mobile-app-root stage-games-root">
@@ -1576,11 +1604,9 @@ export default function MobileAppView({
             type="button"
             className="mobile-games-back-btn"
             onClick={() => {
-              if (searchQuery.trim().length > 0) {
-                setSearchQuery('');
-              } else {
-                setSelectedSystem(null);
-              }
+              setSearchQuery('');
+              setIsSearchOpen(false);
+              setSelectedSystem(null);
               sfx?.playTileNav?.();
             }}
           >
@@ -1594,7 +1620,49 @@ export default function MobileAppView({
             )}
             <span className="mobile-games-nav-title">{systemTitle}</span>
           </div>
+
+          <div className="mobile-games-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <button 
+              type="button"
+              className={`mobile-topbar-action-btn ${isSearchOpen || searchQuery ? 'is-active' : ''}`}
+              onClick={() => {
+                setIsSearchOpen(prev => !prev);
+                sfx?.playTileNav?.();
+              }}
+              title="Search Games"
+              aria-label="Search Games"
+            >
+              <Search size={16} />
+            </button>
+          </div>
         </header>
+
+        {/* Expandable Search Bar in Stage 3 */}
+        {isSearchOpen && (
+          <div className="mobile-expandable-search-bar animate-fade-in">
+            <div className="mobile-search-widget">
+              <Search size={16} className="mobile-search-icon" />
+              <input 
+                type="text"
+                className="mobile-search-input"
+                placeholder={selectedSystem?.name ? `Search ${selectedSystem.name}...` : 'Search games...'}
+                value={searchQuery}
+                autoFocus
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <button 
+                  type="button"
+                  className="mobile-search-clear" 
+                  onClick={() => setSearchQuery('')}
+                  aria-label="Clear search"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Game Content Grid */}
         <main className="mobile-games-grid-body">
@@ -2048,7 +2116,7 @@ export default function MobileAppView({
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
                       <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>About Retro Player</strong>
-                      <span className="info-version-badge" style={{ fontSize: '0.68rem', padding: '0.12rem 0.5rem' }}>v1.0.3</span>
+                      <span className="info-version-badge" style={{ fontSize: '0.68rem', padding: '0.12rem 0.5rem' }}>v1.0.4</span>
                     </div>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
                       Emulation engines, GitHub repository, and system specifications
@@ -2105,150 +2173,204 @@ export default function MobileAppView({
 
       {/* Systems Stage Body */}
       <main className="mobile-systems-body">
-        {/* Stage Header Banner */}
-        <div className="mobile-systems-header">
-          <div className="mobile-systems-header-left">
-            <h2 className="mobile-systems-title">Choose System</h2>
-          </div>
-          <div className="mobile-total-games-badge">
-            <Gamepad2 size={13} />
-            <span>{games.length} Titles</span>
-          </div>
-        </div>
-
-        {/* Quick Access Smart Categories */}
-        {games.length === 0 && (
-          <div className="mobile-empty-library-card" style={{
-            margin: '0.5rem 0 0.85rem 0',
-            padding: '1.1rem 1rem',
-            background: 'var(--panel-bg, #ffffff)',
-            border: '2px dashed var(--panel-border, #cbd5e1)',
-            borderRadius: '12px',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}>
-            <FolderOpen size={32} color="#3b82f6" />
-            <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main, #0f172a)' }}>No ROMs in Library</div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-sub, #64748b)', maxWidth: '280px', lineHeight: 1.4 }}>
-              Load ROM files (.gba, .nes, .gbc, .nds, .zip) from your device to start playing immediately.
+        {searchQuery.trim().length > 0 ? (
+          /* Live Search Results View (Search bar remains continuously mounted) */
+          <div className="mobile-search-results-section animate-fade-in">
+            <div className="mobile-systems-header">
+              <div className="mobile-systems-header-left">
+                <h2 className="mobile-systems-title">Search Results</h2>
+              </div>
+              <div className="mobile-total-games-badge">
+                <Gamepad2 size={13} />
+                <span>{currentGamesList.length} Found</span>
+              </div>
             </div>
-            <button
-              type="button"
-              className="mobile-ds-play-btn"
-              style={{
-                display: 'inline-flex',
+
+            {currentGamesList.length > 0 ? (
+              <div className="mobile-ds-buttons-grid">
+                {currentGamesList.map((game, idx) => {
+                  const meta = metadataMap[game.id] || metadataMap[`${game.systemKey}-${game.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')];
+                  const isFav = isFavorite ? isFavorite(game.id || game.title) : false;
+                  const rawThumb = meta?.coverUrl || (game.coverUrl && !game.coverUrl.endsWith('.svg') ? game.coverUrl : null);
+                  const thumbSrc = rawThumb ? resolveAssetPath(rawThumb) : null;
+
+                  return (
+                    <button
+                      key={game.id || idx}
+                      type="button"
+                      className={`ds-touch-btn ${isFav ? 'is-fav' : ''}`}
+                      onClick={() => {
+                        setSelectedGameForDetails(game);
+                        sfx?.playTileNav?.();
+                      }}
+                      title={game.title}
+                    >
+                      {thumbSrc ? (
+                        <img src={thumbSrc} alt={game.title} className="ds-btn-thumb" loading="lazy" />
+                      ) : (
+                        <span className="ds-btn-text">{game.title}</span>
+                      )}
+                      {isFav && <span className="ds-fav-dot">★</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="mobile-empty-catalog">
+                <FolderOpen size={48} color="#64748b" />
+                <h3>No Games Found</h3>
+                <p>No ROM files found matching &quot;{searchQuery}&quot;.</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* Stage Header Banner */}
+            <div className="mobile-systems-header">
+              <div className="mobile-systems-header-left">
+                <h2 className="mobile-systems-title">Choose System</h2>
+              </div>
+              <div className="mobile-total-games-badge">
+                <Gamepad2 size={13} />
+                <span>{games.length} Titles</span>
+              </div>
+            </div>
+
+            {/* Quick Access Smart Categories */}
+            {games.length === 0 && (
+              <div className="mobile-empty-library-card" style={{
+                margin: '0.5rem 0 0.85rem 0',
+                padding: '1.1rem 1rem',
+                background: 'var(--panel-bg, #ffffff)',
+                border: '2px dashed var(--panel-border, #cbd5e1)',
+                borderRadius: '12px',
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                gap: '6px',
-                padding: '8px 16px',
-                fontSize: '0.82rem',
-                marginTop: '4px',
-                background: '#3b82f6',
-                borderColor: '#2563eb'
-              }}
-              onClick={() => {
-                setShowLoadRomModal?.(true);
-                sfx?.playModalOpen?.();
-              }}
-            >
-              <FolderOpen size={15} />
-              <span>Load Custom ROM</span>
-            </button>
-          </div>
-        )}
-        <div className="mobile-quick-categories-row">
-          <button
-            type="button"
-            className="mobile-quick-cat-card is-all"
-            onClick={() => {
-              setSelectedSystem({ key: 'all', name: 'All Games', icon: 'assets/platforms/gba.svg' });
-              sfx?.playTabSwitch?.();
-            }}
-          >
-            <Layers size={18} color="#e11d48" />
-            <div className="mobile-quick-cat-text">
-              <strong>All Games</strong>
-            </div>
-            <ChevronRight size={16} className="mobile-quick-arrow" />
-          </button>
-
-          {favoriteGames.length > 0 && (
-            <button
-              type="button"
-              className="mobile-quick-cat-card is-fav"
-              onClick={() => {
-                setSelectedSystem({ key: 'favorites', name: 'Favorites', icon: null });
-                sfx?.playTabSwitch?.();
-              }}
-            >
-              <Star size={18} fill="#f59e0b" color="#f59e0b" />
-              <div className="mobile-quick-cat-text">
-                <strong>Favorites</strong>
-                <span>{favoriteGames.length} Titles</span>
+                gap: '0.5rem'
+              }}>
+                <FolderOpen size={32} color="#3b82f6" />
+                <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main, #0f172a)' }}>No ROMs in Library</div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-sub, #64748b)', maxWidth: '280px', lineHeight: 1.4 }}>
+                  Load ROM files (.gba, .nes, .gbc, .nds, .zip) from your device to start playing immediately.
+                </div>
+                <button
+                  type="button"
+                  className="mobile-ds-play-btn"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 16px',
+                    fontSize: '0.82rem',
+                    marginTop: '4px',
+                    background: '#3b82f6',
+                    borderColor: '#2563eb'
+                  }}
+                  onClick={() => {
+                    setShowLoadRomModal?.(true);
+                    sfx?.playModalOpen?.();
+                  }}
+                >
+                  <FolderOpen size={15} />
+                  <span>Load Custom ROM</span>
+                </button>
               </div>
-              <ChevronRight size={16} className="mobile-quick-arrow" />
-            </button>
-          )}
-
-          {recentGames.length > 0 && (
-            <button
-              type="button"
-              className="mobile-quick-cat-card is-recent"
-              onClick={() => {
-                setSelectedSystem({ key: 'recent', name: 'Recently Played', icon: null });
-                sfx?.playTabSwitch?.();
-              }}
-            >
-              <Clock size={18} color="#10b981" />
-              <div className="mobile-quick-cat-text">
-                <strong>Recent</strong>
-              </div>
-              <ChevronRight size={16} className="mobile-quick-arrow" />
-            </button>
-          )}
-        </div>
-
-        {/* DS Touch Console Cards Grid */}
-        <div className="mobile-console-cards-grid">
-          {systems.map((sys) => {
-            const count = systemGamesMap[sys.key]?.length || 0;
-            return (
-              <div
-                key={sys.key}
-                className="mobile-console-card"
-                style={{ '--sys-accent': sys.color || '#e11d48' }}
+            )}
+            <div className="mobile-quick-categories-row">
+              <button
+                type="button"
+                className="mobile-quick-cat-card is-all"
                 onClick={() => {
-                  setSelectedSystem(sys);
+                  setSelectedSystem({ key: 'all', name: 'All Games', icon: 'assets/platforms/gba.svg' });
                   sfx?.playTabSwitch?.();
                 }}
               >
-                {/* Visual SVG Console Header */}
-                <div className="mobile-console-art-wrap">
-                  {sys.icon ? (
-                    <img 
-                      src={resolveAssetPath(sys.icon)} 
-                      alt={sys.name} 
-                      className="mobile-console-svg-img" 
-                    />
-                  ) : (
-                    <Gamepad2 size={42} color={sys.color || '#64748b'} />
-                  )}
+                <Layers size={18} color="#e11d48" />
+                <div className="mobile-quick-cat-text">
+                  <strong>All Games</strong>
                 </div>
+                <ChevronRight size={16} className="mobile-quick-arrow" />
+              </button>
 
-                {/* Info Footer */}
-                <div className="mobile-console-card-footer">
-                  <div className="mobile-console-text-wrap">
-                    <span className="mobile-console-name">{sys.name}</span>
-                    <span className="mobile-console-category">{sys.category || 'Console'}</span>
+              {favoriteGames.length > 0 && (
+                <button
+                  type="button"
+                  className="mobile-quick-cat-card is-fav"
+                  onClick={() => {
+                    setSelectedSystem({ key: 'favorites', name: 'Favorites', icon: null });
+                    sfx?.playTabSwitch?.();
+                  }}
+                >
+                  <Star size={18} fill="#f59e0b" color="#f59e0b" />
+                  <div className="mobile-quick-cat-text">
+                    <strong>Favorites</strong>
+                    <span>{favoriteGames.length} Titles</span>
                   </div>
-                  <span className="mobile-console-count-pill">{count}</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                  <ChevronRight size={16} className="mobile-quick-arrow" />
+                </button>
+              )}
+
+              {recentGames.length > 0 && (
+                <button
+                  type="button"
+                  className="mobile-quick-cat-card is-recent"
+                  onClick={() => {
+                    setSelectedSystem({ key: 'recent', name: 'Recently Played', icon: null });
+                    sfx?.playTabSwitch?.();
+                  }}
+                >
+                  <Clock size={18} color="#10b981" />
+                  <div className="mobile-quick-cat-text">
+                    <strong>Recent</strong>
+                  </div>
+                  <ChevronRight size={16} className="mobile-quick-arrow" />
+                </button>
+              )}
+            </div>
+
+            {/* DS Touch Console Cards Grid */}
+            <div className="mobile-console-cards-grid">
+              {systems.map((sys) => {
+                const count = systemGamesMap[sys.key]?.length || 0;
+                return (
+                  <div
+                    key={sys.key}
+                    className="mobile-console-card"
+                    style={{ '--sys-accent': sys.color || '#e11d48' }}
+                    onClick={() => {
+                      setSelectedSystem(sys);
+                      sfx?.playTabSwitch?.();
+                    }}
+                  >
+                    {/* Visual SVG Console Header */}
+                    <div className="mobile-console-art-wrap">
+                      {sys.icon ? (
+                        <img 
+                          src={resolveAssetPath(sys.icon)} 
+                          alt={sys.name} 
+                          className="mobile-console-svg-img" 
+                        />
+                      ) : (
+                        <Gamepad2 size={42} color={sys.color || '#64748b'} />
+                      )}
+                    </div>
+
+                    {/* Info Footer */}
+                    <div className="mobile-console-card-footer">
+                      <div className="mobile-console-text-wrap">
+                        <span className="mobile-console-name">{sys.name}</span>
+                        <span className="mobile-console-category">{sys.category || 'Console'}</span>
+                      </div>
+                      <span className="mobile-console-count-pill">{count}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
       </main>
     </div>
   );

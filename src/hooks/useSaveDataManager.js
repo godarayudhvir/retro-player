@@ -152,89 +152,233 @@ export function useSaveDataManager() {
   }, []);
 
   /**
-   * Export the active profile's in-game battery RAM as a downloadable .sav file
+   * Helper to trigger a reliable browser file download from base64 data
    */
-  const exportSaveFile = useCallback(async (game, activeProfileId = 'prof_default') => {
+  const triggerDownload = (base64Data, fileName) => {
+    try {
+      const rawBase64 = typeof base64Data === 'string' ? base64Data : (base64Data?.save || base64Data?.data || '');
+      if (!rawBase64) return false;
+      const binary = atob(rawBase64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        try {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        } catch (e) {}
+      }, 15000);
+      return true;
+    } catch (err) {
+      console.warn('⚠️ [DOWNLOAD TRIGGER ERROR]:', err);
+      return false;
+    }
+  };
+
+  /**
+   * Export in-game battery RAM (.sav)
+   */
+  const exportBatterySave = useCallback(async (game, activeProfileId = 'prof_default') => {
     if (!game) return false;
     try {
       const isMasterProfile = activeProfileId === 'prof_default' || activeProfileId === 'default';
-      const scopedKey = `save_${activeProfileId}_${game.id || game.title}`;
-      const legacyKey = `save_${game.id || game.title}`;
+      const profilePrefixes = isMasterProfile
+        ? [activeProfileId, 'prof_default', 'default', '']
+        : [activeProfileId];
 
-      let dbSave = await dbGet(STORES.GAME_SAVES, scopedKey);
-      if (!dbSave && isMasterProfile) {
-        dbSave = await dbGet(STORES.GAME_SAVES, legacyKey);
-      }
+      const identifiers = [
+        game.id,
+        game.slug,
+        game.rawTitle,
+        game.filename,
+        game.title
+      ].filter(Boolean);
 
-      let base64Data = dbSave?.data || null;
-      if (!base64Data) {
-        const lsSave = localStorage.getItem(scopedKey) || (isMasterProfile ? localStorage.getItem(legacyKey) : null);
-        if (lsSave) {
-          const parsed = JSON.parse(lsSave);
-          base64Data = parsed?.data || null;
-        }
-      }
+      let batteryBase64 = null;
 
-      if (!base64Data) {
-        // Search by scan if direct lookup missed
-        const allSaves = await dbGetAll(STORES.GAME_SAVES);
-        const match = (allSaves || []).find(item => {
-          if (!item) return false;
-          if (item.profileId && item.profileId !== activeProfileId) {
-            if (!isMasterProfile || (item.profileId !== 'prof_default' && item.profileId !== 'default')) return false;
+      // 1. Direct key search across profile prefixes & identifiers
+      for (const id of identifiers) {
+        for (const prof of profilePrefixes) {
+          const saveKey = prof ? `save_${prof}_${id}` : `save_${id}`;
+          const dbSave = await dbGet(STORES.GAME_SAVES, saveKey);
+          if (dbSave && dbSave.data) {
+            batteryBase64 = typeof dbSave.data === 'string' ? dbSave.data : (dbSave.data.save || dbSave.data.data || null);
+            break;
           }
-          const key = (item.id || item.key || '').toLowerCase();
-          const target = (game.id || game.title || '').toLowerCase();
-          return key.includes(target);
-        });
-        if (match && match.data) {
-          base64Data = match.data;
+          try {
+            const lsSave = localStorage.getItem(saveKey);
+            if (lsSave) {
+              const parsed = JSON.parse(lsSave);
+              if (parsed && parsed.data) {
+                batteryBase64 = typeof parsed.data === 'string' ? parsed.data : (parsed.data.save || parsed.data.data || null);
+                break;
+              }
+            }
+          } catch (e) {}
         }
+        if (batteryBase64) break;
       }
 
-      if (base64Data) {
-        const rawBase64 = typeof base64Data === 'string' ? base64Data : (base64Data.save || '');
-        const binary = atob(rawBase64);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) {
-          bytes[i] = binary.charCodeAt(i);
-        }
-        const blob = new Blob([bytes], { type: 'application/octet-stream' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-
-        // Formatted clean filename with system-appropriate extension (.sav, .srm, .mcr)
-        const sysInfo = detectSystemFromExtension(game.filename || game.slug || game.title || '');
-        const saveExt = sysInfo?.saveExt || 'sav';
-        const normalized = (game.title || 'RetroGame')
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replace(/[^a-zA-Z0-9\s-_]/g, ' ')
-          .trim()
-          .replace(/\s+/g, '_')
-          .replace(/_+/g, '_');
-        const d = new Date();
-        const pad = (n) => n.toString().padStart(2, '0');
-        const timeStamp = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-        const fileName = `${normalized}_Save_${timeStamp}.${saveExt}`;
-
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        return true;
+      // 2. Comprehensive Store Scan fallback
+      if (!batteryBase64) {
+        try {
+          const allSaves = await dbGetAll(STORES.GAME_SAVES);
+          const match = (allSaves || []).find(item => {
+            if (!item) return false;
+            if (item.profileId && item.profileId !== activeProfileId) {
+              if (!isMasterProfile || (item.profileId !== 'prof_default' && item.profileId !== 'default')) return false;
+            }
+            const key = (item.id || item.key || '').toLowerCase();
+            const gId = (item.gameId || '').toLowerCase();
+            return identifiers.some(id => {
+              const target = id.toLowerCase();
+              return gId === target || key.includes(target);
+            });
+          });
+          if (match && match.data) {
+            batteryBase64 = typeof match.data === 'string' ? match.data : (match.data.save || match.data.data || null);
+          }
+        } catch (e) {}
       }
-      return false;
+
+      if (!batteryBase64) return false;
+
+      const sysInfo = detectSystemFromExtension(game.filename || game.slug || game.title || '');
+      const saveExt = sysInfo?.saveExt || 'sav';
+      const normalized = (game.title || 'RetroGame')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9\s-_]/g, ' ')
+        .trim()
+        .replace(/\s+/g, '_')
+        .replace(/_+/g, '_');
+      const d = new Date();
+      const pad = (n) => n.toString().padStart(2, '0');
+      const timeStamp = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+      const savFileName = `${normalized}_Save_${timeStamp}.${saveExt}`;
+
+      return triggerDownload(batteryBase64, savFileName);
     } catch (err) {
-      console.warn('⚠️ [SAVE EXPORT ERROR]:', err);
+      console.warn('⚠️ [BATTERY SAVE EXPORT ERROR]:', err);
       return false;
     }
   }, []);
 
   /**
-   * Import an uploaded .sav file into the active profile's IndexedDB and localStorage
+   * Export quick save snapshot (.state)
+   */
+  const exportQuickSave = useCallback(async (game, activeProfileId = 'prof_default') => {
+    if (!game) return false;
+    try {
+      const isMasterProfile = activeProfileId === 'prof_default' || activeProfileId === 'default';
+      const profilePrefixes = isMasterProfile
+        ? [activeProfileId, 'prof_default', 'default', '']
+        : [activeProfileId];
+
+      const identifiers = [
+        game.id,
+        game.slug,
+        game.rawTitle,
+        game.filename,
+        game.title
+      ].filter(Boolean);
+
+      let stateBase64 = null;
+
+      // 1. Direct key search across profile prefixes & identifiers
+      for (const id of identifiers) {
+        for (const prof of profilePrefixes) {
+          const stateKey = prof ? `state_${prof}_${id}` : `state_${id}`;
+          const dbState = await dbGet(STORES.SAVE_STATES, stateKey);
+          if (dbState && dbState.data) {
+            stateBase64 = typeof dbState.data === 'string' ? dbState.data : (dbState.data.save || dbState.data.data || null);
+            break;
+          }
+          try {
+            const lsState = localStorage.getItem(stateKey);
+            if (lsState) {
+              const parsed = JSON.parse(lsState);
+              if (parsed && parsed.data) {
+                stateBase64 = typeof parsed.data === 'string' ? parsed.data : (parsed.data.save || parsed.data.data || null);
+                break;
+              }
+            }
+          } catch (e) {}
+        }
+        if (stateBase64) break;
+      }
+
+      // 2. Comprehensive Store Scan fallback
+      if (!stateBase64) {
+        try {
+          const allStates = await dbGetAll(STORES.SAVE_STATES);
+          const match = (allStates || []).find(item => {
+            if (!item) return false;
+            if (item.profileId && item.profileId !== activeProfileId) {
+              if (!isMasterProfile || (item.profileId !== 'prof_default' && item.profileId !== 'default')) return false;
+            }
+            const key = (item.id || item.key || '').toLowerCase();
+            const gId = (item.gameId || '').toLowerCase();
+            return identifiers.some(id => {
+              const target = id.toLowerCase();
+              return gId === target || key.includes(target);
+            });
+          });
+          if (match && match.data) {
+            stateBase64 = typeof match.data === 'string' ? match.data : (match.data.save || match.data.data || null);
+          }
+        } catch (e) {}
+      }
+
+      if (!stateBase64) return false;
+
+      const normalized = (game.title || 'RetroGame')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9\s-_]/g, ' ')
+        .trim()
+        .replace(/\s+/g, '_')
+        .replace(/_+/g, '_');
+      const d = new Date();
+      const pad = (n) => n.toString().padStart(2, '0');
+      const timeStamp = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+      const stateFileName = `${normalized}_QuickSave_${timeStamp}.state`;
+
+      return triggerDownload(stateBase64, stateFileName);
+    } catch (err) {
+      console.warn('⚠️ [QUICK SAVE EXPORT ERROR]:', err);
+      return false;
+    }
+  }, []);
+
+  /**
+   * Export both in-game battery RAM (.sav) and quick save snapshots (.state)
+   */
+  const exportSaveFile = useCallback(async (game, activeProfileId = 'prof_default') => {
+    if (!game) return false;
+    const okBattery = await exportBatterySave(game, activeProfileId);
+    let okState = false;
+    if (okBattery) {
+      setTimeout(async () => {
+        await exportQuickSave(game, activeProfileId);
+      }, 350);
+    } else {
+      okState = await exportQuickSave(game, activeProfileId);
+    }
+    return okBattery || okState;
+  }, [exportBatterySave, exportQuickSave]);
+
+  /**
+   * Import an uploaded .sav (battery save) or .state (quick save snapshot)
    */
   const importSaveFile = useCallback(async (file, game, activeProfileId = 'prof_default') => {
     if (!file || !game) return false;
@@ -248,19 +392,34 @@ export function useSaveDataManager() {
       }
       const b64 = btoa(binary);
 
-      const scopedKey = `save_${activeProfileId}_${game.id || game.title}`;
-      const payload = {
-        id: scopedKey,
-        gameId: game.id || game.title,
-        profileId: activeProfileId,
-        timestamp: Date.now(),
-        data: b64
-      };
+      const fileNameLower = (file.name || '').toLowerCase();
+      const isStateFile = fileNameLower.endsWith('.state');
 
-      await dbSet(STORES.GAME_SAVES, scopedKey, payload);
-      try {
-        localStorage.setItem(scopedKey, JSON.stringify(payload));
-      } catch (e) {}
+      if (isStateFile) {
+        // Quick Save State Snapshot
+        const scopedKey = `state_${activeProfileId}_${game.id || game.title}`;
+        const payload = {
+          id: scopedKey,
+          gameId: game.id || game.title,
+          profileId: activeProfileId,
+          timestamp: Date.now(),
+          data: b64
+        };
+        await dbSet(STORES.SAVE_STATES, scopedKey, payload);
+        try { localStorage.setItem(scopedKey, JSON.stringify(payload)); } catch (e) {}
+      } else {
+        // In-game Battery RAM (.sav, .srm, .ram, .mcr)
+        const scopedKey = `save_${activeProfileId}_${game.id || game.title}`;
+        const payload = {
+          id: scopedKey,
+          gameId: game.id || game.title,
+          profileId: activeProfileId,
+          timestamp: Date.now(),
+          data: b64
+        };
+        await dbSet(STORES.GAME_SAVES, scopedKey, payload);
+        try { localStorage.setItem(scopedKey, JSON.stringify(payload)); } catch (e) {}
+      }
 
       setHasSaveData(true);
       return true;
@@ -271,7 +430,7 @@ export function useSaveDataManager() {
   }, []);
 
   /**
-   * Delete in-game battery RAM and save states for the current game strictly in the active profile
+   * Delete in-game battery RAM and quick save states for the current game in the active profile
    */
   const deleteSaveFile = useCallback(async (game, activeProfileId = 'prof_default') => {
     if (!game) return false;
@@ -378,6 +537,8 @@ export function useSaveDataManager() {
     isCheckingSave,
     checkSaveData,
     exportSaveFile,
+    exportBatterySave,
+    exportQuickSave,
     importSaveFile,
     deleteSaveFile,
     setHasSaveData

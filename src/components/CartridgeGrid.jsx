@@ -28,6 +28,8 @@ export default function CartridgeGrid({
   onEditMetadata,
   onScrapeGame,
   onExportSave,
+  onExportBatterySave,
+  onExportQuickSave,
   onImportSave,
   onDeleteSave,
   onDeleteGame,
@@ -163,6 +165,8 @@ export default function CartridgeGrid({
             onEditMetadata={onEditMetadata}
             onScrapeGame={onScrapeGame}
             onExportSave={onExportSave}
+            onExportBatterySave={onExportBatterySave}
+            onExportQuickSave={onExportQuickSave}
             onImportSave={onImportSave}
             onDeleteSave={onDeleteSave}
             onDeleteGame={onDeleteGame}

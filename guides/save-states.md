@@ -34,12 +34,23 @@ Retro Player maintains a dual-tier save persistence layer strictly namespaced by
 - **Pre-Launch Injection**: If the active player has an existing battery save, the raw byte array is injected into the Emscripten virtual filesystem before the core starts.
 - **FS Sanitization for Fresh Players**: When a player with no prior save starts the game, shared internal databases (`EJS_disableDatabases = true`) are bypassed and Emscripten FS is cleaned so the game boots directly into **"New Game"** without cross-profile save bleeding.
 - **Auto-Syncing**: Any in-game save flush during gameplay or on emulator exit commits the updated SRAM back to the active player's profile in IndexedDB.
-- **Import / Export**: Full support for exporting `.sav` files to desktop or importing existing battery saves directly into the current profile.
+- **Dedicated Export (`.sav`)**: Dedicated button to download the in-game cartridge SRAM save file (`<Game>_Save_<Date>.sav`) to mobile or desktop devices.
+- **Import Support**: Drag & drop or upload existing `.sav` / `.srm` battery saves directly into the active player's profile.
 
 ### 2. Snapshot Save States (`.state` / Quick Save)
 - **Profile Scoping**: Stored under `state_${activeProfileId}_${gameId}` in `STORES.SAVE_STATES`.
 - **Real-Time Snapshots**: Full RAM and CPU register state capture via Quick Save (`F2` / Gamepad Quick Save) and instant restore via Quick Load (`F4` / Gamepad Quick Load).
+- **Universal Compatibility**: Available across **all emulation cores and systems** (including Arcade, Atari, Vectrex, and non-battery platforms).
+- **Dedicated Export (`.state`)**: Dedicated button to download emulator snapshot state files (`<Game>_QuickSave_<Date>.state`).
+- **Import Support**: Upload `.state` snapshot files directly into the active profile.
 - **Isolation**: Completely decoupled across player profiles; Player 2 cannot overwrite or load Player 1's quick save state.
+
+### 3. Integrated Save Studio Controls
+Within both Desktop (Nintendo DS View) and Mobile (Game Details Sheet), the Save Studio provides:
+- **📥 Export Battery Save (.sav)**: Download in-game cartridge SRAM save file.
+- **📥 Export Quick Save (.state)**: Download emulator snapshot state file.
+- **📤 Import Save / State (.sav / .state)**: Upload `.sav` battery saves or `.state` snapshots with auto-routing.
+- **🗑️ Delete All Saved Data**: Erase both in-game battery RAM and quick save states for a complete game reset.
 
 ---
 

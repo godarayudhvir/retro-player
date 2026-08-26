@@ -124,18 +124,25 @@ export default function App() {
     hasSaveData,
     checkSaveData,
     exportSaveFile,
+    exportBatterySave,
+    exportQuickSave,
     importSaveFile,
     deleteSaveFile
   } = useSaveDataManager();
 
   // Selection Handler for game tile navigation & save detection
+  const handleCheckSaveData = useCallback(async (game) => {
+    if (!game) return false;
+    return checkSaveData(game, activeProfileId);
+  }, [checkSaveData, activeProfileId]);
+
   const handleGameSelect = useCallback(async (game) => {
     sfx.playTileNav();
-    const saveExists = await checkSaveData(game, activeProfileId);
+    const saveExists = await handleCheckSaveData(game);
     if (saveExists) {
       sfx.playSaveDetected();
     }
-  }, [checkSaveData, activeProfileId, sfx]);
+  }, [handleCheckSaveData, sfx]);
 
   const [loadRomInitialFile, setLoadRomInitialFile] = useState(null);
 
@@ -349,8 +356,11 @@ export default function App() {
           onEditMetadata={(game, meta) => setEditingMetadataGame({ game, metadata: meta })}
           onScrapeGame={scraper.scrapeSingleGame}
           onExportSave={(game) => exportSaveFile(game, activeProfileId)}
+          onExportBatterySave={(game) => exportBatterySave(game, activeProfileId)}
+          onExportQuickSave={(game) => exportQuickSave(game, activeProfileId)}
           onImportSave={(file, game) => importSaveFile(file, game, activeProfileId)}
           onDeleteSave={(game) => deleteSaveFile(game, activeProfileId)}
+          checkSaveData={handleCheckSaveData}
           onResetStats={resetGameStats}
           hasSaveData={hasSaveData}
           scraper={scraper}
@@ -433,6 +443,8 @@ export default function App() {
             onEditMetadata={(game, meta) => setEditingMetadataGame({ game, metadata: meta })}
             onScrapeGame={scraper.scrapeSingleGame}
             onExportSave={(game) => exportSaveFile(game, activeProfileId)}
+            onExportBatterySave={(game) => exportBatterySave(game, activeProfileId)}
+            onExportQuickSave={(game) => exportQuickSave(game, activeProfileId)}
             onImportSave={(file, game) => importSaveFile(file, game, activeProfileId)}
             onDeleteSave={(game) => deleteSaveFile(game, activeProfileId)}
             onDeleteGame={deleteGame}

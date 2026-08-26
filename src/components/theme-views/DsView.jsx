@@ -56,6 +56,8 @@ export default function DsView({
   onEditMetadata,
   onScrapeGame,
   onExportSave,
+  onExportBatterySave,
+  onExportQuickSave,
   onImportSave,
   onDeleteSave,
   onDeleteGame,
@@ -845,20 +847,21 @@ export default function DsView({
             )}
 
             <div className="ds-save-tiles-group">
-              {/* Export Tile */}
+              {/* Export Battery Save (.sav) */}
               <button
                 type="button"
-                className={`ds-save-action-tile ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'save-export' ? 'gamepad-focused' : ''}`}
+                className={`ds-save-action-tile ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'save-export-battery' ? 'gamepad-focused' : ''}`}
                 onClick={async () => {
-                  if (onExportSave && selectedGame) {
-                    setSaveActionStatus('Exporting save...');
-                    const success = await onExportSave(selectedGame);
+                  if (selectedGame) {
+                    setSaveActionStatus('Exporting battery save (.sav)...');
+                    const fn = onExportBatterySave || onExportSave;
+                    const success = await fn(selectedGame);
                     if (success) {
                       sfx?.playNotification?.();
                       setSaveActionStatus('Downloaded .sav battery save file!');
                       setTimeout(() => setSaveActionStatus(''), 4000);
                     } else {
-                      setSaveActionStatus('No save data found yet. Save in-game first!');
+                      setSaveActionStatus('No in-game battery save found. Save in-game first!');
                       setTimeout(() => setSaveActionStatus(''), 4000);
                     }
                   }
@@ -868,8 +871,37 @@ export default function DsView({
                   <Download size={16} />
                 </div>
                 <div className="ds-save-tile-content">
-                  <div className="ds-save-tile-title">Export Save (.sav)</div>
-                  <div className="ds-save-tile-sub">Download in-game save to your computer</div>
+                  <div className="ds-save-tile-title">Export Battery Save (.sav)</div>
+                  <div className="ds-save-tile-sub">Download in-game cartridge SRAM save file</div>
+                </div>
+              </button>
+
+              {/* Export Quick Save (.state) */}
+              <button
+                type="button"
+                className={`ds-save-action-tile ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'save-export-quick' ? 'gamepad-focused' : ''}`}
+                onClick={async () => {
+                  if (selectedGame) {
+                    setSaveActionStatus('Exporting quick save (.state)...');
+                    const fn = onExportQuickSave || onExportSave;
+                    const success = await fn(selectedGame);
+                    if (success) {
+                      sfx?.playNotification?.();
+                      setSaveActionStatus('Downloaded .state quick save snapshot!');
+                      setTimeout(() => setSaveActionStatus(''), 4000);
+                    } else {
+                      setSaveActionStatus('No quick save snapshot found. Press Quick Save first!');
+                      setTimeout(() => setSaveActionStatus(''), 4000);
+                    }
+                  }
+                }}
+              >
+                <div className="ds-save-tile-icon export" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' }}>
+                  <Download size={16} />
+                </div>
+                <div className="ds-save-tile-content">
+                  <div className="ds-save-tile-title">Export Quick Save (.state)</div>
+                  <div className="ds-save-tile-sub">Download emulator snapshot state file</div>
                 </div>
               </button>
 
@@ -885,8 +917,8 @@ export default function DsView({
                   <Upload size={16} />
                 </div>
                 <div className="ds-save-tile-content">
-                  <div className="ds-save-tile-title">Import Save (.sav)</div>
-                  <div className="ds-save-tile-sub">Upload an existing .sav battery save</div>
+                  <div className="ds-save-tile-title">Import Save / State (.sav / .state)</div>
+                  <div className="ds-save-tile-sub">Upload an existing .sav battery save or .state snapshot</div>
                 </div>
               </button>
 
@@ -899,7 +931,7 @@ export default function DsView({
                     setSaveActionStatus('Deleting save data...');
                     await onDeleteSave(selectedGame);
                     sfx?.playDelete?.();
-                    setSaveActionStatus('Save data & states erased!');
+                    setSaveActionStatus('Save data & quick saves erased!');
                     setTimeout(() => setSaveActionStatus(''), 4000);
                   }
                 }}
@@ -908,8 +940,8 @@ export default function DsView({
                   <Trash2 size={16} />
                 </div>
                 <div className="ds-save-tile-content">
-                  <div className="ds-save-tile-title">Delete In-Game Save</div>
-                  <div className="ds-save-tile-sub">Erase saved data to restart the game fresh</div>
+                  <div className="ds-save-tile-title">Delete All Saved Data</div>
+                  <div className="ds-save-tile-sub">Erase in-game saves & quick save states</div>
                 </div>
               </button>
             </div>
