@@ -40,9 +40,9 @@ export default function OnboardingScreen({
   focusedTarget,
   setFocusedTarget
 }) {
-  const [currentStep, setCurrentStep] = useState(0); // 0: Overview, 1: Gamepad Controls, 2: Character Creation
+  const totalSteps = isMobileDevice ? 2 : 3;
+  const [currentStep, setCurrentStep] = useState(0); // Mobile: 0: Overview, 1: Character Studio | Desktop: 0: Overview, 1: Character Studio, 2: Gamepad Controls
   const [copiedLink, setCopiedLink] = useState(false);
-  const totalSteps = 3;
 
   // Multiavatar Profile Setup State
   const [playerName, setPlayerName] = useState(() => activeProfile?.name || 'Player 1');
@@ -86,9 +86,14 @@ export default function OnboardingScreen({
     }
   };
 
-  // Auto-focus logic when opening or changing steps
+  const viewportRef = React.useRef(null);
+
+  // Auto-focus logic & scroll-to-top when opening or changing steps
   useEffect(() => {
     if (isOpen) {
+      if (viewportRef.current) {
+        viewportRef.current.scrollTop = 0;
+      }
       if (currentStep === 0) {
         setFocusedTarget?.({ zone: 'onboarding', id: 'pillar_0' });
       } else if (currentStep === 1) {
@@ -173,7 +178,7 @@ export default function OnboardingScreen({
         </header>
 
       {/* Main Slide Carousel Body */}
-      <main className="onboarding-body-viewport">
+      <main ref={viewportRef} className="onboarding-body-viewport">
         {/* =========================================================
             SLIDE 0: CONSOLE OVERVIEW & SYSTEM VALUE PILLARS
             ========================================================= */}
@@ -192,7 +197,7 @@ export default function OnboardingScreen({
             <div className="onboarding-pillars-grid">
               {/* Card 1: 12 Consoles & Live Emulation */}
               <div
-                className={`onboarding-pillar-card ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'pillar_0' ? 'gamepad-focused' : ''}`}
+                className={`onboarding-pillar-card ${gamepadConnected && focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'pillar_0' ? 'gamepad-focused' : ''}`}
                 tabIndex={0}
                 data-onboarding-id="pillar_0"
                 onClick={() => { setFocusedTarget?.({ zone: 'onboarding', id: 'pillar_0' }); sfx?.playTileNav?.(); }}
@@ -222,7 +227,7 @@ export default function OnboardingScreen({
                 href="https://github.com/godarayudhvir/retro-player"
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`onboarding-pillar-card onboarding-github-card ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'pillar_1' ? 'gamepad-focused' : ''}`}
+                className={`onboarding-pillar-card onboarding-github-card ${gamepadConnected && focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'pillar_1' ? 'gamepad-focused' : ''}`}
                 data-onboarding-id="pillar_1"
                 onClick={() => { setFocusedTarget?.({ zone: 'onboarding', id: 'pillar_1' }); sfx?.playTileNav?.(); }}
               >
@@ -439,9 +444,9 @@ export default function OnboardingScreen({
         )}
 
         {/* =========================================================
-            SLIDE 2: GAMEPAD CONTROLS & DUALSHOCK VISUALIZER
+            SLIDE 2: GAMEPAD CONTROLS & DUALSHOCK VISUALIZER (Desktop & TV only)
             ========================================================= */}
-        {currentStep === 2 && (
+        {!isMobileDevice && currentStep === 2 && (
           <div className="onboarding-slide slide-controls animate-slide-up">
             <div className="onboarding-header-card is-compact">
               <h1 className="onboarding-slide-title">
@@ -463,8 +468,8 @@ export default function OnboardingScreen({
         )}
       </main>
 
-      {/* Bottom Sticky Action Footer (Hidden on Phase 3 to give the visualizer full height) */}
-      {currentStep < totalSteps - 1 && (
+      {/* Bottom Sticky Action Footer (Hidden on Phase 3 on Desktop to give the visualizer full height; visible on Phase 2 on Mobile) */}
+      {(!isMobileDevice ? currentStep < totalSteps - 1 : true) && (
         <footer className="onboarding-footer">
           {/* Step Indicator Dots */}
           <div className="onboarding-dots-indicator" role="tablist" aria-label="Onboarding Progress">
@@ -497,10 +502,10 @@ export default function OnboardingScreen({
             <button
               className={`onboarding-primary-btn ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'next' ? 'gamepad-focused' : ''}`}
               onClick={handleNext}
-              title={currentStep === 0 ? 'Create Character' : 'View Controls Guide'}
+              title={currentStep === 0 ? 'Create Character' : isMobileDevice ? 'Start Playing' : 'View Controls Guide'}
             >
-              <span>{currentStep === 0 ? 'Create Character' : 'View Controls'}</span>
-              <ChevronRight size={18} />
+              <span>{currentStep === 0 ? 'Create Character' : isMobileDevice ? 'Start Playing' : 'View Controls'}</span>
+              {currentStep === totalSteps - 1 ? <Play size={16} fill="currentColor" /> : <ChevronRight size={18} />}
             </button>
           </div>
         </footer>

@@ -325,8 +325,9 @@ export default function App() {
     };
   }, []);
 
-  // Auto-scroll focused element into view
+  // Auto-scroll focused element into view (disabled inside onboarding on mobile to prevent viewport jumping)
   useEffect(() => {
+    if (focusedTarget?.zone === 'onboarding') return;
     const focusedEl = document.querySelector('.gamepad-focused');
     if (focusedEl) {
       focusedEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
