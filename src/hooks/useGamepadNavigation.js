@@ -291,18 +291,13 @@ export function useGamepadNavigation({
     // -0.5 Full-Screen Onboarding Navigation
     const { showOnboarding: isOnboardingOpen, setShowOnboarding: setOnboardClose } = stateRef.current;
     if (isOnboardingOpen) {
-      const curId = curTarget?.zone === 'onboarding' ? (curTarget?.id || 'next') : 'next';
       const isCharacterStudioActive = Boolean(document.querySelector('.character-studio-container'));
+      const isDualShockActive = Boolean(document.querySelector('.diagram-tester-card'));
+      const defaultId = isCharacterStudioActive ? 'random' : (isDualShockActive ? 'next' : 'pillar_0');
+      const curId = curTarget?.zone === 'onboarding' ? (curTarget?.id || defaultId) : defaultId;
 
       if (dir === 'BACK') {
-        const backBtn = document.querySelector('.onboarding-back-btn');
-        if (backBtn) {
-          backBtn.click();
-        } else {
-          setOnboardClose?.(false);
-          setFocusedTarget({ zone: 'grid', index: 0 });
-        }
-        sfx?.playModalClose?.();
+        // Disabled in onboarding: users can still navigate to the on-screen "Back" button via D-pad and press Select (A)
         return;
       }
 
@@ -310,9 +305,36 @@ export function useGamepadNavigation({
         if (curId === 'next' || curId === 'back') {
           if (isCharacterStudioActive) {
             setFocusedTarget({ zone: 'onboarding', id: 'preset_4' });
+          } else if (isDualShockActive) {
+            const chips = document.querySelectorAll('.diagram-callout');
+            if (chips.length > 0) {
+              const lastChip = chips[chips.length - 1];
+              lastChip?.click();
+            }
+            setFocusedTarget({ zone: 'onboarding', id: 'ds_chips' });
           } else {
-            setFocusedTarget({ zone: 'onboarding', id: 'skip' });
+            // Slide 0: from footer up to PWA CTA or bottom pillars
+            const pwaCta = document.querySelector('.onboarding-pwa-cta-container');
+            if (pwaCta) {
+              setFocusedTarget({ zone: 'onboarding', id: 'pwa_cta' });
+            } else {
+              setFocusedTarget({ zone: 'onboarding', id: 'pillar_2' });
+            }
           }
+          sfx?.playTileNav?.();
+        } else if (curId === 'pwa_cta') {
+          setFocusedTarget({ zone: 'onboarding', id: 'pillar_2' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'ds_chips') {
+          setFocusedTarget({ zone: 'onboarding', id: 'skip' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'pillar_2' || curId === 'pillar_3') {
+          // Row 2 up to Row 1
+          setFocusedTarget({ zone: 'onboarding', id: curId === 'pillar_3' ? 'pillar_1' : 'pillar_0' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'pillar_0' || curId === 'pillar_1') {
+          // Row 1 up to skip
+          setFocusedTarget({ zone: 'onboarding', id: 'skip' });
           sfx?.playTileNav?.();
         } else if (curId.startsWith('preset_')) {
           const pIdx = parseInt(curId.replace('preset_', ''), 10) || 0;
@@ -343,9 +365,30 @@ export function useGamepadNavigation({
         if (curId === 'skip') {
           if (isCharacterStudioActive) {
             setFocusedTarget({ zone: 'onboarding', id: 'archetypeTab' });
+          } else if (isDualShockActive) {
+            setFocusedTarget({ zone: 'onboarding', id: 'ds_chips' });
+          } else {
+            // Slide 0: from skip down to first row of pillars
+            setFocusedTarget({ zone: 'onboarding', id: 'pillar_0' });
+          }
+          sfx?.playTileNav?.();
+        } else if (curId === 'pillar_0' || curId === 'pillar_1') {
+          // Row 1 down to Row 2
+          setFocusedTarget({ zone: 'onboarding', id: curId === 'pillar_1' ? 'pillar_3' : 'pillar_2' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'pillar_2' || curId === 'pillar_3') {
+          const pwaCta = document.querySelector('.onboarding-pwa-cta-container');
+          if (pwaCta) {
+            setFocusedTarget({ zone: 'onboarding', id: 'pwa_cta' });
           } else {
             setFocusedTarget({ zone: 'onboarding', id: 'next' });
           }
+          sfx?.playTileNav?.();
+        } else if (curId === 'pwa_cta') {
+          setFocusedTarget({ zone: 'onboarding', id: 'next' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'ds_chips') {
+          setFocusedTarget({ zone: 'onboarding', id: 'next' });
           sfx?.playTileNav?.();
         } else if (curId === 'archetypeTab' || curId === 'customTab') {
           if (curId === 'customTab') {
@@ -384,6 +427,12 @@ export function useGamepadNavigation({
             setFocusedTarget({ zone: 'onboarding', id: 'back' });
             sfx?.playTileNav?.();
           }
+        } else if (curId === 'pillar_1') {
+          setFocusedTarget({ zone: 'onboarding', id: 'pillar_0' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'pillar_3') {
+          setFocusedTarget({ zone: 'onboarding', id: 'pillar_2' });
+          sfx?.playTileNav?.();
         } else if (curId === 'archetypeTab') {
           setFocusedTarget({ zone: 'onboarding', id: 'random' });
           sfx?.playTileNav?.();
@@ -419,6 +468,12 @@ export function useGamepadNavigation({
       } else if (dir === 'RIGHT') {
         if (curId === 'back') {
           setFocusedTarget({ zone: 'onboarding', id: 'next' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'pillar_0') {
+          setFocusedTarget({ zone: 'onboarding', id: 'pillar_1' });
+          sfx?.playTileNav?.();
+        } else if (curId === 'pillar_2') {
+          setFocusedTarget({ zone: 'onboarding', id: 'pillar_3' });
           sfx?.playTileNav?.();
         } else if (curId === 'random') {
           setFocusedTarget({ zone: 'onboarding', id: 'archetypeTab' });
@@ -456,8 +511,20 @@ export function useGamepadNavigation({
           const backBtn = document.querySelector('.onboarding-back-btn');
           if (backBtn) backBtn.click();
         } else if (curId === 'next') {
+          // On Phase 3 (DualShock visualizer), only the physical START button or clicking the START button launches into the app
           const nextBtn = document.querySelector('.onboarding-primary-btn');
-          if (nextBtn) nextBtn.click();
+          const isPhase3 = Boolean(document.querySelector('.diagram-tester-card'));
+          if (nextBtn && !isPhase3) {
+            nextBtn.click();
+          }
+        } else if (curId === 'pillar_1') {
+          const githubCard = document.querySelector('.onboarding-github-card');
+          if (githubCard) githubCard.click();
+        } else if (curId === 'pillar_pwa' || curId === 'pwa_cta') {
+          const pwaBtn = document.querySelector('.onboarding-install-card-btn');
+          const appleBtn = document.querySelector('.apple-copy-btn');
+          if (pwaBtn) pwaBtn.click();
+          else if (appleBtn) appleBtn.click();
         } else if (curId === 'random') {
           const randBtn = document.querySelector('.avatar-random-btn');
           if (randBtn) randBtn.click();
@@ -2285,7 +2352,7 @@ export function useGamepadNavigation({
         }
 
         // Y button opens/toggles Search OSK when not in game and when OSK is not already open
-        if (!stateRef.current.isMobile && !stateRef.current.activeGame && !stateRef.current.showInfoModal && !stateRef.current.showLoadRomModal && !stateRef.current.showVirtualKeyboard) {
+        if (!stateRef.current.isMobile && !stateRef.current.activeGame && !stateRef.current.showOnboarding && !stateRef.current.showInfoModal && !stateRef.current.showLoadRomModal && !stateRef.current.showVirtualKeyboard) {
           if (btnY && !prevButtonsRef.current.btnY) {
             if (stateRef.current.setOskConfig) {
               stateRef.current.setOskConfig({
@@ -2394,18 +2461,18 @@ export function useGamepadNavigation({
             cancelOsk();
           }
         } else if (stateRef.current.showOnboarding) {
-          // In Onboarding: Start button always directly skips / starts playing into the game UI
+          // In Onboarding: Start button on the final step (or skip button) triggers advance/finish
           if (btnStart && !prevButtonsRef.current.btnStart) {
-            const skipBtn = document.querySelector('.onboarding-skip-btn');
             const finishBtn = document.querySelector('.onboarding-primary-btn');
-            if (skipBtn) {
-              skipBtn.click();
-            } else if (finishBtn) {
+            const skipBtn = document.querySelector('.onboarding-skip-btn');
+            if (finishBtn) {
               finishBtn.click();
+            } else if (skipBtn) {
+              skipBtn.click();
             }
             lastInputTimeRef.current = now;
           }
-        } else if (!stateRef.current.activeGame && !stateRef.current.showVirtualKeyboard) {
+        } else if (!stateRef.current.activeGame && !stateRef.current.showVirtualKeyboard && !stateRef.current.showOnboarding) {
           // 1. X button (Button 2 / Square / X) -> Opens Metadata Scraper from main UI, or triggers start/confirm/scrape-again inside scraper modal
           if (btnX && !prevButtonsRef.current.btnX) {
             if (stateRef.current.showScraperModal) {
@@ -2538,13 +2605,13 @@ export function useGamepadNavigation({
                 setFocusedTarget({ zone: 'scraperModal', id: 'tab-all' });
                 sfx?.playTabSwitch?.();
               }
-            } else if (stateRef.current.showProfileCreatorModal || stateRef.current.showMiiCreatorModal || stateRef.current.showOnboarding) {
+            } else if (stateRef.current.showProfileCreatorModal || stateRef.current.showMiiCreatorModal || (stateRef.current.showOnboarding && document.querySelector('.character-studio-container'))) {
               const zone = stateRef.current.showOnboarding ? 'onboarding' : 'profileModal';
               const tabs = document.querySelectorAll('.character-studio-tab');
               if (tabs[0]) tabs[0].click();
               setFocusedTarget({ zone, id: 'archetypeTab' });
               sfx?.playTabSwitch?.();
-            } else if (!stateRef.current.isMobile) {
+            } else if (!stateRef.current.isMobile && !stateRef.current.showOnboarding) {
               const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
               const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
               const allSysKeys = ['all', 'favorites', 'recent', ...sortedSystems.map(s => s.key)];
@@ -2553,7 +2620,7 @@ export function useGamepadNavigation({
               setActiveSystem(allSysKeys[nextSysIdx]);
               setFocusedTarget({ zone: 'ribbon', index: nextSysIdx });
               sfx?.playTabSwitch?.();
-            } else {
+            } else if (stateRef.current.isMobile && !stateRef.current.showOnboarding) {
               setFocusedTarget(prev => ({ zone: 'mobileChips', index: Math.max(0, (prev.index || 0) - 1) }));
               sfx?.playTabSwitch?.();
             }
@@ -2574,13 +2641,13 @@ export function useGamepadNavigation({
                 setFocusedTarget({ zone: 'scraperModal', id: 'tab-single' });
                 sfx?.playTabSwitch?.();
               }
-            } else if (stateRef.current.showProfileCreatorModal || stateRef.current.showMiiCreatorModal || stateRef.current.showOnboarding) {
+            } else if (stateRef.current.showProfileCreatorModal || stateRef.current.showMiiCreatorModal || (stateRef.current.showOnboarding && document.querySelector('.character-studio-container'))) {
               const zone = stateRef.current.showOnboarding ? 'onboarding' : 'profileModal';
               const tabs = document.querySelectorAll('.character-studio-tab');
               if (tabs[1]) tabs[1].click();
               setFocusedTarget({ zone, id: 'customTab' });
               sfx?.playTabSwitch?.();
-            } else if (!stateRef.current.isMobile) {
+            } else if (!stateRef.current.isMobile && !stateRef.current.showOnboarding) {
               const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
               const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
               const allSysKeys = ['all', 'favorites', 'recent', ...sortedSystems.map(s => s.key)];
@@ -2589,7 +2656,7 @@ export function useGamepadNavigation({
               setActiveSystem(allSysKeys[nextSysIdx]);
               setFocusedTarget({ zone: 'ribbon', index: nextSysIdx });
               sfx?.playTabSwitch?.();
-            } else {
+            } else if (stateRef.current.isMobile && !stateRef.current.showOnboarding) {
               setFocusedTarget(prev => ({ zone: 'mobileChips', index: Math.min((stateRef.current.systems?.length || 1) - 1, (prev.index || 0) + 1) }));
               sfx?.playTabSwitch?.();
             }

@@ -23,7 +23,23 @@ Retro Player supports standard USB, Bluetooth, and 2.4GHz wireless controllers (
 | **`R3` (Right Stick Click)** | **`R3`** | **`R3`** | **Toggle Panoramic Wide Grid Mode** (Library) |
 | **`L3 + R3` (Both Clicks)** | **`L3 + R3`** | **`L3 + R3`** | **Direct Exit Active Game to Library** (In-Game) |
 | **`Select` / `Share`** | **`Share` / `Select`** | **`-` Minus** | **Toggle Favorite ⭐** (Library) / Standard Game Input (In-Game) |
-| **`Start` / `Menu`** | **`Options` / `Start`** | **`+` Plus** | **Quick-Launch Game** (Library) / **Submit** (OSK) / Standard Game Input (In-Game) |
+| **`Start` / `Menu`** | **`Options` / `Start`** | **`+` Plus** | **Quick-Launch Game** (Library) / **Submit** (OSK) / **Complete Onboarding** / Standard Game Input (In-Game) |
+
+---
+
+## 🚀 Onboarding & Interactive Controller Guide Controls
+
+During first-time startup or when revisiting the Onboarding wizard:
+
+| Screen / Phase | Gamepad Action | Function |
+| :--- | :--- | :--- |
+| **Phase 1: Welcome & Overview** | **`D-Pad / Left Stick`** | 2D spatial navigation across value pillar cards and PWA installer banner |
+| | **`[A]` Button / `Enter`** | Open repository / Trigger PWA installation / Advance to next phase |
+| | **`START` Button** | Skip onboarding immediately and boot into library |
+| **Phase 2: Character Studio** | **`D-Pad / Left Stick`** | Navigate between archetype cards, randomizer dice, name inputs, and color circles |
+| | **`[A]` Button / `Enter`** | Select archetype preset, pick color, or roll dice |
+| **Phase 3: Interactive Visualizer** | **Controller Buttons & Sticks** | Live vector DualShock schematic highlights active inputs with Web Audio SFX |
+| | **`START` Button** | **Exclusive button to complete onboarding and launch into the game library** |
 
 ---
 

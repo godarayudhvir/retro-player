@@ -282,6 +282,32 @@ async function processRoms() {
       }
     }
 
+    // Ingest loose ROM files sitting directly inside system folders (e.g. public/roms/snes/*.sfc)
+    for (const entry of rootEntries) {
+      if (entry.isDirectory() && !entry.name.startsWith('.')) {
+        const sysPath = path.join(targetDir, entry.name);
+        try {
+          const sysFiles = fs.readdirSync(sysPath, { withFileTypes: true });
+          for (const sFile of sysFiles) {
+            if (sFile.isFile() && !sFile.name.startsWith('.')) {
+              const ext = path.extname(sFile.name).toLowerCase();
+              if (EXTENSION_MAP[ext]) {
+                const baseName = path.parse(sFile.name).name;
+                const targetGameFolder = path.join(sysPath, baseName);
+                console.log(`📦 Organizing loose system ROM: "${entry.name}/${sFile.name}" -> "${entry.name}/${baseName}/${sFile.name}"`);
+                if (!isDryRun) {
+                  if (!fs.existsSync(targetGameFolder)) {
+                    fs.mkdirSync(targetGameFolder, { recursive: true });
+                  }
+                  fs.renameSync(path.join(sysPath, sFile.name), path.join(targetGameFolder, sFile.name));
+                }
+              }
+            }
+          }
+        } catch (e) {}
+      }
+    }
+
     // Scan non-system staging folders (e.g. "new", "staging", "drops", "temp")
     const stagingFolders = rootEntries.filter(e => e.isDirectory() && !e.name.startsWith('.') && !SYSTEM_NAMES[e.name]);
     for (const stg of stagingFolders) {

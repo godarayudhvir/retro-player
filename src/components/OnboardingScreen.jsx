@@ -16,11 +16,13 @@ import {
   Volume2
 } from 'lucide-react';
 import CharacterStudio from './CharacterStudio';
+import DualShockVisualizer from './DualShockVisualizer';
 import { resolveAssetPath } from '../utils/assetPath';
 
 const isApplePlatform = typeof navigator !== 'undefined' && (/Macintosh|iPhone|iPad|iPod/i.test(navigator.userAgent || ''));
 const isSafariBrowser = typeof navigator !== 'undefined' && (/Safari/i.test(navigator.userAgent || '') && !/Chrome|Chromium|CriOS|FxiOS|Edg/i.test(navigator.userAgent || ''));
 const isMobileDevice = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent || '');
+const isSmartTv = typeof navigator !== 'undefined' && /SmartTV|Tizen|Web0S|BRAVIA|NetCast|Viera|AppleTV|HbbTV|CrKey/i.test(navigator.userAgent || '');
 
 /**
  * Modern Full-Screen Responsive Onboarding Experience for Desktop & Mobile.
@@ -38,9 +40,9 @@ export default function OnboardingScreen({
   focusedTarget,
   setFocusedTarget
 }) {
-  const [currentStep, setCurrentStep] = useState(0); // 0: Overview, 1: Exhaustive Character Creation
+  const [currentStep, setCurrentStep] = useState(0); // 0: Overview, 1: Gamepad Controls, 2: Character Creation
   const [copiedLink, setCopiedLink] = useState(false);
-  const totalSteps = 2;
+  const totalSteps = 3;
 
   // Multiavatar Profile Setup State
   const [playerName, setPlayerName] = useState(() => activeProfile?.name || 'Player 1');
@@ -84,18 +86,29 @@ export default function OnboardingScreen({
     }
   };
 
-  // Auto-focus Randomize Avatar button when entering Phase 2 (Character Studio)
+  // Auto-focus logic when opening or changing steps
   useEffect(() => {
-    if (isOpen && currentStep === 1) {
-      setFocusedTarget?.({ zone: 'onboarding', id: 'random' });
+    if (isOpen) {
+      if (currentStep === 0) {
+        setFocusedTarget?.({ zone: 'onboarding', id: 'pillar_0' });
+      } else if (currentStep === 1) {
+        setFocusedTarget?.({ zone: 'onboarding', id: 'random' });
+      } else if (currentStep === 2) {
+        setFocusedTarget?.({ zone: 'onboarding', id: 'next' });
+      }
     }
   }, [isOpen, currentStep, setFocusedTarget]);
 
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
-      setCurrentStep(prev => prev + 1);
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
       sfx?.playTabSwitch?.();
-      setFocusedTarget?.({ zone: 'onboarding', id: 'random' });
+      if (nextStep === 1) {
+        setFocusedTarget?.({ zone: 'onboarding', id: 'random' });
+      } else if (nextStep === 2) {
+        setFocusedTarget?.({ zone: 'onboarding', id: 'next' });
+      }
     } else {
       handleFinish();
     }
@@ -103,9 +116,16 @@ export default function OnboardingScreen({
 
   const handleBack = () => {
     if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
+      const prevStep = currentStep - 1;
+      setCurrentStep(prevStep);
       sfx?.playTabSwitch?.();
-      setFocusedTarget?.({ zone: 'onboarding', id: 'next' });
+      if (prevStep === 0) {
+        setFocusedTarget?.({ zone: 'onboarding', id: 'pillar_0' });
+      } else if (prevStep === 1) {
+        setFocusedTarget?.({ zone: 'onboarding', id: 'random' });
+      } else {
+        setFocusedTarget?.({ zone: 'onboarding', id: 'next' });
+      }
     }
   };
 
@@ -131,28 +151,26 @@ export default function OnboardingScreen({
 
   return (
     <div className="onboarding-root animate-fade-in" role="dialog" aria-modal="true">
-      {/* Top Header Bar: Skip & Brand */}
-      <header className="onboarding-topbar">
-        <div className="onboarding-brand">
-          <img src={resolveAssetPath('favicon.svg')} alt="Retro Player Logo" className="onboarding-brand-logo" />
-          <span className="onboarding-brand-retro">RETRO</span>
-          <span className="onboarding-brand-player">PLAYER</span>
-        </div>
+        {/* Top Header Bar: Skip & Brand */}
+        <header className="onboarding-topbar">
+          <div className="onboarding-brand">
+            <img src={resolveAssetPath('favicon.svg')} alt="Retro Player Logo" className="onboarding-brand-logo" />
+            <span className="onboarding-brand-retro">RETRO</span>
+            <span className="onboarding-brand-player">PLAYER</span>
+          </div>
 
-        <button
-          className={`onboarding-skip-btn ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'skip' ? 'gamepad-focused' : ''}`}
-          onClick={handleFinish}
-          title="Skip Onboarding & Explore Library (START Button)"
-        >
-          {gamepadConnected && (
+          <button
+            className={`onboarding-skip-btn ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'skip' ? 'gamepad-focused' : ''}`}
+            onClick={handleFinish}
+            title="Skip Onboarding & Explore Library (START Button)"
+          >
             <span className="onboarding-btn-gamepad-badge">
               <span className="gamepad-badge-key">START</span>
             </span>
-          )}
-          <span>Skip to Games</span>
-          <ChevronRight size={16} />
-        </button>
-      </header>
+            <span>Skip to Games</span>
+            <ChevronRight size={16} />
+          </button>
+        </header>
 
       {/* Main Slide Carousel Body */}
       <main className="onboarding-body-viewport">
@@ -173,7 +191,12 @@ export default function OnboardingScreen({
             {/* 4 Feature Pillars Grid */}
             <div className="onboarding-pillars-grid">
               {/* Card 1: 12 Consoles & Live Emulation */}
-              <div className="onboarding-pillar-card">
+              <div
+                className={`onboarding-pillar-card ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'pillar_0' ? 'gamepad-focused' : ''}`}
+                tabIndex={0}
+                data-onboarding-id="pillar_0"
+                onClick={() => { setFocusedTarget?.({ zone: 'onboarding', id: 'pillar_0' }); sfx?.playTileNav?.(); }}
+              >
                 <div className="pillar-icon-wrap" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' }}>
                   <Gamepad2 size={24} />
                 </div>
@@ -199,8 +222,9 @@ export default function OnboardingScreen({
                 href="https://github.com/godarayudhvir/retro-player"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="onboarding-pillar-card onboarding-github-card"
-                onClick={() => sfx?.playTileNav?.()}
+                className={`onboarding-pillar-card onboarding-github-card ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'pillar_1' ? 'gamepad-focused' : ''}`}
+                data-onboarding-id="pillar_1"
+                onClick={() => { setFocusedTarget?.({ zone: 'onboarding', id: 'pillar_1' }); sfx?.playTileNav?.(); }}
               >
                 <div className="pillar-icon-wrap" style={{ background: 'rgba(30, 41, 59, 0.15)', color: '#0f172a' }}>
                   <ExternalLink size={24} />
@@ -220,8 +244,10 @@ export default function OnboardingScreen({
                   // Chrome / Edge / Samsung: native install prompt available
                   <button
                     type="button"
-                    className="onboarding-install-card-btn onboarding-pwa-grid-item"
+                    className={`onboarding-install-card-btn onboarding-pwa-grid-item ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'pillar_pwa' ? 'gamepad-focused' : ''}`}
+                    data-onboarding-id="pillar_pwa"
                     onClick={() => {
+                      setFocusedTarget?.({ zone: 'onboarding', id: 'pillar_pwa' });
                       pwa.promptInstall();
                       sfx?.playThemeSwitch?.();
                     }}
@@ -237,7 +263,7 @@ export default function OnboardingScreen({
                   </button>
                 ) : isSafariBrowser && isApplePlatform ? (
                   // Safari on iPhone / iPad / macOS
-                  <div className="onboarding-pillar-card onboarding-pwa-grid-item" style={{ gap: '0.6rem' }}>
+                  <div className={`onboarding-pillar-card onboarding-pwa-grid-item ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'pillar_pwa' ? 'gamepad-focused' : ''}`} style={{ gap: '0.6rem' }} data-onboarding-id="pillar_pwa">
                     <div className="pillar-icon-wrap" style={{ background: 'rgba(2, 132, 199, 0.12)', color: '#0284c7' }}>
                       <Compass size={24} />
                     </div>
@@ -258,7 +284,7 @@ export default function OnboardingScreen({
                   </div>
                 ) : (
                   // Any other mobile browser — generic Add to Home Screen tip
-                  <div className="onboarding-pillar-card onboarding-pwa-grid-item">
+                  <div className={`onboarding-pillar-card onboarding-pwa-grid-item ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'pillar_pwa' ? 'gamepad-focused' : ''}`} data-onboarding-id="pillar_pwa">
                     <div className="pillar-icon-wrap" style={{ background: 'rgba(37, 99, 235, 0.12)', color: '#2563eb' }}>
                       <Download size={24} />
                     </div>
@@ -271,7 +297,12 @@ export default function OnboardingScreen({
               )}
 
               {/* Card 3: 100% Private Client Saves */}
-              <div className="onboarding-pillar-card">
+              <div
+                className={`onboarding-pillar-card ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'pillar_2' ? 'gamepad-focused' : ''}`}
+                tabIndex={0}
+                data-onboarding-id="pillar_2"
+                onClick={() => { setFocusedTarget?.({ zone: 'onboarding', id: 'pillar_2' }); sfx?.playTileNav?.(); }}
+              >
                 <div className="pillar-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
                   <ShieldCheck size={24} />
                 </div>
@@ -282,7 +313,12 @@ export default function OnboardingScreen({
               </div>
 
               {/* Card 4: Gamepad & Acoustic Audio */}
-              <div className="onboarding-pillar-card">
+              <div
+                className={`onboarding-pillar-card ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'pillar_3' ? 'gamepad-focused' : ''}`}
+                tabIndex={0}
+                data-onboarding-id="pillar_3"
+                onClick={() => { setFocusedTarget?.({ zone: 'onboarding', id: 'pillar_3' }); sfx?.playTileNav?.(); }}
+              >
                 <div className="pillar-icon-wrap" style={{ background: 'rgba(168, 85, 247, 0.15)', color: '#a855f7' }}>
                   <Volume2 size={24} />
                 </div>
@@ -293,14 +329,16 @@ export default function OnboardingScreen({
               </div>
             </div>
 
-            {/* Standalone Install & Platform Guidance Cards */}
-            {(pwa?.canInstall || (isSafariBrowser && isApplePlatform)) && (
+            {/* Standalone Install & Platform Guidance Cards (Hidden on Smart TVs or if already installed/standalone) */}
+            {!pwa?.isStandalone && !isSmartTv && (pwa?.canInstall || (isSafariBrowser && isApplePlatform)) && (
               <div className="onboarding-pwa-cta-container">
                 {pwa?.canInstall ? (
                   <button
                     type="button"
-                    className="onboarding-install-card-btn"
+                    className={`onboarding-install-card-btn ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'pwa_cta' ? 'gamepad-focused' : ''}`}
+                    data-onboarding-id="pwa_cta"
                     onClick={() => {
+                      setFocusedTarget?.({ zone: 'onboarding', id: 'pwa_cta' });
                       pwa.promptInstall();
                       sfx?.playThemeSwitch?.();
                     }}
@@ -349,8 +387,12 @@ export default function OnboardingScreen({
                     <div className="apple-copy-link-row">
                       <button
                         type="button"
-                        className={`apple-copy-btn ${copiedLink ? 'is-copied' : ''}`}
-                        onClick={handleCopySafariLink}
+                        className={`apple-copy-btn ${copiedLink ? 'is-copied' : ''} ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'pwa_cta' ? 'gamepad-focused' : ''}`}
+                        data-onboarding-id="pwa_cta"
+                        onClick={() => {
+                          setFocusedTarget?.({ zone: 'onboarding', id: 'pwa_cta' });
+                          handleCopySafariLink();
+                        }}
                         title="Copy URL to paste in Safari"
                       >
                         {copiedLink ? <Check size={16} /> : <Copy size={16} />}
@@ -395,53 +437,74 @@ export default function OnboardingScreen({
             />
           </div>
         )}
+
+        {/* =========================================================
+            SLIDE 2: GAMEPAD CONTROLS & DUALSHOCK VISUALIZER
+            ========================================================= */}
+        {currentStep === 2 && (
+          <div className="onboarding-slide slide-controls animate-slide-up">
+            <div className="onboarding-header-card is-compact">
+              <h1 className="onboarding-slide-title">
+                Interactive Gamepad Controls
+              </h1>
+              <p className="onboarding-slide-desc">
+                Test your controller buttons in real time below to explore native mappings and tactile audio responses. Press <strong>START</strong> anytime to boot into the game library.
+              </p>
+            </div>
+
+            {/* Interactive DualShock 4 Controller Visualizer */}
+            <DualShockVisualizer
+              sfx={sfx}
+              gamepadConnected={gamepadConnected}
+              focusedTarget={focusedTarget}
+              setFocusedTarget={setFocusedTarget}
+            />
+          </div>
+        )}
       </main>
 
-      {/* Bottom Sticky Action Footer */}
-      <footer className="onboarding-footer">
-        {/* Step Indicator Dots */}
-        <div className="onboarding-dots-indicator" role="tablist" aria-label="Onboarding Progress">
-          {Array.from({ length: totalSteps }).map((_, idx) => (
-            <button
-              key={idx}
-              className={`onboarding-dot ${idx === currentStep ? 'is-active' : ''}`}
-              onClick={() => {
-                setCurrentStep(idx);
-                sfx?.playTileNav?.();
-              }}
-              aria-label={`Go to step ${idx + 1}`}
-            />
-          ))}
-        </div>
+      {/* Bottom Sticky Action Footer (Hidden on Phase 3 to give the visualizer full height) */}
+      {currentStep < totalSteps - 1 && (
+        <footer className="onboarding-footer">
+          {/* Step Indicator Dots */}
+          <div className="onboarding-dots-indicator" role="tablist" aria-label="Onboarding Progress">
+            {Array.from({ length: totalSteps }).map((_, idx) => (
+              <button
+                key={idx}
+                className={`onboarding-dot ${idx === currentStep ? 'is-active' : ''}`}
+                onClick={() => {
+                  setCurrentStep(idx);
+                  sfx?.playTileNav?.();
+                }}
+                aria-label={`Go to step ${idx + 1}`}
+              />
+            ))}
+          </div>
 
-        {/* Action Controls */}
-        <div className="onboarding-footer-actions">
-          {currentStep > 0 && (
-            <button
-              className={`onboarding-back-btn ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'back' ? 'gamepad-focused' : ''}`}
-              onClick={handleBack}
-              title="Previous Step"
-            >
-              <ArrowLeft size={18} />
-              <span>Back</span>
-            </button>
-          )}
-
-          <button
-            className={`onboarding-primary-btn ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'next' ? 'gamepad-focused' : ''}`}
-            onClick={handleNext}
-            title={currentStep === totalSteps - 1 ? 'Start Playing (START Button)' : 'Continue to Character Studio'}
-          >
-            {gamepadConnected && currentStep === totalSteps - 1 && (
-              <span className="onboarding-btn-gamepad-badge is-primary">
-                <span className="gamepad-badge-key">START</span>
-              </span>
+          {/* Action Controls */}
+          <div className="onboarding-footer-actions">
+            {currentStep > 0 && (
+              <button
+                className={`onboarding-back-btn ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'back' ? 'gamepad-focused' : ''}`}
+                onClick={handleBack}
+                title="Previous Step"
+              >
+                <ArrowLeft size={18} />
+                <span>Back</span>
+              </button>
             )}
-            <span>{currentStep === totalSteps - 1 ? 'Start Playing' : 'Continue to Studio'}</span>
-            {currentStep === totalSteps - 1 ? <Play size={18} fill="#ffffff" /> : <ChevronRight size={18} />}
-          </button>
-        </div>
-      </footer>
+
+            <button
+              className={`onboarding-primary-btn ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'next' ? 'gamepad-focused' : ''}`}
+              onClick={handleNext}
+              title={currentStep === 0 ? 'Create Character' : 'View Controls Guide'}
+            >
+              <span>{currentStep === 0 ? 'Create Character' : 'View Controls'}</span>
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }

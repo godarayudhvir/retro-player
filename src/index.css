@@ -13444,41 +13444,54 @@ button.status-pill.status-scraper-pill {
 }
 
 .onboarding-body-viewport {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem 1.5rem;
+  padding: 0.6rem 1.25rem;
   box-sizing: border-box;
 }
 
 .onboarding-slide {
-  max-width: 860px;
+  max-width: 960px;
   width: 100%;
+  height: 100%;
+  max-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 1.25rem;
+  gap: 0.6rem;
   margin: auto;
+  box-sizing: border-box;
+}
+
+.onboarding-slide.slide-controls {
+  max-width: 1060px;
+  justify-content: space-between;
 }
 
 .onboarding-header-card {
   background: var(--tile-bg, linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%));
   border: 2px solid var(--panel-border, #94a3b8);
   border-radius: 8px;
-  padding: 1rem 1.4rem;
+  padding: 0.6rem 1.25rem;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 3px 8px rgba(0, 0, 0, 0.08);
   width: 100%;
-  max-width: 840px;
+  max-width: 100%;
   box-sizing: border-box;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.onboarding-header-card.is-compact {
+  padding: 0.45rem 1rem;
 }
 
 [data-color-mode="dark"] .onboarding-header-card {
@@ -13488,10 +13501,10 @@ button.status-pill.status-scraper-pill {
 }
 
 .onboarding-slide-title {
-  font-size: clamp(1.25rem, 3.2vw, 1.65rem);
+  font-size: clamp(1.15rem, 2.5vw, 1.45rem);
   font-weight: 900;
   color: var(--text-main, #0f172a);
-  line-height: 1.25;
+  line-height: 1.2;
   margin: 0;
   letter-spacing: -0.02em;
 }
@@ -13501,10 +13514,10 @@ button.status-pill.status-scraper-pill {
 }
 
 .onboarding-slide-desc {
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   color: var(--text-sub, #475569);
-  max-width: 620px;
-  line-height: 1.45;
+  max-width: 680px;
+  line-height: 1.35;
   margin: 0;
   font-weight: 600;
 }
@@ -13875,6 +13888,584 @@ button.status-pill.status-scraper-pill {
   background: #0f172a;
   border-color: #475569;
   color: #cbd5e1;
+}
+
+/* ==========================================================================
+   INTEGRATED DIAGRAM DUALSHOCK 4 GAMEPAD VISUALIZER
+   ========================================================================== */
+
+.diagram-tester-card {
+  width: 100%;
+  max-width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  background: #0f131a;
+  border: 1.5px solid #232936;
+  border-radius: 12px;
+  padding: 0.5rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  box-sizing: border-box;
+  color: #f1f5f9;
+}
+
+[data-color-mode="light"] .diagram-tester-card {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.diagram-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid #1e2430;
+  flex-shrink: 0;
+}
+
+[data-color-mode="light"] .diagram-topbar {
+  border-bottom-color: #e2e8f0;
+}
+
+.diagram-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.diagram-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #64748b;
+  transition: all 0.2s ease;
+}
+
+.diagram-dot.is-connected {
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e;
+}
+
+.diagram-device-name {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+[data-color-mode="light"] .diagram-device-name {
+  color: #0f172a;
+}
+
+.diagram-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.diagram-chip {
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background: #181d27;
+  color: #94a3b8;
+  border: 1px solid #232936;
+}
+
+[data-color-mode="light"] .diagram-chip {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+.diagram-chip.is-accent {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+/* Canvas Area */
+.diagram-canvas-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.diagram-svg {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  user-select: none;
+}
+
+/* Leader Lines & Callout Badges */
+.diagram-line {
+  fill: none;
+  stroke: #334155;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 2;
+  transition: all 0.15s ease;
+}
+
+[data-color-mode="light"] .diagram-line {
+  stroke: #94a3b8;
+}
+
+.diagram-anchor-dot {
+  fill: #3b82f6;
+  transition: all 0.15s ease;
+}
+
+.diagram-pill-bg {
+  fill: #161b24;
+  stroke: #262e3d;
+  stroke-width: 1.5;
+  transition: all 0.15s ease;
+}
+
+[data-color-mode="light"] .diagram-pill-bg {
+  fill: #f8fafc;
+  stroke: #cbd5e1;
+}
+
+.diagram-pill-key {
+  font-size: 10.5px;
+  font-weight: 900;
+  fill: #e2e8f0;
+  text-anchor: middle;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
+[data-color-mode="light"] .diagram-pill-key {
+  fill: #0f172a;
+}
+
+.diagram-pill-action {
+  font-size: 9px;
+  font-weight: 700;
+  fill: #94a3b8;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+[data-color-mode="light"] .diagram-pill-action {
+  fill: #475569;
+}
+
+.diagram-callout {
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.diagram-callout:hover {
+  transform: scale(1.03);
+}
+
+.diagram-callout:hover .diagram-line,
+.diagram-callout.is-active .diagram-line {
+  stroke: #3b82f6;
+  stroke-width: 2;
+  stroke-dasharray: none;
+}
+
+.diagram-callout.is-pressed .diagram-line {
+  stroke: #f59e0b;
+  stroke-width: 2.5;
+  stroke-dasharray: none;
+}
+
+.diagram-callout:hover .diagram-pill-bg,
+.diagram-callout.is-active .diagram-pill-bg {
+  fill: #1e293b;
+  stroke: #3b82f6;
+  stroke-width: 2;
+}
+
+[data-color-mode="light"] .diagram-callout:hover .diagram-pill-bg,
+[data-color-mode="light"] .diagram-callout.is-active .diagram-pill-bg {
+  fill: #ffffff;
+  stroke: #2563eb;
+  stroke-width: 2;
+}
+
+[data-color-mode="light"] .diagram-callout.is-active .diagram-pill-key {
+  fill: #1e40af !important;
+}
+
+[data-color-mode="light"] .diagram-callout.is-active .diagram-pill-action {
+  fill: #1e293b !important;
+}
+
+.diagram-callout.is-pressed .diagram-pill-bg {
+  fill: #fbbf24 !important;
+  stroke: #f59e0b !important;
+  stroke-width: 2.5;
+}
+
+.diagram-callout.is-pressed .diagram-pill-key {
+  fill: #78350f !important;
+  font-weight: 900 !important;
+}
+
+.diagram-callout.is-pressed .diagram-pill-action {
+  fill: #92400e !important;
+  font-weight: 900 !important;
+}
+
+/* Controller Shell & Parts */
+.ctrl-shell-body,
+.ctrl-shell-grip {
+  fill: #141822;
+  stroke: #2e3646;
+  stroke-width: 2;
+}
+
+[data-color-mode="light"] .ctrl-shell-body,
+[data-color-mode="light"] .ctrl-shell-grip {
+  fill: #ffffff;
+  stroke: #94a3b8;
+}
+
+.ctrl-part {
+  cursor: pointer;
+  transition: all 0.08s ease-out;
+}
+
+.ctrl-trigger {
+  fill: #11141b;
+  stroke: #2e3646;
+  stroke-width: 2;
+}
+
+[data-color-mode="light"] .ctrl-trigger {
+  fill: #e2e8f0;
+  stroke: #94a3b8;
+}
+
+.ctrl-trigger.is-pressed,
+.ctrl-trigger.is-active {
+  fill: #6366f1;
+  stroke: #818cf8;
+}
+
+.ctrl-trigger-text {
+  font-size: 11px;
+  font-weight: 900;
+  fill: #94a3b8;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.ctrl-bumper {
+  fill: #1e2430;
+  stroke: #3b4458;
+  stroke-width: 2;
+}
+
+[data-color-mode="light"] .ctrl-bumper {
+  fill: #f1f5f9;
+  stroke: #94a3b8;
+}
+
+.ctrl-bumper.is-pressed,
+.ctrl-bumper.is-active {
+  fill: #8b5cf6;
+  stroke: #a78bfa;
+}
+
+.ctrl-bumper-text {
+  font-size: 11px;
+  font-weight: 900;
+  fill: #94a3b8;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.ctrl-touchpad {
+  fill: #1a202c;
+  stroke: #2e3646;
+  stroke-width: 1.5;
+}
+
+[data-color-mode="light"] .ctrl-touchpad {
+  fill: #f1f5f9;
+  stroke: #94a3b8;
+}
+
+.ctrl-touchpad.is-pressed {
+  stroke: #3b82f6;
+  stroke-width: 2.5;
+}
+
+.ctrl-meta-btn {
+  fill: #1e2430;
+  stroke: #2e3646;
+  stroke-width: 1.5;
+}
+
+[data-color-mode="light"] .ctrl-meta-btn {
+  fill: #f1f5f9;
+  stroke: #94a3b8;
+}
+
+.ctrl-meta-btn.is-pressed,
+.ctrl-meta-btn.is-active {
+  fill: #10b981;
+  stroke: #34d399;
+}
+
+/* D-Pad */
+.ctrl-dpad-arm {
+  fill: #1e2430;
+  stroke: #2e3646;
+  stroke-width: 1.5;
+}
+
+[data-color-mode="light"] .ctrl-dpad-arm {
+  fill: #f8fafc;
+  stroke: #94a3b8;
+}
+
+.ctrl-dpad-arm.is-pressed,
+.ctrl-dpad-arm.is-active {
+  fill: #3b82f6;
+  stroke: #93c5fd;
+}
+
+.ctrl-dpad-center {
+  fill: #181d27;
+}
+
+[data-color-mode="light"] .ctrl-dpad-center {
+  fill: #e2e8f0;
+}
+
+/* Action Face Buttons */
+.ctrl-action-btn circle {
+  fill: #1e2430;
+  stroke: #2e3646;
+  stroke-width: 2;
+  transition: all 0.1s ease;
+}
+
+[data-color-mode="light"] .ctrl-action-btn circle {
+  fill: #ffffff;
+  stroke: #94a3b8;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.glyph-triangle {
+  stroke: #10b981 !important;
+  stroke-width: 2.5 !important;
+  fill: rgba(16, 185, 129, 0.2) !important;
+  stroke-linejoin: round;
+}
+
+.glyph-circle {
+  stroke: #ef4444 !important;
+  stroke-width: 2.5 !important;
+  fill: rgba(239, 68, 68, 0.2) !important;
+}
+
+.glyph-cross {
+  stroke: #3b82f6 !important;
+  stroke-width: 2.8 !important;
+  stroke-linecap: round;
+}
+
+.glyph-square {
+  stroke: #ec4899 !important;
+  stroke-width: 2.5 !important;
+  fill: rgba(236, 72, 153, 0.2) !important;
+  stroke-linejoin: round;
+}
+
+.ctrl-action-btn.is-pressed circle,
+.ctrl-action-btn.is-active circle {
+  stroke-width: 3;
+}
+
+.ctrl-action-btn.is-pressed .glyph-triangle,
+.ctrl-action-btn.is-active .glyph-triangle {
+  fill: #10b981 !important;
+}
+
+.ctrl-action-btn.is-pressed .glyph-circle,
+.ctrl-action-btn.is-active .glyph-circle {
+  fill: #ef4444 !important;
+}
+
+.ctrl-action-btn.is-pressed .glyph-square,
+.ctrl-action-btn.is-active .glyph-square {
+  fill: #ec4899 !important;
+}
+
+/* D-Pad Arrows */
+.dpad-arrow-glyph {
+  fill: #64748b;
+  transition: fill 0.1s ease;
+  pointer-events: none;
+}
+
+[data-color-mode="light"] .dpad-arrow-glyph {
+  fill: #475569;
+}
+
+.ctrl-dpad-arm.is-pressed .dpad-arrow-glyph {
+  fill: #ffffff;
+}
+
+/* Analog Sticks */
+.ctrl-stick-base {
+  fill: #13171f;
+  stroke: #2e3646;
+  stroke-width: 2;
+}
+
+[data-color-mode="light"] .ctrl-stick-base {
+  fill: #e2e8f0;
+  stroke: #94a3b8;
+}
+
+.ctrl-stick-pad {
+  fill: #1a202c;
+  stroke: #3b4458;
+  stroke-width: 1.5;
+  transition: all 0.08s ease-out;
+}
+
+[data-color-mode="light"] .ctrl-stick-pad {
+  fill: #f1f5f9;
+  stroke: #64748b;
+}
+
+.ctrl-stick-inner {
+  fill: #141820;
+  stroke: #28303f;
+  stroke-width: 1;
+}
+
+[data-color-mode="light"] .ctrl-stick-inner {
+  fill: #e2e8f0;
+  stroke: #cbd5e1;
+}
+
+.ctrl-stick-group.is-pressed .ctrl-stick-pad,
+.ctrl-stick-group.is-active .ctrl-stick-pad {
+  fill: #f59e0b;
+  stroke: #fbbf24;
+}
+
+.ctrl-stick-text {
+  font-size: 13px;
+  font-weight: 900;
+  fill: #94a3b8;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.ctrl-home-btn {
+  fill: #1e2430;
+  stroke: #2e3646;
+  stroke-width: 1.5;
+}
+
+[data-color-mode="light"] .ctrl-home-btn {
+  fill: #e2e8f0;
+  stroke: #94a3b8;
+}
+
+/* Combo Tag */
+.ctrl-combo-tag rect {
+  fill: #181d27;
+  stroke: #dc2626;
+  stroke-width: 1.5;
+}
+
+.ctrl-combo-tag text {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  fill: #f87171;
+  pointer-events: none;
+}
+
+.ctrl-combo-tag.is-pressed rect,
+.ctrl-combo-tag.is-active rect {
+  fill: #dc2626;
+  stroke: #fca5a5;
+}
+
+.ctrl-combo-tag.is-pressed text,
+.ctrl-combo-tag.is-active text {
+  fill: #ffffff;
+}
+
+/* Detail Card at Bottom */
+.diagram-detail-card {
+  width: 100%;
+  background: #141922;
+  border: 1.5px solid #232936;
+  border-left: 4px solid var(--detail-accent, #3b82f6);
+  border-radius: 8px;
+  padding: 0.55rem 0.95rem;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+[data-color-mode="light"] .diagram-detail-card {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  border-left-color: var(--detail-accent, #3b82f6);
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.15rem;
+}
+
+.detail-pill {
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: var(--detail-accent, #3b82f6);
+  letter-spacing: 0.02em;
+}
+
+.detail-action {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+[data-color-mode="light"] .detail-action {
+  color: #0f172a;
+}
+
+.detail-desc {
+  font-size: 0.76rem;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+[data-color-mode="light"] .detail-desc {
+  color: #475569;
 }
 
 /* ==========================================================================
@@ -14612,6 +15203,21 @@ button.status-pill.status-scraper-pill {
   .onboarding-pillars-grid {
     grid-template-columns: 1fr;
     gap: 0.75rem;
+  }
+
+  .onboarding-controls-grid {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .onboarding-controls-tabs {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .onboarding-tab-btn {
+    font-size: 0.78rem;
+    padding: 0.45rem 0.65rem;
   }
 
   /* Show in-grid PWA install card on mobile only */
