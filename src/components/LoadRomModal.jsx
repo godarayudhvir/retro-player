@@ -27,6 +27,7 @@ import { checkServerDbStatus } from '../services/db';
  */
 export default function LoadRomModal({
   isOpen,
+  initialFile = null,
   focusedTarget,
   onClose,
   onQuickPlay,
@@ -42,9 +43,13 @@ export default function LoadRomModal({
   const [focusedOption, setFocusedOption] = useState(0); // 0: Add & Scrape, 1: Quick Play, 2: Back
   const isServerAvailable = checkServerDbStatus();
 
-  // Reset state when modal opens/closes
+  // Sync state when modal opens/closes or when initialFile is supplied
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      if (initialFile) {
+        setSelectedFile(initialFile);
+      }
+    } else {
       setSelectedFile(null);
       setIsProcessing(false);
       setProgressState(null);
@@ -52,7 +57,7 @@ export default function LoadRomModal({
       setFocusedOption(0);
       setIsDragInside(false);
     }
-  }, [isOpen]);
+  }, [isOpen, initialFile]);
 
   // Keyboard navigation
   useEffect(() => {

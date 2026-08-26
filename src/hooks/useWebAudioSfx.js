@@ -459,7 +459,8 @@ export function useWebAudioSfx() {
     playSaveDetected,
     playFavoriteToggle,
     playThemeSwitch,
-    playBatteryLow
+    playBatteryLow,
+    playNavSelect: playTileNav
   };
 }
 

@@ -137,12 +137,25 @@ export default function App() {
     }
   }, [checkSaveData, activeProfileId, sfx]);
 
-  // Custom ROM Loaded: launch directly into emulator
+  const [loadRomInitialFile, setLoadRomInitialFile] = useState(null);
+
+  // Custom ROM Quick Play: RAM-only direct play without DB storage or library searching
   const handleCustomRomLoaded = useCallback((customGame) => {
-    recordGameLaunch(customGame);
-    sfx.playGameLaunch();
-    setActiveGame(customGame);
+    if (customGame) {
+      recordGameLaunch(customGame);
+      sfx.playGameLaunch();
+      setActiveGame(customGame);
+    }
   }, [recordGameLaunch, sfx]);
+
+  // Drag & Drop / External File Hook: open the Ingestion Review Modal
+  const handleFileDropped = useCallback((file) => {
+    if (file) {
+      setLoadRomInitialFile(file);
+      setShowLoadRomModal(true);
+      sfx.playTileNav();
+    }
+  }, [sfx]);
 
   const {
     games,
@@ -161,7 +174,11 @@ export default function App() {
     handleDragOver,
     handleDragLeave,
     handleDrop
-  } = useRomManifest(handleCustomRomLoaded, { favorites, recentlyPlayed });
+  } = useRomManifest(handleCustomRomLoaded, { 
+    favorites, 
+    recentlyPlayed, 
+    onFileDropped: handleFileDropped 
+  });
 
   // Automated Online Metadata & Cover Art Scraper
   const scraper = useMetadataScraper(games, { isMobile, isPlaying: !!activeGame });
@@ -430,19 +447,32 @@ export default function App() {
       {/* Load Custom ROM In-App Modal Dialog */}
       <LoadRomModal
         isOpen={showLoadRomModal}
+        initialFile={loadRomInitialFile}
         focusedTarget={focusedTarget}
         onClose={() => {
           setShowLoadRomModal(false);
+          setLoadRomInitialFile(null);
           setFocusedTarget({ zone: 'topbar', id: 'loadRom' });
           sfx.playModalClose();
         }}
         onQuickPlay={(file) => {
+          // Direct Play: RAM only, no DB save, no search filtering
           processCustomRomFile(file);
         }}
         onUploadToLibrary={async (file, systemKey, onProgress) => {
+          // Ingest: Upload/save to server/IndexedDB, scrape 3D box art, refresh library
           const game = await uploadRomAndScrape(file, systemKey, onProgress);
           if (game && scraper?.scrapeSingleGame) {
             await scraper.scrapeSingleGame(game);
+          }
+          if (game) {
+            const rawBase = file.name.replace(/\.[^/.]+$/, "");
+            const cleanSearch = game.title
+              || rawBase.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').replace(/_/g, ' ').replace(/\s+/g, ' ').trim()
+              || rawBase;
+            setActiveSystem(game.systemKey || 'all');
+            setSearchQuery(cleanSearch);
+            sfx.playNavSelect();
           }
         }}
         sfx={sfx}

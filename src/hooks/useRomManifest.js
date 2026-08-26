@@ -14,7 +14,7 @@ import {
  * Hook to manage ROM catalog manifest, search filtering, system categories, and custom ROM uploads.
  */
 export function useRomManifest(onCustomRomLoaded, options = {}) {
-  const { favorites = [], recentlyPlayed = [] } = options;
+  const { favorites = [], recentlyPlayed = [], onFileDropped = null } = options;
   const [games, setGames] = useState([]);
   const [systems, setSystems] = useState([]);
   const [activeSystem, setActiveSystem] = useState('all');
@@ -231,9 +231,13 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
-      processCustomRomFile(file);
+      if (onFileDropped) {
+        onFileDropped(file);
+      } else {
+        processCustomRomFile(file);
+      }
     }
-  }, [processCustomRomFile]);
+  }, [onFileDropped, processCustomRomFile]);
 
   const filteredGames = useMemo(() => {
     let result = games;
