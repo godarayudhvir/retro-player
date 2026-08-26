@@ -41,17 +41,63 @@ Featuring Nintendo DS dual-screen Touch architecture, integrated zero-popup Stra
 
 <div align="center">
 
-| Profile Selector | Character Creation Studio |
-|---|---|
-| <img src="docs-screenshots/profile-selector.webp" width="400" alt="Who's Playing profile selector" /> | <img src="docs-screenshots/character-studio.webp" width="400" alt="Character Creation Studio" /> |
+### 🚀 3-Step Onboarding Walkthrough
 
-| Metadata & 3D Box Art Scraper | Load Custom ROM |
-|---|---|
-| <img src="docs-screenshots/scraper-modal.webp" width="400" alt="Metadata & 3D Box Art Scraper" /> | <img src="docs-screenshots/load-rom-modal.webp" width="400" alt="Load Custom ROM dialog" /> |
+| 1. Welcome & 12 Consoles | 2. Character Creation Studio | 3. Interactive Gamepad Visualizer |
+|:---:|:---:|:---:|
+| <img src="docs-screenshots/onboarding.webp" width="300" alt="Welcome and Onboarding Walkthrough" /> | <img src="docs-screenshots/character-studio.webp" width="300" alt="Character Creation Studio" /> | <img src="docs-screenshots/controller-visualizer.webp" width="300" alt="Interactive Gamepad Controller Visualizer" /> |
 
-| Welcome & Onboarding | In-Game Emulation & HUD Controls |
-|---|---|
-| <img src="docs-screenshots/onboarding.webp" width="400" alt="Welcome and Onboarding Walkthrough" /> | <img src="docs-screenshots/ingame-ui.webp" width="400" alt="In-Game Emulation and HUD Controls" /> |
+### 🎮 Nintendo DS Dual-Screen Touch Views (Grid Densities)
+
+| Small Density (`S`) | Medium Density (`M`) | Large Density (`L`) |
+|:---:|:---:|:---:|
+| <img src="docs-screenshots/ds-view-small.webp" width="300" alt="Small Density Grid View" /> | <img src="docs-screenshots/ds-view-medium.webp" width="300" alt="Medium Density Grid View" /> | <img src="docs-screenshots/ds-view-large.webp" width="300" alt="Large Density Grid View" /> |
+
+### 🖼️ Panoramic Wide Grid Views (S, M, L, XL, XXL)
+
+| Small (`S`) | Medium (`M`) | Large (`L`) |
+|:---:|:---:|:---:|
+| <img src="docs-screenshots/wide-grid-small.webp" width="300" alt="Wide Grid Small Density" /> | <img src="docs-screenshots/wide-grid-medium.webp" width="300" alt="Wide Grid Medium Density" /> | <img src="docs-screenshots/wide-grid-large.webp" width="300" alt="Wide Grid Large Density" /> |
+
+| Extra Large (`XL`) | Maximum Scale (`XXL`) |
+|:---:|:---:|
+| <img src="docs-screenshots/wide-grid-xl.webp" width="450" alt="Wide Grid Extra Large Density" /> | <img src="docs-screenshots/wide-grid-xxl.webp" width="450" alt="Wide Grid XXL Density" /> |
+
+### 👤 Profile Selection & Character Creation Studio
+
+| Who's Playing Selector | Character Archetypes | Custom Name & Color |
+|:---:|:---:|:---:|
+| <img src="docs-screenshots/profile-selector.webp" width="300" alt="Who's Playing profile selector modal" /> | <img src="docs-screenshots/character-archetypes.webp" width="300" alt="Character Archetypes Presets" /> | <img src="docs-screenshots/character-customization.webp" width="300" alt="Custom Handle and Color Palette Studio" /> |
+
+### 🌐 Universal Metadata & Box Art Scraper Studio
+
+| Full Library Scan | Single System Target Selector | Inline Metadata & Sidecar Editor |
+|:---:|:---:|:---:|
+| <img src="docs-screenshots/scraper-modal.webp" width="300" alt="Full Library Scraper Modal" /> | <img src="docs-screenshots/scraper-single-system.webp" width="300" alt="Single System Scraper Target Selector" /> | <img src="docs-screenshots/metadata-editor.webp" width="300" alt="Inline Metadata & Sidecar Editor" /> |
+
+### 🗄️ Console Utilities & Storage Management
+
+| Search Virtual Keyboard | Load Custom ROM | Storage & DB Management |
+|:---:|:---:|:---:|
+| <img src="docs-screenshots/virtual-keyboard.webp" width="300" alt="On-Screen Virtual Keyboard Search" /> | <img src="docs-screenshots/load-rom-modal.webp" width="300" alt="Load Custom ROM Dialog" /> | <img src="docs-screenshots/backup-modal.webp" width="300" alt="Storage and Database Management Modal" /> |
+
+### 💾 Inline Save Data Studio & Auto-Resume Engine
+
+| Inline Save Data Studio (`.sav` / `.state`) |
+|:---:|
+| <img src="docs-screenshots/save-data-studio.webp" width="700" alt="Inline Save Data Studio" /> |
+
+| Desktop Topbar Auto-Resume Micro-Switch |
+|:---:|
+| <img src="docs-screenshots/auto-resume-toggle.webp" width="700" alt="Desktop Topbar Auto-Resume Toggle" /> |
+
+| In-Game Auto-Resume Countdown Prompt in Action |
+|:---:|
+| <img src="docs-screenshots/auto-resume-ingame.webp" width="700" alt="In-Game Auto-Resume Prompt in Action" /> |
+
+### 🕹️ In-Game Emulation & HUD Controls
+
+<img src="docs-screenshots/ingame-ui.webp" width="600" alt="In-Game Emulation and HUD Controls" />
 
 </div>
 

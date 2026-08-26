@@ -15,6 +15,7 @@ import ScraperModal from './components/ScraperModal';
 import MobileAppView from './components/MobileAppView';
 import MetadataEditModal from './components/MetadataEditModal';
 import BackupModal from './components/BackupModal';
+import KeyboardControlsModal from './components/KeyboardControlsModal';
 
 import { useWebAudioSfx } from './hooks/useWebAudioSfx';
 import { useGamepadStatus } from './hooks/useGamepadStatus';
@@ -38,6 +39,7 @@ import { BatteryWarning, Zap, X } from 'lucide-react';
  */
 export default function App() {
   const [activeGame, setActiveGame] = useState(null);
+  const [pendingGameForLaunch, setPendingGameForLaunch] = useState(null);
   const [focusedTarget, setFocusedTarget] = useState({ zone: 'grid', index: 0 });
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showLoadRomModal, setShowLoadRomModal] = useState(false);
@@ -143,16 +145,45 @@ export default function App() {
     }
   }, [handleCheckSaveData, sfx]);
 
+  // Game Launch Orchestration: Check if keyboard splash prompt should show on UI before booting into emulator
+  const handleLaunchGameImmediately = useCallback((game) => {
+    if (!game) return;
+    recordGameLaunch(game);
+    sfx.playGameLaunch();
+    setActiveGame(game);
+    setPendingGameForLaunch(null);
+  }, [recordGameLaunch, sfx]);
+
+  const handleRequestLaunchGame = useCallback((game) => {
+    if (!game) return;
+    const isMobileTouch = (typeof window !== 'undefined') && (
+      (window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches) ||
+      (('ontouchstart' in window) && window.innerWidth <= 768) ||
+      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '')
+    );
+    const sysKey = (game?.systemKey || game?.systemCore || 'default').toLowerCase();
+    let skipPrompt = false;
+    try {
+      skipPrompt = localStorage.getItem(`retro_skip_keyboard_controls_prompt_${sysKey}`) === 'true' ||
+                   localStorage.getItem('retro_skip_keyboard_controls_prompt') === 'true';
+    } catch (e) {}
+
+    if (isMobileTouch || gamepadConnected || skipPrompt) {
+      handleLaunchGameImmediately(game);
+    } else {
+      (sfx?.playMenuConfirm || sfx?.playModalOpen || sfx?.playTileNav)?.();
+      setPendingGameForLaunch(game);
+    }
+  }, [gamepadConnected, handleLaunchGameImmediately, sfx]);
+
   const [loadRomInitialFile, setLoadRomInitialFile] = useState(null);
 
   // Custom ROM Quick Play: RAM-only direct play without DB storage or library searching
   const handleCustomRomLoaded = useCallback((customGame) => {
     if (customGame) {
-      recordGameLaunch(customGame);
-      sfx.playGameLaunch();
-      setActiveGame(customGame);
+      handleRequestLaunchGame(customGame);
     }
-  }, [recordGameLaunch, sfx]);
+  }, [handleRequestLaunchGame]);
 
   // Drag & Drop / External File Hook: open the Ingestion Review Modal
   const handleFileDropped = useCallback((file) => {
@@ -251,13 +282,11 @@ export default function App() {
       setShowProfileCreatorModal(true);
     },
     onPlayGame: (game) => {
-      recordGameLaunch(game);
-      sfx.playGameLaunch();
       const gameIdx = filteredGames.findIndex(g => (g.id && g.id === game?.id) || g.title === game?.title);
       if (gameIdx >= 0) {
         setFocusedTarget(isMobile ? { zone: 'mobileChips', index: gameIdx } : { zone: 'grid', index: gameIdx });
       }
-      setActiveGame(game);
+      handleRequestLaunchGame(game);
     },
     showOnboarding,
     setShowOnboarding,
@@ -362,11 +391,7 @@ export default function App() {
           isFavorite={isFavorite}
           toggleFavorite={toggleFavorite}
           getGameStats={getGameStats}
-          onPlayGame={(game) => {
-            recordGameLaunch(game);
-            sfx.playGameLaunch();
-            setActiveGame(game);
-          }}
+          onPlayGame={handleRequestLaunchGame}
           metadataMap={scraper.metadataMap}
           onCustomRomLoad={processCustomRomFile}
           sfx={sfx}
@@ -464,11 +489,7 @@ export default function App() {
             themeEngine={themeEngine}
             getGameStats={getGameStats}
             onResetStats={resetGameStats}
-            onPlayGame={(game) => {
-              recordGameLaunch(game);
-              sfx.playGameLaunch();
-              setActiveGame(game);
-            }}
+            onPlayGame={handleRequestLaunchGame}
             onToggleFavorite={toggleFavorite}
             onEditMetadata={(game, meta) => setEditingMetadataGame({ game, metadata: meta })}
             onScrapeGame={scraper.scrapeSingleGame}
@@ -729,6 +750,23 @@ export default function App() {
         setFocusedTarget={setFocusedTarget}
         onDataRestored={() => window.location.reload()}
       />
+
+      {/* Pre-Launch Keyboard Controls Splash Modal (Rendered on App UI before mounting Emulator) */}
+      {pendingGameForLaunch && (
+        <KeyboardControlsModal
+          game={pendingGameForLaunch}
+          core={pendingGameForLaunch?.systemCore}
+          systemKey={pendingGameForLaunch?.systemKey}
+          sfx={sfx}
+          onDismiss={() => {
+            const gameToBoot = pendingGameForLaunch;
+            handleLaunchGameImmediately(gameToBoot);
+          }}
+          onCancel={() => {
+            setPendingGameForLaunch(null);
+          }}
+        />
+      )}
 
       {/* Active Game Emulator Sandbox */}
       {activeGame && (

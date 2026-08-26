@@ -460,7 +460,9 @@ export function useWebAudioSfx() {
     playFavoriteToggle,
     playThemeSwitch,
     playBatteryLow,
-    playNavSelect: playTileNav
+    playNavSelect: playTileNav,
+    playMenuConfirm: playModalOpen,
+    playConfirm: playModalOpen
   };
 }
 

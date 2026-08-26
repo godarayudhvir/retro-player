@@ -126,3 +126,24 @@ When searching or typing character handles with a controller:
 | **`F`** | Toggle Fullscreen mode |
 | **`M`** | Toggle Background Music (BGM) |
 | **`1` - `9`** | Quick switch console system tabs |
+
+---
+
+## 🕹️ Core-Specific In-Game Keyboard Controls (12 Cores)
+
+When launching a game without a connected gamepad, Retro Player displays a **10-Second Pre-Launch Keyboard Controls Splash** indicating default EmulatorJS key bindings:
+
+| Console Core | Movement | Face / Action Buttons | Shoulders / Triggers | Start / Select / Special |
+| :--- | :--- | :--- | :--- | :--- |
+| **NES** | `Arrow Keys` | `Z` (B), `X` (A) | — | `Shift` (Select), `Enter` (Start) |
+| **Super Nintendo (SNES)** | `Arrow Keys` | `Z` (B), `X` (A), `A` (Y), `S` (X) | `Q` (L), `W` (R) | `Shift` (Select), `Enter` (Start) |
+| **Game Boy (GB / GBC)** | `Arrow Keys` | `Z` (B), `X` (A) | — | `Shift` (Select), `Enter` (Start) |
+| **Game Boy Advance (GBA)** | `Arrow Keys` | `Z` (B), `X` (A) | `Q` (L), `W` (R) | `Shift` (Select), `Enter` (Start) |
+| **Nintendo DS (NDS)** | `Arrow Keys` | `Z` (B), `X` (A), `A` (Y), `S` (X) | `Q` (L), `W` (R) | `Shift` (Select), `Enter` (Start), Mouse (Touch) |
+| **Nintendo 64 (N64)** | `Arrow Keys` | `X` (A), `Z` (B) | `Q` (L), `W` (R), `E` / `Space` (Z-Trigger) | `I/J/K/L` (C-Buttons), `Enter` (Start) |
+| **PlayStation (PS1)** | `Arrow Keys` | `Z` (✕), `X` (○), `A` (□), `S` (△) | `Q` (L1), `W` (R1), `1` (L2), `2` (R2) | `Shift` (Select), `Enter` (Start) |
+| **Sega Genesis / Mega Drive** | `Arrow Keys` | `Z` (A), `X` (B), `C` (C), `A` (X), `S` (Y), `D` (Z) | — | `Shift` (Mode), `Enter` (Start) |
+| **Game Gear** | `Arrow Keys` | `Z` (Btn 1), `X` (Btn 2) | — | `Enter` (Start) |
+| **Arcade (MAME)** | `Arrow Keys` | `Ctrl / Z` (1), `Alt / X` (2), `Space / C` (3), `Shift / V` (4) | — | `5/6` (Insert Coin), `1/2` (Start), `Tab` (Menu) |
+| **Atari 2600** | `Arrow Keys` | `Z / Space` (Fire) | — | `F1 / Enter` (Reset), `F2` (Select) |
+
