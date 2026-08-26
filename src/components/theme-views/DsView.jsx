@@ -615,7 +615,7 @@ export default function DsView({
           <div className="ds-rail-controls">
             <button
               type="button"
-              className="ds-rail-action-btn"
+              className={`ds-rail-action-btn ${focusedTarget?.zone === 'railHeader' && focusedTarget?.id === 'size' ? 'gamepad-focused' : ''}`}
               onClick={handleToggleDensity}
               title={`Tile Size: ${
                 gridDensity === '5' ? 'Small (S)' :
@@ -623,7 +623,7 @@ export default function DsView({
                 gridDensity === '3' ? 'Large (L)' :
                 gridDensity === 'xl' ? 'Extra Large (XL)' :
                 gridDensity === 'xxl' ? 'Giant (XXL)' : 'Medium (M)'
-              } - Click to cycle`}
+              } - Click to cycle (Shortcut: L3)`}
               aria-label="Toggle Tile Size"
             >
               <SlidersHorizontal size={13} />
@@ -639,9 +639,9 @@ export default function DsView({
             </button>
             <button
               type="button"
-              className={`ds-rail-action-btn ${isWideGrid ? 'is-active-wide' : ''}`}
+              className={`ds-rail-action-btn ${isWideGrid ? 'is-active-wide' : ''} ${focusedTarget?.zone === 'railHeader' && focusedTarget?.id === 'wide' ? 'gamepad-focused' : ''}`}
               onClick={handleToggleWideGrid}
-              title={isWideGrid ? 'Collapse to Split Dual-Screen Mode' : 'Expand to Full-Width ROMs Wall'}
+              title={`${isWideGrid ? 'Collapse to Split Dual-Screen Mode' : 'Expand to Full-Width ROMs Wall'} (Shortcut: R3)`}
               aria-label="Toggle Full-Width ROMs Wall"
             >
               {isWideGrid ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
@@ -669,6 +669,13 @@ export default function DsView({
                   className={`ds-touch-btn ${isFocused ? 'ds-btn-focused' : ''} ${isFav ? 'is-fav' : ''}`}
                   onClick={() => {
                     setFocusedTarget({ zone: 'grid', index: idx });
+                    if (isWideGrid) {
+                      setIsWideGrid(false);
+                      try {
+                        localStorage.setItem('retro_ds_wide_grid', 'false');
+                      } catch {}
+                      sfx?.playTabSwitch?.();
+                    }
                     if (handleGameSelect) {
                       handleGameSelect(game);
                     }

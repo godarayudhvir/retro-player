@@ -19,7 +19,8 @@ Retro Player supports standard USB, Bluetooth, and 2.4GHz wireless controllers (
 | **`LB` / `L1`** | **`L1`** | **`L`** | **Previous System** (Ribbon) / **Previous Tab** (Modals) / **Clear All** (OSK) |
 | **`RB` / `R1`** | **`R1`** | **`R`** | **Next System** (Ribbon) / **Next Tab** (Modals) / **Submit** (OSK) |
 | **`D-Pad` / `Left Stick`** | **`D-Pad` / `Left Stick`** | **`D-Pad` / `Left Stick`** | **Spatial Navigation** across grid cards and UI buttons |
-| **`L3` (Left Stick Click)** | **`L3`** | **`L3`** | **Toggle In-Game Topbar HUD Menu** (In-Game) |
+| **`L3` (Left Stick Click)** | **`L3`** | **`L3`** | **Cycle Tile Size Density** (`S` $\rightarrow$ `M` $\rightarrow$ `L` $\rightarrow$ `XL` $\rightarrow$ `XXL`) in Library / **Toggle In-Game Topbar HUD Menu** (In-Game) |
+| **`R3` (Right Stick Click)** | **`R3`** | **`R3`** | **Toggle Panoramic Wide Grid Mode** (Library) |
 | **`L3 + R3` (Both Clicks)** | **`L3 + R3`** | **`L3 + R3`** | **Direct Exit Active Game to Library** (In-Game) |
 | **`Select` / `Share`** | **`Share` / `Select`** | **`-` Minus** | **Toggle Favorite ⭐** (Library) / Standard Game Input (In-Game) |
 | **`Start` / `Menu`** | **`Options` / `Start`** | **`+` Plus** | **Quick-Launch Game** (Library) / **Submit** (OSK) / Standard Game Input (In-Game) |

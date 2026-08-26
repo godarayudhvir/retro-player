@@ -1166,8 +1166,13 @@ export function useGamepadNavigation({
       }
       if (dir === 'SELECT') {
         if (curId === 'close' || curId === 'exit') {
+          const curActive = stateRef.current.activeGame;
+          const curGames = stateRef.current.filteredGames || [];
+          const gameIdx = curActive ? curGames.findIndex(g => (g.id && g.id === curActive.id) || g.title === curActive.title) : -1;
+          const fallbackIdx = stateRef.current.focusedTarget?.index || 0;
+          const targetIndex = gameIdx >= 0 ? gameIdx : fallbackIdx;
           setActiveGame(null);
-          setFocusedTarget(curIsMobile ? { zone: 'mobileChips', index: 0 } : { zone: 'grid', index: 0 });
+          setFocusedTarget(curIsMobile ? { zone: 'mobileChips', index: targetIndex } : { zone: 'grid', index: targetIndex });
           sfx?.playModalClose?.();
         } else {
           const el = document.getElementById('ingame-' + curId);
@@ -1667,6 +1672,11 @@ export function useGamepadNavigation({
         }
       } else if (curZone === 'grid') {
         if (curGames[curIndex]) {
+          const wideContainer = document.querySelector('.ds-wide-grid-layout');
+          if (wideContainer) {
+            const wideBtn = document.querySelector('.ds-rail-action-btn:last-of-type');
+            if (wideBtn) wideBtn.click();
+          }
           handleGameSelect(curGames[curIndex]);
           setFocusedTarget({ zone: 'cardModal', id: 'play' });
           sfx?.playTileNav?.();
@@ -1765,8 +1775,41 @@ export function useGamepadNavigation({
         setFocusedTarget({ zone: 'topbar', id: curIndex === 0 ? 'profile' : 'search' });
         sfx?.playTileNav?.();
       } else if (dir === 'DOWN') {
+        const hasRailHeader = Boolean(document.querySelector('.ds-rail-header'));
+        if (hasRailHeader) {
+          setFocusedTarget({ zone: 'railHeader', id: 'size' });
+        } else {
+          setFocusedTarget({ zone: 'grid', index: 0 });
+        }
+        sfx?.playTileNav?.();
+      }
+    } else if (curZone === 'railHeader') {
+      const curId = curTarget?.id || 'size';
+      if (dir === 'LEFT') {
+        if (curId === 'wide') {
+          setFocusedTarget({ zone: 'railHeader', id: 'size' });
+          sfx?.playTileNav?.();
+        }
+      } else if (dir === 'RIGHT') {
+        if (curId === 'size') {
+          setFocusedTarget({ zone: 'railHeader', id: 'wide' });
+          sfx?.playTileNav?.();
+        }
+      } else if (dir === 'UP') {
+        const sysIdx = allTabs.findIndex(t => t.key === curActiveSys);
+        setFocusedTarget({ zone: 'ribbon', index: sysIdx >= 0 ? sysIdx : 0 });
+        sfx?.playTileNav?.();
+      } else if (dir === 'DOWN') {
         setFocusedTarget({ zone: 'grid', index: 0 });
         sfx?.playTileNav?.();
+      } else if (dir === 'SELECT') {
+        if (curId === 'size') {
+          const btn = document.querySelector('.ds-rail-action-btn:first-of-type');
+          if (btn) btn.click();
+        } else if (curId === 'wide') {
+          const btn = document.querySelector('.ds-rail-action-btn:last-of-type');
+          if (btn) btn.click();
+        }
       }
     } else if (curZone === 'cardModal') {
       // Navigation within the DS game detail card panel
@@ -1889,8 +1932,13 @@ export function useGamepadNavigation({
           setFocusedTarget({ zone: 'grid', index: curIndex - cols });
           sfx?.playTileNav?.();
         } else {
-          const sysIdx = allTabs.findIndex(t => t.key === curActiveSys);
-          setFocusedTarget({ zone: 'ribbon', index: sysIdx >= 0 ? sysIdx : 0 });
+          const hasRailHeader = Boolean(document.querySelector('.ds-rail-header'));
+          if (hasRailHeader) {
+            setFocusedTarget({ zone: 'railHeader', id: 'size' });
+          } else {
+            const sysIdx = allTabs.findIndex(t => t.key === curActiveSys);
+            setFocusedTarget({ zone: 'ribbon', index: sysIdx >= 0 ? sysIdx : 0 });
+          }
           sfx?.playTileNav?.();
         }
       }
@@ -1955,8 +2003,13 @@ export function useGamepadNavigation({
       if (stateRef.current.activeGame) {
         if (e.key === 'Escape' || e.key === 'Esc') {
           e.preventDefault();
+          const curActive = stateRef.current.activeGame;
+          const curGames = stateRef.current.filteredGames || [];
+          const gameIdx = curActive ? curGames.findIndex(g => (g.id && g.id === curActive.id) || g.title === curActive.title) : -1;
+          const fallbackIdx = typeof stateRef.current.focusedTarget?.index === 'number' ? stateRef.current.focusedTarget.index : 0;
+          const targetIndex = gameIdx >= 0 ? gameIdx : fallbackIdx;
           setActiveGame(null);
-          setFocusedTarget(stateRef.current.isMobile ? { zone: 'mobileChips', index: 0 } : { zone: 'grid', index: stateRef.current.focusedTarget?.index || 0 });
+          setFocusedTarget(stateRef.current.isMobile ? { zone: 'mobileChips', index: targetIndex } : { zone: 'grid', index: targetIndex });
         }
         return;
       }
@@ -2120,8 +2173,13 @@ export function useGamepadNavigation({
           const isDirectExit = l3Btn && r3Btn;
           if (isDirectExit && !prevButtonsRef.current.directExit) {
             console.log('🎮 [GAMEPAD] L3 + R3 pressed. Exiting active game to library.');
+            const curActive = stateRef.current.activeGame;
+            const curGames = stateRef.current.filteredGames || [];
+            const gameIdx = curActive ? curGames.findIndex(g => (g.id && g.id === curActive.id) || g.title === curActive.title) : -1;
+            const fallbackIdx = typeof stateRef.current.focusedTarget?.index === 'number' ? stateRef.current.focusedTarget.index : 0;
+            const targetIndex = gameIdx >= 0 ? gameIdx : fallbackIdx;
             setActiveGame(null);
-            setFocusedTarget(stateRef.current.isMobile ? { zone: 'mobileChips', index: 0 } : { zone: 'grid', index: stateRef.current.focusedTarget?.index || 0 });
+            setFocusedTarget(stateRef.current.isMobile ? { zone: 'mobileChips', index: targetIndex } : { zone: 'grid', index: targetIndex });
             sfx?.playModalClose?.();
             prevButtonsRef.current = { directExit: true, l3Single: false };
             setTimeout(() => {
@@ -2213,6 +2271,8 @@ export function useGamepadNavigation({
         const shoulderR = b[5]?.pressed; // R1 / Right Bumper (Next System / Next Game)
         const btnSelect = b[8]?.pressed; // Select / Back
         const btnStart = b[9]?.pressed;  // Start / Menu
+        const btnL3 = b[10]?.pressed;    // L3 / Left Stick Click (Cycle Tile Size Density)
+        const btnR3 = b[11]?.pressed;    // R3 / Right Stick Click (Toggle Panoramic Wide Grid)
 
         // D-Pad + Analog Stick Thresholds
         const dpadUp = b[12]?.pressed || (gp.axes[1] < -STICK_DEADZONE);
@@ -2421,6 +2481,24 @@ export function useGamepadNavigation({
             }
             lastInputTimeRef.current = now;
           }
+
+          // 4. L3 button (Button 10 / Left Thumbstick Click) -> Cycle Tile Size Density (S -> M -> L -> XL -> XXL)
+          if (btnL3 && !prevButtonsRef.current.btnL3) {
+            const sizeBtn = document.querySelector('.ds-rail-action-btn:first-of-type');
+            if (sizeBtn) {
+              sizeBtn.click();
+            }
+            lastInputTimeRef.current = now;
+          }
+
+          // 5. R3 button (Button 11 / Right Thumbstick Click) -> Toggle Panoramic Wide Grid Mode
+          if (btnR3 && !prevButtonsRef.current.btnR3) {
+            const wideBtn = document.querySelector('.ds-rail-action-btn:last-of-type');
+            if (wideBtn) {
+              wideBtn.click();
+            }
+            lastInputTimeRef.current = now;
+          }
         }
 
         if (now - lastInputTimeRef.current > COOLDOWN) {
@@ -2529,7 +2607,7 @@ export function useGamepadNavigation({
           }
         }
 
-        prevButtonsRef.current = { shoulderL, shoulderR, btnA, btnB, btnX, btnY, btnSelect, btnStart };
+        prevButtonsRef.current = { shoulderL, shoulderR, btnA, btnB, btnX, btnY, btnSelect, btnStart, btnL3, btnR3 };
       } else {
         if (gamepadConnectedRef.current) {
           gamepadConnectedRef.current = false;

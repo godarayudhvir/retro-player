@@ -257,6 +257,10 @@ export default function App() {
     onPlayGame: (game) => {
       recordGameLaunch(game);
       sfx.playGameLaunch();
+      const gameIdx = filteredGames.findIndex(g => (g.id && g.id === game?.id) || g.title === game?.title);
+      if (gameIdx >= 0) {
+        setFocusedTarget(isMobile ? { zone: 'mobileChips', index: gameIdx } : { zone: 'grid', index: gameIdx });
+      }
       setActiveGame(game);
     },
     showOnboarding,
@@ -757,7 +761,16 @@ export default function App() {
           sfx={sfx}
           focusedTarget={focusedTarget}
           setFocusedTarget={setFocusedTarget}
-          onClose={() => setActiveGame(null)}
+          onClose={() => {
+            const playedGame = activeGame;
+            setActiveGame(null);
+            if (playedGame) {
+              const gameIdx = filteredGames.findIndex(g => (g.id && g.id === playedGame.id) || g.title === playedGame.title);
+              if (gameIdx >= 0) {
+                setFocusedTarget(isMobile ? { zone: 'mobileChips', index: gameIdx } : { zone: 'grid', index: gameIdx });
+              }
+            }
+          }}
           onSessionEnd={(gameId, elapsedSeconds) => {
             recordGameSession(gameId, elapsedSeconds);
           }}
