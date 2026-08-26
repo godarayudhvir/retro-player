@@ -14,8 +14,6 @@ export function useGamepadNavigation({
   setShowLoadRomModal,
   showScraperModal,
   setShowScraperModal,
-  showThemeModal,
-  setShowThemeModal,
   showBackupModal,
   setShowBackupModal,
   showResetConfirm,
@@ -68,8 +66,7 @@ export function useGamepadNavigation({
   onPlayGame,
   showOnboarding = false,
   setShowOnboarding,
-  games = [],
-  onOpenThemeModal
+  games = []
 }) {
   const stateRef = useRef({});
   const lastInputTimeRef = useRef(0);
@@ -85,8 +82,6 @@ export function useGamepadNavigation({
       showInfoModal,
       showLoadRomModal,
       showScraperModal,
-      showThemeModal,
-      setShowThemeModal,
       showBackupModal,
       setShowBackupModal,
       showResetConfirm,
@@ -125,7 +120,6 @@ export function useGamepadNavigation({
     showInfoModal,
     showLoadRomModal,
     showScraperModal,
-    showThemeModal,
     showBackupModal,
     showResetConfirm,
     showProfileSelectModal,
@@ -284,6 +278,17 @@ export function useGamepadNavigation({
             sfx?.playKeyTick?.();
           }
         }
+      }
+      return;
+    }
+
+    // 0.05 About & Controls Reference Modal Navigation Guard
+    if (isInfoOpen) {
+      if (dir === 'BACK' || dir === 'SELECT') {
+        setShowInfoModal(false);
+        setFocusedTarget({ zone: 'topbar', id: 'info' });
+        sfx?.playModalClose?.();
+        return;
       }
       return;
     }
@@ -774,55 +779,6 @@ export function useGamepadNavigation({
           const contentItems = document.querySelectorAll('.scraper-sys-chip');
           if (contentItems[cIdx]) contentItems[cIdx].click();
           sfx?.playTileNav?.();
-        }
-      }
-      return;
-    }
-
-    // 2.1b Theme Modal Navigation
-    const { showThemeModal: isThemeOpen } = stateRef.current;
-    if (isThemeOpen) {
-      const themeCards = document.querySelectorAll('.theme-preset-card');
-      const themeCount = themeCards.length;
-      const curId = curTarget?.zone === 'themeModal' ? (curTarget?.id || 'close') : 'close';
-      const isThemeCard = curId.startsWith('theme-');
-      const curThemeIdx = isThemeCard ? parseInt(curId.replace('theme-', ''), 10) : -1;
-
-      if (dir === 'BACK') {
-        setShowThemeModal(false);
-        setFocusedTarget({ zone: 'topbar', id: 'theme' });
-        sfx?.playModalClose?.();
-        return;
-      }
-
-      if (dir === 'UP') {
-        if (isThemeCard) {
-          setFocusedTarget({ zone: 'themeModal', id: 'close' });
-          sfx?.playTileNav?.();
-        }
-      } else if (dir === 'DOWN') {
-        if (curId === 'close' || !isThemeCard) {
-          setFocusedTarget({ zone: 'themeModal', id: 'theme-0' });
-          sfx?.playTileNav?.();
-        }
-      } else if (dir === 'LEFT') {
-        if (isThemeCard && curThemeIdx > 0) {
-          setFocusedTarget({ zone: 'themeModal', id: `theme-${curThemeIdx - 1}` });
-          sfx?.playTileNav?.();
-        }
-      } else if (dir === 'RIGHT') {
-        if (isThemeCard && curThemeIdx < themeCount - 1) {
-          setFocusedTarget({ zone: 'themeModal', id: `theme-${curThemeIdx + 1}` });
-          sfx?.playTileNav?.();
-        }
-      } else if (dir === 'SELECT') {
-        if (curId === 'close') {
-          setShowThemeModal(false);
-          setFocusedTarget({ zone: 'topbar', id: 'theme' });
-          sfx?.playModalClose?.();
-        } else if (isThemeCard && themeCards[curThemeIdx]) {
-          themeCards[curThemeIdx].click();
-          sfx?.playThemeSwitch?.();
         }
       }
       return;
@@ -1321,10 +1277,11 @@ export function useGamepadNavigation({
       }
       if (stateRef.current.onOpenScraperModal) items.push('scraper');
       items.push('sfx');
-      if (stateRef.current.themeEngine?.availableThemes?.length > 1) {
-        items.push('theme');
-      }
+      items.push('autoresume');
       items.push('search');
+      if (stateRef.current.themeEngine) {
+        items.push('colormode');
+      }
       return items;
     };
 
@@ -1355,14 +1312,17 @@ export function useGamepadNavigation({
           }
         } else if (curId === 'sfx') {
           sfx?.toggleMute?.();
-        } else if (curId === 'theme') {
-          if (stateRef.current.setShowThemeModal) {
-            stateRef.current.setShowThemeModal(true);
-            sfx?.playModalOpen?.();
-          } else {
-            stateRef.current.themeEngine?.cycleTheme?.();
-            sfx?.playThemeSwitch?.();
-          }
+        } else if (curId === 'autoresume') {
+          try {
+            const curVal = localStorage.getItem('retro_auto_resume_enabled') !== 'false';
+            const nextVal = !curVal;
+            localStorage.setItem('retro_auto_resume_enabled', nextVal ? 'true' : 'false');
+            window.dispatchEvent(new Event('retro_auto_resume_changed'));
+          } catch (e) {}
+          sfx?.playTabSwitch?.();
+        } else if (curId === 'colormode') {
+          stateRef.current.themeEngine?.toggleColorMode?.();
+          sfx?.playThemeSwitch?.();
         } else if (curId === 'search') {
           if (stateRef.current.gamepadConnected) {
             if (stateRef.current.setOskConfig) {
@@ -1797,11 +1757,8 @@ export function useGamepadNavigation({
         case 't':
         case 'T':
           e.preventDefault();
-          if (stateRef.current.setShowThemeModal) {
-            stateRef.current.setShowThemeModal(true);
-            sfx?.playModalOpen?.();
-          } else if (stateRef.current.themeEngine?.cycleTheme) {
-            stateRef.current.themeEngine.cycleTheme();
+          if (stateRef.current.themeEngine?.toggleColorMode) {
+            stateRef.current.themeEngine.toggleColorMode();
             sfx?.playThemeSwitch?.();
           }
           break;
@@ -2145,7 +2102,7 @@ export function useGamepadNavigation({
                 if (btn) btn.click();
               }
               sfx?.playThemeSwitch?.();
-            } else if (!stateRef.current.showThemeModal && !stateRef.current.showLoadRomModal && !stateRef.current.showProfileSelectModal && !stateRef.current.showProfileCreatorModal) {
+            } else if (!stateRef.current.showLoadRomModal && !stateRef.current.showProfileSelectModal && !stateRef.current.showProfileCreatorModal) {
               setShowScraperModal(true);
               setFocusedTarget({ zone: 'scraperModal', id: 'tab-all' });
               sfx?.playModalOpen?.();
@@ -2183,7 +2140,7 @@ export function useGamepadNavigation({
 
           // 3. START button (Button 9 / Options / Menu / Plus) -> Immediately quick-launches highlighted game
           if (btnStart && !prevButtonsRef.current.btnStart) {
-            if (!stateRef.current.showThemeModal && !stateRef.current.showLoadRomModal && !stateRef.current.showProfileSelectModal && !stateRef.current.showProfileCreatorModal && !stateRef.current.showScraperModal) {
+            if (!stateRef.current.showLoadRomModal && !stateRef.current.showProfileSelectModal && !stateRef.current.showProfileCreatorModal && !stateRef.current.showScraperModal) {
               if (stateRef.current.selectedMobileGameForDetails && stateRef.current.onPlayGame) {
                 stateRef.current.onPlayGame(stateRef.current.selectedMobileGameForDetails);
                 sfx?.playGameLaunch?.();

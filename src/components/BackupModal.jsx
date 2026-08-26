@@ -260,41 +260,6 @@ export default function BackupModal({
 
         {/* Modal Scrollable Body */}
         <div className="backup-modal-body">
-          {/* Persistence Status Banner */}
-          <div className="backup-persistence-banner" style={{
-            padding: '0.75rem 1rem',
-            borderRadius: '6px',
-            background: isServerAvailable ? 'rgba(16, 185, 129, 0.08)' : 'rgba(59, 130, 246, 0.08)',
-            border: isServerAvailable ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid rgba(59, 130, 246, 0.25)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem'
-          }}>
-            <HardDrive size={20} style={{ color: isServerAvailable ? '#10b981' : '#3b82f6', flexShrink: 0 }} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <strong style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
-                  {isServerAvailable ? 'Docker / Server Persistence Active' : 'Browser Offline / IndexedDB Storage'}
-                </strong>
-                <span style={{
-                  fontSize: '0.68rem',
-                  padding: '0.1rem 0.45rem',
-                  borderRadius: '4px',
-                  background: isServerAvailable ? '#10b981' : '#3b82f6',
-                  color: '#fff',
-                  fontWeight: 700
-                }}>
-                  {isServerAvailable ? 'SERVER DISK' : 'LOCAL CACHE'}
-                </span>
-              </div>
-              <p style={{ fontSize: '0.74rem', color: 'var(--text-sub)', margin: '2px 0 0', lineHeight: 1.35 }}>
-                {isServerAvailable 
-                  ? 'All profiles, SRAM saves, and save states automatically sync to data/retroplayer_db.json on the server.'
-                  : 'Data is safely stored in browser IndexedDB. Export a JSON backup to transfer your saves to another device.'}
-              </p>
-            </div>
-          </div>
-
           {/* Database Overview Metric Chips */}
           {stats && (
             <div className="backup-metrics-grid" style={{
@@ -480,6 +445,41 @@ export default function BackupModal({
               </button>
             </div>
 
+          </div>
+
+          {/* Persistence Status Banner (Bottom Placement) */}
+          <div className="backup-persistence-banner" style={{
+            padding: '0.75rem 1rem',
+            borderRadius: '6px',
+            background: isServerAvailable ? 'rgba(16, 185, 129, 0.08)' : 'rgba(59, 130, 246, 0.08)',
+            border: isServerAvailable ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid rgba(59, 130, 246, 0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem'
+          }}>
+            <HardDrive size={20} style={{ color: isServerAvailable ? '#10b981' : '#3b82f6', flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <strong style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
+                  {isServerAvailable ? 'Docker / Server Persistence Active' : 'Browser Offline / IndexedDB Storage'}
+                </strong>
+                <span style={{
+                  fontSize: '0.68rem',
+                  padding: '0.1rem 0.45rem',
+                  borderRadius: '4px',
+                  background: isServerAvailable ? '#10b981' : '#3b82f6',
+                  color: '#fff',
+                  fontWeight: 700
+                }}>
+                  {isServerAvailable ? 'SERVER DISK' : 'LOCAL CACHE'}
+                </span>
+              </div>
+              <p style={{ fontSize: '0.74rem', color: 'var(--text-sub)', margin: '2px 0 0', lineHeight: 1.35 }}>
+                {isServerAvailable 
+                  ? 'All profiles, SRAM saves, and save states automatically sync to data/retroplayer_db.json on the server.'
+                  : 'Data is safely stored in browser IndexedDB. Export a JSON backup to transfer your saves to another device.'}
+              </p>
+            </div>
           </div>
         </div>
       </div>

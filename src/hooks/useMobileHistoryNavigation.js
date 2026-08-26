@@ -28,8 +28,6 @@ export function useMobileHistoryNavigation({
   setShowLoadRomModal,
   showScraperModal,
   setShowScraperModal,
-  showThemeModal,
-  setShowThemeModal,
   showBackupModal,
   setShowBackupModal,
   showProfileSelectModal,
@@ -65,7 +63,6 @@ export function useMobileHistoryNavigation({
     if (showVirtualKeyboard) return { type: 'modal', name: 'virtualKeyboard' };
     if (showLoadRomModal) return { type: 'modal', name: 'loadRom' };
     if (showScraperModal) return { type: 'modal', name: 'scraper' };
-    if (showThemeModal) return { type: 'modal', name: 'theme' };
     if (showBackupModal) return { type: 'modal', name: 'backup' };
     if (showInfoModal) return { type: 'modal', name: 'info' };
     if (showProfileSwitcher) return { type: 'layer', name: 'profileSwitcher' };
@@ -80,7 +77,6 @@ export function useMobileHistoryNavigation({
     showVirtualKeyboard,
     showLoadRomModal,
     showScraperModal,
-    showThemeModal,
     showBackupModal,
     showInfoModal,
     showProfileSwitcher,
@@ -151,11 +147,6 @@ export function useMobileHistoryNavigation({
       sfx?.playNavBack?.();
       return true;
     }
-    if (showThemeModal) {
-      setShowThemeModal(false);
-      sfx?.playNavBack?.();
-      return true;
-    }
     if (showBackupModal) {
       setShowBackupModal(false);
       sfx?.playNavBack?.();
@@ -196,7 +187,6 @@ export function useMobileHistoryNavigation({
     showVirtualKeyboard,
     showLoadRomModal,
     showScraperModal,
-    showThemeModal,
     showBackupModal,
     showInfoModal,
     showProfileSwitcher,
@@ -209,7 +199,6 @@ export function useMobileHistoryNavigation({
     setShowVirtualKeyboard,
     setShowLoadRomModal,
     setShowScraperModal,
-    setShowThemeModal,
     setShowBackupModal,
     setShowInfoModal,
     setShowProfileSwitcher,

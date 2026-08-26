@@ -1953,6 +1953,10 @@ export default function EmulatorModal({
   };
 
   const handleClose = () => {
+    // Exit browser fullscreen if active
+    if (document.fullscreenElement && typeof document.exitFullscreen === 'function') {
+      document.exitFullscreen().catch(() => {});
+    }
     reportSessionEnd();
     setIsGameMuted(false);
     setVolumeState(1.0);

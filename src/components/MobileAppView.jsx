@@ -104,7 +104,6 @@ export default function MobileAppView({
   setSearchQuery,
   bgm,
   themeEngine,
-  onOpenThemeModal,
   onEditMetadata,
   onScrapeGame,
   onExportSave,

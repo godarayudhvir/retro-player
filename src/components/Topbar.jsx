@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   FolderOpen, 
@@ -17,16 +17,19 @@ import {
   BatteryMedium,
   BatteryLow,
   BatteryWarning,
+  Save,
   Zap,
   Info,
-  Database
+  Database,
+  Sun,
+  Moon
 } from 'lucide-react';
 import MultiAvatar from './MultiAvatar';
 import { resolveAssetPath } from '../utils/assetPath';
 
 /**
  * Topbar console header with active profile avatar, BGM music player, status indicators,
- * PWA install button, search input, custom ROM loader, and digital clock.
+ * Auto-Resume slider switch, Dark/Light theme switcher, search input, custom ROM loader, and digital clock.
  */
 export default function Topbar({
   gamepadConnected,
@@ -43,7 +46,6 @@ export default function Topbar({
   setShowLoadRomModal,
   setShowVirtualKeyboard,
   onOpenScraperModal,
-  onOpenThemeModal,
   onOpenAboutModal,
   onOpenBackupModal,
   time,
@@ -51,6 +53,44 @@ export default function Topbar({
   themeEngine,
   scraper
 }) {
+  // Auto-Resume on Game Launch Toggle (Persistent localStorage sync)
+  const [isAutoResumeEnabled, setIsAutoResumeEnabled] = useState(() => {
+    try {
+      return localStorage.getItem('retro_auto_resume_enabled') !== 'false';
+    } catch {
+      return true;
+    }
+  });
+
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e.key === 'retro_auto_resume_enabled') {
+        setIsAutoResumeEnabled(e.newValue !== 'false');
+      }
+    };
+    const handleCustomEvent = () => {
+      try {
+        setIsAutoResumeEnabled(localStorage.getItem('retro_auto_resume_enabled') !== 'false');
+      } catch {}
+    };
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('retro_auto_resume_changed', handleCustomEvent);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('retro_auto_resume_changed', handleCustomEvent);
+    };
+  }, []);
+
+  const handleToggleAutoResume = () => {
+    const nextVal = !isAutoResumeEnabled;
+    setIsAutoResumeEnabled(nextVal);
+    try {
+      localStorage.setItem('retro_auto_resume_enabled', nextVal ? 'true' : 'false');
+      window.dispatchEvent(new Event('retro_auto_resume_changed'));
+    } catch (e) {}
+    sfx?.playTabSwitch?.();
+  };
+
   // Helper to render accurate battery icon and theme styling
   const renderBatteryIcon = () => {
     if (!gamepadBattery || !gamepadBattery.hasBatteryInfo) return null;
@@ -217,33 +257,22 @@ export default function Topbar({
           </button>
         )}
 
-        {/* Multi-Theme Selector Pill */}
-        {themeEngine && themeEngine.availableThemes?.length > 1 && (
-          <button
-            className={`status-pill theme-toggle-btn ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'theme' ? 'gamepad-focused' : ''}`}
-            onClick={() => {
-              if (onOpenThemeModal) {
-                onOpenThemeModal();
-                sfx?.playModalOpen?.();
-              } else {
-                themeEngine.cycleTheme();
-                sfx?.playThemeSwitch?.();
-              }
-            }}
-            title={`Theme Studio: ${themeEngine.currentThemeMeta.name} (${themeEngine.colorMode === 'dark' ? 'Dark' : 'Light'})`}
-            aria-label={`Theme Studio: Current ${themeEngine.currentThemeMeta.name}`}
-          >
-            {themeEngine.currentThemeMeta.icon && (themeEngine.currentThemeMeta.icon.endsWith('.svg') || themeEngine.currentThemeMeta.icon.includes('/')) ? (
-              <img 
-                src={resolveAssetPath(themeEngine.currentThemeMeta.icon)} 
-                alt={themeEngine.currentThemeMeta.name} 
-                style={{ width: '20px', height: '20px', objectFit: 'contain' }}
-              />
-            ) : (
-              <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>{themeEngine.currentThemeMeta.icon}</span>
-            )}
-          </button>
-        )}
+        {/* Auto-Resume on Launch Toggle Switch */}
+        <button
+          type="button"
+          className={`status-pill status-autoresume ${isAutoResumeEnabled ? 'is-enabled' : 'is-disabled'} ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'autoresume' ? 'gamepad-focused' : ''}`}
+          onClick={handleToggleAutoResume}
+          title={`Auto-Resume on Launch: ${isAutoResumeEnabled ? 'ENABLED (Will prompt to restore last session)' : 'DISABLED (Always boot fresh game title)'}`}
+          aria-label="Toggle Auto-Resume on Launch"
+        >
+          <div className="status-autoresume-inner">
+            <Save size={16} color={isAutoResumeEnabled ? '#10b981' : '#64748b'} />
+            <span className="pill-text status-autoresume-label">AUTO-RESUME</span>
+            <span className={`topbar-mini-switch ${isAutoResumeEnabled ? 'active' : ''}`}>
+              <span className="topbar-mini-knob" />
+            </span>
+          </div>
+        </button>
 
         {/* Search Input Widget */}
         <div
@@ -285,19 +314,23 @@ export default function Topbar({
           />
         </div>
 
-        {/* PWA Standalone App Install Button */}
-        {pwa?.canInstall && (
+        {/* Dark / Light Color Mode Toggle */}
+        {themeEngine && (
           <button
-            className="status-pill status-install-pwa"
+            type="button"
+            className={`status-pill status-colormode-toggle ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'colormode' ? 'gamepad-focused' : ''}`}
             onClick={() => {
-              pwa.promptInstall();
+              themeEngine.toggleColorMode?.();
               sfx?.playThemeSwitch?.();
             }}
-            title="Install Retro Player as a Standalone Desktop / Handheld App"
-            aria-label="Install Retro Player App"
+            title={`Switch to ${themeEngine.colorMode === 'dark' ? 'Light' : 'Dark'} Mode (Current: ${themeEngine.colorMode === 'dark' ? 'Dark Mode 🌙' : 'Light Mode ☀️'})`}
+            aria-label={`Toggle Color Mode (Current: ${themeEngine.colorMode === 'dark' ? 'Dark' : 'Light'})`}
           >
-            <Download size={16} />
-            <span className="pill-text">INSTALL APP</span>
+            {themeEngine.colorMode === 'dark' ? (
+              <Moon size={17} color="#fbbf24" fill="rgba(251, 191, 36, 0.2)" />
+            ) : (
+              <Sun size={17} color="#f59e0b" fill="rgba(245, 158, 11, 0.2)" />
+            )}
           </button>
         )}
 

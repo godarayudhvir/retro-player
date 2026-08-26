@@ -53,6 +53,7 @@ During first-time startup or when revisiting the Onboarding wizard:
 | **`SELECT` Button** | **`F`** | **Toggle Favorite ⭐ on Highlighted Game** |
 | **`[Y]` Button** | **`/` (Slash) or `S`** | Open Search virtual keyboard |
 | **`[X]` Button** | **`M`** | Open Scraper Modal |
+| — | **`T`** | **Toggle Light / Dark Mode** |
 | **`[L]` / `[R]` Bumpers** | **`[` and `]`** | Cycle active platform console on System Ribbon |
 | **`[B]` Button** | **`Escape`** | Close open modals, drawers, or reset focus |
 

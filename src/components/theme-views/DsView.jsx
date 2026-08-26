@@ -100,6 +100,20 @@ export default function DsView({
     }
   });
 
+  // Listen for view reset on game exit / global events
+  useEffect(() => {
+    const handleResetView = () => {
+      setIsWideGrid(false);
+      setGridDensity('3');
+      try {
+        localStorage.setItem('retro_ds_wide_grid', 'false');
+        localStorage.setItem('retro_ds_grid_density', '3');
+      } catch (e) {}
+    };
+    window.addEventListener('retro_ds_view_reset', handleResetView);
+    return () => window.removeEventListener('retro_ds_view_reset', handleResetView);
+  }, []);
+
   const handleToggleDensity = () => {
     setGridDensity(prev => {
       let next;

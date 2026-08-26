@@ -43,12 +43,14 @@ Retro Player maintains a dual-tier save persistence layer strictly namespaced by
 - **Slot 1 (Automatic Resume State)**: Created automatically whenever you close the game (via topbar `✕`, controller `L3+R3`, or mobile edge swipe-back). Stored under `state_auto_${activeProfileId}_${gameId}`. On next game launch, an interactive 10-second countdown prompt offers one-click resume directly back to the exact frame where you left off.
 - **450ms Graceful Exit Buffer**: Heavy WebAssembly cores (e.g. Nintendo DS DeSmuME/MelonDS, PS1) are provided a 450ms graceful buffer on exit to flush Emscripten virtual memory to IndexedDB before unmounting the iframe.
 - **Mobile Swipe-Back Auto-Save**: Left-edge swipe gesture on mobile routes through the graceful exit sequence, ensuring full save state synchronization before returning to the library.
+- **Auto-Resume Preference Toggle**: Players can enable or disable automatic session resume globally via the **AUTO-RESUME** micro-switch pill in the Desktop Topbar or under Preferences in the Mobile Game Details Sheet (`retro_auto_resume_enabled` in `localStorage`). When disabled, games boot fresh directly to title screens without waiting on the countdown prompt.
 - **Dedicated Dual-Slot Export (`.state`)**: Exporting quick saves downloads both Slot 0 (`..._QuickSave_Slot0_...state`) and Slot 1 (`..._AutoResume_Slot1_...state`) if present.
 - **Import Support**: Uploading any `.state` snapshot file targets the appropriate slot and updates all aliases.
 - **Arcade/MAME Machine Handling**: Classic discrete arcade PCB hardware without snapshot support automatically hides Save/Load controls from the Game Detail tab and in-game HUDs to prevent false state traps.
 
-### 3. Integrated Save Studio Controls
-Within both Desktop (Nintendo DS View) and Mobile (Game Details Sheet), the Save Studio provides:
+### 3. Integrated Save Studio & Topbar Controls
+Within both Desktop (Topbar & Nintendo DS View) and Mobile (Game Details Sheet), Save management provides:
+- **💾 Auto-Resume Slider Switch**: Instant toggle on the desktop topbar to enable/disable automated session restoration with full gamepad/keyboard spatial navigation.
 - **📥 Export Battery Save (.sav)**: Download in-game cartridge SRAM save file.
 - **📥 Export Quick Save (.state)**: Download emulator snapshot state files (Slot 0 Quick Save and Slot 1 Auto-Resume).
 - **📤 Import Save / State (.sav / .state)**: Upload `.sav` battery saves or `.state` snapshots with auto-routing.

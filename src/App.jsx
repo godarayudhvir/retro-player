@@ -14,7 +14,6 @@ import OnboardingScreen from './components/OnboardingScreen';
 import ScraperModal from './components/ScraperModal';
 import MobileAppView from './components/MobileAppView';
 import MetadataEditModal from './components/MetadataEditModal';
-import ThemeSwitcherModal from './components/ThemeSwitcherModal';
 import BackupModal from './components/BackupModal';
 
 import { useWebAudioSfx } from './hooks/useWebAudioSfx';
@@ -43,7 +42,6 @@ export default function App() {
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showLoadRomModal, setShowLoadRomModal] = useState(false);
   const [showScraperModal, setShowScraperModal] = useState(false);
-  const [showThemeModal, setShowThemeModal] = useState(false);
   const [showBackupModal, setShowBackupModal] = useState(false);
   const [showVirtualKeyboard, setShowVirtualKeyboard] = useState(false);
   const [oskConfig, setOskConfig] = useState({
@@ -204,8 +202,6 @@ export default function App() {
     setShowLoadRomModal,
     showScraperModal,
     setShowScraperModal,
-    showThemeModal,
-    setShowThemeModal,
     showBackupModal,
     setShowBackupModal,
     showProfileSelectModal,
@@ -286,8 +282,6 @@ export default function App() {
     setShowLoadRomModal,
     showScraperModal,
     setShowScraperModal,
-    showThemeModal,
-    setShowThemeModal,
     showBackupModal,
     setShowBackupModal,
     showProfileSelectModal,
@@ -390,7 +384,6 @@ export default function App() {
           setSearchQuery={setSearchQuery}
           bgm={bgm}
           themeEngine={themeEngine}
-          onOpenThemeModal={() => setShowThemeModal(true)}
           onEditMetadata={(game, meta) => setEditingMetadataGame({ game, metadata: meta })}
           onScrapeGame={scraper.scrapeSingleGame}
           onExportSave={(game) => exportSaveFile(game, activeProfileId)}
@@ -431,7 +424,6 @@ export default function App() {
             setShowLoadRomModal={setShowLoadRomModal}
             setShowVirtualKeyboard={setShowVirtualKeyboard}
             onOpenScraperModal={() => setShowScraperModal(true)}
-            onOpenThemeModal={() => setShowThemeModal(true)}
             onOpenAboutModal={() => setShowInfoModal(true)}
             onOpenBackupModal={() => setShowBackupModal(true)}
             time={time}
@@ -532,6 +524,7 @@ export default function App() {
       <AboutInfoModal
         isOpen={showInfoModal}
         focusedTarget={focusedTarget}
+        sfx={sfx}
         onClose={() => {
           setShowInfoModal(false);
           setFocusedTarget({ zone: 'topbar', id: 'info' });
@@ -723,22 +716,6 @@ export default function App() {
         setFocusedTarget={setFocusedTarget}
       />
 
-      {/* Console Theme Studio & Light/Dark Switcher Modal */}
-      <ThemeSwitcherModal
-        isOpen={showThemeModal}
-        onClose={() => {
-          setShowThemeModal(false);
-          setFocusedTarget({ zone: 'topbar', id: 'theme' });
-          sfx.playModalClose();
-        }}
-        themeEngine={themeEngine}
-        uiMode={uiMode}
-        setUiMode={setUiMode}
-        sfx={sfx}
-        focusedTarget={focusedTarget}
-        setFocusedTarget={setFocusedTarget}
-      />
-
       {/* Database Backup & Restore Studio Modal */}
       <BackupModal
         isOpen={showBackupModal}
@@ -765,6 +742,12 @@ export default function App() {
           onClose={() => {
             const playedGame = activeGame;
             setActiveGame(null);
+            // Reset DS view layout & density back to default dual-screen mode
+            try {
+              localStorage.setItem('retro_ds_wide_grid', 'false');
+              localStorage.setItem('retro_ds_grid_density', '3');
+              window.dispatchEvent(new Event('retro_ds_view_reset'));
+            } catch (e) {}
             if (playedGame) {
               const gameIdx = filteredGames.findIndex(g => (g.id && g.id === playedGame.id) || g.title === playedGame.title);
               if (gameIdx >= 0) {

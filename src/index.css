@@ -3110,40 +3110,30 @@ button.status-pill.is-active-scraping {
   padding: 0.45rem 0.85rem;
 }
 
-button.status-pill.status-install-pwa {
-  width: auto;
-  border-radius: 30px;
-  padding: 0.45rem 1rem;
-  background: #ffffff;
-  border: 2px solid #10b981;
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
-  color: #059669;
+button.status-pill.status-colormode-toggle {
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  font-weight: 800;
-  animation: pulse-glow-emerald 2.5s infinite ease-in-out;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--border-color, rgba(148, 163, 184, 0.2));
 }
 
-@keyframes pulse-glow-emerald {
-  0%, 100% {
-    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
-    border-color: #10b981;
-  }
-  50% {
-    box-shadow: 0 4px 22px rgba(16, 185, 129, 0.5);
-    border-color: #34d399;
-  }
-}
-
-button.status-pill.status-install-pwa:hover {
+button.status-pill.status-colormode-toggle:hover {
   transform: translateY(-2px) scale(1.05);
-  background: #f0fdf4;
-  border-color: #059669;
-  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
 }
 
-
+[data-color-mode="dark"] button.status-pill.status-colormode-toggle:hover {
+  border-color: rgba(251, 191, 36, 0.6);
+  box-shadow: 0 4px 16px rgba(251, 191, 36, 0.3);
+}
 
 button.status-pill.status-reset-app {
   border-color: rgba(239, 68, 68, 0.3);
@@ -3191,6 +3181,86 @@ button.status-pill.status-scraper-pill {
 
 [data-color-mode="dark"] .status-scraper-label {
   color: #fbbf24;
+}
+
+/* Auto-Resume Status Pill & Micro-Switch */
+button.status-pill.status-autoresume {
+  width: auto;
+  border-radius: 30px;
+  padding: 0.4rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--border-color, rgba(148, 163, 184, 0.2));
+}
+
+button.status-pill.status-autoresume:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.15);
+}
+
+.status-autoresume-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.status-autoresume-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--text-muted, #64748b);
+  transition: color 0.2s ease;
+}
+
+button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
+  color: #059669;
+}
+
+[data-color-mode="dark"] button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
+  color: #34d399;
+}
+
+/* Micro Switch inside Topbar */
+.topbar-mini-switch {
+  width: 28px;
+  height: 16px;
+  border-radius: 10px;
+  background: rgba(148, 163, 184, 0.35);
+  position: relative;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.topbar-mini-switch.active {
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.35);
+}
+
+.topbar-mini-knob {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ffffff;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.topbar-mini-switch.active .topbar-mini-knob {
+  transform: translateX(12px);
+}
+
+@media (max-width: 768px) {
+  .topbar-mini-switch {
+    display: none !important;
+  }
 }
 
 .topbar-keycap {
@@ -6016,9 +6086,17 @@ button.status-pill.status-scraper-pill {
 /* DS Game Detail Panel — Play, Fav, Save, Guides, Edit buttons */
 .ds-play-now-btn.gamepad-focused {
   outline: none !important;
-  border-color: #ffffff !important;
-  box-shadow: 0 0 0 2.5px rgba(239, 68, 68, 0.6), 0 4px 14px rgba(239, 68, 68, 0.4) !important;
-  transform: translateY(-1px) scale(1.01) !important;
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 50%, #be123c 100%) !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 0 0 3px #ffffff, 0 0 0 6.5px #e11d48, 0 14px 28px rgba(225, 29, 72, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+  transform: translateY(-4px) scale(1.03) !important;
+  opacity: 1 !important;
+  z-index: 10 !important;
+}
+
+[data-color-mode="dark"] .ds-play-now-btn.gamepad-focused {
+  box-shadow: 0 0 0 3px #0f172a, 0 0 0 6.5px #fb7185, 0 16px 32px rgba(225, 29, 72, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
 }
 
 .ds-tool-btn.gamepad-focused {
@@ -8391,12 +8469,12 @@ button.status-pill.status-scraper-pill {
 }
 
 .load-rom-body {
-  padding: 1.5rem 1.75rem;
+  padding: 1.25rem 1.5rem 1.5rem;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  max-height: calc(88vh - 150px);
+  gap: 1.15rem;
+  max-height: calc(88vh - 80px);
 }
 
 .load-rom-tagline {
@@ -16569,6 +16647,30 @@ button.status-pill.status-scraper-pill {
   box-shadow: 0 2px 6px rgba(225, 29, 72, 0.35);
 }
 
+[data-color-mode="dark"] .ds-rail-action-btn,
+[data-theme="ds"][data-color-mode="dark"] .ds-rail-action-btn {
+  background: #242c38;
+  border: 1.5px solid #475569;
+  color: #f1f5f9;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-color-mode="dark"] .ds-rail-action-btn:hover,
+[data-theme="ds"][data-color-mode="dark"] .ds-rail-action-btn:hover {
+  background: #334155;
+  border-color: #64748b;
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+[data-color-mode="dark"] .ds-rail-action-btn.is-active-wide,
+[data-theme="ds"][data-color-mode="dark"] .ds-rail-action-btn.is-active-wide {
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+  border-color: #fb7185;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(225, 29, 72, 0.5);
+}
+
 .ds-buttons-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -17182,30 +17284,41 @@ button.status-pill.status-scraper-pill {
 
 /* Primary Play Now Action Button */
 .ds-play-now-btn {
-  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
-  color: #ffffff;
-  border: 2px solid #ffffff;
-  box-shadow: 0 6px 16px rgba(225, 29, 72, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  background: linear-gradient(135deg, #be123c 0%, #9f1239 100%);
+  color: rgba(255, 255, 255, 0.95);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.35);
   border-radius: 6px;
-  padding: 0.85rem 1rem;
+  padding: 0.55rem 0.85rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.65rem;
-  font-size: 1rem;
-  font-weight: 900;
-  letter-spacing: 0.04em;
+  gap: 0.55rem;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
   cursor: pointer;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: scale(0.96);
+  opacity: 0.92;
+  transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-sizing: border-box;
 }
 
 .ds-play-now-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 22px rgba(225, 29, 72, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transform: translateY(-4px) scale(1.03);
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 50%, #be123c 100%);
+  color: #ffffff;
+  border-color: #ffffff;
+  opacity: 1;
+  box-shadow: 0 0 0 3px #ffffff, 0 0 0 6.5px #e11d48, 0 14px 28px rgba(225, 29, 72, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+[data-color-mode="dark"] .ds-play-now-btn:hover {
+  box-shadow: 0 0 0 3px #0f172a, 0 0 0 6.5px #fb7185, 0 16px 32px rgba(225, 29, 72, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .ds-play-now-btn:active {
-  transform: translateY(1px);
+  transform: translateY(-1px) scale(0.99);
 }
 
 /* Action Toolbar (Favorite, Save Data, Guides, Edit & Scrape) */
@@ -17918,16 +18031,16 @@ button.status-pill.status-scraper-pill {
   transform: none;
 }
 
-[data-theme="ds"] .load-rom-platform-pill {
-  border-radius: 4px;
-  border: 1px solid #e2e8f0;
+[data-theme="ds"] .load-rom-platform-chip {
+  border-radius: 6px;
+  border: 1.5px solid #cbd5e1;
   background: #ffffff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-[data-theme="ds"] .load-rom-security-note {
-  border-radius: 4px;
-  border: 1px solid #e2e8f0;
+[data-theme="ds"] .load-rom-privacy-banner {
+  border-radius: 6px;
+  border: 1.5px solid #cbd5e1;
   background: #ffffff;
 }
 
@@ -17973,14 +18086,55 @@ button.status-pill.status-scraper-pill {
   color: #f8fafc;
 }
 
-[data-theme="ds"][data-color-mode="dark"] .load-rom-platform-pill {
+[data-color-mode="dark"] .load-rom-platform-chip,
+[data-theme="ds"][data-color-mode="dark"] .load-rom-platform-chip {
   background: #1e293b;
   border-color: #334155;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
-[data-theme="ds"][data-color-mode="dark"] .load-rom-security-note {
+[data-color-mode="dark"] .load-rom-chip-name,
+[data-theme="ds"][data-color-mode="dark"] .load-rom-chip-name {
+  color: #f8fafc;
+}
+
+[data-color-mode="dark"] .load-rom-chip-ext,
+[data-theme="ds"][data-color-mode="dark"] .load-rom-chip-ext {
+  color: #94a3b8;
+}
+
+[data-color-mode="dark"] .load-rom-privacy-banner,
+[data-theme="ds"][data-color-mode="dark"] .load-rom-privacy-banner {
   background: #1e293b;
   border-color: #334155;
+  color: #cbd5e1;
+}
+
+[data-color-mode="dark"] .load-rom-privacy-banner strong,
+[data-theme="ds"][data-color-mode="dark"] .load-rom-privacy-banner strong {
+  color: #f1f5f9;
+}
+
+[data-color-mode="dark"] .load-rom-dropzone-text strong,
+[data-theme="ds"][data-color-mode="dark"] .load-rom-dropzone-text strong {
+  color: #f8fafc;
+}
+
+[data-color-mode="dark"] .load-rom-dropzone-text span,
+[data-theme="ds"][data-color-mode="dark"] .load-rom-dropzone-text span {
+  color: #94a3b8;
+}
+
+[data-color-mode="dark"] .load-rom-section-title,
+[data-theme="ds"][data-color-mode="dark"] .load-rom-section-title {
+  color: #f1f5f9;
+}
+
+[data-color-mode="dark"] .rom-ingestion-card,
+[data-theme="ds"][data-color-mode="dark"] .rom-ingestion-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 4px 12px rgba(0, 0, 0, 0.4) !important;
 }
 
 /* ==========================================================================

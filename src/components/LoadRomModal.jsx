@@ -481,48 +481,26 @@ export default function LoadRomModal({
                     </button>
                   </div>
 
+                  {/* Choice 3: Back / Choose Different File */}
+                  <button
+                    type="button"
+                    className={`backup-action-btn is-secondary ${focusedOption === 2 ? 'is-focused' : ''}`}
+                    style={{ justifyContent: 'center', height: '36px', marginTop: '0.25rem' }}
+                    onClick={() => {
+                      setSelectedFile(null);
+                      setErrorMessage(null);
+                      sfx?.playTileNav?.();
+                    }}
+                  >
+                    <span>Choose Different File</span>
+                  </button>
+
                 </div>
               )}
 
             </div>
           )}
 
-        </div>
-
-        {/* Modal Footer */}
-        <div className="load-rom-footer">
-          {selectedFile && !isProcessing ? (
-            <button
-              type="button"
-              className="load-rom-btn-cancel"
-              onClick={() => {
-                setSelectedFile(null);
-                setErrorMessage(null);
-                sfx?.playTileNav?.();
-              }}
-            >
-              Choose Different File
-            </button>
-          ) : (
-            <button
-              type="button"
-              className={`load-rom-btn-cancel ${focusedTarget?.zone === 'loadRomModal' && focusedTarget?.id === 'cancel' ? 'gamepad-focused' : ''}`}
-              onClick={onClose}
-              disabled={isProcessing}
-            >
-              Cancel
-            </button>
-          )}
-
-          {!selectedFile && (
-            <button
-              type="button"
-              className={`load-rom-btn-primary ${focusedTarget?.zone === 'loadRomModal' && focusedTarget?.id === 'browse' ? 'gamepad-focused' : ''}`}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              Browse Files...
-            </button>
-          )}
         </div>
 
       </div>
