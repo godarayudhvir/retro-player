@@ -1597,7 +1597,6 @@ export function useGamepadNavigation({
         items.push('theme');
       }
       items.push('search');
-      if (stateRef.current.pwa?.canInstall) items.push('install');
       return items;
     };
 
@@ -1657,11 +1656,6 @@ export function useGamepadNavigation({
               searchInputRef.current.focus();
               searchInputRef.current.select();
             }
-          }
-        } else if (curId === 'install') {
-          if (stateRef.current.pwa?.promptInstall) {
-            stateRef.current.pwa.promptInstall();
-            sfx?.playThemeSwitch?.();
           }
         }
       } else if (curZone === 'ribbon') {

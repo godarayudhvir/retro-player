@@ -288,7 +288,7 @@ export default function Topbar({
         {/* PWA Standalone App Install Button */}
         {pwa?.canInstall && (
           <button
-            className={`status-pill status-install-pwa ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'install' ? 'gamepad-focused' : ''}`}
+            className="status-pill status-install-pwa"
             onClick={() => {
               pwa.promptInstall();
               sfx?.playThemeSwitch?.();
