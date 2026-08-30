@@ -167,7 +167,7 @@ export default function LoadRomModal({
 
   if (!isOpen) return null;
 
-  const handleIncomingFiles = async (input) => {
+  const handleIncomingFiles = async (input, dirHandle = null) => {
     setIsProcessing(true);
     setErrorMessage(null);
     setProgressState({ step: 'scanning', current: 0, total: 0, message: 'Scanning files & console formats...' });
