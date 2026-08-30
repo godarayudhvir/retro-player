@@ -1,47 +1,47 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
-import { 
-  Play, 
-  Star, 
-  Pencil, 
-  RefreshCw, 
-  Clock, 
-  History, 
-  Calendar, 
-  Cpu, 
-  Tag, 
-  Save, 
-  CheckCircle2, 
-  RotateCcw, 
-  Download, 
-  Upload, 
-  Trash2, 
-  BookOpen, 
-  Tv, 
-  ExternalLink, 
-  Smartphone, 
-  Globe, 
-  Check, 
-  ArrowLeft, 
-  Sparkles, 
-  Image, 
-  FileText, 
-  Search, 
-  FolderOpen, 
-  Gamepad2, 
-  Layers, 
-  Volume2, 
-  VolumeX, 
-  Palette, 
-  X, 
+import {
+  Play,
+  Star,
+  Pencil,
+  RefreshCw,
+  Clock,
+  History,
+  Calendar,
+  Cpu,
+  Tag,
+  Save,
+  CheckCircle2,
+  RotateCcw,
+  Download,
+  Upload,
+  Trash2,
+  BookOpen,
+  Tv,
+  ExternalLink,
+  Smartphone,
+  Globe,
+  Check,
+  ArrowLeft,
+  Sparkles,
+  Image,
+  FileText,
+  Search,
+  FolderOpen,
+  Gamepad2,
+  Layers,
+  Volume2,
+  VolumeX,
+  Palette,
+  X,
   Menu,
-  Plus, 
-  ChevronRight, 
-  Music, 
-  SkipForward, 
-  BatteryCharging, 
-  BatteryFull, 
-  BatteryMedium, 
-  BatteryLow, 
+  Plus,
+  ChevronRight,
+  Music,
+  SkipForward,
+  BatteryCharging,
+  BatteryFull,
+  BatteryMedium,
+  BatteryLow,
   BatteryWarning,
   Square,
   Edit3,
@@ -49,7 +49,25 @@ import {
   Database,
   Users,
   Zap,
-  Trophy
+  Trophy,
+  Settings,
+  Shield,
+  Award,
+  Crown,
+  Lock,
+  Bike,
+  Anchor,
+  Waves,
+  Share2,
+  Map as MapIcon,
+  Disc,
+  Feather,
+  DollarSign,
+  AlertCircle,
+  PlusCircle,
+  Eye,
+  Activity,
+  Compass
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import MultiAvatar from './MultiAvatar';
@@ -57,6 +75,59 @@ import ConfirmModal from './ConfirmModal';
 import { resolveAssetPath } from '../utils/assetPath';
 import { getReleaseDate, getGameDescription } from '../gameDescriptions';
 import { saveCachedMetadata } from '../services/metadataScraper';
+import { POKEMON_ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, getPokemonBadgesForGame, getPokemonMilestonesForGame } from '../data/achievementsManifest';
+import { isPokemonRom } from '../services/pokemonSaveParser';
+
+const POKE_ICON_MAP = {
+  Compass,
+  Bike,
+  Anchor,
+  Waves,
+  Search,
+  Volume2,
+  Eye,
+  Share2,
+  Map: MapIcon,
+  Disc,
+  Shield,
+  Award,
+  Trophy,
+  PlusCircle,
+  Zap,
+  Users,
+  Crown,
+  Star,
+  Feather,
+  Activity,
+  DollarSign,
+  AlertCircle,
+  BookOpen
+};
+
+function PokeballIcon({ size = 18, isActive = false }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{
+        display: 'block',
+        flexShrink: 0,
+        transform: isActive ? 'rotate(180deg)' : 'rotate(0deg)',
+        transition: 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)'
+      }}
+    >
+      <path d="M2.05 12a10 10 0 0 0 19.9 0H15a3 3 0 0 1-6 0H2.05z" fill="#ffffff" />
+      <path d="M2.05 12a10 10 0 0 1 19.9 0H15a3 3 0 0 0-6 0H2.05z" fill="#ef4444" />
+      <circle cx="12" cy="12" r="10" stroke="#1e293b" strokeWidth="1.8" fill="none" />
+      <line x1="2" y1="12" x2="22" y2="12" stroke="#1e293b" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="3.5" fill="#ffffff" stroke="#1e293b" strokeWidth="1.8" />
+      <circle cx="12" cy="1.5" fill="#1e293b" />
+    </svg>
+  );
+}
 import { convertRemoteImageToWebpDataUrl } from '../utils/imageConverter';
 import { resetEntireApp } from '../utils/appReset';
 
@@ -174,6 +245,24 @@ export default function MobileAppView({
   const [editSaveStatus, setEditSaveStatus] = useState('');
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
+  // Listen for bottom nav tab transitions from child views (e.g. Trophies)
+  useEffect(() => {
+    const handleNavEvent = (e) => {
+      const tab = e.detail;
+      if (tab === 'favorites') {
+        setSelectedSystem({ key: 'favorites', name: 'Favorites', icon: null });
+      } else if (tab === 'recent') {
+        setSelectedSystem({ key: 'recent', name: 'Recently Played', icon: null });
+      } else if (tab === 'library') {
+        setSelectedSystem({ key: 'all', name: 'All Games', icon: 'assets/platforms/gba.svg' });
+      } else if (tab === 'tools') {
+        setIsHamburgerOpen(true);
+      }
+    };
+    window.addEventListener('retro_nav_tab', handleNavEvent);
+    return () => window.removeEventListener('retro_nav_tab', handleNavEvent);
+  }, []);
+
   // Group games by platform / system
   const systemGamesMap = useMemo(() => {
     const map = {};
@@ -221,8 +310,8 @@ export default function MobileAppView({
 
     if (searchQuery.trim().length > 0) {
       const q = searchQuery.toLowerCase().trim();
-      return baseList.filter(g => 
-        g.title.toLowerCase().includes(q) || 
+      return baseList.filter(g =>
+        g.title.toLowerCase().includes(q) ||
         (g.systemName && g.systemName.toLowerCase().includes(q))
       );
     }
@@ -231,8 +320,8 @@ export default function MobileAppView({
   }, [selectedSystem, searchQuery, games, favoriteGames, recentGames, systemGamesMap]);
 
   // Selected game metadata details
-  const selectedMeta = selectedGameForDetails 
-    ? (metadataMap[selectedGameForDetails.id] || metadataMap[`${selectedGameForDetails.systemKey}-${selectedGameForDetails.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')]) 
+  const selectedMeta = selectedGameForDetails
+    ? (metadataMap[selectedGameForDetails.id] || metadataMap[`${selectedGameForDetails.systemKey}-${selectedGameForDetails.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')])
     : null;
   const selectedStats = selectedGameForDetails && getGameStats ? getGameStats(selectedGameForDetails.id || selectedGameForDetails.title) : null;
   const isSelectedFav = selectedGameForDetails && isFavorite ? isFavorite(selectedGameForDetails.id || selectedGameForDetails.title) : false;
@@ -243,7 +332,7 @@ export default function MobileAppView({
   const screenshotSrc = rawScreenshot ? resolveAssetPath(rawScreenshot) : null;
   const description = selectedMeta?.description || selectedGameForDetails?.sidecarMetadata?.description || (selectedGameForDetails ? getGameDescription(selectedGameForDetails) : '');
   const releaseYear = selectedMeta?.releaseYear || selectedMeta?.releaseDate?.split('-')[0] || (selectedGameForDetails && getReleaseDate(selectedGameForDetails) !== '2000-01-01' ? getReleaseDate(selectedGameForDetails).split('-')[0] : null);
-  
+
   const rawDeveloper = selectedMeta?.developer || selectedGameForDetails?.sidecarMetadata?.developer || null;
   const rawPublisher = selectedMeta?.publisher || selectedGameForDetails?.sidecarMetadata?.publisher || null;
   const rawGenre = selectedMeta?.genre || selectedGameForDetails?.sidecarMetadata?.genre || null;
@@ -347,7 +436,7 @@ export default function MobileAppView({
           if (converted && converted.startsWith('data:image/')) {
             payloadCoverDataUrl = converted;
           }
-        } catch (_) {}
+        } catch (_) { }
       }
 
       // Try saving directly to disk backend via /api/metadata/save-sidecar
@@ -595,8 +684,8 @@ export default function MobileAppView({
           romPath: selectedGameForDetails.romUrl || selectedGameForDetails.url,
           deleteCover: true
         })
-      }).catch(() => {});
-    } catch (_) {}
+      }).catch(() => { });
+    } catch (_) { }
 
     await saveCachedMetadata(id, updatedData);
     scraper?.updateLocalMetadata?.(id, updatedData);
@@ -608,7 +697,7 @@ export default function MobileAppView({
   const handleDeleteMetadata = async () => {
     if (!selectedGameForDetails) return;
     const id = selectedGameForDetails.id || `${selectedGameForDetails.systemKey}-${selectedGameForDetails.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
-    
+
     // 1. Reset all fields to clean defaults
     setEditTitle(selectedGameForDetails.rawTitle || selectedGameForDetails.title);
     setEditYear('');
@@ -619,7 +708,7 @@ export default function MobileAppView({
     setEditCoverUrl('');
     setEditWrittenGuide('');
     setEditVideoGuide('');
-    
+
     // 2. Delete sidecar on backend disk
     try {
       await fetch('/api/metadata/delete-sidecar', {
@@ -631,8 +720,8 @@ export default function MobileAppView({
           romPath: selectedGameForDetails.romUrl || selectedGameForDetails.url,
           title: selectedGameForDetails.title
         })
-      }).catch(() => {});
-    } catch (_) {}
+      }).catch(() => { });
+    } catch (_) { }
 
     // 3. Clear IndexedDB / Server DB and update local cache
     await deleteManualMetadata(id);
@@ -746,15 +835,6 @@ export default function MobileAppView({
               <span className="mobile-brand-retro">RETRO</span>
               <span className="mobile-brand-player">PLAYER</span>
             </div>
-            {hasChosenProfileThisSession && (
-              <button 
-                className="mobile-gate-close-btn"
-                onClick={() => setShowProfileSwitcher(false)}
-                aria-label="Close Profile Switcher"
-              >
-                <X size={18} />
-              </button>
-            )}
           </div>
 
           <div className="mobile-profile-gate-body">
@@ -777,7 +857,7 @@ export default function MobileAppView({
                       sfx?.playProfileSelect?.();
                     }}
                   >
-                    <div 
+                    <div
                       className="mobile-profile-avatar-wrap"
                       style={{ borderColor: p.favoriteColor || '#e11d48' }}
                     >
@@ -803,23 +883,23 @@ export default function MobileAppView({
   // STAGE 4: SHOWS GAME DETAIL (Nintendo DS Dual-Screen Touch Architecture)
   // =========================================================================
   if (isStageDetail) {
-    const gameLogs = (scraper?.logs || []).filter(l => 
-      l.meta?.title === selectedGameForDetails.title || 
-      l.meta?.gameId === selectedGameForDetails.id || 
+    const gameLogs = (scraper?.logs || []).filter(l =>
+      l.meta?.title === selectedGameForDetails.title ||
+      l.meta?.gameId === selectedGameForDetails.id ||
       (selectedGameForDetails.title && l.message?.toLowerCase().includes(selectedGameForDetails.title.toLowerCase()))
     );
 
-    const supportsBattery = selectedGameForDetails?.supportsBatterySaves !== false && 
-      selectedGameForDetails?.systemKey !== 'arcade' && 
-      selectedGameForDetails?.systemKey !== 'atari2600' && 
-      !selectedGameForDetails?.systemName?.toLowerCase().includes('arcade') && 
+    const supportsBattery = selectedGameForDetails?.supportsBatterySaves !== false &&
+      selectedGameForDetails?.systemKey !== 'arcade' &&
+      selectedGameForDetails?.systemKey !== 'atari2600' &&
+      !selectedGameForDetails?.systemName?.toLowerCase().includes('arcade') &&
       !selectedGameForDetails?.systemName?.toLowerCase().includes('atari 2600');
 
     return (
       <div className="mobile-app-root stage-detail-root">
         {/* Detail Top Navigation Bar */}
         <header className="mobile-detail-nav">
-          <button 
+          <button
             type="button"
             className="mobile-detail-back-btn"
             onClick={() => {
@@ -892,6 +972,22 @@ export default function MobileAppView({
             >
               <Star size={16} fill={isSelectedFav ? '#f59e0b' : 'none'} color={isSelectedFav ? '#d97706' : 'currentColor'} />
             </button>
+
+            {/* Pokémon Trainer Milestones Touch Tab (Only for Pokémon ROMs) */}
+            {selectedGameForDetails && isPokemonRom(selectedGameForDetails) && (
+              <button
+                type="button"
+                className={`ds-tool-btn ds-icon-btn ds-pokemon-tab-btn ${dsTab === 'pokemon' ? 'is-active' : ''}`}
+                onClick={() => {
+                  setDsTab(dsTab === 'pokemon' ? 'overview' : 'pokemon');
+                  sfx?.playTabSwitch?.();
+                }}
+                title="Pokémon Trainer Milestones & Badge Case"
+                aria-label="Pokémon Trainer Milestones"
+              >
+                <PokeballIcon size={17} isActive={dsTab === 'pokemon'} />
+              </button>
+            )}
 
             {/* Save RAM Touch Tab (Hidden for Arcade / MAME machines) */}
             {selectedGameForDetails && !['arcade', 'mame', 'cps1', 'cps2', 'cps3', 'neogeo'].includes(selectedGameForDetails.systemKey?.toLowerCase()) && !['arcade', 'mame', 'cps1', 'cps2', 'cps3', 'neogeo'].includes(selectedGameForDetails.systemCore?.toLowerCase()) && (
@@ -982,8 +1078,8 @@ export default function MobileAppView({
 
               {/* Per-ROM Mastered Milestones Card */}
               {(() => {
-                const perRomMilestones = selectedGameForDetails && achievementsEngine?.getGameMilestones 
-                  ? achievementsEngine.getGameMilestones(selectedGameForDetails.id || selectedGameForDetails.title) 
+                const perRomMilestones = selectedGameForDetails && achievementsEngine?.getGameMilestones
+                  ? achievementsEngine.getGameMilestones(selectedGameForDetails.id || selectedGameForDetails.title)
                   : [];
                 if (perRomMilestones.length === 0) return null;
                 return (
@@ -1010,6 +1106,121 @@ export default function MobileAppView({
                   <strong style={{ fontSize: '0.8rem', color: 'var(--poke-red, #e11d48)' }}>Synopsis &amp; Game Overview</strong>
                   <p className="ds-synopsis-text">{description}</p>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* =========================================================================
+              VIEW 1B: POKÉMON TRAINER MILESTONES & BADGE CASE
+              ========================================================================= */}
+          {dsTab === 'pokemon' && (
+            <div className="ds-tab-pane animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              <div className="ds-stats-card">
+                <div className="ds-stat-label" style={{ marginBottom: '0.4rem', width: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <Trophy size={13} color="#f59e0b" />
+                    <span>Trainer Milestones &amp; Badges</span>
+                  </div>
+                </div>
+
+                {/* 8-Badge Case Tray */}
+                <div style={{ padding: '0.35rem 0 0.15rem 0', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    Regional League Badge Case
+                  </span>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.4rem' }}>
+                    {(() => {
+                      const regionalBadges = getPokemonBadgesForGame(selectedGameForDetails);
+                      return regionalBadges.map((badge, idx) => {
+                        const num = idx + 1;
+                        const badgeKey = `poke_badge_${num}`;
+                        const badgeLabel = badge.name.replace(' Badge', '');
+                        const isBadgeEarned = !!achievementsEngine?.unlocked?.[badgeKey] && (
+                          achievementsEngine.unlocked[badgeKey].gameId === selectedGameForDetails?.id ||
+                          achievementsEngine.unlocked[badgeKey].gameTitle === selectedGameForDetails?.title
+                        );
+                        return (
+                          <div
+                            key={badge.name}
+                            className={`ds-badge-box ${isBadgeEarned ? 'is-earned' : ''}`}
+                            title={`${badge.name}: Defeat ${badge.leader} in ${badge.city} (${badge.type} Type)`}
+                          >
+                            <Shield size={16} color={isBadgeEarned ? '#f59e0b' : 'var(--text-sub)'} fill={isBadgeEarned ? '#f59e0b' : 'none'} />
+                            <span style={{ fontSize: '0.63rem', fontWeight: 800, color: isBadgeEarned ? '#d97706' : 'var(--text-sub)' }}>
+                              {badgeLabel}
+                            </span>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                </div>
+              </div>
+
+              {/* Individual Pokémon Milestones List */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                {getPokemonMilestonesForGame(selectedGameForDetails).map(item => {
+                  const unlockData = achievementsEngine?.unlocked?.[item.id];
+                  const isEarned = !!unlockData && (
+                    unlockData.gameId === selectedGameForDetails?.id ||
+                    unlockData.gameTitle === selectedGameForDetails?.title
+                  );
+                  const tier = ACHIEVEMENT_TIERS[item.tier?.toUpperCase()] || ACHIEVEMENT_TIERS.BRONZE;
+                  const IconComponent = POKE_ICON_MAP[item.icon] || Sparkles;
+
+                  return (
+                    <div
+                      key={item.id}
+                      className={`ds-poke-milestone-tile tier-${item.tier} ${isEarned ? 'is-earned' : 'is-locked'}`}
+                    >
+                      {/* Left Milestone Icon Box */}
+                      <div
+                        className="ds-poke-icon-box"
+                        style={{
+                          background: isEarned ? tier.bg : 'var(--bg-glass)',
+                          color: isEarned ? tier.color : 'var(--text-sub)',
+                          borderColor: isEarned ? tier.border : 'var(--panel-border)'
+                        }}
+                      >
+                        {isEarned ? (
+                          <IconComponent size={17} strokeWidth={2.4} />
+                        ) : (
+                          <Lock size={15} />
+                        )}
+                      </div>
+
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.35rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: 0 }}>
+                            <span style={{ fontSize: '0.76rem', fontWeight: 700, color: isEarned ? 'var(--text-main)' : 'var(--text-sub)' }}>
+                              {item.title}
+                            </span>
+                            {isEarned && (
+                              <CheckCircle2 size={12} color="#10b981" style={{ flexShrink: 0 }} />
+                            )}
+                          </div>
+                          <span
+                            className="trophy-ds-points-pill"
+                            style={{
+                              background: isEarned ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-glass)',
+                              color: isEarned ? '#059669' : 'var(--text-sub)',
+                              borderColor: isEarned ? 'rgba(16, 185, 129, 0.35)' : 'var(--panel-border)',
+                              fontSize: '0.62rem',
+                              fontWeight: 800,
+                              letterSpacing: '0.03em',
+                              padding: '1px 5px'
+                            }}
+                          >
+                            {isEarned ? 'UNLOCKED' : 'LOCKED'}
+                          </span>
+                        </div>
+                        <p style={{ fontSize: '0.66rem', color: 'var(--text-sub)', margin: '0.15rem 0 0 0', lineHeight: 1.25 }}>
+                          {item.description}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -1359,10 +1570,10 @@ export default function MobileAppView({
 
                   {coverSrc ? (
                     <div style={{ display: 'flex', gap: '0.55rem', alignItems: 'center' }}>
-                      <img 
-                        src={coverSrc} 
-                        alt="Game Cover" 
-                        style={{ width: '42px', height: '42px', objectFit: 'cover', borderRadius: '4px', border: '1.5px solid var(--panel-border)' }} 
+                      <img
+                        src={coverSrc}
+                        alt="Game Cover"
+                        style={{ width: '42px', height: '42px', objectFit: 'cover', borderRadius: '4px', border: '1.5px solid var(--panel-border)' }}
                       />
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', flex: 1 }}>
                         <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-main)' }}>
@@ -1636,7 +1847,7 @@ export default function MobileAppView({
       <div className="mobile-app-root stage-games-root">
         {/* Topbar Navigation */}
         <header className="mobile-games-nav">
-          <button 
+          <button
             type="button"
             className="mobile-games-back-btn"
             onClick={() => {
@@ -1649,7 +1860,7 @@ export default function MobileAppView({
             <ArrowLeft size={16} />
             <span>Consoles</span>
           </button>
-          
+
           <div className="mobile-games-nav-center">
             {selectedSystem?.icon && (
               <img src={resolveAssetPath(selectedSystem.icon)} alt="" className="mobile-games-nav-sys-icon" />
@@ -1658,7 +1869,7 @@ export default function MobileAppView({
           </div>
 
           <div className="mobile-games-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <button 
+            <button
               type="button"
               className={`mobile-topbar-action-btn ${isSearchOpen || searchQuery ? 'is-active' : ''}`}
               onClick={() => {
@@ -1678,7 +1889,7 @@ export default function MobileAppView({
           <div className="mobile-expandable-search-bar animate-fade-in">
             <div className="mobile-search-widget">
               <Search size={16} className="mobile-search-icon" />
-              <input 
+              <input
                 type="text"
                 className="mobile-search-input"
                 placeholder={selectedSystem?.name ? `Search ${selectedSystem.name}...` : 'Search games...'}
@@ -1687,9 +1898,9 @@ export default function MobileAppView({
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
               {searchQuery && (
-                <button 
+                <button
                   type="button"
-                  className="mobile-search-clear" 
+                  className="mobile-search-clear"
                   onClick={() => setSearchQuery('')}
                   aria-label="Clear search"
                 >
@@ -1753,6 +1964,402 @@ export default function MobileAppView({
             </div>
           )}
         </main>
+
+        {/* Modern Console-Grade Mobile Bottom Navigation Bar in Games List */}
+        <nav className="mobile-bottom-nav-bar" aria-label="Main Mobile Navigation">
+          {/* Tab 1: All Games / Library */}
+          <button
+            type="button"
+            className={`mobile-nav-tab ${selectedSystem?.key === 'all' && !isHamburgerOpen ? 'is-active' : ''}`}
+            onClick={() => {
+              if (isHamburgerOpen) setIsHamburgerOpen(false);
+              setSelectedSystem({ key: 'all', name: 'All Games', icon: 'assets/platforms/gba.svg' });
+              sfx?.playTabSwitch?.();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            aria-label="Library - All Games"
+          >
+            <div className="mobile-nav-icon-wrap">
+              <Gamepad2 size={20} />
+            </div>
+            <span className="mobile-nav-label">Library</span>
+          </button>
+
+          {/* Tab 2: Favorites */}
+          <button
+            type="button"
+            className={`mobile-nav-tab ${selectedSystem?.key === 'favorites' && !isHamburgerOpen ? 'is-active' : ''}`}
+            onClick={() => {
+              if (isHamburgerOpen) setIsHamburgerOpen(false);
+              setSelectedSystem({ key: 'favorites', name: 'Favorites', icon: null });
+              sfx?.playTabSwitch?.();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            aria-label="Favorites"
+          >
+            <div className="mobile-nav-icon-wrap">
+              <Star size={20} fill={selectedSystem?.key === 'favorites' && !isHamburgerOpen ? '#f59e0b' : 'none'} color={selectedSystem?.key === 'favorites' && !isHamburgerOpen ? '#f59e0b' : 'currentColor'} />
+            </div>
+            <span className="mobile-nav-label">Favorites</span>
+          </button>
+
+          {/* Tab 3: Recent */}
+          <button
+            type="button"
+            className={`mobile-nav-tab ${selectedSystem?.key === 'recent' && !isHamburgerOpen ? 'is-active' : ''}`}
+            onClick={() => {
+              if (isHamburgerOpen) setIsHamburgerOpen(false);
+              setSelectedSystem({ key: 'recent', name: 'Recently Played', icon: null });
+              sfx?.playTabSwitch?.();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            aria-label="Recently Played Games"
+          >
+            <div className="mobile-nav-icon-wrap">
+              <Clock size={20} />
+            </div>
+            <span className="mobile-nav-label">Recent</span>
+          </button>
+
+          {/* Tab 4: Trophies / Hall of Fame */}
+          <button
+            type="button"
+            className="mobile-nav-tab"
+            onClick={() => {
+              if (isHamburgerOpen) setIsHamburgerOpen(false);
+              onOpenTrophyModal?.();
+              sfx?.playModalOpen?.();
+            }}
+            aria-label="Trophy Cabinet & Achievements"
+          >
+            <div className="mobile-nav-icon-wrap">
+              <Trophy size={20} color="#f59e0b" />
+            </div>
+            <span className="mobile-nav-label">Trophies</span>
+          </button>
+
+          {/* Tab 5: Tools & System Utilities (Opens Bottom Drawer) */}
+          <button
+            type="button"
+            className={`mobile-nav-tab ${isHamburgerOpen ? 'is-active' : ''}`}
+            onClick={() => {
+              setIsHamburgerOpen(prev => !prev);
+              sfx?.playTileNav?.();
+            }}
+            aria-label="Console Utilities & Settings"
+          >
+            <div className="mobile-nav-icon-wrap">
+              <Settings size={20} />
+              {scraper?.isScraping && (
+                <span className="mobile-nav-indicator-dot animate-pulse" />
+              )}
+            </div>
+            <span className="mobile-nav-label">Tools</span>
+          </button>
+        </nav>
+
+        {/* Mobile Utilities Menu Drawer in Stage 3 (Favorites/Recents/Systems) */}
+        {isHamburgerOpen && (
+          <div className="mobile-menu-backdrop animate-fade-in" onClick={() => setIsHamburgerOpen(false)}>
+            <div className="mobile-menu-drawer animate-slide-up" onClick={(e) => e.stopPropagation()}>
+              {/* Drawer Header */}
+              <div className="mobile-menu-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                  <span className="mobile-stage-badge" style={{ margin: 0 }}>TOOLS</span>
+                  <strong style={{ fontSize: '0.95rem', fontWeight: 900, color: 'var(--text-main)' }}>Console Utilities</strong>
+                </div>
+                <button
+                  type="button"
+                  className="mobile-gate-close-btn"
+                  onClick={() => { setIsHamburgerOpen(false); sfx?.playModalClose?.(); }}
+                  aria-label="Close menu"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Drawer Content */}
+              <div className="mobile-menu-content">
+                {/* Tool 1: Player Profiles & Account Management */}
+                <div className="mobile-menu-card">
+                  <div className="mobile-menu-card-header">
+                    <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(99, 102, 241, 0.15)', color: '#6366f1' }}>
+                      <Users size={18} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                        <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Player Profiles</strong>
+                        <span style={{ fontSize: '0.68rem', padding: '0.1rem 0.45rem', borderRadius: '4px', background: 'rgba(99, 102, 241, 0.12)', color: '#6366f1', fontWeight: 700 }}>
+                          {profiles.length} {profiles.length === 1 ? 'Profile' : 'Profiles'}
+                        </span>
+                      </div>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
+                        Create new players, customize avatars &amp; colors, or manage profiles
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Profiles List with Active / Edit / Delete */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginTop: '0.4rem' }}>
+                    {profiles.map(p => {
+                      const isActive = p.id === activeProfileId;
+                      return (
+                        <div
+                          key={p.id}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '0.4rem 0.6rem',
+                            borderRadius: '6px',
+                            background: isActive ? 'rgba(99, 102, 241, 0.08)' : 'rgba(148, 163, 184, 0.06)',
+                            border: isActive ? '1.5px solid rgba(99, 102, 241, 0.35)' : '1px solid rgba(148, 163, 184, 0.18)'
+                          }}
+                        >
+                          <div
+                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', flex: 1 }}
+                            onClick={() => {
+                              if (!isActive) {
+                                onSelectProfile?.(p.id);
+                                sfx?.playProfileSelect?.();
+                              }
+                            }}
+                          >
+                            <div style={{ width: '26px', height: '26px', borderRadius: '50%', overflow: 'hidden', border: `1.5px solid ${p.favoriteColor || '#6366f1'}` }}>
+                              <MultiAvatar seed={p.avatarSeed || p.name || 'Player'} size={26} />
+                            </div>
+                            <span style={{ fontSize: '0.82rem', fontWeight: isActive ? 800 : 600, color: 'var(--text-main)' }}>
+                              {p.name}
+                            </span>
+                            {isActive && (
+                              <span style={{ fontSize: '0.6rem', fontWeight: 800, padding: '0.06rem 0.3rem', borderRadius: '3px', background: '#6366f1', color: '#fff' }}>
+                                ACTIVE
+                              </span>
+                            )}
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                            <button
+                              type="button"
+                              className="mobile-prof-btn"
+                              onClick={() => {
+                                setIsHamburgerOpen(false);
+                                onEditProfile?.(p);
+                                sfx?.playModalOpen?.();
+                              }}
+                              title={`Edit ${p.name}`}
+                              aria-label={`Edit ${p.name}`}
+                            >
+                              <Edit3 size={12} />
+                            </button>
+                            {profiles.length > 1 && (
+                              <button
+                                type="button"
+                                className="mobile-prof-btn is-delete"
+                                onClick={() => {
+                                  onDeleteProfile?.(p.id);
+                                  sfx?.playDelete?.();
+                                }}
+                                title={`Delete ${p.name}`}
+                                aria-label={`Delete ${p.name}`}
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mobile-menu-card-actions" style={{ marginTop: '0.45rem' }}>
+                    <button
+                      type="button"
+                      className="mobile-menu-btn is-secondary"
+                      onClick={() => {
+                        setIsHamburgerOpen(false);
+                        onCreateNewProfile?.();
+                        sfx?.playModalOpen?.();
+                      }}
+                    >
+                      <Plus size={14} />
+                      <span>Create New Profile</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tool 2: Metadata Scraper Studio */}
+                {scraper && (
+                  <div className="mobile-menu-card">
+                    <div className="mobile-menu-card-header">
+                      <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#d97706' }}>
+                        <Sparkles size={18} />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+                        <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Metadata Scraper Studio</strong>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
+                          {scraper.isScraping ? `Scraping in progress: ${scraper.scrapeProgress.current} / ${scraper.scrapeProgress.total} games...` : 'Fetch official 3D box art & metadata from Libretro CDN'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mobile-menu-card-actions">
+                      {scraper.isScraping ? (
+                        <button
+                          type="button"
+                          className="mobile-menu-btn is-danger"
+                          onClick={() => {
+                            scraper.stopScrape();
+                            sfx?.playModalClose?.();
+                          }}
+                        >
+                          <Square size={13} fill="currentColor" />
+                          <span>Stop Scraping</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="mobile-menu-btn is-primary"
+                          onClick={() => {
+                            setIsHamburgerOpen(false);
+                            if (onOpenScraperModal) {
+                              onOpenScraperModal();
+                            } else {
+                              scraper.scrapeAll(undefined, true);
+                            }
+                            sfx?.playModalOpen?.();
+                          }}
+                        >
+                          <Sparkles size={14} />
+                          <span>Open Scraper Studio</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tool 3: Emulation Preferences & Auto-Resume Settings */}
+                <div className="mobile-menu-card">
+                  <div className="mobile-menu-card-header">
+                    <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>
+                      <Zap size={18} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Auto-Resume on Launch</strong>
+                        <button
+                          type="button"
+                          className={`ds-toggle-switch ${isAutoResumeEnabled ? 'is-active' : ''}`}
+                          style={{
+                            width: '42px',
+                            height: '24px',
+                            borderRadius: '12px',
+                            background: isAutoResumeEnabled ? '#10b981' : '#64748b',
+                            border: 'none',
+                            cursor: 'pointer',
+                            position: 'relative',
+                            transition: 'background 0.2s ease',
+                            padding: 0
+                          }}
+                          onClick={() => {
+                            const nextVal = !isAutoResumeEnabled;
+                            setIsAutoResumeEnabled(nextVal);
+                            try {
+                              localStorage.setItem('retro_auto_resume_enabled', nextVal ? 'true' : 'false');
+                            } catch (e) { }
+                            sfx?.playTabSwitch?.();
+                          }}
+                          aria-label="Toggle Auto-Resume"
+                        >
+                          <span
+                            style={{
+                              display: 'block',
+                              width: '18px',
+                              height: '18px',
+                              borderRadius: '50%',
+                              background: '#ffffff',
+                              position: 'absolute',
+                              top: '3px',
+                              left: isAutoResumeEnabled ? '21px' : '3px',
+                              transition: 'left 0.2s ease',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                            }}
+                          />
+                        </button>
+                      </div>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
+                        {isAutoResumeEnabled ? 'Automatically prompts to resume your last session upon opening a game' : 'Always boot to game title screen (loads battery save normally)'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tool 4: Storage & Database Management Studio (Backup, Restore & Reset) */}
+                <div className="mobile-menu-card">
+                  <div className="mobile-menu-card-header">
+                    <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(37, 99, 235, 0.15)', color: '#2563eb' }}>
+                      <Database size={18} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+                      <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Storage &amp; Database Studio</strong>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
+                        Export full game saves &amp; stats, restore backups, or factory reset storage
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mobile-menu-card-actions">
+                    <button
+                      type="button"
+                      className="mobile-menu-btn is-primary"
+                      onClick={() => {
+                        setIsHamburgerOpen(false);
+                        onOpenBackupModal?.();
+                        sfx?.playModalOpen?.();
+                      }}
+                    >
+                      <Database size={14} />
+                      <span>Open Storage Studio</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tool 7: About & System Info */}
+                <div className="mobile-menu-card">
+                  <div className="mobile-menu-card-header">
+                    <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#059669' }}>
+                      <Info size={18} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                        <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>About Retro Player</strong>
+                        <span className="info-version-badge" style={{ fontSize: '0.68rem', padding: '0.12rem 0.5rem' }}>v1.0.9</span>
+                      </div>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
+                        Emulation engines, GitHub repository, and system specifications
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mobile-menu-card-actions">
+                    <button
+                      type="button"
+                      className="mobile-menu-btn is-primary"
+                      onClick={() => {
+                        setIsHamburgerOpen(false);
+                        onOpenAboutModal?.();
+                        sfx?.playModalOpen?.();
+                      }}
+                    >
+                      <Info size={14} />
+                      <span>About &amp; Specifications</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -1763,11 +2370,11 @@ export default function MobileAppView({
   return (
     <div className="mobile-app-root stage-systems-root">
       {/* Hidden File Input for Custom ROM Loader */}
-      <input 
-        type="file" 
-        ref={fileInputRef} 
-        style={{ display: 'none' }} 
-        onChange={handleFileInputChange} 
+      <input
+        type="file"
+        ref={fileInputRef}
+        style={{ display: 'none' }}
+        onChange={handleFileInputChange}
         accept=".zip,.7z,.nes,.sfc,.smc,.snes,.z64,.n64,.v64,.gba,.gbc,.gb,.nds,.bin,.iso,.pbp,.chd,.cue,.md,.smd,.gen,.gg,.sms,.pce,.ngp,.ngc,.ws,.wsc,.a26,.a78,.jag,.vec,.lynx"
       />
 
@@ -1775,7 +2382,7 @@ export default function MobileAppView({
       <header className="mobile-topbar">
         <div className="mobile-topbar-left-group">
           {/* Active Profile Avatar Pill */}
-          <div 
+          <div
             className="mobile-topbar-profile"
             style={{ borderColor: activeProfile?.favoriteColor || '#e11d48' }}
             onClick={() => {
@@ -1792,7 +2399,7 @@ export default function MobileAppView({
         <div className="mobile-topbar-actions-group">
           {/* 1. Gamepad & Battery Telemetry Pill (Shown only when connected, before search) */}
           {gamepadConnected && (
-            <div 
+            <div
               className={`mobile-topbar-action-btn mobile-gamepad-pill is-connected ${gamepadBattery?.hasBatteryInfo && gamepadBattery.batteryPercent <= 10 && !gamepadBattery.isCharging ? 'is-battery-critical' : gamepadBattery?.hasBatteryInfo && gamepadBattery.batteryPercent <= 20 && !gamepadBattery.isCharging ? 'is-battery-low' : ''}`}
               title={getGamepadTooltip()}
             >
@@ -1807,7 +2414,7 @@ export default function MobileAppView({
           )}
 
           {/* 2. Search Icon Button */}
-          <button 
+          <button
             type="button"
             className={`mobile-topbar-action-btn ${isSearchOpen || searchQuery ? 'is-active' : ''}`}
             onClick={() => {
@@ -1823,7 +2430,7 @@ export default function MobileAppView({
           {/* 3. BGM Toggle Button & Skip Button */}
           {bgm && (
             <div className="mobile-bgm-group" style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-              <button 
+              <button
                 type="button"
                 className={`mobile-topbar-action-btn ${bgm.isPlaying ? 'is-active is-playing' : ''}`}
                 onClick={() => {
@@ -1856,7 +2463,7 @@ export default function MobileAppView({
 
           {/* 4. SFX Toggle Button */}
           {sfx && (
-            <button 
+            <button
               type="button"
               className={`mobile-topbar-action-btn ${!sfx.isMuted ? 'is-active' : ''}`}
               onClick={() => {
@@ -1870,7 +2477,7 @@ export default function MobileAppView({
           )}
 
           {/* 5. Load Custom ROM Button */}
-          <button 
+          <button
             type="button"
             className="mobile-topbar-action-btn load-action-btn"
             onClick={() => {
@@ -1883,23 +2490,21 @@ export default function MobileAppView({
             <FolderOpen size={16} color="#3b82f6" />
           </button>
 
-          {/* 6. Hamburger Menu Button (Scraper & Factory Reset inside) */}
-          <button 
-            type="button"
-            className={`mobile-topbar-action-btn mobile-menu-trigger-btn ${isHamburgerOpen ? 'is-active' : ''}`}
-            onClick={() => {
-              setIsHamburgerOpen(prev => !prev);
-              sfx?.playTileNav?.();
-            }}
-            title="Console Utilities & Menu"
-            aria-label="Open Utilities Menu"
-            style={{ position: 'relative' }}
-          >
-            {isHamburgerOpen ? <X size={16} /> : <Menu size={16} />}
-            {scraper?.isScraping && (
-              <span className="mobile-scraper-indicator-dot" />
-            )}
-          </button>
+          {/* 6. PWA Install App Action (Shown only if not already installed) */}
+          {pwa?.canInstall && (
+            <button
+              type="button"
+              className="mobile-topbar-action-btn pwa-install-action-btn"
+              onClick={() => {
+                pwa.promptInstall();
+                sfx?.playThemeSwitch?.();
+              }}
+              title="Install App (PWA)"
+              aria-label="Install App (PWA)"
+            >
+              <Download size={16} color="#10b981" />
+            </button>
+          )}
         </div>
       </header>
 
@@ -1913,9 +2518,9 @@ export default function MobileAppView({
                 <span className="mobile-stage-badge" style={{ margin: 0 }}>TOOLS</span>
                 <strong style={{ fontSize: '0.95rem', fontWeight: 900, color: 'var(--text-main)' }}>Console Utilities</strong>
               </div>
-              <button 
-                type="button" 
-                className="mobile-gate-close-btn" 
+              <button
+                type="button"
+                className="mobile-gate-close-btn"
                 onClick={() => { setIsHamburgerOpen(false); sfx?.playModalClose?.(); }}
                 aria-label="Close menu"
               >
@@ -1949,7 +2554,7 @@ export default function MobileAppView({
                   {profiles.map(p => {
                     const isActive = p.id === activeProfileId;
                     return (
-                      <div 
+                      <div
                         key={p.id}
                         style={{
                           display: 'flex',
@@ -1961,7 +2566,7 @@ export default function MobileAppView({
                           border: isActive ? '1.5px solid rgba(99, 102, 241, 0.35)' : '1px solid rgba(148, 163, 184, 0.18)'
                         }}
                       >
-                        <div 
+                        <div
                           style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', flex: 1 }}
                           onClick={() => {
                             if (!isActive) {
@@ -2083,7 +2688,7 @@ export default function MobileAppView({
                 </div>
               )}
 
-              {/* Tool 2: Emulation Preferences & Auto-Resume Settings */}
+              {/* Tool 4: Emulation Preferences & Auto-Resume Settings */}
               <div className="mobile-menu-card">
                 <div className="mobile-menu-card-header">
                   <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>
@@ -2111,7 +2716,7 @@ export default function MobileAppView({
                           setIsAutoResumeEnabled(nextVal);
                           try {
                             localStorage.setItem('retro_auto_resume_enabled', nextVal ? 'true' : 'false');
-                          } catch(e) {}
+                          } catch (e) { }
                           sfx?.playTabSwitch?.();
                         }}
                         aria-label="Toggle Auto-Resume"
@@ -2139,7 +2744,7 @@ export default function MobileAppView({
                 </div>
               </div>
 
-              {/* Tool 3: Storage & Database Management Studio (Backup, Restore & Reset) */}
+              {/* Tool 5: Storage & Database Management Studio (Backup, Restore & Reset) */}
               <div className="mobile-menu-card">
                 <div className="mobile-menu-card-header">
                   <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(37, 99, 235, 0.15)', color: '#2563eb' }}>
@@ -2169,37 +2774,9 @@ export default function MobileAppView({
                 </div>
               </div>
 
-              {/* Tool 4: PWA App Install (if available) */}
-              {pwa?.canInstall && (
-                <div className="mobile-menu-card">
-                  <div className="mobile-menu-card-header">
-                    <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
-                      <Download size={18} />
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
-                      <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Install Web App (PWA)</strong>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>Install to home screen for fullscreen offline play</span>
-                    </div>
-                  </div>
 
-                  <div className="mobile-menu-card-actions">
-                    <button
-                      type="button"
-                      className="mobile-menu-btn is-success"
-                      onClick={() => {
-                        setIsHamburgerOpen(false);
-                        pwa.promptInstall();
-                        sfx?.playThemeSwitch?.();
-                      }}
-                    >
-                      <Download size={14} />
-                      <span>Install Retro Player</span>
-                    </button>
-                  </div>
-                </div>
-              )}
 
-              {/* Tool 5: About & System Info */}
+              {/* Tool 7: About & System Info */}
               <div className="mobile-menu-card">
                 <div className="mobile-menu-card-header">
                   <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#059669' }}>
@@ -2231,41 +2808,6 @@ export default function MobileAppView({
                   </button>
                 </div>
               </div>
-
-              {/* Card 5: Trophy Cabinet & Milestones */}
-              <div className="mobile-menu-card">
-                <div className="mobile-menu-card-header">
-                  <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>
-                    <Trophy size={18} />
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                      <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Trophy Cabinet</strong>
-                      <span className="info-version-badge" style={{ fontSize: '0.68rem', padding: '0.12rem 0.5rem', background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11, 0.3)' }}>
-                        {achievementsEngine?.totalEarnedPoints || 0} G
-                      </span>
-                    </div>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
-                      Universal organic milestones, habits, streaks, and gamer rank
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mobile-menu-card-actions">
-                  <button
-                    type="button"
-                    className="mobile-menu-btn is-primary"
-                    onClick={() => {
-                      setIsHamburgerOpen(false);
-                      onOpenTrophyModal?.();
-                      sfx?.playModalOpen?.();
-                    }}
-                  >
-                    <Trophy size={14} />
-                    <span>Open Trophy Cabinet</span>
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -2276,7 +2818,7 @@ export default function MobileAppView({
         <div className="mobile-expandable-search-bar animate-fade-in">
           <div className="mobile-search-widget">
             <Search size={16} className="mobile-search-icon" />
-            <input 
+            <input
               type="text"
               className="mobile-search-input"
               placeholder="Search all games..."
@@ -2285,9 +2827,9 @@ export default function MobileAppView({
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             {searchQuery && (
-              <button 
+              <button
                 type="button"
-                className="mobile-search-clear" 
+                className="mobile-search-clear"
                 onClick={() => setSearchQuery('')}
                 aria-label="Clear search"
               >
@@ -2405,7 +2947,7 @@ export default function MobileAppView({
                 </button>
               </div>
             )}
-            <div className="mobile-quick-categories-row">
+            <div className="mobile-quick-categories-row" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.65rem' }}>
               <button
                 type="button"
                 className="mobile-quick-cat-card is-all"
@@ -2417,44 +2959,10 @@ export default function MobileAppView({
                 <Layers size={18} color="#e11d48" />
                 <div className="mobile-quick-cat-text">
                   <strong>All Games</strong>
+                  <span>Browse complete library ({games.length} titles)</span>
                 </div>
                 <ChevronRight size={16} className="mobile-quick-arrow" />
               </button>
-
-              {favoriteGames.length > 0 && (
-                <button
-                  type="button"
-                  className="mobile-quick-cat-card is-fav"
-                  onClick={() => {
-                    setSelectedSystem({ key: 'favorites', name: 'Favorites', icon: null });
-                    sfx?.playTabSwitch?.();
-                  }}
-                >
-                  <Star size={18} fill="#f59e0b" color="#f59e0b" />
-                  <div className="mobile-quick-cat-text">
-                    <strong>Favorites</strong>
-                    <span>{favoriteGames.length} Titles</span>
-                  </div>
-                  <ChevronRight size={16} className="mobile-quick-arrow" />
-                </button>
-              )}
-
-              {recentGames.length > 0 && (
-                <button
-                  type="button"
-                  className="mobile-quick-cat-card is-recent"
-                  onClick={() => {
-                    setSelectedSystem({ key: 'recent', name: 'Recently Played', icon: null });
-                    sfx?.playTabSwitch?.();
-                  }}
-                >
-                  <Clock size={18} color="#10b981" />
-                  <div className="mobile-quick-cat-text">
-                    <strong>Recent</strong>
-                  </div>
-                  <ChevronRight size={16} className="mobile-quick-arrow" />
-                </button>
-              )}
             </div>
 
             {/* DS Touch Console Cards Grid */}
@@ -2474,10 +2982,10 @@ export default function MobileAppView({
                     {/* Visual SVG Console Header */}
                     <div className="mobile-console-art-wrap">
                       {sys.icon ? (
-                        <img 
-                          src={resolveAssetPath(sys.icon)} 
-                          alt={sys.name} 
-                          className="mobile-console-svg-img" 
+                        <img
+                          src={resolveAssetPath(sys.icon)}
+                          alt={sys.name}
+                          className="mobile-console-svg-img"
                         />
                       ) : (
                         <Gamepad2 size={42} color={sys.color || '#64748b'} />
@@ -2499,6 +3007,99 @@ export default function MobileAppView({
           </>
         )}
       </main>
+
+      {/* Modern Console-Grade Mobile Bottom Navigation Bar */}
+      <nav className="mobile-bottom-nav-bar" aria-label="Main Mobile Navigation">
+        {/* Tab 1: All Games / Library */}
+        <button
+          type="button"
+          className={`mobile-nav-tab ${selectedSystem?.key === 'all' && !isHamburgerOpen ? 'is-active' : ''}`}
+          onClick={() => {
+            if (isHamburgerOpen) setIsHamburgerOpen(false);
+            setSelectedSystem({ key: 'all', name: 'All Games', icon: 'assets/platforms/gba.svg' });
+            sfx?.playTabSwitch?.();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          aria-label="Library - All Games"
+        >
+          <div className="mobile-nav-icon-wrap">
+            <Gamepad2 size={20} />
+          </div>
+          <span className="mobile-nav-label">Library</span>
+        </button>
+
+        {/* Tab 2: Favorites */}
+        <button
+          type="button"
+          className={`mobile-nav-tab ${selectedSystem?.key === 'favorites' && !isHamburgerOpen ? 'is-active' : ''}`}
+          onClick={() => {
+            if (isHamburgerOpen) setIsHamburgerOpen(false);
+            setSelectedSystem({ key: 'favorites', name: 'Favorites', icon: null });
+            sfx?.playTabSwitch?.();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          aria-label="Favorites"
+        >
+          <div className="mobile-nav-icon-wrap">
+            <Star size={20} fill={selectedSystem?.key === 'favorites' && !isHamburgerOpen ? '#f59e0b' : 'none'} color={selectedSystem?.key === 'favorites' && !isHamburgerOpen ? '#f59e0b' : 'currentColor'} />
+          </div>
+          <span className="mobile-nav-label">Favorites</span>
+        </button>
+
+        {/* Tab 3: Recent */}
+        <button
+          type="button"
+          className={`mobile-nav-tab ${selectedSystem?.key === 'recent' && !isHamburgerOpen ? 'is-active' : ''}`}
+          onClick={() => {
+            if (isHamburgerOpen) setIsHamburgerOpen(false);
+            setSelectedSystem({ key: 'recent', name: 'Recently Played', icon: null });
+            sfx?.playTabSwitch?.();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          aria-label="Recently Played Games"
+        >
+          <div className="mobile-nav-icon-wrap">
+            <Clock size={20} />
+          </div>
+          <span className="mobile-nav-label">Recent</span>
+        </button>
+
+        {/* Tab 4: Trophies / Hall of Fame */}
+        <button
+          type="button"
+          className="mobile-nav-tab"
+          onClick={() => {
+            if (isHamburgerOpen) setIsHamburgerOpen(false);
+            onOpenTrophyModal?.();
+            sfx?.playModalOpen?.();
+          }}
+          aria-label="Trophy Cabinet & Achievements"
+        >
+          <div className="mobile-nav-icon-wrap">
+            <Trophy size={20} color="#f59e0b" />
+          </div>
+          <span className="mobile-nav-label">Trophies</span>
+        </button>
+
+        {/* Tab 5: Tools & System Utilities (Opens Bottom Drawer) */}
+        <button
+          type="button"
+          className={`mobile-nav-tab ${isHamburgerOpen ? 'is-active' : ''}`}
+          onClick={() => {
+            setIsHamburgerOpen(prev => !prev);
+            sfx?.playTileNav?.();
+          }}
+          aria-label="Console Utilities & Settings"
+        >
+          <div className="mobile-nav-icon-wrap">
+            <Settings size={20} />
+            {scraper?.isScraping && (
+              <span className="mobile-nav-indicator-dot animate-pulse" />
+            )}
+          </div>
+          <span className="mobile-nav-label">Tools</span>
+        </button>
+      </nav>
     </div>
   );
 }

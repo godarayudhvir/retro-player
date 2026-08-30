@@ -65,7 +65,9 @@ import {
   Copy,
   History,
   Coffee,
-  Dices
+  Dices,
+  ArrowLeft,
+  Settings
 } from 'lucide-react';
 import MultiAvatar from './MultiAvatar';
 import { ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, ACHIEVEMENT_CATEGORIES } from '../data/achievementsManifest';
@@ -438,8 +440,35 @@ export default function TrophyCabinetModal({
         aria-modal="true"
         aria-label="Trophy Cabinet & Milestones Showcase"
       >
-        {/* Nintendo DS Header */}
-        <div className="info-modal-header trophy-cabinet-header">
+        {/* Mobile Page Topbar (Back Arrow, Centered Icon & Title, Search/Spacer) */}
+        <header className="mobile-games-nav mobile-trophy-page-nav">
+          <button 
+            type="button"
+            className="mobile-games-back-btn"
+            onClick={() => {
+              sfx?.playModalClose?.();
+              onClose();
+            }}
+            aria-label="Back to Library"
+          >
+            <ArrowLeft size={16} />
+            <span>Library</span>
+          </button>
+          
+          <div className="mobile-games-nav-center">
+            <Trophy size={16} color="#f59e0b" />
+            <span className="mobile-games-nav-title">Trophies</span>
+          </div>
+
+          <div className="mobile-games-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: '70px', justifyContent: 'flex-end' }}>
+            <span className="mobile-nav-badge is-gold" style={{ position: 'static', padding: '2px 8px', fontSize: '0.65rem' }}>
+              {achievementsEngine?.totalEarnedPoints || 0}G
+            </span>
+          </div>
+        </header>
+
+        {/* Nintendo DS Desktop Header (Hidden on Mobile) */}
+        <div className="info-modal-header trophy-cabinet-header desktop-only-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             <div className="trophy-header-icon-box">
               <Trophy size={20} color="#f59e0b" strokeWidth={2.4} />
@@ -635,6 +664,88 @@ export default function TrophyCabinetModal({
             })
           )}
         </div>
+
+        {/* Persistent Bottom Navigation Dock on Trophies Page */}
+        <nav className="mobile-bottom-nav-bar" aria-label="Main Mobile Navigation">
+          {/* Tab 1: Library */}
+          <button
+            type="button"
+            className="mobile-nav-tab"
+            onClick={() => {
+              onClose();
+              sfx?.playTabSwitch?.();
+            }}
+            aria-label="Library - All Games"
+          >
+            <div className="mobile-nav-icon-wrap">
+              <Gamepad2 size={20} />
+            </div>
+            <span className="mobile-nav-label">Library</span>
+          </button>
+
+          {/* Tab 2: Favorites */}
+          <button
+            type="button"
+            className="mobile-nav-tab"
+            onClick={() => {
+              onClose();
+              window.dispatchEvent(new CustomEvent('retro_nav_tab', { detail: 'favorites' }));
+              sfx?.playTabSwitch?.();
+            }}
+            aria-label="Favorites"
+          >
+            <div className="mobile-nav-icon-wrap">
+              <Star size={20} />
+            </div>
+            <span className="mobile-nav-label">Favorites</span>
+          </button>
+
+          {/* Tab 3: Recent */}
+          <button
+            type="button"
+            className="mobile-nav-tab"
+            onClick={() => {
+              onClose();
+              window.dispatchEvent(new CustomEvent('retro_nav_tab', { detail: 'recent' }));
+              sfx?.playTabSwitch?.();
+            }}
+            aria-label="Recently Played Games"
+          >
+            <div className="mobile-nav-icon-wrap">
+              <Clock size={20} />
+            </div>
+            <span className="mobile-nav-label">Recent</span>
+          </button>
+
+          {/* Tab 4: Trophies (Active) */}
+          <button
+            type="button"
+            className="mobile-nav-tab is-active"
+            aria-label="Trophy Cabinet & Achievements"
+          >
+            <div className="mobile-nav-icon-wrap">
+              <Trophy size={20} color="#f59e0b" />
+            </div>
+            <span className="mobile-nav-label">Trophies</span>
+          </button>
+
+          {/* Tab 5: Tools & System Utilities */}
+          <button
+            type="button"
+            className="mobile-nav-tab"
+            onClick={() => {
+              onClose();
+              window.dispatchEvent(new CustomEvent('retro_nav_tab', { detail: 'tools' }));
+              sfx?.playTileNav?.();
+            }}
+            aria-label="Console Utilities & Settings"
+          >
+            <div className="mobile-nav-icon-wrap">
+              <Settings size={20} />
+            </div>
+            <span className="mobile-nav-label">Tools</span>
+          </button>
+        </nav>
       </div>
     </div>
   );

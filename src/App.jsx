@@ -542,6 +542,11 @@ export default function App() {
             const ok = await importSaveFile(file, game, activeProfileId);
             if (ok) {
               achievementsEngine?.triggerBatteryImport?.(game);
+              try {
+                const arrayBuffer = await file.arrayBuffer();
+                const u8 = new Uint8Array(arrayBuffer);
+                achievementsEngine?.evaluatePokemonSave?.(game, u8);
+              } catch (e) {}
             }
             return ok;
           }}
