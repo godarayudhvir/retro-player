@@ -45,66 +45,66 @@ Featuring Nintendo DS dual-screen Touch architecture, integrated zero-popup Stra
 
 | 1. Welcome & 12 Consoles | 2. Character Creation Studio | 3. Interactive Gamepad Visualizer |
 |:---:|:---:|:---:|
-| <img src="docs-screenshots/onboarding.webp" width="300" alt="Welcome and Onboarding Walkthrough" /> | <img src="docs-screenshots/character-studio.webp" width="300" alt="Character Creation Studio" /> | <img src="docs-screenshots/controller-visualizer.webp" width="300" alt="Interactive Gamepad Controller Visualizer" /> |
+| <img src="public/docs-screenshots/onboarding.webp" width="300" alt="Welcome and Onboarding Walkthrough" /> | <img src="public/docs-screenshots/character-studio.webp" width="300" alt="Character Creation Studio" /> | <img src="public/docs-screenshots/controller-visualizer.webp" width="300" alt="Interactive Gamepad Controller Visualizer" /> |
 
 ### 🎮 Nintendo DS Dual-Screen Touch Views (Grid Densities)
 
 | Small Density (`S`) | Medium Density (`M`) | Large Density (`L`) |
 |:---:|:---:|:---:|
-| <img src="docs-screenshots/ds-view-small.webp" width="300" alt="Small Density Grid View" /> | <img src="docs-screenshots/ds-view-medium.webp" width="300" alt="Medium Density Grid View" /> | <img src="docs-screenshots/ds-view-large.webp" width="300" alt="Large Density Grid View" /> |
+| <img src="public/docs-screenshots/ds-view-small.webp" width="300" alt="Small Density Grid View" /> | <img src="public/docs-screenshots/ds-view-medium.webp" width="300" alt="Medium Density Grid View" /> | <img src="public/docs-screenshots/ds-view-large.webp" width="300" alt="Large Density Grid View" /> |
 
 ### 🖼️ Panoramic Wide Grid Views (S, M, L, XL, XXL)
 
 | Small (`S`) | Medium (`M`) | Large (`L`) |
 |:---:|:---:|:---:|
-| <img src="docs-screenshots/wide-grid-small.webp" width="300" alt="Wide Grid Small Density" /> | <img src="docs-screenshots/wide-grid-medium.webp" width="300" alt="Wide Grid Medium Density" /> | <img src="docs-screenshots/wide-grid-large.webp" width="300" alt="Wide Grid Large Density" /> |
+| <img src="public/docs-screenshots/wide-grid-small.webp" width="300" alt="Wide Grid Small Density" /> | <img src="public/docs-screenshots/wide-grid-medium.webp" width="300" alt="Wide Grid Medium Density" /> | <img src="public/docs-screenshots/wide-grid-large.webp" width="300" alt="Wide Grid Large Density" /> |
 
 | Extra Large (`XL`) | Maximum Scale (`XXL`) |
 |:---:|:---:|
-| <img src="docs-screenshots/wide-grid-xl.webp" width="450" alt="Wide Grid Extra Large Density" /> | <img src="docs-screenshots/wide-grid-xxl.webp" width="450" alt="Wide Grid XXL Density" /> |
+| <img src="public/docs-screenshots/wide-grid-xl.webp" width="450" alt="Wide Grid Extra Large Density" /> | <img src="public/docs-screenshots/wide-grid-xxl.webp" width="450" alt="Wide Grid XXL Density" /> |
 
 ### 👤 Profile Selection & Character Creation Studio
 
 | Who's Playing Selector | Character Archetypes | Custom Name & Color |
 |:---:|:---:|:---:|
-| <img src="docs-screenshots/profile-selector.webp" width="300" alt="Who's Playing profile selector modal" /> | <img src="docs-screenshots/character-archetypes.webp" width="300" alt="Character Archetypes Presets" /> | <img src="docs-screenshots/character-customization.webp" width="300" alt="Custom Handle and Color Palette Studio" /> |
+| <img src="public/docs-screenshots/profile-selector.webp" width="300" alt="Who's Playing profile selector modal" /> | <img src="public/docs-screenshots/character-archetypes.webp" width="300" alt="Character Archetypes Presets" /> | <img src="public/docs-screenshots/character-customization.webp" width="300" alt="Custom Handle and Color Palette Studio" /> |
 
 ### 🌐 Universal Metadata & Box Art Scraper Studio
 
 | Full Library Scan | Single System Target Selector | Inline Metadata & Sidecar Editor |
 |:---:|:---:|:---:|
-| <img src="docs-screenshots/scraper-modal.webp" width="300" alt="Full Library Scraper Modal" /> | <img src="docs-screenshots/scraper-single-system.webp" width="300" alt="Single System Scraper Target Selector" /> | <img src="docs-screenshots/metadata-editor.webp" width="300" alt="Inline Metadata & Sidecar Editor" /> |
+| <img src="public/docs-screenshots/scraper-modal.webp" width="300" alt="Full Library Scraper Modal" /> | <img src="public/docs-screenshots/scraper-single-system.webp" width="300" alt="Single System Scraper Target Selector" /> | <img src="public/docs-screenshots/metadata-editor.webp" width="300" alt="Inline Metadata & Sidecar Editor" /> |
 
 ### 🗄️ Console Utilities & Storage Management
 
 | Search Virtual Keyboard | Load Custom ROM | Storage & DB Management |
 |:---:|:---:|:---:|
-| <img src="docs-screenshots/virtual-keyboard.webp" width="300" alt="On-Screen Virtual Keyboard Search" /> | <img src="docs-screenshots/load-rom-modal.webp" width="300" alt="Load Custom ROM Dialog" /> | <img src="docs-screenshots/backup-modal.webp" width="300" alt="Storage and Database Management Modal" /> |
+| <img src="public/docs-screenshots/virtual-keyboard.webp" width="300" alt="On-Screen Virtual Keyboard Search" /> | <img src="public/docs-screenshots/load-rom-modal.webp" width="300" alt="Load Custom ROM Dialog" /> | <img src="public/docs-screenshots/backup-modal.webp" width="300" alt="Storage and Database Management Modal" /> |
 
 ### 💾 Inline Save Data Studio & Auto-Resume Engine
 
 | Inline Save Data Studio (`.sav` / `.state`) |
 |:---:|
-| <img src="docs-screenshots/save-data-studio.webp" width="700" alt="Inline Save Data Studio" /> |
+| <img src="public/docs-screenshots/save-data-studio.webp" width="700" alt="Inline Save Data Studio" /> |
 
 | Desktop Topbar Auto-Resume Micro-Switch |
 |:---:|
-| <img src="docs-screenshots/auto-resume-toggle.webp" width="700" alt="Desktop Topbar Auto-Resume Toggle" /> |
+| <img src="public/docs-screenshots/auto-resume-toggle.webp" width="700" alt="Desktop Topbar Auto-Resume Toggle" /> |
 
 | In-Game Auto-Resume Countdown Prompt in Action |
 |:---:|
-| <img src="docs-screenshots/auto-resume-ingame.webp" width="700" alt="In-Game Auto-Resume Prompt in Action" /> |
+| <img src="public/docs-screenshots/auto-resume-ingame.webp" width="700" alt="In-Game Auto-Resume Prompt in Action" /> |
 
 ### 🕹️ Pre-Launch Controls (24 Views) & 12-System In-Game Emulation
 
 | Controls Splash | Gameplay Sandbox | Controls Splash | Gameplay Sandbox |
 |:---:|:---:|:---:|:---:|
-| **Atari 2600 (1977)**<br /><img src="docs-screenshots/keyboard-controls-atari2600.webp" width="225" alt="Atari 2600 Pre-Launch Controls Modal" /> | **Pitfall! (Atari 2600)**<br /><img src="docs-screenshots/ingame-atari2600.webp" width="225" alt="Pitfall Atari 2600 Gameplay Sandbox" /> | **Arcade MAME (1970s–90s)**<br /><img src="docs-screenshots/keyboard-controls-arcade.webp" width="225" alt="Arcade MAME Pre-Launch Controls Modal" /> | **Cadillacs & Dinosaurs (Arcade)**<br /><img src="docs-screenshots/ingame-arcade.webp" width="225" alt="Cadillacs and Dinosaurs Arcade Gameplay Sandbox" /> |
-| **Nintendo (NES - 1983)**<br /><img src="docs-screenshots/keyboard-controls-nes.webp" width="225" alt="Nintendo NES Pre-Launch Controls Modal" /> | **Super Mario Bros. (NES)**<br /><img src="docs-screenshots/ingame-nes.webp" width="225" alt="Super Mario Bros NES Gameplay Sandbox" /> | **Sega Genesis (1988)**<br /><img src="docs-screenshots/keyboard-controls-genesis.webp" width="225" alt="Sega Genesis Pre-Launch Controls Modal" /> | **Sonic The Hedgehog 2 (Genesis)**<br /><img src="docs-screenshots/ingame-genesis.webp" width="225" alt="Sonic The Hedgehog 2 Genesis Gameplay Sandbox" /> |
-| **Game Boy (GB - 1989)**<br /><img src="docs-screenshots/keyboard-controls-gb.webp" width="225" alt="Game Boy Pre-Launch Controls Modal" /> | **Tetris (Game Boy)**<br /><img src="docs-screenshots/ingame-gb.webp" width="225" alt="Tetris Game Boy Gameplay Sandbox" /> | **Super Nintendo (SNES - 1990)**<br /><img src="docs-screenshots/keyboard-controls-modal.webp" width="225" alt="Super Nintendo Pre-Launch Controls Modal" /> | **Super Mario World (SNES)**<br /><img src="docs-screenshots/ingame-snes.webp" width="225" alt="Super Mario World SNES Gameplay Sandbox" /> |
-| **Sega Game Gear (1990)**<br /><img src="docs-screenshots/keyboard-controls-gamegear.webp" width="225" alt="Sega Game Gear Pre-Launch Controls Modal" /> | **Sonic The Hedgehog (Game Gear)**<br /><img src="docs-screenshots/ingame-gamegear.webp" width="225" alt="Sonic The Hedgehog Game Gear Gameplay Sandbox" /> | **PlayStation 1 (PS1 - 1994)**<br /><img src="docs-screenshots/keyboard-controls-ps1.webp" width="225" alt="PlayStation 1 Pre-Launch Controls Modal" /> | **Gran Turismo (PS1)**<br /><img src="docs-screenshots/ingame-ps1.webp" width="225" alt="Gran Turismo PS1 Gameplay Sandbox" /> |
-| **Nintendo 64 (N64 - 1996)**<br /><img src="docs-screenshots/keyboard-controls-n64.webp" width="225" alt="Nintendo 64 Pre-Launch Controls Modal" /> | **Super Mario 64 (N64)**<br /><img src="docs-screenshots/ingame-n64.webp" width="225" alt="Super Mario 64 N64 Gameplay Sandbox" /> | **Game Boy Color (GBC - 1998)**<br /><img src="docs-screenshots/keyboard-controls-gbc.webp" width="225" alt="Game Boy Color Pre-Launch Controls Modal" /> | **Pokémon Crystal (GBC)**<br /><img src="docs-screenshots/ingame-gbc.webp" width="225" alt="Pokemon Crystal GBC Gameplay Sandbox" /> |
-| **Game Boy Advance (GBA - 2001)**<br /><img src="docs-screenshots/keyboard-controls-gba.webp" width="225" alt="Game Boy Advance Pre-Launch Controls Modal" /> | **Pokémon Sapphire (GBA)**<br /><img src="docs-screenshots/ingame-gba.webp" width="225" alt="Pokemon Sapphire GBA Gameplay Sandbox" /> | **Nintendo DS (NDS - 2004)**<br /><img src="docs-screenshots/keyboard-controls-nds.webp" width="225" alt="Nintendo DS Pre-Launch Controls Modal" /> | **New Super Mario Bros. (NDS)**<br /><img src="docs-screenshots/ingame-nds.webp" width="225" alt="New Super Mario Bros NDS Dual-Screen Sandbox" /> |
+| **Atari 2600 (1977)**<br /><img src="public/docs-screenshots/keyboard-controls-atari2600.webp" width="225" alt="Atari 2600 Pre-Launch Controls Modal" /> | **Pitfall! (Atari 2600)**<br /><img src="public/docs-screenshots/ingame-atari2600.webp" width="225" alt="Pitfall Atari 2600 Gameplay Sandbox" /> | **Arcade MAME (1970s–90s)**<br /><img src="public/docs-screenshots/keyboard-controls-arcade.webp" width="225" alt="Arcade MAME Pre-Launch Controls Modal" /> | **Cadillacs & Dinosaurs (Arcade)**<br /><img src="public/docs-screenshots/ingame-arcade.webp" width="225" alt="Cadillacs and Dinosaurs Arcade Gameplay Sandbox" /> |
+| **Nintendo (NES - 1983)**<br /><img src="public/docs-screenshots/keyboard-controls-nes.webp" width="225" alt="Nintendo NES Pre-Launch Controls Modal" /> | **Super Mario Bros. (NES)**<br /><img src="public/docs-screenshots/ingame-nes.webp" width="225" alt="Super Mario Bros NES Gameplay Sandbox" /> | **Sega Genesis (1988)**<br /><img src="public/docs-screenshots/keyboard-controls-genesis.webp" width="225" alt="Sega Genesis Pre-Launch Controls Modal" /> | **Sonic The Hedgehog 2 (Genesis)**<br /><img src="public/docs-screenshots/ingame-genesis.webp" width="225" alt="Sonic The Hedgehog 2 Genesis Gameplay Sandbox" /> |
+| **Game Boy (GB - 1989)**<br /><img src="public/docs-screenshots/keyboard-controls-gb.webp" width="225" alt="Game Boy Pre-Launch Controls Modal" /> | **Tetris (Game Boy)**<br /><img src="public/docs-screenshots/ingame-gb.webp" width="225" alt="Tetris Game Boy Gameplay Sandbox" /> | **Super Nintendo (SNES - 1990)**<br /><img src="public/docs-screenshots/keyboard-controls-modal.webp" width="225" alt="Super Nintendo Pre-Launch Controls Modal" /> | **Super Mario World (SNES)**<br /><img src="public/docs-screenshots/ingame-snes.webp" width="225" alt="Super Mario World SNES Gameplay Sandbox" /> |
+| **Sega Game Gear (1990)**<br /><img src="public/docs-screenshots/keyboard-controls-gamegear.webp" width="225" alt="Sega Game Gear Pre-Launch Controls Modal" /> | **Sonic The Hedgehog (Game Gear)**<br /><img src="public/docs-screenshots/ingame-gamegear.webp" width="225" alt="Sonic The Hedgehog Game Gear Gameplay Sandbox" /> | **PlayStation 1 (PS1 - 1994)**<br /><img src="public/docs-screenshots/keyboard-controls-ps1.webp" width="225" alt="PlayStation 1 Pre-Launch Controls Modal" /> | **Gran Turismo (PS1)**<br /><img src="public/docs-screenshots/ingame-ps1.webp" width="225" alt="Gran Turismo PS1 Gameplay Sandbox" /> |
+| **Nintendo 64 (N64 - 1996)**<br /><img src="public/docs-screenshots/keyboard-controls-n64.webp" width="225" alt="Nintendo 64 Pre-Launch Controls Modal" /> | **Super Mario 64 (N64)**<br /><img src="public/docs-screenshots/ingame-n64.webp" width="225" alt="Super Mario 64 N64 Gameplay Sandbox" /> | **Game Boy Color (GBC - 1998)**<br /><img src="public/docs-screenshots/keyboard-controls-gbc.webp" width="225" alt="Game Boy Color Pre-Launch Controls Modal" /> | **Pokémon Crystal (GBC)**<br /><img src="public/docs-screenshots/ingame-gbc.webp" width="225" alt="Pokemon Crystal GBC Gameplay Sandbox" /> |
+| **Game Boy Advance (GBA - 2001)**<br /><img src="public/docs-screenshots/keyboard-controls-gba.webp" width="225" alt="Game Boy Advance Pre-Launch Controls Modal" /> | **Pokémon Sapphire (GBA)**<br /><img src="public/docs-screenshots/ingame-gba.webp" width="225" alt="Pokemon Sapphire GBA Gameplay Sandbox" /> | **Nintendo DS (NDS - 2004)**<br /><img src="public/docs-screenshots/keyboard-controls-nds.webp" width="225" alt="Nintendo DS Pre-Launch Controls Modal" /> | **New Super Mario Bros. (NDS)**<br /><img src="public/docs-screenshots/ingame-nds.webp" width="225" alt="New Super Mario Bros NDS Dual-Screen Sandbox" /> |
 
 </div>
 
@@ -114,11 +114,11 @@ Featuring Nintendo DS dual-screen Touch architecture, integrated zero-popup Stra
 
 | Welcome Walkthrough | Character Studio | Console Hub | Game Library |
 |:---:|:---:|:---:|:---:|
-| <img src="docs-screenshots/mobile-onboarding.webp" width="200" alt="Mobile Onboarding" /> | <img src="docs-screenshots/mobile-character-studio.webp" width="200" alt="Mobile Character Studio" /> | <img src="docs-screenshots/mobile-console-selector.webp" width="200" alt="Mobile Console Selector" /> | <img src="docs-screenshots/mobile-game-grid.webp" width="200" alt="Mobile Game Grid" /> |
+| <img src="public/docs-screenshots/mobile-onboarding.webp" width="200" alt="Mobile Onboarding" /> | <img src="public/docs-screenshots/mobile-character-studio.webp" width="200" alt="Mobile Character Studio" /> | <img src="public/docs-screenshots/mobile-console-selector.webp" width="200" alt="Mobile Console Selector" /> | <img src="public/docs-screenshots/mobile-game-grid.webp" width="200" alt="Mobile Game Grid" /> |
 
 | Game Overview | In-Game Touch Controls | 3D Box Art Scraper | Console Utilities |
 |:---:|:---:|:---:|:---:|
-| <img src="docs-screenshots/mobile-game-detail.webp" width="200" alt="Mobile Game Detail" /> | <img src="docs-screenshots/mobile-ingame-portrait.webp" width="200" alt="Mobile In-Game Emulation" /> | <img src="docs-screenshots/mobile-scraper-modal.webp" width="200" alt="Mobile Scraper Modal" /> | <img src="docs-screenshots/mobile-console-utilities.webp" width="200" alt="Mobile Console Utilities" /> |
+| <img src="public/docs-screenshots/mobile-game-detail.webp" width="200" alt="Mobile Game Detail" /> | <img src="public/docs-screenshots/mobile-ingame-portrait.webp" width="200" alt="Mobile In-Game Emulation" /> | <img src="public/docs-screenshots/mobile-scraper-modal.webp" width="200" alt="Mobile Scraper Modal" /> | <img src="public/docs-screenshots/mobile-console-utilities.webp" width="200" alt="Mobile Console Utilities" /> |
 
 </div>
 

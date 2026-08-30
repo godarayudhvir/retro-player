@@ -20,8 +20,8 @@ const PRECACHE_ASSETS = [
   './icons/apple-touch-icon.png',
   './icons/favicon-32x32.png',
   './icons/favicon-16x16.png',
-  './screenshots/desktop-1.webp',
-  './screenshots/mobile-1.webp'
+  './docs-screenshots/wide-grid-large.webp',
+  './docs-screenshots/mobile-game-grid.webp'
 ];
 
 // File extensions identifying ROM binaries that must only be fetched on-demand
