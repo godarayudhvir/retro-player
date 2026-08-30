@@ -12,24 +12,24 @@ Retro Player is designed with a **100% Bring-Your-Own-ROM (BYOR)** architecture.
 
 ---
 
-## 🕹️ Supported Consoles & File Extensions
+## 🕹️ Supported Consoles & Folder Names
 
 Retro Player supports 12 classic gaming platforms:
 
-| Platform | System Key | Supported File Extensions | Default Core Engine |
-| :--- | :--- | :--- | :--- |
-| **Game Boy Advance** | `gba` | `.gba`, `.zip` | mGBA |
-| **Game Boy Color** | `gbc` | `.gbc`, `.zip` | Gambatte |
-| **Game Boy (DMG)** | `gb` | `.gb`, `.zip` | Gambatte |
-| **Nintendo DS** | `nds` | `.nds`, `.zip` | MelonDS |
-| **Super Nintendo** | `snes` | `.sfc`, `.smc`, `.zip` | Snes9x |
-| **Nintendo (NES)** | `nes` | `.nes`, `.zip` | FCEUmm |
-| **Nintendo 64** | `n64` | `.z64`, `.n64`, `.v64` | Mupen64Plus |
-| **Sega Genesis / Mega Drive** | `sega_genesis` | `.md`, `.gen`, `.smd`, `.bin`, `.zip` | Genesis Plus GX |
-| **Sega Game Gear** | `game_gear` | `.gg`, `.zip` | Genesis Plus GX |
-| **Sony PlayStation (PS1)** | `playstation` | `.chd`, `.iso`, `.cue`, `.pbp` | Beetle PSX |
-| **Arcade (MAME)** | `arcade` | `.zip` | MAME 2003 Plus |
-| **Atari 2600** | `atari_2600` | `.a26`, `.bin`, `.zip` | Stella |
+| Platform | Folder Name / System Key | Recognized Folder Aliases | Supported Extensions | Default Core Engine |
+| :--- | :--- | :--- | :--- | :--- |
+| **Arcade (MAME)** | `arcade` | `mame`, `neogeo`, `fbalpha`, `fbneo` | `.zip` | MAME 2003 Plus |
+| **Atari 2600** | `atari2600` | `atari_2600`, `atari` | `.a26`, `.bin`, `.zip` | Stella |
+| **Game Boy (DMG)** | `gb` | `gameboy`, `game_boy` | `.gb`, `.zip` | Gambatte |
+| **Game Boy Advance** | `gba` | `gameboyadvance`, `game_boy_advance` | `.gba`, `.zip` | mGBA |
+| **Game Boy Color** | `gbc` | `gameboycolor`, `game_boy_color` | `.gbc`, `.zip` | Gambatte |
+| **Nintendo (NES)** | `nes` | `famicom` | `.nes`, `.zip` | FCEUmm |
+| **Nintendo 64** | `n64` | `nintendo64`, `nintendo_64` | `.z64`, `.n64`, `.v64` | Mupen64Plus |
+| **Nintendo DS** | `nds` | `nintendods`, `nintendo_ds`, `ds` | `.nds`, `.zip` | MelonDS |
+| **Sega Game Gear** | `gamegear` | `game_gear`, `segagamegear`, `sega_game_gear`, `gg` | `.gg`, `.zip` | Genesis Plus GX |
+| **Sega Genesis / Mega Drive** | `genesis` | `sega_genesis`, `segagenesis`, `megadrive`, `mega_drive`, `sega`, `md` | `.md`, `.gen`, `.smd`, `.bin`, `.zip` | Genesis Plus GX |
+| **Sony PlayStation (PS1)** | `ps1` | `playstation`, `psx`, `ps` | `.chd`, `.iso`, `.cue`, `.pbp` | Beetle PSX |
+| **Super Nintendo** | `snes` | `super_nintendo`, `supernintendo`, `sfc`, `super_famicom` | `.sfc`, `.smc`, `.zip` | Snes9x |
 
 ---
 
@@ -47,9 +47,7 @@ Place your ROMs and cover artwork directly into the system folder:
 roms/
 ├── gba/
 │   ├── Pokemon Emerald.gba
-│   ├── Pokemon Emerald.webp
-│   ├── Golden Sun.gba
-│   └── Golden Sun.jpg
+│   └── Pokemon Emerald.webp
 ├── snes/
 │   ├── Chrono Trigger.sfc
 │   └── Super Mario World.smc
@@ -68,7 +66,7 @@ roms/
 │       ├── Pokemon Unbound.gba
 │       ├── cover.webp
 │       └── metadata.json
-├── playstation/
+├── ps1/
 │   └── Castlevania - Symphony of the Night/
 │       ├── Castlevania - Symphony of the Night.chd
 │       ├── cover.webp

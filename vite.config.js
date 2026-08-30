@@ -503,7 +503,10 @@ function multiConsoleScannerPlugin() {
         const ext = path.extname(filename).toLowerCase();
         const safeFilename = path.basename(filename);
         const rawTitle = path.parse(safeFilename).name;
-        const systemKey = EXTENSION_MAP[ext] || 'nes';
+        const systemKeyHeader = (req.headers['x-system-key'] || '').toLowerCase();
+        let rawSystemKey = systemKeyHeader && SYSTEM_MAP[systemKeyHeader] ? systemKeyHeader : (EXTENSION_MAP[ext] || 'nes');
+        const systemInfo = SYSTEM_MAP[rawSystemKey] || SYSTEM_MAP['nes'];
+        const systemKey = systemInfo.key || 'nes';
         const targetGameDir = path.join(romsBaseDir, systemKey, rawTitle);
 
         try {
@@ -521,7 +524,6 @@ function multiConsoleScannerPlugin() {
 
           writeStream.on('finish', () => {
             console.log(`✅ [DEV UPLOADER SUCCESS] Successfully saved "${safeFilename}" to ${targetGameDir}`);
-            const systemInfo = SYSTEM_MAP[systemKey] || SYSTEM_MAP['nes'];
             const cleanDisplayTitle = rawTitle
               .replace(/\(.*?\)/g, '')
               .replace(/\[.*?\]/g, '')

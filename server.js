@@ -554,7 +554,8 @@ app.post('/api/upload-rom', express.raw({ type: 'application/octet-stream', limi
     }
 
     const systemInfo = SYSTEM_MAP[systemKey] || SYSTEM_MAP['nes'];
-    const targetGameDir = path.join(ROMS_DIR, systemKey, rawTitle);
+    const canonicalKey = systemInfo.key || 'nes';
+    const targetGameDir = path.join(ROMS_DIR, canonicalKey, rawTitle);
     if (!fs.existsSync(targetGameDir)) {
       fs.mkdirSync(targetGameDir, { recursive: true });
     }
@@ -575,7 +576,7 @@ app.post('/api/upload-rom', express.raw({ type: 'application/octet-stream', limi
         .replace(/_/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
-      const romUrl = `/roms/${systemKey}/${encodeURIComponent(rawTitle)}/${encodeURIComponent(safeFilename)}`;
+      const romUrl = `/roms/${canonicalKey}/${encodeURIComponent(rawTitle)}/${encodeURIComponent(safeFilename)}`;
 
       // Check if companion box art exists, if not, query Libretro CDN
       const libretroSystemName = {
@@ -597,24 +598,24 @@ app.post('/api/upload-rom', express.raw({ type: 'application/octet-stream', limi
         game_gear: 'Sega - Game Gear',
         atari2600: 'Atari - 2600',
         atari_2600: 'Atari - 2600'
-      }[systemKey];
+      }[canonicalKey] || libretroSystemNameMap[systemKey];
 
       const existingCovers = fs.readdirSync(targetGameDir).filter(f => /\.(webp|png|jpg|jpeg)$/i.test(f));
       
       const finalizeUpload = (coverUrl = null) => {
         const gameRecord = {
-          id: `${systemKey}-${rawTitle}`.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+          id: `${canonicalKey}-${rawTitle}`.toLowerCase().replace(/[^a-z0-9]/g, '-'),
           title: cleanDisplayTitle || rawTitle,
           rawTitle: rawTitle,
           filename: safeFilename,
-          systemKey,
+          systemKey: canonicalKey,
           systemName: systemInfo.name,
           systemCore: systemInfo.core,
           systemColor: systemInfo.color,
           systemIcon: systemInfo.icon,
           category: systemInfo.category,
           romUrl,
-          coverUrl: coverUrl || (existingCovers.length > 0 ? `/roms/${systemKey}/${encodeURIComponent(rawTitle)}/${encodeURIComponent(existingCovers[0])}` : null)
+          coverUrl: coverUrl || (existingCovers.length > 0 ? `/roms/${canonicalKey}/${encodeURIComponent(rawTitle)}/${encodeURIComponent(existingCovers[0])}` : null)
         };
         res.status(200).json({ success: true, game: gameRecord });
       };

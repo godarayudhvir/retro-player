@@ -43,8 +43,8 @@ data/
 
 # Exclude all local ROMs, ISOs, sidecar metadata, and covers from Git
 public/roms/**
-!public/roms/
-!public/roms/*/.gitkeep
+!public/roms/**/
+!public/roms/**/.gitkeep
 
 # -----------------------------------------------------------------------------
 # Background Music (BGM)
