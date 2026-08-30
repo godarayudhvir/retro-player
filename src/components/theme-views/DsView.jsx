@@ -348,7 +348,6 @@ export default function DsView({
 
       await saveCachedMetadata(id, updatedData);
       scraper?.updateLocalMetadata?.(id, updatedData);
-      achievementsEngine?.triggerScrapeUpdate?.(selectedGame);
       sfx?.playMenuConfirm?.();
       setEditSaveStatus(diskSaved ? 'Saved to Server Disk & Sidecar!' : 'Saved to Browser Storage!');
       setTimeout(() => {
@@ -498,7 +497,6 @@ export default function DsView({
       };
       await saveCachedMetadata(id, updated);
       scraper?.updateLocalMetadata?.(id, updated);
-      achievementsEngine?.triggerScrapeUpdate?.(selectedGame);
       sfx?.playNotification?.();
       setEditSaveStatus(diskSaved ? 'Cover Uploaded & Saved!' : 'Cover Saved in Browser!');
       setTimeout(() => setEditSaveStatus(''), 2000);

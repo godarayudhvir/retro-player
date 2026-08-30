@@ -398,15 +398,6 @@ export const ACHIEVEMENTS_MANIFEST = [
     tier: 'bronze',
     icon: 'BookOpen',
     isPerRom: true
-  },
-  {
-    id: 'cover_connoisseur',
-    title: 'Cover Art Connoisseur',
-    description: 'Use the Scraper Studio to scrape or customize game cover artwork.',
-    category: 'lore',
-    tier: 'silver',
-    icon: 'Image',
-    isPerRom: true
   }
 ];
 

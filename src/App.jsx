@@ -725,7 +725,6 @@ export default function App() {
         onSaveSuccess={(updatedRecord) => {
           if (updatedRecord) {
             scraper.updateLocalMetadata?.(updatedRecord.id, updatedRecord);
-            achievementsEngine?.triggerScrapeUpdate?.(editingMetadataGame?.game);
           } else {
             scraper.refreshCache?.();
           }

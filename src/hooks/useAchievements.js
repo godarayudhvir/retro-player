@@ -571,13 +571,6 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
   }, [unlockAchievement]);
 
   /**
-   * Scraped / customized game cover art.
-   */
-  const triggerScrapeUpdate = useCallback((game) => {
-    unlockAchievement('cover_connoisseur', game);
-  }, [unlockAchievement]);
-
-  /**
    * Physical hardware gamepad axis/button pressed.
    */
   const triggerPhysicalGamepadUsed = useCallback(() => {
@@ -730,7 +723,6 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
     triggerScreenshot,
     triggerVideoRecording,
     triggerStrategyGuideRead,
-    triggerScrapeUpdate,
     triggerBgmTrackPlayed,
     triggerAvatarUpdated,
     triggerThemeToggled,
