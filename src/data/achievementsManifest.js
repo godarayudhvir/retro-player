@@ -7,22 +7,21 @@ export const ACHIEVEMENT_TIERS = {
   BRONZE: { id: 'bronze', label: 'Bronze', points: 5, color: '#cd7f32', bg: 'rgba(205, 127, 50, 0.15)', border: 'rgba(205, 127, 50, 0.4)' },
   SILVER: { id: 'silver', label: 'Silver', points: 10, color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.15)', border: 'rgba(148, 163, 184, 0.4)' },
   GOLD: { id: 'gold', label: 'Gold', points: 15, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.15)', border: 'rgba(245, 158, 11, 0.4)' },
-  PLATINUM: { id: 'platinum', label: 'Platinum', points: 25, color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.15)', border: 'rgba(56, 189, 248, 0.4)' }
+  PLATINUM: { id: 'platinum', label: 'Platinum', points: 20, color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.15)', border: 'rgba(56, 189, 248, 0.4)' }
 };
 
 export const ACHIEVEMENT_CATEGORIES = {
-  EXPLORATION: { id: 'exploration', label: 'Exploration', icon: 'Compass' },
-  ENDURANCE: { id: 'endurance', label: 'Endurance & Time', icon: 'Clock' },
+  EXPLORATION: { id: 'exploration', label: 'Catalog & Exploration', icon: 'Compass' },
+  ENDURANCE: { id: 'endurance', label: 'Playtime & Endurance', icon: 'Clock' },
   HABITS: { id: 'habits', label: 'Habits & Streaks', icon: 'Flame' },
   QUIRKS: { id: 'quirks', label: 'Retro Quirks', icon: 'Sparkles' },
-  SAVES: { id: 'saves', label: 'Saves & Memory', icon: 'Save' },
-  CUSTOMIZATION: { id: 'customization', label: 'Shell & Hardware', icon: 'Sliders' },
-  LORE: { id: 'lore', label: 'Lore & Guides', icon: 'BookOpen' }
+  SAVES: { id: 'saves', label: 'Saves & Preservation', icon: 'Save' },
+  CUSTOMIZATION: { id: 'customization', label: 'Shell & Hardware', icon: 'Sliders' }
 };
 
 export const ACHIEVEMENTS_MANIFEST = [
   // -------------------------------------------------------------------------
-  // CATEGORY A: CATALOG & SYSTEM EXPLORATION
+  // CATEGORY A: CATALOG & EXPLORATION (50G)
   // -------------------------------------------------------------------------
   {
     id: 'first_launch',
@@ -38,7 +37,7 @@ export const ACHIEVEMENTS_MANIFEST = [
     title: 'Console Hopper',
     description: 'Play at least one game across 3 distinct retro systems.',
     category: 'exploration',
-    tier: 'bronze',
+    tier: 'silver',
     icon: 'Gamepad2',
     isPerRom: false
   },
@@ -47,7 +46,7 @@ export const ACHIEVEMENTS_MANIFEST = [
     title: 'Generation Traveler',
     description: 'Play games across 8-bit, 16-bit, and 32/64-bit platforms.',
     category: 'exploration',
-    tier: 'silver',
+    tier: 'gold',
     icon: 'Layers',
     isPerRom: false
   },
@@ -56,40 +55,13 @@ export const ACHIEVEMENTS_MANIFEST = [
     title: 'Full Spectrum',
     description: 'Play at least one game on every supported system in your library.',
     category: 'exploration',
-    tier: 'gold',
+    tier: 'platinum',
     icon: 'Globe',
-    isPerRom: false
-  },
-  {
-    id: 'library_tourist',
-    title: 'Library Tourist',
-    description: 'Launch 5 different games in a single session.',
-    category: 'exploration',
-    tier: 'bronze',
-    icon: 'Navigation',
-    isPerRom: false
-  },
-  {
-    id: 'cartridge_collector',
-    title: 'Cartridge Collector',
-    description: 'Have at least 25 ROMs indexed in your local library.',
-    category: 'exploration',
-    tier: 'silver',
-    icon: 'FolderHeart',
-    isPerRom: false
-  },
-  {
-    id: 'grand_archivist',
-    title: 'Grand Archivist',
-    description: 'Have 100+ ROMs indexed in your library across all consoles.',
-    category: 'exploration',
-    tier: 'gold',
-    icon: 'Database',
     isPerRom: false
   },
 
   // -------------------------------------------------------------------------
-  // CATEGORY B: PLAYTIME & ENDURANCE
+  // CATEGORY B: PLAYTIME & ENDURANCE (50G)
   // -------------------------------------------------------------------------
   {
     id: 'warming_up',
@@ -110,45 +82,27 @@ export const ACHIEVEMENTS_MANIFEST = [
     isPerRom: true
   },
   {
-    id: 'ironman_endurance',
-    title: 'Ironman Endurance',
-    description: 'Play a single game continuously for over 7 hours in one sitting.',
-    category: 'endurance',
-    tier: 'gold',
-    icon: 'Zap',
-    isPerRom: true
-  },
-  {
     id: 'loyal_companion',
     title: 'Loyal Companion',
     description: 'Spend over 2 hours total playing a single favorite game.',
     category: 'endurance',
-    tier: 'silver',
+    tier: 'gold',
     icon: 'Heart',
+    isPerRom: true
+  },
+  {
+    id: 'ironman_endurance',
+    title: 'Ironman Endurance',
+    description: 'Play a single game continuously for over 7 hours in one sitting.',
+    category: 'endurance',
+    tier: 'platinum',
+    icon: 'Zap',
     isPerRom: true
   },
 
   // -------------------------------------------------------------------------
-  // CATEGORY C: HABITS, STREAKS & TIME-OF-DAY (Dynamic Local Time)
+  // CATEGORY C: HABITS & STREAKS (50G)
   // -------------------------------------------------------------------------
-  {
-    id: 'night_owl',
-    title: 'Night Owl Gamer',
-    description: 'Play any retro game between 11:00 PM and 4:00 AM local time.',
-    category: 'habits',
-    tier: 'silver',
-    icon: 'Moon',
-    isPerRom: false
-  },
-  {
-    id: 'early_bird',
-    title: 'Early Bird',
-    description: 'Play any retro game between 5:00 AM and 8:00 AM local time.',
-    category: 'habits',
-    tier: 'silver',
-    icon: 'Sun',
-    isPerRom: false
-  },
   {
     id: 'weekend_warrior',
     title: 'Weekend Warrior',
@@ -159,11 +113,20 @@ export const ACHIEVEMENTS_MANIFEST = [
     isPerRom: false
   },
   {
+    id: 'night_owl',
+    title: 'Night Owl Gamer',
+    description: 'Play any retro game between 11:00 PM and 4:00 AM local time.',
+    category: 'habits',
+    tier: 'silver',
+    icon: 'Moon',
+    isPerRom: false
+  },
+  {
     id: 'daily_streak_3',
     title: 'Daily Ritual',
     description: 'Play at least one game 3 consecutive days in a row.',
     category: 'habits',
-    tier: 'silver',
+    tier: 'gold',
     icon: 'Sparkles',
     isPerRom: false
   },
@@ -172,13 +135,13 @@ export const ACHIEVEMENTS_MANIFEST = [
     title: 'Weekly Devotion',
     description: 'Play games for 7 consecutive days without breaking the streak.',
     category: 'habits',
-    tier: 'gold',
+    tier: 'platinum',
     icon: 'Trophy',
     isPerRom: false
   },
 
   // -------------------------------------------------------------------------
-  // CATEGORY D: RETRO QUIRKS & HUMOR
+  // CATEGORY D: RETRO QUIRKS (50G)
   // -------------------------------------------------------------------------
   {
     id: 'rage_quit',
@@ -190,12 +153,12 @@ export const ACHIEVEMENTS_MANIFEST = [
     isPerRom: false
   },
   {
-    id: 'indecisive_swapper',
-    title: 'Indecisive Swapper',
-    description: 'Launch 3 different games in under 3 minutes total.',
+    id: 'need_for_speed',
+    title: 'Need for Speed',
+    description: 'Fast-forward emulation continuously for more than 45 seconds.',
     category: 'quirks',
-    tier: 'bronze',
-    icon: 'Shuffle',
+    tier: 'silver',
+    icon: 'FastForward',
     isPerRom: false
   },
   {
@@ -203,7 +166,7 @@ export const ACHIEVEMENTS_MANIFEST = [
     title: 'Window Shopper',
     description: 'Spend 5+ minutes browsing library shelves with BGM playing without launching a game.',
     category: 'quirks',
-    tier: 'silver',
+    tier: 'gold',
     icon: 'Eye',
     isPerRom: false
   },
@@ -212,31 +175,13 @@ export const ACHIEVEMENTS_MANIFEST = [
     title: 'Button Masher',
     description: 'Register over 1,500 total inputs in a single gameplay session.',
     category: 'quirks',
-    tier: 'silver',
+    tier: 'platinum',
     icon: 'Activity',
     isPerRom: true
   },
-  {
-    id: 'need_for_speed',
-    title: 'Need for Speed',
-    description: 'Fast-forward emulation continuously for more than 45 seconds.',
-    category: 'quirks',
-    tier: 'bronze',
-    icon: 'FastForward',
-    isPerRom: false
-  },
-  {
-    id: 'pause_for_thought',
-    title: 'Pause for Thought',
-    description: 'Leave a game paused for more than 10 minutes and then resume.',
-    category: 'quirks',
-    tier: 'bronze',
-    icon: 'PauseCircle',
-    isPerRom: false
-  },
 
   // -------------------------------------------------------------------------
-  // CATEGORY E: SAVE STATES & BATTERY SRAM
+  // CATEGORY E: SAVES & PRESERVATION (50G)
   // -------------------------------------------------------------------------
   {
     id: 'safety_net',
@@ -245,15 +190,6 @@ export const ACHIEVEMENTS_MANIFEST = [
     category: 'saves',
     tier: 'bronze',
     icon: 'Save',
-    isPerRom: false
-  },
-  {
-    id: 'time_traveler',
-    title: 'Time Traveler',
-    description: 'Reload a previous Quick Save state.',
-    category: 'saves',
-    tier: 'bronze',
-    icon: 'RotateCcw',
     isPerRom: false
   },
   {
@@ -266,24 +202,6 @@ export const ACHIEVEMENTS_MANIFEST = [
     isPerRom: true
   },
   {
-    id: 'cartridge_keeper',
-    title: 'Authentic Cartridge Keeper',
-    description: 'Export an authentic .sav battery RAM file to your computer.',
-    category: 'saves',
-    tier: 'silver',
-    icon: 'DownloadCloud',
-    isPerRom: false
-  },
-  {
-    id: 'memory_rebirth',
-    title: 'Memory Card Rebirth',
-    description: 'Import an existing .sav save file into a game.',
-    category: 'saves',
-    tier: 'silver',
-    icon: 'UploadCloud',
-    isPerRom: false
-  },
-  {
     id: 'timeline_master',
     title: 'Multi-Timeline Master',
     description: 'Utilize both Auto Resume and Load State features in a title.',
@@ -292,37 +210,19 @@ export const ACHIEVEMENTS_MANIFEST = [
     icon: 'GitBranch',
     isPerRom: true
   },
+  {
+    id: 'vault_custodian',
+    title: 'Vault Custodian',
+    description: 'Create a complete JSON database snapshot backup.',
+    category: 'saves',
+    tier: 'platinum',
+    icon: 'ShieldCheck',
+    isPerRom: false
+  },
 
   // -------------------------------------------------------------------------
-  // CATEGORY F: CONSOLE CUSTOMIZATION & SHELL
+  // CATEGORY F: SHELL & HARDWARE (50G)
   // -------------------------------------------------------------------------
-  {
-    id: 'identity_crisis',
-    title: 'Identity Crisis',
-    description: 'Change your profile avatar 3 times in the Multiavatar studio.',
-    category: 'customization',
-    tier: 'bronze',
-    icon: 'UserCheck',
-    isPerRom: false
-  },
-  {
-    id: 'chameleon',
-    title: 'Chameleon',
-    description: 'Switch between Dark and Light mode 5 times.',
-    category: 'customization',
-    tier: 'bronze',
-    icon: 'SunMoon',
-    isPerRom: false
-  },
-  {
-    id: 'retro_purist',
-    title: 'Retro Purist',
-    description: 'Play a game with CRT scanline shader filter active.',
-    category: 'customization',
-    tier: 'silver',
-    icon: 'Tv',
-    isPerRom: false
-  },
   {
     id: 'audiophile',
     title: 'Audiophile',
@@ -333,12 +233,21 @@ export const ACHIEVEMENTS_MANIFEST = [
     isPerRom: false
   },
   {
-    id: 'gold_curator',
-    title: 'Gold Star Curator',
-    description: 'Add 5 games to your Favorites collection.',
+    id: 'chameleon',
+    title: 'Chameleon',
+    description: 'Switch between Dark and Light mode 5 times.',
     category: 'customization',
-    tier: 'bronze',
-    icon: 'Star',
+    tier: 'silver',
+    icon: 'SunMoon',
+    isPerRom: false
+  },
+  {
+    id: 'retro_purist',
+    title: 'Retro Purist',
+    description: 'Play a game with CRT scanline shader filter active.',
+    category: 'customization',
+    tier: 'gold',
+    icon: 'Tv',
     isPerRom: false
   },
   {
@@ -346,52 +255,12 @@ export const ACHIEVEMENTS_MANIFEST = [
     title: 'Certified Tactile',
     description: 'Play a game using a physical Bluetooth or USB controller.',
     category: 'customization',
-    tier: 'silver',
+    tier: 'platinum',
     icon: 'Gamepad',
-    isPerRom: false
-  },
-  {
-    id: 'memory_keeper',
-    title: 'Memory Keeper',
-    description: 'Take your first in-game screenshot capture.',
-    category: 'customization',
-    tier: 'silver',
-    icon: 'Camera',
-    isPerRom: false
-  },
-  {
-    id: 'clip_master',
-    title: 'Clip Master',
-    description: 'Record an in-game gameplay video recording.',
-    category: 'customization',
-    tier: 'silver',
-    icon: 'Video',
-    isPerRom: false
-  },
-  {
-    id: 'vault_custodian',
-    title: 'Vault Custodian',
-    description: 'Create a complete JSON database snapshot backup.',
-    category: 'customization',
-    tier: 'gold',
-    icon: 'ShieldCheck',
-    isPerRom: false
-  },
-
-  // -------------------------------------------------------------------------
-  // CATEGORY G: LORE & STRATEGY GUIDES
-  // -------------------------------------------------------------------------
-  {
-    id: 'strategy_scholar',
-    title: 'Strategy Guide Scholar',
-    description: 'Open or view QR companion for a game\'s Strategy Guide / Walkthrough.',
-    category: 'lore',
-    tier: 'bronze',
-    icon: 'BookOpen',
     isPerRom: false
   }
 ];
 
 export const TOTAL_ACHIEVEMENT_POINTS = ACHIEVEMENTS_MANIFEST.reduce((acc, ach) => {
-  return acc + (ACHIEVEMENT_TIERS[ach.tier.toUpperCase()]?.points || 10);
+  return acc + (ACHIEVEMENT_TIERS[ach.tier.toUpperCase()]?.points || 5);
 }, 0);
