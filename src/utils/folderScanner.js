@@ -64,8 +64,9 @@ async function readEntryRecursively(entry, pathPrefix = '') {
 /**
  * Recursively scans a FileSystemDirectoryHandle (Modern File System Access API).
  */
-export async function scanDirectoryHandle(dirHandle, pathPrefix = '') {
+export async function scanDirectoryHandle(dirHandle, pathPrefix = '', onProgress = null) {
   let files = [];
+  let count = 0;
   for await (const entry of dirHandle.values()) {
     const relativePath = pathPrefix ? `${pathPrefix}/${entry.name}` : entry.name;
     if (entry.kind === 'file') {
@@ -81,12 +82,19 @@ export async function scanDirectoryHandle(dirHandle, pathPrefix = '') {
             file.relativePath = relativePath;
           }
           files.push(file);
+          count++;
+          if (count % 150 === 0) {
+            if (onProgress) {
+              onProgress({ current: count, total: 0, message: `Discovered ${count} items in "${pathPrefix || dirHandle.name}"...` });
+            }
+            await new Promise(resolve => setTimeout(resolve, 0));
+          }
         } catch (e) {
           console.warn('Could not read file from directory handle:', entry.name, e);
         }
       }
     } else if (entry.kind === 'directory') {
-      const subFiles = await scanDirectoryHandle(entry, relativePath);
+      const subFiles = await scanDirectoryHandle(entry, relativePath, onProgress);
       files = files.concat(subFiles);
     }
   }
@@ -94,7 +102,7 @@ export async function scanDirectoryHandle(dirHandle, pathPrefix = '') {
 }
 
 /**
- * Pair companion cover images and metadata sidecars with their corresponding ROMs.
+ * Pair companion cover images and metadata sidecars with their corresponding ROMs using O(1) hash maps.
  */
 function pairCompanionFiles(romFiles, imageFiles, sidecarFiles) {
   let localCoversCount = 0;
@@ -110,18 +118,46 @@ function pairCompanionFiles(romFiles, imageFiles, sidecarFiles) {
   const getBaseName = (filename) => filename.replace(/\.[^/.]+$/, "");
   const normalize = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
 
+  // Index images by directory into indexed maps for O(1) lookup
   const imagesByDir = new Map();
   for (const img of imageFiles) {
     const dir = getDir(img);
-    if (!imagesByDir.has(dir)) imagesByDir.set(dir, []);
-    imagesByDir.get(dir).push(img);
+    let dirData = imagesByDir.get(dir);
+    if (!dirData) {
+      dirData = { exact: new Map(), norm: new Map(), generic: null, list: [] };
+      imagesByDir.set(dir, dirData);
+    }
+    const rawBase = getBaseName(img.name);
+    const normBase = normalize(rawBase);
+    dirData.exact.set(rawBase, img);
+    dirData.norm.set(normBase, img);
+    dirData.list.push({ rawBase, normBase, file: img });
+
+    const lower = rawBase.toLowerCase();
+    if (!dirData.generic && (lower === 'cover' || lower === 'boxart' || lower === 'front' || lower === 'folder' || lower === 'poster')) {
+      dirData.generic = img;
+    }
   }
 
+  // Index sidecars by directory into indexed maps for O(1) lookup
   const sidecarsByDir = new Map();
   for (const meta of sidecarFiles) {
     const dir = getDir(meta);
-    if (!sidecarsByDir.has(dir)) sidecarsByDir.set(dir, []);
-    sidecarsByDir.get(dir).push(meta);
+    let dirData = sidecarsByDir.get(dir);
+    if (!dirData) {
+      dirData = { exact: new Map(), norm: new Map(), generic: null, list: [] };
+      sidecarsByDir.set(dir, dirData);
+    }
+    const rawBase = getBaseName(meta.name);
+    const normBase = normalize(rawBase);
+    dirData.exact.set(rawBase, meta);
+    dirData.norm.set(normBase, meta);
+    dirData.list.push({ rawBase, normBase, file: meta });
+
+    const lower = rawBase.toLowerCase();
+    if (!dirData.generic && (lower === 'metadata' || lower === 'game' || lower === 'info')) {
+      dirData.generic = meta;
+    }
   }
 
   for (const rom of romFiles) {
@@ -129,62 +165,31 @@ function pairCompanionFiles(romFiles, imageFiles, sidecarFiles) {
     const rawBase = getBaseName(rom.name);
     const normBase = normalize(rawBase);
 
-    // 1. Pair Companion Cover Image
-    const candidateImages = imagesByDir.get(dir) || [];
-    let matchedCover = null;
+    // 1. Pair Companion Cover Image (O(1) lookups)
+    const imgData = imagesByDir.get(dir);
+    if (imgData) {
+      let matchedCover = imgData.exact.get(rawBase) || imgData.norm.get(normBase) || imgData.generic;
 
-    // Exact base name match (e.g. Pokemon.gba -> Pokemon.webp / Pokemon.png)
-    matchedCover = candidateImages.find(img => getBaseName(img.name) === rawBase);
-    
-    // Normalized base name match
-    if (!matchedCover) {
-      matchedCover = candidateImages.find(img => normalize(getBaseName(img.name)) === normBase);
+      // Suffix / Prefix fallback only if small directory list and not found in Map
+      if (!matchedCover && imgData.list.length > 0 && imgData.list.length <= 50) {
+        const found = imgData.list.find(i => i.normBase.startsWith(normBase) || normBase.startsWith(i.normBase));
+        if (found) matchedCover = found.file;
+      }
+
+      if (matchedCover) {
+        rom.companionCoverFile = matchedCover;
+        localCoversCount++;
+      }
     }
 
-    // Generic cover match in same folder (e.g. cover.webp, boxart.png, folder.jpg)
-    if (!matchedCover) {
-      matchedCover = candidateImages.find(img => {
-        const name = getBaseName(img.name).toLowerCase();
-        return name === 'cover' || name === 'boxart' || name === 'front' || name === 'folder' || name === 'poster';
-      });
-    }
-
-    // Suffix match (e.g. Pokemon-cover.webp)
-    if (!matchedCover) {
-      matchedCover = candidateImages.find(img => {
-        const name = normalize(getBaseName(img.name));
-        return name.startsWith(normBase) || normBase.startsWith(name);
-      });
-    }
-
-    if (matchedCover) {
-      rom.companionCoverFile = matchedCover;
-      localCoversCount++;
-    }
-
-    // 2. Pair Companion Metadata Sidecar (.json, .nfo)
-    const candidateSidecars = sidecarsByDir.get(dir) || [];
-    let matchedMeta = null;
-
-    // Exact base name match (e.g. Pokemon.gba -> Pokemon.json / Pokemon.nfo)
-    matchedMeta = candidateSidecars.find(m => getBaseName(m.name) === rawBase);
-
-    // Normalized match
-    if (!matchedMeta) {
-      matchedMeta = candidateSidecars.find(m => normalize(getBaseName(m.name)) === normBase);
-    }
-
-    // Generic sidecar match in subfolder (e.g. metadata.json, game.nfo)
-    if (!matchedMeta) {
-      matchedMeta = candidateSidecars.find(m => {
-        const name = getBaseName(m.name).toLowerCase();
-        return name === 'metadata' || name === 'game' || name === 'info';
-      });
-    }
-
-    if (matchedMeta) {
-      rom.companionMetaFile = matchedMeta;
-      localSidecarsCount++;
+    // 2. Pair Companion Metadata Sidecar (O(1) lookups)
+    const metaData = sidecarsByDir.get(dir);
+    if (metaData) {
+      let matchedMeta = metaData.exact.get(rawBase) || metaData.norm.get(normBase) || metaData.generic;
+      if (matchedMeta) {
+        rom.companionMetaFile = matchedMeta;
+        localSidecarsCount++;
+      }
     }
   }
 
@@ -194,9 +199,10 @@ function pairCompanionFiles(romFiles, imageFiles, sidecarFiles) {
 /**
  * Extract all ROM files and companion assets from a DataTransferItemList, FileList, or File array.
  * @param {DataTransfer|FileList|Array<File>} input 
+ * @param {Function} [onProgress]
  * @returns {Promise<{ folderName: string, files: Array<File>, stats: { totalFiles: number, totalSizeBytes: number, systems: Record<string, number>, localCoversCount: number, localSidecarsCount: number } }>}
  */
-export async function extractRomsFromInput(input) {
+export async function extractRomsFromInput(input, onProgress = null) {
   let allFiles = [];
   let detectedFolderName = 'ROMs Collection';
 
@@ -222,7 +228,8 @@ export async function extractRomsFromInput(input) {
     const resolvedEntries = (await Promise.all(entryPromises)).flat();
     allFiles = allFiles.concat(resolvedEntries);
   } else if (input?.files) {
-    allFiles = Array.from(input.files).filter(f => isSupportedRomFile(f.name) || isSupportedImageFile(f.name) || isSupportedSidecarFile(f.name));
+    const rawFiles = Array.from(input.files);
+    allFiles = rawFiles.filter(f => isSupportedRomFile(f.name) || isSupportedImageFile(f.name) || isSupportedSidecarFile(f.name));
     if (allFiles.length > 0 && allFiles[0].webkitRelativePath) {
       const parts = allFiles[0].webkitRelativePath.split('/');
       if (parts.length > 1) {
@@ -232,7 +239,8 @@ export async function extractRomsFromInput(input) {
   } else if (Array.isArray(input)) {
     allFiles = input.filter(f => isSupportedRomFile(f.name) || isSupportedImageFile(f.name) || isSupportedSidecarFile(f.name));
   } else if (input instanceof FileList) {
-    allFiles = Array.from(input).filter(f => isSupportedRomFile(f.name) || isSupportedImageFile(f.name) || isSupportedSidecarFile(f.name));
+    const rawFiles = Array.from(input);
+    allFiles = rawFiles.filter(f => isSupportedRomFile(f.name) || isSupportedImageFile(f.name) || isSupportedSidecarFile(f.name));
     if (allFiles.length > 0 && allFiles[0].webkitRelativePath) {
       const parts = allFiles[0].webkitRelativePath.split('/');
       if (parts.length > 1) {
@@ -246,7 +254,7 @@ export async function extractRomsFromInput(input) {
     detectedFolderName = 'ROMs Collection';
   }
 
-  // Split into ROMs, Images, and Sidecars
+  // Split into ROMs, Images, and Sidecars with chunking and progress reporting
   const romFiles = [];
   const imageFiles = [];
   const sidecarFiles = [];
@@ -254,7 +262,9 @@ export async function extractRomsFromInput(input) {
   let totalSizeBytes = 0;
   const systems = {};
 
-  for (const file of allFiles) {
+  const CHUNK_SIZE = 250;
+  for (let i = 0; i < allFiles.length; i++) {
+    const file = allFiles[i];
     const key = `${file.name}_${file.size}`;
     if (!seen.has(key)) {
       seen.add(key);
@@ -273,9 +283,30 @@ export async function extractRomsFromInput(input) {
         sidecarFiles.push(file);
       }
     }
+
+    // Yield to the event loop every chunk for smooth UI rendering and responsive progress
+    if (i > 0 && i % CHUNK_SIZE === 0) {
+      if (onProgress) {
+        onProgress({
+          current: i,
+          total: allFiles.length,
+          message: `Categorizing files (${i} / ${allFiles.length})...`
+        });
+      }
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
   }
 
-  // Pair companion assets with ROMs
+  if (onProgress) {
+    onProgress({
+      current: allFiles.length,
+      total: allFiles.length,
+      message: `Pairing artwork & metadata for ${romFiles.length} ROMs...`
+    });
+  }
+  await new Promise(resolve => setTimeout(resolve, 0));
+
+  // Pair companion assets with ROMs (O(1) lookups)
   const { localCoversCount, localSidecarsCount } = pairCompanionFiles(romFiles, imageFiles, sidecarFiles);
 
   return {

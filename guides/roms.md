@@ -121,8 +121,10 @@ Place a `.nfo` or `.json` file alongside the ROM to define custom metadata (titl
 
 ### 3. Automatic Companion Ingestion in "Load Custom ROM"
 When dragging and dropping a ROM folder or selecting via "Choose Folder", Retro Player automatically detects and pairs existing `.webp`/`.png`/`.jpg` box art and `.json`/`.nfo` metadata sidecars:
+- **Instant $O(1)$ Indexed Pairing**: Uses indexed Map lookups and asynchronous event-loop chunking to scan and pair thousands of ROMs, companion box art images, and sidecar metadata files in milliseconds without blocking the browser main thread.
 - **In-Memory Session Mode**: Immediately creates local in-memory Blob URLs and parses sidecar JSON/NFO files so titles display with full 3D covers and synopses with **zero internet scraper calls**.
 - **Permanent Ingestion Mode**: Copies companion artwork and metadata sidecars directly alongside the ROMs into `/roms/<system>/<game>/` on host disk (or IndexedDB).
+- **Mobile Device Optimization**: For massive multi-system collections on mobile browsers (which lack the desktop File System Access API), selecting individual console subfolders (e.g. `/gba`, `/snes`) provides fast, memory-safe ingestion.
 
 ---
 

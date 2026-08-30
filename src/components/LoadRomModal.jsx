@@ -152,15 +152,27 @@ export default function LoadRomModal({
   const handleIncomingFiles = async (input) => {
     setIsProcessing(true);
     setErrorMessage(null);
-    setProgressState({ step: 'scanning', message: 'Scanning files & console formats...' });
+    setProgressState({ step: 'scanning', current: 0, total: 0, message: 'Scanning files & console formats...' });
+
+    // Yield to the event loop so the scanning progress banner immediately renders
+    await new Promise(resolve => setTimeout(resolve, 40));
 
     try {
-      const extracted = await extractRomsFromInput(input);
+      const extracted = await extractRomsFromInput(input, (prog) => {
+        setProgressState(prev => ({
+          ...prev,
+          step: 'scanning',
+          current: prog.current || 0,
+          total: prog.total || 0,
+          message: prog.message || prev?.message || 'Scanning files & console formats...'
+        }));
+      });
+
       setIsProcessing(false);
       setProgressState(null);
 
       if (!extracted.files || extracted.files.length === 0) {
-        setErrorMessage('No supported retro ROM files were found in the selected location.');
+        setErrorMessage('No supported retro ROM files were found in the selected location. (Tip: On mobile devices with large collections, select individual system folders like /GBA or /SNES).');
         sfx?.playModalClose?.();
         return;
       }
@@ -204,8 +216,18 @@ export default function LoadRomModal({
         const dirHandle = await window.showDirectoryPicker({ mode: 'read' });
         if (!dirHandle) return;
         setIsProcessing(true);
-        setProgressState({ step: 'scanning', message: `Scanning folder "${dirHandle.name}" for retro titles...` });
-        const files = await scanDirectoryHandle(dirHandle, dirHandle.name);
+        setErrorMessage(null);
+        setProgressState({ step: 'scanning', current: 0, total: 0, message: `Scanning folder "${dirHandle.name}" for retro titles...` });
+        await new Promise(resolve => setTimeout(resolve, 40));
+        const files = await scanDirectoryHandle(dirHandle, dirHandle.name, (prog) => {
+          setProgressState(prev => ({
+            ...prev,
+            step: 'scanning',
+            current: prog.current || 0,
+            total: prog.total || 0,
+            message: prog.message || `Scanning folder "${dirHandle.name}" for retro titles...`
+          }));
+        });
         await handleIncomingFiles(files);
       } catch (err) {
         if (err.name === 'AbortError') {
@@ -224,6 +246,8 @@ export default function LoadRomModal({
     const files = e.target.files;
     if (files && files.length > 0) {
       handleIncomingFiles(files);
+    } else {
+      setErrorMessage('The mobile file picker returned 0 items. Mobile OS restricts selecting massive root directories at once. Try selecting a specific system folder (e.g. GBA, SNES, NES) or individual ROMs.');
     }
     e.target.value = '';
   };
@@ -469,6 +493,84 @@ export default function LoadRomModal({
                   style={{ display: 'none' }}
                 />
               </div>
+
+              {/* Active Scanning / Processing Progress Bar in Stage 1 */}
+              {isProcessing && progressState && (
+                <div className="rom-ingestion-progress-box animate-fade-in" style={{
+                  background: 'rgba(59, 130, 246, 0.08)',
+                  border: '1.5px solid rgba(59, 130, 246, 0.25)',
+                  borderRadius: '14px',
+                  padding: '1.1rem 1.25rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem',
+                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.08)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <RefreshCw className="animate-spin" size={22} style={{ color: '#3b82f6', flexShrink: 0 }} />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', flex: 1, minWidth: 0 }}>
+                      <span style={{ fontSize: '0.96rem', fontWeight: 800, color: 'var(--text-color, #0f172a)' }}>
+                        Scanning ROMs &amp; Assets...
+                      </span>
+                      <span style={{ fontSize: '0.82rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {progressState.message}
+                      </span>
+                    </div>
+                  </div>
+                  {progressState.total > 0 && (
+                    <div className="rom-progress-track" style={{
+                      width: '100%',
+                      height: '7px',
+                      background: 'rgba(0, 0, 0, 0.08)',
+                      borderRadius: '999px',
+                      overflow: 'hidden'
+                    }}>
+                      <div
+                        className="rom-progress-fill"
+                        style={{
+                          width: `${Math.min(100, Math.round(((progressState.current || 0) / progressState.total) * 100))}%`,
+                          height: '100%',
+                          background: 'linear-gradient(90deg, #3b82f6, #6366f1)',
+                          transition: 'width 0.15s ease'
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Error Message Alert Banner in Stage 1 */}
+              {errorMessage && (
+                <div className="rom-ingestion-error-box animate-fade-in" style={{
+                  background: 'rgba(239, 68, 68, 0.08)',
+                  border: '1.5px solid rgba(239, 68, 68, 0.25)',
+                  borderRadius: '12px',
+                  padding: '0.9rem 1.1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  color: '#dc2626'
+                }}>
+                  <AlertCircle size={20} style={{ flexShrink: 0 }} />
+                  <span style={{ fontSize: '0.86rem', lineHeight: 1.4, flex: 1 }}>{errorMessage}</span>
+                  <button
+                    type="button"
+                    onClick={() => setErrorMessage(null)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#dc2626',
+                      cursor: 'pointer',
+                      padding: '4px',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                    title="Dismiss"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              )}
 
               {/* Supported Systems Grid */}
               <div className="load-rom-section">
