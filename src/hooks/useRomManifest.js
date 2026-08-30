@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { getReleaseDate } from '../gameDescriptions';
 import { detectSystemFromExtension } from '../utils/systemDetector';
 import { resolveAssetPath } from '../utils/assetPath';
-import { scrapeGame, deleteManualMetadata } from '../services/metadataScraper';
+import { scrapeGame, deleteManualMetadata, saveCachedMetadata } from '../services/metadataScraper';
 import { 
   checkServerDbStatus, 
   saveCustomRomToLocalDb, 
@@ -203,6 +203,316 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
     }
   }, [fetchGames]);
 
+  // Load a batch of ROMs into the active session in-memory without copying/saving
+  const loadBatchCustomRoms = useCallback(async (files = []) => {
+    if (!files || files.length === 0) return [];
+    console.log(`📁 [BATCH IN-MEMORY LOAD] Loading ${files.length} custom ROMs into session...`);
+
+    const customGames = [];
+
+    for (let idx = 0; idx < files.length; idx++) {
+      const file = files[idx];
+      const pathToCheck = file.webkitRelativePath || file.relativePath || file.name;
+      const sys = detectSystemFromExtension(pathToCheck);
+      const blobUrl = URL.createObjectURL(file);
+      const rawTitle = file.name.replace(/\.[^/.]+$/, "");
+      const cleanTitle = rawTitle
+        .replace(/\(.*?\)/g, '')
+        .replace(/\[.*?\]/g, '')
+        .replace(/_/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim() || rawTitle;
+
+      const gameId = `custom_${sys.key}_${rawTitle.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${Date.now()}_${idx}`;
+
+      // 1. Process paired local cover if available
+      let coverUrl = sys.icon || resolveAssetPath('assets/platforms/custom.svg');
+      let hasCustomCover = false;
+      if (file.companionCoverFile) {
+        try {
+          coverUrl = URL.createObjectURL(file.companionCoverFile);
+          hasCustomCover = true;
+        } catch (_) {}
+      }
+
+      // 2. Process paired local sidecar metadata if available
+      let parsedSidecar = null;
+      if (file.companionMetaFile) {
+        try {
+          const text = await file.companionMetaFile.text();
+          if (file.companionMetaFile.name.endsWith('.json')) {
+            parsedSidecar = JSON.parse(text);
+          } else if (file.companionMetaFile.name.endsWith('.nfo')) {
+            const titleMatch = text.match(/<title>(.*?)<\/title>/i);
+            const descMatch = text.match(/<plot>(.*?)<\/plot>/i) || text.match(/<description>(.*?)<\/description>/i);
+            const yearMatch = text.match(/<year>(.*?)<\/year>/i) || text.match(/<releasedate>(.*?)<\/releasedate>/i);
+            const devMatch = text.match(/<developer>(.*?)<\/developer>/i);
+            const pubMatch = text.match(/<publisher>(.*?)<\/publisher>/i);
+            const genreMatch = text.match(/<genre>(.*?)<\/genre>/i);
+            parsedSidecar = {
+              title: titleMatch ? titleMatch[1] : cleanTitle,
+              description: descMatch ? descMatch[1] : undefined,
+              releaseYear: yearMatch ? yearMatch[1] : undefined,
+              developer: devMatch ? devMatch[1] : undefined,
+              publisher: pubMatch ? pubMatch[1] : undefined,
+              genre: genreMatch ? genreMatch[1] : undefined
+            };
+          }
+        } catch (err) {
+          console.warn('Failed to parse sidecar metadata for:', file.name, err);
+        }
+      }
+
+      const gameRecord = {
+        id: gameId,
+        title: parsedSidecar?.title || cleanTitle,
+        rawTitle: rawTitle,
+        filename: file.name,
+        file: file,
+        systemKey: sys.key,
+        systemName: sys.name,
+        systemCore: sys.core,
+        systemIcon: sys.icon,
+        systemColor: sys.color,
+        romUrl: blobUrl,
+        isCustomBlob: true,
+        coverUrl: coverUrl,
+        hasCustomCover: hasCustomCover,
+        sidecarMetadata: parsedSidecar || undefined
+      };
+
+      // Save to local metadata cache so game details and cover render instantly without scraping
+      if (hasCustomCover || parsedSidecar) {
+        const metaRecord = {
+          id: gameId,
+          title: gameRecord.title,
+          systemKey: sys.key,
+          coverUrl: hasCustomCover ? coverUrl : null,
+          hasCustomCover: hasCustomCover,
+          description: parsedSidecar?.description || `Experience ${cleanTitle} on ${sys.name}.`,
+          releaseYear: parsedSidecar?.releaseYear || parsedSidecar?.year || null,
+          developer: parsedSidecar?.developer || null,
+          publisher: parsedSidecar?.publisher || null,
+          genre: parsedSidecar?.genre || null,
+          source: 'Local Sidecar',
+          hasSidecar: Boolean(parsedSidecar),
+          scrapedAt: new Date().toISOString()
+        };
+        saveCachedMetadata(gameId, metaRecord).catch(() => {});
+      }
+
+      customGames.push(gameRecord);
+    }
+
+    setGames(prev => {
+      const existingIds = new Set(prev.map(g => g.id));
+      const newItems = customGames.filter(g => !existingIds.has(g.id));
+      const combined = [...newItems, ...prev];
+
+      // Update systems counts
+      const sysMap = {};
+      combined.forEach(g => {
+        if (!g.systemKey) return;
+        if (!sysMap[g.systemKey]) {
+          sysMap[g.systemKey] = {
+            key: g.systemKey,
+            name: g.systemName || g.systemKey.toUpperCase(),
+            core: g.systemCore,
+            color: g.systemColor,
+            icon: g.systemIcon,
+            gameCount: 0
+          };
+        }
+        sysMap[g.systemKey].gameCount++;
+      });
+      setSystems(Object.values(sysMap));
+      return combined;
+    });
+
+    return customGames;
+  }, []);
+
+  // Helper to read File as Base64 Data URL
+  const readFileAsDataUrl = (file) => {
+    return new Promise((resolve) => {
+      if (!file) {
+        resolve(null);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Batch upload/save ROMs to permanent storage (Server / IndexedDB) along with companion covers & sidecars
+  const batchUploadRoms = useCallback(async (files = [], onProgress) => {
+    if (!files || files.length === 0) return [];
+    const isServer = checkServerDbStatus();
+    const total = files.length;
+    const uploadedGames = [];
+
+    for (let i = 0; i < total; i++) {
+      const file = files[i];
+      const pathToCheck = file.webkitRelativePath || file.relativePath || file.name;
+      const sys = detectSystemFromExtension(pathToCheck);
+      const safeSystemKey = sys.key || 'nes';
+      const rawTitle = file.name.replace(/\.[^/.]+$/, "");
+      const cleanTitle = rawTitle
+        .replace(/\(.*?\)/g, '')
+        .replace(/\[.*?\]/g, '')
+        .replace(/_/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim() || rawTitle;
+
+      if (onProgress) {
+        onProgress({
+          step: 'saving',
+          current: i + 1,
+          total,
+          filename: file.name,
+          message: `Saving (${i + 1}/${total}): ${cleanTitle}...`
+        });
+      }
+
+      try {
+        let targetGame = null;
+
+        // Parse companion sidecar if available
+        let parsedSidecar = null;
+        if (file.companionMetaFile) {
+          try {
+            const text = await file.companionMetaFile.text();
+            if (file.companionMetaFile.name.endsWith('.json')) {
+              parsedSidecar = JSON.parse(text);
+            } else if (file.companionMetaFile.name.endsWith('.nfo')) {
+              const titleMatch = text.match(/<title>(.*?)<\/title>/i);
+              const descMatch = text.match(/<plot>(.*?)<\/plot>/i) || text.match(/<description>(.*?)<\/description>/i);
+              const yearMatch = text.match(/<year>(.*?)<\/year>/i) || text.match(/<releasedate>(.*?)<\/releasedate>/i);
+              const devMatch = text.match(/<developer>(.*?)<\/developer>/i);
+              const pubMatch = text.match(/<publisher>(.*?)<\/publisher>/i);
+              const genreMatch = text.match(/<genre>(.*?)<\/genre>/i);
+              parsedSidecar = {
+                title: titleMatch ? titleMatch[1] : cleanTitle,
+                description: descMatch ? descMatch[1] : undefined,
+                releaseYear: yearMatch ? yearMatch[1] : undefined,
+                developer: devMatch ? devMatch[1] : undefined,
+                publisher: pubMatch ? pubMatch[1] : undefined,
+                genre: genreMatch ? genreMatch[1] : undefined
+              };
+            }
+          } catch (_) {}
+        }
+
+        // Convert companion cover to Data URL if available
+        let coverDataUrl = null;
+        if (file.companionCoverFile) {
+          coverDataUrl = await readFileAsDataUrl(file.companionCoverFile);
+        }
+
+        if (isServer) {
+          const res = await fetch('/api/upload-rom', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/octet-stream',
+              'x-filename': encodeURIComponent(file.name),
+              'x-system-key': safeSystemKey
+            },
+            body: file
+          });
+
+          if (res.ok) {
+            const json = await res.json();
+            if (json.success && json.game) {
+              targetGame = json.game;
+              uploadedGames.push(targetGame);
+
+              // If companion cover or sidecar exists, write to server disk
+              if (coverDataUrl || parsedSidecar) {
+                try {
+                  await fetch('/api/metadata/save-sidecar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      gameId: targetGame.id,
+                      systemKey: safeSystemKey,
+                      romPath: targetGame.romUrl || targetGame.url,
+                      title: parsedSidecar?.title || cleanTitle,
+                      description: parsedSidecar?.description,
+                      releaseYear: parsedSidecar?.releaseYear,
+                      developer: parsedSidecar?.developer,
+                      publisher: parsedSidecar?.publisher,
+                      genre: parsedSidecar?.genre,
+                      coverDataUrl: coverDataUrl
+                    })
+                  });
+                } catch (sidecarErr) {
+                  console.warn('Failed saving companion sidecar to server:', sidecarErr);
+                }
+              }
+            }
+          }
+        } else {
+          const gameId = `local_${safeSystemKey}_${rawTitle.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+          const blobUrl = URL.createObjectURL(file);
+          const gameRecord = {
+            id: gameId,
+            title: parsedSidecar?.title || cleanTitle,
+            rawTitle: rawTitle,
+            filename: file.name,
+            systemKey: safeSystemKey,
+            systemName: sys.name,
+            systemCore: sys.core,
+            systemColor: sys.color,
+            systemIcon: sys.icon,
+            romUrl: blobUrl,
+            coverUrl: coverDataUrl || sys.icon,
+            isCustomBlob: true,
+            isLocalDbRom: true,
+            sidecarMetadata: parsedSidecar || undefined
+          };
+
+          await saveCustomRomToLocalDb(gameRecord, file);
+          uploadedGames.push(gameRecord);
+
+          if (coverDataUrl || parsedSidecar) {
+            const metaRecord = {
+              id: gameId,
+              title: gameRecord.title,
+              systemKey: safeSystemKey,
+              coverUrl: coverDataUrl || null,
+              hasCustomCover: Boolean(coverDataUrl),
+              description: parsedSidecar?.description || `Experience ${cleanTitle} on ${sys.name}.`,
+              releaseYear: parsedSidecar?.releaseYear || null,
+              developer: parsedSidecar?.developer || null,
+              publisher: parsedSidecar?.publisher || null,
+              genre: parsedSidecar?.genre || null,
+              source: 'Local Sidecar',
+              hasSidecar: Boolean(parsedSidecar),
+              scrapedAt: new Date().toISOString()
+            };
+            saveCachedMetadata(gameId, metaRecord).catch(() => {});
+          }
+        }
+      } catch (err) {
+        console.error(`🚨 [BATCH UPLOAD ERROR] File "${file.name}":`, err);
+      }
+    }
+
+    if (onProgress) {
+      onProgress({
+        step: 'refreshing',
+        current: total,
+        total,
+        message: 'Updating library index...'
+      });
+    }
+
+    await fetchGames();
+    return uploadedGames;
+  }, [fetchGames]);
+
   const handleCustomRomSelect = useCallback((e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -338,7 +648,9 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
     isDraggingOver,
     fetchGames,
     processCustomRomFile,
+    loadBatchCustomRoms,
     uploadRomAndScrape,
+    batchUploadRoms,
     deleteGame,
     deleteCustomRom: deleteCustomRomFromLocalDb,
     handleCustomRomSelect,

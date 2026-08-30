@@ -206,7 +206,9 @@ export default function App() {
     isDraggingOver,
     fetchGames,
     processCustomRomFile,
+    loadBatchCustomRoms,
     uploadRomAndScrape,
+    batchUploadRoms,
     deleteGame,
     handleDragOver,
     handleDragLeave,
@@ -537,6 +539,30 @@ export default function App() {
             setSearchQuery(cleanSearch);
             sfx.playNavSelect();
           }
+        }}
+        onLoadFolderSession={(files, { scrapeInBackground, folderName }) => {
+          // In-Memory Session: Load ROMs into memory without disk copying
+          const loadedGames = loadBatchCustomRoms(files);
+          if (scrapeInBackground && loadedGames.length > 0 && scraper?.scrapeAll) {
+            // Asynchronous background scraping without blocking the user
+            scraper.scrapeAll(loadedGames, false, { 
+              targetScope: 'folder_session', 
+              scopeName: folderName || 'Session Folder' 
+            });
+          }
+          sfx.playNavSelect();
+        }}
+        onIngestFolderToLibrary={async (files, { scrapeInBackground, folderName, onProgress }) => {
+          // Permanent Ingest: Save ROMs to storage, optionally scrape in background
+          const uploadedGames = await batchUploadRoms(files, onProgress);
+          if (scrapeInBackground && uploadedGames.length > 0 && scraper?.scrapeAll) {
+            // Asynchronous background scraping without blocking the user
+            scraper.scrapeAll(uploadedGames, false, { 
+              targetScope: 'folder_ingest', 
+              scopeName: folderName || 'Imported Folder' 
+            });
+          }
+          sfx.playThemeSwitch();
         }}
         sfx={sfx}
       />

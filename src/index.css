@@ -8589,6 +8589,15 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   color: var(--text-sub);
 }
 
+.load-rom-dual-triggers {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 0.25rem;
+}
+
 .load-rom-browse-btn {
   background: #ffffff;
   border: 2px solid #93c5fd;
@@ -8596,21 +8605,219 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   font-family: inherit;
   font-weight: 700;
   font-size: 0.85rem;
-  padding: 0.45rem 1.2rem;
+  padding: 0.45rem 1.1rem;
   border-radius: 14px;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
   cursor: pointer;
   box-shadow: 0 4px 10px rgba(59, 130, 246, 0.12);
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .load-rom-browse-btn:hover {
   background: #3b82f6;
   color: #ffffff;
   border-color: #3b82f6;
-  transform: scale(1.05);
+  transform: scale(1.04);
+}
+
+.load-rom-browse-btn.is-folder {
+  border-color: #c084fc;
+  color: #9333ea;
+  box-shadow: 0 4px 10px rgba(147, 51, 234, 0.12);
+}
+
+.load-rom-browse-btn.is-folder:hover {
+  background: #9333ea;
+  color: #ffffff;
+  border-color: #9333ea;
+  transform: scale(1.04);
+}
+
+/* ROM Folder Review Summary Card */
+.rom-folder-summary-card {
+  background: var(--panel-bg, #f8fafc);
+  border: 2px solid var(--panel-border, #cbd5e1);
+  border-radius: 14px;
+  padding: 1rem 1.15rem;
+  box-shadow: inset 0 1px 0 #ffffff, 0 2px 8px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rom-folder-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.rom-folder-icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(147, 51, 234, 0.12);
+  border: 2px solid #9333ea;
+  color: #9333ea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rom-folder-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.rom-folder-name {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--text-main);
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rom-folder-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+  flex-wrap: wrap;
+}
+
+.rom-folder-pill-count {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  background: #10b981;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.rom-folder-pill-size {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-sub);
+}
+
+.rom-folder-systems-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.rom-folder-system-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1.5px solid #cbd5e1;
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.rom-folder-system-badge img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.rom-folder-system-badge strong {
+  font-weight: 900;
+}
+
+/* Storage Mode Segmented Selector */
+.rom-storage-mode-selector {
+  background: rgba(241, 245, 249, 0.75);
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rom-storage-mode-label {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rom-storage-mode-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+
+.rom-storage-mode-tab {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: var(--text-sub);
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+}
+
+.rom-storage-mode-tab:hover {
+  background: #f8fafc;
+  color: var(--text-main);
+}
+
+.rom-storage-mode-tab.is-active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+}
+
+.rom-storage-mode-hint {
+  font-size: 0.72rem;
+  color: var(--text-sub);
+  margin: 0;
+  line-height: 1.35;
+}
+
+.rom-folder-actions-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+/* Progress bar inside progress box */
+.rom-folder-progress-bar-bg {
+  width: 100%;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 0.35rem;
+}
+
+.rom-folder-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #e11d48 0%, #3b82f6 100%);
+  border-radius: 4px;
+  transition: width 0.25s ease;
 }
 
 .load-rom-section {
@@ -10973,6 +11180,41 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
   .load-rom-chip-ext {
     font-size: 0.62rem;
+  }
+
+  .load-rom-dual-triggers {
+    width: 100%;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .load-rom-browse-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.55rem 1rem;
+  }
+
+  .rom-folder-summary-card {
+    padding: 0.85rem;
+  }
+
+  .rom-folder-icon-circle {
+    width: 40px;
+    height: 40px;
+  }
+
+  .rom-folder-name {
+    font-size: 0.95rem;
+  }
+
+  .rom-storage-mode-tabs {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .rom-storage-mode-tab {
+    padding: 0.5rem;
+    font-size: 0.74rem;
   }
 
   /* On-Screen Keyboard Mobile */
@@ -18186,6 +18428,83 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 4px 12px rgba(0, 0, 0, 0.4) !important;
 }
 
+/* DS Touch Theme & Dark Mode for Folder Review Components */
+[data-theme="ds"] .rom-folder-summary-card {
+  border-radius: 6px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+[data-color-mode="dark"] .rom-folder-summary-card,
+[data-theme="ds"][data-color-mode="dark"] .rom-folder-summary-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="ds"] .rom-folder-icon-circle {
+  border-radius: 4px;
+}
+
+[data-theme="ds"] .rom-folder-system-badge {
+  border-radius: 4px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+}
+
+[data-color-mode="dark"] .rom-folder-system-badge,
+[data-theme="ds"][data-color-mode="dark"] .rom-folder-system-badge {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="ds"] .rom-storage-mode-selector {
+  border-radius: 6px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+}
+
+[data-color-mode="dark"] .rom-storage-mode-selector,
+[data-theme="ds"][data-color-mode="dark"] .rom-storage-mode-selector {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+[data-theme="ds"] .rom-storage-mode-tab {
+  border-radius: 4px;
+  border: 1.5px solid #cbd5e1;
+}
+
+[data-color-mode="dark"] .rom-storage-mode-tab,
+[data-theme="ds"][data-color-mode="dark"] .rom-storage-mode-tab {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+[data-color-mode="dark"] .rom-storage-mode-tab.is-active,
+[data-theme="ds"][data-color-mode="dark"] .rom-storage-mode-tab.is-active {
+  background: #2563eb;
+  border-color: #3b82f6;
+  color: #ffffff;
+}
+
+[data-color-mode="dark"] .load-rom-browse-btn.is-folder,
+[data-theme="ds"][data-color-mode="dark"] .load-rom-browse-btn.is-folder {
+  background: #1e293b;
+  border-color: #a855f7;
+  color: #c084fc;
+}
+
+[data-color-mode="dark"] .load-rom-browse-btn.is-folder:hover,
+[data-theme="ds"][data-color-mode="dark"] .load-rom-browse-btn.is-folder:hover {
+  background: #9333ea;
+  border-color: #a855f7;
+  color: #ffffff;
+}
+
 /* ==========================================================================
    DS TOUCH THEME — PROFILE SELECT MODAL
    ========================================================================== */
@@ -18866,8 +19185,15 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 }
 
 .backup-action-card.is-focused {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35);
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.45) !important;
+}
+
+.backup-action-btn.is-focused {
+  border-color: #3b82f6 !important;
+  outline: 2px solid #3b82f6 !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.4) !important;
 }
 
 .backup-action-card.is-danger-card {

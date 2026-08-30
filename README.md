@@ -157,7 +157,7 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 - 🗄️ **Centralized Database & 1-Click Backup**: Single JSON document database (`data/retroplayer_db.json`) on disk with 1-click backup export and restore studio.
 - 🌐 **Unified Metadata & Box Art Scraper**: Automated multi-source scraper (Libretro CDN, ScreenScraper, TheGamesDB, Wikipedia) with an inline metadata editor.
 - 📖 **Curated Strategy Guides & QR Companion**: Integrated written walkthroughs and video playthroughs with mobile QR code pairing for couch play.
-- 📁 **Drag-and-Drop Auto-Sorting**: Drop any `.zip`, `.iso`, or ROM binary directly onto the browser for automatic console sorting and host disk persistence.
+- 📁 **Folder Batch Ingestion & Companion Asset Pairing**: Drag and drop entire multi-system ROM directories or load in-memory with zero disk copies, automatic console classification across 12 platforms, background scraping, and automatic local companion box art (`.webp`/`.png`/`.jpg`) and metadata (`.json`/`.nfo`) sidecar binding.
 - 🎵 **Dynamic BGM & Synthesized SFX**: Multi-track chiptune engine with smart in-game pause and low-latency Web Audio sound effects.
 - 📱 **Adaptive Cross-Device PWA**: Installable standalone app optimized for Mobile Touch Feeds, Steam Deck, Desktop, and 10-Foot TV mode.
 - 📹 **60 FPS Recorder & Engine Controls**: In-browser video capture, speed turbo throttling (`1.0x`–`5.0x`), VSync, CRT/pixel shaders, and live diagnostic HUD.

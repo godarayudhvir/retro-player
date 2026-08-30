@@ -28,9 +28,9 @@ build/
 # -----------------------------------------------------------------------------
 # Runtime Data & Persistence
 # -----------------------------------------------------------------------------
-# Exclude all generated app data and save state files from version control.
-data/
-**/data/
+# Exclude generated database files from version control while preserving data/ folder
+data/*
+!data/.gitkeep
 *.sav
 *.srm
 *.cht

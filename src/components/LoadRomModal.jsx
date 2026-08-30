@@ -3,7 +3,6 @@ import {
   X, 
   FolderOpen, 
   Upload, 
-  ShieldCheck, 
   Gamepad2, 
   Sparkles, 
   Play, 
@@ -11,19 +10,21 @@ import {
   RefreshCw, 
   CheckCircle2, 
   AlertCircle,
-  FileText,
-  Layers,
-  ArrowRight
+  FolderTree,
+  Zap,
+  Check
 } from 'lucide-react';
 import { resolveAssetPath } from '../utils/assetPath';
-import { detectSystemFromExtension } from '../utils/systemDetector';
+import { detectSystemFromExtension, getSystemInfoByKey } from '../utils/systemDetector';
 import { checkServerDbStatus } from '../services/db';
+import { extractRomsFromInput, scanDirectoryHandle } from '../utils/folderScanner';
 
 /**
- * LoadRomModal - Smart In-App Modal Dialog for loading or permanently ingesting custom ROMs.
- * - On Static Hosts (GitHub Pages): Directly launches 100% private in-browser WebAssembly quick play.
- * - On Self-Hosted (Docker / Localhost): Shows Ingestion Review Card to either Add to Library & Scrape
- *   (upload, query Libretro CDN for 3D box art, write <game>.webp and <game>.json sidecars) or Quick Play.
+ * LoadRomModal - Smart In-App Modal Dialog for loading or permanently ingesting custom ROMs and ROM Folders.
+ * - Single ROM File: Direct In-Memory Quick Play or Save to Library & Scrape.
+ * - Entire ROMs Folder:
+ *   1. Session Mode (In-Memory — No Copy): ROMs stay in original location. Choose No Scrape or Background Scrape.
+ *   2. Permanent Ingestion Mode (Save to Storage): Copies ROMs to Server/IndexedDB. Choose No Scrape or Background Scrape.
  */
 export default function LoadRomModal({
   isOpen,
@@ -32,25 +33,33 @@ export default function LoadRomModal({
   onClose,
   onQuickPlay,
   onUploadToLibrary,
+  onLoadFolderSession,
+  onIngestFolderToLibrary,
   sfx
 }) {
   const fileInputRef = useRef(null);
+  const folderInputRef = useRef(null);
   const [isDragInside, setIsDragInside] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [folderData, setFolderData] = useState(null); // { folderName, files: [], stats }
+  const [storageMode, setStorageMode] = useState('session'); // 'session' | 'permanent'
   const [isProcessing, setIsProcessing] = useState(false);
-  const [progressState, setProgressState] = useState(null); // { step: string, message: string }
+  const [progressState, setProgressState] = useState(null); // { step, current, total, message }
   const [errorMessage, setErrorMessage] = useState(null);
-  const [focusedOption, setFocusedOption] = useState(0); // 0: Add & Scrape, 1: Quick Play, 2: Back
+  const [focusedOption, setFocusedOption] = useState(0); 
   const isServerAvailable = checkServerDbStatus();
 
-  // Sync state when modal opens/closes or when initialFile is supplied
+  // Reset or initialize state when modal opens/closes or initialFile is supplied
   useEffect(() => {
     if (isOpen) {
       if (initialFile) {
         setSelectedFile(initialFile);
+        setFolderData(null);
       }
     } else {
       setSelectedFile(null);
+      setFolderData(null);
+      setStorageMode('session');
       setIsProcessing(false);
       setProgressState(null);
       setErrorMessage(null);
@@ -67,8 +76,9 @@ export default function LoadRomModal({
       if (e.key === 'Escape') {
         e.preventDefault();
         sfx?.playModalClose?.();
-        if (selectedFile && !isProcessing) {
+        if ((selectedFile || folderData) && !isProcessing) {
           setSelectedFile(null);
+          setFolderData(null);
           setErrorMessage(null);
         } else {
           onClose();
@@ -77,6 +87,7 @@ export default function LoadRomModal({
       }
 
       if (selectedFile && !isProcessing) {
+        // Single File Navigation
         if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
           e.preventDefault();
           setFocusedOption(prev => (prev + 1) % 3);
@@ -97,30 +108,122 @@ export default function LoadRomModal({
             sfx?.playTileNav?.();
           }
         }
+      } else if (folderData && !isProcessing) {
+        // Folder Navigation
+        if (e.key === 'Tab') {
+          // Tab switches storage mode or button
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          setStorageMode('session');
+          sfx?.playTileNav?.();
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          setStorageMode('permanent');
+          sfx?.playTileNav?.();
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          setFocusedOption(prev => (prev + 1) % 3);
+          sfx?.playTileNav?.();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          setFocusedOption(prev => (prev - 1 + 3) % 3);
+          sfx?.playTileNav?.();
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (focusedOption === 0) {
+            handleFolderAction(false); // No scrape
+          } else if (focusedOption === 1) {
+            handleFolderAction(true); // Scrape in background
+          } else if (focusedOption === 2) {
+            setFolderData(null);
+            setErrorMessage(null);
+            sfx?.playTileNav?.();
+          }
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, selectedFile, isProcessing, focusedOption, sfx, onClose]);
+  }, [isOpen, selectedFile, folderData, storageMode, isProcessing, focusedOption, sfx, onClose]);
 
   if (!isOpen) return null;
 
-  const handleIncomingFile = (file) => {
-    if (!file) return;
-
-    // Transition to Ingestion Review Card for all environments
-    setSelectedFile(file);
+  const handleIncomingFiles = async (input) => {
+    setIsProcessing(true);
     setErrorMessage(null);
-    setProgressState(null);
-    setFocusedOption(0);
-    sfx?.playTileNav?.();
+    setProgressState({ step: 'scanning', message: 'Scanning files & console formats...' });
+
+    try {
+      const extracted = await extractRomsFromInput(input);
+      setIsProcessing(false);
+      setProgressState(null);
+
+      if (!extracted.files || extracted.files.length === 0) {
+        setErrorMessage('No supported retro ROM files were found in the selected location.');
+        sfx?.playModalClose?.();
+        return;
+      }
+
+      if (extracted.files.length === 1 && !extracted.stats?.isExplicitFolder) {
+        setSelectedFile(extracted.files[0]);
+        setFolderData(null);
+      } else {
+        setFolderData(extracted);
+        setSelectedFile(null);
+      }
+      setFocusedOption(0);
+      sfx?.playTileNav?.();
+    } catch (err) {
+      console.error('Error extracting ROMs:', err);
+      setIsProcessing(false);
+      setProgressState(null);
+      setErrorMessage(err.message || 'Failed to parse dropped files');
+    }
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleIncomingFile(file);
+  const handleSingleFileChange = (e) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      if (files.length === 1) {
+        setSelectedFile(files[0]);
+        setFolderData(null);
+        setFocusedOption(0);
+        sfx?.playTileNav?.();
+      } else {
+        handleIncomingFiles(files);
+      }
+    }
+    e.target.value = '';
+  };
+
+  const handleChooseFolderClick = async (e) => {
+    e?.stopPropagation?.();
+    if (typeof window !== 'undefined' && window.showDirectoryPicker) {
+      try {
+        const dirHandle = await window.showDirectoryPicker({ mode: 'read' });
+        if (!dirHandle) return;
+        setIsProcessing(true);
+        setProgressState({ step: 'scanning', message: `Scanning folder "${dirHandle.name}" for retro titles...` });
+        const files = await scanDirectoryHandle(dirHandle, dirHandle.name);
+        await handleIncomingFiles(files);
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          // User cancelled native directory picker
+          return;
+        }
+        console.warn('showDirectoryPicker unavailable, falling back to input:', err);
+        folderInputRef.current?.click();
+      }
+    } else {
+      folderInputRef.current?.click();
+    }
+  };
+
+  const handleFolderChange = (e) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleIncomingFiles(files);
     }
     e.target.value = '';
   };
@@ -142,13 +245,12 @@ export default function LoadRomModal({
     e.stopPropagation();
     setIsDragInside(false);
 
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      handleIncomingFile(file);
+    if (e.dataTransfer) {
+      handleIncomingFiles(e.dataTransfer);
     }
   };
 
-  // Option 1: Add to Library and Scrape
+  // Single File Action 1: Add to Library & Scrape
   const handleAddAndScrape = async () => {
     if (!selectedFile || isProcessing) return;
     setIsProcessing(true);
@@ -173,7 +275,7 @@ export default function LoadRomModal({
     }
   };
 
-  // Option 2: Quick Play (RAM Only)
+  // Single File Action 2: Quick Play (RAM Only)
   const handleExecuteQuickPlay = () => {
     if (!selectedFile || isProcessing) return;
     sfx?.playGameLaunch?.();
@@ -181,6 +283,59 @@ export default function LoadRomModal({
       onQuickPlay(selectedFile);
     }
     onClose();
+  };
+
+  // Folder Actions: Session Mode vs Permanent Ingestion Mode
+  const handleFolderAction = async (scrapeInBackground = false) => {
+    if (!folderData || isProcessing) return;
+    setIsProcessing(true);
+    setErrorMessage(null);
+
+    try {
+      if (storageMode === 'session') {
+        // Path A: Just Load Folder (In-Memory Session — No Copy)
+        setProgressState({ step: 'loading', message: `Loading ${folderData.files.length} ROMs into session...` });
+        sfx?.playGameLaunch?.();
+
+        if (onLoadFolderSession) {
+          onLoadFolderSession(folderData.files, {
+            scrapeInBackground,
+            folderName: folderData.folderName
+          });
+        }
+        
+        sfx?.playThemeSwitch?.();
+        setTimeout(() => {
+          onClose();
+        }, 500);
+      } else {
+        // Path B: Ingest to Library (Permanent Storage — Copies to Server / IndexedDB)
+        setProgressState({
+          step: 'saving',
+          current: 0,
+          total: folderData.files.length,
+          message: `Saving 0/${folderData.files.length} ROMs to library...`
+        });
+        sfx?.playTabSwitch?.();
+
+        if (onIngestFolderToLibrary) {
+          await onIngestFolderToLibrary(folderData.files, {
+            scrapeInBackground,
+            folderName: folderData.folderName,
+            onProgress: (p) => setProgressState(p)
+          });
+        }
+
+        sfx?.playThemeSwitch?.();
+        setTimeout(() => {
+          onClose();
+        }, 600);
+      }
+    } catch (err) {
+      console.error('Failed to process folder:', err);
+      setErrorMessage(err.message || 'Failed to process ROMs folder');
+      setIsProcessing(false);
+    }
   };
 
   const detectedSystem = selectedFile ? detectSystemFromExtension(selectedFile.name) : null;
@@ -193,6 +348,7 @@ export default function LoadRomModal({
     .trim() || rawTitle;
 
   const fileSizeMb = selectedFile ? (selectedFile.size / (1024 * 1024)).toFixed(2) : '0.00';
+  const folderTotalMb = folderData ? (folderData.stats.totalSizeBytes / (1024 * 1024)).toFixed(1) : '0';
 
   const supportedPlatforms = [
     { name: 'Game Boy Advance', ext: '.gba', icon: resolveAssetPath('assets/platforms/gba.svg') },
@@ -202,7 +358,7 @@ export default function LoadRomModal({
     { name: 'SNES', ext: '.sfc, .smc', icon: resolveAssetPath('assets/platforms/snes.svg') },
     { name: 'Nintendo 64', ext: '.z64, .n64', icon: resolveAssetPath('assets/platforms/n64.svg') },
     { name: 'Nintendo DS', ext: '.nds', icon: resolveAssetPath('assets/platforms/nds.svg') },
-    { name: 'PlayStation', ext: '.iso', icon: resolveAssetPath('assets/platforms/psx.svg') },
+    { name: 'PlayStation', ext: '.iso, .bin', icon: resolveAssetPath('assets/platforms/psx.svg') },
     { name: 'Sega Genesis', ext: '.md, .gen', icon: resolveAssetPath('assets/platforms/genesis.svg') },
     { name: 'Game Gear', ext: '.gg', icon: resolveAssetPath('assets/platforms/gamegear.svg') },
     { name: 'Arcade (MAME)', ext: '.zip', icon: resolveAssetPath('assets/platforms/arcade.svg') },
@@ -211,18 +367,32 @@ export default function LoadRomModal({
 
   return (
     <div className="modal-backdrop load-rom-backdrop animate-fade-in" onClick={onClose}>
-      <div className="load-rom-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '620px' }}>
+      <div 
+        className="load-rom-modal-content" 
+        onClick={(e) => e.stopPropagation()} 
+        style={{ maxWidth: folderData ? '660px' : '620px' }}
+      >
         
         {/* Header */}
         <div className="load-rom-header">
           <div className="load-rom-title-group">
             <div className="load-rom-icon-badge" style={{ background: 'rgba(225, 29, 72, 0.12)', color: '#e11d48' }}>
-              <FolderOpen size={22} />
+              {folderData ? <FolderTree size={22} /> : <FolderOpen size={22} />}
             </div>
             <div>
-              <h2>{selectedFile ? 'ROM Ingestion & Review' : 'Load Custom ROM'}</h2>
+              <h2>
+                {folderData 
+                  ? 'Batch ROM Folder Review' 
+                  : selectedFile 
+                    ? 'ROM Ingestion & Review' 
+                    : 'Load Custom ROM or Folder'}
+              </h2>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-sub)', margin: '2px 0 0' }}>
-                {selectedFile ? 'Select how you want to launch this title' : 'Drop a ROM file to launch or add to your library'}
+                {folderData 
+                  ? `Configuring ${folderData.stats.totalFiles} detected retro titles`
+                  : selectedFile 
+                    ? 'Select how you want to launch this title' 
+                    : 'Drop a ROM file, browse multiple ROMs, or select an entire folder'}
               </p>
             </div>
           </div>
@@ -239,41 +409,63 @@ export default function LoadRomModal({
         {/* Modal Body */}
         <div className="load-rom-body">
           
-          {/* STAGE 1: Dropzone (When no file selected) */}
-          {!selectedFile ? (
+          {/* STAGE 1: Dropzone & Dual Triggers (When nothing selected) */}
+          {!selectedFile && !folderData && (
             <>
               <p className="load-rom-tagline">
-                Drop any retro ROM file below or browse from your device. Self-hosted instances automatically give you the option to save to library with authentic 3D box art scraping.
+                Drop retro ROM files or an entire folder below. You can load ROMs directly into your session without copying, or permanently save to your library with background scraping.
               </p>
 
-              {/* Interactive Drop Zone */}
+              {/* Interactive Dual-Mode Drop Zone */}
               <div
                 className={`load-rom-dropzone ${isDragInside ? 'drag-active' : ''} ${focusedTarget?.zone === 'loadRomModal' && focusedTarget?.id === 'browse' ? 'gamepad-focused' : ''}`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
               >
                 <Upload size={38} className="load-rom-dropzone-icon" />
                 <div className="load-rom-dropzone-text">
-                  <strong>Drag &amp; Drop ROM here</strong>
-                  <span>or click to browse from your device</span>
+                  <strong>Drag &amp; Drop ROMs or Folder here</strong>
+                  <span>Supports single ROMs, multiple files, or full directory trees</span>
                 </div>
-                <button
-                  type="button"
-                  className="load-rom-browse-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    fileInputRef.current?.click();
-                  }}
-                >
-                  <FolderOpen size={16} /> Choose File
-                </button>
+
+                {/* Dual Action Buttons */}
+                <div className="load-rom-dual-triggers">
+                  <button
+                    type="button"
+                    className="load-rom-browse-btn"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <FolderOpen size={16} /> Choose File(s)
+                  </button>
+
+                  <button
+                    type="button"
+                    className="load-rom-browse-btn is-folder"
+                    onClick={handleChooseFolderClick}
+                  >
+                    <FolderTree size={16} /> Choose Folder
+                  </button>
+                </div>
+
+                {/* Hidden File Input for Single/Multi ROMs */}
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".gba,.gb,.gbc,.nes,.sfc,.smc,.z64,.n64,.nds,.bin,.cue,.chd,.iso,.zip,.md,.smd,.gen"
-                  onChange={handleFileChange}
+                  multiple
+                  accept=".gba,.gb,.gbc,.nes,.sfc,.smc,.z64,.n64,.v64,.nds,.bin,.cue,.chd,.pbp,.iso,.zip,.md,.smd,.gen,.gg,.a26"
+                  onChange={handleSingleFileChange}
+                  style={{ display: 'none' }}
+                />
+
+                {/* Hidden Directory Input for Full Folder */}
+                <input
+                  ref={folderInputRef}
+                  type="file"
+                  webkitdirectory=""
+                  directory=""
+                  multiple
+                  onChange={handleFolderChange}
                   style={{ display: 'none' }}
                 />
               </div>
@@ -296,22 +488,24 @@ export default function LoadRomModal({
                 </div>
               </div>
 
-              {/* Persistence Notice */}
+              {/* Storage & Privacy Info Banner */}
               <div className="load-rom-privacy-banner" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                 <HardDrive size={18} style={{ color: isServerAvailable ? '#10b981' : '#3b82f6', flexShrink: 0 }} />
                 <span>
-                  <strong>{isServerAvailable ? 'Docker / Server Storage Active:' : '100% Client-Side Play:'}</strong>{' '}
+                  <strong>{isServerAvailable ? 'Server Storage Available:' : '100% Private Client-Side Sandbox:'}</strong>{' '}
                   {isServerAvailable 
-                    ? 'Uploaded games are automatically organized into /roms/<system>/ with authentic Libretro 3D box art & metadata.' 
-                    : 'Loaded ROMs execute directly in your browser WASM sandbox without uploading to any remote server.'}
+                    ? 'You can choose between zero-copy in-memory playback or saving permanently to /roms/ with background 3D box art scraping.' 
+                    : 'Games can run strictly in local browser memory without copying, or be stored safely in your browser IndexedDB.'}
                 </span>
               </div>
             </>
-          ) : (
-            /* STAGE 2: Ingestion Review & Choices (When file selected on Docker / Localhost) */
+          )}
+
+          {/* STAGE 2A: Single File Ingestion Review */}
+          {selectedFile && !folderData && (
             <div className="rom-ingestion-review-view animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               
-              {/* Detected Game Preview Card (DS Touch Style) */}
+              {/* Detected Game Preview Card */}
               <div className="rom-ingestion-card" style={{
                 background: 'var(--panel-bg, #f8fafc)',
                 border: '2px solid var(--panel-border, #cbd5e1)',
@@ -322,7 +516,6 @@ export default function LoadRomModal({
                 alignItems: 'center',
                 gap: '1rem'
               }}>
-                {/* Platform Icon Badge */}
                 <div style={{
                   width: '52px',
                   height: '52px',
@@ -341,7 +534,6 @@ export default function LoadRomModal({
                   )}
                 </div>
 
-                {/* Game & Console Info */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
                     <span style={{
@@ -388,17 +580,9 @@ export default function LoadRomModal({
                 </div>
               </div>
 
-              {/* Progress State during Upload / Scraping */}
+              {/* Progress State */}
               {isProcessing && progressState && (
-                <div className="rom-ingestion-progress-box" style={{
-                  background: 'rgba(225, 29, 72, 0.08)',
-                  border: '1.5px solid rgba(225, 29, 72, 0.3)',
-                  borderRadius: '10px',
-                  padding: '0.85rem 1rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem'
-                }}>
+                <div className="rom-ingestion-progress-box">
                   {progressState.step === 'done' ? (
                     <CheckCircle2 size={20} style={{ color: '#10b981', flexShrink: 0 }} />
                   ) : (
@@ -415,7 +599,6 @@ export default function LoadRomModal({
                 </div>
               )}
 
-              {/* Error Message if any */}
               {errorMessage && (
                 <div className="backup-alert is-danger">
                   <AlertCircle size={16} />
@@ -423,7 +606,7 @@ export default function LoadRomModal({
                 </div>
               )}
 
-              {/* Choice Cards (When not currently processing) */}
+              {/* Choice Cards */}
               {!isProcessing && (
                 <div className="rom-ingestion-choices-grid" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   
@@ -439,7 +622,7 @@ export default function LoadRomModal({
                         </strong>
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>
                           {isServerAvailable 
-                            ? `Saves ROM to /roms/${detectedSystem?.key || 'system'}/ on server disk, fetches authentic 3D box art & synopsis from Libretro CDN, and adds to your permanent dashboard.`
+                            ? `Saves ROM to /roms/${detectedSystem?.key || 'system'}/, fetches authentic 3D box art & synopsis from Libretro CDN, and adds to your permanent dashboard.`
                             : `Saves ROM to browser storage (IndexedDB), fetches authentic 3D box art & synopsis from Libretro CDN, and keeps it in your offline library across reloads.`}
                         </span>
                       </div>
@@ -481,7 +664,7 @@ export default function LoadRomModal({
                     </button>
                   </div>
 
-                  {/* Choice 3: Back / Choose Different File */}
+                  {/* Choice 3: Back */}
                   <button
                     type="button"
                     className={`backup-action-btn is-secondary ${focusedOption === 2 ? 'is-focused' : ''}`}
@@ -496,6 +679,223 @@ export default function LoadRomModal({
                   </button>
 
                 </div>
+              )}
+
+            </div>
+          )}
+
+          {/* STAGE 2B: Folder Ingestion & Batch Review View */}
+          {folderData && (
+            <div className="rom-folder-review-view animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+              
+              {/* Folder Summary Card */}
+              <div className="rom-folder-summary-card">
+                <div className="rom-folder-summary-header">
+                  <div className="rom-folder-icon-circle">
+                    <FolderTree size={24} />
+                  </div>
+                  <div className="rom-folder-details">
+                    <strong className="rom-folder-name">{folderData.folderName}</strong>
+                    <div className="rom-folder-meta-row">
+                      <span className="rom-folder-pill-count">
+                        <Check size={12} /> {folderData.stats.totalFiles} Games Found
+                      </span>
+                      <span className="rom-folder-pill-size">
+                        {folderTotalMb} MB Total
+                      </span>
+                      {folderData.stats.localCoversCount > 0 && (
+                        <span style={{
+                          fontSize: '0.7rem',
+                          fontWeight: 800,
+                          padding: '0.15rem 0.5rem',
+                          borderRadius: '6px',
+                          background: '#8b5cf6',
+                          color: '#ffffff',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem'
+                        }}>
+                          <Sparkles size={11} /> {folderData.stats.localCoversCount} Local Artwork
+                        </span>
+                      )}
+                      {folderData.stats.localSidecarsCount > 0 && (
+                        <span style={{
+                          fontSize: '0.7rem',
+                          fontWeight: 800,
+                          padding: '0.15rem 0.5rem',
+                          borderRadius: '6px',
+                          background: '#06b6d4',
+                          color: '#ffffff',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem'
+                        }}>
+                          📝 {folderData.stats.localSidecarsCount} Sidecars
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* System Distribution Chips */}
+                <div className="rom-folder-systems-list">
+                  {Object.entries(folderData.stats.systems).map(([key, count]) => {
+                    const sampleSys = getSystemInfoByKey(key);
+                    return (
+                      <span key={key} className="rom-folder-system-badge" style={{ borderColor: sampleSys.color }}>
+                        {sampleSys.icon && <img src={sampleSys.icon} alt="" />}
+                        <strong>{count}</strong> {sampleSys.name}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Progress Box for Folder Processing */}
+              {isProcessing && progressState && (
+                <div className="rom-ingestion-progress-box">
+                  {progressState.step === 'done' ? (
+                    <CheckCircle2 size={20} style={{ color: '#10b981', flexShrink: 0 }} />
+                  ) : (
+                    <RefreshCw size={20} className="animate-spin" style={{ color: '#e11d48', flexShrink: 0 }} />
+                  )}
+                  <div style={{ flex: 1 }}>
+                    <strong style={{ fontSize: '0.84rem', color: 'var(--text-main)', display: 'block' }}>
+                      {progressState.step === 'done' ? 'Batch Ingestion Complete!' : 'Processing ROMs Folder...'}
+                    </strong>
+                    <span style={{ fontSize: '0.74rem', color: 'var(--text-sub)' }}>
+                      {progressState.message}
+                    </span>
+                    {progressState.total > 0 && (
+                      <div className="rom-folder-progress-bar-bg">
+                        <div 
+                          className="rom-folder-progress-bar-fill" 
+                          style={{ width: `${Math.min(100, Math.round(((progressState.current || 0) / progressState.total) * 100))}%` }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {errorMessage && (
+                <div className="backup-alert is-danger">
+                  <AlertCircle size={16} />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
+              {!isProcessing && (
+                <>
+                  {/* Storage Mode Segmented Selector */}
+                  <div className="rom-storage-mode-selector">
+                    <div className="rom-storage-mode-label">Select Storage Destination:</div>
+                    <div className="rom-storage-mode-tabs">
+                      <button
+                        type="button"
+                        className={`rom-storage-mode-tab ${storageMode === 'session' ? 'is-active' : ''}`}
+                        onClick={() => {
+                          setStorageMode('session');
+                          sfx?.playTileNav?.();
+                        }}
+                      >
+                        <Zap size={14} />
+                        <span>In-Memory Session (0 Copy)</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className={`rom-storage-mode-tab ${storageMode === 'permanent' ? 'is-active' : ''}`}
+                        onClick={() => {
+                          setStorageMode('permanent');
+                          sfx?.playTileNav?.();
+                        }}
+                      >
+                        <HardDrive size={14} />
+                        <span>Save to Library (Permanent)</span>
+                      </button>
+                    </div>
+
+                    <p className="rom-storage-mode-hint">
+                      {storageMode === 'session'
+                        ? '⚡ ROMs remain strictly in their original location on your computer. Zero disk copying or uploads. Instant playback in this session.'
+                        : `💾 Copies all ${folderData.stats.totalFiles} ROMs permanently to ${isServerAvailable ? 'server /roms/ directory' : 'browser IndexedDB storage'} to persist across reloads.`}
+                    </p>
+                  </div>
+
+                  {/* Dual Action Choices for Selected Storage Mode */}
+                  <div className="rom-folder-actions-grid">
+                    
+                    {/* Action 1: Load Without Scrape */}
+                    <div className={`backup-action-card ${focusedOption === 0 ? 'is-focused' : ''}`}>
+                      <div className="backup-card-info">
+                        <div className="backup-card-icon" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
+                          <Play size={20} />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <strong style={{ fontSize: '0.88rem', color: 'var(--text-main)', display: 'block' }}>
+                            {storageMode === 'session' ? 'Just Load (No Scrape)' : 'Save to Library (No Scrape)'}
+                          </strong>
+                          <span style={{ fontSize: '0.74rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
+                            {storageMode === 'session'
+                              ? 'Instantly imports all titles into your session without scraping or internet lookups.'
+                              : 'Fast batch saves all ROMs to your persistent library without running the scraper.'}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className="backup-action-btn is-secondary"
+                        onClick={() => handleFolderAction(false)}
+                        disabled={isProcessing}
+                      >
+                        <Play size={14} />
+                        <span>{storageMode === 'session' ? 'Just Load Fast' : 'Save (No Scrape)'}</span>
+                      </button>
+                    </div>
+
+                    {/* Action 2: Load & Scrape in Background */}
+                    <div className={`backup-action-card ${focusedOption === 1 ? 'is-focused' : ''}`}>
+                      <div className="backup-card-info">
+                        <div className="backup-card-icon" style={{ background: 'rgba(225, 29, 72, 0.1)', color: '#e11d48' }}>
+                          <Sparkles size={20} />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <strong style={{ fontSize: '0.88rem', color: 'var(--text-main)', display: 'block' }}>
+                            {storageMode === 'session' ? 'Just Load & Scrape (Background)' : 'Ingest & Scrape (Background)'}
+                          </strong>
+                          <span style={{ fontSize: '0.74rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
+                            Loads titles immediately and triggers metadata &amp; 3D box art scraping in the background without making you wait.
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className="backup-action-btn is-primary"
+                        onClick={() => handleFolderAction(true)}
+                        disabled={isProcessing}
+                      >
+                        <Sparkles size={14} />
+                        <span>{storageMode === 'session' ? 'Load & Scrape in BG' : 'Ingest & Scrape in BG'}</span>
+                      </button>
+                    </div>
+
+                    {/* Action 3: Choose Different Folder */}
+                    <button
+                      type="button"
+                      className={`backup-action-btn is-secondary ${focusedOption === 2 ? 'is-focused' : ''}`}
+                      style={{ justifyContent: 'center', height: '36px', marginTop: '0.2rem' }}
+                      onClick={() => {
+                        setFolderData(null);
+                        setErrorMessage(null);
+                        sfx?.playTileNav?.();
+                      }}
+                    >
+                      <span>Choose Different Folder or File</span>
+                    </button>
+
+                  </div>
+                </>
               )}
 
             </div>
