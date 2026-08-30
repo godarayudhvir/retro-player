@@ -240,6 +240,7 @@ Retro Player includes built-in AI agent skills and automated utility scripts und
 Upcoming feature designs, technical blueprints, and step-by-step implementation guides are organized under [`mirai/`](mirai/README.md):
 
 - **[Master Roadmap Index](mirai/README.md)**: Prioritized status index across all upcoming milestones.
+- **[Universal Pokémon Save Achievements](mirai/pokemon-save-achievements.md)**: Real-time byte inspector for battery SRAM/Flash (`.sav`) across Gen 1–5 (GB, GBC, GBA, NDS) unlocking per-ROM milestones (Starter, 8 Gym Badges, Victory Road, League Champion).
 - **[Mobile UI Gamepad & Spatial Navigation](mirai/mobile-gamepad-navigation.md)**: Purpose-built 2D spatial navigation engine for mobile feeds and bottom sheets.
 - **[3D Cartridge & Media Designs](mirai/cartridge-designs-spec.md)**: Master geometric specifications for authentic physical cartridge shells.
 - **[Settings Hub Redesign](mirai/settings-hub.md)**: Enhanced console library management, BGM track manager, and diagnostic tools.
