@@ -88,6 +88,40 @@ const POKE_ICON_MAP = {
 };
 
 /**
+ * Authentic Vector Pokéball Icon for Pokémon Cartridge Inspector
+ */
+function PokeballIcon({ size = 18, isActive = false }) {
+  return (
+    <svg 
+      width={size} 
+      height={size} 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ 
+        display: 'block', 
+        flexShrink: 0,
+        transform: isActive ? 'rotate(180deg)' : 'rotate(0deg)',
+        transition: 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)'
+      }}
+    >
+      {/* Lower White Hemisphere */}
+      <path d="M2.05 12a10 10 0 0 0 19.9 0H15a3 3 0 0 1-6 0H2.05z" fill="#ffffff" />
+      {/* Upper Red Hemisphere */}
+      <path d="M2.05 12a10 10 0 0 1 19.9 0H15a3 3 0 0 0-6 0H2.05z" fill="#ef4444" />
+      {/* Outer Ball Stroke */}
+      <circle cx="12" cy="12" r="10" stroke="#1e293b" strokeWidth="1.8" fill="none" />
+      {/* Middle Dividing Line */}
+      <line x1="2" y1="12" x2="22" y2="12" stroke="#1e293b" strokeWidth="1.8" />
+      {/* Center Outer Ring */}
+      <circle cx="12" cy="12" r="3.5" fill="#ffffff" stroke="#1e293b" strokeWidth="1.8" />
+      {/* Center Inner Button */}
+      <circle cx="12" cy="12" r="1.5" fill="#1e293b" />
+    </svg>
+  );
+}
+
+/**
  * DsView: Nintendo DS / DSi Dual-Screen Touchscreen Firmware Layout.
  * 
  * Features:
@@ -860,9 +894,9 @@ export default function DsView({
                 sfx?.playTabSwitch?.();
               }}
               title="Pokémon Trainer Milestones & Badge Case"
-              aria-label="Trainer Milestones"
+              aria-label="Pokémon Trainer Milestones"
             >
-              <Trophy size={16} color={dsTab === 'pokemon' ? '#ffffff' : '#f59e0b'} />
+              <PokeballIcon size={17} isActive={dsTab === 'pokemon'} />
             </button>
           )}
 
