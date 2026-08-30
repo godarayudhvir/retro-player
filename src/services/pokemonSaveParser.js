@@ -124,14 +124,14 @@ function readUint16LE(bytes, offset) {
 }
 
 /**
- * Reads 32-bit little-endian integer.
+ * Reads 32-bit little-endian unsigned integer.
  */
 function readUint32LE(bytes, offset) {
   return (
-    bytes[offset] |
+    (bytes[offset] |
     (bytes[offset + 1] << 8) |
     (bytes[offset + 2] << 16) |
-    ((bytes[offset + 3] << 24) >>> 0)
+    (bytes[offset + 3] << 24)) >>> 0
   );
 }
 
@@ -143,14 +143,14 @@ function readUint24BE(bytes, offset) {
 }
 
 /**
- * Reads 32-bit big-endian integer.
+ * Reads 32-bit big-endian unsigned integer.
  */
 function readUint32BE(bytes, offset) {
   return (
-    ((bytes[offset] << 24) >>> 0) |
+    ((bytes[offset] << 24) |
     (bytes[offset + 1] << 16) |
     (bytes[offset + 2] << 8) |
-    bytes[offset + 3]
+    bytes[offset + 3]) >>> 0
   );
 }
 
@@ -234,6 +234,10 @@ function parseGen1(data, identifiedGame) {
   // Poke Flute (0x49), Exp. All (0x3A)
   const bagCount = Math.min(20, data[0x25C9] || 0);
   const bagItems = new Set();
+  for (let i = 0; i < bagCount; i++) {
+    bagItems.add(data[0x25CA + (i * 2)]);
+  }
+
   // Check Yellow Pikachu Friendship at 0x271C
   const isYellow = identifiedGame?.id?.includes('yellow') || identifiedGame?.name?.toLowerCase().includes('yellow');
   const pikaFriendship = isYellow ? (data[0x271C] || 0) : 0;
@@ -273,7 +277,7 @@ function parseGen1(data, identifiedGame) {
       pokeFlute: bagItems.has(0x49),
       scope: bagItems.has(0x48),
       expShare: bagItems.has(0x3A),
-      townMap: bagItems.has(0x05),
+      townMap: bagItems.has(0x05) || hasStarter,
       masterBall: bagItems.has(0x01)
     }
   };
@@ -305,12 +309,14 @@ function parseGen2(data, identifiedGame) {
     return null;
   }
 
-  // Gen 2 Johto Badges at 0x23E4 (Zephyr to Rising)
-  // Gen 2 Kanto Badges at 0x23E5 (Boulder to Earth)
-  const johtoBadgesByte = data[0x23E4] || 0;
-  const kantoBadgesByte = data[0x23E5] || 0;
+  // Gen 2 Johto Badges at 0x23E4 (Crystal) or 0x23E3 (Gold/Silver)
+  // Gen 2 Kanto Badges at 0x23E5 (Crystal) or 0x23E4 (Gold/Silver)
+  const johtoBadgesOffset = isCrystal ? 0x23E4 : 0x23E3;
+  const kantoBadgesOffset = isCrystal ? 0x23E5 : 0x23E4;
+  const johtoBadgesByte = data[johtoBadgesOffset] || 0;
+  const kantoBadgesByte = data[kantoBadgesOffset] || 0;
 
-  const badges = [
+  const johtoBadges = [
     Boolean(johtoBadgesByte & 0x01), // Zephyr
     Boolean(johtoBadgesByte & 0x02), // Hive
     Boolean(johtoBadgesByte & 0x04), // Plain
@@ -320,10 +326,25 @@ function parseGen2(data, identifiedGame) {
     Boolean(johtoBadgesByte & 0x40), // Glacier
     Boolean(johtoBadgesByte & 0x80)  // Rising
   ];
-  const badgeCount = badges.filter(Boolean).length;
+  const johtoBadgeCount = johtoBadges.filter(Boolean).length;
 
-  // Money at 0x23DC - 0x23DE (3-byte big-endian integer)
-  const money = readUint24BE(data, 0x23DC);
+  const kantoBadges = [
+    Boolean(kantoBadgesByte & 0x01), // Boulder
+    Boolean(kantoBadgesByte & 0x02), // Cascade
+    Boolean(kantoBadgesByte & 0x04), // Thunder
+    Boolean(kantoBadgesByte & 0x08), // Rainbow
+    Boolean(kantoBadgesByte & 0x10), // Soul
+    Boolean(kantoBadgesByte & 0x20), // Marsh
+    Boolean(kantoBadgesByte & 0x40), // Volcano
+    Boolean(kantoBadgesByte & 0x80)  // Earth
+  ];
+  const kantoBadgeCount = kantoBadges.filter(Boolean).length;
+  const totalBadgeCount = johtoBadgeCount + kantoBadgeCount;
+  const has16Badges = johtoBadgeCount === 8 && kantoBadgeCount === 8;
+
+  // Money at 0x23DC (Crystal) or 0x23DB (Gold/Silver) (3-byte big-endian integer)
+  const moneyOffset = isCrystal ? 0x23DC : 0x23DB;
+  const money = readUint24BE(data, moneyOffset);
 
   // Pokédex Owned:
   // In Crystal: 0x2A4C - 0x2A6B (32 bytes = 256 flags)
@@ -356,7 +377,7 @@ function parseGen2(data, identifiedGame) {
       const level = data[entryOffset + 0x1F]; // Level byte
       const iv1 = data[entryOffset + 0x15];   // Atk/Def IV
       const iv2 = data[entryOffset + 0x16];   // Spd/Spc IV
-      const pokerusByte = data[entryOffset + 0x20];
+      const pokerusByte = data[entryOffset + 0x1C]; // Pokérus byte in Gen 2
 
       if (level > maxPartyLevel && level <= 100) maxPartyLevel = level;
       if (gen2Legends.includes(species)) hasLegendary = true;
@@ -374,13 +395,16 @@ function parseGen2(data, identifiedGame) {
     }
   }
 
-  // Key Items Pocket at 0x2424 (Count + items)
+  // Inventory scanning across all pockets in Gen 2:
+  // Items (0x241E-0x2445), Key Items (0x2446-0x2464), Balls (0x2465-0x247E), TMs (0x247F-0x24B0)
   // Bicycle (0x07), Old Rod (0x3C), Good Rod (0x3D), Super Rod (0x3E),
-  // Itemfinder (0x36), Poke Flute (0x28), Exp. Share (0x96), Master Ball (0x01)
-  const keyItemCount = Math.min(26, data[0x2424] || 0);
+  // Itemfinder (0x36), Squirtbottle (0x56), Radio Card / Poke Flute (0x28), Exp. Share (0x96), Master Ball (0x01)
   const keyItemsSet = new Set();
-  for (let i = 0; i < keyItemCount; i++) {
-    keyItemsSet.add(data[0x2425 + i]);
+  for (let i = 0x2410; i <= 0x24B0; i++) {
+    const val = data[i];
+    if (val > 0 && val !== 0xFF) {
+      keyItemsSet.add(val);
+    }
   }
 
   // Check trainer name at 0x200B
@@ -392,10 +416,15 @@ function parseGen2(data, identifiedGame) {
     generation: 2,
     gameCode: isCrystal ? 'CRYSTAL' : 'GS',
     money: money > 999999 ? 0 : money,
-    badges,
-    badgeCount,
-    hasAllBadges: badgeCount === 8,
-    kantoBadgeCount: countSetBits(new Uint8Array([kantoBadgesByte])),
+    badges: johtoBadges,
+    badgeCount: johtoBadgeCount,
+    hasAllBadges: johtoBadgeCount === 8,
+    johtoBadges,
+    johtoBadgeCount,
+    kantoBadges,
+    kantoBadgeCount,
+    totalBadgeCount,
+    has16Badges,
     pokedexCaught,
     partyCount,
     maxPartyLevel,
@@ -408,8 +437,8 @@ function parseGen2(data, identifiedGame) {
     hasPokerus,
     hasLegendary: hasLegendary || pokedexCaught >= 240,
     hasFossil,
-    hallOfFameCount: badgeCount >= 8 ? 1 : 0,
-    isChampion: badgeCount >= 8,
+    hallOfFameCount: johtoBadgeCount === 8 ? 1 : 0,
+    isChampion: johtoBadgeCount === 8,
     isHighRoller: money >= 999999,
     keyItems: {
       bicycle: keyItemsSet.has(0x07),
@@ -429,6 +458,20 @@ function parseGen2(data, identifiedGame) {
 // ---------------------------------------------------------------------------
 // 5. GENERATION 3 PARSER (Game Boy Advance: RSE / FRLG) - 64 KB / 128 KB Flash
 // ---------------------------------------------------------------------------
+
+/**
+ * Gen 3 4-Substructure order permutations (G=0 Growth, A=1 Attacks, E=2 EVs, M=3 Misc).
+ * Determined by (Personality % 24).
+ */
+const GEN3_ORDER_TABLE = [
+  [0,1,2,3], [0,1,3,2], [0,2,1,3], [0,2,3,1], [0,3,1,2], [0,3,2,1],
+  [1,0,2,3], [1,0,3,2], [1,2,0,3], [1,2,3,0], [1,3,0,2], [1,3,2,0],
+  [2,0,1,3], [2,0,3,1], [2,1,0,3], [2,1,3,0], [2,3,0,1], [2,3,1,0],
+  [3,0,1,2], [3,0,2,1], [3,1,0,2], [3,1,2,0], [3,2,0,1], [3,2,1,0]
+];
+
+const GEN3_LEGENDS = [144, 145, 146, 150, 151, 243, 244, 245, 249, 250, 251, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386];
+const GEN3_FOSSILS = [138, 139, 140, 141, 142, 345, 346, 347, 348];
 
 /**
  * Validates GBA 4KB Section Checksum & Magic Code:
@@ -544,6 +587,7 @@ function parseGen3(data, identifiedGame) {
   let hasShiny = false;
   let hasPokerus = false;
   let hasLegendary = false;
+  let hasFossil = false;
 
   const sec1 = activeSections[1];
   if (sec1 !== undefined) {
@@ -561,6 +605,7 @@ function parseGen3(data, identifiedGame) {
         const level = data[pOffset + 84];
         if (level > maxPartyLevel && level <= 100) maxPartyLevel = level;
 
+        // Shiny check
         const p1 = personality & 0xFFFF;
         const p2 = (personality >>> 16) & 0xFFFF;
         const id1 = otId & 0xFFFF;
@@ -569,7 +614,31 @@ function parseGen3(data, identifiedGame) {
           hasShiny = true;
         }
 
-        if (data[pOffset + 85] > 0) hasPokerus = true;
+        // Decrypt 48 bytes of substructures
+        const key = (personality ^ otId) >>> 0;
+        const order = GEN3_ORDER_TABLE[(personality >>> 0) % 24] || [0, 1, 2, 3];
+        const decrypted = new Uint8Array(48);
+        for (let w = 0; w < 12; w++) {
+          const encWord = readUint32LE(data, pOffset + 32 + (w * 4));
+          const decWord = (encWord ^ key) >>> 0;
+          decrypted[w * 4] = decWord & 0xFF;
+          decrypted[w * 4 + 1] = (decWord >>> 8) & 0xFF;
+          decrypted[w * 4 + 2] = (decWord >>> 16) & 0xFF;
+          decrypted[w * 4 + 3] = (decWord >>> 24) & 0xFF;
+        }
+
+        // Substructure 0 (Growth): Species ID at bytes 0-1
+        const growthPos = order.indexOf(0);
+        const growthOffset = growthPos * 12;
+        const species = decrypted[growthOffset] | (decrypted[growthOffset + 1] << 8);
+        if (GEN3_LEGENDS.includes(species)) hasLegendary = true;
+        if (GEN3_FOSSILS.includes(species)) hasFossil = true;
+
+        // Substructure 3 (Misc): Pokérus byte at byte 0
+        const miscPos = order.indexOf(3);
+        const miscOffset = miscPos * 12;
+        const pokerusByte = decrypted[miscOffset];
+        if (pokerusByte > 0) hasPokerus = true;
       }
     }
   }
@@ -614,7 +683,7 @@ function parseGen3(data, identifiedGame) {
     hasShiny,
     hasPokerus,
     hasLegendary: hasLegendary || pokedexCaught >= 180,
-    hasFossil: pokedexCaught >= 10,
+    hasFossil: hasFossil || pokedexCaught >= 10,
     hallOfFameCount: badgeCount >= 8 ? 1 : 0,
     isChampion: badgeCount === 8,
     isHighRoller: money >= 999999,

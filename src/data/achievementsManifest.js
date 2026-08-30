@@ -491,6 +491,15 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     isPerRom: true
   },
   {
+    id: 'poke_sixteen_badges',
+    title: 'Dual-Region Master (16 Badges)',
+    description: 'Conquer both the Johto and Kanto leagues, assembling all 16 Regional Gym Badges to unlock Mt. Silver.',
+    category: 'pokemon',
+    tier: 'platinum',
+    icon: 'Crown',
+    isPerRom: true
+  },
+  {
     id: 'poke_myth_and_legend',
     title: 'Legendary Encounter',
     description: 'Encounter and capture a legendary or mythical box-art Pokémon.',

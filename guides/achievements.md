@@ -108,6 +108,7 @@ The achievement system features a balanced **6 Categories × 4 Tiers (1 Bronze, 
 | ⏳ | 🥇 Gold | `poke_master_angler` | **Master Angler** | Acquire the legendary Super Rod. | `summary.keyItems.superRod === true` | Per-ROM |
 | ⏳ | 🥇 Gold | `poke_master_ball` | **Master Ball Acquired** | Obtain the legendary Master Ball. | `summary.keyItems.masterBall === true` | Per-ROM |
 | ⏳ | 🥇 Gold | `poke_eight_badges` | **Eight Badges Assembled** | Complete the 8-badge regional case. | `summary.hasAllBadges === true` | Per-ROM |
+| ⏳ | 💎 Platinum | `poke_sixteen_badges` | **Dual-Region Master (16 Badges)** | Assemble all 16 Johto & Kanto badges to unlock Mt. Silver. | `summary.has16Badges === true` | Per-ROM |
 | ⏳ | 🥇 Gold | `poke_myth_and_legend` | **Myth & Legend** | Encounter and capture a legendary Pokémon. | `summary.hasLegendary === true` | Per-ROM |
 | ⏳ | 💎 Platinum | `poke_hall_of_fame` | **Regional Champion** | Defeat Elite Four & enter Hall of Fame. | `summary.isChampion === true` | Per-ROM |
 | ⏳ | 💎 Platinum | `poke_level_100` | **Level 100 Ascension** | Train any single Pokémon to Level 100. | `summary.hasLevel100 === true` | Per-ROM |
@@ -127,17 +128,17 @@ Track local hardware and ROM verification status across all official mainline ti
 
 | Generation | System | Game Title | Save Format | Status | Notes |
 | :---: | :---: | :--- | :---: | :---: | :--- |
-| **Gen 1** | GB | *Pokémon Red Version* | 32 KB SRAM | ⏳ Pending | Bank 1 fixed offsets (`0x2602` Badges) |
-| **Gen 1** | GB | *Pokémon Blue Version* | 32 KB SRAM | ⏳ Pending | Bank 1 fixed offsets (`0x2602` Badges) |
-| **Gen 1** | GB | *Pokémon Yellow: Special Pikachu* | 32 KB SRAM | ⏳ Pending | Pikachu starter & Kanto badge bits |
-| **Gen 2** | GBC | *Pokémon Gold Version* | 32 KB SRAM | ⏳ Pending | Johto & Kanto dual badge arrays |
-| **Gen 2** | GBC | *Pokémon Silver Version* | 32 KB SRAM | ⏳ Pending | Johto & Kanto dual badge arrays |
-| **Gen 2** | GBC | *Pokémon Crystal Version* | 32 KB SRAM | ⏳ Pending | Battle Tower & Suicune plot flags |
-| **Gen 3** | GBA | *Pokémon Ruby Version* | 64/128 KB Flash | ⏳ Pending | 14 Rotating sections (Slot A/B) |
-| **Gen 3** | GBA | *Pokémon Sapphire Version* | 64/128 KB Flash | ⏳ Pending | 14 Rotating sections (Slot A/B) |
-| **Gen 3** | GBA | *Pokémon Emerald Version* | 128 KB Flash | ⏳ Pending | Battle Frontier & Hoenn badge case |
-| **Gen 3** | GBA | *Pokémon FireRed Version* | 128 KB Flash | ⏳ Pending | Kanto remake & Sevii Islands flags |
-| **Gen 3** | GBA | *Pokémon LeafGreen Version* | 128 KB Flash | ⏳ Pending | Kanto remake & Sevii Islands flags |
+| **Gen 1** | GB | *Pokémon Red Version* | 32 KB SRAM | ✅ Verified | Checksum `0x3523`, 8 Badges `0x2602`, Bag items `0x25CA` |
+| **Gen 1** | GB | *Pokémon Blue Version* | 32 KB SRAM | ✅ Verified | Checksum `0x3523`, 8 Badges `0x2602`, Bag items `0x25CA` |
+| **Gen 1** | GB | *Pokémon Yellow: Special Pikachu* | 32 KB SRAM | ✅ Verified | Checksum `0x3523`, Pikachu Friendship `0x271C` (`>= 200`) |
+| **Gen 2** | GBC | *Pokémon Gold Version* | 32 KB SRAM | ✅ Verified | Checksum `0x2D69`, Johto (`0x23E3`) & Kanto (`0x23E4`) 16 Badges |
+| **Gen 2** | GBC | *Pokémon Silver Version* | 32 KB SRAM | ✅ Verified | Checksum `0x2D69`, Johto (`0x23E3`) & Kanto (`0x23E4`) 16 Badges |
+| **Gen 2** | GBC | *Pokémon Crystal Version* | 32 KB SRAM | ✅ Verified | Checksum `0x2D0D`, Johto (`0x23E4`) & Kanto (`0x23E5`) 16 Badges |
+| **Gen 3** | GBA | *Pokémon Ruby Version* | 64/128 KB Flash | ✅ Verified | 14 Sections, Substructure XOR Decryption, Hoenn Badges |
+| **Gen 3** | GBA | *Pokémon Sapphire Version* | 64/128 KB Flash | ✅ Verified | 14 Sections, Substructure XOR Decryption, Hoenn Badges |
+| **Gen 3** | GBA | *Pokémon Emerald Version* | 128 KB Flash | ✅ Verified | 14 Sections, Substructure XOR Decryption, Hoenn Badges |
+| **Gen 3** | GBA | *Pokémon FireRed Version* | 128 KB Flash | ✅ Verified | 14 Sections, Substructure XOR Decryption, Kanto Badges |
+| **Gen 3** | GBA | *Pokémon LeafGreen Version* | 128 KB Flash | ✅ Verified | 14 Sections, Substructure XOR Decryption, Kanto Badges |
 | **Gen 4** | NDS | *Pokémon Diamond Version* | 512 KB EEPROM | ⏳ Pending | Dual sector CRC16 block counters |
 | **Gen 4** | NDS | *Pokémon Pearl Version* | 512 KB EEPROM | ⏳ Pending | Dual sector CRC16 block counters |
 | **Gen 4** | NDS | *Pokémon Platinum Version* | 512 KB EEPROM | ⏳ Pending | Distortion World & Sinnoh badges |

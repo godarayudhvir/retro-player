@@ -698,7 +698,7 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       if (summary.keyItems?.townMap) unlockAchievement('poke_digital_cartographer', game);
       if (summary.keyItems?.masterBall) unlockAchievement('poke_master_ball', game);
 
-      // 3. Gym Badges (1 to 8)
+      // 3. Gym Badges (1 to 8 & Gen 2 Dual 16 Badges)
       if (summary.badges?.[0]) unlockAchievement('poke_badge_1', game);
       if (summary.badges?.[1]) unlockAchievement('poke_badge_2', game);
       if (summary.badges?.[2]) unlockAchievement('poke_badge_3', game);
@@ -708,6 +708,7 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       if (summary.badges?.[6]) unlockAchievement('poke_badge_7', game);
       if (summary.badges?.[7]) unlockAchievement('poke_badge_8', game);
       if (summary.hasAllBadges || summary.badgeCount >= 8) unlockAchievement('poke_eight_badges', game);
+      if (summary.has16Badges || summary.totalBadgeCount >= 16) unlockAchievement('poke_sixteen_badges', game);
 
       // 4. Hall of Fame / Champion
       if (summary.isChampion || summary.hallOfFameCount > 0) {
@@ -777,11 +778,13 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
   }, [persistState]);
 
   // ---------------------------------------------------------------------------
-  // PER-ROM MILESTONES GETTER
+  // PER-ROM MILESTONES GETTER (Universal platform achievements only)
   // ---------------------------------------------------------------------------
   const getGameMilestones = useCallback((gameId) => {
     if (!gameId) return [];
-    return Object.values(unlocked).filter(u => u.gameId === gameId);
+    return Object.values(unlocked).filter(
+      u => u.gameId === gameId && !u.id?.startsWith('poke_') && u.category !== 'pokemon'
+    );
   }, [unlocked]);
 
   // Total points earned (Strictly universal milestones from ACHIEVEMENTS_MANIFEST, 300G max)
