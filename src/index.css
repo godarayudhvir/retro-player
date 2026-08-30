@@ -10273,19 +10273,56 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 .mobile-topbar-profile {
   flex-shrink: 0;
   cursor: pointer;
-  border-radius: 50%;
-  border: 2px solid var(--poke-red, #e11d48);
+  border-radius: 20px;
+  border: 1.5px solid var(--poke-red, #e11d48);
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: #ffffff;
-  padding: 1px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-  transition: transform 0.12s ease;
+  gap: 0.35rem;
+  background: var(--tile-bg, linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%));
+  padding: 2px 0.5rem 2px 2px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.12s ease, border-color 0.15s ease;
+  max-width: 100px;
+}
+
+[data-color-mode="dark"] .mobile-topbar-profile {
+  background: var(--tile-bg, linear-gradient(180deg, #1e293b 0%, #0f172a 100%));
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 .mobile-topbar-profile:active {
-  transform: scale(0.92);
+  transform: scale(0.94);
+}
+
+.mobile-topbar-profile-avatar-wrap {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mobile-topbar-profile-name {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-main, #0f172a);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1;
+}
+
+@media (max-width: 360px) {
+  .mobile-topbar-profile-name {
+    display: none;
+  }
+  .mobile-topbar-profile {
+    padding: 2px;
+    border-radius: 50%;
+  }
 }
 
 .mobile-topbar-actions-group {

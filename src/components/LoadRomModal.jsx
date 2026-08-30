@@ -535,9 +535,6 @@ export default function LoadRomModal({
           {/* STAGE 1: Dropzone & Dual Triggers (When nothing selected) */}
           {!selectedFile && !folderData && (
             <>
-              <p className="load-rom-tagline">
-                Drop retro ROM files or an entire ROMs folder below. You can load ROMs directly into your session without copying, or permanently save to your library with background scraping.
-              </p>
 
               {/* Interactive Dual-Mode Drop Zone */}
               <div
@@ -792,16 +789,6 @@ export default function LoadRomModal({
                 </div>
               </div>
 
-              {/* Storage & Privacy Info Banner */}
-              <div className="load-rom-privacy-banner" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                <HardDrive size={18} style={{ color: isServerAvailable ? '#10b981' : '#3b82f6', flexShrink: 0 }} />
-                <span>
-                  <strong>{isServerAvailable ? 'Server Storage Available:' : '100% Private Client-Side Sandbox:'}</strong>{' '}
-                  {isServerAvailable 
-                    ? 'You can choose between zero-copy in-memory playback or saving permanently to /roms/ with background 3D box art scraping.' 
-                    : 'Games can run strictly in local browser memory without copying, or be stored safely in your browser IndexedDB.'}
-                </span>
-              </div>
             </>
           )}
 

@@ -2381,7 +2381,7 @@ export default function MobileAppView({
       {/* Mobile Topbar: Brand & Profile --- Complete Parity Action Buttons Group */}
       <header className="mobile-topbar">
         <div className="mobile-topbar-left-group">
-          {/* Active Profile Avatar Pill */}
+          {/* Active Profile Pill with Avatar & Player Name */}
           <div
             className="mobile-topbar-profile"
             style={{ borderColor: activeProfile?.favoriteColor || '#e11d48' }}
@@ -2391,7 +2391,10 @@ export default function MobileAppView({
             }}
             title={`Profile: ${activeProfile?.name || 'Player'} (Tap to switch)`}
           >
-            <MultiAvatar seed={activeProfile?.avatarSeed || activeProfile?.name || 'Player'} size={32} />
+            <div className="mobile-topbar-profile-avatar-wrap">
+              <MultiAvatar seed={activeProfile?.avatarSeed || activeProfile?.name || 'Player'} size={24} />
+            </div>
+            <span className="mobile-topbar-profile-name">{activeProfile?.name || 'Player'}</span>
           </div>
         </div>
 
