@@ -1,5 +1,5 @@
 import React from 'react';
-import { FolderOpen, RefreshCw, Star, Clock, Search } from 'lucide-react';
+import { FolderOpen, RefreshCw, Star, Clock, Search, FolderTree, Zap } from 'lucide-react';
 import DsView from './theme-views/DsView';
 
 /**
@@ -36,7 +36,10 @@ export default function CartridgeGrid({
   hasSaveData,
   scraper,
   gamepadConnected = false,
-  setShowLoadRomModal
+  setShowLoadRomModal,
+  linkedDirectoryHandle = null,
+  onReconnectLinkedFolder = null,
+  isReconnectingLinkedFolder = false
 }) {
   const currentTheme = themeEngine?.theme || 'ds';
 
@@ -113,6 +116,46 @@ export default function CartridgeGrid({
               }}
             >
               <span>Browse All Games</span>
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (linkedDirectoryHandle && activeSystem === 'all' && (!searchQuery || !searchQuery.trim())) {
+      return (
+        <div className="console-empty-card">
+          <div className="empty-icon-capsule folder-capsule-icon" style={{ background: 'rgba(59, 130, 246, 0.12)' }}>
+            <FolderTree size={38} color="#3b82f6" className="empty-pulsing-icon" />
+          </div>
+          <h3 className="empty-title">Linked Folder: &quot;{linkedDirectoryHandle.name}&quot;</h3>
+          <p className="empty-subtitle">
+            Your zero-copy folder link is saved on this device. Click below to reconnect and stream your titles directly from your computer without duplicating storage.
+          </p>
+          <div className="empty-action-group" style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <button
+              type="button"
+              className={`empty-primary-btn ${focusedTarget?.zone === 'emptyGrid' ? 'gamepad-focused' : ''}`}
+              onClick={onReconnectLinkedFolder}
+              disabled={isReconnectingLinkedFolder}
+              style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)', borderColor: '#2563eb' }}
+            >
+              {isReconnectingLinkedFolder ? <RefreshCw size={16} className="animate-spin" /> : <Zap size={16} />}
+              <span>{isReconnectingLinkedFolder ? `Reconnecting "${linkedDirectoryHandle.name}"...` : `Reconnect "${linkedDirectoryHandle.name}" Folder`}</span>
+            </button>
+
+            <button
+              type="button"
+              className="empty-primary-btn"
+              style={{ background: 'var(--panel-bg, #ffffff)', color: 'var(--text-main, #0f172a)', border: '1.5px solid var(--panel-border, #cbd5e1)' }}
+              onClick={() => {
+                setShowLoadRomModal?.(true);
+                setFocusedTarget?.({ zone: 'loadRomModal', id: 'browse' });
+                sfx?.playModalOpen?.();
+              }}
+            >
+              <FolderOpen size={16} />
+              <span>Load Different ROM</span>
             </button>
           </div>
         </div>

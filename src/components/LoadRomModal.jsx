@@ -576,31 +576,21 @@ export default function LoadRomModal({
 
               {/* Desktop Reconnect Linked Folder Card */}
               {savedLinkedHandle && !isMobile && (
-                <div className="rom-linked-folder-card animate-fade-in" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  background: 'rgba(99, 102, 241, 0.08)',
-                  border: '1.5px solid rgba(99, 102, 241, 0.28)',
-                  borderRadius: '12px',
-                  padding: '0.75rem 1rem',
-                  gap: '0.75rem'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}>
+                <div className="rom-linked-folder-card animate-fade-in">
+                  <div className="rom-linked-folder-left">
                     <FolderTree size={20} style={{ color: '#6366f1', flexShrink: 0 }} />
-                    <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                      <strong style={{ fontSize: '0.86rem', color: 'var(--text-main)' }}>
-                        Linked Folder: {savedLinkedHandle.name}
+                    <div className="rom-linked-folder-info">
+                      <strong>
+                        Linked Folder: &quot;{savedLinkedHandle.name}&quot;
                       </strong>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)' }}>
+                      <span>
                         Persistent zero-copy link saved on this device.
                       </span>
                     </div>
                   </div>
                   <button
                     type="button"
-                    className="backup-action-btn is-primary"
-                    style={{ padding: '0.35rem 0.85rem', fontSize: '0.78rem', height: '32px', flexShrink: 0 }}
+                    className="rom-linked-folder-btn"
                     onClick={handleReconnectLinkedFolder}
                     disabled={isProcessing}
                   >

@@ -29,8 +29,8 @@ import { useProfileManager } from './hooks/useProfileManager';
 import { useBgmEngine } from './hooks/useBgmEngine';
 import { useDeviceDetection } from './hooks/useDeviceDetection';
 import { usePwaInstall } from './hooks/usePwaInstall';
-import { useMobileHistoryNavigation } from './hooks/useMobileHistoryNavigation';
-import { syncAllStoresFromBackend } from './services/db';
+import { syncAllStoresFromBackend, getLinkedDirectoryHandle } from './services/db';
+import { scanDirectoryHandle } from './utils/folderScanner';
 import { BatteryWarning, Zap, X } from 'lucide-react';
 
 /**
@@ -221,6 +221,57 @@ export default function App() {
 
   // Automated Online Metadata & Cover Art Scraper
   const scraper = useMetadataScraper(games, { isMobile, isPlaying: !!activeGame });
+
+  // Persistent Desktop Zero-Copy Linked Directory Handle
+  const [linkedDirectoryHandle, setLinkedDirectoryHandle] = useState(null);
+  const [isReconnectingHandle, setIsReconnectingHandle] = useState(false);
+
+  // Check for desktop linked directory handle on startup
+  useEffect(() => {
+    if (!isMobile && typeof window !== 'undefined' && window.showDirectoryPicker) {
+      getLinkedDirectoryHandle().then(async (handle) => {
+        if (!handle) return;
+        setLinkedDirectoryHandle(handle);
+        try {
+          const perm = await handle.queryPermission({ mode: 'read' });
+          if (perm === 'granted') {
+            console.log(`⚡ [AUTO-RECONNECT] Auto-loading linked folder: "${handle.name}"...`);
+            setIsReconnectingHandle(true);
+            const files = await scanDirectoryHandle(handle, handle.name);
+            if (files && files.length > 0) {
+              await loadBatchCustomRoms(files);
+            }
+            setIsReconnectingHandle(false);
+          }
+        } catch (e) {
+          console.warn('Auto-reconnect queryPermission check failed:', e);
+          setIsReconnectingHandle(false);
+        }
+      }).catch(() => {});
+    }
+  }, [isMobile, loadBatchCustomRoms]);
+
+  const handleReconnectLinkedFolder = useCallback(async () => {
+    if (!linkedDirectoryHandle) return;
+    try {
+      setIsReconnectingHandle(true);
+      const perm = await linkedDirectoryHandle.requestPermission({ mode: 'read' });
+      if (perm !== 'granted') {
+        setIsReconnectingHandle(false);
+        return;
+      }
+      sfx.playNavSelect();
+      const files = await scanDirectoryHandle(linkedDirectoryHandle, linkedDirectoryHandle.name);
+      if (files && files.length > 0) {
+        await loadBatchCustomRoms(files);
+        sfx.playThemeSwitch();
+      }
+      setIsReconnectingHandle(false);
+    } catch (err) {
+      console.error('Failed to reconnect linked folder:', err);
+      setIsReconnectingHandle(false);
+    }
+  }, [linkedDirectoryHandle, loadBatchCustomRoms, sfx]);
 
   // Progressive Web App (PWA) & Service Worker Cache Engine
   const pwa = usePwaInstall();
@@ -505,6 +556,9 @@ export default function App() {
             scraper={scraper}
             gamepadConnected={gamepadConnected}
             setShowLoadRomModal={setShowLoadRomModal}
+            linkedDirectoryHandle={linkedDirectoryHandle}
+            onReconnectLinkedFolder={handleReconnectLinkedFolder}
+            isReconnectingLinkedFolder={isReconnectingHandle}
           />
         </>
       )}
