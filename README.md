@@ -217,6 +217,7 @@ Explore dedicated, step-by-step documentation located in the [`guides/`](guides/
 | **[💾 Save States & In-Game Save Architecture](guides/save-states.md)** | Snapshot quick saves vs in-game battery saves (`.sav`) breakdown across all 12 console platforms. |
 | **[🌐 Hardware & Platform Compatibility Matrix](guides/compatibility.md)** | Browser, OS, Smart TV (LG webOS, Samsung Tizen, Fire TV), Handheld (Steam Deck), and Console compatibility breakdown. |
 | **[📱 Cross-Device Experience Matrix](guides/device-experience-matrix.md)** | Feature sets, UI density, input modes, and admin capabilities compared across Mobile, Handheld, PC, and TV. |
+| **[🏆 Achievements & Player Milestones Guide](guides/achievements.md)** | Master registry of 30+ universal organic achievements, points matrix, status checklist, and persistence. |
 | **[🎮 ROM Management & Sidecar Metadata](guides/roms.md)** | Directory organization, folder mounting, and local companion sidecars (`.nfo`, `.json`, `cover.webp`) guide. |
 
 ---
@@ -239,13 +240,13 @@ Retro Player includes built-in AI agent skills and automated utility scripts und
 Upcoming feature designs, technical blueprints, and step-by-step implementation guides are organized under [`mirai/`](mirai/README.md):
 
 - **[Master Roadmap Index](mirai/README.md)**: Prioritized status index across all upcoming milestones.
+- **[Mobile UI Gamepad & Spatial Navigation](mirai/mobile-gamepad-navigation.md)**: Purpose-built 2D spatial navigation engine for mobile feeds and bottom sheets.
 - **[3D Cartridge & Media Designs](mirai/cartridge-designs-spec.md)**: Master geometric specifications for authentic physical cartridge shells.
-- **[Local Directory Library Mount](mirai/local-directory-library.md)**: Direct filesystem folder mounting and client-side metadata scraping.
-- **[BYOS Cloud Storage](mirai/byos-cloud-storage.md)**: Bring-Your-Own-Storage streaming (Google Drive, AWS S3, Cloudflare R2).
+- **[Settings Hub Redesign](mirai/settings-hub.md)**: Enhanced console library management, BGM track manager, and diagnostic tools.
 - **[Cross-Device Cloud Saves](mirai/cloud-saves.md)**: Cloud synchronization for quick saves and battery SRAM states.
+- **[BYOS Cloud Storage](mirai/byos-cloud-storage.md)**: Bring-Your-Own-Storage streaming (Google Drive, AWS S3, Cloudflare R2).
 - **[Self-Hosted User Management](mirai/self-hosted-user-management.md)**: Multi-user auth, admin dashboard, and role permissions.
-- **[Organic Achievements & Trophies](mirai/organic-achievements.md)**: Universal gameplay milestones, trophies, and unlock toasts.
-- **[Settings Hub Redesign](mirai/settings-hub.md)**: Enhanced console library management and diagnostic tools.
+- **[Hardware 3D WebGL2 Upscaling](mirai/hardware-3d-upscaling.md)**: WebAssembly WebGL2 multi-core pipeline with internal resolution scaling.
 - **[WebRTC Netplay](mirai/multiplayer.md)**: Peer-to-peer online multiplayer with input rollback synchronization.
 
 ---
