@@ -119,15 +119,6 @@ export const ACHIEVEMENTS_MANIFEST = [
     isPerRom: true
   },
   {
-    id: 'century_club',
-    title: 'Century Club',
-    description: 'Spend over 100 hours total playing a single retro game.',
-    category: 'endurance',
-    tier: 'gold',
-    icon: 'Award',
-    isPerRom: true
-  },
-  {
     id: 'loyal_companion',
     title: 'Loyal Companion',
     description: 'Spend over 2 hours total playing a single favorite game.',

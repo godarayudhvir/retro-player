@@ -29,7 +29,6 @@ This guide contains the master registry of all **30+ Universal Organic Achieveme
 |  | 🥈 Silver | +25G | `marathon_runner` | **Marathon Runner** | Play a single game continuously for 1 hour in one sitting. | Single session duration `>= 3600s` (1h) | Per-ROM |
 |  | 🥇 Gold | +50G | `ironman_endurance` | **Ironman Endurance** | Play a single game continuously for 7 hours in one sitting. | Single session duration `>= 25200s` (7h) | Per-ROM |
 |  | 🥈 Silver | +25G | `loyal_companion` | **Loyal Companion** | Spend 2 total hours played on a single title. | Cumulative single-game playtime `>= 7200s` (2h) | Per-ROM |
-|  | 🥇 Gold | +50G | `century_club` | **Century Club** | Log 100 total hours played on a single title. | Cumulative single-game playtime `>= 360000s` (100h) | Per-ROM |
 
 ---
 

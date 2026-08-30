@@ -437,12 +437,7 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
         unlockAchievement('loyal_companion', gameObj);
       }
 
-      // 6. Century Club (100 hours total on single game = 360000s)
-      if (nextGamePlaytime >= 360000) {
-        unlockAchievement('century_club', gameObj);
-      }
-
-      // 7. Flush all deferred session unlocks sequentially upon returning to library
+      // 6. Flush all deferred session unlocks sequentially upon returning to library
       if (sessionUnlocksRef.current.length > 0) {
         const deferred = [...sessionUnlocksRef.current];
         sessionUnlocksRef.current = [];
