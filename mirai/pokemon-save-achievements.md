@@ -27,6 +27,7 @@ The parser tracks only universal gameplay milestones present in every mainline P
 12. **High Roller (Max Wallet)**: Triggers when the trainer's wallet reaches maximum currency (₽999,999 PokéDollars).
 13. **Pokédex Scaling (10, 25, 50, 100 Caught)**: Progressive milestones for expanding the trainer's collection.
 14. **Regional Pokédex Completed**: Triggers when the player completes all owned entries for the regional Pokédex.
+15. **Flat Broke (Bankrupt / ₽0 Wallet)**: Triggers when the trainer's wallet drops to exactly ₽0 PokéDollars (e.g., after spending all funds at the Department Store or blacking out in battle).
 
 ### 2.2 Per-ROM Scoping Architecture (`isPerRom: true`)
 All Pokémon milestones are strictly scoped on a **per-ROM basis**:
