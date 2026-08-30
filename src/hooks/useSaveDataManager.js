@@ -579,36 +579,42 @@ export function useSaveDataManager() {
         const allSaves = await dbGetAll(STORES.GAME_SAVES);
         for (const item of (allSaves || [])) {
           if (!item) continue;
-          if (item.profileId && item.profileId !== activeProfileId) {
-            if (!isMasterProfile || (item.profileId !== 'prof_default' && item.profileId !== 'default')) continue;
+          const actualItem = item.value !== undefined ? item.value : item;
+          if (actualItem.profileId && actualItem.profileId !== activeProfileId) {
+            if (!isMasterProfile || (actualItem.profileId !== 'prof_default' && actualItem.profileId !== 'default')) continue;
           }
-          const key = (item.id || item.key || '');
-          const gId = (item.gameId || '');
+          const rawKey = item.key || item.id || actualItem.id || actualItem.key || '';
+          const gId = (actualItem.gameId || '');
           const idMatches = identifiers.some(id => {
             const target = id.toLowerCase();
-            return gId.toLowerCase() === target || key.toLowerCase().includes(target);
+            return gId.toLowerCase() === target || String(rawKey).toLowerCase().includes(target);
           });
           if (idMatches) {
-            await dbDelete(STORES.GAME_SAVES, key);
-            try { localStorage.removeItem(key); } catch (e) {}
+            if (rawKey) {
+              await dbDelete(STORES.GAME_SAVES, rawKey);
+              try { localStorage.removeItem(rawKey); } catch (e) {}
+            }
           }
         }
 
         const allStates = await dbGetAll(STORES.SAVE_STATES);
         for (const item of (allStates || [])) {
           if (!item) continue;
-          if (item.profileId && item.profileId !== activeProfileId) {
-            if (!isMasterProfile || (item.profileId !== 'prof_default' && item.profileId !== 'default')) continue;
+          const actualItem = item.value !== undefined ? item.value : item;
+          if (actualItem.profileId && actualItem.profileId !== activeProfileId) {
+            if (!isMasterProfile || (actualItem.profileId !== 'prof_default' && actualItem.profileId !== 'default')) continue;
           }
-          const key = (item.id || item.key || '');
-          const gId = (item.gameId || '');
+          const rawKey = item.key || item.id || actualItem.id || actualItem.key || '';
+          const gId = (actualItem.gameId || '');
           const idMatches = identifiers.some(id => {
             const target = id.toLowerCase();
-            return gId.toLowerCase() === target || key.toLowerCase().includes(target);
+            return gId.toLowerCase() === target || String(rawKey).toLowerCase().includes(target);
           });
           if (idMatches) {
-            await dbDelete(STORES.SAVE_STATES, key);
-            try { localStorage.removeItem(key); } catch (e) {}
+            if (rawKey) {
+              await dbDelete(STORES.SAVE_STATES, rawKey);
+              try { localStorage.removeItem(rawKey); } catch (e) {}
+            }
           }
         }
       } catch (scanErr) {

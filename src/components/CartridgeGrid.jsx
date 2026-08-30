@@ -229,6 +229,7 @@ export default function CartridgeGrid({
             scraper={scraper}
             sfx={sfx}
             gamepadConnected={gamepadConnected}
+            achievementsEngine={achievementsEngine}
           />
         );
     }

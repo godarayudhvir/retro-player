@@ -406,6 +406,7 @@ export default function MobileAppView({
 
       await saveCachedMetadata(id, updatedData);
       scraper?.updateLocalMetadata?.(id, updatedData);
+      achievementsEngine?.triggerScrapeUpdate?.(selectedGameForDetails);
       sfx?.playMenuConfirm?.();
       setEditSaveStatus(diskSaved ? 'Saved to Server Disk & Sidecar!' : 'Saved to Browser Storage!');
       setTimeout(() => {
@@ -556,6 +557,7 @@ export default function MobileAppView({
       };
       await saveCachedMetadata(id, updated);
       scraper?.updateLocalMetadata?.(id, updated);
+      achievementsEngine?.triggerScrapeUpdate?.(selectedGameForDetails);
       sfx?.playNotification?.();
       setEditSaveStatus(diskSaved ? 'Cover Uploaded & Saved!' : 'Cover Saved in Browser!');
       setTimeout(() => setEditSaveStatus(''), 2000);
@@ -1189,7 +1191,10 @@ export default function MobileAppView({
                         <button
                           type="button"
                           className="ds-guide-act-btn primary"
-                          onClick={() => window.open(writtenGuideUrl, '_blank', 'noopener,noreferrer')}
+                          onClick={() => {
+                            achievementsEngine?.triggerStrategyGuideRead?.(selectedGameForDetails, 60);
+                            window.open(writtenGuideUrl, '_blank', 'noopener,noreferrer');
+                          }}
                         >
                           <Globe size={12} />
                           <span>Open</span>
@@ -1197,7 +1202,10 @@ export default function MobileAppView({
                         <button
                           type="button"
                           className={`ds-guide-act-btn qr ${activeQrType === 'written' ? 'active' : ''}`}
-                          onClick={() => handleToggleQr('written', writtenGuideUrl)}
+                          onClick={() => {
+                            achievementsEngine?.triggerStrategyGuideRead?.(selectedGameForDetails, 60);
+                            handleToggleQr('written', writtenGuideUrl);
+                          }}
                         >
                           <Smartphone size={12} />
                           <span>QR</span>
@@ -1249,7 +1257,10 @@ export default function MobileAppView({
                         <button
                           type="button"
                           className="ds-guide-act-btn video-act"
-                          onClick={() => window.open(videoGuideUrl, '_blank', 'noopener,noreferrer')}
+                          onClick={() => {
+                            achievementsEngine?.triggerStrategyGuideRead?.(selectedGameForDetails, 60);
+                            window.open(videoGuideUrl, '_blank', 'noopener,noreferrer');
+                          }}
                         >
                           <Globe size={12} />
                           <span>Watch</span>
@@ -1257,7 +1268,10 @@ export default function MobileAppView({
                         <button
                           type="button"
                           className={`ds-guide-act-btn qr ${activeQrType === 'video' ? 'active' : ''}`}
-                          onClick={() => handleToggleQr('video', videoGuideUrl)}
+                          onClick={() => {
+                            achievementsEngine?.triggerStrategyGuideRead?.(selectedGameForDetails, 60);
+                            handleToggleQr('video', videoGuideUrl);
+                          }}
                         >
                           <Smartphone size={12} />
                           <span>QR</span>

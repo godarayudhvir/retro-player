@@ -397,7 +397,8 @@ export default function App() {
     },
     showOnboarding,
     setShowOnboarding,
-    games
+    games,
+    achievementsEngine
   });
 
   // Hook 10: PWA & Mobile History Navigation & Swipe-Back Gestures
@@ -519,9 +520,19 @@ export default function App() {
           onEditMetadata={(game, meta) => setEditingMetadataGame({ game, metadata: meta })}
           onScrapeGame={scraper.scrapeSingleGame}
           onExportSave={(game) => exportSaveFile(game, activeProfileId)}
-          onExportBatterySave={(game) => exportBatterySave(game, activeProfileId)}
+          onExportBatterySave={async (game) => {
+            const ok = await exportBatterySave(game, activeProfileId);
+            if (ok) achievementsEngine?.triggerBatteryExport?.(game);
+            return ok;
+          }}
           onExportQuickSave={(game) => exportQuickSave(game, activeProfileId)}
-          onImportSave={(file, game) => importSaveFile(file, game, activeProfileId)}
+          onImportSave={async (file, game) => {
+            const ok = await importSaveFile(file, game, activeProfileId);
+            if (ok) {
+              achievementsEngine?.triggerBatteryImport?.(game);
+            }
+            return ok;
+          }}
           onDeleteSave={(game) => deleteSaveFile(game, activeProfileId)}
           checkSaveData={handleCheckSaveData}
           onResetStats={resetGameStats}
@@ -605,9 +616,19 @@ export default function App() {
             onEditMetadata={(game, meta) => setEditingMetadataGame({ game, metadata: meta })}
             onScrapeGame={scraper.scrapeSingleGame}
             onExportSave={(game) => exportSaveFile(game, activeProfileId)}
-            onExportBatterySave={(game) => exportBatterySave(game, activeProfileId)}
+            onExportBatterySave={async (game) => {
+              const ok = await exportBatterySave(game, activeProfileId);
+              if (ok) achievementsEngine?.triggerBatteryExport?.(game);
+              return ok;
+            }}
             onExportQuickSave={(game) => exportQuickSave(game, activeProfileId)}
-            onImportSave={(file, game) => importSaveFile(file, game, activeProfileId)}
+            onImportSave={async (file, game) => {
+              const ok = await importSaveFile(file, game, activeProfileId);
+              if (ok) {
+                achievementsEngine?.triggerBatteryImport?.(game);
+              }
+              return ok;
+            }}
             onDeleteSave={(game) => deleteSaveFile(game, activeProfileId)}
             onDeleteGame={deleteGame}
             hasSaveData={hasSaveData}
@@ -704,6 +725,7 @@ export default function App() {
         onSaveSuccess={(updatedRecord) => {
           if (updatedRecord) {
             scraper.updateLocalMetadata?.(updatedRecord.id, updatedRecord);
+            achievementsEngine?.triggerScrapeUpdate?.(editingMetadataGame?.game);
           } else {
             scraper.refreshCache?.();
           }
@@ -850,6 +872,7 @@ export default function App() {
           } else {
             createProfile(data.name, data.avatarSeed, data.favoriteColor);
           }
+          achievementsEngine?.triggerAvatarUpdated?.();
           setShowProfileCreatorModal(false);
           setFocusedTarget({ zone: 'topbar', id: 'profile' });
         }}

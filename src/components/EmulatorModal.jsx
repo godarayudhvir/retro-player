@@ -2315,6 +2315,7 @@ export default function EmulatorModal({
             URL.revokeObjectURL(url);
           }, 2000);
           showToast('Gameplay Video Saved!');
+          achievementsEngine?.triggerVideoRecording?.(game);
         };
 
         recorder.start(500); // Record chunks every 500ms
@@ -2334,10 +2335,39 @@ export default function EmulatorModal({
     }
   };
 
+  // Fast-Forward & Speed Multiplier Tracking
+  const fastForwardStartTimeRef = useRef(0);
+  const fastForwardTimerRef = useRef(null);
+
   // Speed Multiplier Handler [1.0, 1.5, 2.0, 3.0, 4.0, 5.0]
   const handleSpeedChange = (newSpeed) => {
     const spd = parseFloat(newSpeed);
+    const prevSpeed = emulationSpeed;
     setEmulationSpeed(spd);
+
+    // Fast-Forward duration tracking for need_for_speed achievement (continuous > 45s)
+    if (spd > 1.0) {
+      if (!fastForwardStartTimeRef.current) {
+        fastForwardStartTimeRef.current = Date.now();
+        if (fastForwardTimerRef.current) clearInterval(fastForwardTimerRef.current);
+        fastForwardTimerRef.current = setInterval(() => {
+          if (fastForwardStartTimeRef.current && (Date.now() - fastForwardStartTimeRef.current >= 45000)) {
+            achievementsEngine?.triggerFastForward?.(45);
+          }
+        }, 1000);
+      }
+    } else {
+      if (fastForwardStartTimeRef.current) {
+        const elapsed = (Date.now() - fastForwardStartTimeRef.current) / 1000;
+        achievementsEngine?.triggerFastForward?.(elapsed);
+        fastForwardStartTimeRef.current = 0;
+      }
+      if (fastForwardTimerRef.current) {
+        clearInterval(fastForwardTimerRef.current);
+        fastForwardTimerRef.current = null;
+      }
+    }
+
     try {
       const win = iframeRef.current?.contentWindow;
       let applied = false;
@@ -2915,6 +2945,9 @@ export default function EmulatorModal({
               activeShaderRef.current = nextShader;
               setActiveShader(nextShader);
               showToast(`Display Filter: ${SHADER_LABELS[nextShader]}`);
+              if (nextShader === 'crt') {
+                achievementsEngine?.triggerCrtToggled?.(true);
+              }
             }}
             title="Cycle Display Filters"
           >
@@ -3075,6 +3108,9 @@ export default function EmulatorModal({
               activeShaderRef.current = nextShader;
               setActiveShader(nextShader);
               showToast(`Display Filter: ${SHADER_LABELS[nextShader]}`);
+              if (nextShader === 'crt') {
+                achievementsEngine?.triggerCrtToggled?.(true);
+              }
             }}
             title="Cycle Display Filters"
           >

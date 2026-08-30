@@ -66,7 +66,8 @@ export function useGamepadNavigation({
   onPlayGame,
   showOnboarding = false,
   setShowOnboarding,
-  games = []
+  games = [],
+  achievementsEngine
 }) {
   const stateRef = useRef({});
   const lastInputTimeRef = useRef(0);
@@ -2287,8 +2288,8 @@ export function useGamepadNavigation({
             moved = true;
           }
 
-          if (moved) {
-            lastInputTimeRef.current = now;
+          if (gamepadConnectedRef.current) {
+            achievementsEngine?.triggerPhysicalGamepadUsed?.();
           }
         }
 

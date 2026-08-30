@@ -347,6 +347,14 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
         unlockAchievement('console_hopper');
       }
 
+      // 2.5 Full Spectrum (Play game on every supported system present in mounted library)
+      if (mountedGames && mountedGames.length > 0) {
+        const availableLibrarySystems = Array.from(new Set(mountedGames.map(g => g.systemKey).filter(Boolean)));
+        if (availableLibrarySystems.length > 0 && availableLibrarySystems.every(sys => systems.includes(sys))) {
+          unlockAchievement('full_spectrum');
+        }
+      }
+
       // 3. Generation Traveler (8-bit + 16-bit + 32/64-bit)
       const has8Bit = systems.some(s => ['nes', 'gb', 'gbc', 'atari2600', 'gg'].includes(s?.toLowerCase()));
       const has16Bit = systems.some(s => ['snes', 'genesis', 'megadrive'].includes(s?.toLowerCase()));
@@ -556,12 +564,10 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
   }, [unlockAchievement]);
 
   /**
-   * Read Strategy Guide for > 60s.
+   * Read Strategy Guide / Opened Walkthrough or QR.
    */
-  const triggerStrategyGuideRead = useCallback((game, durationSeconds) => {
-    if (durationSeconds >= 60) {
-      unlockAchievement('strategy_scholar', game);
-    }
+  const triggerStrategyGuideRead = useCallback((game, durationSeconds = 60) => {
+    unlockAchievement('strategy_scholar', game);
   }, [unlockAchievement]);
 
   /**
