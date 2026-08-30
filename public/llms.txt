@@ -1,4 +1,4 @@
-# Retro Player (v1.0.8)
+# Retro Player (v1.0.9)
 
 > The High-Performance, Zero-Overhead Web Emulation Station. A console-grade retro game launcher and library running 12 classic systems directly in your browser with physical 3D cartridge rendering, client-side WebAssembly execution, real-time metadata scraping, battery save RAM (.sav), and universal gamepad navigation.
 
@@ -15,7 +15,7 @@
 - **Centralized Filesystem DB & 1-Click Backup**: Single JSON document database (`data/retroplayer_db.json`) syncing profiles, saves, and settings to host disk, with 1-click JSON backup export and restore studio.
 - **Folder Ingestion & Companion Asset Pairing**: Drag-and-drop or browse entire multi-system ROM folders with zero-copy in-memory sessions or permanent host disk ingestion, automatic console classification, background scraping, and local box art / sidecar binding.
 - **Universal Gamepad & Keyboard Navigation**: 100% controller spatial navigation across desktop & mobile feeds, telemetry widget with gamepad battery status and charging indicators.
-- **Universal Organic Achievements & Pokémon Save Inspector**: Master registry of 50+ organic achievements across 7 categories with Bronze/Silver/Gold/Platinum tiers, gamer score tracking, in-game unlock buffering, session exit toast flushing with Web Audio chiptune fanfare, and a zero-overhead binary Pokémon Save Inspector across Gen 1–5 (.sav) unlocking Gym Badges, starter choices, Pokédex milestones, key items, and League Champions.
+- **Universal Organic Achievements & Pokémon Save Inspector**: Master registry of 24 universal organic achievements across 6 categories (300G Gamerscore), in-game unlock buffering, session exit toast flushing with Web Audio chiptune fanfare, and a zero-overhead binary Pokémon Save Inspector across Gen 1–3 (.sav) unlocking 8/16 Gym Badges, starter choices, Pokédex milestones, key items, and League Champions.
 - **Progressive Web App (PWA) & Offline Mode**: Installable standalone app across macOS, Windows, Linux, Steam Deck, iOS, and Android.
 
 ## Documentation & Guides
@@ -24,6 +24,7 @@
 - [Remote Access Guide](https://github.com/godarayudhvir/retro-player/blob/main/guides/remote-access.md): Anywhere play via Tailscale Mesh VPN and Cloudflare Tunnels.
 - [Controls & Keybindings](https://github.com/godarayudhvir/retro-player/blob/main/guides/controls.md): Complete controller button mappings, spatial navigation, hotkeys, and virtual keyboard.
 - [Save States & Battery Architecture](https://github.com/godarayudhvir/retro-player/blob/main/guides/save-states.md): Snapshot quick saves vs in-game cartridge battery saves (.sav) across all platforms.
-- [Universal Achievements & Milestones Guide](https://github.com/godarayudhvir/retro-player/blob/main/guides/achievements.md): Master registry of 30+ universal achievements, points matrix, status checklist, and persistence model.
+- [Universal Achievements & Milestones Guide](https://github.com/godarayudhvir/retro-player/blob/main/guides/achievements.md): Master registry of 24 universal achievements (300G Gamerscore), points matrix, status checklist, and persistence model.
+- [Pokémon Save Inspector & Regional Milestones Hub](https://github.com/godarayudhvir/retro-player/blob/main/guides/pokemon/README.md): Binary SRAM/Flash save inspection specifications across Gen 1 (Kanto), Gen 2 (Johto 16 Badges), and Gen 3 (Hoenn & FRLG).
 - [Hardware Compatibility Matrix](https://github.com/godarayudhvir/retro-player/blob/main/guides/compatibility.md): Smart TV (LG webOS, Samsung Tizen), Steam Deck, mobile, tablet, and browser matrix.
 - [ROM Management & Sidecar Metadata](https://github.com/godarayudhvir/retro-player/blob/main/guides/roms.md): Directory organization, folder mounting, and local companion sidecars (.nfo, .json, cover.webp) guide.

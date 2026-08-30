@@ -7,7 +7,7 @@
 ### *The High-Performance, Zero-Overhead Web Emulation Station*
 
 [![Live Web Demo](https://img.shields.io/badge/Live%20Demo-godarayudhvir.github.io%2Fretro--player-emerald?style=for-the-badge&logo=githubpages&logoColor=white)](https://godarayudhvir.github.io/retro-player/)
-[![Version: v1.0.8](https://img.shields.io/badge/Version-v1.0.8-emerald?style=for-the-badge&logo=semver&logoColor=white)](https://github.com/godarayudhvir/retro-player)
+[![Version: v1.0.9](https://img.shields.io/badge/Version-v1.0.9-emerald?style=for-the-badge&logo=semver&logoColor=white)](https://github.com/godarayudhvir/retro-player)
 
 <br />
 
@@ -157,7 +157,7 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 - 🗄️ **Centralized Database & 1-Click Backup**: Single JSON document database (`data/retroplayer_db.json`) on disk with 1-click backup export and restore studio.
 - 🌐 **Unified Metadata & Box Art Scraper**: Automated multi-source scraper (Libretro CDN, ScreenScraper, TheGamesDB, Wikipedia) with an inline metadata editor.
 - 📖 **Curated Strategy Guides & QR Companion**: Integrated written walkthroughs and video playthroughs with mobile QR code pairing for couch play.
-- 🏆 **Universal Organic Achievements & Pokémon Save Inspector**: Master registry of 50+ organic achievements across 7 categories (Bronze, Silver, Gold, Platinum), Gamerscore tracking, in-game unlock buffering, session-exit toast fanfare with Web Audio chiptune chimes, and a real-time, offline Pokémon Save Inspector for Gen 1–5 (GB, GBC, GBA, NDS) unlocking Gym Badges, starter choices, Pokédex milestones, key items, and League Champions.
+- 🏆 **Universal Organic Achievements & Pokémon Save Inspector**: Master registry of 24 universal organic achievements across 6 categories (300G Gamerscore), Gamerscore tracking, in-game unlock buffering, session-exit toast fanfare with Web Audio chiptune chimes, and a real-time, offline Pokémon Save Inspector for Gen 1–3 (GB, GBC, GBA) unlocking 8/16 Gym Badges, starter choices, Pokédex milestones, key items, and League Champions.
 - 📁 **Folder Batch Ingestion & Companion Asset Pairing**: Drag and drop entire multi-system ROM directories or load in-memory with zero disk copies, automatic console classification across 12 platforms, background scraping, and automatic local companion box art (`.webp`/`.png`/`.jpg`) and metadata (`.json`/`.nfo`) sidecar binding.
 - 🎵 **Dynamic BGM & Synthesized SFX**: Multi-track chiptune engine with smart in-game pause and low-latency Web Audio sound effects.
 - 📱 **Adaptive Cross-Device PWA**: Installable standalone app optimized for Mobile Touch Feeds, Steam Deck, Desktop, and 10-Foot TV mode.
@@ -218,7 +218,8 @@ Explore dedicated, step-by-step documentation located in the [`guides/`](guides/
 | **[💾 Save States & In-Game Save Architecture](guides/save-states.md)** | Snapshot quick saves vs in-game battery saves (`.sav`) breakdown across all 12 console platforms. |
 | **[🌐 Hardware & Platform Compatibility Matrix](guides/compatibility.md)** | Browser, OS, Smart TV (LG webOS, Samsung Tizen, Fire TV), Handheld (Steam Deck), and Console compatibility breakdown. |
 | **[📱 Cross-Device Experience Matrix](guides/device-experience-matrix.md)** | Feature sets, UI density, input modes, and admin capabilities compared across Mobile, Handheld, PC, and TV. |
-| **[🏆 Achievements & Player Milestones Guide](guides/achievements.md)** | Master registry of 30+ universal organic achievements, points matrix, status checklist, and persistence. |
+| **[🏆 Universal Achievements & Player Milestones Guide](guides/achievements.md)** | Master registry of 24 universal organic achievements (300G Gamerscore), points matrix, and persistence. |
+| **[⚡ Pokémon Save Inspector & Regional Milestones Hub](guides/pokemon/README.md)** | Binary SRAM/Flash save inspection specifications across Gen 1 (Kanto), Gen 2 (Johto 16 Badges), and Gen 3 (Hoenn & FRLG). |
 | **[🎮 ROM Management & Sidecar Metadata](guides/roms.md)** | Directory organization, folder mounting, and local companion sidecars (`.nfo`, `.json`, `cover.webp`) guide. |
 
 ---
@@ -242,7 +243,7 @@ Retro Player includes built-in AI agent skills and automated utility scripts und
 Upcoming feature designs, technical blueprints, and step-by-step implementation guides are organized under [`mirai/`](mirai/README.md):
 
 - **[Master Roadmap Index](mirai/README.md)**: Prioritized status index across all upcoming milestones.
-- **[Universal Pokémon Save Achievements](mirai/pokemon-save-achievements.md)**: Real-time byte inspector for battery SRAM/Flash (`.sav`) across Gen 1–5 (GB, GBC, GBA, NDS) unlocking per-ROM milestones (Starter, 8 Gym Badges, Victory Road, League Champion).
+- **[Pokémon Save Inspector (Gen 4 & Gen 5 NDS)](mirai/pokemon-save-gen4-gen5.md)**: Zero-overhead binary save parser for 512KB NDS saves across Gen 4–5 (Sinnoh & Unova Gym Badges, Creation/Tao Trios, and Champions).
 - **[Dynamic Emulation Core Switching](mirai/emulation-core-switching.md)**: Per-system and per-game WebAssembly core override engine (mGBA vs VBA-M, Gambatte vs SameBoy, Snes9x vs bsnes, Beetle PSX vs PCSX ReARMed).
 - **[Mobile UI Gamepad & Spatial Navigation](mirai/mobile-gamepad-navigation.md)**: Purpose-built 2D spatial navigation engine for mobile feeds and bottom sheets.
 - **[3D Cartridge & Media Designs](mirai/cartridge-designs-spec.md)**: Master geometric specifications for authentic physical cartridge shells.
