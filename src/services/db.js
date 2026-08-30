@@ -681,5 +681,10 @@ export async function removeLinkedDirectoryHandle() {
   }
 }
 
-export { STORES };
+export { 
+  STORES,
+  saveLinkedDirectoryHandle,
+  getLinkedDirectoryHandle,
+  removeLinkedDirectoryHandle
+};
 
