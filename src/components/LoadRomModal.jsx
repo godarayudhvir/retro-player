@@ -437,7 +437,7 @@ export default function LoadRomModal({
           {!selectedFile && !folderData && (
             <>
               <p className="load-rom-tagline">
-                Drop retro ROM files or an entire folder below. You can load ROMs directly into your session without copying, or permanently save to your library with background scraping.
+                Drop retro ROM files or an entire ROMs folder below. You can load ROMs directly into your session without copying, or permanently save to your library with background scraping.
               </p>
 
               {/* Interactive Dual-Mode Drop Zone */}
@@ -450,7 +450,7 @@ export default function LoadRomModal({
                 <Upload size={38} className="load-rom-dropzone-icon" />
                 <div className="load-rom-dropzone-text">
                   <strong>Drag &amp; Drop ROMs or Folder here</strong>
-                  <span>Supports single ROMs, multiple files, or full directory trees</span>
+                  <span>Supports single ROMs, multiple ROMs in a system folder, or full ROMs directory</span>
                 </div>
 
                 {/* Dual Action Buttons */}
@@ -468,7 +468,7 @@ export default function LoadRomModal({
                     className="load-rom-browse-btn is-folder"
                     onClick={handleChooseFolderClick}
                   >
-                    <FolderTree size={16} /> Choose Folder
+                    <FolderTree size={16} /> Choose ROMs Folder
                   </button>
                 </div>
 
@@ -492,6 +492,25 @@ export default function LoadRomModal({
                   onChange={handleFolderChange}
                   style={{ display: 'none' }}
                 />
+              </div>
+
+              {/* Universal Speed & Efficiency Tip */}
+              <div className="load-rom-speed-tip" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.65rem',
+                background: 'rgba(245, 158, 11, 0.08)',
+                border: '1px solid rgba(245, 158, 11, 0.22)',
+                borderRadius: '10px',
+                padding: '0.65rem 0.95rem',
+                fontSize: '0.81rem',
+                color: '#b45309',
+                lineHeight: 1.45
+              }}>
+                <Zap size={16} style={{ flexShrink: 0, color: '#f59e0b' }} />
+                <span>
+                  <strong>Pro Tip:</strong> Selecting a specific system folder (e.g. <code>/gba</code>, <code>/snes</code>, or <code>/n64</code>) loads near-instantly compared to scanning entire multi-thousand root directories at once.
+                </span>
               </div>
 
               {/* Active Scanning / Processing Progress Bar in Stage 1 */}

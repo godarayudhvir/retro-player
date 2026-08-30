@@ -203,8 +203,8 @@ function pairCompanionFiles(romFiles, imageFiles, sidecarFiles) {
  * @returns {Promise<{ folderName: string, files: Array<File>, stats: { totalFiles: number, totalSizeBytes: number, systems: Record<string, number>, localCoversCount: number, localSidecarsCount: number } }>}
  */
 export async function extractRomsFromInput(input, onProgress = null) {
-  let allFiles = [];
   let detectedFolderName = 'ROMs Collection';
+  let rawSourceList = [];
 
   if (input?.items && input.items.length > 0) {
     const entryPromises = [];
@@ -220,32 +220,28 @@ export async function extractRomsFromInput(input, onProgress = null) {
         }
       } else {
         const file = item.getAsFile();
-        if (file && (isSupportedRomFile(file.name) || isSupportedImageFile(file.name) || isSupportedSidecarFile(file.name))) {
-          allFiles.push(file);
-        }
+        if (file) rawSourceList.push(file);
       }
     }
     const resolvedEntries = (await Promise.all(entryPromises)).flat();
-    allFiles = allFiles.concat(resolvedEntries);
+    rawSourceList = rawSourceList.concat(resolvedEntries);
   } else if (input?.files) {
-    const rawFiles = Array.from(input.files);
-    allFiles = rawFiles.filter(f => isSupportedRomFile(f.name) || isSupportedImageFile(f.name) || isSupportedSidecarFile(f.name));
-    if (allFiles.length > 0 && allFiles[0].webkitRelativePath) {
-      const parts = allFiles[0].webkitRelativePath.split('/');
-      if (parts.length > 1) {
-        detectedFolderName = parts[0];
-      }
+    rawSourceList = input.files;
+    if (rawSourceList.length > 0 && rawSourceList[0]?.webkitRelativePath) {
+      const parts = rawSourceList[0].webkitRelativePath.split('/');
+      if (parts.length > 1) detectedFolderName = parts[0];
+    }
+  } else if (input instanceof FileList) {
+    rawSourceList = input;
+    if (rawSourceList.length > 0 && rawSourceList[0]?.webkitRelativePath) {
+      const parts = rawSourceList[0].webkitRelativePath.split('/');
+      if (parts.length > 1) detectedFolderName = parts[0];
     }
   } else if (Array.isArray(input)) {
-    allFiles = input.filter(f => isSupportedRomFile(f.name) || isSupportedImageFile(f.name) || isSupportedSidecarFile(f.name));
-  } else if (input instanceof FileList) {
-    const rawFiles = Array.from(input);
-    allFiles = rawFiles.filter(f => isSupportedRomFile(f.name) || isSupportedImageFile(f.name) || isSupportedSidecarFile(f.name));
-    if (allFiles.length > 0 && allFiles[0].webkitRelativePath) {
-      const parts = allFiles[0].webkitRelativePath.split('/');
-      if (parts.length > 1) {
-        detectedFolderName = parts[0];
-      }
+    rawSourceList = input;
+    if (rawSourceList.length > 0 && rawSourceList[0]?.webkitRelativePath) {
+      const parts = rawSourceList[0].webkitRelativePath.split('/');
+      if (parts.length > 1) detectedFolderName = parts[0];
     }
   }
 
@@ -254,7 +250,7 @@ export async function extractRomsFromInput(input, onProgress = null) {
     detectedFolderName = 'ROMs Collection';
   }
 
-  // Split into ROMs, Images, and Sidecars with chunking and progress reporting
+  const totalInputCount = rawSourceList.length || 0;
   const romFiles = [];
   const imageFiles = [];
   const sidecarFiles = [];
@@ -262,35 +258,45 @@ export async function extractRomsFromInput(input, onProgress = null) {
   let totalSizeBytes = 0;
   const systems = {};
 
-  const CHUNK_SIZE = 250;
-  for (let i = 0; i < allFiles.length; i++) {
-    const file = allFiles[i];
-    const key = `${file.name}_${file.size}`;
-    if (!seen.has(key)) {
-      seen.add(key);
+  const CHUNK_SIZE = 75;
+  for (let i = 0; i < totalInputCount; i++) {
+    const file = rawSourceList[i];
+    if (!file || !file.name) continue;
 
-      if (isSupportedRomFile(file.name)) {
-        romFiles.push(file);
-        totalSizeBytes += file.size;
+    const fname = file.name;
+    const isRom = isSupportedRomFile(fname);
+    const isImg = !isRom && isSupportedImageFile(fname);
+    const isMeta = !isRom && !isImg && isSupportedSidecarFile(fname);
 
-        const pathToCheck = file.webkitRelativePath || file.relativePath || file.name;
-        const sys = detectSystemFromExtension(pathToCheck);
-        const sysKey = sys?.key || 'custom';
-        systems[sysKey] = (systems[sysKey] || 0) + 1;
-      } else if (isSupportedImageFile(file.name)) {
-        imageFiles.push(file);
-      } else if (isSupportedSidecarFile(file.name)) {
-        sidecarFiles.push(file);
+    if (isRom || isImg || isMeta) {
+      const key = `${fname}_${file.size || 0}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+
+        if (isRom) {
+          romFiles.push(file);
+          totalSizeBytes += (file.size || 0);
+
+          const pathToCheck = file.webkitRelativePath || file.relativePath || fname;
+          const sys = detectSystemFromExtension(pathToCheck);
+          const sysKey = sys?.key || 'custom';
+          systems[sysKey] = (systems[sysKey] || 0) + 1;
+        } else if (isImg) {
+          imageFiles.push(file);
+        } else if (isMeta) {
+          sidecarFiles.push(file);
+        }
       }
     }
 
     // Yield to the event loop every chunk for smooth UI rendering and responsive progress
     if (i > 0 && i % CHUNK_SIZE === 0) {
       if (onProgress) {
+        const percent = Math.round(((i + 1) / totalInputCount) * 100);
         onProgress({
-          current: i,
-          total: allFiles.length,
-          message: `Categorizing files (${i} / ${allFiles.length})...`
+          current: i + 1,
+          total: totalInputCount,
+          message: `Scanned ${i + 1} of ${totalInputCount} items (${percent}%)...`
         });
       }
       await new Promise(resolve => setTimeout(resolve, 0));
@@ -299,9 +305,9 @@ export async function extractRomsFromInput(input, onProgress = null) {
 
   if (onProgress) {
     onProgress({
-      current: allFiles.length,
-      total: allFiles.length,
-      message: `Pairing artwork & metadata for ${romFiles.length} ROMs...`
+      current: totalInputCount,
+      total: totalInputCount,
+      message: `Pairing artwork & sidecars for ${romFiles.length} detected ROMs...`
     });
   }
   await new Promise(resolve => setTimeout(resolve, 0));
