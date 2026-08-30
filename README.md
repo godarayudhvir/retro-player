@@ -157,6 +157,7 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 - 🗄️ **Centralized Database & 1-Click Backup**: Single JSON document database (`data/retroplayer_db.json`) on disk with 1-click backup export and restore studio.
 - 🌐 **Unified Metadata & Box Art Scraper**: Automated multi-source scraper (Libretro CDN, ScreenScraper, TheGamesDB, Wikipedia) with an inline metadata editor.
 - 📖 **Curated Strategy Guides & QR Companion**: Integrated written walkthroughs and video playthroughs with mobile QR code pairing for couch play.
+- 🏆 **Universal Organic Achievements & Trophy Cabinet**: Master registry of 30+ organic achievements across 7 categories (Bronze, Silver, Gold, Platinum), Gamerscore tracking, in-game unlock buffering, session-exit toast fanfare with Web Audio chiptune chimes, and per-ROM milestone badges.
 - 📁 **Folder Batch Ingestion & Companion Asset Pairing**: Drag and drop entire multi-system ROM directories or load in-memory with zero disk copies, automatic console classification across 12 platforms, background scraping, and automatic local companion box art (`.webp`/`.png`/`.jpg`) and metadata (`.json`/`.nfo`) sidecar binding.
 - 🎵 **Dynamic BGM & Synthesized SFX**: Multi-track chiptune engine with smart in-game pause and low-latency Web Audio sound effects.
 - 📱 **Adaptive Cross-Device PWA**: Installable standalone app optimized for Mobile Touch Feeds, Steam Deck, Desktop, and 10-Foot TV mode.
@@ -168,11 +169,11 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 Retro Player supports **12 classic retro gaming platforms** out of the box:
 
-| Category | Supported Consoles | Formats | Default Emulation Core |
+| Category | Supported Consoles | Formats | Emulation Core |
 | :--- | :--- | :--- | :--- |
-| **Handhelds** | Game Boy Advance (`gba`), Game Boy Color (`gbc`), Game Boy DMG (`gb`), Sega Game Gear (`game_gear`), Nintendo DS (`nds`) | `.gba`, `.gbc`, `.gb`, `.gg`, `.nds` | mGBA, Gambatte, Genesis Plus GX, MelonDS |
-| **Home Consoles** | Super Nintendo (`snes`), NES (`nes`), Nintendo 64 (`n64`), Sega Genesis (`sega_genesis`), Atari 2600 (`atari_2600`), PlayStation 1 (`playstation`) | `.sfc`, `.smc`, `.nes`, `.z64`, `.md`, `.gen`, `.a26`, `.chd`, `.iso`, `.cue` | Snes9x, FCEUmm, Mupen64Plus, Genesis Plus GX, Stella, Beetle PSX |
-| **Arcade** | Arcade MAME (`arcade`) | `.zip` | MAME 2003 Plus |
+| **Handhelds** | Game Boy Advance (`gba`), Game Boy Color (`gbc`), Game Boy DMG (`gb`), Sega Game Gear (`gamegear`), Nintendo DS (`nds`) | `.gba`, `.gbc`, `.gb`, `.gg`, `.nds` | mGBA, Gambatte, Genesis Plus GX, MelonDS |
+| **Home Consoles** | Super Nintendo (`snes`), NES (`nes`), Nintendo 64 (`n64`), Sega Genesis (`genesis`), Atari 2600 (`atari2600`), PlayStation 1 (`ps1`) | `.sfc`, `.smc`, `.nes`, `.fds`, `.z64`, `.v64`, `.md`, `.gen`, `.smd`, `.a26`, `.chd`, `.iso`, `.cue`, `.pbp`, `.bin` | Snes9x, FCEUmm, Mupen64Plus, Genesis Plus GX, Stella, Beetle PSX |
+| **Arcade** | Arcade MAME (`arcade`) | `.zip`, `.7z` | MAME 2003 Plus |
 
 ---
 
@@ -230,6 +231,7 @@ Retro Player includes built-in AI agent skills and automated utility scripts und
 | :--- | :--- | :--- |
 | **[Codebase Stats](.agents/skills/codebase-stats/SKILL.md)** | [`.agents/skills/codebase-stats/`](.agents/skills/codebase-stats/) | Analyzes and reports file extension counts, sizes, and summaries while filtering build/cache folders. |
 | **[Update ROMs](.agents/skills/update-roms/SKILL.md)** | [`.agents/skills/update-roms/`](.agents/skills/update-roms/) | High-throughput parallel ROM organizer and unified multi-source scraper with layered fallback matching and WebP conversion. |
+| **[Convert WebP](.agents/skills/convert-webp/SKILL.md)** | [`.agents/skills/convert-webp/`](.agents/skills/convert-webp/) | Scans ROM directories for PNG/JPG images, batch converts to WebP via cwebp/sips, and purges source files. |
 | **[ROM Cleanup](.agents/skills/rom-cleanup/SKILL.md)** | [`.agents/skills/rom-cleanup/`](.agents/skills/rom-cleanup/) | Deduplicates dated builds, prunes non-English regions, and filters obscure releases with structured keep/remove approval. |
 | **[Release Version](.agents/skills/release-version/SKILL.md)** | [`.agents/skills/release-version/`](.agents/skills/release-version/) | Synchronizes app version across Service Worker caches, PWA manifest, package configs, in-app About modal, and documentation. |
 
@@ -241,6 +243,7 @@ Upcoming feature designs, technical blueprints, and step-by-step implementation 
 
 - **[Master Roadmap Index](mirai/README.md)**: Prioritized status index across all upcoming milestones.
 - **[Universal Pokémon Save Achievements](mirai/pokemon-save-achievements.md)**: Real-time byte inspector for battery SRAM/Flash (`.sav`) across Gen 1–5 (GB, GBC, GBA, NDS) unlocking per-ROM milestones (Starter, 8 Gym Badges, Victory Road, League Champion).
+- **[Dynamic Emulation Core Switching](mirai/emulation-core-switching.md)**: Per-system and per-game WebAssembly core override engine (mGBA vs VBA-M, Gambatte vs SameBoy, Snes9x vs bsnes, Beetle PSX vs PCSX ReARMed).
 - **[Mobile UI Gamepad & Spatial Navigation](mirai/mobile-gamepad-navigation.md)**: Purpose-built 2D spatial navigation engine for mobile feeds and bottom sheets.
 - **[3D Cartridge & Media Designs](mirai/cartridge-designs-spec.md)**: Master geometric specifications for authentic physical cartridge shells.
 - **[Settings Hub Redesign](mirai/settings-hub.md)**: Enhanced console library management, BGM track manager, and diagnostic tools.
