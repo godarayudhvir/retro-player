@@ -37,9 +37,9 @@ export default function CartridgeGrid({
   scraper,
   gamepadConnected = false,
   setShowLoadRomModal,
-  linkedDirectoryHandle = null,
-  onReconnectLinkedFolder = null,
-  isReconnectingLinkedFolder = false
+  linkedDirectoryHandles = [],
+  onReconnectLinkedFolders = null,
+  isReconnectingLinkedFolders = false
 }) {
   const currentTheme = themeEngine?.theme || 'ds';
 
@@ -122,26 +122,37 @@ export default function CartridgeGrid({
       );
     }
 
-    if (linkedDirectoryHandle && activeSystem === 'all' && (!searchQuery || !searchQuery.trim())) {
+    if (linkedDirectoryHandles && linkedDirectoryHandles.length > 0 && activeSystem === 'all' && (!searchQuery || !searchQuery.trim())) {
+      const count = linkedDirectoryHandles.length;
+      const folderNames = linkedDirectoryHandles.map(h => `"${h.name}"`).join(', ');
+      const titleText = count === 1 
+        ? `Linked Folder: "${linkedDirectoryHandles[0].name}"` 
+        : `${count} Linked Folders: ${folderNames}`;
+      const btnText = isReconnectingLinkedFolders
+        ? `Reconnecting ${count > 1 ? `${count} Folders...` : `"${linkedDirectoryHandles[0].name}"...`}`
+        : `Reconnect ${count > 1 ? `All Folders (${count})` : `"${linkedDirectoryHandles[0].name}" Folder`}`;
+
       return (
         <div className="console-empty-card">
           <div className="empty-icon-capsule folder-capsule-icon" style={{ background: 'rgba(59, 130, 246, 0.12)' }}>
             <FolderTree size={38} color="#3b82f6" className="empty-pulsing-icon" />
           </div>
-          <h3 className="empty-title">Linked Folder: &quot;{linkedDirectoryHandle.name}&quot;</h3>
+          <h3 className="empty-title">{titleText}</h3>
           <p className="empty-subtitle">
-            Your zero-copy folder link is saved on this device. Click below to reconnect and stream your titles directly from your computer without duplicating storage.
+            {count === 1 
+              ? 'Your zero-copy folder link is saved on this device. Click below to reconnect and stream your titles directly from your computer without duplicating storage.'
+              : `Your ${count} zero-copy folder links are saved on this device. Click below to reconnect all folders and stream your full collection with 0 MB storage overhead.`}
           </p>
           <div className="empty-action-group" style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <button
               type="button"
               className={`empty-primary-btn ${focusedTarget?.zone === 'emptyGrid' ? 'gamepad-focused' : ''}`}
-              onClick={onReconnectLinkedFolder}
-              disabled={isReconnectingLinkedFolder}
+              onClick={() => onReconnectLinkedFolders?.()}
+              disabled={isReconnectingLinkedFolders}
               style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)', borderColor: '#2563eb' }}
             >
-              {isReconnectingLinkedFolder ? <RefreshCw size={16} className="animate-spin" /> : <Zap size={16} />}
-              <span>{isReconnectingLinkedFolder ? `Reconnecting "${linkedDirectoryHandle.name}"...` : `Reconnect "${linkedDirectoryHandle.name}" Folder`}</span>
+              {isReconnectingLinkedFolders ? <RefreshCw size={16} className="animate-spin" /> : <Zap size={16} />}
+              <span>{btnText}</span>
             </button>
 
             <button

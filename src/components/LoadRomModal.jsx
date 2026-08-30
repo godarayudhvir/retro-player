@@ -19,6 +19,7 @@ import { detectSystemFromExtension, getSystemInfoByKey } from '../utils/systemDe
 import { 
   checkServerDbStatus,
   saveLinkedDirectoryHandle,
+  getLinkedDirectoryHandles,
   getLinkedDirectoryHandle,
   removeLinkedDirectoryHandle
 } from '../services/db';
@@ -36,6 +37,9 @@ export default function LoadRomModal({
   initialFile = null,
   focusedTarget,
   isMobile = false,
+  savedLinkedHandles = [],
+  onReconnectLinkedFolders = null,
+  onRemoveLinkedFolder = null,
   onClose,
   onQuickPlay,
   onUploadToLibrary,
@@ -49,20 +53,22 @@ export default function LoadRomModal({
   const [selectedFile, setSelectedFile] = useState(null);
   const [folderData, setFolderData] = useState(null); // { folderName, files: [], stats, dirHandle }
   const [storageMode, setStorageMode] = useState('session'); // 'session' | 'permanent'
-  const [savedLinkedHandle, setSavedLinkedHandle] = useState(null);
+  const [localLinkedHandles, setLocalLinkedHandles] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progressState, setProgressState] = useState(null); // { step, current, total, message }
   const [errorMessage, setErrorMessage] = useState(null);
   const [focusedOption, setFocusedOption] = useState(0); 
   const isServerAvailable = checkServerDbStatus();
 
-  // Check for saved linked directory handle on desktop
+  const activeHandles = savedLinkedHandles && savedLinkedHandles.length > 0 ? savedLinkedHandles : localLinkedHandles;
+
+  // Check for saved linked directory handles on desktop
   useEffect(() => {
     if (isOpen && !isMobile && typeof window !== 'undefined' && window.showDirectoryPicker) {
-      getLinkedDirectoryHandle().then(handle => {
-        setSavedLinkedHandle(handle || null);
+      getLinkedDirectoryHandles().then(handles => {
+        setLocalLinkedHandles(handles || []);
       }).catch(() => {
-        setSavedLinkedHandle(null);
+        setLocalLinkedHandles([]);
       });
     }
   }, [isOpen, isMobile]);
@@ -261,44 +267,55 @@ export default function LoadRomModal({
     }
   };
 
-  const handleReconnectLinkedFolder = async (e) => {
+  const handleReconnectAllLinkedFolders = async (e) => {
     e?.stopPropagation?.();
-    if (!savedLinkedHandle) return;
+    if (!activeHandles || activeHandles.length === 0) return;
+    if (onReconnectLinkedFolders) {
+      await onReconnectLinkedFolders(activeHandles);
+      onClose();
+      return;
+    }
     try {
       setIsProcessing(true);
       setErrorMessage(null);
-      setProgressState({ step: 'scanning', current: 0, total: 0, message: `Reconnecting to "${savedLinkedHandle.name}"...` });
+      setProgressState({ step: 'scanning', current: 0, total: 0, message: `Reconnecting ${activeHandles.length} linked folder(s)...` });
       
-      const perm = await savedLinkedHandle.requestPermission({ mode: 'read' });
-      if (perm !== 'granted') {
+      const allFiles = [];
+      for (const h of activeHandles) {
+        try {
+          const perm = await h.requestPermission({ mode: 'read' });
+          if (perm === 'granted') {
+            const files = await scanDirectoryHandle(h, h.name);
+            allFiles.push(...files);
+          }
+        } catch (_) {}
+      }
+      if (allFiles.length > 0) {
+        await handleIncomingFiles(allFiles);
+      } else {
         setIsProcessing(false);
         setProgressState(null);
-        setErrorMessage(`Permission denied for linked folder "${savedLinkedHandle.name}".`);
-        return;
       }
-
-      await new Promise(resolve => setTimeout(resolve, 40));
-      const files = await scanDirectoryHandle(savedLinkedHandle, savedLinkedHandle.name, (prog) => {
-        setProgressState(prev => ({
-          ...prev,
-          step: 'scanning',
-          current: prog.current || 0,
-          total: prog.total || 0,
-          message: prog.message || `Scanning folder "${savedLinkedHandle.name}"...`
-        }));
-      });
-
-      await handleIncomingFiles(files, savedLinkedHandle);
     } catch (err) {
       if (err.name === 'AbortError') {
         setIsProcessing(false);
         setProgressState(null);
         return;
       }
-      console.error('Failed to reconnect linked folder:', err);
+      console.error('Failed to reconnect linked folders:', err);
       setIsProcessing(false);
       setProgressState(null);
-      setErrorMessage(err.message || 'Failed to reconnect linked folder');
+      setErrorMessage(err.message || 'Failed to reconnect linked folders');
+    }
+  };
+
+  const handleRemoveSingleLinkedFolder = async (folderName) => {
+    if (onRemoveLinkedFolder) {
+      await onRemoveLinkedFolder(folderName);
+    } else {
+      await removeLinkedDirectoryHandle(folderName);
+      const updated = await getLinkedDirectoryHandles();
+      setLocalLinkedHandles(updated);
     }
   };
 
@@ -381,7 +398,8 @@ export default function LoadRomModal({
         if (folderData?.dirHandle && !isMobile) {
           try {
             await saveLinkedDirectoryHandle(folderData.dirHandle);
-            setSavedLinkedHandle(folderData.dirHandle);
+            const updated = await getLinkedDirectoryHandles();
+            setLocalLinkedHandles(updated);
           } catch (_) {}
         }
 
@@ -409,8 +427,9 @@ export default function LoadRomModal({
         // Path B: Ingest to Library (Permanent Storage — Copies to Server / IndexedDB)
         if (folderData?.dirHandle) {
           try {
-            await removeLinkedDirectoryHandle();
-            setSavedLinkedHandle(null);
+            await removeLinkedDirectoryHandle(folderData.dirHandle.name);
+            const updated = await getLinkedDirectoryHandles();
+            setLocalLinkedHandles(updated);
           } catch (_) {}
         }
 
@@ -574,29 +593,69 @@ export default function LoadRomModal({
                 />
               </div>
 
-              {/* Desktop Reconnect Linked Folder Card */}
-              {savedLinkedHandle && !isMobile && (
-                <div className="rom-linked-folder-card animate-fade-in">
-                  <div className="rom-linked-folder-left">
-                    <FolderTree size={20} style={{ color: '#6366f1', flexShrink: 0 }} />
-                    <div className="rom-linked-folder-info">
-                      <strong>
-                        Linked Folder: &quot;{savedLinkedHandle.name}&quot;
-                      </strong>
-                      <span>
-                        Persistent zero-copy link saved on this device.
-                      </span>
+              {/* Desktop Reconnect Linked Folder(s) Card */}
+              {activeHandles && activeHandles.length > 0 && !isMobile && (
+                <div className="rom-linked-folder-card animate-fade-in" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '0.65rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '0.75rem' }}>
+                    <div className="rom-linked-folder-left">
+                      <FolderTree size={20} style={{ color: '#6366f1', flexShrink: 0 }} />
+                      <div className="rom-linked-folder-info">
+                        <strong>
+                          {activeHandles.length === 1 ? `Linked Folder: "${activeHandles[0].name}"` : `${activeHandles.length} Linked Folders Saved`}
+                        </strong>
+                        <span>
+                          Persistent zero-copy links saved on this device.
+                        </span>
+                      </div>
                     </div>
+                    <button
+                      type="button"
+                      className="rom-linked-folder-btn"
+                      onClick={handleReconnectAllLinkedFolders}
+                      disabled={isProcessing}
+                    >
+                      <Zap size={13} />
+                      <span>{activeHandles.length > 1 ? `Reconnect All (${activeHandles.length})` : 'Reconnect'}</span>
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    className="rom-linked-folder-btn"
-                    onClick={handleReconnectLinkedFolder}
-                    disabled={isProcessing}
-                  >
-                    <Zap size={13} />
-                    <span>Reconnect</span>
-                  </button>
+
+                  {/* Individual Folder Chips with Remove Option */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', paddingTop: '6px', borderTop: '1px solid rgba(99, 102, 241, 0.15)' }}>
+                    {activeHandles.map((handle) => (
+                      <div key={handle.name} style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        background: 'rgba(99, 102, 241, 0.12)',
+                        border: '1px solid rgba(99, 102, 241, 0.25)',
+                        borderRadius: '6px',
+                        padding: '2px 8px',
+                        fontSize: '0.75rem',
+                        color: 'var(--text-main)'
+                      }}>
+                        <span>📁 {handle.name}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveSingleLinkedFolder(handle.name);
+                          }}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '0 2px',
+                            color: '#94a3b8',
+                            fontSize: '0.75rem',
+                            lineHeight: 1
+                          }}
+                          title={`Remove link for ${handle.name}`}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 

@@ -623,17 +623,21 @@ export async function deleteCustomRomFromLocalDb(gameId) {
 }
 
 /**
- * Saves a desktop FileSystemDirectoryHandle to IndexedDB for zero-copy session persistence.
+ * Saves a desktop FileSystemDirectoryHandle to IndexedDB for zero-copy multi-folder persistence.
  */
 export async function saveLinkedDirectoryHandle(dirHandle) {
-  if (!dirHandle) return false;
+  if (!dirHandle || !dirHandle.name) return false;
   try {
     const db = await getDB();
     if (!db) return false;
+    const existing = await getLinkedDirectoryHandles();
+    const updated = existing.filter(h => h.name !== dirHandle.name);
+    updated.push(dirHandle);
+
     return new Promise((resolve) => {
       const transaction = db.transaction([STORES.SETTINGS], 'readwrite');
       const store = transaction.objectStore(STORES.SETTINGS);
-      const request = store.put({ key: 'linked_directory_handle', value: dirHandle });
+      const request = store.put({ key: 'linked_directory_handles', value: updated });
       request.onsuccess = () => resolve(true);
       request.onerror = () => resolve(false);
     });
@@ -644,37 +648,73 @@ export async function saveLinkedDirectoryHandle(dirHandle) {
 }
 
 /**
- * Retrieves the saved desktop FileSystemDirectoryHandle from IndexedDB.
+ * Retrieves all saved desktop FileSystemDirectoryHandles from IndexedDB.
+ * @returns {Promise<Array<FileSystemDirectoryHandle>>}
  */
-export async function getLinkedDirectoryHandle() {
+export async function getLinkedDirectoryHandles() {
   try {
     const db = await getDB();
-    if (!db) return null;
+    if (!db) return [];
     return new Promise((resolve) => {
       const transaction = db.transaction([STORES.SETTINGS], 'readonly');
       const store = transaction.objectStore(STORES.SETTINGS);
-      const request = store.get('linked_directory_handle');
-      request.onsuccess = () => resolve(request.result?.value || null);
-      request.onerror = () => resolve(null);
+      const request = store.get('linked_directory_handles');
+      request.onsuccess = async () => {
+        const val = request.result?.value;
+        if (Array.isArray(val)) {
+          resolve(val);
+        } else {
+          // Check legacy single-handle key
+          const legacyReq = store.get('linked_directory_handle');
+          legacyReq.onsuccess = () => {
+            const legacyVal = legacyReq.result?.value;
+            resolve(legacyVal ? [legacyVal] : []);
+          };
+          legacyReq.onerror = () => resolve([]);
+        }
+      };
+      request.onerror = () => resolve([]);
     });
   } catch (e) {
-    return null;
+    return [];
   }
 }
 
 /**
- * Removes the saved desktop FileSystemDirectoryHandle from IndexedDB.
+ * Backwards-compatible single handle getter.
  */
-export async function removeLinkedDirectoryHandle() {
+export async function getLinkedDirectoryHandle() {
+  const handles = await getLinkedDirectoryHandles();
+  return handles[0] || null;
+}
+
+/**
+ * Removes a specific saved directory handle by folder name, or removes all if no folderName provided.
+ */
+export async function removeLinkedDirectoryHandle(folderName = null) {
   try {
     const db = await getDB();
     if (!db) return false;
+
+    if (folderName) {
+      const existing = await getLinkedDirectoryHandles();
+      const updated = existing.filter(h => h.name !== folderName);
+      return new Promise((resolve) => {
+        const transaction = db.transaction([STORES.SETTINGS], 'readwrite');
+        const store = transaction.objectStore(STORES.SETTINGS);
+        const request = store.put({ key: 'linked_directory_handles', value: updated });
+        request.onsuccess = () => resolve(true);
+        request.onerror = () => resolve(false);
+      });
+    }
+
     return new Promise((resolve) => {
       const transaction = db.transaction([STORES.SETTINGS], 'readwrite');
       const store = transaction.objectStore(STORES.SETTINGS);
-      const request = store.delete('linked_directory_handle');
-      request.onsuccess = () => resolve(true);
-      request.onerror = () => resolve(false);
+      store.delete('linked_directory_handles');
+      store.delete('linked_directory_handle');
+      transaction.oncomplete = () => resolve(true);
+      transaction.onerror = () => resolve(false);
     });
   } catch (e) {
     return false;
