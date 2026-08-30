@@ -59,6 +59,7 @@ import { getGameDescription, getReleaseDate } from '../../gameDescriptions';
 import { saveCachedMetadata } from '../../services/metadataScraper';
 import { convertRemoteImageToWebpDataUrl } from '../../utils/imageConverter';
 import { POKEMON_ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, getPokemonBadgesForGame, getPokemonMilestonesForGame } from '../../data/achievementsManifest';
+import { isPokemonRom } from '../../services/pokemonSaveParser';
 import ConfirmModal from '../ConfirmModal';
 
 const POKE_ICON_MAP = {
@@ -884,8 +885,8 @@ export default function DsView({
             </button>
           )}
 
-          {/* Pokémon Specific Trainer Milestones Tab */}
-          {selectedGame && (selectedGame.title || selectedGame.name || '').toLowerCase().includes('pokemon') && (
+          {/* Pokémon Canonical Save Inspector Tab (Excludes ROM Hacks) */}
+          {selectedGame && isPokemonRom(selectedGame) && (
             <button
               type="button"
               className={`ds-tool-btn ds-icon-btn ds-pokemon-tab-btn ${dsTab === 'pokemon' ? 'is-active' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'pokemon' ? 'gamepad-focused' : ''}`}

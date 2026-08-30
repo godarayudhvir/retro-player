@@ -6,87 +6,84 @@
  * - Gen 1 (GB): Red, Blue, Yellow
  * - Gen 2 (GBC): Gold, Silver, Crystal
  * - Gen 3 (GBA): Ruby, Sapphire, Emerald, FireRed, LeafGreen
- * - Gen 4 (NDS): Diamond, Pearl, Platinum, HeartGold, SoulSilver
- * - Gen 5 (NDS): Black, White, Black 2, White 2
  */
 
 // ---------------------------------------------------------------------------
-// 1. GAME TITLE & ID RECOGNITION
+// 1. CANONICAL MAINLINE POKÉMON GAME REGISTRY (Gen 1 to Gen 3 ONLY)
 // ---------------------------------------------------------------------------
 
 const POKEMON_GAMES = [
-  // Generation 1 (GB)
-  { id: 'red', name: 'Pokemon Red', aliases: ['pokemon red', 'pocket monsters red', 'pocket monsters aka'], gen: 1, code: 'RBY', region: 'kanto' },
-  { id: 'blue', name: 'Pokemon Blue', aliases: ['pokemon blue', 'pocket monsters blue', 'pocket monsters midori', 'pocket monsters ao'], gen: 1, code: 'RBY', region: 'kanto' },
-  { id: 'yellow', name: 'Pokemon Yellow', aliases: ['pokemon yellow', 'pocket monsters yellow', 'special pikachu edition'], gen: 1, code: 'RBY', region: 'kanto' },
+  // Generation 1 (Game Boy)
+  { id: 'red', name: 'Pokemon Red Version', matchPatterns: [/\bred version\b/, /\bred\b/], gen: 1, code: 'RBY', region: 'kanto' },
+  { id: 'blue', name: 'Pokemon Blue Version', matchPatterns: [/\bblue version\b/, /\bblue\b/], gen: 1, code: 'RBY', region: 'kanto' },
+  { id: 'yellow', name: 'Pokemon Yellow Version', matchPatterns: [/\byellow version\b/, /\byellow\b/, /\bspecial pikachu\b/], gen: 1, code: 'YELLOW', region: 'kanto' },
 
-  // Generation 2 (GBC)
-  { id: 'gold', name: 'Pokemon Gold', aliases: ['pokemon gold', 'pocket monsters gold', 'pocket monsters kin'], gen: 2, code: 'GSC', region: 'johto' },
-  { id: 'silver', name: 'Pokemon Silver', aliases: ['pokemon silver', 'pocket monsters silver', 'pocket monsters gin'], gen: 2, code: 'GSC', region: 'johto' },
-  { id: 'crystal', name: 'Pokemon Crystal', aliases: ['pokemon crystal', 'pocket monsters crystal'], gen: 2, code: 'GSC', region: 'johto' },
+  // Generation 2 (Game Boy Color)
+  { id: 'gold', name: 'Pokemon Gold Version', matchPatterns: [/\bgold version\b/, /\bgold\b/], gen: 2, code: 'GS', region: 'johto' },
+  { id: 'silver', name: 'Pokemon Silver Version', matchPatterns: [/\bsilver version\b/, /\bsilver\b/], gen: 2, code: 'GS', region: 'johto' },
+  { id: 'crystal', name: 'Pokemon Crystal Version', matchPatterns: [/\bcrystal version\b/, /\bcrystal\b/], gen: 2, code: 'CRYSTAL', region: 'johto' },
 
-  // Generation 3 (GBA)
-  { id: 'ruby', name: 'Pokemon Ruby', aliases: ['pokemon ruby', 'pocket monsters ruby'], gen: 3, code: 'RSE', region: 'hoenn' },
-  { id: 'sapphire', name: 'Pokemon Sapphire', aliases: ['pokemon sapphire', 'pocket monsters sapphire'], gen: 3, code: 'RSE', region: 'hoenn' },
-  { id: 'emerald', name: 'Pokemon Emerald', aliases: ['pokemon emerald', 'pocket monsters emerald'], gen: 3, code: 'RSE', region: 'hoenn' },
-  { id: 'firered', name: 'Pokemon FireRed', aliases: ['pokemon firered', 'pokemon fire red', 'pocket monsters firered'], gen: 3, code: 'FRLG', region: 'kanto' },
-  { id: 'leafgreen', name: 'Pokemon LeafGreen', aliases: ['pokemon leafgreen', 'pokemon leaf green', 'pocket monsters leafgreen'], gen: 3, code: 'FRLG', region: 'kanto' },
+  // Generation 3 (Game Boy Advance)
+  { id: 'ruby', name: 'Pokemon Ruby Version', matchPatterns: [/\bruby version\b/], gen: 3, code: 'RSE', region: 'hoenn' },
+  { id: 'sapphire', name: 'Pokemon Sapphire Version', matchPatterns: [/\bsapphire version\b/], gen: 3, code: 'RSE', region: 'hoenn' },
+  { id: 'emerald', name: 'Pokemon Emerald Version', matchPatterns: [/\bemerald version\b/, /\bemerald\b/], gen: 3, code: 'EMERALD', region: 'hoenn' },
+  { id: 'firered', name: 'Pokemon FireRed Version', matchPatterns: [/\bfirered version\b/, /\bfire red version\b/, /\bfirered\b/, /\bfire red\b/], gen: 3, code: 'FRLG', region: 'kanto' },
+  { id: 'leafgreen', name: 'Pokemon LeafGreen Version', matchPatterns: [/\bleafgreen version\b/, /\bleaf green version\b/, /\bleafgreen\b/, /\bleaf green\b/], gen: 3, code: 'FRLG', region: 'kanto' }
+];
 
-  // Generation 4 (NDS)
-  { id: 'diamond', name: 'Pokemon Diamond', aliases: ['pokemon diamond', 'pocket monsters diamond'], gen: 4, code: 'DPPT', region: 'sinnoh' },
-  { id: 'pearl', name: 'Pokemon Pearl', aliases: ['pokemon pearl', 'pocket monsters pearl'], gen: 4, code: 'DPPT', region: 'sinnoh' },
-  { id: 'platinum', name: 'Pokemon Platinum', aliases: ['pokemon platinum', 'pocket monsters platinum'], gen: 4, code: 'DPPT', region: 'sinnoh' },
-  { id: 'heartgold', name: 'Pokemon HeartGold', aliases: ['pokemon heartgold', 'pokemon heart gold'], gen: 4, code: 'HGSS', region: 'johto' },
-  { id: 'soulsilver', name: 'Pokemon SoulSilver', aliases: ['pokemon soulsilver', 'pokemon soul silver'], gen: 4, code: 'HGSS', region: 'johto' },
-
-  // Generation 5 (NDS)
-  { id: 'black', name: 'Pokemon Black', aliases: ['pokemon black', 'pokemon black version'], gen: 5, code: 'BW', region: 'unova' },
-  { id: 'white', name: 'Pokemon White', aliases: ['pokemon white', 'pokemon white version'], gen: 5, code: 'BW', region: 'unova' },
-  { id: 'black2', name: 'Pokemon Black 2', aliases: ['pokemon black 2', 'pokemon black version 2'], gen: 5, code: 'B2W2', region: 'unova' },
-  { id: 'white2', name: 'Pokemon White 2', aliases: ['pokemon white 2', 'pokemon white version 2'], gen: 5, code: 'B2W2', region: 'unova' }
+// Explicit keywords that immediately disqualify a ROM (Spin-offs, hacks, fan editions)
+const NON_CANONICAL_KEYWORDS = [
+  'pinball', 'mystery dungeon', 'rescue team', 'puzzle', 'trading card', 'tcg', 'snap', 'stadium',
+  'adventure', 'chapter', 'unbound', 'radical', 'gaia', 'rocket edition', 'scorched', 'scorchedsilver',
+  'glazed', 'flora sky', 'liquid crystal', 'prism', 'theta', 'mega power', 'lazarus', 'seaglass',
+  'dark rising', 'light platinum', 'ash gray', 'blazed', 'clover', 'snakewood', 'dreamstone',
+  'recharged', 'inclement', 'rowan', 'shiny gold', 'xenoverse', 'uranium', 'stupid rom', 'hack', 'v1.', 'v2.', 'v3.', 'v4.'
 ];
 
 /**
- * Checks if a game record matches any known mainline Pokémon title.
+ * Checks if a game record strictly matches a verified canonical mainline Pokémon title (Gen 1-3 only).
  */
 export function isPokemonRom(game) {
   if (!game) return false;
+  const sysKey = (game.systemKey || game.systemCore || '').toLowerCase();
+  
+  // Strictly Gen 1 (GB), Gen 2 (GBC), and Gen 3 (GBA) only. No NDS / Spin-offs.
+  if (!['gb', 'gbc', 'gba', 'gameboy', 'gameboy advance', 'gameboy color'].includes(sysKey)) {
+    return false;
+  }
+
   const rawTitle = (game.title || game.name || game.fileName || '').toLowerCase().trim();
   if (!rawTitle) return false;
   
-  if (rawTitle.includes('pokemon') || rawTitle.includes('pokémon') || rawTitle.includes('pocket monster')) {
-    return true;
+  // Must be a pokemon game
+  if (!rawTitle.includes('pokemon') && !rawTitle.includes('pokémon') && !rawTitle.includes('pocket monster')) {
+    return false;
   }
-  return POKEMON_GAMES.some(g => g.aliases.some(alias => rawTitle.includes(alias)));
+
+  // Reject all spin-offs and ROM hacks
+  if (NON_CANONICAL_KEYWORDS.some(kw => rawTitle.includes(kw))) {
+    return false;
+  }
+
+  // Handle Ruby/Sapphire exact title matching to prevent Pinball matching
+  if (rawTitle.includes('pinball')) return false;
+
+  return POKEMON_GAMES.some(g => g.matchPatterns.some(pat => pat.test(rawTitle)));
 }
 
 /**
  * Identifies the specific Pokémon game metadata from title/filename.
  */
 export function identifyPokemonGame(game) {
-  if (!game) return null;
+  if (!isPokemonRom(game)) return null;
   const rawTitle = (game.title || game.name || game.fileName || '').toLowerCase().trim();
-  const sysKey = (game.systemKey || game.systemCore || '').toLowerCase();
-  
+
   for (const p of POKEMON_GAMES) {
-    if (p.aliases.some(alias => rawTitle.includes(alias))) {
+    if (p.matchPatterns.some(pat => pat.test(rawTitle))) {
       return p;
     }
   }
 
-  // System based detection if generic pokemon title
-  if (rawTitle.includes('pokemon') || rawTitle.includes('pokémon')) {
-    if (sysKey === 'gbc') {
-      return { id: 'generic_gbc', name: game.title || 'Pokémon GBC', gen: 2, code: 'GSC', region: 'johto' };
-    }
-    if (sysKey === 'gba') {
-      return { id: 'generic_gba', name: game.title || 'Pokémon GBA', gen: 3, code: 'RSE', region: 'hoenn' };
-    }
-    if (sysKey === 'nds') {
-      return { id: 'generic_nds', name: game.title || 'Pokémon DS', gen: 4, code: 'DPPT', region: 'sinnoh' };
-    }
-    return { id: 'generic_pokemon', name: game.title || 'Pokémon Game', gen: 1, code: 'GENERIC', region: 'kanto' };
-  }
   return null;
 }
 
