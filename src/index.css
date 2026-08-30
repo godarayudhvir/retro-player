@@ -6648,17 +6648,114 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 }
 
 .emulator-topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 56px;
   padding: 0 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #0f172a;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   gap: 0.75rem;
-  z-index: 20;
+  z-index: 100020;
   flex-shrink: 0;
-  transform: translateZ(0);
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.emulator-topbar.is-hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.emulator-topbar.is-visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Floating Pull-Tab Pill Button to summon Toolbar */
+.emulator-floating-pulltab {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  z-index: 100015;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.emulator-floating-pulltab.is-visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 0.85;
+  pointer-events: auto;
+}
+
+.emulator-floating-pulltab.is-visible:hover {
+  opacity: 1;
+  transform: translateX(-50%) translateY(2px);
+}
+
+.pulltab-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 9999px;
+  padding: 4px 12px;
+  color: #cbd5e1;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+}
+
+.emulator-floating-pulltab:hover .pulltab-pill {
+  background: rgba(30, 41, 59, 0.98);
+  border-color: rgba(56, 189, 248, 0.5);
+  color: #38bdf8;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6), 0 0 12px rgba(56, 189, 248, 0.25);
+}
+
+.pulltab-icon {
+  color: #38bdf8;
+  transition: transform 0.2s ease;
+}
+
+.emulator-floating-pulltab:hover .pulltab-icon {
+  transform: translateY(1px);
+}
+
+@media (max-width: 640px) {
+  .emulator-floating-pulltab {
+    top: 6px;
+  }
+  .pulltab-pill {
+    padding: 3px 10px;
+    font-size: 0.66rem;
+  }
 }
 
 .emulator-topbar-left {

@@ -65,6 +65,10 @@ When a game is running in the emulator core:
 
 | Gesture / Shortcut | Action | Description |
 | :--- | :--- | :--- |
+| **Auto-Hiding In-Game Toolbar** | **Fullscreen Immersion** | Slides off-screen after 3.5s of inactivity to give full 100% viewport height to the game. |
+| **`⌄ MENU` Pull-Tab (Mobile / Touch)** | **Reveal In-Game Menu** | Semi-transparent floating pill at top edge. Tap to instantly slide the toolbar down. |
+| **`Tab` or `` ` `` / `~` (Keyboard)** | **Toggle Topbar HUD** | Instantly toggles toolbar visibility on/off during gameplay. |
+| **Mouse Hover (Top 50px)** | **Reveal In-Game Menu** | Moving the mouse cursor to the top edge of the window reveals the toolbar smoothly. |
 | **`L3` (Left Stick Click)** | **Toggle Topbar HUD** | Opens the in-game action menu starting at **`Restart`**. Use D-Pad to select options. |
 | **`L3 + R3` (Thumbstick Clicks)** | **Exit Game** | Flushes battery save, captures Slot 1 auto-resume state, and returns to library. |
 | **Mobile Left Edge-Swipe** | **Exit Game (Mobile)** | Triggers the graceful 450ms flush & exit sequence with automatic save persistence. |

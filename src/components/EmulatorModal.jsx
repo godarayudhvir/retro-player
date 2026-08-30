@@ -24,7 +24,9 @@ import {
   Video,
   Cpu,
   Zap,
-  Check
+  Check,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { detectSystemFromExtension } from '../utils/systemDetector';
 import { dbGet, dbSet, STORES } from '../services/db';
@@ -94,6 +96,86 @@ export default function EmulatorModal({
   const [toastMessage, setToastMessage] = useState('');
   const [loadingHintIndex, setLoadingHintIndex] = useState(() => Math.floor(Math.random() * LOADING_HINTS.length));
   const toastTimeoutRef = useRef(null);
+
+  const [isToolbarVisible, setIsToolbarVisible] = useState(true);
+  const toolbarHideTimeoutRef = useRef(null);
+
+  // Auto-hide toolbar after 3.5s of inactivity
+  const showToolbarTemporarily = useCallback((durationMs = 3500) => {
+    setIsToolbarVisible(true);
+    if (toolbarHideTimeoutRef.current) {
+      clearTimeout(toolbarHideTimeoutRef.current);
+    }
+    if (durationMs > 0) {
+      toolbarHideTimeoutRef.current = setTimeout(() => {
+        // Keep toolbar open if sub-toolbar menu or diagnostics panel is actively opened
+        setShowSubToolbar(curSub => {
+          setShowDiagnostics(curDiag => {
+            if (!curSub && !curDiag) {
+              setIsToolbarVisible(false);
+            }
+            return curDiag;
+          });
+          return curSub;
+        });
+      }, durationMs);
+    }
+  }, []);
+
+  const toggleToolbarVisibility = useCallback(() => {
+    setIsToolbarVisible(prev => {
+      const next = !prev;
+      if (next) {
+        showToolbarTemporarily(4000);
+      } else {
+        setShowSubToolbar(false);
+        setShowDiagnostics(false);
+      }
+      return next;
+    });
+  }, [showToolbarTemporarily]);
+
+  // Activity listeners to bring toolbar back on mouse/touch/key
+  useEffect(() => {
+    // Initial display for 4.5s on game mount
+    showToolbarTemporarily(4500);
+
+    const handlePointerActivity = (e) => {
+      // If pointer is moving near top 50px of window, reveal immediately
+      if (e.clientY <= 50) {
+        showToolbarTemporarily(3500);
+      }
+    };
+
+    const handleKeyActivity = (e) => {
+      // Toggle toolbar with Tab or ` or reveal on any functional key
+      if (e.key === 'Tab' || e.key === '`' || e.key === '~') {
+        e.preventDefault();
+        toggleToolbarVisibility();
+        return;
+      }
+      showToolbarTemporarily(3500);
+    };
+
+    window.addEventListener('mousemove', handlePointerActivity, { passive: true });
+    window.addEventListener('keydown', handleKeyActivity);
+    return () => {
+      if (toolbarHideTimeoutRef.current) clearTimeout(toolbarHideTimeoutRef.current);
+      window.removeEventListener('mousemove', handlePointerActivity);
+      window.removeEventListener('keydown', handleKeyActivity);
+    };
+  }, [showToolbarTemporarily, toggleToolbarVisibility]);
+
+  // Keep toolbar visible whenever gamepad focuses the in-game bar or sub-toolbar
+  useEffect(() => {
+    if (focusedTarget?.zone === 'inGameBar' || focusedTarget?.zone === 'inGameSubBar') {
+      setIsToolbarVisible(true);
+      if (toolbarHideTimeoutRef.current) {
+        clearTimeout(toolbarHideTimeoutRef.current);
+      }
+    }
+  }, [focusedTarget]);
+
 
   // Dual-Slot Auto-Resume State (Slot 1)
   const [showResumePrompt, setShowResumePrompt] = useState(false);
@@ -2701,8 +2783,14 @@ export default function EmulatorModal({
   }, [showResumePrompt, handleApplyResumeState, handleDismissResumePrompt]);
 
   return (
-    <div className="emulator-backdrop-iisu" onClick={focusEmulator}>
-      <header className="emulator-topbar">
+    <div 
+      className="emulator-backdrop-iisu" 
+      onClick={focusEmulator}
+      onMouseMove={() => showToolbarTemporarily(3500)}
+      onTouchStart={() => showToolbarTemporarily(3500)}
+    >
+      {/* Auto-Hiding Top Bar */}
+      <header className={`emulator-topbar ${isToolbarVisible ? 'is-visible' : 'is-hidden'}`}>
         <div className="emulator-topbar-left">
           <Gamepad2 size={20} style={{ color: game.systemColor || '#00c6ff', flexShrink: 0 }} />
           <span className="emulator-game-title" title={game.title}>{game.title}</span>
@@ -2887,8 +2975,25 @@ export default function EmulatorModal({
         </div>
       </header>
 
+      {/* Floating Pull-Tab Pill to Reveal Toolbar when Hidden */}
+      <button
+        id="emulator-toolbar-tab"
+        className={`emulator-floating-pulltab ${!isToolbarVisible ? 'is-visible' : 'is-hidden'}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleToolbarVisibility();
+        }}
+        title="Show in-game menu bar (or hover top edge / press Tab)"
+        aria-label="Toggle in-game menu bar"
+      >
+        <span className="pulltab-pill">
+          <ChevronDown size={14} className="pulltab-icon" />
+          <span className="pulltab-label">MENU</span>
+        </span>
+      </button>
+
       {/* Mobile-only Dropdown Toolbar */}
-      {showSubToolbar && (
+      {showSubToolbar && isToolbarVisible && (
         <div className="emulator-sub-toolbar mobile-sub-toolbar animate-slide-down" onClick={(e) => e.stopPropagation()}>
           <button
             id="ingame-sub-restart"
