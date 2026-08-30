@@ -10,7 +10,7 @@ This guide contains the master registry of all **30+ Universal Organic Achieveme
 
 | Status | Tier | Points | ID | Title | Universal Requirement | Evaluation Logic | Scope |
 | :---: | :---: | :---: | :--- | :--- | :--- | :--- | :---: |
-| ✅ | 🥉 Bronze | +10G | `first_launch` | **Insert Coin** | Launch your very first retro game in Retro Player. | `totalLaunches >= 1` | Global & Per-ROM |
+| ✅ | 🥉 Bronze | +10G | `first_launch` | **Insert Coin** | Launch your very first retro game in Retro Player. | `totalLaunches >= 1` | Global |
 | ✅ | 🥉 Bronze | +10G | `console_hopper` | **Console Hopper** | Play at least one game across 3 distinct retro systems. | Unique system keys played `>= 3` | Global |
 | ✅ | 🥈 Silver | +25G | `gen_traveler` | **Generation Traveler** | Play games across 8-bit, 16-bit, and 32/64-bit platforms. | Played `[NES/GB/GG]` + `[SNES/MD]` + `[N64/PS1/NDS/GBA]` | Global |
 | ✅ | 🥇 Gold | +50G | `full_spectrum` | **Full Spectrum** | Play at least one game on every supported system in your library. | All detected library systems played | Global |
@@ -26,10 +26,10 @@ This guide contains the master registry of all **30+ Universal Organic Achieveme
 | Status | Tier | Points | ID | Title | Universal Requirement | Evaluation Logic | Scope |
 | :---: | :---: | :---: | :--- | :--- | :--- | :--- | :---: |
 |  | 🥉 Bronze | +10G | `warming_up` | **Warming Up** | Log 15 cumulative minutes of gameplay across any games. | Cumulative playtime `>= 900s` (15m) | Global |
-|  | 🥈 Silver | +25G | `marathon_runner` | **Marathon Runner** | Play a single game continuously for 1 hour in one sitting. | Single session duration `>= 3600s` (1h) | Global & Per-ROM |
-|  | 🥇 Gold | +50G | `ironman_endurance` | **Ironman Endurance** | Play a single game continuously for 2.5 hours in one sitting. | Single session duration `>= 9000s` (2.5h) | Global & Per-ROM |
-|  | 🥇 Gold | +50G | `loyal_companion` | **Loyal Companion** | Spend 5 total hours played on a single title. | Cumulative single-game playtime `>= 18000s` (5h) | Per-ROM |
-|  | 💎 Platinum | +100G | `century_club` | **Century Club** | Log 50 cumulative hours of total gameplay in Retro Player. | Total app playtime `>= 180000s` (50h) | Global |
+|  | 🥈 Silver | +25G | `marathon_runner` | **Marathon Runner** | Play a single game continuously for 1 hour in one sitting. | Single session duration `>= 3600s` (1h) | Per-ROM |
+|  | 🥇 Gold | +50G | `ironman_endurance` | **Ironman Endurance** | Play a single game continuously for 7 hours in one sitting. | Single session duration `>= 25200s` (7h) | Per-ROM |
+|  | 🥈 Silver | +25G | `loyal_companion` | **Loyal Companion** | Spend 2 total hours played on a single title. | Cumulative single-game playtime `>= 7200s` (2h) | Per-ROM |
+|  | 🥇 Gold | +50G | `century_club` | **Century Club** | Log 100 total hours played on a single title. | Cumulative single-game playtime `>= 360000s` (100h) | Per-ROM |
 
 ---
 
@@ -37,7 +37,7 @@ This guide contains the master registry of all **30+ Universal Organic Achieveme
 
 | Status | Tier | Points | ID | Title | Universal Requirement | Evaluation Logic | Scope |
 | :---: | :---: | :---: | :--- | :--- | :--- | :--- | :---: |
-|  | 🥉 Bronze | +10G | `night_owl` | **Night Owl** | Boot any retro game between 1:00 AM and 4:30 AM local time. | Browser local hour `1 <= h <= 4.5` | Global |
+|  | 🥉 Bronze | +10G | `night_owl` | **Night Owl** | Boot any retro game between 11:00 PM and 4:00 AM local time. | Browser local hour `h >= 23 || h < 4` | Global |
 |  | 🥉 Bronze | +10G | `early_bird` | **Early Bird** | Boot any retro game between 5:00 AM and 8:00 AM local time. | Browser local hour `5 <= h < 8` | Global |
 |  | 🥉 Bronze | +10G | `weekend_warrior` | **Weekend Warrior** | Play games on both Saturday and Sunday of the same weekend. | Active calendar dates include Sat & Sun | Global |
 |  | 🥈 Silver | +25G | `daily_streak_3` | **Dedicated Gamer** | Play games for 3 consecutive days in a row. | Consecutive active calendar days `>= 3` | Global |

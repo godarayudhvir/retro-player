@@ -31,7 +31,7 @@ export const ACHIEVEMENTS_MANIFEST = [
     category: 'exploration',
     tier: 'bronze',
     icon: 'PlayCircle',
-    isPerRom: true
+    isPerRom: false
   },
   {
     id: 'console_hopper',
@@ -63,7 +63,7 @@ export const ACHIEVEMENTS_MANIFEST = [
   {
     id: 'library_tourist',
     title: 'Library Tourist',
-    description: 'Launch 5 different games in a single active session.',
+    description: 'Launch 5 different games in a single session.',
     category: 'exploration',
     tier: 'bronze',
     icon: 'Navigation',
@@ -112,7 +112,7 @@ export const ACHIEVEMENTS_MANIFEST = [
   {
     id: 'ironman_endurance',
     title: 'Ironman Endurance',
-    description: 'Play a single game continuously for over 2.5 hours without exiting.',
+    description: 'Play a single game continuously for over 7 hours in one sitting.',
     category: 'endurance',
     tier: 'gold',
     icon: 'Zap',
@@ -121,16 +121,16 @@ export const ACHIEVEMENTS_MANIFEST = [
   {
     id: 'century_club',
     title: 'Century Club',
-    description: 'Accumulate over 50 hours of total retro playtime.',
+    description: 'Spend over 100 hours total playing a single retro game.',
     category: 'endurance',
     tier: 'gold',
     icon: 'Award',
-    isPerRom: false
+    isPerRom: true
   },
   {
     id: 'loyal_companion',
     title: 'Loyal Companion',
-    description: 'Spend over 5 hours total playing a single favorite game.',
+    description: 'Spend over 2 hours total playing a single favorite game.',
     category: 'endurance',
     tier: 'silver',
     icon: 'Heart',
@@ -143,7 +143,7 @@ export const ACHIEVEMENTS_MANIFEST = [
   {
     id: 'night_owl',
     title: 'Night Owl Gamer',
-    description: 'Play any retro game between 1:00 AM and 4:30 AM local time.',
+    description: 'Play any retro game between 11:00 PM and 4:00 AM local time.',
     category: 'habits',
     tier: 'silver',
     icon: 'Moon',

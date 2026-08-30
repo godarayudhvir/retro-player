@@ -258,12 +258,12 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
     const localMin = now.getMinutes();
     const todayStr = getLocalDateString(now);
 
-    // Night Owl: 1:00 AM to 4:30 AM local time
-    if (localHour >= 1 && (localHour < 4 || (localHour === 4 && localMin <= 30))) {
+    // Night Owl: 11:00 PM to 4:00 AM local time (23:00 to 03:59)
+    if (localHour >= 23 || localHour < 4) {
       unlockAchievement('night_owl');
     }
 
-    // Early Bird: 5:00 AM to 8:00 AM local time
+    // Early Bird: 5:00 AM to 8:00 AM local time (05:00 to 07:59)
     if (localHour >= 5 && localHour < 8) {
       unlockAchievement('early_bird');
     }
@@ -427,19 +427,19 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
         unlockAchievement('marathon_runner', gameObj);
       }
 
-      // 4. Ironman Endurance (2.5 hours continuous session)
-      if (sessionDurationSeconds >= 9000) {
+      // 4. Ironman Endurance (7 hours continuous session = 25200s)
+      if (sessionDurationSeconds >= 25200) {
         unlockAchievement('ironman_endurance', gameObj);
       }
 
-      // 5. Loyal Companion (5 hours total on single game)
-      if (nextGamePlaytime >= 18000) {
+      // 5. Loyal Companion (2 hours total on single game = 7200s)
+      if (nextGamePlaytime >= 7200) {
         unlockAchievement('loyal_companion', gameObj);
       }
 
-      // 6. Century Club (50 hours total)
-      if (nextTotalPlaytime >= 180000) {
-        unlockAchievement('century_club');
+      // 6. Century Club (100 hours total on single game = 360000s)
+      if (nextGamePlaytime >= 360000) {
+        unlockAchievement('century_club', gameObj);
       }
 
       // 7. Flush all deferred session unlocks sequentially upon returning to library
