@@ -29,8 +29,9 @@ import { useProfileManager } from './hooks/useProfileManager';
 import { useBgmEngine } from './hooks/useBgmEngine';
 import { useDeviceDetection } from './hooks/useDeviceDetection';
 import { usePwaInstall } from './hooks/usePwaInstall';
+import { useMobileHistoryNavigation } from './hooks/useMobileHistoryNavigation';
 import { syncAllStoresFromBackend, getLinkedDirectoryHandle } from './services/db';
-import { scanDirectoryHandle } from './utils/folderScanner';
+import { scanDirectoryHandle, extractRomsFromInput } from './utils/folderScanner';
 import { BatteryWarning, Zap, X } from 'lucide-react';
 
 /**
@@ -237,9 +238,12 @@ export default function App() {
           if (perm === 'granted') {
             console.log(`⚡ [AUTO-RECONNECT] Auto-loading linked folder: "${handle.name}"...`);
             setIsReconnectingHandle(true);
-            const files = await scanDirectoryHandle(handle, handle.name);
-            if (files && files.length > 0) {
-              await loadBatchCustomRoms(files);
+            const rawFiles = await scanDirectoryHandle(handle, handle.name);
+            if (rawFiles && rawFiles.length > 0) {
+              const extracted = await extractRomsFromInput(rawFiles);
+              if (extracted.files && extracted.files.length > 0) {
+                await loadBatchCustomRoms(extracted.files);
+              }
             }
             setIsReconnectingHandle(false);
           }
@@ -261,10 +265,13 @@ export default function App() {
         return;
       }
       sfx.playNavSelect();
-      const files = await scanDirectoryHandle(linkedDirectoryHandle, linkedDirectoryHandle.name);
-      if (files && files.length > 0) {
-        await loadBatchCustomRoms(files);
-        sfx.playThemeSwitch();
+      const rawFiles = await scanDirectoryHandle(linkedDirectoryHandle, linkedDirectoryHandle.name);
+      if (rawFiles && rawFiles.length > 0) {
+        const extracted = await extractRomsFromInput(rawFiles);
+        if (extracted.files && extracted.files.length > 0) {
+          await loadBatchCustomRoms(extracted.files);
+          sfx.playThemeSwitch();
+        }
       }
       setIsReconnectingHandle(false);
     } catch (err) {

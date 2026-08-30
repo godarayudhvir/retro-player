@@ -225,7 +225,7 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
         .replace(/\s+/g, ' ')
         .trim() || rawTitle;
 
-      const gameId = `custom_${sys.key}_${rawTitle.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${Date.now()}_${idx}`;
+      const gameId = `custom_${sys.key}_${rawTitle.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
 
       // 1. Process paired local cover if available
       let coverUrl = sys.icon || resolveAssetPath('assets/platforms/custom.svg');

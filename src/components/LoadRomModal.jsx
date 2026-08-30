@@ -557,7 +557,7 @@ export default function LoadRomModal({
                   ref={fileInputRef}
                   type="file"
                   multiple
-                  accept=".gba,.gb,.gbc,.nes,.sfc,.smc,.z64,.n64,.v64,.nds,.bin,.cue,.chd,.pbp,.iso,.zip,.md,.smd,.gen,.gg,.a26"
+                  accept=".gba,.gb,.gbc,.nes,.fds,.sfc,.smc,.snes,.z64,.n64,.v64,.nds,.bin,.cue,.chd,.pbp,.iso,.zip,.7z,.md,.smd,.gen,.gg,.a26,.png,.webp,.jpg,.jpeg,.json,.nfo"
                   onChange={handleSingleFileChange}
                   style={{ display: 'none' }}
                 />

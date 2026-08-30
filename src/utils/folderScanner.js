@@ -221,7 +221,7 @@ export async function extractRomsFromInput(input, onProgress = null) {
           }
           entryPromises.push(readEntryRecursively(entry));
         }
-      } else {
+      } else if (item.getAsFile) {
         const file = item.getAsFile();
         if (file) rawSourceList.push(file);
       }
@@ -229,22 +229,22 @@ export async function extractRomsFromInput(input, onProgress = null) {
     const resolvedEntries = (await Promise.all(entryPromises)).flat();
     rawSourceList = rawSourceList.concat(resolvedEntries);
   } else if (input?.files) {
-    rawSourceList = input.files;
-    if (rawSourceList.length > 0 && rawSourceList[0]?.webkitRelativePath) {
-      const parts = rawSourceList[0].webkitRelativePath.split('/');
-      if (parts.length > 1) detectedFolderName = parts[0];
-    }
-  } else if (input instanceof FileList) {
-    rawSourceList = input;
-    if (rawSourceList.length > 0 && rawSourceList[0]?.webkitRelativePath) {
-      const parts = rawSourceList[0].webkitRelativePath.split('/');
-      if (parts.length > 1) detectedFolderName = parts[0];
-    }
+    rawSourceList = Array.from(input.files);
   } else if (Array.isArray(input)) {
     rawSourceList = input;
-    if (rawSourceList.length > 0 && rawSourceList[0]?.webkitRelativePath) {
-      const parts = rawSourceList[0].webkitRelativePath.split('/');
-      if (parts.length > 1) detectedFolderName = parts[0];
+  } else if (input && typeof input.length === 'number') {
+    rawSourceList = Array.from(input);
+  } else if (input && typeof input[Symbol.iterator] === 'function') {
+    rawSourceList = Array.from(input);
+  } else if (input && typeof input.name === 'string') {
+    rawSourceList = [input];
+  }
+
+  if (rawSourceList.length > 0) {
+    const firstRel = rawSourceList[0]?.webkitRelativePath || rawSourceList[0]?.relativePath;
+    if (firstRel) {
+      const parts = firstRel.split('/');
+      if (parts.length > 1 && parts[0]) detectedFolderName = parts[0];
     }
   }
 

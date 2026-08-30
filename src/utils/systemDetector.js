@@ -1,8 +1,8 @@
 import { resolveAssetPath } from './assetPath';
 
 export const SUPPORTED_ROM_EXTENSIONS = new Set([
-  'gba', 'gb', 'gbc', 'nes', 'sfc', 'smc', 'snes', 'z64', 'n64', 'v64', 
-  'nds', 'bin', 'cue', 'chd', 'pbp', 'iso', 'zip', 'md', 'smd', 'gen', 'genesis', 'megadrive', 'gg', 'gamegear', 'a26', 'atari2600'
+  'gba', 'gb', 'gbc', 'nes', 'fds', 'unf', 'unif', 'sfc', 'smc', 'snes', 'z64', 'n64', 'v64', 
+  'nds', 'bin', 'cue', 'chd', 'pbp', 'iso', 'zip', '7z', 'md', 'smd', 'gen', 'genesis', 'megadrive', 'gg', 'gamegear', 'a26', 'atari2600'
 ]);
 
 export function isSupportedRomFile(filename) {
