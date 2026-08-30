@@ -1259,6 +1259,8 @@ export default function EmulatorModal({
               } catch (e) {}
             }
 
+            let _isKeyboardActive = false;
+
             function syncVirtualGamepadVisibility() {
               try {
                 const gps = navigator.getGamepads ? navigator.getGamepads() : [];
@@ -1271,7 +1273,7 @@ export default function EmulatorModal({
                 }
                 const vgp = document.querySelector('.ejs_virtualGamepad_parent');
                 if (vgp) {
-                  if (hasPhysical) {
+                  if (hasPhysical || _isKeyboardActive) {
                     vgp.style.setProperty('display', 'none', 'important');
                     vgp.style.setProperty('opacity', '0', 'important');
                     vgp.style.setProperty('pointer-events', 'none', 'important');
@@ -1297,6 +1299,39 @@ export default function EmulatorModal({
               syncAllGamepads();
               syncVirtualGamepadVisibility();
             }, { once: false });
+
+            window.addEventListener('keydown', function() {
+              if (!_isKeyboardActive) {
+                _isKeyboardActive = true;
+                syncVirtualGamepadVisibility();
+              }
+            });
+
+            window.addEventListener('touchstart', function() {
+              if (_isKeyboardActive) {
+                _isKeyboardActive = false;
+                syncVirtualGamepadVisibility();
+              }
+            }, { passive: true });
+
+            window.addEventListener('pointerdown', function(e) {
+              if (e.pointerType === 'touch' && _isKeyboardActive) {
+                _isKeyboardActive = false;
+                syncVirtualGamepadVisibility();
+              }
+            }, { passive: true });
+
+            window.addEventListener('message', function(e) {
+              if (e && e.data && e.data.type === 'RETRO_PLAYER_INPUT_MODE') {
+                if (e.data.mode === 'keyboard') {
+                  _isKeyboardActive = true;
+                  syncVirtualGamepadVisibility();
+                } else if (e.data.mode === 'touch') {
+                  _isKeyboardActive = false;
+                  syncVirtualGamepadVisibility();
+                }
+              }
+            });
 
             // Periodic sync check to ensure seamless controller plug/unplug handling
             setInterval(syncVirtualGamepadVisibility, 500);
@@ -1854,6 +1889,17 @@ export default function EmulatorModal({
       if (!isGameMutedRef.current) {
         ensureAudioUnlocked();
       }
+      // Relay input mode to emulator iframe for seamless virtual gamepad visibility toggle
+      try {
+        const iframe = iframeRef.current;
+        if (iframe && iframe.contentWindow) {
+          if (e.type === 'keydown') {
+            iframe.contentWindow.postMessage({ type: 'RETRO_PLAYER_INPUT_MODE', mode: 'keyboard' }, '*');
+          } else if (e.type === 'touchstart') {
+            iframe.contentWindow.postMessage({ type: 'RETRO_PLAYER_INPUT_MODE', mode: 'touch' }, '*');
+          }
+        }
+      } catch(err) {}
     };
     window.addEventListener('click', handleUserTouch);
     window.addEventListener('keydown', handleUserTouch);

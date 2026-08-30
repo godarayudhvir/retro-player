@@ -85,6 +85,7 @@ For touch-screen devices, Retro Player renders system-adaptive, zero-latency vir
   - **Triggers**: Split `L` and `Z` triggers on the left bumper deck with `R` on the right bumper deck.
   - **Right Cluster**: Yellow C-buttons (`CU, CD, CL, CR`) positioned above primary `A` (blue) and `B` (green) action buttons.
 - **Classic Systems (GB, GBA, NES, SNES, Genesis, PS1, NDS, Arcade)**: Standard low-profile dual/quad button ergonomics tailored for thumb reach.
+- **Smart Input Detection & Auto-Hide**: Virtual on-screen touch controls automatically disappear whenever a physical gamepad/controller is connected or whenever physical keyboard keystrokes are pressed (preventing screen clutter on 2-in-1s, touchscreen laptops, and tablet keyboards). Tapping or touching the screen immediately restores the on-screen touch controls.
 
 ---
 
