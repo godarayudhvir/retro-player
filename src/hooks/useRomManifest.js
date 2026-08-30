@@ -204,13 +204,15 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
   }, [fetchGames]);
 
   // Load a batch of ROMs into the active session in-memory without copying/saving
-  const loadBatchCustomRoms = useCallback(async (files = []) => {
+  const loadBatchCustomRoms = useCallback(async (files = [], onProgress = null) => {
     if (!files || files.length === 0) return [];
     console.log(`📁 [BATCH IN-MEMORY LOAD] Loading ${files.length} custom ROMs into session...`);
 
     const customGames = [];
+    const totalFiles = files.length;
+    const CHUNK_SIZE = 50;
 
-    for (let idx = 0; idx < files.length; idx++) {
+    for (let idx = 0; idx < totalFiles; idx++) {
       const file = files[idx];
       const pathToCheck = file.webkitRelativePath || file.relativePath || file.name;
       const sys = detectSystemFromExtension(pathToCheck);
@@ -302,6 +304,18 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
       }
 
       customGames.push(gameRecord);
+
+      if (idx > 0 && idx % CHUNK_SIZE === 0) {
+        if (onProgress) {
+          onProgress({
+            step: 'loading',
+            current: idx + 1,
+            total: totalFiles,
+            message: `Loading ${idx + 1}/${totalFiles} ROMs into session...`
+          });
+        }
+        await new Promise(r => setTimeout(r, 0));
+      }
     }
 
     setGames(prev => {

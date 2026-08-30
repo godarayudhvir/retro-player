@@ -540,9 +540,9 @@ export default function App() {
             sfx.playNavSelect();
           }
         }}
-        onLoadFolderSession={(files, { scrapeInBackground, folderName }) => {
+        onLoadFolderSession={async (files, { scrapeInBackground, folderName, onProgress }) => {
           // In-Memory Session: Load ROMs into memory without disk copying
-          const loadedGames = loadBatchCustomRoms(files);
+          const loadedGames = await loadBatchCustomRoms(files, onProgress);
           if (scrapeInBackground && loadedGames.length > 0 && scraper?.scrapeAll) {
             // Asynchronous background scraping without blocking the user
             scraper.scrapeAll(loadedGames, false, { 

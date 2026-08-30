@@ -318,20 +318,26 @@ export default function LoadRomModal({
     try {
       if (storageMode === 'session') {
         // Path A: Just Load Folder (In-Memory Session — No Copy)
-        setProgressState({ step: 'loading', message: `Loading ${folderData.files.length} ROMs into session...` });
+        setProgressState({
+          step: 'loading',
+          current: 0,
+          total: folderData.files.length,
+          message: `Loading 0/${folderData.files.length} ROMs into session...`
+        });
         sfx?.playGameLaunch?.();
 
         if (onLoadFolderSession) {
-          onLoadFolderSession(folderData.files, {
+          await onLoadFolderSession(folderData.files, {
             scrapeInBackground,
-            folderName: folderData.folderName
+            folderName: folderData.folderName,
+            onProgress: (p) => setProgressState(p)
           });
         }
         
         sfx?.playThemeSwitch?.();
         setTimeout(() => {
           onClose();
-        }, 500);
+        }, 300);
       } else {
         // Path B: Ingest to Library (Permanent Storage — Copies to Server / IndexedDB)
         setProgressState({
@@ -353,7 +359,7 @@ export default function LoadRomModal({
         sfx?.playThemeSwitch?.();
         setTimeout(() => {
           onClose();
-        }, 600);
+        }, 300);
       }
     } catch (err) {
       console.error('Failed to process folder:', err);
@@ -532,18 +538,18 @@ export default function LoadRomModal({
                         <span style={{ fontSize: '0.96rem', fontWeight: 800, color: 'var(--text-color, #0f172a)' }}>
                           Scanning ROMs &amp; Assets...
                         </span>
-                        <span style={{
-                          fontSize: '0.78rem',
-                          fontWeight: 800,
-                          color: '#3b82f6',
-                          background: 'rgba(59, 130, 246, 0.12)',
-                          padding: '2px 8px',
-                          borderRadius: '6px'
-                        }}>
-                          {progressState.total > 0
-                            ? `${Math.round(((progressState.current || 0) / progressState.total) * 100)}%`
-                            : (progressState.current > 0 ? `${progressState.current} items` : 'Discovering...')}
-                        </span>
+                        {progressState.total > 0 && (
+                          <span style={{
+                            fontSize: '0.78rem',
+                            fontWeight: 800,
+                            color: '#3b82f6',
+                            background: 'rgba(59, 130, 246, 0.12)',
+                            padding: '2px 8px',
+                            borderRadius: '6px'
+                          }}>
+                            {Math.round(((progressState.current || 0) / progressState.total) * 100)}%
+                          </span>
+                        )}
                       </div>
                       <span style={{ fontSize: '0.82rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {progressState.message}
