@@ -20084,5 +20084,32 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   }
 }
 
+/* ==========================================================================
+   ROM FOLDER SCANNING & INGESTION PROGRESS
+   ========================================================================== */
+@keyframes rom-indeterminate-slide {
+  0% {
+    left: -40%;
+    width: 35%;
+  }
+  50% {
+    left: 30%;
+    width: 50%;
+  }
+  100% {
+    left: 100%;
+    width: 35%;
+  }
+}
+
+.rom-progress-indeterminate {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, #3b82f6, #6366f1, #8b5cf6);
+  border-radius: 999px;
+  animation: rom-indeterminate-slide 1.4s infinite ease-in-out;
+}
+
 
 

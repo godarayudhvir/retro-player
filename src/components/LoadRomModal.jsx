@@ -528,33 +528,51 @@ export default function LoadRomModal({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <RefreshCw className="animate-spin" size={22} style={{ color: '#3b82f6', flexShrink: 0 }} />
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', flex: 1, minWidth: 0 }}>
-                      <span style={{ fontSize: '0.96rem', fontWeight: 800, color: 'var(--text-color, #0f172a)' }}>
-                        Scanning ROMs &amp; Assets...
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '0.96rem', fontWeight: 800, color: 'var(--text-color, #0f172a)' }}>
+                          Scanning ROMs &amp; Assets...
+                        </span>
+                        <span style={{
+                          fontSize: '0.78rem',
+                          fontWeight: 800,
+                          color: '#3b82f6',
+                          background: 'rgba(59, 130, 246, 0.12)',
+                          padding: '2px 8px',
+                          borderRadius: '6px'
+                        }}>
+                          {progressState.total > 0
+                            ? `${Math.round(((progressState.current || 0) / progressState.total) * 100)}%`
+                            : (progressState.current > 0 ? `${progressState.current} items` : 'Discovering...')}
+                        </span>
+                      </div>
                       <span style={{ fontSize: '0.82rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {progressState.message}
                       </span>
                     </div>
                   </div>
-                  {progressState.total > 0 && (
-                    <div className="rom-progress-track" style={{
-                      width: '100%',
-                      height: '7px',
-                      background: 'rgba(0, 0, 0, 0.08)',
-                      borderRadius: '999px',
-                      overflow: 'hidden'
-                    }}>
+
+                  <div className="rom-progress-track" style={{
+                    width: '100%',
+                    height: '7px',
+                    background: 'rgba(0, 0, 0, 0.08)',
+                    borderRadius: '999px',
+                    overflow: 'hidden',
+                    position: 'relative'
+                  }}>
+                    {progressState.total > 0 ? (
                       <div
                         className="rom-progress-fill"
                         style={{
-                          width: `${Math.min(100, Math.round(((progressState.current || 0) / progressState.total) * 100))}%`,
+                          width: `${Math.max(3, Math.min(100, Math.round(((progressState.current || 0) / progressState.total) * 100)))}%`,
                           height: '100%',
                           background: 'linear-gradient(90deg, #3b82f6, #6366f1)',
                           transition: 'width 0.15s ease'
                         }}
                       />
-                    </div>
-                  )}
+                    ) : (
+                      <div className="rom-progress-indeterminate" />
+                    )}
+                  </div>
                 </div>
               )}
 

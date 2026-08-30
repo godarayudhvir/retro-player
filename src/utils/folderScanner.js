@@ -64,9 +64,8 @@ async function readEntryRecursively(entry, pathPrefix = '') {
 /**
  * Recursively scans a FileSystemDirectoryHandle (Modern File System Access API).
  */
-export async function scanDirectoryHandle(dirHandle, pathPrefix = '', onProgress = null) {
+export async function scanDirectoryHandle(dirHandle, pathPrefix = '', onProgress = null, sharedState = { count: 0 }) {
   let files = [];
-  let count = 0;
   for await (const entry of dirHandle.values()) {
     const relativePath = pathPrefix ? `${pathPrefix}/${entry.name}` : entry.name;
     if (entry.kind === 'file') {
@@ -82,10 +81,14 @@ export async function scanDirectoryHandle(dirHandle, pathPrefix = '', onProgress
             file.relativePath = relativePath;
           }
           files.push(file);
-          count++;
-          if (count % 150 === 0) {
+          sharedState.count++;
+          if (sharedState.count % 20 === 0) {
             if (onProgress) {
-              onProgress({ current: count, total: 0, message: `Discovered ${count} items in "${pathPrefix || dirHandle.name}"...` });
+              onProgress({
+                current: sharedState.count,
+                total: 0,
+                message: `Discovered ${sharedState.count} items in folder...`
+              });
             }
             await new Promise(resolve => setTimeout(resolve, 0));
           }
@@ -94,7 +97,7 @@ export async function scanDirectoryHandle(dirHandle, pathPrefix = '', onProgress
         }
       }
     } else if (entry.kind === 'directory') {
-      const subFiles = await scanDirectoryHandle(entry, relativePath, onProgress);
+      const subFiles = await scanDirectoryHandle(entry, relativePath, onProgress, sharedState);
       files = files.concat(subFiles);
     }
   }
