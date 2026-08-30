@@ -96,15 +96,15 @@ const ICON_MAP = {
   Sliders
 };
 
-// Calculate Gamer Level from points
+// Calculate Gamer Level from points (scaled for 225G maximum)
 function getGamerLevel(points = 0) {
-  if (points >= 1500) return { level: 8, title: 'Retro Legend' };
-  if (points >= 1000) return { level: 7, title: 'Master Collector' };
-  if (points >= 700) return { level: 6, title: 'Console Champion' };
-  if (points >= 450) return { level: 5, title: 'Dedicated Gamer' };
-  if (points >= 250) return { level: 4, title: 'Seasoned Player' };
-  if (points >= 120) return { level: 3, title: 'Cartridge Explorer' };
-  if (points >= 50) return { level: 2, title: 'Apprentice' };
+  if (points >= 200) return { level: 8, title: 'Retro Legend' };
+  if (points >= 160) return { level: 7, title: 'Master Collector' };
+  if (points >= 120) return { level: 6, title: 'Console Champion' };
+  if (points >= 80) return { level: 5, title: 'Dedicated Gamer' };
+  if (points >= 50) return { level: 4, title: 'Seasoned Player' };
+  if (points >= 25) return { level: 3, title: 'Cartridge Explorer' };
+  if (points >= 10) return { level: 2, title: 'Apprentice' };
   return { level: 1, title: 'Novice Gamer' };
 }
 
