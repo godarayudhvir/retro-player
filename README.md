@@ -7,7 +7,7 @@
 ### *The High-Performance, Zero-Overhead Web Emulation Station*
 
 [![Live Web Demo](https://img.shields.io/badge/Live%20Demo-godarayudhvir.github.io%2Fretro--player-emerald?style=for-the-badge&logo=githubpages&logoColor=white)](https://godarayudhvir.github.io/retro-player/)
-[![Version: v1.0.7](https://img.shields.io/badge/Version-v1.0.7-emerald?style=for-the-badge&logo=semver&logoColor=white)](https://github.com/godarayudhvir/retro-player)
+[![Version: v1.0.8](https://img.shields.io/badge/Version-v1.0.8-emerald?style=for-the-badge&logo=semver&logoColor=white)](https://github.com/godarayudhvir/retro-player)
 
 <br />
 
