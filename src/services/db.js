@@ -25,6 +25,46 @@ export function checkServerDbStatus() {
 }
 
 /**
+ * Close active IndexedDB database connection.
+ */
+export function closeDB() {
+  if (dbInstance) {
+    try {
+      dbInstance.close();
+    } catch (e) {}
+    dbInstance = null;
+  }
+}
+
+/**
+ * Empties all object stores inside RetroPlayerDB immediately and closes the connection.
+ */
+export async function clearAllIndexedDbStores() {
+  try {
+    const db = await getDB();
+    if (db) {
+      const storeNames = Array.from(db.objectStoreNames);
+      if (storeNames.length > 0) {
+        const tx = db.transaction(storeNames, 'readwrite');
+        for (const storeName of storeNames) {
+          try {
+            tx.objectStore(storeName).clear();
+          } catch (err) {}
+        }
+        await new Promise((resolve) => {
+          tx.oncomplete = resolve;
+          tx.onerror = resolve;
+          tx.onabort = resolve;
+        });
+      }
+    }
+  } catch (e) {
+    console.warn('⚠️ [PURGE] Error clearing IndexedDB object stores:', e);
+  }
+  closeDB();
+}
+
+/**
  * Open or upgrade the database instance.
  */
 export function getDB() {

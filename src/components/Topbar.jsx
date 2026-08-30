@@ -22,7 +22,8 @@ import {
   Info,
   Database,
   Sun,
-  Moon
+  Moon,
+  Trophy
 } from 'lucide-react';
 import MultiAvatar from './MultiAvatar';
 import { resolveAssetPath } from '../utils/assetPath';
@@ -48,10 +49,12 @@ export default function Topbar({
   onOpenScraperModal,
   onOpenAboutModal,
   onOpenBackupModal,
+  onOpenTrophyModal,
   time,
   sfx,
   themeEngine,
-  scraper
+  scraper,
+  achievementsEngine
 }) {
   // Auto-Resume on Game Launch Toggle (Persistent localStorage sync)
   const [isAutoResumeEnabled, setIsAutoResumeEnabled] = useState(() => {
@@ -162,6 +165,9 @@ export default function Topbar({
               className={`status-pill status-bgm ${bgm.isPlaying ? 'is-bgm-playing' : ''} ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'bgm' ? 'gamepad-focused' : ''}`}
               onClick={() => {
                 bgm.togglePlay();
+                if (!bgm.isPlaying && bgm.currentTrack) {
+                  achievementsEngine?.triggerBgmTrackPlayed?.(bgm.currentTrack.title || bgm.currentTrack.url);
+                }
                 sfx?.playTileNav?.();
               }}
               title={bgm.currentTrack 
@@ -178,6 +184,9 @@ export default function Topbar({
                 className={`status-pill status-bgm-skip ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'bgmSkip' ? 'gamepad-focused' : ''}`}
                 onClick={() => {
                   bgm.nextTrack();
+                  if (bgm.currentTrack) {
+                    achievementsEngine?.triggerBgmTrackPlayed?.(bgm.currentTrack.title || bgm.currentTrack.url);
+                  }
                   sfx?.playTabSwitch?.();
                 }}
                 title="Next BGM Track"
@@ -321,6 +330,7 @@ export default function Topbar({
             className={`status-pill status-colormode-toggle ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'colormode' ? 'gamepad-focused' : ''}`}
             onClick={() => {
               themeEngine.toggleColorMode?.();
+              achievementsEngine?.triggerThemeToggled?.();
               sfx?.playThemeSwitch?.();
             }}
             title={`Switch to ${themeEngine.colorMode === 'dark' ? 'Light' : 'Dark'} Mode (Current: ${themeEngine.colorMode === 'dark' ? 'Dark Mode 🌙' : 'Light Mode ☀️'})`}
@@ -360,14 +370,28 @@ export default function Topbar({
           <Database size={17} color="#2563eb" />
         </button>
 
-        {/* About & System Info (v1.0.3) */}
+        {/* Hall of Fame & Trophy Cabinet */}
+        <button
+          type="button"
+          className={`status-pill status-trophies ${focusedTarget?.zone === 'topbar' && focusedTarget?.id === 'trophy' ? 'gamepad-focused' : ''}`}
+          onClick={() => {
+            onOpenTrophyModal?.();
+            sfx?.playModalOpen?.();
+          }}
+          title={`Trophy Cabinet & Milestones (${achievementsEngine?.totalEarnedPoints || 0} G Earned)`}
+          aria-label="Trophy Cabinet and Milestones"
+        >
+          <Trophy size={18} color="#f59e0b" />
+        </button>
+
+        {/* About & System Info (v1.0.6) */}
         <button
           className="status-pill status-info-app"
           onClick={() => {
             onOpenAboutModal?.();
             sfx?.playModalOpen?.();
           }}
-          title="About Retro Player & System Capabilities (v1.0.3)"
+          title="About Retro Player & System Capabilities"
           aria-label="About Retro Player"
         >
           <Info size={17} color="#059669" />

@@ -29,7 +29,8 @@ import {
   LayoutGrid,
   Maximize2,
   Minimize2,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Trophy
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { resolveAssetPath } from '../../utils/assetPath';
@@ -69,7 +70,8 @@ export default function DsView({
   hasSaveData,
   scraper,
   sfx,
-  gamepadConnected = false
+  gamepadConnected = false,
+  achievementsEngine
 }) {
   const lastGridIndexRef = useRef(0);
   const fileInputRef = useRef(null);
@@ -870,6 +872,30 @@ export default function DsView({
                 </div>
               </div>
             </div>
+
+            {/* Per-ROM Mastered Milestones Card */}
+            {(() => {
+              const perRomMilestones = selectedGame && achievementsEngine?.getGameMilestones 
+                ? achievementsEngine.getGameMilestones(selectedGame.id || selectedGame.title) 
+                : [];
+              if (perRomMilestones.length === 0) return null;
+              return (
+                <div className="ds-per-rom-trophies-card animate-fade-in">
+                  <div className="ds-trophies-header">
+                    <Trophy size={13} color="#f59e0b" />
+                    <span>Milestones Mastered ({perRomMilestones.length})</span>
+                  </div>
+                  <div className="ds-trophies-badge-row">
+                    {perRomMilestones.map(t => (
+                      <div key={t.id} className={`ds-trophy-mini-badge tier-${t.tier}`} title={`${t.title}: ${t.description}`}>
+                        <Trophy size={11} />
+                        <span>{t.title}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Specs Details Card */}
             {(genre || developer || publisher || releaseYear) ? (

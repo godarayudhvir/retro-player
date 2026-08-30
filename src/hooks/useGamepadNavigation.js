@@ -1282,6 +1282,7 @@ export function useGamepadNavigation({
       if (stateRef.current.themeEngine) {
         items.push('colormode');
       }
+      items.push('trophy');
       return items;
     };
 
@@ -1323,6 +1324,11 @@ export function useGamepadNavigation({
         } else if (curId === 'colormode') {
           stateRef.current.themeEngine?.toggleColorMode?.();
           sfx?.playThemeSwitch?.();
+        } else if (curId === 'trophy') {
+          if (stateRef.current.onOpenTrophyModal) {
+            stateRef.current.onOpenTrophyModal();
+            sfx?.playModalOpen?.();
+          }
         } else if (curId === 'search') {
           if (stateRef.current.gamepadConnected) {
             if (stateRef.current.setOskConfig) {

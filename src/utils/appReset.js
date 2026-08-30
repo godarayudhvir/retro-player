@@ -1,3 +1,5 @@
+import { clearAllIndexedDbStores, closeDB } from '../services/db';
+
 /**
  * Full Client-Side Factory Reset Utility for Retro Player.
  * Wipes all browser storage, caches, service workers, and IndexedDB databases
@@ -14,7 +16,14 @@ export async function resetEntireApp() {
       console.warn('⚠️ [APP RESET] Server DB purge warn:', e);
     }
 
-    // 1. Unregister all service workers
+    // 1. Empties all object stores inside RetroPlayerDB immediately and closes active connections
+    try {
+      await clearAllIndexedDbStores();
+    } catch (e) {
+      console.warn('⚠️ [APP RESET] IndexedDB store clear warn:', e);
+    }
+
+    // 2. Unregister all service workers
     if ('serviceWorker' in navigator) {
       try {
         const registrations = await navigator.serviceWorker.getRegistrations();
@@ -25,7 +34,7 @@ export async function resetEntireApp() {
       }
     }
 
-    // 2. Delete all CacheStorage entries (PWA assets, cached ROMs, images)
+    // 3. Delete all CacheStorage entries (PWA assets, cached ROMs, images)
     if ('caches' in window) {
       try {
         const cacheNames = await caches.keys();
@@ -36,7 +45,7 @@ export async function resetEntireApp() {
       }
     }
 
-    // 3. Clear LocalStorage and SessionStorage
+    // 4. Clear LocalStorage and SessionStorage
     try {
       localStorage.clear();
       sessionStorage.clear();
@@ -45,11 +54,13 @@ export async function resetEntireApp() {
       console.warn('⚠️ [APP RESET] Storage clear warn:', e);
     }
 
-    // 4. Delete all IndexedDB databases
+    // 5. Delete all IndexedDB databases
     try {
+      closeDB();
       const knownDbs = [
         'RetroPlayerDB',
         'RetroPlayerMetadataDB',
+        'retroplayer_metadata_db',
         'emulatorjs',
         'localforage',
         'keyval-store',
@@ -83,10 +94,10 @@ export async function resetEntireApp() {
       console.warn('⚠️ [APP RESET] IndexedDB purge warn:', e);
     }
 
-    // 5. Brief 250ms buffer for browser storage engines to finalize deletions
+    // 6. Brief 250ms buffer for browser storage engines to finalize deletions
     await new Promise(resolve => setTimeout(resolve, 250));
 
-    // 6. Hard reload to origin for a fresh start
+    // 7. Hard reload to origin for a fresh start
     window.location.href = window.location.origin + window.location.pathname;
   } catch (err) {
     console.error('🚨 [APP RESET ERROR]:', err);

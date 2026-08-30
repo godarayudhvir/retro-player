@@ -1,9 +1,10 @@
+import { clearAllIndexedDbStores, closeDB } from '../services/db';
+
 /**
  * Centralized Client-Side Browser Storage & Cache Purger
  * Safely clears browser IndexedDB, CacheStorage (Service Worker), and localStorage
  * without affecting server disk files (ROMs, covers, sidecars).
  */
-
 export async function clearBrowserCacheAndData() {
   const results = {
     indexedDb: false,
@@ -12,7 +13,14 @@ export async function clearBrowserCacheAndData() {
     sessionStorage: false
   };
 
-  // 1. Clear CacheStorage (Service Worker asset caches)
+  // 1. Purge all object stores and close open connection
+  try {
+    await clearAllIndexedDbStores();
+  } catch (e) {
+    console.warn('⚠️ [CACHE PURGE] Error clearing IndexedDB stores:', e);
+  }
+
+  // 2. Clear CacheStorage (Service Worker asset caches)
   if (typeof window !== 'undefined' && 'caches' in window) {
     try {
       const keys = await caches.keys();
@@ -23,10 +31,11 @@ export async function clearBrowserCacheAndData() {
     }
   }
 
-  // 2. Clear IndexedDB Databases
+  // 3. Clear IndexedDB Databases
   if (typeof window !== 'undefined' && window.indexedDB) {
     try {
-      const dbsToPurge = ['RetroPlayerDB', 'retroplayer_metadata_db', 'localforage'];
+      closeDB();
+      const dbsToPurge = ['RetroPlayerDB', 'retroplayer_metadata_db', 'RetroPlayerMetadataDB', 'localforage', 'emulatorjs'];
       await Promise.all(
         dbsToPurge.map((dbName) => {
           return new Promise((resolve) => {
@@ -34,6 +43,7 @@ export async function clearBrowserCacheAndData() {
             req.onsuccess = () => resolve(true);
             req.onerror = () => resolve(false);
             req.onblocked = () => resolve(false);
+            setTimeout(resolve, 300);
           });
         })
       );
@@ -43,7 +53,7 @@ export async function clearBrowserCacheAndData() {
     }
   }
 
-  // 3. Clear LocalStorage and SessionStorage
+  // 4. Clear LocalStorage and SessionStorage
   if (typeof window !== 'undefined') {
     try {
       localStorage.clear();

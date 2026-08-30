@@ -76,7 +76,8 @@ export default function EmulatorModal({
   onClose, 
   onSessionEnd,
   focusedTarget,
-  setFocusedTarget
+  setFocusedTarget,
+  achievementsEngine
 }) {
   const stageRef = useRef(null);
   const iframeRef = useRef(null);
@@ -367,7 +368,7 @@ export default function EmulatorModal({
     const currentGame = gameRef.current;
     if (finalSeconds >= 3 && onSessionEndRef.current && currentGame) {
       console.log(`⏱️ [PLAYTIME TRACKER] Recorded active gameplay: ${finalSeconds}s for "${currentGame.title}"`);
-      onSessionEndRef.current(currentGame.id || currentGame.title, finalSeconds);
+      onSessionEndRef.current(currentGame.id || currentGame.title, finalSeconds, currentGame);
     }
   }, []);
 
@@ -627,8 +628,33 @@ export default function EmulatorModal({
       if (core === 'ps1' || core === 'playstation') core = 'psx';
       if (core === 'sega' || core === 'genesis' || core === 'megadrive' || core === 'sega_genesis') core = 'segaMD';
       if (core === 'gamegear' || core === 'game_gear') core = 'segaGG';
-      if (core === 'arcade') core = 'mame2003_plus';
+      if (core === 'arcade' || core === 'mame2003_plus') core = 'mame';
       if (core === 'atari_2600') core = 'atari2600';
+
+      let romFilename = currentGame.filename || '';
+      if (!romFilename || !romFilename.includes('.')) {
+        const extMap = {
+          segaGG: 'gg',
+          gamegear: 'gg',
+          mame: 'zip',
+          arcade: 'zip',
+          mame2003_plus: 'zip',
+          segaMD: 'md',
+          genesis: 'md',
+          nes: 'nes',
+          snes: 'sfc',
+          gb: 'gb',
+          gbc: 'gbc',
+          gba: 'gba',
+          n64: 'z64',
+          nds: 'nds',
+          psx: 'cue',
+          atari2600: 'a26'
+        };
+        const ext = extMap[core] || extMap[currentGame.systemKey] || 'bin';
+        const base = (currentGame.title || 'game').replace(/[#<$+%>!`&*'|{}/\\?"=@:^\r\n]/g, '').trim();
+        romFilename = `${base}.${ext}`;
+      }
 
       const iframe = document.createElement('iframe');
       iframeRef.current = iframe;
@@ -993,60 +1019,36 @@ export default function EmulatorModal({
               }
             }, 80);
 
-            // Clear lingering flags and purge un-scoped Emscripten IDBFS databases
-            try {
-              localStorage.removeItem('ejs_muted');
-              localStorage.removeItem('muted');
-              localStorage.setItem('ejs_volume', '1');
-              const emscriptenDbs = [
-                '/home/web_user/retroarch/userdata',
-                '/home/web_user/retroarch',
-                '/home/web_user',
-                '/retroarch',
-                '/data',
-                '/saves',
-                'emulatorjs',
-                'retroarch'
-              ];
-              emscriptenDbs.forEach(d => {
-                try {
-                  if (window.indexedDB && typeof window.indexedDB.deleteDatabase === 'function') {
-                    window.indexedDB.deleteDatabase(d);
-                  }
-                } catch(e) {}
-              });
-
-              // Intercept IDBFS IndexedDB open so Emscripten cannot store or resurrect un-scoped global saves
-              const origIndexedDBOpen = window.indexedDB ? window.indexedDB.open.bind(window.indexedDB) : null;
-              if (origIndexedDBOpen) {
-                window.indexedDB.open = function(name, version) {
-                  if (emscriptenDbs.includes(name) || (typeof name === 'string' && (name.startsWith('/home') || name.startsWith('/') || name === 'emulatorjs'))) {
-                    const dummyReq = {
-                      readyState: 'done',
-                      result: null,
-                      error: new DOMException('IDBFS blocked for multi-profile isolation', 'AbortError'),
-                      addEventListener: () => {},
-                      removeEventListener: () => {},
-                      dispatchEvent: () => false
-                    };
-                    setTimeout(() => {
-                      if (typeof dummyReq.onerror === 'function') {
-                        dummyReq.onerror({ target: dummyReq });
-                      }
-                    }, 0);
-                    return dummyReq;
-                  }
-                  return origIndexedDBOpen(name, version);
-                };
-              }
-            } catch(e) {}
+              // Clear lingering flags and purge un-scoped Emscripten IDBFS databases before launch
+              try {
+                localStorage.removeItem('ejs_muted');
+                localStorage.removeItem('muted');
+                localStorage.setItem('ejs_volume', '1');
+                const emscriptenDbs = [
+                  '/home/web_user/retroarch/userdata',
+                  '/home/web_user/retroarch',
+                  '/home/web_user',
+                  '/retroarch',
+                  '/data',
+                  '/saves',
+                  'emulatorjs',
+                  'retroarch'
+                ];
+                emscriptenDbs.forEach(d => {
+                  try {
+                    if (window.indexedDB && typeof window.indexedDB.deleteDatabase === 'function') {
+                      window.indexedDB.deleteDatabase(d);
+                    }
+                  } catch(e) {}
+                });
+              } catch(e) {}
 
             window.EJS_player = '#game';
             window.EJS_volume = 1.0;
             window.EJS_gameUrl = ${JSON.stringify(absoluteRomUrl)};
             window.EJS_gameID = ${JSON.stringify(`${activeProfileId}_${currentGame.id || 'custom_game'}`)};
             window.EJS_gameId = ${JSON.stringify(`${activeProfileId}_${currentGame.id || 'custom_game'}`)};
-            window.EJS_gameName = ${JSON.stringify(currentGame.title || 'Custom Game')};
+            window.EJS_gameName = ${JSON.stringify(romFilename)};
             window.EJS_core = ${JSON.stringify(core)};
             window.EJS_pathtodata = ${JSON.stringify(initialDataPath)};
             window.EJS_startOnLoaded = true;
@@ -2540,6 +2542,9 @@ export default function EmulatorModal({
               console.warn('Canvas capture fallback failed:', e);
             }
           }
+          if (captured) {
+            achievementsEngine?.triggerScreenshot?.(game);
+          }
           sfx?.play?.('click');
           break;
         }
@@ -2572,6 +2577,7 @@ export default function EmulatorModal({
               await dbSet(STORES.SAVE_STATES, scopedKey, payload);
               try { localStorage.setItem(scopedKey, JSON.stringify(payload)); } catch(e) {}
               showToast('Quick Save Created!');
+              achievementsEngine?.triggerQuickSave?.(game);
             } else {
               showToast('Quick Save failed - state empty');
             }
@@ -2612,6 +2618,7 @@ export default function EmulatorModal({
                 emu.gameManager.functions.loadState(bytes);
               }
               showToast('Quick Load Restored!');
+              achievementsEngine?.triggerQuickLoad?.(game);
             } else {
               showToast('No Quick Save state found');
             }
@@ -2712,6 +2719,7 @@ export default function EmulatorModal({
       setShowResumePrompt(false);
       sfx?.playGameLaunch?.();
       showToast('⚡ Resumed where you left off!');
+      achievementsEngine?.triggerAutoResume?.(game);
     } catch(e) {
       console.warn('Auto-resume load error:', e);
       resumeStateDataRef.current = null;

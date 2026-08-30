@@ -48,7 +48,8 @@ import {
   Info,
   Database,
   Users,
-  Zap
+  Zap,
+  Trophy
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import MultiAvatar from './MultiAvatar';
@@ -123,8 +124,10 @@ export default function MobileAppView({
   onOpenScraperModal,
   onOpenAboutModal,
   onOpenBackupModal,
+  onOpenTrophyModal,
   setShowLoadRomModal,
-  setShowVirtualKeyboard
+  setShowVirtualKeyboard,
+  achievementsEngine
 }) {
   const fileInputRef = useRef(null);
   const saveFileInputRef = useRef(null);
@@ -976,6 +979,30 @@ export default function MobileAppView({
                   </div>
                 </div>
               </div>
+
+              {/* Per-ROM Mastered Milestones Card */}
+              {(() => {
+                const perRomMilestones = selectedGameForDetails && achievementsEngine?.getGameMilestones 
+                  ? achievementsEngine.getGameMilestones(selectedGameForDetails.id || selectedGameForDetails.title) 
+                  : [];
+                if (perRomMilestones.length === 0) return null;
+                return (
+                  <div className="ds-per-rom-trophies-card animate-fade-in" style={{ marginBottom: '0.5rem' }}>
+                    <div className="ds-trophies-header">
+                      <Trophy size={13} color="#f59e0b" />
+                      <span>Milestones Mastered ({perRomMilestones.length})</span>
+                    </div>
+                    <div className="ds-trophies-badge-row">
+                      {perRomMilestones.map(t => (
+                        <div key={t.id} className={`ds-trophy-mini-badge tier-${t.tier}`} title={`${t.title}: ${t.description}`}>
+                          <Trophy size={11} />
+                          <span>{t.title}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Bottom Screen Frame: Synopsis & Game Overview */}
               <div className="ds-screen-frame bottom-screen mobile-ds-bottom-screen">
@@ -2169,7 +2196,7 @@ export default function MobileAppView({
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
                       <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>About Retro Player</strong>
-                      <span className="info-version-badge" style={{ fontSize: '0.68rem', padding: '0.12rem 0.5rem' }}>v1.0.6</span>
+                      <span className="info-version-badge" style={{ fontSize: '0.68rem', padding: '0.12rem 0.5rem' }}>v1.0.7</span>
                     </div>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
                       Emulation engines, GitHub repository, and system specifications
@@ -2189,6 +2216,41 @@ export default function MobileAppView({
                   >
                     <Info size={14} />
                     <span>About &amp; Specifications</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Card 5: Trophy Cabinet & Milestones */}
+              <div className="mobile-menu-card">
+                <div className="mobile-menu-card-header">
+                  <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>
+                    <Trophy size={18} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Trophy Cabinet</strong>
+                      <span className="info-version-badge" style={{ fontSize: '0.68rem', padding: '0.12rem 0.5rem', background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11, 0.3)' }}>
+                        {achievementsEngine?.totalEarnedPoints || 0} G
+                      </span>
+                    </div>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
+                      Universal organic milestones, habits, streaks, and gamer rank
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mobile-menu-card-actions">
+                  <button
+                    type="button"
+                    className="mobile-menu-btn is-primary"
+                    onClick={() => {
+                      setIsHamburgerOpen(false);
+                      onOpenTrophyModal?.();
+                      sfx?.playModalOpen?.();
+                    }}
+                  >
+                    <Trophy size={14} />
+                    <span>Open Trophy Cabinet</span>
                   </button>
                 </div>
               </div>

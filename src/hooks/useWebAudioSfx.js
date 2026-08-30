@@ -445,6 +445,45 @@ export function useWebAudioSfx() {
     }
   }, [isMuted, getAudioContext]);
 
+  /**
+   * Triumphant 8-bit / 16-bit chiptune fanfare for Achievement & Milestone unlocks.
+   */
+  const playAchievementUnlock = useCallback(() => {
+    if (isMuted) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      // 4-note ascending fanfare arpeggio: C5 (523Hz) -> E5 (659Hz) -> G5 (784Hz) -> C6 (1046Hz)
+      const notes = [
+        { freq: 523.25, time: 0, dur: 0.09, type: 'triangle', gain: 0.28 },
+        { freq: 659.25, time: 0.08, dur: 0.09, type: 'triangle', gain: 0.28 },
+        { freq: 783.99, time: 0.16, dur: 0.11, type: 'triangle', gain: 0.30 },
+        { freq: 1046.50, time: 0.26, dur: 0.35, type: 'sine', gain: 0.35 }
+      ];
+
+      notes.forEach((n) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = n.type;
+        osc.frequency.setValueAtTime(n.freq, now + n.time);
+
+        gain.gain.setValueAtTime(n.gain, now + n.time);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + n.time + n.dur);
+
+        osc.connect(gain);
+        gain.connect(getDestination(ctx));
+
+        osc.start(now + n.time);
+        osc.stop(now + n.time + n.dur + 0.01);
+      });
+    } catch (e) {
+      console.debug('Achievement SFX error:', e);
+    }
+  }, [isMuted, getAudioContext]);
+
   return {
     isMuted,
     toggleMute,
@@ -460,6 +499,7 @@ export function useWebAudioSfx() {
     playFavoriteToggle,
     playThemeSwitch,
     playBatteryLow,
+    playAchievementUnlock,
     playNavSelect: playTileNav,
     playMenuConfirm: playModalOpen,
     playConfirm: playModalOpen

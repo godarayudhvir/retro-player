@@ -34,7 +34,8 @@ export default function BackupModal({
   sfx,
   focusedTarget,
   setFocusedTarget,
-  onDataRestored
+  onDataRestored,
+  achievementsEngine
 }) {
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -143,6 +144,7 @@ export default function BackupModal({
       URL.revokeObjectURL(url);
 
       setStatusMessage(`Database successfully exported as "${filename}"`);
+      achievementsEngine?.triggerDatabaseBackup?.();
       sfx?.playThemeSwitch?.();
     } catch (err) {
       console.error('Export error:', err);

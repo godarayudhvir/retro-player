@@ -39,7 +39,8 @@ export default function CartridgeGrid({
   setShowLoadRomModal,
   linkedDirectoryHandles = [],
   onReconnectLinkedFolders = null,
-  isReconnectingLinkedFolders = false
+  isReconnectingLinkedFolders = false,
+  achievementsEngine
 }) {
   const currentTheme = themeEngine?.theme || 'ds';
 

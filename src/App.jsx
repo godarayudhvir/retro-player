@@ -16,6 +16,10 @@ import MobileAppView from './components/MobileAppView';
 import MetadataEditModal from './components/MetadataEditModal';
 import BackupModal from './components/BackupModal';
 import KeyboardControlsModal from './components/KeyboardControlsModal';
+import AchievementToast from './components/AchievementToast';
+import TrophyCabinetModal from './components/TrophyCabinetModal';
+
+import { useAchievements } from './hooks/useAchievements';
 
 import { useWebAudioSfx } from './hooks/useWebAudioSfx';
 import { useGamepadStatus } from './hooks/useGamepadStatus';
@@ -46,6 +50,7 @@ export default function App() {
   const [showLoadRomModal, setShowLoadRomModal] = useState(false);
   const [showScraperModal, setShowScraperModal] = useState(false);
   const [showBackupModal, setShowBackupModal] = useState(false);
+  const [showTrophyModal, setShowTrophyModal] = useState(false);
   const [showVirtualKeyboard, setShowVirtualKeyboard] = useState(false);
   const [oskConfig, setOskConfig] = useState({
     title: 'SEARCH LIBRARY',
@@ -146,37 +151,6 @@ export default function App() {
     }
   }, [handleCheckSaveData, sfx]);
 
-  // Game Launch Orchestration: Check if keyboard splash prompt should show on UI before booting into emulator
-  const handleLaunchGameImmediately = useCallback((game) => {
-    if (!game) return;
-    recordGameLaunch(game);
-    sfx.playGameLaunch();
-    setActiveGame(game);
-    setPendingGameForLaunch(null);
-  }, [recordGameLaunch, sfx]);
-
-  const handleRequestLaunchGame = useCallback((game) => {
-    if (!game) return;
-    const isMobileTouch = (typeof window !== 'undefined') && (
-      (window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches) ||
-      (('ontouchstart' in window) && window.innerWidth <= 768) ||
-      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '')
-    );
-    const sysKey = (game?.systemKey || game?.systemCore || 'default').toLowerCase();
-    let skipPrompt = false;
-    try {
-      skipPrompt = localStorage.getItem(`retro_skip_keyboard_controls_prompt_${sysKey}`) === 'true' ||
-                   localStorage.getItem('retro_skip_keyboard_controls_prompt') === 'true';
-    } catch (e) {}
-
-    if (isMobileTouch || gamepadConnected || skipPrompt) {
-      handleLaunchGameImmediately(game);
-    } else {
-      (sfx?.playMenuConfirm || sfx?.playModalOpen || sfx?.playTileNav)?.();
-      setPendingGameForLaunch(game);
-    }
-  }, [gamepadConnected, handleLaunchGameImmediately, sfx]);
-
   const [loadRomInitialFile, setLoadRomInitialFile] = useState(null);
 
   // Custom ROM Quick Play: RAM-only direct play without DB storage or library searching
@@ -184,7 +158,7 @@ export default function App() {
     if (customGame) {
       handleRequestLaunchGame(customGame);
     }
-  }, [handleRequestLaunchGame]);
+  }, []);
 
   // Drag & Drop / External File Hook: open the Ingestion Review Modal
   const handleFileDropped = useCallback((file) => {
@@ -219,6 +193,46 @@ export default function App() {
     recentlyPlayed, 
     onFileDropped: handleFileDropped 
   });
+
+  // Hook 8: Universal Organic Achievements & Milestones Engine
+  const achievementsEngine = useAchievements({
+    activeProfileId,
+    sfx,
+    mountedGames: games,
+    isPlaying: Boolean(activeGame)
+  });
+
+  // Game Launch Orchestration: Check if keyboard splash prompt should show on UI before booting into emulator
+  const handleLaunchGameImmediately = useCallback((game) => {
+    if (!game) return;
+    recordGameLaunch(game);
+    achievementsEngine?.triggerGameLaunch?.(game);
+    sfx.playGameLaunch();
+    setActiveGame(game);
+    setPendingGameForLaunch(null);
+  }, [recordGameLaunch, achievementsEngine, sfx]);
+
+  const handleRequestLaunchGame = useCallback((game) => {
+    if (!game) return;
+    const isMobileTouch = (typeof window !== 'undefined') && (
+      (window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches) ||
+      (('ontouchstart' in window) && window.innerWidth <= 768) ||
+      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '')
+    );
+    const sysKey = (game?.systemKey || game?.systemCore || 'default').toLowerCase();
+    let skipPrompt = false;
+    try {
+      skipPrompt = localStorage.getItem(`retro_skip_keyboard_controls_prompt_${sysKey}`) === 'true' ||
+                   localStorage.getItem('retro_skip_keyboard_controls_prompt') === 'true';
+    } catch (e) {}
+
+    if (isMobileTouch || gamepadConnected || skipPrompt) {
+      handleLaunchGameImmediately(game);
+    } else {
+      (sfx?.playMenuConfirm || sfx?.playModalOpen || sfx?.playTileNav)?.();
+      setPendingGameForLaunch(game);
+    }
+  }, [gamepadConnected, handleLaunchGameImmediately, sfx]);
 
   // Automated Online Metadata & Cover Art Scraper
   const scraper = useMetadataScraper(games, { isMobile, isPlaying: !!activeGame });
@@ -356,6 +370,7 @@ export default function App() {
     themeEngine,
     pwa,
     onOpenScraperModal: () => setShowScraperModal(true),
+    onOpenTrophyModal: () => setShowTrophyModal(true),
     // Mobile coordination
     isMobile,
     selectedMobileGameForDetails,
@@ -519,9 +534,11 @@ export default function App() {
           onOpenScraperModal={() => setShowScraperModal(true)}
           onOpenAboutModal={() => setShowInfoModal(true)}
           onOpenBackupModal={() => setShowBackupModal(true)}
+          onOpenTrophyModal={() => setShowTrophyModal(true)}
           setShowLoadRomModal={setShowLoadRomModal}
           setShowVirtualKeyboard={setShowVirtualKeyboard}
           onDeleteGame={deleteGame}
+          achievementsEngine={achievementsEngine}
         />
       ) : (
         <>
@@ -543,10 +560,12 @@ export default function App() {
             onOpenScraperModal={() => setShowScraperModal(true)}
             onOpenAboutModal={() => setShowInfoModal(true)}
             onOpenBackupModal={() => setShowBackupModal(true)}
+            onOpenTrophyModal={() => setShowTrophyModal(true)}
             time={time}
             sfx={sfx}
             themeEngine={themeEngine}
             scraper={scraper}
+            achievementsEngine={achievementsEngine}
           />
 
           {/* System Selection Ribbon */}
@@ -598,6 +617,7 @@ export default function App() {
             linkedDirectoryHandles={linkedDirectoryHandles}
             onReconnectLinkedFolders={handleReconnectLinkedFolders}
             isReconnectingLinkedFolders={isReconnectingHandle}
+            achievementsEngine={achievementsEngine}
           />
         </>
       )}
@@ -871,6 +891,7 @@ export default function App() {
         sfx={sfx}
         focusedTarget={focusedTarget}
         setFocusedTarget={setFocusedTarget}
+        achievementsEngine={achievementsEngine}
         onDataRestored={() => window.location.reload()}
       />
 
@@ -900,6 +921,7 @@ export default function App() {
           sfx={sfx}
           focusedTarget={focusedTarget}
           setFocusedTarget={setFocusedTarget}
+          achievementsEngine={achievementsEngine}
           onClose={() => {
             const playedGame = activeGame;
             setActiveGame(null);
@@ -916,8 +938,10 @@ export default function App() {
               }
             }
           }}
-          onSessionEnd={(gameId, elapsedSeconds) => {
+          onSessionEnd={(gameId, elapsedSeconds, gameObj) => {
             recordGameSession(gameId, elapsedSeconds);
+            const targetGame = gameObj || activeGame || (gameId ? { id: gameId, title: gameId } : null);
+            achievementsEngine?.triggerGameExit?.(targetGame, elapsedSeconds);
           }}
         />
       )}
@@ -973,6 +997,26 @@ export default function App() {
           </button>
         </aside>
       )}
+
+      {/* In-App Achievement & Milestone Unlock Toast Notification HUD */}
+      <AchievementToast
+        toast={achievementsEngine.activeToast}
+        onDismiss={achievementsEngine.dismissToast}
+        onOpenCabinet={() => setShowTrophyModal(true)}
+      />
+
+      {/* Interactive Trophy Cabinet & Hall of Fame Modal */}
+      <TrophyCabinetModal
+        isOpen={showTrophyModal}
+        onClose={() => {
+          setShowTrophyModal(false);
+          setFocusedTarget({ zone: 'topbar', id: 'trophy' });
+          sfx?.playModalClose?.();
+        }}
+        activeProfile={activeProfile}
+        achievementsEngine={achievementsEngine}
+        sfx={sfx}
+      />
     </div>
   );
 }
