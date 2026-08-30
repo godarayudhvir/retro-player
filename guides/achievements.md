@@ -9,7 +9,7 @@ The achievement system features a balanced **6 Categories × 4 Tiers (1 Bronze, 
 - 💎 **Platinum (+20G)**: 6 Trophies = 120G
 - **🏆 Total Obtainable Gamer Score: 300G**
 
-> 📖 **Pokémon Save Inspector Guide**: For game-specific cartridge milestones, Gym Badge Cases, and memory parsing specifications across Pokémon Red, Blue, Yellow, Gold, Silver, Crystal, Ruby, Sapphire, Emerald, FireRed, and LeafGreen, see the dedicated **[Pokémon Save Inspector & Regional Milestones Guide](pokemon-milestones.md)**.
+> 📖 **Pokémon Save Inspector Guide**: For game-specific cartridge milestones, Gym Badge Cases, and memory parsing specifications across Pokémon Red, Blue, Yellow, Gold, Silver, Crystal, Ruby, Sapphire, Emerald, FireRed, and LeafGreen, see the dedicated **[Pokémon Save Inspector & Regional Milestones Hub](pokemon/README.md)**.
 
 > **Status Checklist**: Use the `Status / Working` column to mark off testing verification on your local setup (✅ Verified Working).
 
@@ -81,77 +81,15 @@ The achievement system features a balanced **6 Categories × 4 Tiers (1 Bronze, 
 
 ---
 
-## ⚡ Category G: Pokémon Trainer Milestones (Per-ROM Scoped)
+## 🎯 Pokémon Save Inspector & Regional Badge Cases
 
-| Status | Tier | ID | Title | Universal Requirement | Evaluation Logic / Byte Source | Scope |
-| :---: | :---: | :--- | :--- | :--- | :--- | :---: |
-| ⏳ | 🥉 Bronze | `poke_journey_begun` | **Journey Begun** | Receive your first starter Pokémon companion. | `summary.hasStarter === true` | Per-ROM |
-| ⏳ | 🥉 Bronze | `poke_digital_cartographer` | **Digital Cartographer** | Acquire Town Map / Pokégear / Device. | `summary.keyItems.townMap === true` | Per-ROM |
-| ⏳ | 🥉 Bronze | `poke_first_catch` | **First Wild Catch** | Register first non-starter capture. | `summary.hasFirstCatch === true` | Per-ROM |
-| ⏳ | 🥉 Bronze | `poke_gone_fishin` | **Gone Fishin'** | Acquire your first fishing rod (Old / Good Rod). | `oldRod || goodRod === true` | Per-ROM |
-| ⏳ | 🥈 Silver | `poke_full_party` | **Full Battle Party** | Assemble 6 battle Pokémon in party. | `summary.hasFullParty === true` | Per-ROM |
-| ⏳ | 🥈 Silver | `poke_pedal_to_metal` | **Pedal to the Metal** | Acquire the Bicycle key item. | `summary.keyItems.bicycle === true` | Per-ROM |
-| ⏳ | 🥉 Bronze | `poke_evolution_master` | **Evolution Master** | Evolve a Pokémon into a new stage. | `summary.hasEvolved === true` | Per-ROM |
-| ⏳ | 🥉 Bronze | `poke_badge_1` | **First Badge of Honor** | Defeat Gym Leader 1 & earn Badge 1. | `summary.badges[0] === true` | Per-ROM |
-| ⏳ | 🥉 Bronze | `poke_badge_2` | **Second Badge Claimed** | Defeat Gym Leader 2 & earn Badge 2. | `summary.badges[1] === true` | Per-ROM |
-| ⏳ | 🥉 Bronze | `poke_badge_3` | **Third Badge Claimed** | Defeat Gym Leader 3 & earn Badge 3. | `summary.badges[2] === true` | Per-ROM |
-| ⏳ | 🥈 Silver | `poke_badge_4` | **Fourth Badge Claimed** | Defeat Gym Leader 4 & earn Badge 4. | `summary.badges[3] === true` | Per-ROM |
-| ⏳ | 🥈 Silver | `poke_badge_5` | **Fifth Badge Claimed** | Defeat Gym Leader 5 & earn Badge 5. | `summary.badges[4] === true` | Per-ROM |
-| ⏳ | 🥈 Silver | `poke_badge_6` | **Sixth Badge Claimed** | Defeat Gym Leader 6 & earn Badge 6. | `summary.badges[5] === true` | Per-ROM |
-| ⏳ | 🥇 Gold | `poke_badge_7` | **Seventh Badge Claimed** | Defeat Gym Leader 7 & earn Badge 7. | `summary.badges[6] === true` | Per-ROM |
-| ⏳ | 🥇 Gold | `poke_badge_8` | **Eighth Badge Claimed** | Defeat Gym Leader 8 & earn Badge 8. | `summary.badges[7] === true` | Per-ROM |
-| ⏳ | 🥈 Silver | `poke_treasure_hunter` | **Treasure Hunter** | Acquire the Itemfinder / Dowsing Machine. | `summary.keyItems.itemfinder === true` | Per-ROM |
-| ⏳ | 🥈 Silver | `poke_wake_up_call` | **Wake-Up Call** | Acquire the Poké Flute. | `summary.keyItems.pokeFlute === true` | Per-ROM |
-| ⏳ | 🥈 Silver | `poke_revealer_of_mysteries` | **Revealer of Mysteries** | Acquire the Scope (Silph / Devon / Goggles). | `summary.keyItems.scope === true` | Per-ROM |
-| ⏳ | 🥈 Silver | `poke_shared_growth` | **Shared Growth** | Acquire the Exp. Share key item. | `summary.keyItems.expShare === true` | Per-ROM |
-| ⏳ | 🥈 Silver | `poke_jurassic_revival` | **Jurassic Revival** | Revive an ancient prehistoric fossil. | `summary.hasFossil === true` | Per-ROM |
-| ⏳ | 🥇 Gold | `poke_master_angler` | **Master Angler** | Acquire the legendary Super Rod. | `summary.keyItems.superRod === true` | Per-ROM |
-| ⏳ | 🥇 Gold | `poke_master_ball` | **Master Ball Acquired** | Obtain the legendary Master Ball. | `summary.keyItems.masterBall === true` | Per-ROM |
-| ⏳ | 🥇 Gold | `poke_eight_badges` | **Eight Badges Assembled** | Complete the 8-badge regional case. | `summary.hasAllBadges === true` | Per-ROM |
-| ⏳ | 💎 Platinum | `poke_sixteen_badges` | **Dual-Region Master (16 Badges)** | Assemble all 16 Johto & Kanto badges to unlock Mt. Silver. | `summary.has16Badges === true` | Per-ROM |
-| ⏳ | 🥇 Gold | `poke_myth_and_legend` | **Myth & Legend** | Encounter and capture a legendary Pokémon. | `summary.hasLegendary === true` | Per-ROM |
-| ⏳ | 💎 Platinum | `poke_hall_of_fame` | **Regional Champion** | Defeat Elite Four & enter Hall of Fame. | `summary.isChampion === true` | Per-ROM |
-| ⏳ | 💎 Platinum | `poke_level_100` | **Level 100 Ascension** | Train any single Pokémon to Level 100. | `summary.hasLevel100 === true` | Per-ROM |
-| ⏳ | 💎 Platinum | `poke_star_trainer` | **Star Trainer (Shiny)** | Capture or own an ultra-rare Shiny Pokémon. | `summary.hasShiny === true` | Per-ROM |
-| ⏳ | 🥇 Gold | `poke_microscopic_miracle`| **Microscopic Miracle**| Harbor the beneficial Pokérus virus. | `summary.hasPokerus === true` | Per-ROM |
-| ⏳ | 🥇 Gold | `poke_high_roller` | **High Roller (Max Wallet)** | Reach maximum wealth (₽999,999). | `summary.isHighRoller === true` | Per-ROM |
-| ⏳ | 🥉 Bronze | `poke_dex_10` | **Novice Collector** | Register 10 caught Dex entries. | `summary.pokedexCaught >= 10` | Per-ROM |
-| ⏳ | 🥈 Silver | `poke_dex_25` | **Seasoned Collector** | Register 25 caught Dex entries. | `summary.pokedexCaught >= 25` | Per-ROM |
-| ⏳ | 🥇 Gold | `poke_dex_50` | **Master Collector** | Register 50 caught Dex entries. | `summary.pokedexCaught >= 50` | Per-ROM |
-| ⏳ | 💎 Platinum | `poke_dex_100` | **Grandmaster Collector** | Register 100 caught Dex entries. | `summary.pokedexCaught >= 100` | Per-ROM |
+For cartridge-specific memory maps, 16-badge dual cases, and generation-by-generation specifications across Gen 1 (*Red, Blue, Yellow*), Gen 2 (*Gold, Silver, Crystal*), and Gen 3 (*Ruby, Sapphire, Emerald, FireRed, LeafGreen*), see the dedicated documentation hub:
+
+👉 **[Pokémon Milestones & Save Inspector Guide Hub (Gen 1 – Gen 3)](pokemon/README.md)**
 
 ---
 
-## 🎮 Mainline Cartridge Verification Matrix (Gen 1 – Gen 5)
-
-Track local hardware and ROM verification status across all official mainline titles:
-
-| Generation | System | Game Title | Save Format | Status | Notes |
-| :---: | :---: | :--- | :---: | :---: | :--- |
-| **Gen 1** | GB | *Pokémon Red Version* | 32 KB SRAM | ✅ Verified | Checksum `0x3523`, 8 Badges `0x2602`, Bag items `0x25CA` |
-| **Gen 1** | GB | *Pokémon Blue Version* | 32 KB SRAM | ✅ Verified | Checksum `0x3523`, 8 Badges `0x2602`, Bag items `0x25CA` |
-| **Gen 1** | GB | *Pokémon Yellow: Special Pikachu* | 32 KB SRAM | ✅ Verified | Checksum `0x3523`, Pikachu Friendship `0x271C` (`>= 200`) |
-| **Gen 2** | GBC | *Pokémon Gold Version* | 32 KB SRAM | ✅ Verified | Checksum `0x2D69`, Johto (`0x23E3`) & Kanto (`0x23E4`) 16 Badges |
-| **Gen 2** | GBC | *Pokémon Silver Version* | 32 KB SRAM | ✅ Verified | Checksum `0x2D69`, Johto (`0x23E3`) & Kanto (`0x23E4`) 16 Badges |
-| **Gen 2** | GBC | *Pokémon Crystal Version* | 32 KB SRAM | ✅ Verified | Checksum `0x2D0D`, Johto (`0x23E4`) & Kanto (`0x23E5`) 16 Badges |
-| **Gen 3** | GBA | *Pokémon Ruby Version* | 64/128 KB Flash | ✅ Verified | 14 Sections, Substructure XOR Decryption, Hoenn Badges |
-| **Gen 3** | GBA | *Pokémon Sapphire Version* | 64/128 KB Flash | ✅ Verified | 14 Sections, Substructure XOR Decryption, Hoenn Badges |
-| **Gen 3** | GBA | *Pokémon Emerald Version* | 128 KB Flash | ✅ Verified | 14 Sections, Substructure XOR Decryption, Hoenn Badges |
-| **Gen 3** | GBA | *Pokémon FireRed Version* | 128 KB Flash | ✅ Verified | 14 Sections, Substructure XOR Decryption, Kanto Badges |
-| **Gen 3** | GBA | *Pokémon LeafGreen Version* | 128 KB Flash | ✅ Verified | 14 Sections, Substructure XOR Decryption, Kanto Badges |
-| **Gen 4** | NDS | *Pokémon Diamond Version* | 512 KB EEPROM | ⏳ Pending | Dual sector CRC16 block counters |
-| **Gen 4** | NDS | *Pokémon Pearl Version* | 512 KB EEPROM | ⏳ Pending | Dual sector CRC16 block counters |
-| **Gen 4** | NDS | *Pokémon Platinum Version* | 512 KB EEPROM | ⏳ Pending | Distortion World & Sinnoh badges |
-| **Gen 4** | NDS | *Pokémon HeartGold Version* | 512 KB EEPROM | ⏳ Pending | 16 Badges & Pokéathlon flags |
-| **Gen 4** | NDS | *Pokémon SoulSilver Version* | 512 KB EEPROM | ⏳ Pending | 16 Badges & Pokéathlon flags |
-| **Gen 5** | NDS | *Pokémon Black Version* | 512 KB Flash | ⏳ Pending | Unova badges & C-Gear sectors |
-| **Gen 5** | NDS | *Pokémon White Version* | 512 KB Flash | ⏳ Pending | Unova badges & C-Gear sectors |
-| **Gen 5** | NDS | *Pokémon Black Version 2* | 512 KB Flash | ⏳ Pending | PWT & Aspertia start badges |
-| **Gen 5** | NDS | *Pokémon White Version 2* | 512 KB Flash | ⏳ Pending | PWT & Aspertia start badges |
-
----
-
-## 💡 How Achievements Work Under the Hood
+## 💡 How Universal Achievements Work Under the Hood
 
 1. **In-Game Silence**: When playing inside the emulator, unlocked achievements buffer silently in memory with zero on-screen HUD popups or sound interruptions during gameplay.
 2. **Session Exit Toast Flush**: When you exit emulation back to the library, all earned achievements slide in sequentially at the top right with Nintendo DS Touch styling and Web Audio chiptune fanfare.
