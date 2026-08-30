@@ -9,6 +9,8 @@ The achievement system features a balanced **6 Categories × 4 Tiers (1 Bronze, 
 - 💎 **Platinum (+20G)**: 6 Trophies = 120G
 - **🏆 Total Obtainable Gamer Score: 300G**
 
+> 📖 **Pokémon Save Inspector Guide**: For game-specific cartridge milestones, Gym Badge Cases, and memory parsing specifications across Pokémon Red, Blue, Yellow, Gold, Silver, Crystal, Ruby, Sapphire, Emerald, FireRed, and LeafGreen, see the dedicated **[Pokémon Save Inspector & Regional Milestones Guide](pokemon-milestones.md)**.
+
 > **Status Checklist**: Use the `Status / Working` column to mark off testing verification on your local setup (✅ Verified Working).
 
 ---

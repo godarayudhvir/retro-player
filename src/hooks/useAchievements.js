@@ -724,8 +724,9 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       if (summary.hasShiny) unlockAchievement('poke_star_trainer', game);
       if (summary.hasPokerus) unlockAchievement('poke_microscopic_miracle', game);
 
-      // 6. Finances
+      // 6. Finances & Special Exclusives
       if (summary.isHighRoller) unlockAchievement('poke_high_roller', game);
+      if (summary.hasPikaFriend) unlockAchievement('poke_yellow_pika_friend', game);
 
       // 7. Pokédex Scaling
       const dex = summary.pokedexCaught || 0;

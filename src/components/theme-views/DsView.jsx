@@ -58,7 +58,7 @@ import { resolveAssetPath } from '../../utils/assetPath';
 import { getGameDescription, getReleaseDate } from '../../gameDescriptions';
 import { saveCachedMetadata } from '../../services/metadataScraper';
 import { convertRemoteImageToWebpDataUrl } from '../../utils/imageConverter';
-import { POKEMON_ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS } from '../../data/achievementsManifest';
+import { POKEMON_ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, getPokemonBadgesForGame, getPokemonMilestonesForGame } from '../../data/achievementsManifest';
 import ConfirmModal from '../ConfirmModal';
 
 const POKE_ICON_MAP = {
@@ -1164,31 +1164,37 @@ export default function DsView({
                   Regional League Badge Case
                 </span>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.4rem' }}>
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map(num => {
-                    const badgeKey = `poke_badge_${num}`;
-                    const isBadgeEarned = !!achievementsEngine?.unlocked?.[badgeKey] && (
-                      achievementsEngine.unlocked[badgeKey].gameId === selectedGame?.id ||
-                      achievementsEngine.unlocked[badgeKey].gameTitle === selectedGame?.title
-                    );
-                    return (
-                      <div
-                        key={num}
-                        className={`ds-badge-box ${isBadgeEarned ? 'is-earned' : ''}`}
-                      >
-                        <Shield size={16} color={isBadgeEarned ? '#f59e0b' : 'var(--text-sub)'} fill={isBadgeEarned ? '#f59e0b' : 'none'} />
-                        <span style={{ fontSize: '0.63rem', fontWeight: 800, color: isBadgeEarned ? '#d97706' : 'var(--text-sub)' }}>
-                          Badge {num}
-                        </span>
-                      </div>
-                    );
-                  })}
+                  {(() => {
+                    const regionalBadges = getPokemonBadgesForGame(selectedGame);
+                    return regionalBadges.map((badge, idx) => {
+                      const num = idx + 1;
+                      const badgeKey = `poke_badge_${num}`;
+                      const badgeLabel = badge.name.replace(' Badge', '');
+                      const isBadgeEarned = !!achievementsEngine?.unlocked?.[badgeKey] && (
+                        achievementsEngine.unlocked[badgeKey].gameId === selectedGame?.id ||
+                        achievementsEngine.unlocked[badgeKey].gameTitle === selectedGame?.title
+                      );
+                      return (
+                        <div
+                          key={badge.name}
+                          className={`ds-badge-box ${isBadgeEarned ? 'is-earned' : ''}`}
+                          title={`${badge.name}: Defeat ${badge.leader} in ${badge.city} (${badge.type} Type)`}
+                        >
+                          <Shield size={16} color={isBadgeEarned ? '#f59e0b' : 'var(--text-sub)'} fill={isBadgeEarned ? '#f59e0b' : 'none'} />
+                          <span style={{ fontSize: '0.63rem', fontWeight: 800, color: isBadgeEarned ? '#d97706' : 'var(--text-sub)' }}>
+                            {badgeLabel}
+                          </span>
+                        </div>
+                      );
+                    });
+                  })()}
                 </div>
               </div>
             </div>
 
             {/* Individual Pokémon Milestones List (Fills full vertical panel depth) */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: '4px' }}>
-              {POKEMON_ACHIEVEMENTS_MANIFEST.filter(m => !m.id.startsWith('poke_badge_')).map(item => {
+              {getPokemonMilestonesForGame(selectedGame).map(item => {
                 const unlockData = achievementsEngine?.unlocked?.[item.id];
                 const isEarned = !!unlockData && (
                   unlockData.gameId === selectedGame?.id ||
