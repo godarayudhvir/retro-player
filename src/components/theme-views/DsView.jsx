@@ -30,14 +30,62 @@ import {
   Maximize2,
   Minimize2,
   SlidersHorizontal,
-  Trophy
+  Trophy,
+  Shield,
+  Award,
+  Crown,
+  Lock,
+  Bike,
+  Anchor,
+  Waves,
+  Search,
+  Volume2,
+  Share2,
+  Map as MapIcon,
+  Disc,
+  Users,
+  Feather,
+  DollarSign,
+  AlertCircle,
+  PlusCircle,
+  Eye,
+  Activity,
+  Zap,
+  Compass
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { resolveAssetPath } from '../../utils/assetPath';
 import { getGameDescription, getReleaseDate } from '../../gameDescriptions';
 import { saveCachedMetadata } from '../../services/metadataScraper';
 import { convertRemoteImageToWebpDataUrl } from '../../utils/imageConverter';
+import { POKEMON_ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS } from '../../data/achievementsManifest';
 import ConfirmModal from '../ConfirmModal';
+
+const POKE_ICON_MAP = {
+  Compass,
+  Bike,
+  Anchor,
+  Waves,
+  Search,
+  Volume2,
+  Eye,
+  Share2,
+  Map: MapIcon,
+  Disc,
+  Shield,
+  Award,
+  Trophy,
+  PlusCircle,
+  Zap,
+  Users,
+  Crown,
+  Star,
+  Feather,
+  Activity,
+  DollarSign,
+  AlertCircle,
+  BookOpen
+};
 
 /**
  * DsView: Nintendo DS / DSi Dual-Screen Touchscreen Firmware Layout.
@@ -802,6 +850,22 @@ export default function DsView({
             </button>
           )}
 
+          {/* Pokémon Specific Trainer Milestones Tab */}
+          {selectedGame && (selectedGame.title || selectedGame.name || '').toLowerCase().includes('pokemon') && (
+            <button
+              type="button"
+              className={`ds-tool-btn ds-icon-btn ds-pokemon-tab-btn ${dsTab === 'pokemon' ? 'is-active' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'pokemon' ? 'gamepad-focused' : ''}`}
+              onClick={() => {
+                setDsTab(dsTab === 'pokemon' ? 'overview' : 'pokemon');
+                sfx?.playTabSwitch?.();
+              }}
+              title="Pokémon Trainer Milestones & Badge Case"
+              aria-label="Trainer Milestones"
+            >
+              <Trophy size={16} color={dsTab === 'pokemon' ? '#ffffff' : '#f59e0b'} />
+            </button>
+          )}
+
           {/* Guides Touch Button (Toggles between Overview and Strategy Guides inside DS pane) */}
           {hasGuides && (
             <button
@@ -821,7 +885,7 @@ export default function DsView({
           {/* Unified Edit & Scrape Touch Button */}
           <button
             type="button"
-            className={`ds-tool-btn ds-icon-btn ds-edit-tab-btn ${dsTab === 'manage' ? 'is-active' : ''}`}
+            className={`ds-tool-btn ds-icon-btn ds-edit-tab-btn ${dsTab === 'manage' ? 'is-active' : ''} ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'edit' ? 'gamepad-focused' : ''}`}
             onClick={() => {
               setDsTab(dsTab === 'manage' ? 'overview' : 'manage');
               sfx?.playTabSwitch?.();
@@ -1077,6 +1141,115 @@ export default function DsView({
                   <div className="ds-save-tile-sub">Erase in-game saves & quick save states</div>
                 </div>
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            VIEW 2B: POKÉMON TRAINER MILESTONES & BADGE CASE
+            ========================================================================= */}
+        {dsTab === 'pokemon' && (
+          <div className="ds-tab-pane animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', flex: 1, minHeight: 0, height: '100%' }}>
+            <div className="ds-stats-card">
+              <div className="ds-stat-label" style={{ marginBottom: '0.4rem', width: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <Trophy size={13} color="#f59e0b" />
+                  <span>Trainer Milestones &amp; Badges</span>
+                </div>
+              </div>
+
+              {/* 8-Badge Case Tray */}
+              <div style={{ padding: '0.35rem 0 0.15rem 0', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Regional League Badge Case
+                </span>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.4rem' }}>
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map(num => {
+                    const badgeKey = `poke_badge_${num}`;
+                    const isBadgeEarned = !!achievementsEngine?.unlocked?.[badgeKey] && (
+                      achievementsEngine.unlocked[badgeKey].gameId === selectedGame?.id ||
+                      achievementsEngine.unlocked[badgeKey].gameTitle === selectedGame?.title
+                    );
+                    return (
+                      <div
+                        key={num}
+                        className={`ds-badge-box ${isBadgeEarned ? 'is-earned' : ''}`}
+                      >
+                        <Shield size={16} color={isBadgeEarned ? '#f59e0b' : 'var(--text-sub)'} fill={isBadgeEarned ? '#f59e0b' : 'none'} />
+                        <span style={{ fontSize: '0.63rem', fontWeight: 800, color: isBadgeEarned ? '#d97706' : 'var(--text-sub)' }}>
+                          Badge {num}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Individual Pokémon Milestones List (Fills full vertical panel depth) */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: '4px' }}>
+              {POKEMON_ACHIEVEMENTS_MANIFEST.filter(m => !m.id.startsWith('poke_badge_')).map(item => {
+                const unlockData = achievementsEngine?.unlocked?.[item.id];
+                const isEarned = !!unlockData && (
+                  unlockData.gameId === selectedGame?.id ||
+                  unlockData.gameTitle === selectedGame?.title
+                );
+                const tier = ACHIEVEMENT_TIERS[item.tier?.toUpperCase()] || ACHIEVEMENT_TIERS.BRONZE;
+                const IconComponent = POKE_ICON_MAP[item.icon] || Sparkles;
+
+                return (
+                  <div
+                    key={item.id}
+                    className={`ds-poke-milestone-tile tier-${item.tier} ${isEarned ? 'is-earned' : 'is-locked'}`}
+                  >
+                    {/* Left Milestone Icon Box */}
+                    <div 
+                      className="ds-poke-icon-box"
+                      style={{
+                        background: isEarned ? tier.bg : 'var(--bg-glass)',
+                        color: isEarned ? tier.color : 'var(--text-sub)',
+                        borderColor: isEarned ? tier.border : 'var(--panel-border)'
+                      }}
+                    >
+                      {isEarned ? (
+                        <IconComponent size={17} strokeWidth={2.4} />
+                      ) : (
+                        <Lock size={15} />
+                      )}
+                    </div>
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.35rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: 0 }}>
+                          <span style={{ fontSize: '0.76rem', fontWeight: 700, color: isEarned ? 'var(--text-main)' : 'var(--text-sub)' }}>
+                            {item.title}
+                          </span>
+                          {isEarned && (
+                            <CheckCircle2 size={12} color="#10b981" style={{ flexShrink: 0 }} />
+                          )}
+                        </div>
+                        <span 
+                          className="trophy-ds-points-pill"
+                          style={{
+                            background: isEarned ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-glass)',
+                            color: isEarned ? '#059669' : 'var(--text-sub)',
+                            borderColor: isEarned ? 'rgba(16, 185, 129, 0.35)' : 'var(--panel-border)',
+                            fontSize: '0.62rem',
+                            fontWeight: 800,
+                            letterSpacing: '0.03em',
+                            padding: '1px 5px'
+                          }}
+                        >
+                          {isEarned ? 'UNLOCKED' : 'LOCKED'}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: '0.66rem', color: 'var(--text-sub)', margin: '0.15rem 0 0 0', lineHeight: 1.25 }}>
+                        {item.description}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, TOTAL_ACHIEVEMENT_POINTS } from '../data/achievementsManifest';
+import { ACHIEVEMENTS_MANIFEST, POKEMON_ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, TOTAL_ACHIEVEMENT_POINTS } from '../data/achievementsManifest';
+import { parsePokemonSave, isPokemonRom } from '../services/pokemonSaveParser';
 import { dbGet, dbSet, STORES } from '../services/db';
 
 const STORAGE_PREFIX = 'achievements_';
@@ -207,7 +208,8 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
     // Immediate synchronous guard against duplicate unlock execution
     if (unlockedRef.current[achievementId]) return;
 
-    const manifestItem = ACHIEVEMENTS_MANIFEST.find(a => a.id === achievementId);
+    const manifestItem = ACHIEVEMENTS_MANIFEST.find(a => a.id === achievementId) ||
+                         POKEMON_ACHIEVEMENTS_MANIFEST.find(a => a.id === achievementId);
     if (!manifestItem) return;
 
     const newUnlockEntry = {
@@ -670,6 +672,109 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
     }
   }, [unlockAchievement]);
 
+  /**
+   * Universal Pokémon Save File Evaluator.
+   * Inspects SRAM / Flash raw bytes and retroactively / in-real-time unlocks milestones.
+   */
+  const evaluatePokemonSave = useCallback((game, sramBuffer) => {
+    if (!game || !sramBuffer) return null;
+    try {
+      const summary = parsePokemonSave(sramBuffer, game);
+      if (!summary || !summary.isPokemon) return null;
+
+      // 1. Starter chosen
+      if (summary.hasStarter) {
+        unlockAchievement('poke_journey_begun', game);
+      }
+
+      // 2. Key Items
+      if (summary.keyItems?.bicycle) unlockAchievement('poke_pedal_to_metal', game);
+      if (summary.keyItems?.oldRod || summary.keyItems?.goodRod) unlockAchievement('poke_gone_fishin', game);
+      if (summary.keyItems?.superRod) unlockAchievement('poke_master_angler', game);
+      if (summary.keyItems?.itemfinder) unlockAchievement('poke_treasure_hunter', game);
+      if (summary.keyItems?.pokeFlute) unlockAchievement('poke_wake_up_call', game);
+      if (summary.keyItems?.scope) unlockAchievement('poke_revealer_of_mysteries', game);
+      if (summary.keyItems?.expShare) unlockAchievement('poke_shared_growth', game);
+      if (summary.keyItems?.townMap) unlockAchievement('poke_digital_cartographer', game);
+      if (summary.keyItems?.masterBall) unlockAchievement('poke_master_ball', game);
+
+      // 3. Gym Badges (1 to 8)
+      if (summary.badges?.[0]) unlockAchievement('poke_badge_1', game);
+      if (summary.badges?.[1]) unlockAchievement('poke_badge_2', game);
+      if (summary.badges?.[2]) unlockAchievement('poke_badge_3', game);
+      if (summary.badges?.[3]) unlockAchievement('poke_badge_4', game);
+      if (summary.badges?.[4]) unlockAchievement('poke_badge_5', game);
+      if (summary.badges?.[5]) unlockAchievement('poke_badge_6', game);
+      if (summary.badges?.[6]) unlockAchievement('poke_badge_7', game);
+      if (summary.badges?.[7]) unlockAchievement('poke_badge_8', game);
+      if (summary.hasAllBadges || summary.badgeCount >= 8) unlockAchievement('poke_eight_badges', game);
+
+      // 4. Hall of Fame / Champion
+      if (summary.isChampion || summary.hallOfFameCount > 0) {
+        unlockAchievement('poke_hall_of_fame', game);
+      }
+
+      // 5. Catches, Party, Evolutions, Level 100
+      if (summary.hasFirstCatch) unlockAchievement('poke_first_catch', game);
+      if (summary.hasEvolved) unlockAchievement('poke_evolution_master', game);
+      if (summary.hasFullParty) unlockAchievement('poke_full_party', game);
+      if (summary.hasLevel100) unlockAchievement('poke_level_100', game);
+      if (summary.hasLegendary) unlockAchievement('poke_myth_and_legend', game);
+      if (summary.hasFossil) unlockAchievement('poke_jurassic_revival', game);
+      if (summary.hasShiny) unlockAchievement('poke_star_trainer', game);
+      if (summary.hasPokerus) unlockAchievement('poke_microscopic_miracle', game);
+
+      // 6. Finances
+      if (summary.isHighRoller) unlockAchievement('poke_high_roller', game);
+
+      // 7. Pokédex Scaling
+      const dex = summary.pokedexCaught || 0;
+      if (dex >= 10) unlockAchievement('poke_dex_10', game);
+      if (dex >= 25) unlockAchievement('poke_dex_25', game);
+      if (dex >= 50) unlockAchievement('poke_dex_50', game);
+      if (dex >= 100) unlockAchievement('poke_dex_100', game);
+
+      return summary;
+    } catch (err) {
+      console.warn('[useAchievements] Failed to evaluate Pokémon save buffer:', err);
+      return null;
+    }
+  }, [unlockAchievement]);
+
+  /**
+   * Resets all per-cartridge Pokémon milestones for a specific game (e.g. when deleting save data).
+   */
+  const resetPokemonMilestones = useCallback((game) => {
+    if (!game) return;
+    const targetGameId = game.id || game.title;
+    const targetGameTitle = game.title;
+
+    setUnlocked(prevUnlocked => {
+      const nextUnlocked = {};
+      let changed = false;
+
+      Object.entries(prevUnlocked).forEach(([key, val]) => {
+        const isTarget = (val.gameId === targetGameId || val.gameTitle === targetGameTitle) &&
+                         (key.startsWith('poke_') || val.category === 'pokemon');
+        if (!isTarget) {
+          nextUnlocked[key] = val;
+        } else {
+          changed = true;
+        }
+      });
+
+      if (changed) {
+        unlockedRef.current = nextUnlocked;
+        setStats(latestStats => {
+          persistState(nextUnlocked, latestStats);
+          return latestStats;
+        });
+      }
+
+      return changed ? nextUnlocked : prevUnlocked;
+    });
+  }, [persistState]);
+
   // ---------------------------------------------------------------------------
   // PER-ROM MILESTONES GETTER
   // ---------------------------------------------------------------------------
@@ -678,14 +783,16 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
     return Object.values(unlocked).filter(u => u.gameId === gameId);
   }, [unlocked]);
 
-  // Total points earned
+  // Total points earned (Strictly universal milestones from ACHIEVEMENTS_MANIFEST, 300G max)
   const totalEarnedPoints = useMemo(() => {
     return Object.entries(unlocked).reduce((acc, [key, u]) => {
-      let tierStr = u?.tier;
-      if (!tierStr) {
-        const manifestItem = ACHIEVEMENTS_MANIFEST.find(m => m.id === key);
-        tierStr = manifestItem?.tier || 'bronze';
-      }
+      // Exclude per-cartridge / Pokemon milestones from Gamerscore
+      if (key.startsWith('poke_') || u?.category === 'pokemon') return acc;
+      
+      const manifestItem = ACHIEVEMENTS_MANIFEST.find(m => m.id === key);
+      if (!manifestItem) return acc;
+
+      const tierStr = manifestItem.tier || 'bronze';
       const tierKey = String(tierStr).toUpperCase();
       const tierObj = ACHIEVEMENT_TIERS[tierKey] || ACHIEVEMENT_TIERS.BRONZE;
       return acc + (tierObj.points || 10);
@@ -727,6 +834,8 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
     triggerInputMash,
     triggerFastForward,
     triggerPause,
-    triggerBrowseIdle
+    triggerBrowseIdle,
+    evaluatePokemonSave,
+    resetPokemonMilestones
   };
 }

@@ -10,7 +10,7 @@
 
 | # | Impact | Specification | Domain | Description | Status |
 | :---: | :---: | :--- | :--- | :--- | :--- |
-| 1 | 🟢 Low-Med | **[Universal Pokémon Save Achievements (Gen 1–5)](pokemon-save-achievements.md)** | Achievements / Save Inspection | Real-time byte inspector for battery SRAM/Flash (`.sav`) across Gen 1–5 (GB, GBC, GBA, NDS) unlocking universal milestones: Starter, 8 Gym Badges, Victory Road, and League Champion. | 📋 Planned |
+| 1 | 🟢 Low-Med | **[Rich Presence & Multi-Platform Game Activity](game-presence-rpc.md)** | Social & System Presence | Real-time game presence broadcasting to Discord Rich Presence (RPC), OS MediaSession (Lock Screen / Control Center), and local `/api/presence` webhook feeds. | 📋 Planned |
 | 2 | 🟡 Medium | **[Mobile UI Gamepad & Spatial Navigation](mobile-gamepad-navigation.md)** | Mobile UX / Controls | Purpose-built, ergonomic 2D spatial gamepad navigation engine tailored specifically for mobile feeds, bottom sheets, search overlays, and drilldowns. | 📋 Planned |
 | 3 | 🟡 Medium | **[3D Cartridge & Media Design Blueprint](cartridge-designs-spec.md)** | Theme Engine | Master geometric and CSS blueprint for all 10+ authentic physical cartridge shells (NES, SNES, N64, GBA, NDS, Genesis, GB, Game Gear, Atari, PS1) for future theme designs. | 📋 Planned |
 | 4 | 🟡 Medium | **[Settings & Library Management Hub](settings-hub.md)** | System Hub & Tools | Clean console-native settings redesign: ROM library administration, BGM track manager, and IndexedDB storage diagnostics (wires into existing server REST endpoints). | 📋 Planned |

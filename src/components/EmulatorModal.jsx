@@ -167,13 +167,23 @@ export default function EmulatorModal({
     };
   }, [showToolbarTemporarily, toggleToolbarVisibility]);
 
-  // Keep toolbar visible whenever gamepad focuses the in-game bar or sub-toolbar
+  // Keep toolbar visible whenever gamepad focuses the in-game bar or sub-toolbar & mute controller inputs to game
   useEffect(() => {
-    if (focusedTarget?.zone === 'inGameBar' || focusedTarget?.zone === 'inGameSubBar') {
+    const isBarFocused = focusedTarget?.zone === 'inGameBar' || focusedTarget?.zone === 'inGameSubBar';
+    if (isBarFocused) {
       setIsToolbarVisible(true);
       if (toolbarHideTimeoutRef.current) {
         clearTimeout(toolbarHideTimeoutRef.current);
       }
+    }
+    // Mute game controller input when toolbar is navigated via gamepad
+    if (iframeRef.current?.contentWindow) {
+      try {
+        iframeRef.current.contentWindow.postMessage({
+          type: 'RETRO_PLAYER_MUTE_INPUT',
+          muted: isBarFocused
+        }, '*');
+      } catch (eMute) {}
     }
   }, [focusedTarget]);
 
@@ -1180,6 +1190,7 @@ export default function EmulatorModal({
                       return;
                     }
 
+                    if (_isInputMuted) return;
                     if ((this.settingsMenu && this.settingsMenu.style.display !== "none") || (typeof this.isPopupOpen === 'function' && this.isPopupOpen())) return;
 
                     const special = [16, 17, 18, 19, 20, 21, 22, 23];
@@ -1405,6 +1416,8 @@ export default function EmulatorModal({
               }
             }, { passive: true });
 
+            let _isInputMuted = false;
+
             window.addEventListener('message', function(e) {
               if (e && e.data && e.data.type === 'RETRO_PLAYER_INPUT_MODE') {
                 if (e.data.mode === 'keyboard') {
@@ -1413,6 +1426,21 @@ export default function EmulatorModal({
                 } else if (e.data.mode === 'touch') {
                   _isKeyboardActive = false;
                   syncVirtualGamepadVisibility();
+                }
+              } else if (e && e.data && e.data.type === 'RETRO_PLAYER_MUTE_INPUT') {
+                _isInputMuted = Boolean(e.data.muted);
+                if (_isInputMuted) {
+                  try {
+                    const emu = window.EJS_emulator;
+                    if (emu && emu.gameManager && typeof emu.gameManager.simulateInput === 'function') {
+                      // Release all standard directions and buttons so player doesn't keep running
+                      for (let p = 0; p < 4; p++) {
+                        for (let b = 0; b < 24; b++) {
+                          emu.gameManager.simulateInput(p, b, 0);
+                        }
+                      }
+                    }
+                  } catch (eRelease) {}
                 }
               }
             });
@@ -2030,6 +2058,20 @@ export default function EmulatorModal({
             localStorage.setItem(saveKey, JSON.stringify(payload));
           } catch(err) {}
           console.log(`💾 [RetroPlayerDB SAVED] Stored battery RAM for "${e.data.gameId}" (Profile: ${activeProfileId})`);
+
+          // Evaluate Pokémon Save Milestones in real-time
+          if (e.data.saveData && achievementsEngine?.evaluatePokemonSave) {
+            try {
+              const binStr = atob(e.data.saveData);
+              const u8 = new Uint8Array(binStr.length);
+              for (let i = 0; i < binStr.length; i++) {
+                u8[i] = binStr.charCodeAt(i);
+              }
+              achievementsEngine.evaluatePokemonSave(game, u8);
+            } catch (pErr) {
+              console.warn('[EmulatorModal] Failed to evaluate Pokémon save buffer:', pErr);
+            }
+          }
         } catch (err) {
           console.warn('⚠️ [DB SAVE ERROR]:', err);
         }

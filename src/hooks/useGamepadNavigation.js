@@ -67,7 +67,8 @@ export function useGamepadNavigation({
   showOnboarding = false,
   setShowOnboarding,
   games = [],
-  achievementsEngine
+  achievementsEngine,
+  onOpenTrophyModal
 }) {
   const stateRef = useRef({});
   const lastInputTimeRef = useRef(0);
@@ -104,6 +105,7 @@ export function useGamepadNavigation({
       pwa,
       bgm,
       onOpenScraperModal,
+      onOpenTrophyModal,
       isMobile,
       selectedMobileGameForDetails,
       hasChosenProfileThisSession,
@@ -1409,6 +1411,10 @@ export function useGamepadNavigation({
           const saveBtn = document.querySelector('.ds-save-tab-btn');
           if (saveBtn) saveBtn.click();
           sfx?.playTabSwitch?.();
+        } else if (curId === 'pokemon') {
+          const pokeBtn = document.querySelector('.ds-pokemon-tab-btn');
+          if (pokeBtn) pokeBtn.click();
+          sfx?.playTabSwitch?.();
         } else if (curId === 'guides') {
           const guidesBtn = document.querySelector('.ds-guide-btn');
           if (guidesBtn) guidesBtn.click();
@@ -1503,9 +1509,16 @@ export function useGamepadNavigation({
     } else if (curZone === 'cardModal') {
       // Navigation within the DS game detail card panel
       const curId = curTarget?.id || 'play';
+      const hasPokemon = Boolean(document.querySelector('.ds-pokemon-tab-btn'));
       const hasGuides = Boolean(document.querySelector('.ds-guide-btn'));
-      // Tab order: fav -> save -> (guides) (top toolbar), play (bottom)
-      const toolbarItems = hasGuides ? ['fav', 'save', 'guides'] : ['fav', 'save'];
+      const hasEdit = Boolean(document.querySelector('.ds-edit-tab-btn'));
+      
+      // Dynamic Tab order: fav -> save -> (pokemon) -> (guides) -> (edit)
+      const toolbarItems = ['fav', 'save'];
+      if (hasPokemon) toolbarItems.push('pokemon');
+      if (hasGuides) toolbarItems.push('guides');
+      if (hasEdit) toolbarItems.push('edit');
+
       const isSavePaneOpen = Boolean(document.querySelector('.ds-save-studio'));
       const saveTiles = ['save-export', 'save-import', 'save-delete'];
 
@@ -1946,7 +1959,8 @@ export function useGamepadNavigation({
 
         const b = gp.buttons;
         const now = (typeof timestamp === 'number') ? timestamp : performance.now();
-        const COOLDOWN = 180;
+        const INITIAL_REPEAT_DELAY = 380; // Delay before holding starts rapid-fire repeating
+        const REPEAT_RATE = 160;          // Interval for holding down a direction
 
         // Detect all standard buttons
         const btnA = b[0]?.pressed;      // A / Cross (Select / Confirm)
@@ -1961,10 +1975,22 @@ export function useGamepadNavigation({
         const btnR3 = b[11]?.pressed;    // R3 / Right Stick Click (Toggle Panoramic Wide Grid)
 
         // D-Pad + Analog Stick Thresholds
-        const dpadUp = b[12]?.pressed || (gp.axes[1] < -STICK_DEADZONE);
-        const dpadDown = b[13]?.pressed || (gp.axes[1] > STICK_DEADZONE);
-        const dpadLeft = b[14]?.pressed || (gp.axes[0] < -STICK_DEADZONE);
-        const dpadRight = b[15]?.pressed || (gp.axes[0] > STICK_DEADZONE);
+        const dpadUp = !!(b[12]?.pressed || (gp.axes[1] < -STICK_DEADZONE));
+        const dpadDown = !!(b[13]?.pressed || (gp.axes[1] > STICK_DEADZONE));
+        const dpadLeft = !!(b[14]?.pressed || (gp.axes[0] < -STICK_DEADZONE));
+        const dpadRight = !!(b[15]?.pressed || (gp.axes[0] > STICK_DEADZONE));
+
+        const prev = prevButtonsRef.current || {};
+        const isDirHeld = dpadUp || dpadDown || dpadLeft || dpadRight;
+        const wasDirHeld = prev.dpadUp || prev.dpadDown || prev.dpadLeft || prev.dpadRight;
+
+        // Rising-edge (just pressed) or repeating after initial delay
+        const isNewPress = (dpadRight && !prev.dpadRight) ||
+                           (dpadLeft && !prev.dpadLeft) ||
+                           (dpadDown && !prev.dpadDown) ||
+                           (dpadUp && !prev.dpadUp);
+
+        const canRepeat = isDirHeld && (now - lastInputTimeRef.current > (wasDirHeld ? REPEAT_RATE : INITIAL_REPEAT_DELAY));
 
         // On mobile devices, gamepad input is reserved strictly for in-game play
         if (stateRef.current.isMobile && !stateRef.current.activeGame) {
@@ -1990,15 +2016,13 @@ export function useGamepadNavigation({
                 onCloseTarget: { zone: 'grid', index: 0 }
               });
             }
-            setShowVirtualKeyboard(prev => {
-              const next = !prev;
+            setShowVirtualKeyboard(prevVal => {
+              const next = !prevVal;
               if (next) sfx?.playModalOpen?.();
-              else sfx?.playModalClose?.();
               return next;
             });
-            setOskPos({ row: 0, col: 0 });
             lastInputTimeRef.current = now;
-            prevButtonsRef.current = { ...prevButtonsRef.current, btnY, btnSelect, btnA, btnB, btnX, btnStart, shoulderL, shoulderR };
+            prevButtonsRef.current = { ...prevButtonsRef.current, btnY, btnSelect, btnA, btnB, btnX, btnStart, shoulderL, shoulderR, dpadUp, dpadDown, dpadLeft, dpadRight };
             animId = requestAnimationFrame(pollGamepad);
             return;
           }
@@ -2014,7 +2038,7 @@ export function useGamepadNavigation({
             } else {
               const currentStr = curConfig.currentValue || '';
               const nextStr = updater(currentStr);
-              if (stateRef.current.setOskConfig) stateRef.current.setOskConfig(prev => ({ ...prev, currentValue: nextStr }));
+              if (stateRef.current.setOskConfig) stateRef.current.setOskConfig(p => ({ ...p, currentValue: nextStr }));
               if (curConfig.onChange) curConfig.onChange(nextStr);
             }
           };
@@ -2187,7 +2211,8 @@ export function useGamepadNavigation({
           }
         }
 
-        if (now - lastInputTimeRef.current > COOLDOWN) {
+        // Directional Navigation (Rising-edge single press or deliberate repeat after initial delay)
+        if (isNewPress || canRepeat) {
           let moved = false;
 
           if (dpadRight) {
@@ -2202,98 +2227,105 @@ export function useGamepadNavigation({
           } else if (dpadUp) {
             navigateSpatial('UP');
             moved = true;
-          } else if (btnA && !prevButtonsRef.current.btnA) {
-            navigateSpatial('SELECT');
-            moved = true;
-          } else if (btnB && !prevButtonsRef.current.btnB) {
-            navigateSpatial('BACK');
-            moved = true;
-          } else if (shoulderL && !prevButtonsRef.current.shoulderL && !stateRef.current.showVirtualKeyboard) {
-            if (stateRef.current.showScraperModal) {
-              const summaryEl = document.querySelector('.scraper-completion-pane');
-              if (summaryEl) {
-                const terminalEl = document.querySelector('.scraper-terminal-view');
-                const toggleLogsBtn = document.querySelector('.scraper-toggle-logs-btn');
-                if (!terminalEl && toggleLogsBtn) {
-                  // Toggle logs open
-                  toggleLogsBtn.click();
-                  setFocusedTarget({ zone: 'scraperModal', id: 'toggle-logs' });
-                  sfx?.playTileNav?.();
-                } else if (terminalEl) {
-                  // Scroll Up
-                  terminalEl.scrollBy({ top: -100, behavior: 'smooth' });
-                  sfx?.playTileNav?.();
-                }
-              } else {
-                const allTabEls = document.querySelectorAll('.scraper-scope-tab');
-                if (allTabEls[0]) allTabEls[0].click();
-                setFocusedTarget({ zone: 'scraperModal', id: 'tab-all' });
-                sfx?.playTabSwitch?.();
-              }
-            } else if (stateRef.current.showProfileCreatorModal || stateRef.current.showMiiCreatorModal || (stateRef.current.showOnboarding && document.querySelector('.character-studio-container'))) {
-              const zone = stateRef.current.showOnboarding ? 'onboarding' : 'profileModal';
-              const tabs = document.querySelectorAll('.character-studio-tab');
-              if (tabs[0]) tabs[0].click();
-              setFocusedTarget({ zone, id: 'archetypeTab' });
-              sfx?.playTabSwitch?.();
-            } else if (!stateRef.current.isMobile && !stateRef.current.showOnboarding) {
-              const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
-              const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
-              const allSysKeys = ['all', 'favorites', 'recent', ...sortedSystems.map(s => s.key)];
-              const curSysIdx = allSysKeys.indexOf(stateRef.current.activeSystem);
-              const nextSysIdx = (curSysIdx - 1 + allSysKeys.length) % allSysKeys.length;
-              setActiveSystem(allSysKeys[nextSysIdx]);
-              setFocusedTarget({ zone: 'ribbon', index: nextSysIdx });
-              sfx?.playTabSwitch?.();
-            } else if (stateRef.current.isMobile && !stateRef.current.showOnboarding) {
-              setFocusedTarget(prev => ({ zone: 'mobileChips', index: Math.max(0, (prev.index || 0) - 1) }));
-              sfx?.playTabSwitch?.();
-            }
-            moved = true;
-          } else if (shoulderR && !prevButtonsRef.current.shoulderR && !stateRef.current.showVirtualKeyboard) {
-            if (stateRef.current.showScraperModal) {
-              const summaryEl = document.querySelector('.scraper-completion-pane');
-              if (summaryEl) {
-                const terminalEl = document.querySelector('.scraper-terminal-view');
-                if (terminalEl) {
-                  // Scroll Down
-                  terminalEl.scrollBy({ top: 100, behavior: 'smooth' });
-                  sfx?.playTileNav?.();
-                }
-              } else {
-                const allTabEls = document.querySelectorAll('.scraper-scope-tab');
-                if (allTabEls[1]) allTabEls[1].click();
-                setFocusedTarget({ zone: 'scraperModal', id: 'tab-single' });
-                sfx?.playTabSwitch?.();
-              }
-            } else if (stateRef.current.showProfileCreatorModal || stateRef.current.showMiiCreatorModal || (stateRef.current.showOnboarding && document.querySelector('.character-studio-container'))) {
-              const zone = stateRef.current.showOnboarding ? 'onboarding' : 'profileModal';
-              const tabs = document.querySelectorAll('.character-studio-tab');
-              if (tabs[1]) tabs[1].click();
-              setFocusedTarget({ zone, id: 'customTab' });
-              sfx?.playTabSwitch?.();
-            } else if (!stateRef.current.isMobile && !stateRef.current.showOnboarding) {
-              const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
-              const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
-              const allSysKeys = ['all', 'favorites', 'recent', ...sortedSystems.map(s => s.key)];
-              const curSysIdx = allSysKeys.indexOf(stateRef.current.activeSystem);
-              const nextSysIdx = (curSysIdx + 1) % allSysKeys.length;
-              setActiveSystem(allSysKeys[nextSysIdx]);
-              setFocusedTarget({ zone: 'ribbon', index: nextSysIdx });
-              sfx?.playTabSwitch?.();
-            } else if (stateRef.current.isMobile && !stateRef.current.showOnboarding) {
-              setFocusedTarget(prev => ({ zone: 'mobileChips', index: Math.min((stateRef.current.systems?.length || 1) - 1, (prev.index || 0) + 1) }));
-              sfx?.playTabSwitch?.();
-            }
-            moved = true;
           }
 
-          if (gamepadConnectedRef.current) {
-            achievementsEngine?.triggerPhysicalGamepadUsed?.();
+          if (moved) {
+            lastInputTimeRef.current = now;
           }
         }
 
-        prevButtonsRef.current = { shoulderL, shoulderR, btnA, btnB, btnX, btnY, btnSelect, btnStart, btnL3, btnR3 };
+        // Face Button Confirm / Back / Bumpers (Single Click Rising Edge)
+        if (btnA && !prevButtonsRef.current.btnA) {
+          navigateSpatial('SELECT');
+          lastInputTimeRef.current = now;
+        } else if (btnB && !prevButtonsRef.current.btnB) {
+          navigateSpatial('BACK');
+          lastInputTimeRef.current = now;
+        } else if (shoulderL && !prevButtonsRef.current.shoulderL && !stateRef.current.showVirtualKeyboard) {
+          if (stateRef.current.showScraperModal) {
+            const summaryEl = document.querySelector('.scraper-completion-pane');
+            if (summaryEl) {
+              const terminalEl = document.querySelector('.scraper-terminal-view');
+              const toggleLogsBtn = document.querySelector('.scraper-toggle-logs-btn');
+              if (!terminalEl && toggleLogsBtn) {
+                toggleLogsBtn.click();
+                setFocusedTarget({ zone: 'scraperModal', id: 'toggle-logs' });
+                sfx?.playTileNav?.();
+              } else if (terminalEl) {
+                terminalEl.scrollBy({ top: -100, behavior: 'smooth' });
+                sfx?.playTileNav?.();
+              }
+            } else {
+              const allTabEls = document.querySelectorAll('.scraper-scope-tab');
+              if (allTabEls[0]) allTabEls[0].click();
+              setFocusedTarget({ zone: 'scraperModal', id: 'tab-all' });
+              sfx?.playTabSwitch?.();
+            }
+          } else if (stateRef.current.showProfileCreatorModal || stateRef.current.showMiiCreatorModal || (stateRef.current.showOnboarding && document.querySelector('.character-studio-container'))) {
+            const zone = stateRef.current.showOnboarding ? 'onboarding' : 'profileModal';
+            const tabs = document.querySelectorAll('.character-studio-tab');
+            if (tabs[0]) tabs[0].click();
+            setFocusedTarget({ zone, id: 'archetypeTab' });
+            sfx?.playTabSwitch?.();
+          } else if (!stateRef.current.isMobile && !stateRef.current.showOnboarding) {
+            const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
+            const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
+            const allSysKeys = ['all', 'favorites', 'recent', ...sortedSystems.map(s => s.key)];
+            const curSysIdx = allSysKeys.indexOf(stateRef.current.activeSystem);
+            const nextSysIdx = (curSysIdx - 1 + allSysKeys.length) % allSysKeys.length;
+            setActiveSystem(allSysKeys[nextSysIdx]);
+            setFocusedTarget({ zone: 'ribbon', index: nextSysIdx });
+            sfx?.playTabSwitch?.();
+          } else if (stateRef.current.isMobile && !stateRef.current.showOnboarding) {
+            setFocusedTarget(p => ({ zone: 'mobileChips', index: Math.max(0, (p.index || 0) - 1) }));
+            sfx?.playTabSwitch?.();
+          }
+          lastInputTimeRef.current = now;
+        } else if (shoulderR && !prevButtonsRef.current.shoulderR && !stateRef.current.showVirtualKeyboard) {
+          if (stateRef.current.showScraperModal) {
+            const summaryEl = document.querySelector('.scraper-completion-pane');
+            if (summaryEl) {
+              const terminalEl = document.querySelector('.scraper-terminal-view');
+              if (terminalEl) {
+                terminalEl.scrollBy({ top: 100, behavior: 'smooth' });
+                sfx?.playTileNav?.();
+              }
+            } else {
+              const allTabEls = document.querySelectorAll('.scraper-scope-tab');
+              if (allTabEls[1]) allTabEls[1].click();
+              setFocusedTarget({ zone: 'scraperModal', id: 'tab-single' });
+              sfx?.playTabSwitch?.();
+            }
+          } else if (stateRef.current.showProfileCreatorModal || stateRef.current.showMiiCreatorModal || (stateRef.current.showOnboarding && document.querySelector('.character-studio-container'))) {
+            const zone = stateRef.current.showOnboarding ? 'onboarding' : 'profileModal';
+            const tabs = document.querySelectorAll('.character-studio-tab');
+            if (tabs[1]) tabs[1].click();
+            setFocusedTarget({ zone, id: 'customTab' });
+            sfx?.playTabSwitch?.();
+          } else if (!stateRef.current.isMobile && !stateRef.current.showOnboarding) {
+            const activeSysList = stateRef.current.systems.filter(s => s.gameCount > 0);
+            const sortedSystems = [...activeSysList].sort((a, b) => b.gameCount - a.gameCount);
+            const allSysKeys = ['all', 'favorites', 'recent', ...sortedSystems.map(s => s.key)];
+            const curSysIdx = allSysKeys.indexOf(stateRef.current.activeSystem);
+            const nextSysIdx = (curSysIdx + 1) % allSysKeys.length;
+            setActiveSystem(allSysKeys[nextSysIdx]);
+            setFocusedTarget({ zone: 'ribbon', index: nextSysIdx });
+            sfx?.playTabSwitch?.();
+          } else if (stateRef.current.isMobile && !stateRef.current.showOnboarding) {
+            setFocusedTarget(p => ({ zone: 'mobileChips', index: Math.min((stateRef.current.systems?.length || 1) - 1, (p.index || 0) + 1) }));
+            sfx?.playTabSwitch?.();
+          }
+          lastInputTimeRef.current = now;
+        }
+
+        if (gamepadConnectedRef.current) {
+          achievementsEngine?.triggerPhysicalGamepadUsed?.();
+        }
+
+        prevButtonsRef.current = {
+          shoulderL, shoulderR, btnA, btnB, btnX, btnY, btnSelect, btnStart, btnL3, btnR3,
+          dpadUp, dpadDown, dpadLeft, dpadRight
+        };
       } else {
         if (gamepadConnectedRef.current) {
           gamepadConnectedRef.current = false;

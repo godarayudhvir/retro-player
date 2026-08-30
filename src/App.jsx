@@ -237,6 +237,16 @@ export default function App() {
   // Automated Online Metadata & Cover Art Scraper
   const scraper = useMetadataScraper(games, { isMobile, isPlaying: !!activeGame });
 
+  // Dynamic Browser Tab Title: Show current game name when playing
+  useEffect(() => {
+    if (activeGame) {
+      const gameTitle = activeGame.title || activeGame.name || 'Game';
+      document.title = `▶ Playing ${gameTitle} • Retro Player`;
+    } else {
+      document.title = 'Retro Player';
+    }
+  }, [activeGame]);
+
   // Persistent Desktop Zero-Copy Linked Directory Handles
   const [linkedDirectoryHandles, setLinkedDirectoryHandles] = useState([]);
   const [isReconnectingHandle, setIsReconnectingHandle] = useState(false);
@@ -626,10 +636,21 @@ export default function App() {
               const ok = await importSaveFile(file, game, activeProfileId);
               if (ok) {
                 achievementsEngine?.triggerBatteryImport?.(game);
+                try {
+                  const arrayBuffer = await file.arrayBuffer();
+                  const u8 = new Uint8Array(arrayBuffer);
+                  achievementsEngine?.evaluatePokemonSave?.(game, u8);
+                } catch (e) {}
               }
               return ok;
             }}
-            onDeleteSave={(game) => deleteSaveFile(game, activeProfileId)}
+            onDeleteSave={async (game) => {
+              const ok = await deleteSaveFile(game, activeProfileId);
+              if (ok) {
+                achievementsEngine?.resetPokemonMilestones?.(game);
+              }
+              return ok;
+            }}
             onDeleteGame={deleteGame}
             hasSaveData={hasSaveData}
             scraper={scraper}

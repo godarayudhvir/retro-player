@@ -45,7 +45,27 @@ import {
   Camera,
   Video,
   ShieldCheck,
-  Image
+  Image,
+  Shield,
+  Bike,
+  Anchor,
+  Waves,
+  Search,
+  Volume2,
+  Share2,
+  Map,
+  Disc,
+  Users,
+  Crown,
+  Feather,
+  DollarSign,
+  AlertCircle,
+  PlusCircle,
+  DoorOpen,
+  Copy,
+  History,
+  Coffee,
+  Dices
 } from 'lucide-react';
 import MultiAvatar from './MultiAvatar';
 import { ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, ACHIEVEMENT_CATEGORIES } from '../data/achievementsManifest';
@@ -93,7 +113,27 @@ const ICON_MAP = {
   Trophy,
   Compass,
   Clock,
-  Sliders
+  Sliders,
+  Shield,
+  Bike,
+  Anchor,
+  Waves,
+  Search,
+  Volume2,
+  Share2,
+  Map,
+  Disc,
+  Users,
+  Crown,
+  Feather,
+  DollarSign,
+  AlertCircle,
+  PlusCircle,
+  DoorOpen,
+  Copy,
+  History,
+  Coffee,
+  Dices
 };
 
 // Calculate Gamer Level from points (scaled for 300G maximum)
@@ -140,28 +180,251 @@ export default function TrophyCabinetModal({
     });
   }, [statusFilter, categoryFilter, unlocked]);
 
-  // Keyboard navigation
+  const STATUS_TABS = ['all', 'unlocked', 'locked'];
+  const CATEGORY_LIST = ['all', ...Object.keys(ACHIEVEMENT_CATEGORIES).map(k => ACHIEVEMENT_CATEGORIES[k].id)];
+
+  // Auto-scroll focused card into view smoothly
+  useEffect(() => {
+    if (!isOpen || !cardsContainerRef.current) return;
+    const focusedCard = cardsContainerRef.current.children[focusedIndex];
+    if (focusedCard && typeof focusedCard.scrollIntoView === 'function') {
+      focusedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    }
+  }, [focusedIndex, isOpen]);
+
+  // Enhanced 2D Spatial Grid & Gamepad Navigation (2 columns: left/right/up/down, L1/R1 tabs, L2/R2 categories)
   useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (e) => {
+      // Close modal on Escape / B
       if (e.key === 'Escape' || e.key === 'Esc') {
         e.preventDefault();
         sfx?.playModalClose?.();
         onClose();
-      } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        return;
+      }
+
+      // L1 / Q / PageUp: Cycle Status Tab Left (All -> Locked -> Unlocked -> All)
+      if (e.key === 'PageUp' || e.key === 'q' || e.key === 'Q') {
         e.preventDefault();
-        setFocusedIndex(prev => Math.min(prev + 1, filteredAchievements.length - 1));
-        sfx?.playTileNav?.();
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        setStatusFilter(prev => {
+          const curIdx = STATUS_TABS.indexOf(prev);
+          const nextIdx = (curIdx - 1 + STATUS_TABS.length) % STATUS_TABS.length;
+          return STATUS_TABS[nextIdx];
+        });
+        setFocusedIndex(0);
+        sfx?.playTabSwitch?.();
+        return;
+      }
+
+      // R1 / E / PageDown: Cycle Status Tab Right (All -> Unlocked -> Locked -> All)
+      if (e.key === 'PageDown' || e.key === 'e' || e.key === 'E') {
         e.preventDefault();
-        setFocusedIndex(prev => Math.max(0, prev - 1));
-        sfx?.playTileNav?.();
+        setStatusFilter(prev => {
+          const curIdx = STATUS_TABS.indexOf(prev);
+          const nextIdx = (curIdx + 1) % STATUS_TABS.length;
+          return STATUS_TABS[nextIdx];
+        });
+        setFocusedIndex(0);
+        sfx?.playTabSwitch?.();
+        return;
+      }
+
+      // [ or ] / L2 or R2: Cycle Categories
+      if (e.key === '[' || e.key === '{') {
+        e.preventDefault();
+        setCategoryFilter(prev => {
+          const curIdx = CATEGORY_LIST.indexOf(prev);
+          const nextIdx = (curIdx - 1 + CATEGORY_LIST.length) % CATEGORY_LIST.length;
+          return CATEGORY_LIST[nextIdx];
+        });
+        setFocusedIndex(0);
+        sfx?.playTabSwitch?.();
+        return;
+      }
+      if (e.key === ']' || e.key === '}') {
+        e.preventDefault();
+        setCategoryFilter(prev => {
+          const curIdx = CATEGORY_LIST.indexOf(prev);
+          const nextIdx = (curIdx + 1) % CATEGORY_LIST.length;
+          return CATEGORY_LIST[nextIdx];
+        });
+        setFocusedIndex(0);
+        sfx?.playTabSwitch?.();
+        return;
+      }
+
+      const total = filteredAchievements.length;
+      if (total === 0) return;
+
+      const cols = window.innerWidth <= 640 ? 1 : 2;
+
+      // 2D Spatial Grid Navigation
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (cols === 2) {
+          if (focusedIndex % 2 === 0 && focusedIndex + 1 < total) {
+            setFocusedIndex(prev => prev + 1);
+            sfx?.playTileNav?.();
+          }
+        }
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (cols === 2) {
+          if (focusedIndex % 2 === 1) {
+            setFocusedIndex(prev => prev - 1);
+            sfx?.playTileNav?.();
+          }
+        }
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (focusedIndex + cols < total) {
+          setFocusedIndex(prev => prev + cols);
+          sfx?.playTileNav?.();
+        } else if (focusedIndex < total - 1) {
+          setFocusedIndex(total - 1);
+          sfx?.playTileNav?.();
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (focusedIndex - cols >= 0) {
+          setFocusedIndex(prev => prev - cols);
+          sfx?.playTileNav?.();
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+
+    // Direct Gamepad Polling Loop for physical controllers
+    let animId = null;
+    let prevButtons = {};
+    let lastStickMove = 0;
+
+    const pollGamepad = () => {
+      const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+      const gp = gamepads[0] || gamepads[1] || gamepads[2] || gamepads[3];
+
+      if (gp && gp.connected) {
+        const now = Date.now();
+        const total = filteredAchievements.length;
+        const cols = window.innerWidth <= 640 ? 1 : 2;
+
+        const isDown = gp.buttons[13]?.pressed || gp.axes[1] > 0.5;
+        const isUp = gp.buttons[12]?.pressed || gp.axes[1] < -0.5;
+        const isRight = gp.buttons[15]?.pressed || gp.axes[0] > 0.5;
+        const isLeft = gp.buttons[14]?.pressed || gp.axes[0] < -0.5;
+        const isL1 = gp.buttons[4]?.pressed;
+        const isR1 = gp.buttons[5]?.pressed;
+        const isL2 = gp.buttons[6]?.pressed;
+        const isR2 = gp.buttons[7]?.pressed;
+        const isB = gp.buttons[1]?.pressed; // B / Circle button
+
+        // Close on B
+        if (isB && !prevButtons[1]) {
+          sfx?.playModalClose?.();
+          onClose();
+          return;
+        }
+
+        // L1: Previous status tab
+        if (isL1 && !prevButtons[4]) {
+          setStatusFilter(prev => {
+            const curIdx = STATUS_TABS.indexOf(prev);
+            const nextIdx = (curIdx - 1 + STATUS_TABS.length) % STATUS_TABS.length;
+            return STATUS_TABS[nextIdx];
+          });
+          setFocusedIndex(0);
+          sfx?.playTabSwitch?.();
+        }
+
+        // R1: Next status tab
+        if (isR1 && !prevButtons[5]) {
+          setStatusFilter(prev => {
+            const curIdx = STATUS_TABS.indexOf(prev);
+            const nextIdx = (curIdx + 1) % STATUS_TABS.length;
+            return STATUS_TABS[nextIdx];
+          });
+          setFocusedIndex(0);
+          sfx?.playTabSwitch?.();
+        }
+
+        // L2 / R2: Cycle categories
+        if (isL2 && !prevButtons[6]) {
+          setCategoryFilter(prev => {
+            const curIdx = CATEGORY_LIST.indexOf(prev);
+            const nextIdx = (curIdx - 1 + CATEGORY_LIST.length) % CATEGORY_LIST.length;
+            return CATEGORY_LIST[nextIdx];
+          });
+          setFocusedIndex(0);
+          sfx?.playTabSwitch?.();
+        }
+        if (isR2 && !prevButtons[7]) {
+          setCategoryFilter(prev => {
+            const curIdx = CATEGORY_LIST.indexOf(prev);
+            const nextIdx = (curIdx + 1) % CATEGORY_LIST.length;
+            return CATEGORY_LIST[nextIdx];
+          });
+          setFocusedIndex(0);
+          sfx?.playTabSwitch?.();
+        }
+
+        // Directional 2D grid movement
+        if (now - lastStickMove > 180) {
+          if (isDown) {
+            setFocusedIndex(prev => {
+              const next = (prev + cols < total) ? prev + cols : (prev < total - 1 ? total - 1 : prev);
+              if (next !== prev) sfx?.playTileNav?.();
+              return next;
+            });
+            lastStickMove = now;
+          } else if (isUp) {
+            setFocusedIndex(prev => {
+              const next = (prev - cols >= 0) ? prev - cols : prev;
+              if (next !== prev) sfx?.playTileNav?.();
+              return next;
+            });
+            lastStickMove = now;
+          } else if (isRight && cols === 2) {
+            setFocusedIndex(prev => {
+              if (prev % 2 === 0 && prev + 1 < total) {
+                sfx?.playTileNav?.();
+                return prev + 1;
+              }
+              return prev;
+            });
+            lastStickMove = now;
+          } else if (isLeft && cols === 2) {
+            setFocusedIndex(prev => {
+              if (prev % 2 === 1) {
+                sfx?.playTileNav?.();
+                return prev - 1;
+              }
+              return prev;
+            });
+            lastStickMove = now;
+          }
+        }
+
+        prevButtons = {
+          1: isB,
+          4: isL1,
+          5: isR1,
+          6: isL2,
+          7: isR2
+        };
+      }
+
+      animId = requestAnimationFrame(pollGamepad);
+    };
+
+    animId = requestAnimationFrame(pollGamepad);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      if (animId) cancelAnimationFrame(animId);
+    };
   }, [isOpen, onClose, filteredAchievements.length, sfx]);
 
   if (!isOpen) return null;
