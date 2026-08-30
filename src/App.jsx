@@ -514,6 +514,7 @@ export default function App() {
         isOpen={showLoadRomModal}
         initialFile={loadRomInitialFile}
         focusedTarget={focusedTarget}
+        isMobile={isMobile}
         onClose={() => {
           setShowLoadRomModal(false);
           setLoadRomInitialFile(null);

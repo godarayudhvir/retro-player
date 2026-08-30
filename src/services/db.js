@@ -622,5 +622,64 @@ export async function deleteCustomRomFromLocalDb(gameId) {
   }
 }
 
+/**
+ * Saves a desktop FileSystemDirectoryHandle to IndexedDB for zero-copy session persistence.
+ */
+export async function saveLinkedDirectoryHandle(dirHandle) {
+  if (!dirHandle) return false;
+  try {
+    const db = await getDB();
+    if (!db) return false;
+    return new Promise((resolve) => {
+      const transaction = db.transaction([STORES.SETTINGS], 'readwrite');
+      const store = transaction.objectStore(STORES.SETTINGS);
+      const request = store.put({ key: 'linked_directory_handle', value: dirHandle });
+      request.onsuccess = () => resolve(true);
+      request.onerror = () => resolve(false);
+    });
+  } catch (e) {
+    console.warn('Failed to save directory handle in IndexedDB:', e);
+    return false;
+  }
+}
+
+/**
+ * Retrieves the saved desktop FileSystemDirectoryHandle from IndexedDB.
+ */
+export async function getLinkedDirectoryHandle() {
+  try {
+    const db = await getDB();
+    if (!db) return null;
+    return new Promise((resolve) => {
+      const transaction = db.transaction([STORES.SETTINGS], 'readonly');
+      const store = transaction.objectStore(STORES.SETTINGS);
+      const request = store.get('linked_directory_handle');
+      request.onsuccess = () => resolve(request.result?.value || null);
+      request.onerror = () => resolve(null);
+    });
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Removes the saved desktop FileSystemDirectoryHandle from IndexedDB.
+ */
+export async function removeLinkedDirectoryHandle() {
+  try {
+    const db = await getDB();
+    if (!db) return false;
+    return new Promise((resolve) => {
+      const transaction = db.transaction([STORES.SETTINGS], 'readwrite');
+      const store = transaction.objectStore(STORES.SETTINGS);
+      const request = store.delete('linked_directory_handle');
+      request.onsuccess = () => resolve(true);
+      request.onerror = () => resolve(false);
+    });
+  } catch (e) {
+    return false;
+  }
+}
+
 export { STORES };
 

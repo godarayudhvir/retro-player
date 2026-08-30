@@ -16,20 +16,26 @@ import {
 } from 'lucide-react';
 import { resolveAssetPath } from '../utils/assetPath';
 import { detectSystemFromExtension, getSystemInfoByKey } from '../utils/systemDetector';
-import { checkServerDbStatus } from '../services/db';
+import { 
+  checkServerDbStatus,
+  saveLinkedDirectoryHandle,
+  getLinkedDirectoryHandle,
+  removeLinkedDirectoryHandle
+} from '../services/db';
 import { extractRomsFromInput, scanDirectoryHandle } from '../utils/folderScanner';
 
 /**
  * LoadRomModal - Smart In-App Modal Dialog for loading or permanently ingesting custom ROMs and ROM Folders.
  * - Single ROM File: Direct In-Memory Quick Play or Save to Library & Scrape.
  * - Entire ROMs Folder:
- *   1. Session Mode (In-Memory — No Copy): ROMs stay in original location. Choose No Scrape or Background Scrape.
- *   2. Permanent Ingestion Mode (Save to Storage): Copies ROMs to Server/IndexedDB. Choose No Scrape or Background Scrape.
+ *   1. Desktop: Persistent Zero-Copy Link (0 MB disk duplication) or Save to Library (Permanent).
+ *   2. Mobile: Permanent Library Ingestion (Fast or Background Scrape) to guarantee persistence across tab reloads.
  */
 export default function LoadRomModal({
   isOpen,
   initialFile = null,
   focusedTarget,
+  isMobile = false,
   onClose,
   onQuickPlay,
   onUploadToLibrary,
@@ -41,13 +47,25 @@ export default function LoadRomModal({
   const folderInputRef = useRef(null);
   const [isDragInside, setIsDragInside] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [folderData, setFolderData] = useState(null); // { folderName, files: [], stats }
+  const [folderData, setFolderData] = useState(null); // { folderName, files: [], stats, dirHandle }
   const [storageMode, setStorageMode] = useState('session'); // 'session' | 'permanent'
+  const [savedLinkedHandle, setSavedLinkedHandle] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progressState, setProgressState] = useState(null); // { step, current, total, message }
   const [errorMessage, setErrorMessage] = useState(null);
   const [focusedOption, setFocusedOption] = useState(0); 
   const isServerAvailable = checkServerDbStatus();
+
+  // Check for saved linked directory handle on desktop
+  useEffect(() => {
+    if (isOpen && !isMobile && typeof window !== 'undefined' && window.showDirectoryPicker) {
+      getLinkedDirectoryHandle().then(handle => {
+        setSavedLinkedHandle(handle || null);
+      }).catch(() => {
+        setSavedLinkedHandle(null);
+      });
+    }
+  }, [isOpen, isMobile]);
 
   // Reset or initialize state when modal opens/closes or initialFile is supplied
   useEffect(() => {
@@ -59,14 +77,14 @@ export default function LoadRomModal({
     } else {
       setSelectedFile(null);
       setFolderData(null);
-      setStorageMode('session');
+      setStorageMode(isMobile ? 'permanent' : 'session');
       setIsProcessing(false);
       setProgressState(null);
       setErrorMessage(null);
       setFocusedOption(0);
       setIsDragInside(false);
     }
-  }, [isOpen, initialFile]);
+  }, [isOpen, initialFile, isMobile]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -181,8 +199,9 @@ export default function LoadRomModal({
         setSelectedFile(extracted.files[0]);
         setFolderData(null);
       } else {
-        setFolderData(extracted);
+        setFolderData({ ...extracted, dirHandle });
         setSelectedFile(null);
+        setStorageMode(isMobile ? 'permanent' : 'session');
       }
       setFocusedOption(0);
       sfx?.playTileNav?.();
@@ -228,7 +247,7 @@ export default function LoadRomModal({
             message: prog.message || `Scanning folder "${dirHandle.name}" for retro titles...`
           }));
         });
-        await handleIncomingFiles(files);
+        await handleIncomingFiles(files, dirHandle);
       } catch (err) {
         if (err.name === 'AbortError') {
           // User cancelled native directory picker
@@ -239,6 +258,47 @@ export default function LoadRomModal({
       }
     } else {
       folderInputRef.current?.click();
+    }
+  };
+
+  const handleReconnectLinkedFolder = async (e) => {
+    e?.stopPropagation?.();
+    if (!savedLinkedHandle) return;
+    try {
+      setIsProcessing(true);
+      setErrorMessage(null);
+      setProgressState({ step: 'scanning', current: 0, total: 0, message: `Reconnecting to "${savedLinkedHandle.name}"...` });
+      
+      const perm = await savedLinkedHandle.requestPermission({ mode: 'read' });
+      if (perm !== 'granted') {
+        setIsProcessing(false);
+        setProgressState(null);
+        setErrorMessage(`Permission denied for linked folder "${savedLinkedHandle.name}".`);
+        return;
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 40));
+      const files = await scanDirectoryHandle(savedLinkedHandle, savedLinkedHandle.name, (prog) => {
+        setProgressState(prev => ({
+          ...prev,
+          step: 'scanning',
+          current: prog.current || 0,
+          total: prog.total || 0,
+          message: prog.message || `Scanning folder "${savedLinkedHandle.name}"...`
+        }));
+      });
+
+      await handleIncomingFiles(files, savedLinkedHandle);
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        setIsProcessing(false);
+        setProgressState(null);
+        return;
+      }
+      console.error('Failed to reconnect linked folder:', err);
+      setIsProcessing(false);
+      setProgressState(null);
+      setErrorMessage(err.message || 'Failed to reconnect linked folder');
     }
   };
 
@@ -317,7 +377,14 @@ export default function LoadRomModal({
 
     try {
       if (storageMode === 'session') {
-        // Path A: Just Load Folder (In-Memory Session — No Copy)
+        // Path A: Just Load Folder (In-Memory Session / Persistent Zero-Copy on Desktop)
+        if (folderData?.dirHandle && !isMobile) {
+          try {
+            await saveLinkedDirectoryHandle(folderData.dirHandle);
+            setSavedLinkedHandle(folderData.dirHandle);
+          } catch (_) {}
+        }
+
         setProgressState({
           step: 'loading',
           current: 0,
@@ -340,6 +407,13 @@ export default function LoadRomModal({
         }, 300);
       } else {
         // Path B: Ingest to Library (Permanent Storage — Copies to Server / IndexedDB)
+        if (folderData?.dirHandle) {
+          try {
+            await removeLinkedDirectoryHandle();
+            setSavedLinkedHandle(null);
+          } catch (_) {}
+        }
+
         setProgressState({
           step: 'saving',
           current: 0,
@@ -499,6 +573,42 @@ export default function LoadRomModal({
                   style={{ display: 'none' }}
                 />
               </div>
+
+              {/* Desktop Reconnect Linked Folder Card */}
+              {savedLinkedHandle && !isMobile && (
+                <div className="rom-linked-folder-card animate-fade-in" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  background: 'rgba(99, 102, 241, 0.08)',
+                  border: '1.5px solid rgba(99, 102, 241, 0.28)',
+                  borderRadius: '12px',
+                  padding: '0.75rem 1rem',
+                  gap: '0.75rem'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}>
+                    <FolderTree size={20} style={{ color: '#6366f1', flexShrink: 0 }} />
+                    <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                      <strong style={{ fontSize: '0.86rem', color: 'var(--text-main)' }}>
+                        Linked Folder: {savedLinkedHandle.name}
+                      </strong>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)' }}>
+                        Persistent zero-copy link saved on this device.
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="backup-action-btn is-primary"
+                    style={{ padding: '0.35rem 0.85rem', fontSize: '0.78rem', height: '32px', flexShrink: 0 }}
+                    onClick={handleReconnectLinkedFolder}
+                    disabled={isProcessing}
+                  >
+                    <Zap size={13} />
+                    <span>Reconnect</span>
+                  </button>
+                </div>
+              )}
 
               {/* Universal Speed & Efficiency Tip */}
               <div className="load-rom-speed-tip" style={{
@@ -932,41 +1042,61 @@ export default function LoadRomModal({
 
               {!isProcessing && (
                 <>
-                  {/* Storage Mode Segmented Selector */}
-                  <div className="rom-storage-mode-selector">
-                    <div className="rom-storage-mode-label">Select Storage Destination:</div>
-                    <div className="rom-storage-mode-tabs">
-                      <button
-                        type="button"
-                        className={`rom-storage-mode-tab ${storageMode === 'session' ? 'is-active' : ''}`}
-                        onClick={() => {
-                          setStorageMode('session');
-                          sfx?.playTileNav?.();
-                        }}
-                      >
-                        <Zap size={14} />
-                        <span>In-Memory Session (0 Copy)</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        className={`rom-storage-mode-tab ${storageMode === 'permanent' ? 'is-active' : ''}`}
-                        onClick={() => {
-                          setStorageMode('permanent');
-                          sfx?.playTileNav?.();
-                        }}
-                      >
-                        <HardDrive size={14} />
-                        <span>Save to Library (Permanent)</span>
-                      </button>
+                  {/* Storage Mode: Mobile Permanent Notice vs Desktop Zero-Copy Selector */}
+                  {isMobile ? (
+                    <div className="rom-storage-mobile-notice" style={{
+                      background: 'rgba(59, 130, 246, 0.08)',
+                      border: '1.5px solid rgba(59, 130, 246, 0.22)',
+                      borderRadius: '12px',
+                      padding: '0.8rem 1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      fontSize: '0.8rem',
+                      color: 'var(--text-main)'
+                    }}>
+                      <HardDrive size={20} style={{ color: '#3b82f6', flexShrink: 0 }} />
+                      <div style={{ lineHeight: 1.4 }}>
+                        <strong style={{ display: 'block', marginBottom: '2px', color: '#2563eb' }}>Permanent Mobile Library Storage</strong>
+                        <span>Saves {folderData.stats.totalFiles} ROMs, local artwork, and sidecars directly into offline browser storage to persist across refreshes.</span>
+                      </div>
                     </div>
+                  ) : (
+                    <div className="rom-storage-mode-selector">
+                      <div className="rom-storage-mode-label">Select Storage Destination:</div>
+                      <div className="rom-storage-mode-tabs">
+                        <button
+                          type="button"
+                          className={`rom-storage-mode-tab ${storageMode === 'session' ? 'is-active' : ''}`}
+                          onClick={() => {
+                            setStorageMode('session');
+                            sfx?.playTileNav?.();
+                          }}
+                        >
+                          <Zap size={14} />
+                          <span>Persistent Zero-Copy Link</span>
+                        </button>
 
-                    <p className="rom-storage-mode-hint">
-                      {storageMode === 'session'
-                        ? '⚡ ROMs remain strictly in their original location on your computer. Zero disk copying or uploads. Instant playback in this session.'
-                        : `💾 Copies all ${folderData.stats.totalFiles} ROMs permanently to ${isServerAvailable ? 'server /roms/ directory' : 'browser IndexedDB storage'} to persist across reloads.`}
-                    </p>
-                  </div>
+                        <button
+                          type="button"
+                          className={`rom-storage-mode-tab ${storageMode === 'permanent' ? 'is-active' : ''}`}
+                          onClick={() => {
+                            setStorageMode('permanent');
+                            sfx?.playTileNav?.();
+                          }}
+                        >
+                          <HardDrive size={14} />
+                          <span>Save to Library (Permanent)</span>
+                        </button>
+                      </div>
+
+                      <p className="rom-storage-mode-hint">
+                        {storageMode === 'session'
+                          ? '⚡ Zero disk duplication. Keeps the folder linked directly on your computer and streams games into your session.'
+                          : `💾 Copies all ${folderData.stats.totalFiles} ROMs permanently to ${isServerAvailable ? 'server /roms/ directory' : 'browser IndexedDB storage'} for offline portability.`}
+                      </p>
+                    </div>
+                  )}
 
                   {/* Dual Action Choices for Selected Storage Mode */}
                   <div className="rom-folder-actions-grid">
@@ -979,12 +1109,12 @@ export default function LoadRomModal({
                         </div>
                         <div style={{ flex: 1 }}>
                           <strong style={{ fontSize: '0.88rem', color: 'var(--text-main)', display: 'block' }}>
-                            {storageMode === 'session' ? 'Just Load (No Scrape)' : 'Save to Library (No Scrape)'}
+                            {storageMode === 'session' ? 'Just Load (No Scrape)' : 'Save to Library (Fast / No Scrape)'}
                           </strong>
                           <span style={{ fontSize: '0.74rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
                             {storageMode === 'session'
-                              ? 'Instantly imports all titles into your session without scraping or internet lookups.'
-                              : 'Fast batch saves all ROMs to your persistent library without running the scraper.'}
+                              ? 'Instantly imports all titles and local covers into your session without scraping or internet lookups.'
+                              : 'Fast batch saves all ROMs, local box art, and sidecars to your persistent library without internet scraping.'}
                           </span>
                         </div>
                       </div>
@@ -995,7 +1125,7 @@ export default function LoadRomModal({
                         disabled={isProcessing}
                       >
                         <Play size={14} />
-                        <span>{storageMode === 'session' ? 'Just Load Fast' : 'Save (No Scrape)'}</span>
+                        <span>{storageMode === 'session' ? 'Just Load Fast' : 'Save (Fast)'}</span>
                       </button>
                     </div>
 
@@ -1007,10 +1137,12 @@ export default function LoadRomModal({
                         </div>
                         <div style={{ flex: 1 }}>
                           <strong style={{ fontSize: '0.88rem', color: 'var(--text-main)', display: 'block' }}>
-                            {storageMode === 'session' ? 'Just Load & Scrape (Background)' : 'Ingest & Scrape (Background)'}
+                            {storageMode === 'session' ? 'Just Load & Scrape (Background)' : 'Save & Scrape (Background)'}
                           </strong>
                           <span style={{ fontSize: '0.74rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
-                            Loads titles immediately and triggers metadata &amp; 3D box art scraping in the background without making you wait.
+                            {storageMode === 'session'
+                              ? 'Loads your session instantly while fetching missing 3D box art & metadata in the background.'
+                              : 'Saves your entire collection locally and automatically fills in missing 3D box art from the internet in the background.'}
                           </span>
                         </div>
                       </div>
@@ -1021,7 +1153,7 @@ export default function LoadRomModal({
                         disabled={isProcessing}
                       >
                         <Sparkles size={14} />
-                        <span>{storageMode === 'session' ? 'Load & Scrape in BG' : 'Ingest & Scrape in BG'}</span>
+                        <span>{storageMode === 'session' ? 'Load & Scrape' : 'Save & Scrape'}</span>
                       </button>
                     </div>
 
