@@ -165,6 +165,8 @@ const homeImgPath = path.join(ROOT_DIR, 'home.webp');
 if (fs.existsSync(homeImgPath)) {
   const ogImgPath = path.join(ROOT_DIR, 'public/og-image.webp');
   const desktopImgPath = path.join(ROOT_DIR, 'public/screenshots/desktop-1.webp');
+  fs.mkdirSync(path.dirname(ogImgPath), { recursive: true });
+  fs.mkdirSync(path.dirname(desktopImgPath), { recursive: true });
   fs.copyFileSync(homeImgPath, ogImgPath);
   fs.copyFileSync(homeImgPath, desktopImgPath);
   console.log(`✅ Synchronized cover image (home.webp -> og-image.webp & screenshots/desktop-1.webp)`);
