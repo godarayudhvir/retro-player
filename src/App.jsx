@@ -351,6 +351,8 @@ export default function App() {
     setShowScraperModal,
     showBackupModal,
     setShowBackupModal,
+    showTrophyModal,
+    setShowTrophyModal,
     showProfileSelectModal,
     setShowProfileSelectModal,
     showProfileCreatorModal,

@@ -299,6 +299,8 @@ export default function DsView({
       setDsTab('overview');
     } else if (focusedTarget.id === 'save') {
       setDsTab('save');
+    } else if (focusedTarget.id === 'pokemon') {
+      setDsTab('pokemon');
     } else if (focusedTarget.id === 'guides') {
       setDsTab('guides');
     } else if (focusedTarget.id === 'edit') {

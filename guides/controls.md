@@ -121,6 +121,17 @@ When searching or typing character handles with a controller:
 
 ---
 
+## 🏆 Trophy Cabinet & Achievements Modal Controls
+
+| Gamepad Button | Keyboard Equivalent | Function |
+| :--- | :--- | :--- |
+| **`D-Pad / Left Stick`** | **`Arrow Keys`** | 2D spatial navigation across achievement cards |
+| **`[L1] / [R1]` Bumpers** | **`Q / E` or `PageUp / PageDown`** | Cycle status filter (**All** $\leftrightarrow$ **Unlocked** $\leftrightarrow$ **Locked**) |
+| **`[L2] / [R2]` Triggers** | **`[` and `]`** | Cycle achievement categories (Progress, Mastery, Dedication, etc.) |
+| **`[B]` Button** | **`Escape`** | Close Trophy Cabinet and restore focus to Topbar Trophy icon |
+
+---
+
 ## ⌨️ Global Keyboard Hotkeys Reference
 
 | Key | Description |

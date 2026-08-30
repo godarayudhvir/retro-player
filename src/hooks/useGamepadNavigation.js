@@ -16,6 +16,8 @@ export function useGamepadNavigation({
   setShowScraperModal,
   showBackupModal,
   setShowBackupModal,
+  showTrophyModal,
+  setShowTrophyModal,
   showResetConfirm,
   setShowResetConfirm,
   showProfileSelectModal,
@@ -86,6 +88,8 @@ export function useGamepadNavigation({
       showScraperModal,
       showBackupModal,
       setShowBackupModal,
+      showTrophyModal,
+      setShowTrophyModal,
       showResetConfirm,
       setShowResetConfirm,
       showProfileSelectModal,
@@ -124,6 +128,7 @@ export function useGamepadNavigation({
     showLoadRomModal,
     showScraperModal,
     showBackupModal,
+    showTrophyModal,
     showResetConfirm,
     showProfileSelectModal,
     showProfileCreatorModal,
@@ -281,6 +286,17 @@ export function useGamepadNavigation({
             sfx?.playKeyTick?.();
           }
         }
+      }
+      return;
+    }
+
+    // 0.04 Trophy / Achievements Cabinet Modal Navigation Guard
+    const { showTrophyModal: isTrophyOpen, setShowTrophyModal: setTrophyClose } = stateRef.current;
+    if (isTrophyOpen) {
+      if (dir === 'BACK') {
+        if (setTrophyClose) setTrophyClose(false);
+        setFocusedTarget({ zone: 'topbar', id: 'trophy' });
+        sfx?.playModalClose?.();
       }
       return;
     }
@@ -1701,6 +1717,9 @@ export function useGamepadNavigation({
 
       if (document.activeElement?.tagName === 'INPUT') return;
 
+      // Yield keyboard inputs when Trophy Cabinet Modal is open
+      if (stateRef.current.showTrophyModal) return;
+
       // Yield keyboard inputs during active emulation session except ESC exit
       if (stateRef.current.activeGame) {
         if (e.key === 'Escape' || e.key === 'Esc') {
@@ -1994,6 +2013,16 @@ export function useGamepadNavigation({
 
         // On mobile devices, gamepad input is reserved strictly for in-game play
         if (stateRef.current.isMobile && !stateRef.current.activeGame) {
+          prevButtonsRef.current = {
+            btnY, btnSelect, btnA, btnB, btnX, btnStart, shoulderL, shoulderR,
+            dpadUp, dpadDown, dpadLeft, dpadRight
+          };
+          animId = requestAnimationFrame(pollGamepad);
+          return;
+        }
+
+        // When Trophy Cabinet Modal is open, yield global gamepad polling to modal
+        if (stateRef.current.showTrophyModal) {
           prevButtonsRef.current = {
             btnY, btnSelect, btnA, btnB, btnX, btnStart, shoulderL, shoulderR,
             dpadUp, dpadDown, dpadLeft, dpadRight
