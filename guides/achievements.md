@@ -48,8 +48,8 @@ This guide contains the master registry of all **30+ Universal Organic Achieveme
 
 | Status | Tier | Points | ID | Title | Universal Requirement | Evaluation Logic | Scope |
 | :---: | :---: | :---: | :--- | :--- | :--- | :--- | :---: |
-| ✅ | 🥉 Bronze | +10G | `rage_quit` | **Instant Regret?** | Exit a game in under 45 seconds of launching. | Session duration `3s < s < 45s` | Global & Per-ROM |
-|  | 🥉 Bronze | +10G | `button_masher` | **Button Masher** | Register 1,500+ total gamepad/keyboard input events in a single session. | Active session button count `>= 1500` | Global & Per-ROM |
+| ✅ | 🥉 Bronze | +10G | `rage_quit` | **Instant Regret?** | Exit a game in under 45 seconds of launching. | Session duration `3s < s < 45s` | Global |
+|  | 🥉 Bronze | +10G | `button_masher` | **Button Masher** | Register 1,500+ total gamepad/keyboard input events in a single session. | Active session button count `>= 1500` | Per-ROM |
 | ✅ | 🥉 Bronze | +10G | `need_for_speed` | **Need for Speed** | Keep Fast-Forward active continuously for over 45 seconds. | Continuous fast-forward `>= 45s` | Global |
 |  | 🥉 Bronze | +10G | `pause_for_thought`| **AFK Champion** | Leave the emulator paused for over 10 minutes. | Continuous pause duration `>= 600s` | Global |
 |  | 🥉 Bronze | +10G | `window_shopper` | **Window Shopper** | Idle in the cartridge library with BGM playing for > 5 minutes. | Menu idle duration `>= 300s` | Global |
@@ -60,12 +60,12 @@ This guide contains the master registry of all **30+ Universal Organic Achieveme
 
 | Status | Tier | Points | ID | Title | Universal Requirement | Evaluation Logic | Scope |
 | :---: | :---: | :---: | :--- | :--- | :--- | :--- | :---: |
-| ✅ | 🥉 Bronze | +10G | `safety_net` | **Safety Net** | Create your very first Quick Save state snapshot. | Save state created (`Slot 0`) | Global & Per-ROM |
-| ✅ | 🥉 Bronze | +10G | `time_traveler` | **Time Traveler** | Load a previously saved state snapshot. | Save state loaded (`Slot 0`) | Global & Per-ROM |
+| ✅ | 🥉 Bronze | +10G | `safety_net` | **Safety Net** | Create your very first Quick Save state snapshot. | Save state created (`Slot 0`) | Global |
+| ✅ | 🥉 Bronze | +10G | `time_traveler` | **Time Traveler** | Load a previously saved state snapshot. | Save state loaded (`Slot 0`) | Global |
 | ✅ | 🥈 Silver | +25G | `save_scummer` | **Save Scummer** | Create 10 save states in a single game. | Game save state count `>= 10` | Per-ROM |
 | ✅ | 🥈 Silver | +25G | `timeline_master` | **Multi-Timeline Master** | Use both Auto-Resume and Manual Load State in the same title. | Auto-Resume + Load State used | Per-ROM |
-|  | 🥈 Silver | +25G | `cartridge_keeper`| **Cartridge Keeper** | Export an authentic `.sav` battery SRAM file to your device. | Save Data Studio `.sav` export | Global & Per-ROM |
-|  | 🥈 Silver | +25G | `memory_rebirth` | **Memory Rebirth** | Import an authentic `.sav` battery SRAM file into a game. | Save Data Studio `.sav` import | Global & Per-ROM |
+|  | 🥈 Silver | +25G | `cartridge_keeper`| **Cartridge Keeper** | Export an authentic `.sav` battery SRAM file to your device. | Save Data Studio `.sav` export | Global |
+|  | 🥈 Silver | +25G | `memory_rebirth` | **Memory Rebirth** | Import an authentic `.sav` battery SRAM file into a game. | Save Data Studio `.sav` import | Global |
 | ✅ | 🥇 Gold | +50G | `vault_custodian` | **Vault Custodian** | Export a full JSON database backup snapshot from Storage Studio. | Storage Studio backup export | Global |
 
 ---
@@ -74,8 +74,8 @@ This guide contains the master registry of all **30+ Universal Organic Achieveme
 
 | Status | Tier | Points | ID | Title | Universal Requirement | Evaluation Logic | Scope |
 | :---: | :---: | :---: | :--- | :--- | :--- | :--- | :---: |
-| ✅ | 🥉 Bronze | +10G | `memory_keeper` | **Memory Keeper** | Capture an in-game screenshot. | In-game screenshot action | Global & Per-ROM |
-| ✅ | 🥈 Silver | +25G | `clip_master` | **Clip Master** | Record an in-game video clip. | In-game video recording action | Global & Per-ROM |
+| ✅ | 🥉 Bronze | +10G | `memory_keeper` | **Memory Keeper** | Capture an in-game screenshot. | In-game screenshot action | Global |
+| ✅ | 🥈 Silver | +25G | `clip_master` | **Clip Master** | Record an in-game video clip. | In-game video recording action | Global |
 | ✅ | 🥉 Bronze | +10G | `audiophile` | **Audiophile** | Listen to at least 3 distinct chiptune BGM background music tracks. | Unique BGM tracks played `>= 3` | Global |
 | ✅ | 🥉 Bronze | +10G | `identity_crisis` | **Identity Crisis** | Customize/randomize your player avatar 3 times in Profile Studio. | Avatar updates `>= 3` | Global |
 | ✅ | 🥉 Bronze | +10G | `chameleon` | **Chameleon** | Toggle between Light and Dark mode 5 times. | Theme toggles `>= 5` | Global |
@@ -88,7 +88,7 @@ This guide contains the master registry of all **30+ Universal Organic Achieveme
 
 | Status | Tier | Points | ID | Title | Universal Requirement | Evaluation Logic | Scope |
 | :---: | :---: | :---: | :--- | :--- | :--- | :--- | :---: |
-|  | 🥉 Bronze | +10G | `strategy_scholar`| **Strategy Scholar** | Open or view QR companion for a game's Strategy Guide / Walkthrough. | Strategy guide open or QR action | Global & Per-ROM |
+|  | 🥉 Bronze | +10G | `strategy_scholar`| **Strategy Scholar** | Open or view QR companion for a game's Strategy Guide / Walkthrough. | Strategy guide open or QR action | Global |
 
 ---
 

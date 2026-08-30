@@ -245,7 +245,7 @@ export const ACHIEVEMENTS_MANIFEST = [
     category: 'saves',
     tier: 'bronze',
     icon: 'Save',
-    isPerRom: true
+    isPerRom: false
   },
   {
     id: 'time_traveler',
@@ -254,7 +254,7 @@ export const ACHIEVEMENTS_MANIFEST = [
     category: 'saves',
     tier: 'bronze',
     icon: 'RotateCcw',
-    isPerRom: true
+    isPerRom: false
   },
   {
     id: 'save_scummer',
@@ -272,7 +272,7 @@ export const ACHIEVEMENTS_MANIFEST = [
     category: 'saves',
     tier: 'silver',
     icon: 'DownloadCloud',
-    isPerRom: true
+    isPerRom: false
   },
   {
     id: 'memory_rebirth',
@@ -281,7 +281,7 @@ export const ACHIEVEMENTS_MANIFEST = [
     category: 'saves',
     tier: 'silver',
     icon: 'UploadCloud',
-    isPerRom: true
+    isPerRom: false
   },
   {
     id: 'timeline_master',
@@ -357,7 +357,7 @@ export const ACHIEVEMENTS_MANIFEST = [
     category: 'customization',
     tier: 'silver',
     icon: 'Camera',
-    isPerRom: true
+    isPerRom: false
   },
   {
     id: 'clip_master',
@@ -366,7 +366,7 @@ export const ACHIEVEMENTS_MANIFEST = [
     category: 'customization',
     tier: 'silver',
     icon: 'Video',
-    isPerRom: true
+    isPerRom: false
   },
   {
     id: 'vault_custodian',
@@ -384,11 +384,11 @@ export const ACHIEVEMENTS_MANIFEST = [
   {
     id: 'strategy_scholar',
     title: 'Strategy Guide Scholar',
-    description: 'Open and read a game\'s Strategy Guide / Walkthrough for over 60 seconds.',
+    description: 'Open or view QR companion for a game\'s Strategy Guide / Walkthrough.',
     category: 'lore',
     tier: 'bronze',
     icon: 'BookOpen',
-    isPerRom: true
+    isPerRom: false
   }
 ];
 
