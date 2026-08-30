@@ -7492,10 +7492,23 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  padding: 56px 0 0 0;
+  box-sizing: border-box;
   margin: 0;
   overflow: hidden;
   background: #000000;
+}
+
+@media (max-width: 640px) and (orientation: portrait) {
+  .emulator-stage {
+    padding: calc(48px + env(safe-area-inset-top, 0px)) 0 0 0;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 540px) {
+  .emulator-stage {
+    padding: 0;
+  }
 }
 
 /* ── Skyrim-style rotating loading hints ── */
