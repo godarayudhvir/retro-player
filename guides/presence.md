@@ -131,3 +131,16 @@ Streamers can add Retro Player's live "Now Playing" card directly into OBS Studi
 3. Set dimensions to `420 x 140`.
 4. Check **"Shutdown source when not visible"**.
 5. The widget automatically appears when a game is launched (displaying animated glowing pill, box art, system badge, and live session playtime) and gracefully slides out when returning to the game library.
+
+---
+
+## 4. 🌐 Tri-Environment Deployment Matrix
+
+| Feature | Localhost (`npm run dev`) | Self-Hosted / Docker (`server.js`) | GitHub Pages (`github.io`) |
+| :--- | :---: | :---: | :---: |
+| **📱 OS Media Controls** | ✅ Active | ✅ Active | ✅ Active *(Full Client-Side IndexedDB Cover Art support)* |
+| **⏱️ Session Playtime Scrubber** | ✅ Active | ✅ Active | ✅ Active |
+| **⏯️ Media Key Controls & Speed** | ✅ Active | ✅ Active | ✅ Active |
+| **🖥️ Discord Desktop RPC** | ✅ Active *(IPC `/tmp/discord-ipc-0`)* | ✅ Active *(Host IPC socket mount)* | 🔒 Inactive *(Browser security sandbox blocks cloud sites from local sockets)* |
+| **📺 OBS Streamer Overlay** | ✅ Active (`:3000/widgets/...`) | ✅ Active (`:3000/widgets/...`) | 🔒 Inactive *(Requires active backend REST server)* |
+

@@ -44,7 +44,14 @@ function createSilentAudioBlobUrl() {
 
 function resolveAbsoluteUrl(pathStr) {
   if (!pathStr || typeof window === 'undefined') return '';
-  if (pathStr.startsWith('http://') || pathStr.startsWith('https://')) return pathStr;
+  if (
+    pathStr.startsWith('data:') ||
+    pathStr.startsWith('blob:') ||
+    pathStr.startsWith('http://') ||
+    pathStr.startsWith('https://')
+  ) {
+    return pathStr;
+  }
 
   try {
     const base = new URL(window.location.href);
@@ -189,10 +196,10 @@ export function useGamePresence(activeGame) {
           const artwork = [];
           if (coverUrl) {
             artwork.push(
-              { src: coverUrl, sizes: '96x96', type: 'image/png' },
-              { src: coverUrl, sizes: '128x128', type: 'image/png' },
-              { src: coverUrl, sizes: '256x256', type: 'image/png' },
-              { src: coverUrl, sizes: '512x512', type: 'image/png' }
+              { src: coverUrl, sizes: '96x96' },
+              { src: coverUrl, sizes: '128x128' },
+              { src: coverUrl, sizes: '256x256' },
+              { src: coverUrl, sizes: '512x512' }
             );
           }
 
