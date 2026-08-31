@@ -87,7 +87,7 @@
   "screenshots": [
     {
       "src": "docs-screenshots/wide-grid-large.webp",
-      "sizes": "1024x576",
+      "sizes": "1024x578",
       "type": "image/webp",
       "form_factor": "wide",
       "label": "Retro Player — Panoramic Game Grid and Library Showcase"
