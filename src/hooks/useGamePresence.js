@@ -42,6 +42,24 @@ function createSilentAudioBlobUrl() {
   }
 }
 
+function resolveAbsoluteUrl(pathStr) {
+  if (!pathStr || typeof window === 'undefined') return '';
+  if (pathStr.startsWith('http://') || pathStr.startsWith('https://')) return pathStr;
+
+  try {
+    const base = new URL(window.location.href);
+    const basePath = base.pathname.replace(/\/+$/, '');
+    const cleanPath = pathStr.startsWith('/') ? pathStr : `/${pathStr}`;
+
+    if (basePath && !cleanPath.startsWith(`${basePath}/`)) {
+      return `${base.origin}${basePath}${cleanPath}`;
+    }
+    return `${base.origin}${cleanPath}`;
+  } catch {
+    return pathStr;
+  }
+}
+
 // Module-level persistent audio singleton to preserve browser Autoplay permissions across game switches
 let singletonAudio = null;
 let singletonBlobUrl = null;
@@ -117,15 +135,12 @@ export function useGamePresence(activeGame) {
     const systemKey = activeGame.systemKey || activeGame.system || '';
     const systemName = activeGame.systemName || activeGame.systemTitle || (systemKey ? systemKey.toUpperCase() : 'Retro Console');
     
-    // Resolve absolute cover URL for MediaSession and Discord RPC
+    // Resolve absolute cover URL for MediaSession and Discord RPC (supports GitHub Pages subpaths)
     let rawCover = activeGame.coverUrl || activeGame.cover || activeGame.boxArt || activeGame.metadata?.coverUrl || activeGame.metadata?.cover || '';
     if (rawCover && rawCover.endsWith('.svg')) {
       rawCover = '';
     }
-    let coverUrl = rawCover;
-    if (coverUrl && !coverUrl.startsWith('http') && typeof window !== 'undefined') {
-      coverUrl = `${window.location.origin}${coverUrl.startsWith('/') ? '' : '/'}${coverUrl}`;
-    }
+    const coverUrl = resolveAbsoluteUrl(rawCover);
 
     const gameKey = `${systemKey}_${activeGame.id || activeGame.filename || gameTitle}`;
     lastDispatchedGameKeyRef.current = gameKey;
