@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Check, Edit2, Trash2, X, Sparkles, Gamepad2 } from 'lucide-react';
+import { Plus, Check, Edit2, Trash2, Sparkles, Gamepad2 } from 'lucide-react';
 import MultiAvatar from './MultiAvatar';
 import ConfirmModal from './ConfirmModal';
 
@@ -44,15 +44,6 @@ export default function ProfileSelectModal({
               <Gamepad2 size={32} color="#ef4444" />
               <h2>Who&apos;s Playing?</h2>
             </div>
-            {onClose && (
-              <button 
-                className={`profile-close-btn ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`} 
-                onClick={handleClose} 
-                aria-label="Close Profile Selector"
-              >
-                <X size={20} />
-              </button>
-            )}
           </div>
 
           <p className="profile-select-subtitle">

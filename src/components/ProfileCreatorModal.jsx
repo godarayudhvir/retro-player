@@ -61,7 +61,7 @@ export default function ProfileCreatorModal({
   return (
     <>
       <div className="info-modal-backdrop animate-fade-in" onClick={onClose}>
-        <div className="scraper-modal-container animate-scale-up" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '640px' }}>
+        <div className="scraper-modal-container custom-studio-modal animate-scale-up" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '860px', width: '92%' }}>
           {/* Header */}
           <header className="scraper-modal-header">
             <div className="scraper-modal-title-group">

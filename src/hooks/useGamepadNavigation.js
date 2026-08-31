@@ -1135,17 +1135,9 @@ export function useGamepadNavigation({
         if (curId === 'manage') {
           setFocusedTarget({ zone: 'profileModal', index: Math.min(curDeskProfiles?.length || 0, curIndex) });
           sfx?.playTileNav?.();
-        } else if (curId === 'close') {
-          // Stay at top
-        } else {
-          setFocusedTarget({ zone: 'profileModal', id: 'close' });
-          sfx?.playTileNav?.();
         }
       } else if (dir === 'DOWN') {
-        if (curId === 'close') {
-          setFocusedTarget({ zone: 'profileModal', index: 0 });
-          sfx?.playTileNav?.();
-        } else if (curId !== 'manage') {
+        if (curId !== 'manage') {
           setFocusedTarget({ zone: 'profileModal', id: 'manage' });
           sfx?.playTileNav?.();
         }
@@ -1162,11 +1154,7 @@ export function useGamepadNavigation({
           sfx?.playTileNav?.();
         }
       } else if (dir === 'SELECT') {
-        if (curId === 'close') {
-          setShowProfileSelectModal(false);
-          setFocusedTarget({ zone: 'topbar', id: 'profile' });
-          sfx?.playModalClose?.();
-        } else if (curId === 'manage') {
+        if (curId === 'manage') {
           const manageBtn = document.querySelector('.profile-manage-toggle-btn');
           if (manageBtn) manageBtn.click();
         } else {
