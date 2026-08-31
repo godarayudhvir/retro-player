@@ -203,6 +203,17 @@ export default function App() {
     isPlaying: Boolean(activeGame)
   });
 
+  const achievementsEngineRef = useRef(achievementsEngine);
+  achievementsEngineRef.current = achievementsEngine;
+
+  // Automatically record BGM track listen progress whenever a track plays
+  const currentBgmTrackKey = bgm?.isPlaying && bgm?.currentTrack ? (bgm.currentTrack.title || bgm.currentTrack.url) : null;
+  useEffect(() => {
+    if (currentBgmTrackKey) {
+      achievementsEngineRef.current?.triggerBgmTrackPlayed?.(currentBgmTrackKey);
+    }
+  }, [currentBgmTrackKey]);
+
   // Game Launch Orchestration: Check if keyboard splash prompt should show on UI before booting into emulator
   const handleLaunchGameImmediately = useCallback((game) => {
     if (!game) return;

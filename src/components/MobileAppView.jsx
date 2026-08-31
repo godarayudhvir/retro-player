@@ -2691,6 +2691,9 @@ export default function MobileAppView({
                 className={`mobile-topbar-action-btn ${bgm.isPlaying ? 'is-active is-playing' : ''}`}
                 onClick={() => {
                   bgm.togglePlay();
+                  if (!bgm.isPlaying && bgm.currentTrack) {
+                    achievementsEngine?.triggerBgmTrackPlayed?.(bgm.currentTrack.title || bgm.currentTrack.url);
+                  }
                   sfx?.playTileNav?.();
                   haptics.selection();
                 }}
@@ -2706,6 +2709,9 @@ export default function MobileAppView({
                   className="mobile-topbar-action-btn mobile-bgm-skip-btn"
                   onClick={() => {
                     bgm.nextTrack();
+                    if (bgm.currentTrack) {
+                      achievementsEngine?.triggerBgmTrackPlayed?.(bgm.currentTrack.title || bgm.currentTrack.url);
+                    }
                     sfx?.playTabSwitch?.();
                     haptics.selection();
                   }}

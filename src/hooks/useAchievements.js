@@ -649,7 +649,11 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
   const triggerBgmTrackPlayed = useCallback((trackFilename) => {
     if (!trackFilename) return;
     setStats(prev => {
-      const tracks = Array.from(new Set([...(prev.bgmTracksListened || []), trackFilename]));
+      const existing = prev.bgmTracksListened || [];
+      if (existing.includes(trackFilename)) {
+        return prev;
+      }
+      const tracks = [...existing, trackFilename];
       if (tracks.length >= 3) {
         unlockAchievement('audiophile');
       }

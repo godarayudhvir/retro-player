@@ -1309,9 +1309,15 @@ export function useGamepadNavigation({
           sfx?.playModalOpen?.();
         } else if (curId === 'bgm') {
           stateRef.current.bgm?.togglePlay?.();
+          if (!stateRef.current.bgm?.isPlaying && stateRef.current.bgm?.currentTrack) {
+            achievementsEngine?.triggerBgmTrackPlayed?.(stateRef.current.bgm.currentTrack.title || stateRef.current.bgm.currentTrack.url);
+          }
           sfx?.playTileNav?.();
         } else if (curId === 'bgmSkip') {
           stateRef.current.bgm?.nextTrack?.();
+          if (stateRef.current.bgm?.currentTrack) {
+            achievementsEngine?.triggerBgmTrackPlayed?.(stateRef.current.bgm.currentTrack.title || stateRef.current.bgm.currentTrack.url);
+          }
           sfx?.playTabSwitch?.();
         } else if (curId === 'scraper') {
           if (stateRef.current.onOpenScraperModal) {
