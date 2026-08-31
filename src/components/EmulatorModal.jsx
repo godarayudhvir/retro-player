@@ -535,16 +535,23 @@ export default function EmulatorModal({
           currentGame.title
         ].filter(Boolean);
 
+        // Non-master profiles strictly query their own scoped profile ID with ZERO fallback to master/unscoped saves
         const profilePrefixes = isMasterProfile
           ? [activeProfileId, 'prof_default', 'default', '']
           : [activeProfileId];
 
-        // 1. In-game Battery RAM lookup across all identifiers
+        // 1. In-game Battery RAM lookup strictly for the active profile
         for (const id of identifiers) {
           for (const prof of profilePrefixes) {
             const saveKey = prof ? `save_${prof}_${id}` : `save_${id}`;
             let dbSave = await dbGet(STORES.GAME_SAVES, saveKey);
             if (dbSave && dbSave.data) {
+              // Ensure save record explicitly matches active profile (or is legacy master)
+              if (dbSave.profileId && dbSave.profileId !== activeProfileId) {
+                if (!isMasterProfile || (dbSave.profileId !== 'prof_default' && dbSave.profileId !== 'default')) {
+                  continue;
+                }
+              }
               initialSaveBase64 = typeof dbSave.data === 'string' ? dbSave.data : (dbSave.data.save || dbSave.data.data || null);
               if (initialSaveBase64) break;
             }
@@ -553,6 +560,11 @@ export default function EmulatorModal({
               try {
                 const parsed = JSON.parse(lsSave);
                 if (parsed && parsed.data) {
+                  if (parsed.profileId && parsed.profileId !== activeProfileId) {
+                    if (!isMasterProfile || (parsed.profileId !== 'prof_default' && parsed.profileId !== 'default')) {
+                      continue;
+                    }
+                  }
                   initialSaveBase64 = typeof parsed.data === 'string' ? parsed.data : (parsed.data.save || parsed.data.data || null);
                   if (initialSaveBase64) break;
                 }
@@ -562,12 +574,17 @@ export default function EmulatorModal({
           if (initialSaveBase64) break;
         }
 
-        // 2. Slot 0 Quick Save lookup across all identifiers
+        // 2. Slot 0 Quick Save lookup strictly for the active profile
         for (const id of identifiers) {
           for (const prof of profilePrefixes) {
             const stateKey = prof ? `state_${prof}_${id}` : `state_${id}`;
             let dbState = await dbGet(STORES.SAVE_STATES, stateKey);
             if (dbState && dbState.data) {
+              if (dbState.profileId && dbState.profileId !== activeProfileId) {
+                if (!isMasterProfile || (dbState.profileId !== 'prof_default' && dbState.profileId !== 'default')) {
+                  continue;
+                }
+              }
               initialStateBase64 = typeof dbState.data === 'string' ? dbState.data : (dbState.data.state || dbState.data.data || null);
               if (initialStateBase64) break;
             }
@@ -576,6 +593,11 @@ export default function EmulatorModal({
               try {
                 const parsed = JSON.parse(lsState);
                 if (parsed && parsed.data) {
+                  if (parsed.profileId && parsed.profileId !== activeProfileId) {
+                    if (!isMasterProfile || (parsed.profileId !== 'prof_default' && parsed.profileId !== 'default')) {
+                      continue;
+                    }
+                  }
                   initialStateBase64 = typeof parsed.data === 'string' ? parsed.data : (parsed.data.state || parsed.data.data || null);
                   if (initialStateBase64) break;
                 }

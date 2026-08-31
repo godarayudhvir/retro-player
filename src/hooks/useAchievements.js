@@ -110,9 +110,24 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
   // Key for active profile
   const dbKey = `${STORAGE_PREFIX}${activeProfileId || 'default'}`;
 
-  // 1. Initial Load from IndexedDB
+  // 1. Initial Load from IndexedDB upon activeProfileId change
   useEffect(() => {
     let isMounted = true;
+    // Immediately reset in-memory state on profile switch to avoid stale crossover
+    setUnlocked({});
+    unlockedRef.current = {};
+    setStats({
+      totalLaunches: 0,
+      recentLaunches: [],
+      systemsPlayed: [],
+      totalPlaytimeSeconds: 0,
+      bgmTracksListened: [],
+      avatarChangeCount: 0,
+      themeToggleCount: 0,
+      activeDates: [],
+      perGameStats: {}
+    });
+
     async function loadAchievements() {
       try {
         const saved = await dbGet(STORES.USER_DATA, dbKey);
@@ -123,11 +138,17 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
 
           console.log(`🏆 [ACHIEVEMENTS INIT] Loaded ${Object.keys(loadedUnlocked).length} unlocked trophies from storage for profile "${activeProfileId || 'default'}"`);
 
-          setStats(prev => ({
-            ...prev,
-            ...(saved.stats || {}),
-            perGameStats: { ...(prev.perGameStats || {}), ...(saved.stats?.perGameStats || {}) }
-          }));
+          setStats({
+            totalLaunches: saved.stats?.totalLaunches || 0,
+            recentLaunches: saved.stats?.recentLaunches || [],
+            systemsPlayed: saved.stats?.systemsPlayed || [],
+            totalPlaytimeSeconds: saved.stats?.totalPlaytimeSeconds || 0,
+            bgmTracksListened: saved.stats?.bgmTracksListened || [],
+            avatarChangeCount: saved.stats?.avatarChangeCount || 0,
+            themeToggleCount: saved.stats?.themeToggleCount || 0,
+            activeDates: saved.stats?.activeDates || [],
+            perGameStats: saved.stats?.perGameStats || {}
+          });
         } else if (isMounted) {
           console.log(`🏆 [ACHIEVEMENTS INIT] Clean profile state for "${activeProfileId || 'default'}" (0 unlocked)`);
         }

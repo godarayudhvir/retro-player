@@ -39,16 +39,20 @@ export function useSaveDataManager() {
           // IndexedDB checks
           const dbSave = await dbGet(STORES.GAME_SAVES, saveKey);
           if (dbSave && dbSave.data && (typeof dbSave.data === 'string' ? dbSave.data.length > 0 : Object.keys(dbSave.data).length > 0)) {
-            setHasSaveData(true);
-            setIsCheckingSave(false);
-            return true;
+            if (!dbSave.profileId || dbSave.profileId === activeProfileId || (isMasterProfile && (dbSave.profileId === 'prof_default' || dbSave.profileId === 'default'))) {
+              setHasSaveData(true);
+              setIsCheckingSave(false);
+              return true;
+            }
           }
 
           const dbState = await dbGet(STORES.SAVE_STATES, stateKey);
           if (dbState && dbState.data && (typeof dbState.data === 'string' ? dbState.data.length > 0 : Object.keys(dbState.data).length > 0)) {
-            setHasSaveData(true);
-            setIsCheckingSave(false);
-            return true;
+            if (!dbState.profileId || dbState.profileId === activeProfileId || (isMasterProfile && (dbState.profileId === 'prof_default' || dbState.profileId === 'default'))) {
+              setHasSaveData(true);
+              setIsCheckingSave(false);
+              return true;
+            }
           }
 
           // LocalStorage fallback checks
@@ -57,9 +61,11 @@ export function useSaveDataManager() {
             if (lsSave) {
               const parsed = JSON.parse(lsSave);
               if (parsed && parsed.data && (typeof parsed.data === 'string' ? parsed.data.length > 0 : Object.keys(parsed.data).length > 0)) {
-                setHasSaveData(true);
-                setIsCheckingSave(false);
-                return true;
+                if (!parsed.profileId || parsed.profileId === activeProfileId || (isMasterProfile && (parsed.profileId === 'prof_default' || parsed.profileId === 'default'))) {
+                  setHasSaveData(true);
+                  setIsCheckingSave(false);
+                  return true;
+                }
               }
             }
 
@@ -67,9 +73,11 @@ export function useSaveDataManager() {
             if (lsState) {
               const parsed = JSON.parse(lsState);
               if (parsed && parsed.data && (typeof parsed.data === 'string' ? parsed.data.length > 0 : Object.keys(parsed.data).length > 0)) {
-                setHasSaveData(true);
-                setIsCheckingSave(false);
-                return true;
+                if (!parsed.profileId || parsed.profileId === activeProfileId || (isMasterProfile && (parsed.profileId === 'prof_default' || parsed.profileId === 'default'))) {
+                  setHasSaveData(true);
+                  setIsCheckingSave(false);
+                  return true;
+                }
               }
             }
           } catch (e) {}
@@ -211,16 +219,20 @@ export function useSaveDataManager() {
           const saveKey = prof ? `save_${prof}_${id}` : `save_${id}`;
           const dbSave = await dbGet(STORES.GAME_SAVES, saveKey);
           if (dbSave && dbSave.data) {
-            batteryBase64 = typeof dbSave.data === 'string' ? dbSave.data : (dbSave.data.save || dbSave.data.data || null);
-            break;
+            if (!dbSave.profileId || dbSave.profileId === activeProfileId || (isMasterProfile && (dbSave.profileId === 'prof_default' || dbSave.profileId === 'default'))) {
+              batteryBase64 = typeof dbSave.data === 'string' ? dbSave.data : (dbSave.data.save || dbSave.data.data || null);
+              break;
+            }
           }
           try {
             const lsSave = localStorage.getItem(saveKey);
             if (lsSave) {
               const parsed = JSON.parse(lsSave);
               if (parsed && parsed.data) {
-                batteryBase64 = typeof parsed.data === 'string' ? parsed.data : (parsed.data.save || parsed.data.data || null);
-                break;
+                if (!parsed.profileId || parsed.profileId === activeProfileId || (isMasterProfile && (parsed.profileId === 'prof_default' || parsed.profileId === 'default'))) {
+                  batteryBase64 = typeof parsed.data === 'string' ? parsed.data : (parsed.data.save || parsed.data.data || null);
+                  break;
+                }
               }
             }
           } catch (e) {}
@@ -299,16 +311,20 @@ export function useSaveDataManager() {
           const autoKey = prof ? `state_auto_${prof}_${id}` : `state_auto_${id}`;
           const dbState = await dbGet(STORES.SAVE_STATES, autoKey);
           if (dbState && dbState.data) {
-            autoBase64 = typeof dbState.data === 'string' ? dbState.data : (dbState.data.save || dbState.data.data || null);
-            break;
+            if (!dbState.profileId || dbState.profileId === activeProfileId || (isMasterProfile && (dbState.profileId === 'prof_default' || dbState.profileId === 'default'))) {
+              autoBase64 = typeof dbState.data === 'string' ? dbState.data : (dbState.data.save || dbState.data.data || null);
+              break;
+            }
           }
           try {
             const lsState = localStorage.getItem(autoKey);
             if (lsState) {
               const parsed = JSON.parse(lsState);
               if (parsed && parsed.data) {
-                autoBase64 = typeof parsed.data === 'string' ? parsed.data : (parsed.data.save || parsed.data.data || null);
-                break;
+                if (!parsed.profileId || parsed.profileId === activeProfileId || (isMasterProfile && (parsed.profileId === 'prof_default' || parsed.profileId === 'default'))) {
+                  autoBase64 = typeof parsed.data === 'string' ? parsed.data : (parsed.data.save || parsed.data.data || null);
+                  break;
+                }
               }
             }
           } catch (e) {}
@@ -364,16 +380,20 @@ export function useSaveDataManager() {
           const stateKey = prof ? `state_${prof}_${id}` : `state_${id}`;
           const dbState = await dbGet(STORES.SAVE_STATES, stateKey);
           if (dbState && dbState.data) {
-            stateBase64 = typeof dbState.data === 'string' ? dbState.data : (dbState.data.save || dbState.data.data || null);
-            break;
+            if (!dbState.profileId || dbState.profileId === activeProfileId || (isMasterProfile && (dbState.profileId === 'prof_default' || dbState.profileId === 'default'))) {
+              stateBase64 = typeof dbState.data === 'string' ? dbState.data : (dbState.data.save || dbState.data.data || null);
+              break;
+            }
           }
           try {
             const lsState = localStorage.getItem(stateKey);
             if (lsState) {
               const parsed = JSON.parse(lsState);
               if (parsed && parsed.data) {
-                stateBase64 = typeof parsed.data === 'string' ? parsed.data : (parsed.data.save || parsed.data.data || null);
-                break;
+                if (!parsed.profileId || parsed.profileId === activeProfileId || (isMasterProfile && (parsed.profileId === 'prof_default' || parsed.profileId === 'default'))) {
+                  stateBase64 = typeof parsed.data === 'string' ? parsed.data : (parsed.data.save || parsed.data.data || null);
+                  break;
+                }
               }
             }
           } catch (e) {}

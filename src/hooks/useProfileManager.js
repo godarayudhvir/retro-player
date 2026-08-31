@@ -257,6 +257,7 @@ export function useProfileManager() {
     await dbDelete(STORES.USER_DATA, `favs_${profileId}`);
     await dbDelete(STORES.USER_DATA, `recents_${profileId}`);
     await dbDelete(STORES.USER_DATA, `playtime_${profileId}`);
+    await dbDelete(STORES.USER_DATA, `achievements_${profileId}`);
 
     // 2. Sweep and delete all battery RAM saves and save states belonging to this profile
     try {
