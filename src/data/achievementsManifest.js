@@ -262,58 +262,60 @@ export const ACHIEVEMENTS_MANIFEST = [
 ];
 
 // ---------------------------------------------------------------------------
+import { resolveAssetPath } from '../utils/assetPath';
+
 // REGIONAL POKÉMON LEAGUE BADGE DIRECTORY (Gen 1 to 5)
 // ---------------------------------------------------------------------------
 export const REGIONAL_BADGES = {
   kanto: [
-    { num: 1, name: 'Boulder Badge', leader: 'Brock', city: 'Pewter City', type: 'Rock', tier: 'bronze', image: '/assets/badges/kanto/boulder.webp' },
-    { num: 2, name: 'Cascade Badge', leader: 'Misty', city: 'Cerulean City', type: 'Water', tier: 'bronze', image: '/assets/badges/kanto/cascade.webp' },
-    { num: 3, name: 'Thunder Badge', leader: 'Lt. Surge', city: 'Vermilion City', type: 'Electric', tier: 'bronze', image: '/assets/badges/kanto/thunder.webp' },
-    { num: 4, name: 'Rainbow Badge', leader: 'Erika', city: 'Celadon City', type: 'Grass', tier: 'silver', image: '/assets/badges/kanto/rainbow.webp' },
-    { num: 5, name: 'Soul Badge', leader: 'Koga', city: 'Fuchsia City', type: 'Poison', tier: 'silver', image: '/assets/badges/kanto/soul.webp' },
-    { num: 6, name: 'Marsh Badge', leader: 'Sabrina', city: 'Saffron City', type: 'Psychic', tier: 'silver', image: '/assets/badges/kanto/marsh.webp' },
-    { num: 7, name: 'Volcano Badge', leader: 'Blaine', city: 'Cinnabar Island', type: 'Fire', tier: 'gold', image: '/assets/badges/kanto/volcano.webp' },
-    { num: 8, name: 'Earth Badge', leader: 'Giovanni', city: 'Viridian City', type: 'Ground', tier: 'gold', image: '/assets/badges/kanto/earth.webp' }
+    { num: 1, name: 'Boulder Badge', leader: 'Brock', city: 'Pewter City', type: 'Rock', tier: 'bronze', image: resolveAssetPath('assets/badges/kanto/boulder.webp') },
+    { num: 2, name: 'Cascade Badge', leader: 'Misty', city: 'Cerulean City', type: 'Water', tier: 'bronze', image: resolveAssetPath('assets/badges/kanto/cascade.webp') },
+    { num: 3, name: 'Thunder Badge', leader: 'Lt. Surge', city: 'Vermilion City', type: 'Electric', tier: 'bronze', image: resolveAssetPath('assets/badges/kanto/thunder.webp') },
+    { num: 4, name: 'Rainbow Badge', leader: 'Erika', city: 'Celadon City', type: 'Grass', tier: 'silver', image: resolveAssetPath('assets/badges/kanto/rainbow.webp') },
+    { num: 5, name: 'Soul Badge', leader: 'Koga', city: 'Fuchsia City', type: 'Poison', tier: 'silver', image: resolveAssetPath('assets/badges/kanto/soul.webp') },
+    { num: 6, name: 'Marsh Badge', leader: 'Sabrina', city: 'Saffron City', type: 'Psychic', tier: 'silver', image: resolveAssetPath('assets/badges/kanto/marsh.webp') },
+    { num: 7, name: 'Volcano Badge', leader: 'Blaine', city: 'Cinnabar Island', type: 'Fire', tier: 'gold', image: resolveAssetPath('assets/badges/kanto/volcano.webp') },
+    { num: 8, name: 'Earth Badge', leader: 'Giovanni', city: 'Viridian City', type: 'Ground', tier: 'gold', image: resolveAssetPath('assets/badges/kanto/earth.webp') }
   ],
   johto: [
-    { num: 1, name: 'Zephyr Badge', leader: 'Falkner', city: 'Violet City', type: 'Flying', tier: 'bronze', image: '/assets/badges/johto/zephyr.webp' },
-    { num: 2, name: 'Hive Badge', leader: 'Bugsy', city: 'Azalea Town', type: 'Bug', tier: 'bronze', image: '/assets/badges/johto/hive.webp' },
-    { num: 3, name: 'Plain Badge', leader: 'Whitney', city: 'Goldenrod City', type: 'Normal', tier: 'bronze', image: '/assets/badges/johto/plain.webp' },
-    { num: 4, name: 'Fog Badge', leader: 'Morty', city: 'Ecruteak City', type: 'Ghost', tier: 'silver', image: '/assets/badges/johto/fog.webp' },
-    { num: 5, name: 'Storm Badge', leader: 'Chuck', city: 'Cianwood City', type: 'Fighting', tier: 'silver', image: '/assets/badges/johto/storm.webp' },
-    { num: 6, name: 'Mineral Badge', leader: 'Jasmine', city: 'Olivine City', type: 'Steel', tier: 'silver', image: '/assets/badges/johto/mineral.webp' },
-    { num: 7, name: 'Glacier Badge', leader: 'Pryce', city: 'Mahogany Town', type: 'Ice', tier: 'gold', image: '/assets/badges/johto/glacier.webp' },
-    { num: 8, name: 'Rising Badge', leader: 'Clair', city: 'Blackthorn City', type: 'Dragon', tier: 'gold', image: '/assets/badges/johto/rising.webp' }
+    { num: 1, name: 'Zephyr Badge', leader: 'Falkner', city: 'Violet City', type: 'Flying', tier: 'bronze', image: resolveAssetPath('assets/badges/johto/zephyr.webp') },
+    { num: 2, name: 'Hive Badge', leader: 'Bugsy', city: 'Azalea Town', type: 'Bug', tier: 'bronze', image: resolveAssetPath('assets/badges/johto/hive.webp') },
+    { num: 3, name: 'Plain Badge', leader: 'Whitney', city: 'Goldenrod City', type: 'Normal', tier: 'bronze', image: resolveAssetPath('assets/badges/johto/plain.webp') },
+    { num: 4, name: 'Fog Badge', leader: 'Morty', city: 'Ecruteak City', type: 'Ghost', tier: 'silver', image: resolveAssetPath('assets/badges/johto/fog.webp') },
+    { num: 5, name: 'Storm Badge', leader: 'Chuck', city: 'Cianwood City', type: 'Fighting', tier: 'silver', image: resolveAssetPath('assets/badges/johto/storm.webp') },
+    { num: 6, name: 'Mineral Badge', leader: 'Jasmine', city: 'Olivine City', type: 'Steel', tier: 'silver', image: resolveAssetPath('assets/badges/johto/mineral.webp') },
+    { num: 7, name: 'Glacier Badge', leader: 'Pryce', city: 'Mahogany Town', type: 'Ice', tier: 'gold', image: resolveAssetPath('assets/badges/johto/glacier.webp') },
+    { num: 8, name: 'Rising Badge', leader: 'Clair', city: 'Blackthorn City', type: 'Dragon', tier: 'gold', image: resolveAssetPath('assets/badges/johto/rising.webp') }
   ],
   hoenn: [
-    { num: 1, name: 'Stone Badge', leader: 'Roxanne', city: 'Rustboro City', type: 'Rock', tier: 'bronze', image: '/assets/badges/hoenn/stone.webp' },
-    { num: 2, name: 'Knuckle Badge', leader: 'Brawly', city: 'Dewford Town', type: 'Fighting', tier: 'bronze', image: '/assets/badges/hoenn/knuckle.webp' },
-    { num: 3, name: 'Dynamo Badge', leader: 'Wattson', city: 'Mauville City', type: 'Electric', tier: 'bronze', image: '/assets/badges/hoenn/dynamo.webp' },
-    { num: 4, name: 'Heat Badge', leader: 'Flannery', city: 'Lavaridge Town', type: 'Fire', tier: 'silver', image: '/assets/badges/hoenn/heat.webp' },
-    { num: 5, name: 'Balance Badge', leader: 'Norman', city: 'Petalburg City', type: 'Normal', tier: 'silver', image: '/assets/badges/hoenn/balance.webp' },
-    { num: 6, name: 'Feather Badge', leader: 'Winona', city: 'Fortree City', type: 'Flying', tier: 'silver', image: '/assets/badges/hoenn/feather.webp' },
-    { num: 7, name: 'Mind Badge', leader: 'Tate & Liza', city: 'Mossdeep City', type: 'Psychic', tier: 'gold', image: '/assets/badges/hoenn/mind.webp' },
-    { num: 8, name: 'Rain Badge', leader: 'Wallace / Juan', city: 'Sootopolis City', type: 'Water', tier: 'gold', image: '/assets/badges/hoenn/rain.webp' }
+    { num: 1, name: 'Stone Badge', leader: 'Roxanne', city: 'Rustboro City', type: 'Rock', tier: 'bronze', image: resolveAssetPath('assets/badges/hoenn/stone.webp') },
+    { num: 2, name: 'Knuckle Badge', leader: 'Brawly', city: 'Dewford Town', type: 'Fighting', tier: 'bronze', image: resolveAssetPath('assets/badges/hoenn/knuckle.webp') },
+    { num: 3, name: 'Dynamo Badge', leader: 'Wattson', city: 'Mauville City', type: 'Electric', tier: 'bronze', image: resolveAssetPath('assets/badges/hoenn/dynamo.webp') },
+    { num: 4, name: 'Heat Badge', leader: 'Flannery', city: 'Lavaridge Town', type: 'Fire', tier: 'silver', image: resolveAssetPath('assets/badges/hoenn/heat.webp') },
+    { num: 5, name: 'Balance Badge', leader: 'Norman', city: 'Petalburg City', type: 'Normal', tier: 'silver', image: resolveAssetPath('assets/badges/hoenn/balance.webp') },
+    { num: 6, name: 'Feather Badge', leader: 'Winona', city: 'Fortree City', type: 'Flying', tier: 'silver', image: resolveAssetPath('assets/badges/hoenn/feather.webp') },
+    { num: 7, name: 'Mind Badge', leader: 'Tate & Liza', city: 'Mossdeep City', type: 'Psychic', tier: 'gold', image: resolveAssetPath('assets/badges/hoenn/mind.webp') },
+    { num: 8, name: 'Rain Badge', leader: 'Wallace / Juan', city: 'Sootopolis City', type: 'Water', tier: 'gold', image: resolveAssetPath('assets/badges/hoenn/rain.webp') }
   ],
   sinnoh: [
-    { num: 1, name: 'Coal Badge', leader: 'Roark', city: 'Oreburgh City', type: 'Rock', tier: 'bronze', image: '/assets/badges/sinnoh/coal.webp' },
-    { num: 2, name: 'Forest Badge', leader: 'Gardenia', city: 'Eterna City', type: 'Grass', tier: 'bronze', image: '/assets/badges/sinnoh/forest.webp' },
-    { num: 3, name: 'Cobble Badge', leader: 'Maylene', city: 'Veilstone City', type: 'Fighting', tier: 'bronze', image: '/assets/badges/sinnoh/cobble.webp' },
-    { num: 4, name: 'Fen Badge', leader: 'Crasher Wake', city: 'Pastoria City', type: 'Water', tier: 'silver', image: '/assets/badges/sinnoh/fen.webp' },
-    { num: 5, name: 'Relic Badge', leader: 'Fantina', city: 'Hearthome City', type: 'Ghost', tier: 'silver', image: '/assets/badges/sinnoh/relic.webp' },
-    { num: 6, name: 'Mine Badge', leader: 'Byron', city: 'Canalave City', type: 'Steel', tier: 'silver', image: '/assets/badges/sinnoh/mine.webp' },
-    { num: 7, name: 'Icicle Badge', leader: 'Candice', city: 'Snowpoint City', type: 'Ice', tier: 'gold', image: '/assets/badges/sinnoh/icicle.webp' },
-    { num: 8, name: 'Beacon Badge', leader: 'Volkner', city: 'Sunyshore City', type: 'Electric', tier: 'gold', image: '/assets/badges/sinnoh/beacon.webp' }
+    { num: 1, name: 'Coal Badge', leader: 'Roark', city: 'Oreburgh City', type: 'Rock', tier: 'bronze', image: resolveAssetPath('assets/badges/sinnoh/coal.webp') },
+    { num: 2, name: 'Forest Badge', leader: 'Gardenia', city: 'Eterna City', type: 'Grass', tier: 'bronze', image: resolveAssetPath('assets/badges/sinnoh/forest.webp') },
+    { num: 3, name: 'Cobble Badge', leader: 'Maylene', city: 'Veilstone City', type: 'Fighting', tier: 'bronze', image: resolveAssetPath('assets/badges/sinnoh/cobble.webp') },
+    { num: 4, name: 'Fen Badge', leader: 'Crasher Wake', city: 'Pastoria City', type: 'Water', tier: 'silver', image: resolveAssetPath('assets/badges/sinnoh/fen.webp') },
+    { num: 5, name: 'Relic Badge', leader: 'Fantina', city: 'Hearthome City', type: 'Ghost', tier: 'silver', image: resolveAssetPath('assets/badges/sinnoh/relic.webp') },
+    { num: 6, name: 'Mine Badge', leader: 'Byron', city: 'Canalave City', type: 'Steel', tier: 'silver', image: resolveAssetPath('assets/badges/sinnoh/mine.webp') },
+    { num: 7, name: 'Icicle Badge', leader: 'Candice', city: 'Snowpoint City', type: 'Ice', tier: 'gold', image: resolveAssetPath('assets/badges/sinnoh/icicle.webp') },
+    { num: 8, name: 'Beacon Badge', leader: 'Volkner', city: 'Sunyshore City', type: 'Electric', tier: 'gold', image: resolveAssetPath('assets/badges/sinnoh/beacon.webp') }
   ],
   unova: [
-    { num: 1, name: 'Trio / Basic Badge', leader: 'Cilan / Cheren', city: 'Striaton / Aspertia', type: 'Various', tier: 'bronze', image: '/assets/badges/unova/trio.webp' },
-    { num: 2, name: 'Basic / Toxic Badge', leader: 'Lenora / Roxie', city: 'Nacrene / Virbank', type: 'Normal / Poison', tier: 'bronze', image: '/assets/badges/unova/basic.webp' },
-    { num: 3, name: 'Insect Badge', leader: 'Burgh', city: 'Castelia City', type: 'Bug', tier: 'bronze', image: '/assets/badges/unova/insect.webp' },
-    { num: 4, name: 'Bolt Badge', leader: 'Elesa', city: 'Nimbasa City', type: 'Electric', tier: 'silver', image: '/assets/badges/unova/bolt.webp' },
-    { num: 5, name: 'Quake Badge', leader: 'Clay', city: 'Driftveil City', type: 'Ground', tier: 'silver', image: '/assets/badges/unova/quake.webp' },
-    { num: 6, name: 'Jet Badge', leader: 'Skyla', city: 'Mistralton City', type: 'Flying', tier: 'silver', image: '/assets/badges/unova/jet.webp' },
-    { num: 7, name: 'Freeze / Legend Badge', leader: 'Brycen / Drayden', city: 'Icirrus / Opelucid', type: 'Ice / Dragon', tier: 'gold', image: '/assets/badges/unova/freeze.webp' },
-    { num: 8, name: 'Legend / Wave Badge', leader: 'Drayden / Marlon', city: 'Opelucid / Humilau', type: 'Dragon / Water', tier: 'gold', image: '/assets/badges/unova/legend.webp' }
+    { num: 1, name: 'Trio / Basic Badge', leader: 'Cilan / Cheren', city: 'Striaton / Aspertia', type: 'Various', tier: 'bronze', image: resolveAssetPath('assets/badges/unova/trio.webp') },
+    { num: 2, name: 'Basic / Toxic Badge', leader: 'Lenora / Roxie', city: 'Nacrene / Virbank', type: 'Normal / Poison', tier: 'bronze', image: resolveAssetPath('assets/badges/unova/basic.webp') },
+    { num: 3, name: 'Insect Badge', leader: 'Burgh', city: 'Castelia City', type: 'Bug', tier: 'bronze', image: resolveAssetPath('assets/badges/unova/insect.webp') },
+    { num: 4, name: 'Bolt Badge', leader: 'Elesa', city: 'Nimbasa City', type: 'Electric', tier: 'silver', image: resolveAssetPath('assets/badges/unova/bolt.webp') },
+    { num: 5, name: 'Quake Badge', leader: 'Clay', city: 'Driftveil City', type: 'Ground', tier: 'silver', image: resolveAssetPath('assets/badges/unova/quake.webp') },
+    { num: 6, name: 'Jet Badge', leader: 'Skyla', city: 'Mistralton City', type: 'Flying', tier: 'silver', image: resolveAssetPath('assets/badges/unova/jet.webp') },
+    { num: 7, name: 'Freeze / Legend Badge', leader: 'Brycen / Drayden', city: 'Icirrus / Opelucid', type: 'Ice / Dragon', tier: 'gold', image: resolveAssetPath('assets/badges/unova/freeze.webp') },
+    { num: 8, name: 'Legend / Wave Badge', leader: 'Drayden / Marlon', city: 'Opelucid / Humilau', type: 'Dragon / Water', tier: 'gold', image: resolveAssetPath('assets/badges/unova/legend.webp') }
   ]
 };
 
