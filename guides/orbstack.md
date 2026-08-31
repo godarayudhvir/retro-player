@@ -39,8 +39,11 @@ docker compose up -d
 
 ### 3. Open in Browser
 You can access your portal immediately via either:
-* **OrbStack Local Domain**: `http://retro-player.orb.local:3000`
-* **Localhost**: `http://localhost:3000`
+* **Localhost**: `http://localhost:3000` *(Recommended on desktop for native zero-copy folder linking)*
+* **OrbStack Local Domain / Bridge IP**: `http://retro-player.orb.local:3000` or `http://192.168.x.x:3000`
+
+> [!NOTE]
+> Modern desktop browsers restrict the File System Access API (`showDirectoryPicker`) to **Secure Contexts** (`localhost` or `HTTPS`). When opening Retro Player via `localhost:3000` or HTTPS, desktop zero-copy folder selection and collection re-linking are fully enabled. When accessing via a raw LAN IP, drag-and-drop and multi-file selection are used instead. (Mobile browsers support folder selection across all origins).
 
 ---
 
@@ -56,12 +59,13 @@ For full directory structures, companion sidecar formats, and ROM organization, 
 
 ### Using the OrbStack macOS GUI App
 1. Open the **OrbStack** app from Applications or Spotlight (`Cmd + Space` $\rightarrow$ `OrbStack`).
-2. Click **Containers** in the sidebar.
-3. Locate `retro-player`:
-   * **Click the URL** (`http://retro-player.orb.local:3000`) to open directly in your default browser.
+2. Click **Containers** in the left sidebar.
+3. Locate the `retro-player` compose stack:
+   * **Click the dropdown chevron (`>`)** next to `retro-player` to expand the stack containers.
+   * **Click the link / paperclip icon (`🔗`)** next to the running container row to immediately open `http://retro-player.orb.local:3000` in your default browser.
    * **View live metrics**: Monitor real-time CPU %, RAM usage, and network I/O.
-   * **View logs**: Click the container to inspect real-time server logs and ROM scanner output.
-   * **Open Terminal**: Click the **Terminal** icon to get an instant shell inside `/app`.
+   * **View logs**: Click the container row to inspect real-time server logs and ROM scanner output.
+   * **Open Terminal**: Click the **Terminal** tab or icon to get an instant shell inside `/app`.
 
 ### Using the Terminal CLI
 ```bash

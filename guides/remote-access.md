@@ -71,3 +71,18 @@ services:
 ### 3. Route Public Hostname
 - In Cloudflare: Map `games.yourdomain.com` to `retro-player:3000` (HTTP).
 - Access your library at `https://games.yourdomain.com`.
+
+---
+
+## 🚀 Option C: Caddy Reverse Proxy (Direct Server Hosting + Auto SSL)
+
+If your server has a public IP and port 80/443 forwarded, Caddy provides zero-maintenance automatic TLS certificates via Let's Encrypt:
+
+1. Create a `Caddyfile` next to `docker-compose.yml`:
+   ```caddy
+   games.yourdomain.com {
+       reverse_proxy retro-player:3000
+   }
+   ```
+2. Add the `caddy:alpine` service to `docker-compose.yml` (see [Docker Deployment Guide](docker.md#enable-https-automatic-ssl)).
+3. Run `docker compose up -d` and connect via `https://games.yourdomain.com`.

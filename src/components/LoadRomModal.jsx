@@ -71,16 +71,20 @@ export default function LoadRomModal({
     }
   }, [savedLinkedHandles]);
 
-  // Load saved directory handles on desktop
+  // Detect if native folder selection is supported in current context
+  const isSecure = typeof window !== 'undefined' ? Boolean(window.isSecureContext) : false;
+  const canPickFolder = isMobile || (isSecure && typeof window !== 'undefined' && Boolean(window.showDirectoryPicker));
+
+  // Load saved directory handles on secure desktop
   useEffect(() => {
-    if (isOpen && !isMobile && typeof window !== 'undefined' && window.showDirectoryPicker) {
+    if (isOpen && !isMobile && isSecure && typeof window !== 'undefined' && window.showDirectoryPicker) {
       getLinkedDirectoryHandles().then(handles => {
         setLocalLinkedHandles(handles || []);
       }).catch(() => {
         setLocalLinkedHandles([]);
       });
     }
-  }, [isOpen, isMobile]);
+  }, [isOpen, isMobile, isSecure]);
 
   // Reset or initialize state when modal opens/closes or initialFile / initialDroppedData is supplied
   useEffect(() => {
@@ -257,7 +261,11 @@ export default function LoadRomModal({
 
   const handleChooseFolderClick = async (e) => {
     e?.stopPropagation?.();
-    if (typeof window !== 'undefined' && window.showDirectoryPicker) {
+    if (isMobile) {
+      folderInputRef.current?.click();
+      return;
+    }
+    if (isSecure && typeof window !== 'undefined' && window.showDirectoryPicker) {
       try {
         const dirHandle = await window.showDirectoryPicker({ mode: 'read' });
         if (!dirHandle) return;
@@ -600,11 +608,15 @@ export default function LoadRomModal({
               >
                 <Upload size={38} className="load-rom-dropzone-icon" />
                 <div className="load-rom-dropzone-text">
-                  <strong>Drag &amp; Drop ROMs or Folder here</strong>
-                  <span>Supports single ROMs, multiple ROMs in a system folder, or full ROMs directory</span>
+                  <strong>{canPickFolder ? 'Drag & Drop ROMs or Folder here' : 'Drag & Drop ROMs here'}</strong>
+                  <span>
+                    {canPickFolder
+                      ? 'Supports single ROMs, multiple ROMs in a system folder, or full ROMs directory'
+                      : 'Supports single or multiple ROM files via file picker or drag & drop'}
+                  </span>
                 </div>
 
-                {/* Dual Action Buttons */}
+                {/* Action Buttons */}
                 <div className="load-rom-dual-triggers">
                   <button
                     type="button"
@@ -617,21 +629,23 @@ export default function LoadRomModal({
                     <FolderOpen size={16} /> Choose File(s)
                   </button>
 
-                  <button
-                    type="button"
-                    className="load-rom-browse-btn is-folder"
-                    onClick={(e) => {
-                      haptics.medium();
-                      handleChooseFolderClick(e);
-                    }}
-                  >
-                    <FolderTree size={16} /> Choose ROMs Folder
-                  </button>
+                  {canPickFolder && (
+                    <button
+                      type="button"
+                      className="load-rom-browse-btn is-folder"
+                      onClick={(e) => {
+                        haptics.medium();
+                        handleChooseFolderClick(e);
+                      }}
+                    >
+                      <FolderTree size={16} /> Choose ROMs Folder
+                    </button>
+                  )}
                 </div>
               </div>
 
-              {/* Desktop Reconnect Linked Folder(s) Card */}
-              {activeHandles && activeHandles.length > 0 && !isMobile && (
+              {/* Desktop Reconnect Linked Folder(s) Card (Secure Context only) */}
+              {activeHandles && activeHandles.length > 0 && !isMobile && isSecure && (
                 <div className="rom-linked-folder-card animate-fade-in" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '0.65rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '0.75rem' }}>
                     <div className="rom-linked-folder-left">
@@ -712,7 +726,15 @@ export default function LoadRomModal({
               }}>
                 <Zap size={16} style={{ flexShrink: 0, color: '#f59e0b' }} />
                 <span>
-                  <strong>Pro Tip:</strong> Selecting a specific system folder (e.g. <code>/gba</code>, <code>/snes</code>, or <code>/n64</code>) loads near-instantly compared to scanning entire multi-thousand root directories at once.
+                  {canPickFolder ? (
+                    <>
+                      <strong>Pro Tip:</strong> Selecting a specific system folder (e.g. <code>/gba</code>, <code>/snes</code>, or <code>/n64</code>) loads near-instantly compared to scanning entire multi-thousand root directories at once.
+                    </>
+                  ) : (
+                    <>
+                      <strong>Pro Tip:</strong> You can select multiple ROM files at once or drag &amp; drop ROM files directly into this window. Native folder picker &amp; zero-copy linking require a Secure Context (<code>localhost</code> or HTTPS).
+                    </>
+                  )}
                 </span>
               </div>
 

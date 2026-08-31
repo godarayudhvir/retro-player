@@ -49,9 +49,10 @@ Retro Player supports configuration via environment variables in `docker-compose
 - **Settings**: Mount `./roms:/roms`, `./bgm:/bgm`, and `./data:/data`.
 - **UI Experience**: All profiles, in-game battery RAM (`.sav`), snapshot save states (`.state`), favorites, recents, playtime metrics, and settings are written directly to `./data/retroplayer_db.json`. Any games placed into `./roms/<system>/` (along with `<game>.webp` covers and `<game>.json` sidecars) are instantly indexed.
 
-#### Scenario 2: Pure Client-Side Drag-and-Drop
+#### Scenario 2: Pure Client-Side Drag-and-Drop & Custom Loads
 - **Settings**: No host volume mounts needed.
 - **UI Experience**: Drop `.gba`, `.sfc`, `.nes`, `.nds`, or `.zip` files directly into your browser window or use **"Load Custom ROM"**. Games execute 100% in browser RAM with saves persisted to your browser's IndexedDB and exportable to JSON at any time.
+- **Desktop Zero-Copy Folder Picker**: When accessed via `localhost` or `HTTPS`, desktop browsers enable the zero-copy folder picker to link local ROM collections without disk duplication. When accessed over raw LAN IP addresses (e.g. `http://192.168.x.x:3000`), drag-and-drop and multi-file selection are used. On mobile devices, folder picking is supported across all origins.
 
 ---
 
@@ -121,8 +122,69 @@ retro-player/
     ├── nds/
     │   └── Pokemon Platinum.nds
     └── nes/
-        └── Megaman 2.nes
 ```
+
+---
+
+## 🔒 Enabling HTTPS & Automatic SSL (Recommended for Linux/HomeLab)
+
+Deploying behind HTTPS unlocks all browser **Secure Context** capabilities, including desktop zero-copy directory linking (`showDirectoryPicker`), PWA offline caching, and remote access.
+
+The easiest way to enable HTTPS on Linux or HomeLab servers is using **Caddy** alongside Docker Compose.
+
+### 1. Create a `Caddyfile` next to `docker-compose.yml`
+
+#### Option A: With a Public Domain (Automatic Let's Encrypt SSL)
+```caddy
+games.yourdomain.com {
+    reverse_proxy retro-player:3000
+}
+```
+
+#### Option B: For Home Network / Local LAN IP (`tls internal` Local SSL)
+```caddy
+192.168.1.100, retro-player.local {
+    tls internal
+    reverse_proxy retro-player:3000
+}
+```
+
+### 2. Add Caddy to `docker-compose.yml`
+```yaml
+services:
+  retro-player:
+    image: ghcr.io/godarayudhvir/retro-player:latest
+    container_name: retro-player
+    restart: unless-stopped
+    volumes:
+      - ./roms:/roms
+      - ./bgm:/bgm
+      - ./data:/data
+
+  caddy:
+    image: caddy:alpine
+    container_name: retro-player-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - retro-player
+
+volumes:
+  caddy_data:
+  caddy_config:
+```
+
+### 3. Launch
+```bash
+docker compose up -d
+```
+Access via `https://games.yourdomain.com` or `https://192.168.1.100`!
 
 ---
 

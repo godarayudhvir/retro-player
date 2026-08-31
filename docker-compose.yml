@@ -26,3 +26,28 @@ services:
       - ./bgm:/bgm
       # Mount persistent server database (profiles, favorites, playtime, controller mappings, scraped metadata)
       - ./data:/data
+
+  # --- Optional: Automatic HTTPS Reverse Proxy via Caddy ---
+  # Uncomment the service below for zero-configuration TLS / HTTPS on Linux or HomeLabs.
+  # Create a Caddyfile alongside this docker-compose.yml:
+  #   games.yourdomain.com {
+  #       reverse_proxy retro-player:3000
+  #   }
+  #
+  # caddy:
+  #   image: caddy:alpine
+  #   container_name: retro-player-caddy
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./Caddyfile:/etc/caddy/Caddyfile:ro
+  #     - caddy_data:/data
+  #     - caddy_config:/config
+  #   depends_on:
+  #     - retro-player
+
+# volumes:
+#   caddy_data:
+#   caddy_config:

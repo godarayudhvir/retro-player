@@ -78,7 +78,7 @@ Deploy globally on Fly.io edge infrastructure:
    - Host path: `/data/retro-player/roms` $\rightarrow$ Mount path: `/roms`
    - Host path: `/data/retro-player/data` $\rightarrow$ Mount path: `/data`
    - Host path: `/data/retro-player/bgm` $\rightarrow$ Mount path: `/bgm`
-4. Set Exposed Port to `3000` and deploy.
+4. Set Exposed Port to `3000` (Coolify automatically provisions automatic HTTPS & Let's Encrypt certificates via Traefik).
 
 ---
 
@@ -95,6 +95,7 @@ Deploy globally on Fly.io edge infrastructure:
   - `ROMS_DIR=/roms`
   - `DATA_DIR=/data`
   - `BGM_DIR=/bgm`
+- **HTTPS & SSL**: For local network HTTPS or public domains, pair with **Caddy** (see [Docker HTTPS Guide](docker.md#enable-https-automatic-ssl)), Nginx Proxy Manager, or Tailscale HTTPS.
 
 ---
 

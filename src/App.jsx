@@ -294,9 +294,10 @@ export default function App() {
   const [linkedDirectoryHandles, setLinkedDirectoryHandles] = useState([]);
   const [isReconnectingHandle, setIsReconnectingHandle] = useState(false);
 
-  // Check for desktop linked directory handles on startup
+  // Check for desktop linked directory handles on startup (secure context only)
   useEffect(() => {
-    if (!isMobile && typeof window !== 'undefined' && window.showDirectoryPicker) {
+    const isSecure = typeof window !== 'undefined' ? Boolean(window.isSecureContext) : false;
+    if (!isMobile && isSecure && typeof window !== 'undefined' && window.showDirectoryPicker) {
       getLinkedDirectoryHandles().then(async (handles) => {
         if (!handles || handles.length === 0) return;
         setLinkedDirectoryHandles(handles);
