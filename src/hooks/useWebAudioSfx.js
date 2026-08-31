@@ -54,12 +54,14 @@ export function useWebAudioSfx() {
     window.addEventListener('click', unlockAudio, { passive: true });
     window.addEventListener('keydown', unlockAudio, { passive: true });
     window.addEventListener('touchstart', unlockAudio, { passive: true });
+    window.addEventListener('pointerdown', unlockAudio, { passive: true });
     window.addEventListener('gamepadconnected', unlockAudio, { passive: true });
 
     return () => {
       window.removeEventListener('click', unlockAudio);
       window.removeEventListener('keydown', unlockAudio);
       window.removeEventListener('touchstart', unlockAudio);
+      window.removeEventListener('pointerdown', unlockAudio);
       window.removeEventListener('gamepadconnected', unlockAudio);
     };
   }, [getAudioContext]);

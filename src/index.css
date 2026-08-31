@@ -220,7 +220,8 @@ body {
   box-shadow: 0 0 14px rgba(16, 185, 129, 0.35);
 }
 
-.status-bgm-skip {
+.status-bgm-skip,
+.status-bgm-prev {
   padding: 0 !important;
   width: 32px !important;
   height: 32px !important;
@@ -13051,10 +13052,7 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 0.75rem;
-  max-height: 250px;
-  overflow-y: auto;
-  padding: 6px 6px 6px 6px;
-  margin: -4px -4px 0 -4px;
+  padding: 4px 2px;
 }
 
 .scraper-sys-chip {
@@ -13323,7 +13321,9 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   .scraper-modal-container {
     width: 100% !important;
     max-width: 100vw !important;
-    max-height: 48vh !important;
+    max-height: 85vh !important;
+    display: flex !important;
+    flex-direction: column !important;
     border-top-left-radius: 16px !important;
     border-top-right-radius: 16px !important;
     border-bottom-left-radius: 0 !important;
@@ -13331,12 +13331,13 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
     border-bottom: none !important;
     margin: 0 !important;
     border-width: 2px !important;
-    overflow-y: auto !important;
+    overflow: hidden !important;
   }
 
   .scraper-modal-header {
     padding: 0.85rem 1rem !important;
     gap: 0.5rem !important;
+    flex-shrink: 0 !important;
   }
 
   .scraper-modal-title-group {
@@ -13364,6 +13365,7 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   .scraper-scope-tabs {
     padding: 0.45rem 0.75rem 0 !important;
     gap: 0.4rem !important;
+    flex-shrink: 0 !important;
   }
 
   .scraper-scope-tab {
@@ -13377,9 +13379,19 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
   .scraper-modal-body {
     padding: 0.75rem 0.85rem !important;
-    max-height: 52vh !important;
+    flex: 1 !important;
+    max-height: none !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .scraper-systems-grid {
+    grid-template-columns: 1fr !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
   .scraper-scope-banner {

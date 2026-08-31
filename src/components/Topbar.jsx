@@ -5,10 +5,11 @@ import {
   Gamepad2, 
   Volume2, 
   VolumeX, 
-  Sparkles, 
+  Disc, 
   RefreshCw, 
   Square, 
   Music, 
+  SkipBack,
   SkipForward, 
   Download,
   Battery,
@@ -160,143 +161,7 @@ export default function Topbar({
       </div>
 
       <div className="topbar-right">
-        {/* Background Music (BGM) Player */}
-        {bgm && bgm.tracks && bgm.tracks.length > 0 && (
-          <div className="bgm-control-group">
-            <button
-              className={`status-pill status-bgm ${bgm.isPlaying ? 'is-bgm-playing' : ''} ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'bgm' ? 'gamepad-focused' : ''}`}
-              onClick={() => {
-                bgm.togglePlay();
-                if (!bgm.isPlaying && bgm.currentTrack) {
-                  achievementsEngine?.triggerBgmTrackPlayed?.(bgm.currentTrack.title || bgm.currentTrack.url);
-                }
-                sfx?.playTileNav?.();
-                haptics.selection();
-              }}
-              title={bgm.currentTrack 
-                ? `BGM: ${bgm.currentTrack.title} (${bgm.isPlaying ? 'Playing - Click to Pause' : 'Paused - Click to Play'})`
-                : "Toggle Background Music"
-              }
-              aria-label="Toggle Background Music"
-            >
-              <Music size={18} color={bgm.isPlaying ? '#10b981' : '#64748b'} className={bgm.isPlaying ? 'pulse-icon' : ''} />
-            </button>
-
-            {bgm.isPlaying && (
-              <button
-                className={`status-pill status-bgm-skip ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'bgmSkip' ? 'gamepad-focused' : ''}`}
-                onClick={() => {
-                  bgm.nextTrack();
-                  if (bgm.currentTrack) {
-                    achievementsEngine?.triggerBgmTrackPlayed?.(bgm.currentTrack.title || bgm.currentTrack.url);
-                  }
-                  sfx?.playTabSwitch?.();
-                  haptics.selection();
-                }}
-                title="Next BGM Track"
-                aria-label="Next BGM Track"
-              >
-                <SkipForward size={14} color="#94a3b8" />
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* Gamepad Connection & Battery Status Pill (Shown only when connected) */}
-        {gamepadConnected && (
-          <div 
-            className={`status-pill status-gamepad is-connected ${gamepadBattery?.hasBatteryInfo && gamepadBattery.batteryPercent <= 10 && !gamepadBattery.isCharging ? 'is-battery-critical' : gamepadBattery?.hasBatteryInfo && gamepadBattery.batteryPercent <= 20 && !gamepadBattery.isCharging ? 'is-battery-low' : ''}`} 
-            title={getGamepadTooltip()}
-            aria-label={getGamepadTooltip()}
-          >
-            <Gamepad2 size={18} />
-            {gamepadBattery?.hasBatteryInfo && (
-              <span className="battery-badge">
-                {renderBatteryIcon()}
-                <span className="battery-percent-text">{gamepadBattery.batteryPercent}%</span>
-                {gamepadBattery.isCharging && <span className="charging-tag">⚡</span>}
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Metadata Scraper Status / Trigger / Stop Button */}
-        {scraper && (
-          <button
-            className={`status-pill status-scraper-pill ${scraper.isScraping ? 'is-active-scraping is-stoppable' : ''} ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'scraper' ? 'gamepad-focused' : ''}`}
-            onClick={() => {
-              if (scraper.isScraping) {
-                scraper.stopScrape();
-                sfx?.playModalClose?.();
-                haptics.medium();
-              } else if (onOpenScraperModal) {
-                onOpenScraperModal();
-                sfx?.playModalOpen?.();
-                haptics.medium();
-              } else {
-                scraper.scrapeAll(undefined, true);
-                sfx?.playThemeSwitch?.();
-                haptics.selection();
-              }
-            }}
-            title={scraper.isScraping 
-              ? `Scraping art... (${scraper.scrapeProgress.current}/${scraper.scrapeProgress.total}) — Click to STOP` 
-              : "Choose Scraper Target Scope (All Systems / Single System)"
-            }
-            aria-label={scraper.isScraping ? "Stop Metadata Scraper" : "Choose Scraper Target Scope"}
-          >
-            {scraper.isScraping ? (
-              <>
-                <Square size={14} className="stop-icon" fill="currentColor" />
-                <span className="pill-text scrape-badge">{scraper.scrapeProgress.current}/{scraper.scrapeProgress.total}</span>
-                <span className="scraper-stop-hover-text">STOP</span>
-              </>
-            ) : (
-              <div className="status-scraper-inner">
-                {gamepadConnected && <span className="osk-btn-badge badge-x topbar-keycap">X</span>}
-                <Sparkles size={16} color="#f59e0b" />
-                <span className="pill-text status-scraper-label">SCRAPER</span>
-              </div>
-            )}
-          </button>
-        )}
-
-        {/* SFX Audio Mute/Unmute Toggle */}
-        {sfx && (
-          <button
-            className={`status-pill status-sfx ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'sfx' ? 'gamepad-focused' : ''}`}
-            onClick={() => {
-              sfx.toggleMute();
-              haptics.selection();
-            }}
-            title={sfx.isMuted ? 'Unmute UI Sound Effects' : 'Mute UI Sound Effects'}
-            aria-label={sfx.isMuted ? 'Unmute UI Sound Effects' : 'Mute UI Sound Effects'}
-          >
-            {sfx.isMuted ? <VolumeX size={18} color="#94a3b8" /> : <Volume2 size={18} color="#3b82f6" />}
-          </button>
-        )}
-
-        {/* Auto-Resume on Launch Toggle Switch */}
-        <button
-          type="button"
-          className={`status-pill status-autoresume ${isAutoResumeEnabled ? 'is-enabled' : 'is-disabled'} ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'autoresume' ? 'gamepad-focused' : ''}`}
-          onClick={() => {
-            handleToggleAutoResume();
-            haptics.selection();
-          }}
-          title={`Auto-Resume on Launch: ${isAutoResumeEnabled ? 'ENABLED (Will prompt to restore last session)' : 'DISABLED (Always boot fresh game title)'}`}
-          aria-label="Toggle Auto-Resume on Launch"
-        >
-          <div className="status-autoresume-inner">
-            <Save size={16} color={isAutoResumeEnabled ? '#10b981' : '#64748b'} />
-            <span className="pill-text status-autoresume-label">AUTO-RESUME</span>
-            <span className={`topbar-mini-switch ${isAutoResumeEnabled ? 'active' : ''}`}>
-              <span className="topbar-mini-knob" />
-            </span>
-          </div>
-        </button>
-
-        {/* Search Input Widget */}
+        {/* 1. Search Input Widget */}
         <div
           className={`status-pill status-search ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'search' ? 'gamepad-focused' : ''}`}
           onClick={() => {
@@ -337,7 +202,157 @@ export default function Topbar({
           />
         </div>
 
-        {/* Dark / Light Color Mode Toggle */}
+        {/* 2. Load Custom ROM */}
+        <button
+          className={`status-pill status-loadrom ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'loadrom' ? 'gamepad-focused' : ''}`}
+          onClick={() => {
+            setShowLoadRomModal(true);
+            sfx?.playModalOpen?.();
+            haptics.medium();
+          }}
+          title="Open Load Custom ROM dialog"
+          aria-label="Load Custom ROM"
+        >
+          <FolderOpen size={18} color="#3b82f6" />
+        </button>
+
+        {/* 3. Metadata Scraper Status / Trigger / Stop Button */}
+        {scraper && (
+          <button
+            className={`status-pill status-scraper-pill ${scraper.isScraping ? 'is-active-scraping is-stoppable' : ''} ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'scraper' ? 'gamepad-focused' : ''}`}
+            onClick={() => {
+              if (scraper.isScraping) {
+                scraper.stopScrape();
+                sfx?.playModalClose?.();
+                haptics.medium();
+              } else if (onOpenScraperModal) {
+                onOpenScraperModal();
+                sfx?.playModalOpen?.();
+                haptics.medium();
+              } else {
+                scraper.scrapeAll(undefined, true);
+                sfx?.playThemeSwitch?.();
+                haptics.selection();
+              }
+            }}
+            title={scraper.isScraping 
+              ? `Scraping art... (${scraper.scrapeProgress.current}/${scraper.scrapeProgress.total}) — Click to STOP` 
+              : "Choose Scraper Target Scope (All Systems / Single System)"
+            }
+            aria-label={scraper.isScraping ? "Stop Metadata Scraper" : "Choose Scraper Target Scope"}
+          >
+            {scraper.isScraping ? (
+              <>
+                <Square size={14} className="stop-icon" fill="currentColor" />
+                <span className="pill-text scrape-badge">{scraper.scrapeProgress.current}/{scraper.scrapeProgress.total}</span>
+                <span className="scraper-stop-hover-text">STOP</span>
+              </>
+            ) : (
+              <div className="status-scraper-inner">
+                {gamepadConnected && <span className="osk-btn-badge badge-x topbar-keycap">X</span>}
+                <Disc size={16} color="#f59e0b" />
+                <span className="pill-text status-scraper-label">SCRAPER</span>
+              </div>
+            )}
+          </button>
+        )}
+
+        {/* 4. Background Music (BGM) Player */}
+        {bgm && bgm.tracks && bgm.tracks.length > 0 && (
+          <div className="bgm-control-group">
+            {bgm.isPlaying && (
+              <button
+                className={`status-pill status-bgm-prev ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'bgmPrev' ? 'gamepad-focused' : ''}`}
+                onClick={() => {
+                  bgm.prevTrack();
+                  if (bgm.currentTrack) {
+                    achievementsEngine?.triggerBgmTrackPlayed?.(bgm.currentTrack.title || bgm.currentTrack.url);
+                  }
+                  sfx?.playTabSwitch?.();
+                  haptics.selection();
+                }}
+                title="Previous BGM Track"
+                aria-label="Previous BGM Track"
+              >
+                <SkipBack size={14} color="#94a3b8" />
+              </button>
+            )}
+
+            <button
+              className={`status-pill status-bgm ${bgm.isPlaying ? 'is-bgm-playing' : ''} ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'bgm' ? 'gamepad-focused' : ''}`}
+              onClick={() => {
+                bgm.togglePlay();
+                if (!bgm.isPlaying && bgm.currentTrack) {
+                  achievementsEngine?.triggerBgmTrackPlayed?.(bgm.currentTrack.title || bgm.currentTrack.url);
+                }
+                sfx?.playTileNav?.();
+                haptics.selection();
+              }}
+              title={bgm.currentTrack 
+                ? `BGM: ${bgm.currentTrack.title} (${bgm.isPlaying ? 'Playing - Click to Pause' : 'Paused - Click to Play'})`
+                : "Toggle Background Music"
+              }
+              aria-label="Toggle Background Music"
+            >
+              <Music size={18} color={bgm.isPlaying ? '#10b981' : '#64748b'} className={bgm.isPlaying ? 'pulse-icon' : ''} />
+            </button>
+
+            {bgm.isPlaying && (
+              <button
+                className={`status-pill status-bgm-skip ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'bgmSkip' ? 'gamepad-focused' : ''}`}
+                onClick={() => {
+                  bgm.nextTrack();
+                  if (bgm.currentTrack) {
+                    achievementsEngine?.triggerBgmTrackPlayed?.(bgm.currentTrack.title || bgm.currentTrack.url);
+                  }
+                  sfx?.playTabSwitch?.();
+                  haptics.selection();
+                }}
+                title="Next BGM Track"
+                aria-label="Next BGM Track"
+              >
+                <SkipForward size={14} color="#94a3b8" />
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* 5. SFX Audio Mute/Unmute Toggle */}
+        {sfx && (
+          <button
+            className={`status-pill status-sfx ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'sfx' ? 'gamepad-focused' : ''}`}
+            onClick={() => {
+              sfx.toggleMute();
+              haptics.selection();
+            }}
+            title={sfx.isMuted ? 'Unmute UI Sound Effects' : 'Mute UI Sound Effects'}
+            aria-label={sfx.isMuted ? 'Unmute UI Sound Effects' : 'Mute UI Sound Effects'}
+          >
+            {sfx.isMuted ? <VolumeX size={18} color="#94a3b8" /> : <Volume2 size={18} color="#3b82f6" />}
+          </button>
+        )}
+
+        {/* 6. Auto-Resume on Launch Toggle Switch */}
+        <button
+          type="button"
+          className={`status-pill status-autoresume ${isAutoResumeEnabled ? 'is-enabled' : 'is-disabled'} ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'autoresume' ? 'gamepad-focused' : ''}`}
+          onClick={() => {
+            handleToggleAutoResume();
+            haptics.selection();
+          }}
+          title={`Auto-Resume on Launch: ${isAutoResumeEnabled ? 'ENABLED (Will prompt to restore last session)' : 'DISABLED (Always boot fresh game title)'}`}
+          aria-label="Toggle Auto-Resume on Launch"
+        >
+          <div className="status-autoresume-inner">
+            <Save size={16} color={isAutoResumeEnabled ? '#10b981' : '#64748b'} />
+            <span className="pill-text status-autoresume-label">AUTO-RESUME</span>
+            <span className={`topbar-mini-switch ${isAutoResumeEnabled ? 'active' : ''}`}>
+              <span className="topbar-mini-knob" />
+            </span>
+          </div>
+        </button>
+
+        {/* 7. Dark / Light Color Mode Toggle */}
         {themeEngine && (
           <button
             type="button"
@@ -359,23 +374,9 @@ export default function Topbar({
           </button>
         )}
 
-        {/* Load Custom ROM */}
+        {/* 8. Storage & Database Management Studio (Backup, Restore & Reset) */}
         <button
-          className="status-pill status-loadrom"
-          onClick={() => {
-            setShowLoadRomModal(true);
-            sfx?.playModalOpen?.();
-            haptics.medium();
-          }}
-          title="Open Load Custom ROM dialog"
-          aria-label="Load Custom ROM"
-        >
-          <FolderOpen size={18} color="#3b82f6" />
-        </button>
-
-        {/* Storage & Database Management Studio (Backup, Restore & Reset) */}
-        <button
-          className="status-pill status-backup-app"
+          className={`status-pill status-backup-app ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'backup' ? 'gamepad-focused' : ''}`}
           onClick={() => {
             onOpenBackupModal?.();
             sfx?.playModalOpen?.();
@@ -387,7 +388,7 @@ export default function Topbar({
           <Database size={17} color="#2563eb" />
         </button>
 
-        {/* Hall of Fame & Trophy Cabinet */}
+        {/* 9. Hall of Fame & Trophy Cabinet */}
         <button
           type="button"
           className={`status-pill status-trophies ${focusedTarget?.zone === 'topbar' && focusedTarget?.id === 'trophy' ? 'gamepad-focused' : ''}`}
@@ -402,9 +403,9 @@ export default function Topbar({
           <Trophy size={18} color="#f59e0b" />
         </button>
 
-        {/* About & System Info (v1.0.6) */}
+        {/* 10. About & System Info */}
         <button
-          className="status-pill status-info-app"
+          className={`status-pill status-info-app ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'about' ? 'gamepad-focused' : ''}`}
           onClick={() => {
             onOpenAboutModal?.();
             sfx?.playModalOpen?.();
@@ -415,7 +416,25 @@ export default function Topbar({
           <Info size={17} color="#059669" />
         </button>
 
-        {/* Real-time Clock */}
+        {/* 11. Gamepad Connection & Battery Status Pill (Shown when connected) */}
+        {gamepadConnected && (
+          <div 
+            className={`status-pill status-gamepad is-connected ${gamepadBattery?.hasBatteryInfo && gamepadBattery.batteryPercent <= 10 && !gamepadBattery.isCharging ? 'is-battery-critical' : gamepadBattery?.hasBatteryInfo && gamepadBattery.batteryPercent <= 20 && !gamepadBattery.isCharging ? 'is-battery-low' : ''}`} 
+            title={getGamepadTooltip()}
+            aria-label={getGamepadTooltip()}
+          >
+            <Gamepad2 size={18} />
+            {gamepadBattery?.hasBatteryInfo && (
+              <span className="battery-badge">
+                {renderBatteryIcon ? renderBatteryIcon() : getBatteryIcon()}
+                <span className="battery-percent-text">{gamepadBattery.batteryPercent}%</span>
+                {gamepadBattery.isCharging && <span className="charging-tag">⚡</span>}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* 12. Real-time Clock */}
         <div className="status-pill status-clock">
           <span>{time}</span>
         </div>

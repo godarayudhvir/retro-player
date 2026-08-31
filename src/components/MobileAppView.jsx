@@ -37,6 +37,7 @@ import {
   Plus,
   ChevronRight,
   Music,
+  SkipBack,
   SkipForward,
   BatteryCharging,
   BatteryFull,
@@ -2683,9 +2684,29 @@ export default function MobileAppView({
             <Search size={16} />
           </button>
 
-          {/* 3. BGM Toggle Button & Skip Button */}
+          {/* 3. BGM Toggle Button & Prev/Skip Buttons */}
           {bgm && (
             <div className="mobile-bgm-group" style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+              {bgm.isPlaying && (
+                <button
+                  type="button"
+                  className="mobile-topbar-action-btn mobile-bgm-prev-btn"
+                  onClick={() => {
+                    bgm.prevTrack();
+                    if (bgm.currentTrack) {
+                      achievementsEngine?.triggerBgmTrackPlayed?.(bgm.currentTrack.title || bgm.currentTrack.url);
+                    }
+                    sfx?.playTabSwitch?.();
+                    haptics.selection();
+                  }}
+                  title="Previous BGM Track"
+                  aria-label="Previous BGM Track"
+                  style={{ width: '28px', height: '28px' }}
+                >
+                  <SkipBack size={12} color="#94a3b8" />
+                </button>
+              )}
+
               <button
                 type="button"
                 className={`mobile-topbar-action-btn ${bgm.isPlaying ? 'is-active is-playing' : ''}`}
@@ -2725,21 +2746,6 @@ export default function MobileAppView({
             </div>
           )}
 
-          {/* 4. SFX Toggle Button */}
-          {sfx && (
-            <button
-              type="button"
-              className={`mobile-topbar-action-btn ${!sfx.isMuted ? 'is-active' : ''}`}
-              onClick={() => {
-                sfx.toggleMute();
-                haptics.selection();
-              }}
-              title={sfx.isMuted ? "Sound Effects (Off)" : "Sound Effects (On)"}
-              aria-label="Toggle Sound Effects"
-            >
-              {sfx.isMuted ? <VolumeX size={16} color="#64748b" /> : <Volume2 size={16} color="#3b82f6" />}
-            </button>
-          )}
 
           {/* 5. Load Custom ROM Button */}
           <button
@@ -2909,7 +2915,7 @@ export default function MobileAppView({
                 <div className="mobile-menu-card">
                   <div className="mobile-menu-card-header">
                     <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#d97706' }}>
-                      <Sparkles size={18} />
+                      <Disc size={18} />
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
                       <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Metadata Scraper Studio</strong>
@@ -2946,7 +2952,7 @@ export default function MobileAppView({
                           sfx?.playModalOpen?.();
                         }}
                       >
-                        <Sparkles size={14} />
+                        <Disc size={14} />
                         <span>Open Scraper Studio</span>
                       </button>
                     )}
@@ -3114,6 +3120,60 @@ export default function MobileAppView({
                       </div>
                       <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
                         {themeEngine.colorMode === 'dark' ? 'Sleek OLED dark console palette active' : 'Bright daylight retro console palette active'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* UI Sound Effects Synthesizer Toggle */}
+                {sfx && (
+                  <div className="mobile-menu-card-header" style={{ marginTop: '0.65rem', paddingTop: '0.65rem', borderTop: '1px solid rgba(148, 163, 184, 0.15)' }}>
+                    <div className="mobile-menu-icon-wrap" style={{ background: !sfx.isMuted ? 'rgba(59, 130, 246, 0.15)' : 'rgba(148, 163, 184, 0.15)', color: !sfx.isMuted ? '#3b82f6' : '#64748b' }}>
+                      {!sfx.isMuted ? <Volume2 size={18} /> : <VolumeX size={18} />}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                          UI Sound Effects
+                        </strong>
+                        <button
+                          type="button"
+                          className={`ds-toggle-switch ${!sfx.isMuted ? 'is-active' : ''}`}
+                          style={{
+                            width: '42px',
+                            height: '24px',
+                            borderRadius: '12px',
+                            background: !sfx.isMuted ? '#3b82f6' : '#64748b',
+                            border: 'none',
+                            cursor: 'pointer',
+                            position: 'relative',
+                            transition: 'background 0.2s ease',
+                            padding: 0
+                          }}
+                          onClick={() => {
+                            sfx.toggleMute();
+                            haptics.selection();
+                          }}
+                          aria-label={`Toggle UI Sound Effects (Current: ${sfx.isMuted ? 'Muted' : 'Enabled'})`}
+                        >
+                          <span
+                            style={{
+                              display: 'block',
+                              width: '18px',
+                              height: '18px',
+                              borderRadius: '50%',
+                              background: '#ffffff',
+                              position: 'absolute',
+                              top: '3px',
+                              left: !sfx.isMuted ? '21px' : '3px',
+                              transition: 'left 0.2s ease',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                            }}
+                          />
+                        </button>
+                      </div>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
+                        {!sfx.isMuted ? 'Tactile 8-bit & 16-bit acoustic feedback for menu navigation and actions' : 'Synthesized UI sound effects muted'}
                       </span>
                     </div>
                   </div>

@@ -1275,21 +1275,25 @@ export function useGamepadNavigation({
 
     // Helper to get active desktop topbar items
     const getDesktopTopbarItems = () => {
-      const items = ['profile'];
+      const items = ['profile', 'search', 'loadrom'];
+      if (stateRef.current.onOpenScraperModal) items.push('scraper');
       if (stateRef.current.bgm?.tracks?.length > 0) {
+        if (stateRef.current.bgm.isPlaying) {
+          items.push('bgmPrev');
+        }
         items.push('bgm');
         if (stateRef.current.bgm.isPlaying) {
           items.push('bgmSkip');
         }
       }
-      if (stateRef.current.onOpenScraperModal) items.push('scraper');
       items.push('sfx');
       items.push('autoresume');
-      items.push('search');
       if (stateRef.current.themeEngine) {
         items.push('colormode');
       }
+      items.push('backup');
       items.push('trophy');
+      items.push('about');
       return items;
     };
 
@@ -1307,6 +1311,15 @@ export function useGamepadNavigation({
           setShowProfileSelectModal?.(true);
           setFocusedTarget({ zone: 'profileModal', index: 0 });
           sfx?.playModalOpen?.();
+        } else if (curId === 'loadrom') {
+          setShowLoadRomModal?.(true);
+          sfx?.playModalOpen?.();
+        } else if (curId === 'bgmPrev') {
+          stateRef.current.bgm?.prevTrack?.();
+          if (stateRef.current.bgm?.currentTrack) {
+            achievementsEngine?.triggerBgmTrackPlayed?.(stateRef.current.bgm.currentTrack.title || stateRef.current.bgm.currentTrack.url);
+          }
+          sfx?.playTabSwitch?.();
         } else if (curId === 'bgm') {
           stateRef.current.bgm?.togglePlay?.();
           if (!stateRef.current.bgm?.isPlaying && stateRef.current.bgm?.currentTrack) {
@@ -1337,9 +1350,19 @@ export function useGamepadNavigation({
         } else if (curId === 'colormode') {
           stateRef.current.themeEngine?.toggleColorMode?.();
           sfx?.playThemeSwitch?.();
+        } else if (curId === 'backup') {
+          if (stateRef.current.onOpenBackupModal) {
+            stateRef.current.onOpenBackupModal();
+            sfx?.playModalOpen?.();
+          }
         } else if (curId === 'trophy') {
           if (stateRef.current.onOpenTrophyModal) {
             stateRef.current.onOpenTrophyModal();
+            sfx?.playModalOpen?.();
+          }
+        } else if (curId === 'about') {
+          if (stateRef.current.onOpenAboutModal) {
+            stateRef.current.onOpenAboutModal();
             sfx?.playModalOpen?.();
           }
         } else if (curId === 'search') {

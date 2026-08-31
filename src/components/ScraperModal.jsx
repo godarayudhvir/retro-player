@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   X, 
-  Sparkles, 
   RefreshCw, 
   Square, 
   Check, 
@@ -158,7 +157,7 @@ export default function ScraperModal({
         <header className="scraper-modal-header">
           <div className="scraper-modal-title-group">
             <div className="scraper-icon-bubble">
-              <Sparkles size={22} color="#f59e0b" />
+              <Disc size={22} color="#f59e0b" />
             </div>
             <div>
               <h2>Metadata & 3D Box Art Scraper</h2>
@@ -552,7 +551,7 @@ export default function ScraperModal({
                   onClick={handleOpenPrompt}
                 >
                   {gamepadConnected && !isMobile && <span className="osk-btn-badge badge-x">X</span>}
-                  <Sparkles size={16} />
+                  <Disc size={16} />
                   <span>Start Scraping ({targetCount})</span>
                 </button>
               </>
