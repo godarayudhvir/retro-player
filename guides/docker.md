@@ -33,6 +33,7 @@ Retro Player supports configuration via environment variables in `docker-compose
 | `DATA_DIR` | `/data` | Path where the central JSON document database (`retroplayer_db.json`) is stored. |
 | `INCLUDE_DEMO_BGM` | `true` | Set to `true` to include bundled 8-bit chiptune audio; set to `false` for purely your own audio. |
 | `AUTO_SEED_DEMOS` | `false` | When set to `true`, auto-seeds bundled demo games/music into external mounted volumes. |
+| `DISCORD_CLIENT_ID` | `1544079303598411776` | Discord Application ID for Desktop Rich Presence (RPC). |
 
 ---
 

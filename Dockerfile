@@ -27,9 +27,10 @@ ENV AUTO_SEED_DEMOS=false
 COPY package*.json ./
 RUN npm ci --omit=dev
 
-# Copy server and built static frontend from builder stage
+# Copy server, server helpers, and built static frontend from builder stage
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/server.js ./server.js
+COPY --from=builder /app/src/server ./src/server
 COPY --from=builder /app/public ./public
 
 # Default volume mount points for ROMs, BGM, and persistent SQLite/JSON metadata

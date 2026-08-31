@@ -16,6 +16,8 @@ services:
       # Audio configuration:
       # Set to 'true' to include bundled 8-bit chiptune audio tracks; set to 'false' for purely your own audio tracks
       - INCLUDE_DEMO_BGM=true
+      # Discord Rich Presence configuration:
+      # - DISCORD_CLIENT_ID=1544079303598411776
     volumes:
       # Mount your host ROMs directory to /roms (Read/Write allows uploading new games directly from the UI)
       - ./roms:/roms
