@@ -31,8 +31,7 @@ Retro Player supports configuration via environment variables in `docker-compose
 | `ROMS_DIR` | `/roms` | Path where mounted host ROMs, companion covers, sidecars, and uploads are stored. |
 | `BGM_DIR` | `/bgm` | Path where custom background audio tracks are stored. |
 | `DATA_DIR` | `/data` | Path where the central JSON document database (`retroplayer_db.json`) is stored. |
-| `INCLUDE_DEMO_BGM` | `true` | Set to `true` to include bundled 8-bit chiptune audio; set to `false` for purely your own audio. |
-| `AUTO_SEED_DEMOS` | `false` | When set to `true`, auto-seeds bundled demo games/music into external mounted volumes. |
+| `INCLUDE_DEMO_BGM` | `true` | Set to `true` to include bundled background audio tracks; set to `false` for purely your own audio. |
 | `DISCORD_CLIENT_ID` | `1544079303598411776` | Discord Application ID for Desktop Rich Presence (RPC). |
 | `APP_URL` | `http://localhost:3000` | Public URL of your Retro Player instance (used for Discord RPC "Play in Browser" button). |
 

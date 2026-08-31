@@ -19,10 +19,9 @@ const DIST_DIR = path.join(__dirname, 'dist');
 const BUNDLED_ROMS_DIR = path.join(__dirname, 'public/roms');
 const BUNDLED_BGM_DIR = path.join(__dirname, 'public/bgm');
 
-// Configuration flags for demo assets & auto-seeding
+// Configuration flags for demo assets
 const INCLUDE_DEMO_ROMS = (process.env.INCLUDE_DEMO_ROMS || 'true').toLowerCase() !== 'false';
 const INCLUDE_DEMO_BGM = (process.env.INCLUDE_DEMO_BGM || 'true').toLowerCase() !== 'false';
-const AUTO_SEED_DEMOS = (process.env.AUTO_SEED_DEMOS || 'false').toLowerCase() === 'true';
 
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -32,39 +31,6 @@ if (!fs.existsSync(ROMS_DIR)) {
 }
 if (!fs.existsSync(BGM_DIR)) {
   fs.mkdirSync(BGM_DIR, { recursive: true });
-}
-
-// Helper to copy directory recursively for auto-seeding
-function copyDirRecursive(src, dest) {
-  if (!fs.existsSync(src)) return;
-  if (!fs.existsSync(dest)) {
-    fs.mkdirSync(dest, { recursive: true });
-  }
-  const entries = fs.readdirSync(src, { withFileTypes: true });
-  for (const entry of entries) {
-    const srcPath = path.join(src, entry.name);
-    const destPath = path.join(dest, entry.name);
-    if (entry.isDirectory()) {
-      copyDirRecursive(srcPath, destPath);
-    } else if (entry.isFile() && !fs.existsSync(destPath)) {
-      try {
-        fs.copyFileSync(srcPath, destPath);
-      } catch (err) {
-        console.warn(`[AUTO-SEED WARN] Failed copying ${entry.name}:`, err.message);
-      }
-    }
-  }
-}
-
-if (AUTO_SEED_DEMOS) {
-  if (path.resolve(ROMS_DIR) !== path.resolve(BUNDLED_ROMS_DIR) && fs.existsSync(BUNDLED_ROMS_DIR)) {
-    console.log(`🌱 [AUTO-SEED] Seeding bundled demo ROMs into: ${ROMS_DIR}`);
-    copyDirRecursive(BUNDLED_ROMS_DIR, ROMS_DIR);
-  }
-  if (path.resolve(BGM_DIR) !== path.resolve(BUNDLED_BGM_DIR) && fs.existsSync(BUNDLED_BGM_DIR)) {
-    console.log(`🌱 [AUTO-SEED] Seeding bundled BGM tracks into: ${BGM_DIR}`);
-    copyDirRecursive(BUNDLED_BGM_DIR, BGM_DIR);
-  }
 }
 
 // System definition mapping with canonical keys and platform aliases
@@ -1373,5 +1339,4 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`💾 [DATA DIRECTORY] ${DATA_DIR}`);
   console.log(`🎮 [DEMO ROMS ENABLED] ${INCLUDE_DEMO_ROMS}`);
   console.log(`🎶 [DEMO BGM ENABLED] ${INCLUDE_DEMO_BGM}`);
-  console.log(`🌱 [AUTO SEED DEMOS] ${AUTO_SEED_DEMOS}`);
 });

@@ -21,7 +21,6 @@ ENV BGM_DIR=/bgm
 ENV DATA_DIR=/data
 ENV INCLUDE_DEMO_ROMS=true
 ENV INCLUDE_DEMO_BGM=true
-ENV AUTO_SEED_DEMOS=false
 
 # Install only production dependencies
 COPY package*.json ./
