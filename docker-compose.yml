@@ -18,6 +18,7 @@ services:
       - INCLUDE_DEMO_BGM=true
       # Discord Rich Presence configuration:
       # - DISCORD_CLIENT_ID=1544079303598411776
+      # - APP_URL=https://retro.yourdomain.com
     volumes:
       # Mount your host ROMs directory to /roms (Read/Write allows uploading new games directly from the UI)
       - ./roms:/roms
