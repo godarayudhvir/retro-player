@@ -21,6 +21,12 @@ Complete documentation for deploying **Retro Player** using Docker and Docker Co
 
 ---
 
+## 🍎 macOS Quick Start: OrbStack
+
+Running on macOS (Apple Silicon or Intel)? Check out our dedicated **[macOS & OrbStack Deployment & Backend ROM Management Guide](orbstack.md)** for near-instant container startup, native VirtioFS filesystem performance, local `.orb.local` domains, and complete backend ROM management via Finder and Terminal.
+
+---
+
 ## ⚙️ Environment Variables & Configuration
 
 Retro Player supports configuration via environment variables in `docker-compose.yml` or `docker run`:

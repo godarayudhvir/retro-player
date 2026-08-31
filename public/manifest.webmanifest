@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Retro Player - High-Performance Web Emulation Station",
   "short_name": "Retro Player",
-  "description": "A console-grade retro game launcher and library delivered straight to any web browser. WebAssembly emulation cores, 3D cartridges, Multiavatar character studio, synthesized SFX, and pure client-side execution.",
+  "description": "Your favorite retro classics, beautifully organized and ready to play anywhere. Retro Player turns any browser into a dedicated retro console with tactile navigation, save management, and customizable profiles.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

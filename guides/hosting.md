@@ -96,3 +96,12 @@ Deploy globally on Fly.io edge infrastructure:
   - `DATA_DIR=/data`
   - `BGM_DIR=/bgm`
 
+---
+
+## 6. 🍎 macOS (OrbStack)
+
+[OrbStack](https://orbstack.dev) is a lightweight macOS alternative to Docker Desktop with near-instant startup, native filesystem speeds, and local domain routing without needing a separate Linux machine.
+
+See the dedicated **[macOS & OrbStack Deployment & Backend ROM Management Guide](orbstack.md)** for complete setup, Finder drag-and-drop workflows, and backend ROM library administration.
+
+

@@ -22,8 +22,8 @@
 
 <br />
 
-**A console-grade retro game launcher and library, delivered straight to any web browser.**  
-Featuring Nintendo DS dual-screen Touch architecture, integrated zero-popup Strategy Guides & inline Metadata Editor/Scraper, Multiavatar Character Creation Studio with Archetype presets, real-time online metadata scraping, synthesized acoustic SFX, and **pure client-side WebAssembly execution**.
+**Your favorite retro classics, beautifully organized and ready to play anywhere.**  
+Retro Player turns any browser into a dedicated retro console. Experience tactile navigation, authentic save management, customizable player profiles, and curated game libraries tailored for both living-room couch play and on-the-go handheld sessions.
 
 <br />
 
@@ -145,28 +145,6 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 ---
 
-## Key Highlights & Features
-
-- ⚡ **Pure Client-Side WASM Emulation**: Hardware-accelerated WebAssembly execution across 12 retro platforms with ~0% host server CPU usage.
-- 🎨 **Nintendo DS Dual-Screen Touch UI**: Dynamic top-screen box art & specs, bottom touchscreen carousel, and grid density toggles (`S`–`XXL`).
-- 🎮 **Universal Gamepad & Spatial Navigation**: 100% controller-driven library navigation, live DualShock visualizer, battery telemetry, and on-screen virtual keyboard.
-- ⏱️ **Auto-Resume & Save State Engine**: Automatic state extraction on game exit with instant countdown auto-resume and dedicated quick save state studio.
-- 💾 **Profile-Scoped Battery Saves (`.sav`)**: In-game cartridge battery saves and SRAM isolated per Multiavatar profile with auto-injection.
-- 👤 **Multiavatar Character Creation Studio**: Custom retro player profiles with randomized avatar generators and 4 archetype presets.
-- 🕹️ **Authentic 3D Cartridge & Jewel Cases**: Console-authentic 3D physical cartridge models and dark obsidian PS1 CD cases with dynamic tilt.
-- 🗄️ **Centralized Database & 1-Click Backup**: Single JSON document database (`data/retroplayer_db.json`) on disk with 1-click backup export and restore studio.
-- 🌐 **Unified Metadata & Box Art Scraper**: Automated multi-source scraper (Libretro CDN, ScreenScraper, TheGamesDB, Wikipedia) with an inline metadata editor.
-- 📖 **Curated Strategy Guides & QR Companion**: Integrated written walkthroughs and video playthroughs with mobile QR code pairing for couch play.
-- 🏆 **Universal Organic Achievements & Pokémon Save Inspector**: Master registry of 24 universal organic achievements across 6 categories (300G Gamerscore), Gamerscore tracking, in-game unlock buffering, session-exit toast fanfare with Web Audio chiptune chimes, and a real-time, offline Pokémon Save Inspector for Gen 1–3 (GB, GBC, GBA) unlocking 8/16 Gym Badges, starter choices, Pokédex milestones, key items, and League Champions.
-- 📁 **Folder Batch Ingestion & Companion Asset Pairing**: Drag and drop entire multi-system ROM directories or load in-memory with zero disk copies, automatic console classification across 12 platforms, background scraping, and automatic local companion box art (`.webp`/`.png`/`.jpg`) and metadata (`.json`/`.nfo`) sidecar binding.
-- 🎵 **Dynamic BGM & Synthesized SFX**: Multi-track chiptune engine with smart in-game pause and low-latency Web Audio sound effects.
-- 🎮 **Rich Presence & Multi-Platform Game Activity**: Real-time game status broadcasting to Discord Desktop Rich Presence (RPC via local IPC socket with interactive web launcher & GitHub buttons), OS MediaSession API (macOS Control Center, Windows 11, iOS Lock Screen, Android notifications), and `/api/presence` webhook / OBS streamer overlay widget (`/widgets/now-playing.html`).
-- 📳 **Haptic Touch & Tactile Feedback Engine**: Hardware-accelerated micro-vibration feedback (`navigator.vibrate`) across mobile touch navigation, carousel selection, on-screen virtual gamepads, and achievement fanfare with built-in battery-saver awareness.
-- 📱 **Adaptive Cross-Device PWA**: Installable standalone app optimized for Mobile Touch Feeds, Steam Deck, Desktop, and 10-Foot TV mode.
-- 📹 **60 FPS Recorder & Engine Controls**: In-browser video capture, speed turbo throttling (`1.0x`–`5.0x`), VSync, CRT/pixel shaders, and live diagnostic HUD.
-
----
-
 ## 🕹️ Supported Consoles & Platforms
 
 Retro Player supports **12 classic retro gaming platforms** out of the box:
@@ -181,12 +159,12 @@ Retro Player supports **12 classic retro gaming platforms** out of the box:
 
 ## 🎮 Bring-Your-Own-ROM (BYOR) Architecture & Privacy
 
-Retro Player follows a strict **Bring-Your-Own-ROM (BYOR)** architecture designed for maximum privacy, zero server overhead, and complete copyright compliance:
+Retro Player follows a strict **Bring-Your-Own-ROM (BYOR)** model designed for user privacy, zero server overhead, and complete copyright compliance:
 
-- 🔒 **100% Private Client-Side Execution**: Load personal game dumps and ROM hacks via **"Load Custom ROM"** or direct drag-and-drop. Files are parsed strictly in local browser RAM with zero server uploads.
-- 📁 **Local Host & Docker Storage**: Self-hosters can mount their private `./roms/` collection directly into the container with automatic console sorting, persistence, and local library scanning.
-- 🎨 **Universal Local Sidecars**: Automatically detects and renders local companion covers (`cover.webp`, `cover.png`) and Kodi/Jellyfin `.nfo` or `.json` metadata files.
-- 📑 **ROM Organization & Sidecar Specs**: See **[guides/roms.md](guides/roms.md)** for directory structures, naming conventions, and sidecar metadata schemas.
+- 🔒 **100% Private Client-Side Execution**: Load personal game dumps and ROM hacks via **"Load Custom ROM"** or direct drag-and-drop (single files or entire multi-game folders). Files execute strictly in local browser RAM with zero server telemetry or uploads.
+- 📁 **Host & Docker Volume Persistence**: Self-hosters can mount their private `./roms/` library directly into the container with automatic console sorting, companion cover indexing, and hot-reload scanning.
+- 🎨 **Companion Covers & Metadata Sidecars**: Automatically detects and renders local companion covers (`.webp`, `.png`, `.jpg`) and `.json` / `.nfo` metadata sidecars placed alongside your games.
+- 📑 **ROM Organization & Sidecar Specs**: See the **[ROM Management Guide](guides/roms.md)** for directory structures, naming conventions, and metadata schemas.
 
 ---
 
@@ -214,6 +192,7 @@ Explore dedicated, step-by-step documentation located in the [`guides/`](guides/
 | Guide | Description |
 | :--- | :--- |
 | **[🐳 Docker Deployment Guide](guides/docker.md)** | Full Docker & Docker Compose setup, CLI commands, updates, and troubleshooting. |
+| **[🍎 macOS & OrbStack Guide](guides/orbstack.md)** | Ultra-fast macOS Docker alternative, native filesystem speeds, and backend ROM & save management. |
 | **[☁️ Cloud & Self-Hosting Guide](guides/hosting.md)** | Detailed setup for Railway, Render, Fly.io, Coolify, Portainer, and NAS (Unraid/TrueNAS). |
 | **[🌐 Remote Access & Anywhere Play](guides/remote-access.md)** | Access your home instance from phones/tablets via **Tailscale Mesh VPN** or **Cloudflare Tunnels**. |
 | **[🎮 Controls & Keybindings Guide](guides/controls.md)** | Full gamepad button mappings, dashboard spatial navigation, virtual keyboard, and in-game controls. |

@@ -1,6 +1,6 @@
 # Retro Player (v1.0.9)
 
-> The High-Performance, Zero-Overhead Web Emulation Station. A console-grade retro game launcher and library running 12 classic systems directly in your browser with physical 3D cartridge rendering, client-side WebAssembly execution, real-time metadata scraping, battery save RAM (.sav), and universal gamepad navigation.
+> Your favorite retro classics, beautifully organized and ready to play anywhere. Retro Player turns any browser into a dedicated retro console. Experience tactile navigation, authentic save management, customizable player profiles, and curated game libraries tailored for both living-room couch play and on-the-go handheld sessions.
 
 ## Live Demo & Source
 - [Live Web Demo](https://godarayudhvir.github.io/retro-player/): Play classic retro games directly in your browser with zero installation.
@@ -21,7 +21,8 @@
 - **Progressive Web App (PWA) & Offline Mode**: Installable standalone app across macOS, Windows, Linux, Steam Deck, iOS, and Android.
 
 ## Documentation & Guides
-- [Docker Deployment Guide](https://github.com/godarayudhvir/retro-player/blob/main/guides/docker.md): Full Docker Compose setup, container configurations, and auto-seeding.
+- [Docker Deployment Guide](https://github.com/godarayudhvir/retro-player/blob/main/guides/docker.md): Full Docker Compose setup, container configurations, and troubleshooting.
+- [macOS & OrbStack Guide](https://github.com/godarayudhvir/retro-player/blob/main/guides/orbstack.md): Ultra-fast macOS Docker alternative, native filesystem speeds, and backend ROM & save management.
 - [Cloud & Self-Hosting Guide](https://github.com/godarayudhvir/retro-player/blob/main/guides/hosting.md): Deployment instructions for Railway, Render, Fly.io, Coolify, Portainer, and NAS (Unraid/TrueNAS).
 - [Remote Access Guide](https://github.com/godarayudhvir/retro-player/blob/main/guides/remote-access.md): Anywhere play via Tailscale Mesh VPN and Cloudflare Tunnels.
 - [Controls & Keybindings](https://github.com/godarayudhvir/retro-player/blob/main/guides/controls.md): Complete controller button mappings, spatial navigation, hotkeys, and virtual keyboard.

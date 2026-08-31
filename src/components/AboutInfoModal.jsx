@@ -62,7 +62,7 @@ export default function AboutInfoModal({ isOpen, focusedTarget, onClose, sfx }) 
         {/* Modal Body */}
         <div className="backup-modal-body" style={{ padding: '1.25rem 1.75rem', overflowY: 'auto' }}>
           <p className="info-tagline" style={{ marginTop: 0, marginBottom: '1rem' }}>
-            A modern, high-performance web-based retro game launcher and emulator library for classic retro console games.
+            Your favorite retro classics, beautifully organized and ready to play anywhere. A dedicated retro console experience directly in your browser.
           </p>
 
           <div className="info-repo-card" style={{ marginBottom: 0 }}>
