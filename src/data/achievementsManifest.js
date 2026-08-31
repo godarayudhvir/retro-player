@@ -610,8 +610,10 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
 export function getPokemonMilestonesForGame(game) {
   if (!game) return POKEMON_ACHIEVEMENTS_MANIFEST;
   const rawTitle = (game.title || game.name || game.fileName || '').toLowerCase();
+  const sysKey = (game.systemKey || game.systemCore || '').toLowerCase();
+
   const isYellow = rawTitle.includes('yellow');
-  const isJohto = rawTitle.includes('gold') || rawTitle.includes('silver') || rawTitle.includes('crystal') || rawTitle.includes('heartgold') || rawTitle.includes('soulsilver');
+  const isJohto = rawTitle.includes('gold') || rawTitle.includes('silver') || rawTitle.includes('crystal') || rawTitle.includes('heartgold') || rawTitle.includes('soulsilver') || sysKey === 'gbc';
   const isHoenn = rawTitle.includes('ruby') || rawTitle.includes('sapphire') || rawTitle.includes('emerald');
   const isEmerald = rawTitle.includes('emerald');
   const isFRLG = rawTitle.includes('fire') || rawTitle.includes('leaf');
@@ -619,6 +621,8 @@ export function getPokemonMilestonesForGame(game) {
   return POKEMON_ACHIEVEMENTS_MANIFEST.filter(item => {
     // Only show Yellow-specific milestone for Pokemon Yellow
     if (item.id === 'poke_yellow_pika_friend' && !isYellow) return false;
+    // Only show 16 Badges for Gen 2 Dual Region (Johto + Kanto)
+    if (item.id === 'poke_sixteen_badges' && !isJohto) return false;
     return true;
   }).map(item => {
     if (isJohto) {
@@ -634,7 +638,7 @@ export function getPokemonMilestonesForGame(game) {
       if (item.id === 'poke_revealer_of_mysteries') return { ...item, title: 'Unseen Chameleon (Devon Scope)', description: 'Receive the Devon Scope from Steven on Route 120 to unmask camouflaged Kecleon.' };
       if (item.id === 'poke_hall_of_fame') return { ...item, title: 'Ever Grande Champion', description: isEmerald ? 'Defeat Champion Wallace to claim the Hoenn League throne.' : 'Defeat Champion Steven Stone to conquer the Hoenn League.' };
       if (item.id === 'poke_myth_and_legend') return { ...item, title: 'Sovereign of Land, Sea & Sky', description: 'Capture Groudon, Kyogre, or the dragon king Rayquaza at Sky Pillar.' };
-    } else if (isFRLG || !isJohto) {
+    } else if (isFRLG || (!isJohto && !isHoenn)) {
       if (item.id === 'poke_journey_begun') return { ...item, title: 'Pallet Town Departure', description: 'Receive your starter companion from Professor Oak in Pallet Town.' };
       if (item.id === 'poke_digital_cartographer') return { ...item, title: 'Cartographer of Kanto (Town Map)', description: 'Obtain the Town Map from Daisy Oak in Pallet Town.' };
       if (item.id === 'poke_pedal_to_metal') return { ...item, title: 'Cerulean Cyclist (Bicycle)', description: 'Exchange your Bike Voucher for a Bicycle at the Cerulean Bike Shop.' };

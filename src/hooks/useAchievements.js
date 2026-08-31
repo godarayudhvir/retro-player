@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { ACHIEVEMENTS_MANIFEST, POKEMON_ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, TOTAL_ACHIEVEMENT_POINTS } from '../data/achievementsManifest';
+import { ACHIEVEMENTS_MANIFEST, POKEMON_ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, TOTAL_ACHIEVEMENT_POINTS, getPokemonMilestonesForGame } from '../data/achievementsManifest';
 import { parsePokemonSave, isPokemonRom } from '../services/pokemonSaveParser';
 import { dbGet, dbSet, STORES } from '../services/db';
 import { haptics } from '../services/hapticsService';
@@ -210,8 +210,11 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
     // Immediate synchronous guard against duplicate unlock execution
     if (unlockedRef.current[achievementId]) return;
 
-    const manifestItem = ACHIEVEMENTS_MANIFEST.find(a => a.id === achievementId) ||
-                         POKEMON_ACHIEVEMENTS_MANIFEST.find(a => a.id === achievementId);
+    let manifestItem = ACHIEVEMENTS_MANIFEST.find(a => a.id === achievementId);
+    if (!manifestItem) {
+      const pokeList = gameContext ? getPokemonMilestonesForGame(gameContext) : POKEMON_ACHIEVEMENTS_MANIFEST;
+      manifestItem = pokeList.find(a => a.id === achievementId) || POKEMON_ACHIEVEMENTS_MANIFEST.find(a => a.id === achievementId);
+    }
     if (!manifestItem) return;
 
     const newUnlockEntry = {

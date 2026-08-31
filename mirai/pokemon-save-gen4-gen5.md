@@ -101,8 +101,24 @@ Add sub-parsers in `src/services/pokemonSaveParser.js`:
 4. Extract Money, Pokédex Owned bitset (493 species in Gen 4, 649 species in Gen 5), and 8/16-badge bitmasks.
 5. Decrypt 236-byte party structs using the LCRNG pipeline to detect Species, Level 100, Shinies, and Pokérus.
 
-### Step 3: Register Badges & Milestones in Manifest
-Link Gen 4 (`REGIONAL_BADGES.sinnoh`) and Gen 5 (`REGIONAL_BADGES.unova`) in `src/data/achievementsManifest.js` to enable automatic badge rendering in Nintendo DS View and the Trophy Cabinet.
+### Step 3: Register Badges & Contextual Milestones in Manifest
+1. Register `REGIONAL_BADGES.sinnoh` and `REGIONAL_BADGES.unova` in `src/data/achievementsManifest.js` to enable automatic badge rendering in Nintendo DS View and the Trainer Milestones view.
+2. Add Gen 4 & Gen 5 regional mappings to `getPokemonMilestonesForGame(game)` in `src/data/achievementsManifest.js`:
+   * **Generation 4 (Sinnoh – Diamond, Pearl, Platinum)**:
+     - `poke_journey_begun`: **Twinleaf Departure** (*"Receive your starter companion from Professor Rowan at Lake Verity."*)
+     - `poke_digital_cartographer`: **Pokétch Navigator (Town Map)** (*"Obtain the Pokétch and Town Map to navigate the Sinnoh region."*)
+     - `poke_pedal_to_metal`: **Rad Rickshaw's Cyclist (Bicycle)** (*"Receive the gear-shifting Bicycle from Rad Rickshaw in Eterna City."*)
+     - `poke_hall_of_fame`: **Sinnoh League Champion** (*"Defeat the Elite Four and Champion Cynthia to enter the Hall of Fame."*)
+     - `poke_myth_and_legend`: **The Creation Dragon** (*"Encounter and capture Dialga, Palkia, or Giratina at Spear Pillar / Distortion World."*)
+   * **Generation 5 (Unova – Black, White, Black 2, White 2)**:
+     - `poke_journey_begun`: **Nuvema Departure** (*"Unbox your starter gift from Professor Juniper in Nuvema Town."*)
+     - `poke_digital_cartographer`: **C-Gear Navigation (Town Map)** (*"Acquire the C-Gear and Town Map to traverse the Unova region."*)
+     - `poke_pedal_to_metal`: **Nimbasa Cyclist (Bicycle)** (*"Receive the folding Bicycle from the Day Care man in Nimbasa City."*)
+     - `poke_hall_of_fame`: **Unova League Champion** (*"Defeat the Elite Four and Champion Alder or Iris to conquer Unova."*)
+     - `poke_myth_and_legend`: **Dragons of Truth & Ideals** (*"Encounter and capture Reshiram, Zekrom, or Kyurem in the Unova region."*)
+3. **HUD Toast Notification Consistency**:
+   - Ensure `useAchievements.js` resolves the dynamic title via `getPokemonMilestonesForGame(gameContext)` so the toast title matches the Trainer view 1-to-1.
+   - Milestone unlock toasts display the compact HUD (Icon Box, `POKÉMON MILESTONE` kicker, Title, `TRAINER` / `TIER` badge) with no description body rendered in the toast popup.
 
 ### Step 4: Verification Suite
 Run automated test suite verifying 100% pass rate across all Gen 4 and Gen 5 reference files and update `guides/pokemon/README.md` documentation matrix.
