@@ -36,6 +36,7 @@ import { extractRomsFromInput, scanDirectoryHandle } from '../utils/folderScanne
 export default function LoadRomModal({
   isOpen,
   initialFile = null,
+  initialDroppedData = null,
   focusedTarget,
   isMobile = false,
   savedLinkedHandles = [],
@@ -58,7 +59,7 @@ export default function LoadRomModal({
   const [isProcessing, setIsProcessing] = useState(false);
   const [progressState, setProgressState] = useState(null); // { step, current, total, message }
   const [errorMessage, setErrorMessage] = useState(null);
-  const [focusedOption, setFocusedOption] = useState(0); 
+  const [focusedOption, setFocusedOption] = useState(0); // 0: primary, 1: secondary, 2: cancel
   const isServerAvailable = checkServerDbStatus();
 
   const activeHandles = localLinkedHandles;
@@ -70,7 +71,7 @@ export default function LoadRomModal({
     }
   }, [savedLinkedHandles]);
 
-  // Check for saved linked directory handles on desktop when modal opens
+  // Load saved directory handles on desktop
   useEffect(() => {
     if (isOpen && !isMobile && typeof window !== 'undefined' && window.showDirectoryPicker) {
       getLinkedDirectoryHandles().then(handles => {
@@ -81,10 +82,22 @@ export default function LoadRomModal({
     }
   }, [isOpen, isMobile]);
 
-  // Reset or initialize state when modal opens/closes or initialFile is supplied
+  // Reset or initialize state when modal opens/closes or initialFile / initialDroppedData is supplied
   useEffect(() => {
     if (isOpen) {
-      if (initialFile) {
+      if (initialDroppedData) {
+        if (initialDroppedData.files && (initialDroppedData.files.length > 1 || initialDroppedData.stats?.isExplicitFolder)) {
+          setFolderData(initialDroppedData);
+          setSelectedFile(null);
+          setStorageMode(isMobile ? 'permanent' : 'session');
+        } else if (initialDroppedData.files && initialDroppedData.files.length === 1) {
+          setSelectedFile(initialDroppedData.files[0]);
+          setFolderData(null);
+        } else if (initialDroppedData instanceof File || (initialDroppedData.name && !initialDroppedData.files)) {
+          setSelectedFile(initialDroppedData);
+          setFolderData(null);
+        }
+      } else if (initialFile) {
         setSelectedFile(initialFile);
         setFolderData(null);
       }
@@ -98,7 +111,7 @@ export default function LoadRomModal({
       setFocusedOption(0);
       setIsDragInside(false);
     }
-  }, [isOpen, initialFile, isMobile]);
+  }, [isOpen, initialFile, initialDroppedData, isMobile]);
 
   // Keyboard navigation
   useEffect(() => {

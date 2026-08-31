@@ -119,12 +119,13 @@ Place a `.nfo` or `.json` file alongside the ROM to define custom metadata (titl
 }
 ```
 
-### 3. Automatic Companion Ingestion in "Load Custom ROM"
-When dragging and dropping a ROM folder or selecting via "Choose Folder", Retro Player automatically detects and pairs existing `.webp`/`.png`/`.jpg` box art and `.json`/`.nfo` metadata sidecars:
+### 3. Automatic Companion Ingestion & Recursive Folder Drops in "Load Custom ROM"
+When dragging and dropping a ROM file, nested directory structure (`b/c.gba`, `d/b/c.gba`), or choosing a folder via the in-app picker, Retro Player automatically scans and pairs everything:
+- **Full Recursive Directory Traversal**: Dragging any folder hierarchy (e.g. `root/system/game/rom.gba` or nested packs) directly onto the main console dashboard or the Load ROM modal parses the full tree recursively via `readEntryRecursively` / `extractRomsFromInput`, discovering all supported ROMs, subfolder box art, and `.nfo`/`.json` sidecars without flattening errors.
 - **Instant $O(1)$ Indexed Pairing & Clean Progress View**: Uses indexed Map lookups and asynchronous event-loop chunking to scan and pair thousands of ROMs, companion box art images, and sidecar metadata files in milliseconds. When scanning starts, the modal transitions into a clean, focused progress telemetry card to prevent UI clutter and eliminate accidental clicks.
-- **Desktop Multi-Folder Zero-Copy Links (0 MB Duplication)**: On desktop browsers (Chrome, Edge, Brave, Opera), saving folders in Session Mode persists each directory's `FileSystemDirectoryHandle` into IndexedDB (`linked_directory_handles`). You can link multiple independent system folders (e.g. `/gba`, `/gbc`, `/snes`), manage or remove individual folders via chips, and reconnect all linked directories with 1 click on startup or after reload with zero storage duplication.
+- **Desktop Multi-Folder Zero-Copy Links & Reconnect (0 MB Duplication)**: On desktop Chromium browsers (Chrome, Edge, Brave, Opera), choosing folders via **"Choose ROMs Folder"** in Session Mode persists each directory's `FileSystemDirectoryHandle` into IndexedDB (`linked_directory_handles`). You can link multiple independent system folders (e.g. `/gba`, `/gbc`, `/snes`), manage or remove individual folders via chips, and reconnect all linked directories with 1 click (**⚡ Reconnect Full Collection**) on startup or after page reload with zero storage duplication. *(Note: Standard OS drag-and-drop provides temporary session read access due to browser security sandboxes, while the "Choose ROMs Folder" picker creates persistent reusable handles).*
 - **Mobile Permanent Library Storage**: On Android and iOS touch devices, folders are ingested directly into persistent IndexedDB storage (or server `/roms/`), ensuring games, local box art, and sidecars persist across tab reloads, browser app switching, and offline PWA mode.
-- **Single ROM Quick Play**: Single ROM files can still be booted instantly into RAM across both desktop and mobile devices via one-click Quick Play without saving.
+- **Single ROM Quick Play & Library Ingest**: Single ROM files dropped or selected can either be booted instantly into RAM across both desktop and mobile devices via one-click Quick Play, or permanently saved to the library with automated Libretro box art scraping and local fallback.
 
 ---
 

@@ -154,6 +154,7 @@ export default function App() {
   }, [handleCheckSaveData, sfx]);
 
   const [loadRomInitialFile, setLoadRomInitialFile] = useState(null);
+  const [loadRomInitialDroppedData, setLoadRomInitialDroppedData] = useState(null);
 
   // Custom ROM Quick Play: RAM-only direct play without DB storage or library searching
   const handleCustomRomLoaded = useCallback((customGame) => {
@@ -162,10 +163,36 @@ export default function App() {
     }
   }, []);
 
-  // Drag & Drop / External File Hook: open the Ingestion Review Modal
-  const handleFileDropped = useCallback((file) => {
-    if (file) {
-      setLoadRomInitialFile(file);
+  // Drag & Drop / External File Hook: open the Ingestion Review Modal (supporting files & folders)
+  const handleFileDropped = useCallback(async (input) => {
+    if (!input) return;
+    try {
+      // If input is a raw DataTransfer object or multi-file list, extract recursively
+      if (input.items || (input.files && input.files.length > 0) || Array.isArray(input)) {
+        const extracted = await extractRomsFromInput(input);
+        if (extracted && extracted.files && extracted.files.length > 0) {
+          if (extracted.files.length === 1 && !extracted.stats?.isExplicitFolder) {
+            setLoadRomInitialFile(extracted.files[0]);
+            setLoadRomInitialDroppedData(null);
+          } else {
+            setLoadRomInitialDroppedData(extracted);
+            setLoadRomInitialFile(null);
+          }
+          setShowLoadRomModal(true);
+          sfx.playTileNav();
+          return;
+        }
+      }
+
+      // Single standard File fallback
+      setLoadRomInitialFile(input);
+      setLoadRomInitialDroppedData(null);
+      setShowLoadRomModal(true);
+      sfx.playTileNav();
+    } catch (e) {
+      console.warn('Failed to extract dropped items:', e);
+      setLoadRomInitialFile(input);
+      setLoadRomInitialDroppedData(null);
       setShowLoadRomModal(true);
       sfx.playTileNav();
     }
@@ -585,7 +612,6 @@ export default function App() {
           setShowVirtualKeyboard={setShowVirtualKeyboard}
           onDeleteGame={deleteGame}
           achievementsEngine={achievementsEngine}
-          themeEngine={themeEngine}
         />
       ) : (
         <>
@@ -694,6 +720,7 @@ export default function App() {
       <LoadRomModal
         isOpen={showLoadRomModal}
         initialFile={loadRomInitialFile}
+        initialDroppedData={loadRomInitialDroppedData}
         focusedTarget={focusedTarget}
         isMobile={isMobile}
         savedLinkedHandles={linkedDirectoryHandles}
@@ -702,6 +729,7 @@ export default function App() {
         onClose={() => {
           setShowLoadRomModal(false);
           setLoadRomInitialFile(null);
+          setLoadRomInitialDroppedData(null);
           setFocusedTarget({ zone: 'topbar', id: 'loadRom' });
           sfx.playModalClose();
         }}

@@ -134,27 +134,53 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
         // 1. Docker / Localhost Server Flow
         if (onProgress) onProgress({ step: 'uploading', message: `Saving "${file.name}" to server library...` });
 
-        const res = await fetch('/api/upload-rom', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/octet-stream',
-            'x-filename': encodeURIComponent(file.name),
-            'x-system-key': safeSystemKey
-          },
-          body: file
-        });
+        try {
+          const res = await fetch('/api/upload-rom', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/octet-stream',
+              'x-filename': encodeURIComponent(file.name),
+              'x-system-key': safeSystemKey
+            },
+            body: file
+          });
 
-        if (!res.ok) {
-          const errorJson = await res.json().catch(() => ({}));
-          throw new Error(errorJson.error || `Upload failed (HTTP ${res.status})`);
+          if (!res.ok) {
+            const errorJson = await res.json().catch(() => ({}));
+            throw new Error(errorJson.error || `Upload failed (HTTP ${res.status})`);
+          }
+
+          const json = await res.json();
+          if (!json.success || !json.game) {
+            throw new Error('Server did not return game record');
+          }
+
+          targetGame = json.game;
+        } catch (serverErr) {
+          console.warn('⚠️ [SERVER UPLOAD FALLBACK] Server upload endpoint unavailable, falling back to local IndexedDB storage:', serverErr);
+          if (onProgress) onProgress({ step: 'saving_local', message: `Saving "${file.name}" to browser storage...` });
+
+          const gameId = `local_${safeSystemKey}_${rawTitle.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+          const blobUrl = URL.createObjectURL(file);
+
+          targetGame = {
+            id: gameId,
+            title: cleanTitle || rawTitle,
+            rawTitle: rawTitle,
+            filename: file.name,
+            systemKey: safeSystemKey,
+            systemName: sys.name,
+            systemCore: sys.core,
+            systemColor: sys.color,
+            systemIcon: sys.icon,
+            romUrl: blobUrl,
+            coverUrl: sys.icon,
+            isCustomBlob: true,
+            isLocalDbRom: true
+          };
+
+          await saveCustomRomToLocalDb(targetGame, file);
         }
-
-        const json = await res.json();
-        if (!json.success || !json.game) {
-          throw new Error('Server did not return game record');
-        }
-
-        targetGame = json.game;
       } else {
         // 2. Client-Side IndexedDB Flow (GitHub Pages / Offline PWA)
         if (onProgress) onProgress({ step: 'saving_local', message: `Saving "${file.name}" to browser storage...` });
@@ -553,13 +579,10 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
     e.stopPropagation();
     setIsDraggingOver(false);
 
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      if (onFileDropped) {
-        onFileDropped(file);
-      } else {
-        processCustomRomFile(file);
-      }
+    if (onFileDropped) {
+      onFileDropped(e.dataTransfer || e.dataTransfer?.files?.[0]);
+    } else if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
+      processCustomRomFile(e.dataTransfer.files[0]);
     }
   }, [onFileDropped, processCustomRomFile]);
 
