@@ -73,6 +73,19 @@ export default function ProfileCreatorModal({
                 <p>Customize your gamer identity, avatar seed, and favorite console color</p>
               </div>
             </div>
+            <button
+              type="button"
+              className={`scraper-modal-close-btn ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`}
+              onClick={() => {
+                sfx?.playModalClose?.();
+                onClose?.();
+                haptics.selection();
+              }}
+              title="Close (Esc)"
+              aria-label="Close Character Studio Modal"
+            >
+              <X size={18} />
+            </button>
           </header>
 
           {/* Modal Body: Character Studio */}
