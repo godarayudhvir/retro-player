@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { X, Gamepad2, Github, ExternalLink } from 'lucide-react';
+import { Gamepad2, Github, ExternalLink, Info } from 'lucide-react';
+import { haptics } from '../services/hapticsService';
 
 /**
  * About & Controls Reference Modal displaying system capabilities, repository source, and full keyboard / gamepad mappings.
@@ -24,28 +25,31 @@ export default function AboutInfoModal({ isOpen, focusedTarget, onClose, sfx }) 
   if (!isOpen) return null;
 
   return (
-    <div className="info-modal-backdrop" onClick={onClose}>
-      <div className="info-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '540px' }}>
-        <div className="info-modal-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Gamepad2 size={28} color="#ef4444" />
-            <h2>Retro Player</h2>
-            <span className="info-version-badge">v1.0.9</span>
+    <div className="info-modal-backdrop animate-fade-in" onClick={onClose} role="dialog" aria-modal="true">
+      <div 
+        className="scraper-modal-container animate-scale-up" 
+        onClick={(e) => e.stopPropagation()} 
+        style={{ maxWidth: '580px' }}
+      >
+        {/* Modal Header */}
+        <header className="scraper-modal-header">
+          <div className="scraper-modal-title-group">
+            <div className="scraper-icon-bubble" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#059669' }}>
+              <Info size={22} color="#059669" />
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <h2>Retro Player</h2>
+                <span className="info-version-badge" style={{ fontSize: '0.68rem', padding: '0.12rem 0.5rem' }}>v1.0.9</span>
+              </div>
+              <p>System specifications, emulation engines, and repository source</p>
+            </div>
           </div>
-          <button
-            className="info-close-btn"
-            onClick={() => {
-              sfx?.playModalClose?.();
-              onClose?.();
-            }}
-            aria-label="Close modal"
-          >
-            <X size={20} />
-          </button>
-        </div>
+        </header>
         
-        <div className="info-modal-body" style={{ paddingBottom: '1.5rem' }}>
-          <p className="info-tagline">
+        {/* Modal Body */}
+        <div className="backup-modal-body" style={{ padding: '1.25rem 1.75rem', overflowY: 'auto' }}>
+          <p className="info-tagline" style={{ marginTop: 0, marginBottom: '1rem' }}>
             A modern, high-performance web-based retro game launcher and emulator library for classic retro console games.
           </p>
 
@@ -66,6 +70,7 @@ export default function AboutInfoModal({ isOpen, focusedTarget, onClose, sfx }) 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="info-repo-link"
+                onClick={() => haptics.selection()}
               >
                 <span>github.com/godarayudhvir/retro-player</span>
                 <ExternalLink size={14} />
@@ -73,6 +78,23 @@ export default function AboutInfoModal({ isOpen, focusedTarget, onClose, sfx }) 
             </div>
           </div>
         </div>
+
+        {/* Modal Footer */}
+        <footer className="scraper-modal-footer" style={{ justifyContent: 'flex-end' }}>
+          <div className="scraper-footer-actions">
+            <button
+              type="button"
+              className="settings-action-btn folder-btn"
+              onClick={() => {
+                onClose?.();
+                sfx?.playModalClose?.();
+                haptics.selection();
+              }}
+            >
+              <span>Close</span>
+            </button>
+          </div>
+        </footer>
       </div>
     </div>
   );

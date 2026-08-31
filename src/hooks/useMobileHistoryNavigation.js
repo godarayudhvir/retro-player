@@ -30,6 +30,8 @@ export function useMobileHistoryNavigation({
   setShowScraperModal,
   showBackupModal,
   setShowBackupModal,
+  showTrophyModal,
+  setShowTrophyModal,
   showProfileSelectModal,
   setShowProfileSelectModal,
   showProfileCreatorModal,
@@ -64,6 +66,7 @@ export function useMobileHistoryNavigation({
     if (showLoadRomModal) return { type: 'modal', name: 'loadRom' };
     if (showScraperModal) return { type: 'modal', name: 'scraper' };
     if (showBackupModal) return { type: 'modal', name: 'backup' };
+    if (showTrophyModal) return { type: 'modal', name: 'trophy' };
     if (showInfoModal) return { type: 'modal', name: 'info' };
     if (showProfileSwitcher) return { type: 'layer', name: 'profileSwitcher' };
     if (activeGame) return { type: 'stage', name: 'emulator', item: activeGame };
@@ -78,6 +81,7 @@ export function useMobileHistoryNavigation({
     showLoadRomModal,
     showScraperModal,
     showBackupModal,
+    showTrophyModal,
     showInfoModal,
     showProfileSwitcher,
     activeGame,
@@ -152,6 +156,11 @@ export function useMobileHistoryNavigation({
       sfx?.playNavBack?.();
       return true;
     }
+    if (showTrophyModal) {
+      setShowTrophyModal(false);
+      sfx?.playNavBack?.();
+      return true;
+    }
     if (showInfoModal) {
       setShowInfoModal(false);
       sfx?.playNavBack?.();
@@ -188,6 +197,7 @@ export function useMobileHistoryNavigation({
     showLoadRomModal,
     showScraperModal,
     showBackupModal,
+    showTrophyModal,
     showInfoModal,
     showProfileSwitcher,
     activeGame,
@@ -200,6 +210,7 @@ export function useMobileHistoryNavigation({
     setShowLoadRomModal,
     setShowScraperModal,
     setShowBackupModal,
+    setShowTrophyModal,
     setShowInfoModal,
     setShowProfileSwitcher,
     setActiveGame,

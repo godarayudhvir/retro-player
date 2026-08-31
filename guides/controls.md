@@ -164,3 +164,22 @@ When launching a game without a connected gamepad, Retro Player displays a **10-
 | **Arcade (MAME)** | `Arrow Keys` | `Ctrl / Z` (1), `Alt / X` (2), `Space / C` (3), `Shift / V` (4) | — | `5/6` (Insert Coin), `1/2` (Start), `Tab` (Menu) |
 | **Atari 2600** | `Arrow Keys` | `Z / Space` (Fire) | — | `F1 / Enter` (Reset), `F2` (Select) |
 
+---
+
+## 📳 Haptic Touch & Tactile Feedback Engine
+
+For mobile touch and handheld PWA players, Retro Player integrates a console-grade **Haptic Feedback Engine** powered by the HTML5 Vibration API (`navigator.vibrate`):
+
+| Interaction / Context | Haptic Pulse Profile | Purpose |
+| :--- | :--- | :--- |
+| **Virtual Touch Gamepad** | `8ms` Micro-Pulse | Instant physical click feedback when pressing on-screen D-Pad or A/B/X/Y buttons |
+| **Tabs & Ribbon Selection** | `12ms` Crisp Pulse | Tactile confirmation on platform filters, bottom dock tabs, and search chips |
+| **Drawer & Modal Navigation** | `18ms` Medium Pulse | Tactile confirmation when opening game details, save manager, or tools drawer |
+| **Save Confirmation** | `[15ms, 30ms, 20ms]` Rhythm | Haptic acknowledgment upon quick saving or battery export |
+| **Achievement & Milestone Toast** | `[25ms, 40ms, 25ms, 40ms, 60ms]` Fanfare | Multi-beat trophy celebration rhythm synchronized with achievement popups |
+
+### Battery & Device Protections
+- **Rate-Limiting**: Capped at `35ms` frequency to prevent motor stutter during intense gameplay.
+- **Battery-Saver Awareness**: Automatically throttles/disables vibration when device battery is $\le 15\%$.
+- **User Toggle**: Customizable anytime in the **Mobile Tools Drawer $\rightarrow$ Emulation Preferences & Haptics**.
+

@@ -160,6 +160,7 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 - 🏆 **Universal Organic Achievements & Pokémon Save Inspector**: Master registry of 24 universal organic achievements across 6 categories (300G Gamerscore), Gamerscore tracking, in-game unlock buffering, session-exit toast fanfare with Web Audio chiptune chimes, and a real-time, offline Pokémon Save Inspector for Gen 1–3 (GB, GBC, GBA) unlocking 8/16 Gym Badges, starter choices, Pokédex milestones, key items, and League Champions.
 - 📁 **Folder Batch Ingestion & Companion Asset Pairing**: Drag and drop entire multi-system ROM directories or load in-memory with zero disk copies, automatic console classification across 12 platforms, background scraping, and automatic local companion box art (`.webp`/`.png`/`.jpg`) and metadata (`.json`/`.nfo`) sidecar binding.
 - 🎵 **Dynamic BGM & Synthesized SFX**: Multi-track chiptune engine with smart in-game pause and low-latency Web Audio sound effects.
+- 📳 **Haptic Touch & Tactile Feedback Engine**: Hardware-accelerated micro-vibration feedback (`navigator.vibrate`) across mobile touch navigation, carousel selection, on-screen virtual gamepads, and achievement fanfare with built-in battery-saver awareness.
 - 📱 **Adaptive Cross-Device PWA**: Installable standalone app optimized for Mobile Touch Feeds, Steam Deck, Desktop, and 10-Foot TV mode.
 - 📹 **60 FPS Recorder & Engine Controls**: In-browser video capture, speed turbo throttling (`1.0x`–`5.0x`), VSync, CRT/pixel shaders, and live diagnostic HUD.
 

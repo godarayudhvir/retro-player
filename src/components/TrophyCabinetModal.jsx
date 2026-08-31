@@ -67,10 +67,12 @@ import {
   Coffee,
   Dices,
   ArrowLeft,
-  Settings
+  Settings,
+  ChevronDown
 } from 'lucide-react';
 import MultiAvatar from './MultiAvatar';
 import { ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, ACHIEVEMENT_CATEGORIES } from '../data/achievementsManifest';
+import { haptics } from '../services/hapticsService';
 
 const ICON_MAP = {
   PlayCircle,
@@ -159,8 +161,10 @@ export default function TrophyCabinetModal({
 }) {
   const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'unlocked', 'locked'
   const [categoryFilter, setCategoryFilter] = useState('all'); // 'all', or category id
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(0);
   const cardsContainerRef = useRef(null);
+  const categoryMenuRef = useRef(null);
 
   const unlocked = achievementsEngine?.unlocked || {};
   const totalEarnedPoints = achievementsEngine?.totalEarnedPoints || 0;
@@ -194,14 +198,35 @@ export default function TrophyCabinetModal({
     }
   }, [focusedIndex, isOpen]);
 
+  // Close category dropdown on outside click or touch
+  useEffect(() => {
+    if (!isCategoryMenuOpen) return;
+    const handleOutsideClick = (e) => {
+      if (categoryMenuRef.current && !categoryMenuRef.current.contains(e.target)) {
+        setIsCategoryMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+    };
+  }, [isCategoryMenuOpen]);
+
   // Enhanced 2D Spatial Grid & Gamepad Navigation (2 columns: left/right/up/down, L1/R1 tabs, L2/R2 categories)
   useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (e) => {
-      // Close modal on Escape / B
+      // Close category dropdown or modal on Escape / B
       if (e.key === 'Escape' || e.key === 'Esc') {
         e.preventDefault();
+        if (isCategoryMenuOpen) {
+          setIsCategoryMenuOpen(false);
+          sfx?.playTileNav?.();
+          return;
+        }
         sfx?.playModalClose?.();
         onClose();
         return;
@@ -447,6 +472,7 @@ export default function TrophyCabinetModal({
             className="mobile-games-back-btn"
             onClick={() => {
               sfx?.playModalClose?.();
+              haptics.selection();
               onClose();
             }}
             aria-label="Back to Library"
@@ -536,6 +562,7 @@ export default function TrophyCabinetModal({
               onClick={() => {
                 setStatusFilter('all');
                 sfx?.playTabSwitch?.();
+                haptics.selection();
               }}
             >
               All ({totalCount})
@@ -546,6 +573,7 @@ export default function TrophyCabinetModal({
               onClick={() => {
                 setStatusFilter('unlocked');
                 sfx?.playTabSwitch?.();
+                haptics.selection();
               }}
             >
               Unlocked ({unlockedCount})
@@ -556,28 +584,78 @@ export default function TrophyCabinetModal({
               onClick={() => {
                 setStatusFilter('locked');
                 sfx?.playTabSwitch?.();
+                haptics.selection();
               }}
             >
               Locked ({totalCount - unlockedCount})
             </button>
           </div>
 
-          {/* Category Dropdown Filter */}
-          <div className="trophy-category-wrap">
-            <select
-              value={categoryFilter}
-              onChange={(e) => {
-                setCategoryFilter(e.target.value);
-                sfx?.playTabSwitch?.();
+          {/* Category Custom Popover Filter */}
+          <div className="trophy-category-wrap" ref={categoryMenuRef} style={{ position: 'relative' }}>
+            <button
+              type="button"
+              className="trophy-ds-select-btn"
+              onClick={() => {
+                setIsCategoryMenuOpen(prev => !prev);
+                sfx?.playTileNav?.();
+                haptics.selection();
               }}
-              className="trophy-ds-select"
+              aria-haspopup="listbox"
+              aria-expanded={isCategoryMenuOpen}
               aria-label="Filter by Category"
             >
-              <option value="all">All Categories</option>
-              {Object.values(ACHIEVEMENT_CATEGORIES).map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.label}</option>
-              ))}
-            </select>
+              <span>{categoryFilter === 'all' ? 'All Categories' : (ACHIEVEMENT_CATEGORIES[categoryFilter?.toUpperCase()]?.label || categoryFilter)}</span>
+              <ChevronDown size={14} style={{ transform: isCategoryMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease', opacity: 0.7 }} />
+            </button>
+
+            {isCategoryMenuOpen && (
+              <div 
+                className="trophy-custom-dropdown-menu animate-scale-up"
+                role="listbox"
+                aria-label="Category Selection"
+              >
+                <div
+                  className={`trophy-dropdown-item ${categoryFilter === 'all' ? 'is-active' : ''}`}
+                  role="option"
+                  aria-selected={categoryFilter === 'all'}
+                  onClick={() => {
+                    setCategoryFilter('all');
+                    setIsCategoryMenuOpen(false);
+                    sfx?.playTabSwitch?.();
+                    haptics.selection();
+                  }}
+                >
+                  <span className="trophy-dropdown-item-label">All Categories</span>
+                  <div className="trophy-dropdown-radio-indicator">
+                    {categoryFilter === 'all' && <div className="trophy-dropdown-radio-inner" />}
+                  </div>
+                </div>
+
+                {Object.values(ACHIEVEMENT_CATEGORIES).map(cat => {
+                  const isSelected = categoryFilter === cat.id;
+                  return (
+                    <div
+                      key={cat.id}
+                      className={`trophy-dropdown-item ${isSelected ? 'is-active' : ''}`}
+                      role="option"
+                      aria-selected={isSelected}
+                      onClick={() => {
+                        setCategoryFilter(cat.id);
+                        setIsCategoryMenuOpen(false);
+                        sfx?.playTabSwitch?.();
+                        haptics.selection();
+                      }}
+                    >
+                      <span className="trophy-dropdown-item-label">{cat.label}</span>
+                      <div className="trophy-dropdown-radio-indicator">
+                        {isSelected && <div className="trophy-dropdown-radio-inner" />}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 
@@ -602,6 +680,7 @@ export default function TrophyCabinetModal({
                   className={`trophy-ds-card tier-${item.tier} ${isUnlocked ? 'is-unlocked' : 'is-locked'} ${isFocused ? 'is-focused' : ''}`}
                   tabIndex={0}
                   onFocus={() => setFocusedIndex(idx)}
+                  onClick={() => haptics.selection()}
                 >
                   {/* Left Icon Box */}
                   <div 
@@ -674,6 +753,7 @@ export default function TrophyCabinetModal({
             onClick={() => {
               onClose();
               sfx?.playTabSwitch?.();
+              haptics.selection();
             }}
             aria-label="Library - All Games"
           >
@@ -691,6 +771,7 @@ export default function TrophyCabinetModal({
               onClose();
               window.dispatchEvent(new CustomEvent('retro_nav_tab', { detail: 'favorites' }));
               sfx?.playTabSwitch?.();
+              haptics.selection();
             }}
             aria-label="Favorites"
           >
@@ -708,6 +789,7 @@ export default function TrophyCabinetModal({
               onClose();
               window.dispatchEvent(new CustomEvent('retro_nav_tab', { detail: 'recent' }));
               sfx?.playTabSwitch?.();
+              haptics.selection();
             }}
             aria-label="Recently Played Games"
           >
@@ -737,6 +819,7 @@ export default function TrophyCabinetModal({
               onClose();
               window.dispatchEvent(new CustomEvent('retro_nav_tab', { detail: 'tools' }));
               sfx?.playTileNav?.();
+              haptics.medium();
             }}
             aria-label="Console Utilities & Settings"
           >

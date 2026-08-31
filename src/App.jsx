@@ -433,6 +433,8 @@ export default function App() {
     setShowScraperModal,
     showBackupModal,
     setShowBackupModal,
+    showTrophyModal,
+    setShowTrophyModal,
     showProfileSelectModal,
     setShowProfileSelectModal,
     showProfileCreatorModal,
@@ -567,6 +569,7 @@ export default function App() {
           setShowVirtualKeyboard={setShowVirtualKeyboard}
           onDeleteGame={deleteGame}
           achievementsEngine={achievementsEngine}
+          themeEngine={themeEngine}
         />
       ) : (
         <>

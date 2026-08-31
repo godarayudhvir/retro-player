@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { ACHIEVEMENTS_MANIFEST, POKEMON_ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, TOTAL_ACHIEVEMENT_POINTS } from '../data/achievementsManifest';
 import { parsePokemonSave, isPokemonRom } from '../services/pokemonSaveParser';
 import { dbGet, dbSet, STORES } from '../services/db';
+import { haptics } from '../services/hapticsService';
 
 const STORAGE_PREFIX = 'achievements_';
 
@@ -169,9 +170,10 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
     console.log(`🏆 [ACHIEVEMENTS TOAST ACTIVE] Pop-up active for "${nextAch.title}" (+${nextAch.tier} tier)`);
     setActiveToast({ ...nextAch });
 
-    // Play chiptune fanfare
+    // Play chiptune fanfare & haptic vibration
     try {
       sfxRef.current?.playAchievementUnlock?.();
+      haptics.trophy();
     } catch (e) {
       console.warn('SFX fanfare error:', e);
     }

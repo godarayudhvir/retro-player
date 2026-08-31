@@ -22,6 +22,7 @@ import {
 import ConfirmModal from './ConfirmModal';
 import { resetEntireApp } from '../utils/appReset';
 import { exportFullDatabase, importFullDatabase, checkServerDbStatus } from '../services/db';
+import { haptics } from '../services/hapticsService';
 
 /**
  * BackupModal: Centralized Filesystem Database & Storage Management Studio.
@@ -234,34 +235,28 @@ export default function BackupModal({
   if (!isOpen) return null;
 
   return (
-    <div className="theme-modal-backdrop animate-fade-in" onClick={onClose} role="dialog" aria-modal="true">
+    <div className="info-modal-backdrop animate-fade-in" onClick={onClose} role="dialog" aria-modal="true">
       <div 
-        className="backup-modal-content animate-fade-in" 
+        className="scraper-modal-container animate-scale-up" 
         onClick={(e) => e.stopPropagation()}
         ref={modalRef}
+        style={{ maxWidth: '680px' }}
       >
         {/* Modal Header */}
-        <div className="backup-modal-header">
-          <div className="backup-modal-title">
-            <Database size={20} className="backup-header-icon" />
+        <header className="scraper-modal-header">
+          <div className="scraper-modal-title-group">
+            <div className="scraper-icon-bubble" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' }}>
+              <Database size={22} color="#3b82f6" />
+            </div>
             <div>
               <h2>Storage &amp; Database Management</h2>
               <p>Export full game saves &amp; stats, restore backups, or factory reset storage</p>
             </div>
           </div>
-
-          <button 
-            type="button" 
-            className="info-close-btn" 
-            onClick={() => { onClose(); sfx?.playModalClose?.(); }}
-            aria-label="Close modal"
-          >
-            <X size={18} />
-          </button>
-        </div>
+        </header>
 
         {/* Modal Scrollable Body */}
-        <div className="backup-modal-body">
+        <div className="backup-modal-body" style={{ overflowY: 'auto' }}>
           {/* Database Overview Metric Chips */}
           {stats && (
             <div className="backup-metrics-grid" style={{
@@ -440,6 +435,7 @@ export default function BackupModal({
                 onClick={() => {
                   setShowResetConfirm(true);
                   sfx?.playModalOpen?.();
+                  haptics.medium();
                 }}
               >
                 <RotateCcw size={15} />
@@ -449,6 +445,23 @@ export default function BackupModal({
 
           </div>
         </div>
+
+        {/* Modal Footer */}
+        <footer className="scraper-modal-footer" style={{ justifyContent: 'flex-end' }}>
+          <div className="scraper-footer-actions">
+            <button
+              type="button"
+              className="settings-action-btn folder-btn"
+              onClick={() => {
+                onClose?.();
+                sfx?.playModalClose?.();
+                haptics.selection();
+              }}
+            >
+              <span>Close</span>
+            </button>
+          </div>
+        </footer>
       </div>
 
       {/* Factory Reset Nested Confirmation Modal */}

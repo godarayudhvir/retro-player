@@ -16,6 +16,7 @@
 - **Folder Ingestion & Companion Asset Pairing**: Drag-and-drop or browse entire multi-system ROM folders with zero-copy in-memory sessions or permanent host disk ingestion, automatic console classification, background scraping, and local box art / sidecar binding.
 - **Universal Gamepad & Keyboard Navigation**: 100% controller spatial navigation across desktop & mobile feeds, telemetry widget with gamepad battery status and charging indicators.
 - **Universal Organic Achievements & Pokémon Save Inspector**: Master registry of 24 universal organic achievements across 6 categories (300G Gamerscore), in-game unlock buffering, session exit toast flushing with Web Audio chiptune fanfare, and a zero-overhead binary Pokémon Save Inspector across Gen 1–3 (.sav) unlocking 8/16 Gym Badges, starter choices, Pokédex milestones, key items, and League Champions.
+- **Haptic Touch & Tactile Feedback Engine**: Hardware-accelerated tactile impulses (`navigator.vibrate`) for mobile touch navigation, carousel selection, on-screen virtual gamepads, and achievement fanfare with built-in battery-saver awareness.
 - **Progressive Web App (PWA) & Offline Mode**: Installable standalone app across macOS, Windows, Linux, Steam Deck, iOS, and Android.
 
 ## Documentation & Guides

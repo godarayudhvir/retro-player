@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Check, User, Sparkles, Trash2 } from 'lucide-react';
 import CharacterStudio from './CharacterStudio';
 import { CHARACTER_ARCHETYPES } from '../utils/characterPresets';
+import { haptics } from '../services/hapticsService';
 
 /**
  * ProfileCreatorModal - Multiavatar Profile Creation & Customizer Studio
@@ -59,26 +60,23 @@ export default function ProfileCreatorModal({
 
   return (
     <>
-      <div className="profile-creator-backdrop animate-fade-in" onClick={onClose}>
-        <div className="profile-creator-modal custom-studio-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="info-modal-backdrop animate-fade-in" onClick={onClose}>
+        <div className="scraper-modal-container animate-scale-up" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '640px' }}>
           {/* Header */}
-          <div className="profile-creator-header">
-            <div className="profile-creator-title">
-              <User size={20} color={favoriteColor} />
-              <h2>{initialProfile ? 'Edit Character Profile' : 'Character Creation Studio'}</h2>
+          <header className="scraper-modal-header">
+            <div className="scraper-modal-title-group">
+              <div className="scraper-icon-bubble" style={{ background: `${favoriteColor}22`, color: favoriteColor }}>
+                <User size={22} color={favoriteColor} />
+              </div>
+              <div>
+                <h2>{initialProfile ? 'Edit Character Profile' : 'Character Creation Studio'}</h2>
+                <p>Customize your gamer identity, avatar seed, and favorite console color</p>
+              </div>
             </div>
-            <button 
-              type="button" 
-              className={`info-close-btn profile-close-btn ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`} 
-              onClick={() => { onClose(); sfx?.playModalClose?.(); }}
-              aria-label="Close"
-            >
-              <X size={18} />
-            </button>
-          </div>
+          </header>
 
           {/* Modal Body: Character Studio */}
-          <div className="profile-creator-body custom-studio-body">
+          <div className="profile-creator-body custom-studio-body" style={{ padding: '1.25rem 1.75rem', overflowY: 'auto' }}>
             <CharacterStudio
               playerName={name}
               setPlayerName={setName}
@@ -96,46 +94,36 @@ export default function ProfileCreatorModal({
           </div>
 
           {/* Footer Actions */}
-          <div className="profile-creator-footer">
-            {canDelete && onDelete && (
+          <footer className="scraper-modal-footer" style={{ justifyContent: 'flex-end' }}>
+            <div className="scraper-footer-actions">
               <button
                 type="button"
-                className={`profile-btn-danger ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'delete' ? 'gamepad-focused' : ''}`}
+                className={`settings-action-btn folder-btn ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'cancel' ? 'gamepad-focused' : ''}`}
                 onClick={() => {
-                  if (onDelete && initialProfile) {
-                    onDelete(initialProfile.id);
-                    onClose?.();
-                    sfx?.playModalClose?.();
-                  }
+                  onClose?.();
+                  sfx?.playModalClose?.();
+                  haptics.selection();
                 }}
-                title="Delete Profile"
-                aria-label="Delete Profile"
               >
-                <Trash2 size={15} />
-                <span>Delete</span>
-              </button>
-            )}
-
-            <div className="profile-footer-right-actions" style={{ display: 'flex', gap: '0.5rem', marginLeft: 'auto' }}>
-              <button
-                type="button"
-                className={`profile-btn-secondary profile-btn-cancel ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'cancel' ? 'gamepad-focused' : ''}`}
-                onClick={onClose}
-              >
-                Cancel
+                {gamepadConnected && <span className="osk-btn-badge badge-b">B</span>}
+                <span>Cancel</span>
               </button>
 
               <button
                 type="button"
-                className={`profile-btn-primary profile-btn-save ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'save' ? 'gamepad-focused' : ''}`}
-                style={{ backgroundColor: favoriteColor }}
-                onClick={handleSubmit}
+                className={`settings-action-btn primary ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'save' ? 'gamepad-focused' : ''}`}
+                style={{ backgroundColor: favoriteColor, borderColor: favoriteColor }}
+                onClick={(e) => {
+                  haptics.medium();
+                  handleSubmit(e);
+                }}
               >
+                {gamepadConnected && <span className="osk-btn-badge badge-x">X</span>}
                 <Check size={16} />
                 <span>{initialProfile ? 'Save Changes' : 'Create Profile'}</span>
               </button>
             </div>
-          </div>
+          </footer>
         </div>
       </div>
     </>

@@ -20891,22 +20891,131 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3);
 }
 
-.trophy-ds-select {
-  padding: 0.3rem 0.75rem;
-  font-size: 0.74rem;
+.trophy-ds-select-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.76rem;
   font-weight: 700;
   border-radius: 6px;
-  background: #f1f5f9;
-  border: 1.5px solid #cbd5e1;
-  color: var(--text-main);
+  background: var(--bg-card, #ffffff);
+  border: 1.5px solid var(--panel-border, #cbd5e1);
+  color: var(--text-main, #0f172a);
   outline: none;
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.15s ease;
 }
 
-[data-color-mode="dark"] .trophy-ds-select {
-  background: #0f172a;
+.trophy-ds-select-btn:hover {
+  background: var(--bg-hover, #f1f5f9);
+  border-color: #94a3b8;
+}
+
+[data-color-mode="dark"] .trophy-ds-select-btn {
+  background: #1e293b;
   border-color: #334155;
   color: #f8fafc;
+}
+
+[data-color-mode="dark"] .trophy-ds-select-btn:hover {
+  background: #334155;
+  border-color: #475569;
+}
+
+.trophy-custom-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 210px;
+  background: var(--bg-card, #ffffff);
+  border: 1.5px solid var(--panel-border, #cbd5e1);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.18), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  padding: 0.35rem;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+[data-color-mode="dark"] .trophy-custom-dropdown-menu {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45);
+}
+
+.trophy-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-main, #0f172a);
+  transition: background 0.12s ease;
+  user-select: none;
+}
+
+.trophy-dropdown-item:hover {
+  background: var(--bg-hover, #f1f5f9);
+}
+
+.trophy-dropdown-item.is-active {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+  font-weight: 700;
+}
+
+[data-color-mode="dark"] .trophy-dropdown-item {
+  color: #e2e8f0;
+}
+
+[data-color-mode="dark"] .trophy-dropdown-item:hover {
+  background: #334155;
+}
+
+[data-color-mode="dark"] .trophy-dropdown-item.is-active {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+
+.trophy-dropdown-item-label {
+  flex: 1;
+}
+
+.trophy-dropdown-radio-indicator {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+}
+
+.trophy-dropdown-item.is-active .trophy-dropdown-radio-indicator {
+  border-color: #2563eb;
+}
+
+[data-color-mode="dark"] .trophy-dropdown-item.is-active .trophy-dropdown-radio-indicator {
+  border-color: #60a5fa;
+}
+
+.trophy-dropdown-radio-inner {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2563eb;
+}
+
+[data-color-mode="dark"] .trophy-dropdown-radio-inner {
+  background: #60a5fa;
 }
 
 /* Cards Grid */
@@ -21233,8 +21342,15 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   }
 
   .trophy-category-wrap,
-  .trophy-ds-select {
+  .trophy-ds-select-btn {
     width: 100%;
+    justify-content: space-between;
+  }
+
+  .trophy-custom-dropdown-menu {
+    width: 100%;
+    left: 0;
+    right: 0;
   }
 
   .trophy-ds-card {

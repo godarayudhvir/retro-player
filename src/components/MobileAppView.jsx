@@ -67,7 +67,9 @@ import {
   PlusCircle,
   Eye,
   Activity,
-  Compass
+  Compass,
+  Sun,
+  Moon
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import MultiAvatar from './MultiAvatar';
@@ -77,6 +79,7 @@ import { getReleaseDate, getGameDescription } from '../gameDescriptions';
 import { saveCachedMetadata } from '../services/metadataScraper';
 import { POKEMON_ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, getPokemonBadgesForGame, getPokemonMilestonesForGame } from '../data/achievementsManifest';
 import { isPokemonRom } from '../services/pokemonSaveParser';
+import { haptics } from '../services/hapticsService';
 
 const POKE_ICON_MAP = {
   Compass,
@@ -222,6 +225,9 @@ export default function MobileAppView({
       return true;
     }
   });
+
+  // Setting: Haptic Touch & Tactile Feedback
+  const [isHapticsEnabled, setIsHapticsEnabled] = useState(() => haptics.isEnabled);
 
   // DS Detail Tabs: 'overview' | 'save' | 'guides' | 'manage'
   const [dsTab, setDsTab] = useState('overview');
@@ -905,6 +911,7 @@ export default function MobileAppView({
             onClick={() => {
               setSelectedGameForDetails(null);
               sfx?.playTileNav?.();
+              haptics.selection();
             }}
           >
             <ArrowLeft size={16} />
@@ -914,19 +921,16 @@ export default function MobileAppView({
 
         {/* Game Detail Body */}
         <main className="mobile-detail-body">
-          {/* Top Screen Frame: Snapshot / Box Art in DS Bezel */}
-          <div className="ds-screen-frame top-screen mobile-ds-top-screen">
-            {screenshotSrc ? (
-              <img src={screenshotSrc} alt="Gameplay Snapshot" className="ds-screen-img" />
-            ) : coverSrc ? (
-              <img src={coverSrc} alt={selectedGameForDetails.title} className="ds-screen-img cover-fit" />
-            ) : (
-              <div className="ds-screen-placeholder">
-                <Gamepad2 size={42} color="#94a3b8" />
-                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#94a3b8' }}>{selectedGameForDetails.title}</span>
-              </div>
-            )}
-          </div>
+          {/* Top Screen Frame: Snapshot / Box Art in DS Bezel (Only rendered if an authentic image exists) */}
+          {(screenshotSrc || coverSrc) && (
+            <div className="ds-screen-frame top-screen mobile-ds-top-screen">
+              {screenshotSrc ? (
+                <img src={screenshotSrc} alt="Gameplay Snapshot" className="ds-screen-img" />
+              ) : (
+                <img src={coverSrc} alt={selectedGameForDetails.title} className="ds-screen-img cover-fit" />
+              )}
+            </div>
+          )}
 
           {/* Title & Metadata Block */}
           <div className="ds-game-title-card mobile-ds-title-card">
@@ -946,12 +950,17 @@ export default function MobileAppView({
               className="ds-play-now-btn mobile-ds-play-btn"
               onClick={() => {
                 if (onPlayGame) {
+                  haptics.medium();
                   onPlayGame(selectedGameForDetails);
                 }
               }}
+              title={`Play ${selectedGameForDetails.title}`}
+              aria-label={`Play ${selectedGameForDetails.title} now`}
             >
-              <Play size={20} fill="#ffffff" />
-              <span>{hasSaveData ? 'CONTINUE / PLAY NOW' : 'PLAY GAME NOW'}</span>
+              <div className="ds-play-inner">
+                <Play size={20} fill="#ffffff" color="#ffffff" className="play-icon-glow" />
+                <span className="ds-play-text">PLAY GAME NOW</span>
+              </div>
             </button>
           </div>
 
@@ -965,6 +974,7 @@ export default function MobileAppView({
                 if (toggleFavorite) {
                   toggleFavorite(selectedGameForDetails);
                   sfx?.playFavoriteToggle?.(!isSelectedFav);
+                  haptics.selection();
                 }
               }}
               title={isSelectedFav ? 'Favorited' : 'Favorite'}
@@ -981,6 +991,7 @@ export default function MobileAppView({
                 onClick={() => {
                   setDsTab(dsTab === 'pokemon' ? 'overview' : 'pokemon');
                   sfx?.playTabSwitch?.();
+                  haptics.selection();
                 }}
                 title="Pokémon Trainer Milestones & Badge Case"
                 aria-label="Pokémon Trainer Milestones"
@@ -997,6 +1008,7 @@ export default function MobileAppView({
                 onClick={() => {
                   setDsTab(dsTab === 'save' ? 'overview' : 'save');
                   sfx?.playTabSwitch?.();
+                  haptics.selection();
                 }}
                 title="In-Game Save Data & Battery RAM (.sav)"
                 aria-label="Save Data"
@@ -1013,6 +1025,7 @@ export default function MobileAppView({
                 onClick={() => {
                   setDsTab(dsTab === 'guides' ? 'overview' : 'guides');
                   sfx?.playTabSwitch?.();
+                  haptics.selection();
                 }}
                 title="Strategy Guides & Walkthroughs"
                 aria-label="Strategy Guides"
@@ -1028,6 +1041,7 @@ export default function MobileAppView({
               onClick={() => {
                 setDsTab(dsTab === 'manage' ? 'overview' : 'manage');
                 sfx?.playTabSwitch?.();
+                haptics.selection();
               }}
               title="Edit Game Metadata & Scraper Studio"
               aria-label="Edit & Scrape"
@@ -1855,6 +1869,7 @@ export default function MobileAppView({
               setIsSearchOpen(false);
               setSelectedSystem(null);
               sfx?.playTileNav?.();
+              haptics.selection();
             }}
           >
             <ArrowLeft size={16} />
@@ -1875,6 +1890,7 @@ export default function MobileAppView({
               onClick={() => {
                 setIsSearchOpen(prev => !prev);
                 sfx?.playTileNav?.();
+                haptics.selection();
               }}
               title="Search Games"
               aria-label="Search Games"
@@ -1929,6 +1945,7 @@ export default function MobileAppView({
                     onClick={() => {
                       setSelectedGameForDetails(game);
                       sfx?.playTileNav?.();
+                      haptics.medium();
                     }}
                     title={game.title}
                   >
@@ -1975,6 +1992,7 @@ export default function MobileAppView({
               if (isHamburgerOpen) setIsHamburgerOpen(false);
               setSelectedSystem({ key: 'all', name: 'All Games', icon: 'assets/platforms/gba.svg' });
               sfx?.playTabSwitch?.();
+              haptics.selection();
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             aria-label="Library - All Games"
@@ -1993,6 +2011,7 @@ export default function MobileAppView({
               if (isHamburgerOpen) setIsHamburgerOpen(false);
               setSelectedSystem({ key: 'favorites', name: 'Favorites', icon: null });
               sfx?.playTabSwitch?.();
+              haptics.selection();
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             aria-label="Favorites"
@@ -2011,6 +2030,7 @@ export default function MobileAppView({
               if (isHamburgerOpen) setIsHamburgerOpen(false);
               setSelectedSystem({ key: 'recent', name: 'Recently Played', icon: null });
               sfx?.playTabSwitch?.();
+              haptics.selection();
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             aria-label="Recently Played Games"
@@ -2029,6 +2049,7 @@ export default function MobileAppView({
               if (isHamburgerOpen) setIsHamburgerOpen(false);
               onOpenTrophyModal?.();
               sfx?.playModalOpen?.();
+              haptics.medium();
             }}
             aria-label="Trophy Cabinet & Achievements"
           >
@@ -2045,6 +2066,7 @@ export default function MobileAppView({
             onClick={() => {
               setIsHamburgerOpen(prev => !prev);
               sfx?.playTileNav?.();
+              haptics.medium();
             }}
             aria-label="Console Utilities & Settings"
           >
@@ -2122,6 +2144,7 @@ export default function MobileAppView({
                               if (!isActive) {
                                 onSelectProfile?.(p.id);
                                 sfx?.playProfileSelect?.();
+                                haptics.medium();
                               }
                             }}
                           >
@@ -2146,6 +2169,7 @@ export default function MobileAppView({
                                 setIsHamburgerOpen(false);
                                 onEditProfile?.(p);
                                 sfx?.playModalOpen?.();
+                                haptics.medium();
                               }}
                               title={`Edit ${p.name}`}
                               aria-label={`Edit ${p.name}`}
@@ -2159,6 +2183,7 @@ export default function MobileAppView({
                                 onClick={() => {
                                   onDeleteProfile?.(p.id);
                                   sfx?.playDelete?.();
+                                  haptics.selection();
                                 }}
                                 title={`Delete ${p.name}`}
                                 aria-label={`Delete ${p.name}`}
@@ -2180,6 +2205,7 @@ export default function MobileAppView({
                         setIsHamburgerOpen(false);
                         onCreateNewProfile?.();
                         sfx?.playModalOpen?.();
+                        haptics.medium();
                       }}
                     >
                       <Plus size={14} />
@@ -2211,6 +2237,7 @@ export default function MobileAppView({
                           onClick={() => {
                             scraper.stopScrape();
                             sfx?.playModalClose?.();
+                            haptics.medium();
                           }}
                         >
                           <Square size={13} fill="currentColor" />
@@ -2228,6 +2255,7 @@ export default function MobileAppView({
                               scraper.scrapeAll(undefined, true);
                             }
                             sfx?.playModalOpen?.();
+                            haptics.medium();
                           }}
                         >
                           <Sparkles size={14} />
@@ -2268,6 +2296,7 @@ export default function MobileAppView({
                               localStorage.setItem('retro_auto_resume_enabled', nextVal ? 'true' : 'false');
                             } catch (e) { }
                             sfx?.playTabSwitch?.();
+                            haptics.selection();
                           }}
                           aria-label="Toggle Auto-Resume"
                         >
@@ -2292,6 +2321,116 @@ export default function MobileAppView({
                       </span>
                     </div>
                   </div>
+
+                  {/* Haptic Feedback (Vibration) Toggle */}
+                  <div className="mobile-menu-card-header" style={{ marginTop: '0.65rem', paddingTop: '0.65rem', borderTop: '1px solid rgba(148, 163, 184, 0.15)' }}>
+                    <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
+                      <Smartphone size={18} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Haptic Touch &amp; Rumble</strong>
+                        <button
+                          type="button"
+                          className={`ds-toggle-switch ${isHapticsEnabled ? 'is-active' : ''}`}
+                          style={{
+                            width: '42px',
+                            height: '24px',
+                            borderRadius: '12px',
+                            background: isHapticsEnabled ? '#10b981' : '#64748b',
+                            border: 'none',
+                            cursor: 'pointer',
+                            position: 'relative',
+                            transition: 'background 0.2s ease',
+                            padding: 0
+                          }}
+                          onClick={() => {
+                            const nextVal = !isHapticsEnabled;
+                            setIsHapticsEnabled(nextVal);
+                            haptics.setPreference(nextVal);
+                            if (nextVal) {
+                              haptics.medium();
+                            }
+                            sfx?.playTabSwitch?.();
+                          }}
+                          aria-label="Toggle Haptic Touch"
+                        >
+                          <span
+                            style={{
+                              display: 'block',
+                              width: '18px',
+                              height: '18px',
+                              borderRadius: '50%',
+                              background: '#ffffff',
+                              position: 'absolute',
+                              top: '3px',
+                              left: isHapticsEnabled ? '21px' : '3px',
+                              transition: 'left 0.2s ease',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                            }}
+                          />
+                        </button>
+                      </div>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
+                        {isHapticsEnabled ? 'Hardware-accelerated micro-vibrations for touches, tabs, virtual buttons & achievements' : 'Haptic feedback disabled'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Theme Mode (Light / Dark) Toggle */}
+                  {themeEngine && (
+                    <div className="mobile-menu-card-header" style={{ marginTop: '0.65rem', paddingTop: '0.65rem', borderTop: '1px solid rgba(148, 163, 184, 0.15)' }}>
+                      <div className="mobile-menu-icon-wrap" style={{ background: themeEngine.colorMode === 'dark' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(245, 158, 11, 0.15)', color: themeEngine.colorMode === 'dark' ? '#818cf8' : '#d97706' }}>
+                        {themeEngine.colorMode === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                            {themeEngine.colorMode === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                          </strong>
+                          <button
+                            type="button"
+                            className={`ds-toggle-switch ${themeEngine.colorMode === 'dark' ? 'is-active' : ''}`}
+                            style={{
+                              width: '42px',
+                              height: '24px',
+                              borderRadius: '12px',
+                              background: themeEngine.colorMode === 'dark' ? '#6366f1' : '#f59e0b',
+                              border: 'none',
+                              cursor: 'pointer',
+                              position: 'relative',
+                              transition: 'background 0.2s ease',
+                              padding: 0
+                            }}
+                            onClick={() => {
+                              themeEngine.toggleColorMode?.();
+                              sfx?.playTabSwitch?.();
+                              haptics.selection();
+                            }}
+                            aria-label={`Toggle theme (Current: ${themeEngine.colorMode === 'dark' ? 'Dark' : 'Light'})`}
+                          >
+                            <span
+                              style={{
+                                display: 'block',
+                                width: '18px',
+                                height: '18px',
+                                borderRadius: '50%',
+                                background: '#ffffff',
+                                position: 'absolute',
+                                top: '3px',
+                                left: themeEngine.colorMode === 'dark' ? '21px' : '3px',
+                                transition: 'left 0.2s ease',
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                              }}
+                            />
+                          </button>
+                        </div>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
+                          {themeEngine.colorMode === 'dark' ? 'Sleek OLED dark console palette active' : 'Bright daylight retro console palette active'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Tool 4: Storage & Database Management Studio (Backup, Restore & Reset) */}
@@ -2316,6 +2455,7 @@ export default function MobileAppView({
                         setIsHamburgerOpen(false);
                         onOpenBackupModal?.();
                         sfx?.playModalOpen?.();
+                        haptics.medium();
                       }}
                     >
                       <Database size={14} />
@@ -2349,6 +2489,7 @@ export default function MobileAppView({
                         setIsHamburgerOpen(false);
                         onOpenAboutModal?.();
                         sfx?.playModalOpen?.();
+                        haptics.medium();
                       }}
                     >
                       <Info size={14} />
@@ -2388,6 +2529,7 @@ export default function MobileAppView({
             onClick={() => {
               setShowProfileSwitcher(true);
               sfx?.playModalOpen?.();
+              haptics.medium();
             }}
             title={`Profile: ${activeProfile?.name || 'Player'} (Tap to switch)`}
           >
@@ -2423,6 +2565,7 @@ export default function MobileAppView({
             onClick={() => {
               setIsSearchOpen(prev => !prev);
               sfx?.playTileNav?.();
+              haptics.selection();
             }}
             title="Search Library"
             aria-label="Search Library"
@@ -2439,6 +2582,7 @@ export default function MobileAppView({
                 onClick={() => {
                   bgm.togglePlay();
                   sfx?.playTileNav?.();
+                  haptics.selection();
                 }}
                 title={bgm.currentTrack ? `BGM: ${bgm.currentTrack.title} (${bgm.isPlaying ? 'Playing' : 'Paused'})` : "Toggle BGM"}
                 aria-label="Toggle Background Music"
@@ -2453,6 +2597,7 @@ export default function MobileAppView({
                   onClick={() => {
                     bgm.nextTrack();
                     sfx?.playTabSwitch?.();
+                    haptics.selection();
                   }}
                   title="Next BGM Track"
                   aria-label="Next BGM Track"
@@ -2471,6 +2616,7 @@ export default function MobileAppView({
               className={`mobile-topbar-action-btn ${!sfx.isMuted ? 'is-active' : ''}`}
               onClick={() => {
                 sfx.toggleMute();
+                haptics.selection();
               }}
               title={sfx.isMuted ? "Sound Effects (Off)" : "Sound Effects (On)"}
               aria-label="Toggle Sound Effects"
@@ -2486,6 +2632,7 @@ export default function MobileAppView({
             onClick={() => {
               setShowLoadRomModal?.(true);
               sfx?.playModalOpen?.();
+              haptics.medium();
             }}
             title="Load Custom ROM"
             aria-label="Load Custom ROM"
@@ -2745,6 +2892,116 @@ export default function MobileAppView({
                     </span>
                   </div>
                 </div>
+
+                {/* Haptic Feedback (Vibration) Toggle */}
+                <div className="mobile-menu-card-header" style={{ marginTop: '0.65rem', paddingTop: '0.65rem', borderTop: '1px solid rgba(148, 163, 184, 0.15)' }}>
+                  <div className="mobile-menu-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
+                    <Smartphone size={18} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Haptic Touch &amp; Rumble</strong>
+                      <button
+                        type="button"
+                        className={`ds-toggle-switch ${isHapticsEnabled ? 'is-active' : ''}`}
+                        style={{
+                          width: '42px',
+                          height: '24px',
+                          borderRadius: '12px',
+                          background: isHapticsEnabled ? '#10b981' : '#64748b',
+                          border: 'none',
+                          cursor: 'pointer',
+                          position: 'relative',
+                          transition: 'background 0.2s ease',
+                          padding: 0
+                        }}
+                        onClick={() => {
+                          const nextVal = !isHapticsEnabled;
+                          setIsHapticsEnabled(nextVal);
+                          haptics.setPreference(nextVal);
+                          if (nextVal) {
+                            haptics.medium();
+                          }
+                          sfx?.playTabSwitch?.();
+                        }}
+                        aria-label="Toggle Haptic Touch"
+                      >
+                        <span
+                          style={{
+                            display: 'block',
+                            width: '18px',
+                            height: '18px',
+                            borderRadius: '50%',
+                            background: '#ffffff',
+                            position: 'absolute',
+                            top: '3px',
+                            left: isHapticsEnabled ? '21px' : '3px',
+                            transition: 'left 0.2s ease',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                          }}
+                        />
+                      </button>
+                    </div>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
+                      {isHapticsEnabled ? 'Hardware-accelerated micro-vibrations for touches, tabs, virtual buttons & achievements' : 'Haptic feedback disabled'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Theme Mode (Light / Dark) Toggle */}
+                {themeEngine && (
+                  <div className="mobile-menu-card-header" style={{ marginTop: '0.65rem', paddingTop: '0.65rem', borderTop: '1px solid rgba(148, 163, 184, 0.15)' }}>
+                    <div className="mobile-menu-icon-wrap" style={{ background: themeEngine.colorMode === 'dark' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(245, 158, 11, 0.15)', color: themeEngine.colorMode === 'dark' ? '#818cf8' : '#d97706' }}>
+                      {themeEngine.colorMode === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                          {themeEngine.colorMode === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                        </strong>
+                        <button
+                          type="button"
+                          className={`ds-toggle-switch ${themeEngine.colorMode === 'dark' ? 'is-active' : ''}`}
+                          style={{
+                            width: '42px',
+                            height: '24px',
+                            borderRadius: '12px',
+                            background: themeEngine.colorMode === 'dark' ? '#6366f1' : '#f59e0b',
+                            border: 'none',
+                            cursor: 'pointer',
+                            position: 'relative',
+                            transition: 'background 0.2s ease',
+                            padding: 0
+                          }}
+                          onClick={() => {
+                            themeEngine.toggleColorMode?.();
+                            sfx?.playTabSwitch?.();
+                            haptics.selection();
+                          }}
+                          aria-label={`Toggle theme (Current: ${themeEngine.colorMode === 'dark' ? 'Dark' : 'Light'})`}
+                        >
+                          <span
+                            style={{
+                              display: 'block',
+                              width: '18px',
+                              height: '18px',
+                              borderRadius: '50%',
+                              background: '#ffffff',
+                              position: 'absolute',
+                              top: '3px',
+                              left: themeEngine.colorMode === 'dark' ? '21px' : '3px',
+                              transition: 'left 0.2s ease',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                            }}
+                          />
+                        </button>
+                      </div>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
+                        {themeEngine.colorMode === 'dark' ? 'Sleek OLED dark console palette active' : 'Bright daylight retro console palette active'}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Tool 5: Storage & Database Management Studio (Backup, Restore & Reset) */}
@@ -2769,6 +3026,7 @@ export default function MobileAppView({
                       setIsHamburgerOpen(false);
                       onOpenBackupModal?.();
                       sfx?.playModalOpen?.();
+                      haptics.medium();
                     }}
                   >
                     <Database size={14} />
@@ -2804,6 +3062,7 @@ export default function MobileAppView({
                       setIsHamburgerOpen(false);
                       onOpenAboutModal?.();
                       sfx?.playModalOpen?.();
+                      haptics.medium();
                     }}
                   >
                     <Info size={14} />
@@ -2957,6 +3216,7 @@ export default function MobileAppView({
                 onClick={() => {
                   setSelectedSystem({ key: 'all', name: 'All Games', icon: 'assets/platforms/gba.svg' });
                   sfx?.playTabSwitch?.();
+                  haptics.selection();
                 }}
               >
                 <Layers size={18} color="#e11d48" />
@@ -2980,6 +3240,7 @@ export default function MobileAppView({
                     onClick={() => {
                       setSelectedSystem(sys);
                       sfx?.playTabSwitch?.();
+                      haptics.selection();
                     }}
                   >
                     {/* Visual SVG Console Header */}
@@ -3021,6 +3282,7 @@ export default function MobileAppView({
             if (isHamburgerOpen) setIsHamburgerOpen(false);
             setSelectedSystem({ key: 'all', name: 'All Games', icon: 'assets/platforms/gba.svg' });
             sfx?.playTabSwitch?.();
+            haptics.selection();
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           aria-label="Library - All Games"
@@ -3039,6 +3301,7 @@ export default function MobileAppView({
             if (isHamburgerOpen) setIsHamburgerOpen(false);
             setSelectedSystem({ key: 'favorites', name: 'Favorites', icon: null });
             sfx?.playTabSwitch?.();
+            haptics.selection();
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           aria-label="Favorites"
@@ -3057,6 +3320,7 @@ export default function MobileAppView({
             if (isHamburgerOpen) setIsHamburgerOpen(false);
             setSelectedSystem({ key: 'recent', name: 'Recently Played', icon: null });
             sfx?.playTabSwitch?.();
+            haptics.selection();
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           aria-label="Recently Played Games"
@@ -3075,6 +3339,7 @@ export default function MobileAppView({
             if (isHamburgerOpen) setIsHamburgerOpen(false);
             onOpenTrophyModal?.();
             sfx?.playModalOpen?.();
+            haptics.medium();
           }}
           aria-label="Trophy Cabinet & Achievements"
         >
@@ -3091,6 +3356,7 @@ export default function MobileAppView({
           onClick={() => {
             setIsHamburgerOpen(prev => !prev);
             sfx?.playTileNav?.();
+            haptics.medium();
           }}
           aria-label="Console Utilities & Settings"
         >

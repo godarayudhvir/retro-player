@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import MultiAvatar from './MultiAvatar';
 import { resolveAssetPath } from '../utils/assetPath';
+import { haptics } from '../services/hapticsService';
 
 /**
  * Topbar console header with active profile avatar, BGM music player, status indicators,
@@ -135,6 +136,7 @@ export default function Topbar({
           onClick={() => {
             onOpenProfileSelect?.();
             sfx?.playModalOpen?.();
+            haptics.medium();
           }}
           title={`Profile: ${activeProfile?.name || 'Player 1'} (Click to switch)`}
           aria-label={`Switch User Profile (Current: ${activeProfile?.name || 'Player 1'})`}
@@ -169,6 +171,7 @@ export default function Topbar({
                   achievementsEngine?.triggerBgmTrackPlayed?.(bgm.currentTrack.title || bgm.currentTrack.url);
                 }
                 sfx?.playTileNav?.();
+                haptics.selection();
               }}
               title={bgm.currentTrack 
                 ? `BGM: ${bgm.currentTrack.title} (${bgm.isPlaying ? 'Playing - Click to Pause' : 'Paused - Click to Play'})`
@@ -188,6 +191,7 @@ export default function Topbar({
                     achievementsEngine?.triggerBgmTrackPlayed?.(bgm.currentTrack.title || bgm.currentTrack.url);
                   }
                   sfx?.playTabSwitch?.();
+                  haptics.selection();
                 }}
                 title="Next BGM Track"
                 aria-label="Next BGM Track"
@@ -224,12 +228,15 @@ export default function Topbar({
               if (scraper.isScraping) {
                 scraper.stopScrape();
                 sfx?.playModalClose?.();
+                haptics.medium();
               } else if (onOpenScraperModal) {
                 onOpenScraperModal();
                 sfx?.playModalOpen?.();
+                haptics.medium();
               } else {
                 scraper.scrapeAll(undefined, true);
                 sfx?.playThemeSwitch?.();
+                haptics.selection();
               }
             }}
             title={scraper.isScraping 
@@ -258,7 +265,10 @@ export default function Topbar({
         {sfx && (
           <button
             className={`status-pill status-sfx ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'sfx' ? 'gamepad-focused' : ''}`}
-            onClick={sfx.toggleMute}
+            onClick={() => {
+              sfx.toggleMute();
+              haptics.selection();
+            }}
             title={sfx.isMuted ? 'Unmute UI Sound Effects' : 'Mute UI Sound Effects'}
             aria-label={sfx.isMuted ? 'Unmute UI Sound Effects' : 'Mute UI Sound Effects'}
           >
@@ -270,7 +280,10 @@ export default function Topbar({
         <button
           type="button"
           className={`status-pill status-autoresume ${isAutoResumeEnabled ? 'is-enabled' : 'is-disabled'} ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'autoresume' ? 'gamepad-focused' : ''}`}
-          onClick={handleToggleAutoResume}
+          onClick={() => {
+            handleToggleAutoResume();
+            haptics.selection();
+          }}
           title={`Auto-Resume on Launch: ${isAutoResumeEnabled ? 'ENABLED (Will prompt to restore last session)' : 'DISABLED (Always boot fresh game title)'}`}
           aria-label="Toggle Auto-Resume on Launch"
         >
@@ -287,6 +300,7 @@ export default function Topbar({
         <div
           className={`status-pill status-search ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'search' ? 'gamepad-focused' : ''}`}
           onClick={() => {
+            haptics.selection();
             if (searchInputRef?.current) {
               searchInputRef.current.focus();
             }
@@ -332,6 +346,7 @@ export default function Topbar({
               themeEngine.toggleColorMode?.();
               achievementsEngine?.triggerThemeToggled?.();
               sfx?.playThemeSwitch?.();
+              haptics.selection();
             }}
             title={`Switch to ${themeEngine.colorMode === 'dark' ? 'Light' : 'Dark'} Mode (Current: ${themeEngine.colorMode === 'dark' ? 'Dark Mode 🌙' : 'Light Mode ☀️'})`}
             aria-label={`Toggle Color Mode (Current: ${themeEngine.colorMode === 'dark' ? 'Dark' : 'Light'})`}
@@ -350,6 +365,7 @@ export default function Topbar({
           onClick={() => {
             setShowLoadRomModal(true);
             sfx?.playModalOpen?.();
+            haptics.medium();
           }}
           title="Open Load Custom ROM dialog"
           aria-label="Load Custom ROM"
@@ -363,6 +379,7 @@ export default function Topbar({
           onClick={() => {
             onOpenBackupModal?.();
             sfx?.playModalOpen?.();
+            haptics.medium();
           }}
           title="Storage & Database Studio (Backup, Restore & Reset Storage)"
           aria-label="Storage and Database Studio"
@@ -377,6 +394,7 @@ export default function Topbar({
           onClick={() => {
             onOpenTrophyModal?.();
             sfx?.playModalOpen?.();
+            haptics.medium();
           }}
           title={`Trophy Cabinet & Milestones (${achievementsEngine?.totalEarnedPoints || 0} G Earned)`}
           aria-label="Trophy Cabinet and Milestones"

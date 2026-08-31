@@ -173,17 +173,6 @@ export default function ScraperModal({
               </p>
             </div>
           </div>
-          {!isScraping && (
-            <button 
-              type="button" 
-              className="scraper-modal-close-btn"
-              onClick={handleClose}
-              title="Close Dialog"
-              aria-label="Close Dialog"
-            >
-              <X size={18} />
-            </button>
-          )}
         </header>
 
         {/* Scope Mode Selector Tabs (Visible when not actively scraping, no prompt, and no summary showing) */}
@@ -486,11 +475,7 @@ export default function ScraperModal({
               <span className="status-badge ready">
                 ● Selected mode: <strong>{scanMode === 'smart' ? 'Smart Scan' : 'Force Re-fetch'}</strong>
               </span>
-            ) : (
-              <span className="status-badge ready">
-                ● Ready to scrape <strong>{targetCount} game{targetCount === 1 ? '' : 's'}</strong>
-              </span>
-            )}
+            ) : null}
           </div>
 
           <div className="scraper-footer-actions">

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { resolveAssetPath } from '../utils/assetPath';
 import { detectSystemFromExtension, getSystemInfoByKey } from '../utils/systemDetector';
+import { haptics } from '../services/hapticsService';
 import { 
   checkServerDbStatus,
   saveLinkedDirectoryHandle,
@@ -519,14 +520,6 @@ export default function LoadRomModal({
               </p>
             </div>
           </div>
-          <button
-            className={`load-rom-close-btn ${focusedTarget?.zone === 'loadRomModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`}
-            onClick={onClose}
-            title="Close"
-            aria-label="Close modal"
-          >
-            <X size={20} />
-          </button>
         </div>
 
         {/* Modal Body */}
@@ -554,7 +547,10 @@ export default function LoadRomModal({
                   <button
                     type="button"
                     className="load-rom-browse-btn"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => {
+                      haptics.medium();
+                      fileInputRef.current?.click();
+                    }}
                   >
                     <FolderOpen size={16} /> Choose File(s)
                   </button>
@@ -562,7 +558,10 @@ export default function LoadRomModal({
                   <button
                     type="button"
                     className="load-rom-browse-btn is-folder"
-                    onClick={handleChooseFolderClick}
+                    onClick={(e) => {
+                      haptics.medium();
+                      handleChooseFolderClick(e);
+                    }}
                   >
                     <FolderTree size={16} /> Choose ROMs Folder
                   </button>
@@ -635,6 +634,7 @@ export default function LoadRomModal({
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
+                            haptics.selection();
                             handleRemoveSingleLinkedFolder(handle.name);
                           }}
                           style={{

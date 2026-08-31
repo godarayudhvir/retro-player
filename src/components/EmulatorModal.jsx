@@ -1402,17 +1402,40 @@ export default function EmulatorModal({
               }
             });
 
-            window.addEventListener('touchstart', function() {
+            let _lastHapticTime = 0;
+            function triggerVirtualGamepadHaptic() {
+              try {
+                const now = performance.now();
+                if (now - _lastHapticTime > 40) {
+                  _lastHapticTime = now;
+                  if (navigator.vibrate) {
+                    navigator.vibrate(8);
+                  }
+                }
+              } catch (e) {}
+            }
+
+            window.addEventListener('touchstart', function(e) {
               if (_isKeyboardActive) {
                 _isKeyboardActive = false;
                 syncVirtualGamepadVisibility();
               }
+              const target = e.target;
+              if (target && (target.classList?.contains('ejs_virtualGamepad_button') || target.closest?.('.ejs_virtualGamepad_parent'))) {
+                triggerVirtualGamepadHaptic();
+              }
             }, { passive: true });
 
             window.addEventListener('pointerdown', function(e) {
-              if (e.pointerType === 'touch' && _isKeyboardActive) {
-                _isKeyboardActive = false;
-                syncVirtualGamepadVisibility();
+              if (e.pointerType === 'touch') {
+                if (_isKeyboardActive) {
+                  _isKeyboardActive = false;
+                  syncVirtualGamepadVisibility();
+                }
+                const target = e.target;
+                if (target && (target.classList?.contains('ejs_virtualGamepad_button') || target.closest?.('.ejs_virtualGamepad_parent'))) {
+                  triggerVirtualGamepadHaptic();
+                }
               }
             }, { passive: true });
 
