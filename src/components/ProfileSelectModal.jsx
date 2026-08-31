@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Check, Edit2, Trash2, Sparkles, Gamepad2 } from 'lucide-react';
+import { Plus, Check, Edit2, Trash2, Sparkles, Gamepad2, X } from 'lucide-react';
 import MultiAvatar from './MultiAvatar';
 import ConfirmModal from './ConfirmModal';
 
@@ -28,6 +28,22 @@ export default function ProfileSelectModal({
     setPendingDeleteProfile(null);
   }, [isOpen]);
 
+  // Listen for Escape key to close modal
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' || e.key === 'Esc') {
+        e.preventDefault();
+        sfx?.playModalClose?.();
+        handleClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleClose = () => {
@@ -44,6 +60,17 @@ export default function ProfileSelectModal({
               <Gamepad2 size={32} color="#ef4444" />
               <h2>Who&apos;s Playing?</h2>
             </div>
+            <button
+              className={`profile-close-btn ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`}
+              onClick={() => {
+                sfx?.playModalClose?.();
+                handleClose();
+              }}
+              title="Close Profile Selector (Esc)"
+              aria-label="Close Profile Selector"
+            >
+              <X size={20} />
+            </button>
           </div>
 
           <p className="profile-select-subtitle">

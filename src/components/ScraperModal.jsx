@@ -172,6 +172,20 @@ export default function ScraperModal({
               </p>
             </div>
           </div>
+          {!isScraping && (
+            <button
+              type="button"
+              className={`scraper-modal-close-btn ${focusedTarget?.zone === 'scraperModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`}
+              onClick={() => {
+                sfx?.playModalClose?.();
+                handleClose();
+              }}
+              title="Close (Esc)"
+              aria-label="Close Scraper Modal"
+            >
+              <X size={18} />
+            </button>
+          )}
         </header>
 
         {/* Scope Mode Selector Tabs (Visible when not actively scraping, no prompt, and no summary showing) */}

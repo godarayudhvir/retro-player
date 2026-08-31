@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Gamepad2, Github, ExternalLink, Info } from 'lucide-react';
+import { Gamepad2, Github, ExternalLink, Info, X } from 'lucide-react';
 import { haptics } from '../services/hapticsService';
 
 /**
@@ -45,6 +45,18 @@ export default function AboutInfoModal({ isOpen, focusedTarget, onClose, sfx }) 
               <p>System specifications, emulation engines, and repository source</p>
             </div>
           </div>
+          <button
+            type="button"
+            className={`scraper-modal-close-btn ${focusedTarget?.zone === 'infoModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`}
+            onClick={() => {
+              sfx?.playModalClose?.();
+              onClose?.();
+            }}
+            title="Close (Esc)"
+            aria-label="Close About Modal"
+          >
+            <X size={18} />
+          </button>
         </header>
         
         {/* Modal Body */}
@@ -78,23 +90,6 @@ export default function AboutInfoModal({ isOpen, focusedTarget, onClose, sfx }) 
             </div>
           </div>
         </div>
-
-        {/* Modal Footer */}
-        <footer className="scraper-modal-footer" style={{ justifyContent: 'flex-end' }}>
-          <div className="scraper-footer-actions">
-            <button
-              type="button"
-              className="settings-action-btn folder-btn"
-              onClick={() => {
-                onClose?.();
-                sfx?.playModalClose?.();
-                haptics.selection();
-              }}
-            >
-              <span>Close</span>
-            </button>
-          </div>
-        </footer>
       </div>
     </div>
   );

@@ -526,11 +526,12 @@ export default function TrophyCabinetModal({
 
           <button 
             type="button"
-            className="info-close-btn"
+            className="scraper-modal-close-btn"
             onClick={() => {
               sfx?.playModalClose?.();
               onClose();
             }}
+            title="Close (Esc)"
             aria-label="Close Trophy Cabinet"
           >
             <X size={18} />

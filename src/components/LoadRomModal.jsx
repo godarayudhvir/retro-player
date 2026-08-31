@@ -537,6 +537,18 @@ export default function LoadRomModal({
               </p>
             </div>
           </div>
+          <button
+            type="button"
+            className="load-rom-close-btn"
+            onClick={() => {
+              sfx?.playModalClose?.();
+              onClose?.();
+            }}
+            title="Close (Esc)"
+            aria-label="Close Load ROM Modal"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         {/* Modal Body */}

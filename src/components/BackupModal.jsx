@@ -264,6 +264,18 @@ export default function BackupModal({
               <p>Export data snapshots, restore backups, and manage browser storage</p>
             </div>
           </div>
+          <button
+            type="button"
+            className={`scraper-modal-close-btn ${focusedTarget?.zone === 'backupModal' && focusedTarget?.id === 'close' ? 'gamepad-focused' : ''}`}
+            onClick={() => {
+              sfx?.playModalClose?.();
+              onClose?.();
+            }}
+            title="Close (Esc)"
+            aria-label="Close Data & Storage Management"
+          >
+            <X size={18} />
+          </button>
         </header>
 
         <div className="backup-modal-body" style={{ overflowY: 'auto' }}>
