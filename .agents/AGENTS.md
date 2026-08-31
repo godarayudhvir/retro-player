@@ -16,5 +16,11 @@
 7. Never execute `git commit` or `git push` unless the user specifically and explicitly requests you to commit or push in their prompt. Whenever executing a git commit requested by the user, always format the commit with a concise title and a comprehensive multi-line description detailing the exact changes and rationale (e.g. `git commit -m '<type>(<scope>): <summary>' -m '- <detail 1>' -m '- <detail 2>'`). Never push any commits without the user's explicit request and approval.
 8. Never use generic AI design clichés and tropes. Never include floating pill badges with sparkles/stars/emojis above headings (e.g. `✨ FEATURE NAME`, `✨ LIVE DEMO`, `✨ EMULATION STATION`), cheesy multi-color gradient buzzwords in headings, or generic SaaS marketing filler. Always build bespoke, authentic, human-crafted interfaces with clean typography, purposeful visual hierarchy, and genuine console-grade craftsmanship.
 9. Never execute `npm run build` or production bundling commands on your own unless the user explicitly requests you to build or validate via build in their prompt.
-
-
+10. Ensure Tri-Environment Universal Compatibility for every feature and modification. Every new or updated capability, API endpoint, asset path, and configuration MUST operate seamlessly across all 3 deployment environments:
+    - **Local Development**: `http://localhost:3000` via Vite dev server (`vite.config.js`).
+    - **Docker / Self-Hosted Production**: `http://<server-ip>:3000` via Express runtime (`server.js` and `Dockerfile`).
+    - **GitHub Pages / Static Hosting**: `https://<user>.github.io/<repo>/` with subpath base routing (`./` or `/<repo>/`).
+    **Mandatory Engineering Checkpoints**:
+    - **Dual Server Middleware Parity**: Any API route, WebSocket, or backend handler added to `server.js` MUST also be mirrored in `vite.config.js` (`server.middlewares`) so it functions in `npm run dev`.
+    - **Docker Multi-Stage Runtime Parity**: Any new server helper, backend module, or runtime asset directory (e.g. `src/server/`, `data/`, `public/`) MUST be copied to the `runner` stage in [Dockerfile](file:///Users/godarayudhvir/Github/retro-player/Dockerfile).
+    - **Subpath-Aware URL & Asset Resolution**: All asset URLs, cover art paths, audio links, and API fetches MUST be subpath-aware so they never 404 when hosted on a repository subpath (e.g. GitHub Pages) vs domain root (e.g. localhost/Docker).
