@@ -301,6 +301,24 @@ export function useGamepadNavigation({
       return;
     }
 
+    // 0.045 Load ROM / Folder Modal Navigation Guard
+    if (isLoadRomOpen) {
+      if (dir === 'BACK') {
+        const reviewBackBtn = document.querySelector('.backup-action-btn.is-secondary:last-child');
+        if (reviewBackBtn && document.querySelector('.rom-ingestion-review-view')) {
+          reviewBackBtn.click();
+          sfx?.playTileNav?.();
+          return;
+        }
+        setShowLoadRomModal(false);
+        setFocusedTarget({ zone: 'topbar', id: 'folder' });
+        sfx?.playModalClose?.();
+        return;
+      }
+      // Strictly guard all spatial navigation within LoadRomModal so it never leaks into background UI
+      return;
+    }
+
     // 0.05 About & Controls Reference Modal Navigation Guard
     if (isInfoOpen) {
       if (dir === 'BACK' || dir === 'SELECT') {
@@ -1734,8 +1752,16 @@ export function useGamepadNavigation({
 
       if (document.activeElement?.tagName === 'INPUT') return;
 
-      // Yield keyboard inputs when Trophy Cabinet Modal is open
-      if (stateRef.current.showTrophyModal) return;
+      // Yield keyboard inputs when modal dialogs are open
+      if (
+        stateRef.current.showLoadRomModal ||
+        stateRef.current.showTrophyModal ||
+        stateRef.current.showInfoModal ||
+        stateRef.current.showBackupModal ||
+        stateRef.current.showResetConfirm
+      ) {
+        return;
+      }
 
       // Yield keyboard inputs during active emulation session except ESC exit
       if (stateRef.current.activeGame) {

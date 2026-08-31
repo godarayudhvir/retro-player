@@ -58,6 +58,9 @@ During first-time startup or when revisiting the Onboarding wizard:
 | **`[L]` / `[R]` Bumpers** | **`[` and `]`** | Cycle active platform console on System Ribbon |
 | **`[B]` Button** | **`Escape`** | Close open modals, drawers, or reset focus |
 
+> [!NOTE]
+> **Modal Input Isolation**: When an in-app modal (e.g. Load Custom ROM, Scraper, Backup & Restore, Trophy Cabinet, or About) is open, all keyboard hotkeys and gamepad spatial navigation are strictly trapped within the active dialog to prevent background UI changes or unintended game launches.
+
 ---
 
 ## 🕹️ In-Game Controls & Gestures

@@ -501,22 +501,26 @@ export default function LoadRomModal({
         <div className="load-rom-header">
           <div className="load-rom-title-group">
             <div className="load-rom-icon-badge" style={{ background: 'rgba(225, 29, 72, 0.12)', color: '#e11d48' }}>
-              {folderData ? <FolderTree size={22} /> : <FolderOpen size={22} />}
+              {folderData ? <FolderTree size={22} /> : isProcessing ? <RefreshCw size={22} className="animate-spin" /> : <FolderOpen size={22} />}
             </div>
             <div>
               <h2>
-                {folderData 
-                  ? 'Batch ROM Folder Review' 
-                  : selectedFile 
-                    ? 'ROM Ingestion & Review' 
-                    : 'Load Custom ROM or Folder'}
+                {isProcessing
+                  ? 'Scanning ROMs & Assets'
+                  : folderData 
+                    ? 'Batch ROM Folder Review' 
+                    : selectedFile 
+                      ? 'ROM Ingestion & Review' 
+                      : 'Load Custom ROM or Folder'}
               </h2>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-sub)', margin: '2px 0 0' }}>
-                {folderData 
-                  ? `Configuring ${folderData.stats.totalFiles} detected retro titles`
-                  : selectedFile 
-                    ? 'Select how you want to launch this title' 
-                    : 'Drop a ROM file, browse multiple ROMs, or select an entire folder'}
+                {isProcessing
+                  ? 'Parsing directory structure and verifying supported retro formats...'
+                  : folderData 
+                    ? `Configuring ${folderData.stats.totalFiles} detected retro titles`
+                    : selectedFile 
+                      ? 'Select how you want to launch this title' 
+                      : 'Drop a ROM file, browse multiple ROMs, or select an entire folder'}
               </p>
             </div>
           </div>
@@ -524,9 +528,29 @@ export default function LoadRomModal({
 
         {/* Modal Body */}
         <div className="load-rom-body">
+
+          {/* Hidden File Inputs (Always in DOM for ref accessibility) */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept=".gba,.gb,.gbc,.nes,.fds,.sfc,.smc,.snes,.z64,.n64,.v64,.nds,.bin,.cue,.chd,.pbp,.iso,.zip,.7z,.md,.smd,.gen,.gg,.a26,.png,.webp,.jpg,.jpeg,.json,.nfo"
+            onChange={handleSingleFileChange}
+            style={{ display: 'none' }}
+          />
+
+          <input
+            ref={folderInputRef}
+            type="file"
+            webkitdirectory=""
+            directory=""
+            multiple
+            onChange={handleFolderChange}
+            style={{ display: 'none' }}
+          />
           
-          {/* STAGE 1: Dropzone & Dual Triggers (When nothing selected) */}
-          {!selectedFile && !folderData && (
+          {/* STAGE 1: Dropzone & Initial State (When not scanning and nothing selected) */}
+          {!selectedFile && !folderData && !isProcessing && (
             <>
 
               {/* Interactive Dual-Mode Drop Zone */}
@@ -566,27 +590,6 @@ export default function LoadRomModal({
                     <FolderTree size={16} /> Choose ROMs Folder
                   </button>
                 </div>
-
-                {/* Hidden File Input for Single/Multi ROMs */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  accept=".gba,.gb,.gbc,.nes,.fds,.sfc,.smc,.snes,.z64,.n64,.v64,.nds,.bin,.cue,.chd,.pbp,.iso,.zip,.7z,.md,.smd,.gen,.gg,.a26,.png,.webp,.jpg,.jpeg,.json,.nfo"
-                  onChange={handleSingleFileChange}
-                  style={{ display: 'none' }}
-                />
-
-                {/* Hidden Directory Input for Full Folder */}
-                <input
-                  ref={folderInputRef}
-                  type="file"
-                  webkitdirectory=""
-                  directory=""
-                  multiple
-                  onChange={handleFolderChange}
-                  style={{ display: 'none' }}
-                />
               </div>
 
               {/* Desktop Reconnect Linked Folder(s) Card */}
@@ -675,69 +678,6 @@ export default function LoadRomModal({
                 </span>
               </div>
 
-              {/* Active Scanning / Processing Progress Bar in Stage 1 */}
-              {isProcessing && progressState && (
-                <div className="rom-ingestion-progress-box animate-fade-in" style={{
-                  background: 'rgba(59, 130, 246, 0.08)',
-                  border: '1.5px solid rgba(59, 130, 246, 0.25)',
-                  borderRadius: '14px',
-                  padding: '1.1rem 1.25rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.75rem',
-                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.08)'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <RefreshCw className="animate-spin" size={22} style={{ color: '#3b82f6', flexShrink: 0 }} />
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: '0.96rem', fontWeight: 800, color: 'var(--text-color, #0f172a)' }}>
-                          Scanning ROMs &amp; Assets...
-                        </span>
-                        {progressState.total > 0 && (
-                          <span style={{
-                            fontSize: '0.78rem',
-                            fontWeight: 800,
-                            color: '#3b82f6',
-                            background: 'rgba(59, 130, 246, 0.12)',
-                            padding: '2px 8px',
-                            borderRadius: '6px'
-                          }}>
-                            {Math.round(((progressState.current || 0) / progressState.total) * 100)}%
-                          </span>
-                        )}
-                      </div>
-                      <span style={{ fontSize: '0.82rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {progressState.message}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="rom-progress-track" style={{
-                    width: '100%',
-                    height: '7px',
-                    background: 'rgba(0, 0, 0, 0.08)',
-                    borderRadius: '999px',
-                    overflow: 'hidden',
-                    position: 'relative'
-                  }}>
-                    {progressState.total > 0 ? (
-                      <div
-                        className="rom-progress-fill"
-                        style={{
-                          width: `${Math.max(3, Math.min(100, Math.round(((progressState.current || 0) / progressState.total) * 100)))}%`,
-                          height: '100%',
-                          background: 'linear-gradient(90deg, #3b82f6, #6366f1)',
-                          transition: 'width 0.15s ease'
-                        }}
-                      />
-                    ) : (
-                      <div className="rom-progress-indeterminate" />
-                    )}
-                  </div>
-                </div>
-              )}
-
               {/* Error Message Alert Banner in Stage 1 */}
               {errorMessage && (
                 <div className="rom-ingestion-error-box animate-fade-in" style={{
@@ -790,6 +730,70 @@ export default function LoadRomModal({
               </div>
 
             </>
+          )}
+
+          {/* STAGE 1B: Active Scanning / Processing Progress View (When scanning is active) */}
+          {!selectedFile && !folderData && isProcessing && (
+            <div className="rom-ingestion-progress-box animate-fade-in" style={{
+              background: 'rgba(59, 130, 246, 0.08)',
+              border: '1.5px solid rgba(59, 130, 246, 0.25)',
+              borderRadius: '14px',
+              padding: '1.5rem 1.25rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem',
+              boxShadow: '0 4px 12px rgba(59, 130, 246, 0.08)',
+              margin: '0.5rem 0'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                <RefreshCw className="animate-spin" size={24} style={{ color: '#3b82f6', flexShrink: 0 }} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.98rem', fontWeight: 800, color: 'var(--text-color, #0f172a)' }}>
+                      Scanning ROMs &amp; Assets...
+                    </span>
+                    {progressState?.total > 0 && (
+                      <span style={{
+                        fontSize: '0.78rem',
+                        fontWeight: 800,
+                        color: '#3b82f6',
+                        background: 'rgba(59, 130, 246, 0.12)',
+                        padding: '2px 8px',
+                        borderRadius: '6px'
+                      }}>
+                        {progressState.total} items
+                      </span>
+                    )}
+                  </div>
+                  <span style={{ fontSize: '0.82rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {progressState?.message || 'Scanning files & console formats...'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="rom-progress-track" style={{
+                width: '100%',
+                height: '7px',
+                background: 'rgba(0, 0, 0, 0.08)',
+                borderRadius: '999px',
+                overflow: 'hidden',
+                position: 'relative'
+              }}>
+                {progressState?.total > 0 ? (
+                  <div
+                    className="rom-progress-fill"
+                    style={{
+                      width: `${Math.max(3, Math.min(100, Math.round(((progressState.current || 0) / progressState.total) * 100)))}%`,
+                      height: '100%',
+                      background: 'linear-gradient(90deg, #3b82f6, #6366f1)',
+                      transition: 'width 0.15s ease'
+                    }}
+                  />
+                ) : (
+                  <div className="rom-progress-indeterminate" />
+                )}
+              </div>
+            </div>
           )}
 
           {/* STAGE 2A: Single File Ingestion Review */}
