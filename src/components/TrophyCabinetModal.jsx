@@ -155,6 +155,7 @@ function getGamerLevel(points = 0) {
 export default function TrophyCabinetModal({
   isOpen,
   onClose,
+  initialAchievementId = null,
   activeProfile,
   achievementsEngine,
   sfx
@@ -188,6 +189,24 @@ export default function TrophyCabinetModal({
 
   const STATUS_TABS = ['all', 'unlocked', 'locked'];
   const CATEGORY_LIST = ['all', ...Object.keys(ACHIEVEMENT_CATEGORIES).map(k => ACHIEVEMENT_CATEGORIES[k].id)];
+
+  // Automatically focus & navigate to target trophy when opened via universal achievement toast click
+  useEffect(() => {
+    if (!isOpen) return;
+    if (initialAchievementId) {
+      const targetItem = ACHIEVEMENTS_MANIFEST.find(a => a.id === initialAchievementId);
+      if (targetItem) {
+        setStatusFilter('unlocked');
+        setCategoryFilter('all');
+        const unlockedList = ACHIEVEMENTS_MANIFEST.filter(item => !!unlocked[item.id]);
+        const idx = unlockedList.findIndex(item => item.id === initialAchievementId);
+        if (idx >= 0) {
+          setFocusedIndex(idx);
+        }
+        return;
+      }
+    }
+  }, [isOpen, initialAchievementId, unlocked]);
 
   // Auto-scroll focused card into view smoothly
   useEffect(() => {
@@ -673,11 +692,12 @@ export default function TrophyCabinetModal({
               const tier = ACHIEVEMENT_TIERS[item.tier?.toUpperCase()] || ACHIEVEMENT_TIERS.BRONZE;
               const IconComponent = ICON_MAP[item.icon] || Trophy;
               const isFocused = idx === focusedIndex;
+              const isTarget = item.id === initialAchievementId;
 
               return (
                 <div
                   key={item.id}
-                  className={`trophy-ds-card tier-${item.tier} ${isUnlocked ? 'is-unlocked' : 'is-locked'} ${isFocused ? 'is-focused' : ''}`}
+                  className={`trophy-ds-card tier-${item.tier} ${isUnlocked ? 'is-unlocked' : 'is-locked'} ${isFocused ? 'is-focused' : ''} ${isTarget ? 'is-target-trophy' : ''}`}
                   tabIndex={0}
                   onFocus={() => setFocusedIndex(idx)}
                   onClick={() => haptics.selection()}

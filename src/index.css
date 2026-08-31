@@ -21076,6 +21076,21 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   transform: translateY(-1px);
 }
 
+@keyframes trophyTargetGlow {
+  0%, 100% {
+    border-color: #e11d48 !important;
+    box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.55), 0 8px 24px rgba(225, 29, 72, 0.25);
+  }
+  50% {
+    border-color: #f43f5e !important;
+    box-shadow: 0 0 0 5px rgba(244, 63, 94, 0.75), 0 12px 32px rgba(244, 63, 94, 0.35);
+  }
+}
+
+.trophy-ds-card.is-target-trophy {
+  animation: trophyTargetGlow 1.6s ease-in-out 3;
+}
+
 .trophy-ds-icon-box {
   flex: 0 0 38px;
   height: 38px;

@@ -95,7 +95,7 @@ For cartridge-specific memory maps, 16-badge dual cases, and generation-by-gener
 2. **Session Exit Toast Flush**: When you exit emulation back to the library, all earned achievements slide in sequentially at the top right with Nintendo DS Touch styling and Web Audio chiptune fanfare.
 3. **Console-Grade Compact Toast HUD**: Toasts display a streamlined layout (Icon Box, Kicker, Title, Tier/Points Badge, Close Button) without multi-line description clutter.
 4. **Contextual Parity & Navigation**:
-   - Universal achievement toasts (`category !== 'pokemon'`) are clickable and open the **Trophy Cabinet & Hall of Fame** modal directly.
+   - Universal achievement toasts (`category !== 'pokemon'`) are clickable and open the **Trophy Cabinet & Hall of Fame** modal directly, automatically switching to the **Unlocked** filter, focusing the exact earned trophy card, and highlighting it with a glow pulse animation.
    - Pokémon milestone toasts (`category === 'pokemon'`) display the exact contextual title matching the **Trainer Milestones & Badge Case** view 1-to-1 (e.g. *Pallet Town Departure*), and clicking them dismisses the toast without navigating to the universal Trophy Cabinet.
 5. **Menu Immediate Triggers**: Non-game actions (e.g. toggling theme 5 times, exporting backup, listening to 3 BGM tracks, or loading 25/100 ROMs) trigger their unlock toasts immediately.
 6. **Trophy Cabinet**: Press **`H`** on keyboard or click the **Trophy (🏆)** icon in the topbar to open the **Hall of Fame**, view progress meters, gamer level, and filter by categories.

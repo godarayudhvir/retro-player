@@ -142,7 +142,7 @@ export default function AchievementToast({ toast, onDismiss, onOpenCabinet }) {
 
   const handleToastClick = () => {
     if (!isPokemon && onOpenCabinet) {
-      onOpenCabinet();
+      onOpenCabinet(toast.id);
     }
     if (onDismiss) {
       onDismiss();

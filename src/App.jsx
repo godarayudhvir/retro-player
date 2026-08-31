@@ -51,6 +51,7 @@ export default function App() {
   const [showScraperModal, setShowScraperModal] = useState(false);
   const [showBackupModal, setShowBackupModal] = useState(false);
   const [showTrophyModal, setShowTrophyModal] = useState(false);
+  const [targetTrophyId, setTargetTrophyId] = useState(null);
   const [showVirtualKeyboard, setShowVirtualKeyboard] = useState(false);
   const [oskConfig, setOskConfig] = useState({
     title: 'SEARCH LIBRARY',
@@ -1055,7 +1056,10 @@ export default function App() {
       <AchievementToast
         toast={achievementsEngine.activeToast}
         onDismiss={achievementsEngine.dismissToast}
-        onOpenCabinet={() => setShowTrophyModal(true)}
+        onOpenCabinet={(trophyId) => {
+          setTargetTrophyId(trophyId || null);
+          setShowTrophyModal(true);
+        }}
       />
 
       {/* Interactive Trophy Cabinet & Hall of Fame Modal */}
@@ -1063,9 +1067,11 @@ export default function App() {
         isOpen={showTrophyModal}
         onClose={() => {
           setShowTrophyModal(false);
+          setTargetTrophyId(null);
           setFocusedTarget({ zone: 'topbar', id: 'trophy' });
           sfx?.playModalClose?.();
         }}
+        initialAchievementId={targetTrophyId}
         activeProfile={activeProfile}
         achievementsEngine={achievementsEngine}
         sfx={sfx}
