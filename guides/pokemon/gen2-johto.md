@@ -36,6 +36,17 @@ This specification details the dual-region 16-badge save format, multi-pocket in
 | `0x80` | 🐉 **Rising Badge** | Clair | Blackthorn City | Dragon | `poke_badge_8` |
 
 ### 2. Post-Game Kanto League Return (Badges 9 – 16)
+| Bit | Badge Name | Gym Leader | City | Specialization | Milestone ID |
+| :---: | :--- | :--- | :--- | :--- | :--- |
+| `0x01` | 🪨 **Boulder Badge** | Brock | Pewter City | Rock | `poke_badge_kanto_1` |
+| `0x02` | 💧 **Cascade Badge** | Misty | Cerulean City | Water | `poke_badge_kanto_2` |
+| `0x04` | ⚡ **Thunder Badge** | Lt. Surge | Vermilion City | Electric | `poke_badge_kanto_3` |
+| `0x08` | 🌸 **Rainbow Badge** | Erika | Celadon City | Grass | `poke_badge_kanto_4` |
+| `0x10` | 💖 **Soul Badge** | Janine | Fuchsia City | Poison | `poke_badge_kanto_5` |
+| `0x20` | 🔮 **Marsh Badge** | Sabrina | Saffron City | Psychic | `poke_badge_kanto_6` |
+| `0x40` | 🔥 **Volcano Badge** | Blaine | Seafoam Islands | Fire | `poke_badge_kanto_7` |
+| `0x80` | 🌍 **Earth Badge** | Blue | Viridian City | Various | `poke_badge_kanto_8` |
+
 After defeating Lance at Indigo Plateau, players cross to Kanto to assemble the 8 classic badges. Gathering all 16 badges triggers the Platinum milestone **`poke_sixteen_badges`** (*Dual-Region Master*) and unlocks access to the summit of Mt. Silver.
 
 ---

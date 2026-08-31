@@ -102,8 +102,11 @@ Add sub-parsers in `src/services/pokemonSaveParser.js`:
 5. Decrypt 236-byte party structs using the LCRNG pipeline to detect Species, Level 100, Shinies, and Pokérus.
 
 ### Step 3: Register Badges & Contextual Milestones in Manifest
-1. Register `REGIONAL_BADGES.sinnoh` and `REGIONAL_BADGES.unova` in `src/data/achievementsManifest.js` to enable automatic badge rendering in Nintendo DS View and the Trainer Milestones view.
-2. Add Gen 4 & Gen 5 regional mappings to `getPokemonMilestonesForGame(game)` in `src/data/achievementsManifest.js`:
+1. **Prepared Badge Assets Ready**:
+   * Sinnoh WebP Badges (`coal.webp`, `forest.webp`, `cobble.webp`, `fen.webp`, `relic.webp`, `mine.webp`, `icicle.webp`, `beacon.webp`) are pre-extracted in `public/assets/badges/sinnoh/`.
+   * Unova WebP Badges (`trio.webp`, `basic.webp`, `insect.webp`, `bolt.webp`, `quake.webp`, `jet.webp`, `freeze.webp`, `legend.webp`) are pre-extracted in `public/assets/badges/unova/`.
+2. Register `REGIONAL_BADGES.sinnoh` and `REGIONAL_BADGES.unova` in `src/data/achievementsManifest.js` with their respective `image` paths to enable automatic badge rendering in Nintendo DS View, Mobile App View, and unlock toasts.
+3. Add Gen 4 & Gen 5 regional mappings to `getPokemonMilestonesForGame(game)` in `src/data/achievementsManifest.js`:
    * **Generation 4 (Sinnoh – Diamond, Pearl, Platinum)**:
      - `poke_journey_begun`: **Twinleaf Departure** (*"Receive your starter companion from Professor Rowan at Lake Verity."*)
      - `poke_digital_cartographer`: **Pokétch Navigator (Town Map)** (*"Obtain the Pokétch and Town Map to navigate the Sinnoh region."*)

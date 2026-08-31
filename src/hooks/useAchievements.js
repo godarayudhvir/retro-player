@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { ACHIEVEMENTS_MANIFEST, POKEMON_ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, TOTAL_ACHIEVEMENT_POINTS, getPokemonMilestonesForGame } from '../data/achievementsManifest';
+import { ACHIEVEMENTS_MANIFEST, POKEMON_ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, TOTAL_ACHIEVEMENT_POINTS, getPokemonMilestonesForGame, getPokemonBadgesForGame, REGIONAL_BADGES, isJohtoPokemonGame } from '../data/achievementsManifest';
 import { parsePokemonSave, isPokemonRom } from '../services/pokemonSaveParser';
 import { dbGet, dbSet, STORES } from '../services/db';
 import { haptics } from '../services/hapticsService';
@@ -212,8 +212,41 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
 
     let manifestItem = ACHIEVEMENTS_MANIFEST.find(a => a.id === achievementId);
     if (!manifestItem) {
-      const pokeList = gameContext ? getPokemonMilestonesForGame(gameContext) : POKEMON_ACHIEVEMENTS_MANIFEST;
-      manifestItem = pokeList.find(a => a.id === achievementId) || POKEMON_ACHIEVEMENTS_MANIFEST.find(a => a.id === achievementId);
+      if (achievementId.startsWith('poke_badge_kanto_')) {
+        const badgeNum = parseInt(achievementId.replace('poke_badge_kanto_', ''), 10);
+        const badge = REGIONAL_BADGES.kanto[badgeNum - 1];
+        if (badge) {
+          manifestItem = {
+            id: achievementId,
+            title: `Kanto ${badge.name}`,
+            description: `Defeat Kanto Gym Leader ${badge.leader} in ${badge.city} (${badge.type} Type).`,
+            tier: badge.tier || 'bronze',
+            category: 'pokemon',
+            icon: 'Shield',
+            image: badge.image,
+            isPerRom: true
+          };
+        }
+      } else if (achievementId.startsWith('poke_badge_')) {
+        const badgeNum = parseInt(achievementId.replace('poke_badge_', ''), 10);
+        const badges = getPokemonBadgesForGame(gameContext);
+        const badge = badges[badgeNum - 1];
+        if (badge) {
+          manifestItem = {
+            id: achievementId,
+            title: badge.name,
+            description: `Defeat Gym Leader ${badge.leader} in ${badge.city} (${badge.type} Type).`,
+            tier: badge.tier || 'bronze',
+            category: 'pokemon',
+            icon: 'Shield',
+            image: badge.image,
+            isPerRom: true
+          };
+        }
+      } else {
+        const pokeList = gameContext ? getPokemonMilestonesForGame(gameContext) : POKEMON_ACHIEVEMENTS_MANIFEST;
+        manifestItem = pokeList.find(a => a.id === achievementId) || POKEMON_ACHIEVEMENTS_MANIFEST.find(a => a.id === achievementId);
+      }
     }
     if (!manifestItem) return;
 
@@ -224,6 +257,7 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       tier: manifestItem.tier,
       category: manifestItem.category,
       icon: manifestItem.icon,
+      image: manifestItem.image || null,
       unlockedAt: new Date().toISOString(),
       gameId: gameContext?.id || gameContext?.title || null,
       gameTitle: gameContext?.title || null,
@@ -712,6 +746,19 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       if (summary.badges?.[5]) unlockAchievement('poke_badge_6', game);
       if (summary.badges?.[6]) unlockAchievement('poke_badge_7', game);
       if (summary.badges?.[7]) unlockAchievement('poke_badge_8', game);
+
+      // Gen 2 Kanto Return Badges (9 to 16)
+      if (summary.kantoBadges) {
+        if (summary.kantoBadges[0]) unlockAchievement('poke_badge_kanto_1', game);
+        if (summary.kantoBadges[1]) unlockAchievement('poke_badge_kanto_2', game);
+        if (summary.kantoBadges[2]) unlockAchievement('poke_badge_kanto_3', game);
+        if (summary.kantoBadges[3]) unlockAchievement('poke_badge_kanto_4', game);
+        if (summary.kantoBadges[4]) unlockAchievement('poke_badge_kanto_5', game);
+        if (summary.kantoBadges[5]) unlockAchievement('poke_badge_kanto_6', game);
+        if (summary.kantoBadges[6]) unlockAchievement('poke_badge_kanto_7', game);
+        if (summary.kantoBadges[7]) unlockAchievement('poke_badge_kanto_8', game);
+      }
+
       if (summary.hasAllBadges || summary.badgeCount >= 8) unlockAchievement('poke_eight_badges', game);
       if (summary.has16Badges || summary.totalBadgeCount >= 16) unlockAchievement('poke_sixteen_badges', game);
 

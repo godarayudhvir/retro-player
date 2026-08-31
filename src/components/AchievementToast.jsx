@@ -163,7 +163,11 @@ export default function AchievementToast({ toast, onDismiss, onOpenCabinet }) {
           className="achievement-toast-icon-box" 
           style={{ background: tier.bg, color: tier.color, borderColor: tier.border }}
         >
-          <IconComponent size={22} strokeWidth={2.4} />
+          {toast.image ? (
+            <img src={toast.image} alt={toast.title} className="achievement-toast-badge-img" />
+          ) : (
+            <IconComponent size={22} strokeWidth={2.4} />
+          )}
         </div>
 
         {/* Content Details */}

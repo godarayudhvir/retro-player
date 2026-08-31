@@ -57,8 +57,7 @@ import QRCode from 'qrcode';
 import { resolveAssetPath } from '../../utils/assetPath';
 import { getGameDescription, getReleaseDate } from '../../gameDescriptions';
 import { saveCachedMetadata } from '../../services/metadataScraper';
-import { convertRemoteImageToWebpDataUrl } from '../../utils/imageConverter';
-import { POKEMON_ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, getPokemonBadgesForGame, getPokemonMilestonesForGame } from '../../data/achievementsManifest';
+import { POKEMON_ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, getPokemonBadgesForGame, getPokemonMilestonesForGame, REGIONAL_BADGES, isJohtoPokemonGame } from '../../data/achievementsManifest';
 import { isPokemonRom } from '../../services/pokemonSaveParser';
 import ConfirmModal from '../ConfirmModal';
 
@@ -1195,38 +1194,132 @@ export default function DsView({
                 </div>
               </div>
 
-              {/* 8-Badge Case Tray */}
-              <div style={{ padding: '0.35rem 0 0.15rem 0', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Regional League Badge Case
-                </span>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.4rem' }}>
-                  {(() => {
-                    const regionalBadges = getPokemonBadgesForGame(selectedGame);
-                    return regionalBadges.map((badge, idx) => {
-                      const num = idx + 1;
-                      const badgeKey = `poke_badge_${num}`;
-                      const badgeLabel = badge.name.replace(' Badge', '');
-                      const isBadgeEarned = !!achievementsEngine?.unlocked?.[badgeKey] && (
-                        achievementsEngine.unlocked[badgeKey].gameId === selectedGame?.id ||
-                        achievementsEngine.unlocked[badgeKey].gameTitle === selectedGame?.title
-                      );
-                      return (
-                        <div
-                          key={badge.name}
-                          className={`ds-badge-box ${isBadgeEarned ? 'is-earned' : ''}`}
-                          title={`${badge.name}: Defeat ${badge.leader} in ${badge.city} (${badge.type} Type)`}
-                        >
-                          <Shield size={16} color={isBadgeEarned ? '#f59e0b' : 'var(--text-sub)'} fill={isBadgeEarned ? '#f59e0b' : 'none'} />
-                          <span style={{ fontSize: '0.63rem', fontWeight: 800, color: isBadgeEarned ? '#d97706' : 'var(--text-sub)' }}>
-                            {badgeLabel}
-                          </span>
+              {/* Regional League Badge Case Trays */}
+              {(() => {
+                const isJohto = isJohtoPokemonGame(selectedGame);
+                if (isJohto) {
+                  return (
+                    <div style={{ padding: '0.2rem 0 0.1rem 0', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                      {/* 1. Johto League Case (8 Badges) */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        <span style={{ fontSize: '0.63rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          Johto League Badge Case (8)
+                        </span>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.35rem' }}>
+                          {REGIONAL_BADGES.johto.map((badge, idx) => {
+                            const num = idx + 1;
+                            const badgeKey = `poke_badge_${num}`;
+                            const badgeLabel = badge.name.replace(' Badge', '');
+                            const isBadgeEarned = !!achievementsEngine?.unlocked?.[badgeKey] && (
+                              achievementsEngine.unlocked[badgeKey].gameId === selectedGame?.id ||
+                              achievementsEngine.unlocked[badgeKey].gameTitle === selectedGame?.title
+                            );
+                            return (
+                              <div
+                                key={badge.name}
+                                className={`ds-badge-box ${isBadgeEarned ? 'is-earned' : 'is-locked'}`}
+                                title={`${badge.name}: Defeat ${badge.leader} in ${badge.city} (${badge.type} Type)`}
+                              >
+                                {badge.image ? (
+                                  <img
+                                    src={badge.image}
+                                    alt={badge.name}
+                                    className={`ds-badge-img ${isBadgeEarned ? 'is-earned' : 'is-locked'}`}
+                                  />
+                                ) : (
+                                  <Shield size={16} color={isBadgeEarned ? '#f59e0b' : 'var(--text-sub)'} fill={isBadgeEarned ? '#f59e0b' : 'none'} />
+                                )}
+                                <span style={{ fontSize: '0.61rem', fontWeight: 800, color: isBadgeEarned ? '#d97706' : 'var(--text-sub)' }}>
+                                  {badgeLabel}
+                                </span>
+                              </div>
+                            );
+                          })}
                         </div>
-                      );
-                    });
-                  })()}
-                </div>
-              </div>
+                      </div>
+
+                      {/* 2. Kanto Return League Case (8 Badges) */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        <span style={{ fontSize: '0.63rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          Kanto Return League Badge Case (8)
+                        </span>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.35rem' }}>
+                          {REGIONAL_BADGES.kanto.map((badge, idx) => {
+                            const num = idx + 1;
+                            const badgeKey = `poke_badge_kanto_${num}`;
+                            const badgeLabel = badge.name.replace(' Badge', '');
+                            const isBadgeEarned = !!achievementsEngine?.unlocked?.[badgeKey] && (
+                              achievementsEngine.unlocked[badgeKey].gameId === selectedGame?.id ||
+                              achievementsEngine.unlocked[badgeKey].gameTitle === selectedGame?.title
+                            );
+                            return (
+                              <div
+                                key={badge.name}
+                                className={`ds-badge-box ${isBadgeEarned ? 'is-earned' : 'is-locked'}`}
+                                title={`Kanto ${badge.name}: Defeat ${badge.leader} in ${badge.city} (${badge.type} Type)`}
+                              >
+                                {badge.image ? (
+                                  <img
+                                    src={badge.image}
+                                    alt={badge.name}
+                                    className={`ds-badge-img ${isBadgeEarned ? 'is-earned' : 'is-locked'}`}
+                                  />
+                                ) : (
+                                  <Shield size={16} color={isBadgeEarned ? '#f59e0b' : 'var(--text-sub)'} fill={isBadgeEarned ? '#f59e0b' : 'none'} />
+                                )}
+                                <span style={{ fontSize: '0.61rem', fontWeight: 800, color: isBadgeEarned ? '#d97706' : 'var(--text-sub)' }}>
+                                  {badgeLabel}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Standard Single Regional Badge Case (Gen 1 Kanto, Gen 3 Hoenn, etc.)
+                const regionalBadges = getPokemonBadgesForGame(selectedGame);
+                return (
+                  <div style={{ padding: '0.35rem 0 0.15rem 0', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      Regional League Badge Case
+                    </span>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.4rem' }}>
+                      {regionalBadges.map((badge, idx) => {
+                        const num = idx + 1;
+                        const badgeKey = `poke_badge_${num}`;
+                        const badgeLabel = badge.name.replace(' Badge', '');
+                        const isBadgeEarned = !!achievementsEngine?.unlocked?.[badgeKey] && (
+                          achievementsEngine.unlocked[badgeKey].gameId === selectedGame?.id ||
+                          achievementsEngine.unlocked[badgeKey].gameTitle === selectedGame?.title
+                        );
+                        return (
+                          <div
+                            key={badge.name}
+                            className={`ds-badge-box ${isBadgeEarned ? 'is-earned' : 'is-locked'}`}
+                            title={`${badge.name}: Defeat ${badge.leader} in ${badge.city} (${badge.type} Type)`}
+                          >
+                            {badge.image ? (
+                              <img
+                                src={badge.image}
+                                alt={badge.name}
+                                className={`ds-badge-img ${isBadgeEarned ? 'is-earned' : 'is-locked'}`}
+                              />
+                            ) : (
+                              <Shield size={16} color={isBadgeEarned ? '#f59e0b' : 'var(--text-sub)'} fill={isBadgeEarned ? '#f59e0b' : 'none'} />
+                            )}
+                            <span style={{ fontSize: '0.63rem', fontWeight: 800, color: isBadgeEarned ? '#d97706' : 'var(--text-sub)' }}>
+                              {badgeLabel}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Individual Pokémon Milestones List (Fills full vertical panel depth, sorted Unlocked First) */}
