@@ -54,16 +54,23 @@ export default function LoadRomModal({
   const [selectedFile, setSelectedFile] = useState(null);
   const [folderData, setFolderData] = useState(null); // { folderName, files: [], stats, dirHandle }
   const [storageMode, setStorageMode] = useState('session'); // 'session' | 'permanent'
-  const [localLinkedHandles, setLocalLinkedHandles] = useState([]);
+  const [localLinkedHandles, setLocalLinkedHandles] = useState(savedLinkedHandles || []);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progressState, setProgressState] = useState(null); // { step, current, total, message }
   const [errorMessage, setErrorMessage] = useState(null);
   const [focusedOption, setFocusedOption] = useState(0); 
   const isServerAvailable = checkServerDbStatus();
 
-  const activeHandles = savedLinkedHandles && savedLinkedHandles.length > 0 ? savedLinkedHandles : localLinkedHandles;
+  const activeHandles = localLinkedHandles;
 
-  // Check for saved linked directory handles on desktop
+  // Keep localLinkedHandles synced whenever savedLinkedHandles prop updates
+  useEffect(() => {
+    if (savedLinkedHandles && Array.isArray(savedLinkedHandles)) {
+      setLocalLinkedHandles(savedLinkedHandles);
+    }
+  }, [savedLinkedHandles]);
+
+  // Check for saved linked directory handles on desktop when modal opens
   useEffect(() => {
     if (isOpen && !isMobile && typeof window !== 'undefined' && window.showDirectoryPicker) {
       getLinkedDirectoryHandles().then(handles => {
@@ -311,12 +318,18 @@ export default function LoadRomModal({
   };
 
   const handleRemoveSingleLinkedFolder = async (folderName) => {
-    if (onRemoveLinkedFolder) {
-      await onRemoveLinkedFolder(folderName);
-    } else {
-      await removeLinkedDirectoryHandle(folderName);
+    try {
+      // Optimistically update local modal state immediately
+      setLocalLinkedHandles(prev => (prev || []).filter(h => h.name !== folderName));
+      if (onRemoveLinkedFolder) {
+        await onRemoveLinkedFolder(folderName);
+      } else {
+        await removeLinkedDirectoryHandle(folderName);
+      }
       const updated = await getLinkedDirectoryHandles();
-      setLocalLinkedHandles(updated);
+      setLocalLinkedHandles(updated || []);
+    } catch (err) {
+      console.error('Failed to remove linked folder handle:', err);
     }
   };
 
