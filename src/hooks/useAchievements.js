@@ -720,9 +720,8 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
         unlockAchievement('poke_hall_of_fame', game);
       }
 
-      // 5. Catches, Party, Evolutions, Level 100
+      // 5. Catches, Party, Level 100
       if (summary.hasFirstCatch) unlockAchievement('poke_first_catch', game);
-      if (summary.hasEvolved) unlockAchievement('poke_evolution_master', game);
       if (summary.hasFullParty) unlockAchievement('poke_full_party', game);
       if (summary.hasLevel100) unlockAchievement('poke_level_100', game);
       if (summary.hasLegendary) unlockAchievement('poke_myth_and_legend', game);

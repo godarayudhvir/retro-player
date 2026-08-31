@@ -405,15 +405,6 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     icon: 'Bike',
     isPerRom: true
   },
-  {
-    id: 'poke_evolution_master',
-    title: 'Metamorphosis',
-    description: 'Raise and evolve any Pokémon into a new evolutionary stage of power.',
-    category: 'pokemon',
-    tier: 'bronze',
-    icon: 'Zap',
-    isPerRom: true
-  },
 
   // Tools & Items
   {

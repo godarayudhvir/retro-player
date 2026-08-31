@@ -207,7 +207,6 @@ function parseGen1(data, identifiedGame) {
   // Each party entry is 44 bytes starting around 0x2F34
   let maxPartyLevel = 0;
   let hasStarter = partyCount > 0 || pokedexCaught > 0;
-  let hasEvolved = false;
   let hasLegendary = false;
   let hasFossil = false;
 
@@ -257,7 +256,6 @@ function parseGen1(data, identifiedGame) {
     hasLevel100: maxPartyLevel >= 100,
     hasStarter: hasStarter || badgeCount > 0,
     hasFirstCatch: pokedexCaught >= 2,
-    hasEvolved: pokedexCaught >= 3 || hasEvolved,
     hasFullParty: partyCount >= 6,
     hasShiny: false, // Shinies introduced in Gen 2
     hasPokerus: false,
@@ -431,7 +429,6 @@ function parseGen2(data, identifiedGame) {
     hasLevel100: maxPartyLevel >= 100,
     hasStarter,
     hasFirstCatch: pokedexCaught >= 2,
-    hasEvolved: pokedexCaught >= 3,
     hasFullParty: partyCount >= 6,
     hasShiny,
     hasPokerus,
@@ -678,7 +675,6 @@ function parseGen3(data, identifiedGame) {
     hasLevel100: maxPartyLevel >= 100,
     hasStarter,
     hasFirstCatch: pokedexCaught >= 2,
-    hasEvolved: pokedexCaught >= 3,
     hasFullParty: partyCount >= 6,
     hasShiny,
     hasPokerus,

@@ -1229,16 +1229,31 @@ export default function DsView({
               </div>
             </div>
 
-            {/* Individual Pokémon Milestones List (Fills full vertical panel depth) */}
+            {/* Individual Pokémon Milestones List (Fills full vertical panel depth, sorted Unlocked First) */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: '4px' }}>
-              {getPokemonMilestonesForGame(selectedGame).map(item => {
-                const unlockData = achievementsEngine?.unlocked?.[item.id];
-                const isEarned = !!unlockData && (
-                  unlockData.gameId === selectedGame?.id ||
-                  unlockData.gameTitle === selectedGame?.title
-                );
-                const tier = ACHIEVEMENT_TIERS[item.tier?.toUpperCase()] || ACHIEVEMENT_TIERS.BRONZE;
-                const IconComponent = POKE_ICON_MAP[item.icon] || Sparkles;
+              {(() => {
+                const milestones = getPokemonMilestonesForGame(selectedGame);
+                const sorted = [...milestones].sort((a, b) => {
+                  const aEarned = !!achievementsEngine?.unlocked?.[a.id] && (
+                    achievementsEngine.unlocked[a.id].gameId === selectedGame?.id ||
+                    achievementsEngine.unlocked[a.id].gameTitle === selectedGame?.title
+                  );
+                  const bEarned = !!achievementsEngine?.unlocked?.[b.id] && (
+                    achievementsEngine.unlocked[b.id].gameId === selectedGame?.id ||
+                    achievementsEngine.unlocked[b.id].gameTitle === selectedGame?.title
+                  );
+                  if (aEarned && !bEarned) return -1;
+                  if (!aEarned && bEarned) return 1;
+                  return 0;
+                });
+                return sorted.map(item => {
+                  const unlockData = achievementsEngine?.unlocked?.[item.id];
+                  const isEarned = !!unlockData && (
+                    unlockData.gameId === selectedGame?.id ||
+                    unlockData.gameTitle === selectedGame?.title
+                  );
+                  const tier = ACHIEVEMENT_TIERS[item.tier?.toUpperCase()] || ACHIEVEMENT_TIERS.BRONZE;
+                  const IconComponent = POKE_ICON_MAP[item.icon] || Sparkles;
 
                 return (
                   <div
@@ -1292,7 +1307,8 @@ export default function DsView({
                     </div>
                   </div>
                 );
-              })}
+                });
+              })()}
             </div>
           </div>
         )}

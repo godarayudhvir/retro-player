@@ -1171,70 +1171,86 @@ export default function MobileAppView({
                 </div>
               </div>
 
-              {/* Individual Pokémon Milestones List */}
+              {/* Individual Pokémon Milestones List (Sorted Unlocked First) */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-                {getPokemonMilestonesForGame(selectedGameForDetails).map(item => {
-                  const unlockData = achievementsEngine?.unlocked?.[item.id];
-                  const isEarned = !!unlockData && (
-                    unlockData.gameId === selectedGameForDetails?.id ||
-                    unlockData.gameTitle === selectedGameForDetails?.title
-                  );
-                  const tier = ACHIEVEMENT_TIERS[item.tier?.toUpperCase()] || ACHIEVEMENT_TIERS.BRONZE;
-                  const IconComponent = POKE_ICON_MAP[item.icon] || Sparkles;
+                {(() => {
+                  const milestones = getPokemonMilestonesForGame(selectedGameForDetails);
+                  const sorted = [...milestones].sort((a, b) => {
+                    const aEarned = !!achievementsEngine?.unlocked?.[a.id] && (
+                      achievementsEngine.unlocked[a.id].gameId === selectedGameForDetails?.id ||
+                      achievementsEngine.unlocked[a.id].gameTitle === selectedGameForDetails?.title
+                    );
+                    const bEarned = !!achievementsEngine?.unlocked?.[b.id] && (
+                      achievementsEngine.unlocked[b.id].gameId === selectedGameForDetails?.id ||
+                      achievementsEngine.unlocked[b.id].gameTitle === selectedGameForDetails?.title
+                    );
+                    if (aEarned && !bEarned) return -1;
+                    if (!aEarned && bEarned) return 1;
+                    return 0;
+                  });
+                  return sorted.map(item => {
+                    const unlockData = achievementsEngine?.unlocked?.[item.id];
+                    const isEarned = !!unlockData && (
+                      unlockData.gameId === selectedGameForDetails?.id ||
+                      unlockData.gameTitle === selectedGameForDetails?.title
+                    );
+                    const tier = ACHIEVEMENT_TIERS[item.tier?.toUpperCase()] || ACHIEVEMENT_TIERS.BRONZE;
+                    const IconComponent = POKE_ICON_MAP[item.icon] || Sparkles;
 
-                  return (
-                    <div
-                      key={item.id}
-                      className={`ds-poke-milestone-tile tier-${item.tier} ${isEarned ? 'is-earned' : 'is-locked'}`}
-                    >
-                      {/* Left Milestone Icon Box */}
+                    return (
                       <div
-                        className="ds-poke-icon-box"
-                        style={{
-                          background: isEarned ? tier.bg : 'var(--bg-glass)',
-                          color: isEarned ? tier.color : 'var(--text-sub)',
-                          borderColor: isEarned ? tier.border : 'var(--panel-border)'
-                        }}
+                        key={item.id}
+                        className={`ds-poke-milestone-tile tier-${item.tier} ${isEarned ? 'is-earned' : 'is-locked'}`}
                       >
-                        {isEarned ? (
-                          <IconComponent size={17} strokeWidth={2.4} />
-                        ) : (
-                          <Lock size={15} />
-                        )}
-                      </div>
-
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.35rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: 0 }}>
-                            <span style={{ fontSize: '0.76rem', fontWeight: 700, color: isEarned ? 'var(--text-main)' : 'var(--text-sub)' }}>
-                              {item.title}
-                            </span>
-                            {isEarned && (
-                              <CheckCircle2 size={12} color="#10b981" style={{ flexShrink: 0 }} />
-                            )}
-                          </div>
-                          <span
-                            className="trophy-ds-points-pill"
-                            style={{
-                              background: isEarned ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-glass)',
-                              color: isEarned ? '#059669' : 'var(--text-sub)',
-                              borderColor: isEarned ? 'rgba(16, 185, 129, 0.35)' : 'var(--panel-border)',
-                              fontSize: '0.62rem',
-                              fontWeight: 800,
-                              letterSpacing: '0.03em',
-                              padding: '1px 5px'
-                            }}
-                          >
-                            {isEarned ? 'UNLOCKED' : 'LOCKED'}
-                          </span>
+                        {/* Left Milestone Icon Box */}
+                        <div
+                          className="ds-poke-icon-box"
+                          style={{
+                            background: isEarned ? tier.bg : 'var(--bg-glass)',
+                            color: isEarned ? tier.color : 'var(--text-sub)',
+                            borderColor: isEarned ? tier.border : 'var(--panel-border)'
+                          }}
+                        >
+                          {isEarned ? (
+                            <IconComponent size={17} strokeWidth={2.4} />
+                          ) : (
+                            <Lock size={15} />
+                          )}
                         </div>
-                        <p style={{ fontSize: '0.66rem', color: 'var(--text-sub)', margin: '0.15rem 0 0 0', lineHeight: 1.25 }}>
-                          {item.description}
-                        </p>
+
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.35rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: 0 }}>
+                              <span style={{ fontSize: '0.76rem', fontWeight: 700, color: isEarned ? 'var(--text-main)' : 'var(--text-sub)' }}>
+                                {item.title}
+                              </span>
+                              {isEarned && (
+                                <CheckCircle2 size={12} color="#10b981" style={{ flexShrink: 0 }} />
+                              )}
+                            </div>
+                            <span
+                              className="trophy-ds-points-pill"
+                              style={{
+                                background: isEarned ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-glass)',
+                                color: isEarned ? '#059669' : 'var(--text-sub)',
+                                borderColor: isEarned ? 'rgba(16, 185, 129, 0.35)' : 'var(--panel-border)',
+                                fontSize: '0.62rem',
+                                fontWeight: 800,
+                                letterSpacing: '0.03em',
+                                padding: '1px 5px'
+                              }}
+                            >
+                              {isEarned ? 'UNLOCKED' : 'LOCKED'}
+                            </span>
+                          </div>
+                          <p style={{ fontSize: '0.66rem', color: 'var(--text-sub)', margin: '0.15rem 0 0 0', lineHeight: 1.25 }}>
+                            {item.description}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  });
+                })()}
               </div>
             </div>
           )}
