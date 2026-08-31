@@ -40,7 +40,7 @@ export default function AboutInfoModal({ isOpen, focusedTarget, onClose, sfx }) 
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <h2>Retro Player</h2>
-                <span className="info-version-badge" style={{ fontSize: '0.68rem', padding: '0.12rem 0.5rem' }}>v1.0.9</span>
+                <span className="info-version-badge" style={{ fontSize: '0.68rem', padding: '0.12rem 0.5rem' }}>v1.1.0</span>
               </div>
               <p>System specifications, emulation engines, and repository source</p>
             </div>

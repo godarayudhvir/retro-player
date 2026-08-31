@@ -24,3 +24,14 @@
     - **Dual Server Middleware Parity**: Any API route, WebSocket, or backend handler added to `server.js` MUST also be mirrored in `vite.config.js` (`server.middlewares`) so it functions in `npm run dev`.
     - **Docker Multi-Stage Runtime Parity**: Any new server helper, backend module, or runtime asset directory (e.g. `src/server/`, `data/`, `public/`) MUST be copied to the `runner` stage in [Dockerfile](file:///Users/godarayudhvir/Github/retro-player/Dockerfile).
     - **Subpath-Aware URL & Asset Resolution**: All asset URLs, cover art paths, audio links, and API fetches MUST be subpath-aware so they never 404 when hosted on a repository subpath (e.g. GitHub Pages) vs domain root (e.g. localhost/Docker).
+11. **Release Version Synchronization & Verification**:
+    Whenever preparing or executing a release commit or version bump requested by the user, **always** execute the automated version synchronization script (`node .agents/skills/release-version/scripts/bump_version.js <version>`) and run a strict codebase grep verification to guarantee that **every** version touchpoint across the entire project is 100% updated with zero stale version references:
+    - `package.json` & `package-lock.json`
+    - `public/sw.js` (`CACHE_NAME`)
+    - `public/manifest.webmanifest`
+    - `src/components/AboutInfoModal.jsx` (`.info-version-badge`)
+    - `src/components/MobileAppView.jsx` (all `.info-version-badge` instances)
+    - `public/llms.txt`
+    - `README.md` (Version status badge)
+    - Cover showcase images (`home.webp` -> `public/og-image.webp` & `public/screenshots/desktop-1.webp`)
+

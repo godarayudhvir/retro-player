@@ -21,7 +21,8 @@ When a version release is triggered, this skill updates all version touchpoints 
 | **Package Manifests** | `package.json` & `package-lock.json` | Updates `"version": "x.y.z"` |
 | **Service Worker Cache** | `public/sw.js` | Updates `CACHE_NAME = 'retro-player-vx.y.z'` (Forces clean client HTTP asset refresh) |
 | **PWA Web Manifest** | `public/manifest.webmanifest` | Updates `"version": "x.y.z"` |
-| **In-App About Dialog** | `src/components/AboutInfoModal.jsx` | Updates the displayed `vx.y.z` version badge |
+| **In-App About Modal** | `src/components/AboutInfoModal.jsx` | Updates the displayed `vx.y.z` version badge |
+| **In-App Mobile View** | `src/components/MobileAppView.jsx` | Updates all displayed `vx.y.z` version badges |
 | **AI LLM Context** | `public/llms.txt` | Updates release version header |
 | **Cover Showcase Images** | `home.webp` -> `public/og-image.webp` & `public/screenshots/desktop-1.webp` | Syncs latest README cover image to SEO Open Graph and PWA installation screenshots |
 | **Project Documentation** | `README.md` | Updates release status badge & documentation highlights |
@@ -40,18 +41,25 @@ node .agents/skills/release-version/scripts/bump_version.js <version>
 ```
 *Example:*
 ```bash
-node .agents/skills/release-version/scripts/bump_version.js 1.0.0
+node .agents/skills/release-version/scripts/bump_version.js 1.1.0
 ```
 
-### 2. Update Documentation (`README.md`)
+### 2. Verify Zero Leftover Stale Versions
+Run ripgrep / grep across the repository to guarantee all components are 100% updated:
+```bash
+# Verify no stale versions remain in source files
+git grep -n "v<old-version>" src/ public/
+```
+
+### 3. Update Documentation (`README.md`)
 Ensure [README.md](file:///Users/godarayudhvir/Github/retro-player/README.md) accurately reflects the changes being committed and includes the updated version status badge.
 
-### 3. Stage & Commit
+### 4. Stage & Commit
 Format the commit message with a concise title and comprehensive multi-line details:
 ```bash
 git add .
 git commit -m "release: v<version>" \
-  -m "- Synchronized application version to v<version> in package.json and PWA manifest" \
+  -m "- Synchronized application version to v<version> across package.json, PWA manifest, and in-app views" \
   -m "- Updated Service Worker cache name to retro-player-v<version> for seamless offline asset refresh" \
-  -m "- Updated in-app About modal and documentation badges"
+  -m "- Updated in-app About modals and documentation badges"
 ```

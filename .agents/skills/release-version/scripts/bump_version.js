@@ -92,15 +92,16 @@ const aboutModalPath = path.join(ROOT_DIR, 'src/components/AboutInfoModal.jsx');
 if (fs.existsSync(aboutModalPath)) {
   let modalContent = fs.readFileSync(aboutModalPath, 'utf8');
   // Look for version span or header
-  if (modalContent.includes('className="info-version-badge"')) {
+  const badgeRegex = /<span className="info-version-badge"[^>]*>[^<]+<\/span>/g;
+  if (badgeRegex.test(modalContent)) {
     modalContent = modalContent.replace(
-      /<span className="info-version-badge">[^<]+<\/span>/,
-      `<span className="info-version-badge">${tagVer}</span>`
+      badgeRegex,
+      `<span className="info-version-badge" style={{ fontSize: '0.68rem', padding: '0.12rem 0.5rem' }}>${tagVer}</span>`
     );
   } else {
     modalContent = modalContent.replace(
       /<h2>Retro Player<\/h2>/,
-      `<h2>Retro Player</h2>\n            <span className="info-version-badge">${tagVer}</span>`
+      `<h2>Retro Player</h2>\n            <span className="info-version-badge" style={{ fontSize: '0.68rem', padding: '0.12rem 0.5rem' }}>${tagVer}</span>`
     );
   }
   fs.writeFileSync(aboutModalPath, modalContent, 'utf8');
@@ -108,11 +109,11 @@ if (fs.existsSync(aboutModalPath)) {
   updatedCount++;
 }
 
-// 5b. src/components/MobileAppView.jsx (Mobile Drawer Badge)
+// 5b. src/components/MobileAppView.jsx (All Mobile Drawer Badges)
 const mobileViewPath = path.join(ROOT_DIR, 'src/components/MobileAppView.jsx');
 if (fs.existsSync(mobileViewPath)) {
   let mobileContent = fs.readFileSync(mobileViewPath, 'utf8');
-  const badgeRegex = /<span className="info-version-badge"[^>]*>[^<]+<\/span>/;
+  const badgeRegex = /<span className="info-version-badge"[^>]*>[^<]+<\/span>/g;
   if (badgeRegex.test(mobileContent)) {
     mobileContent = mobileContent.replace(
       badgeRegex,
