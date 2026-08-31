@@ -65,6 +65,45 @@ export async function clearAllIndexedDbStores() {
 }
 
 /**
+ * Empties all object stores inside RetroPlayerDB EXCEPT custom_roms and linked directory handles.
+ */
+export async function clearUserDataStoresPreserveRoms() {
+  try {
+    const savedHandles = await getLinkedDirectoryHandles();
+    const db = await getDB();
+    if (db) {
+      const storeNames = Array.from(db.objectStoreNames).filter(s => s !== STORES.CUSTOM_ROMS);
+      if (storeNames.length > 0) {
+        const tx = db.transaction(storeNames, 'readwrite');
+        for (const storeName of storeNames) {
+          try {
+            tx.objectStore(storeName).clear();
+          } catch (err) {}
+        }
+        await new Promise((resolve) => {
+          tx.oncomplete = resolve;
+          tx.onerror = resolve;
+          tx.onabort = resolve;
+        });
+      }
+
+      // Restore linked folder handles so desktop zero-copy linked folders remain connected
+      if (savedHandles && savedHandles.length > 0) {
+        const restoreTx = db.transaction([STORES.SETTINGS], 'readwrite');
+        const settingsStore = restoreTx.objectStore(STORES.SETTINGS);
+        settingsStore.put({ key: 'linked_directory_handles', value: savedHandles });
+        await new Promise((resolve) => {
+          restoreTx.oncomplete = resolve;
+          restoreTx.onerror = resolve;
+        });
+      }
+    }
+  } catch (e) {
+    console.warn('⚠️ [PURGE] Error clearing user data stores:', e);
+  }
+}
+
+/**
  * Open or upgrade the database instance.
  */
 export function getDB() {

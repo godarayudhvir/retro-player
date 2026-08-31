@@ -17,16 +17,17 @@ import {
   Sparkles,
   ArrowRight,
   RotateCcw,
+  Trash2,
   AlertTriangle
 } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
-import { resetEntireApp } from '../utils/appReset';
+import { resetEntireApp, resetUserDataPreserveRoms } from '../utils/appReset';
 import { exportFullDatabase, importFullDatabase, checkServerDbStatus } from '../services/db';
 import { haptics } from '../services/hapticsService';
 
 /**
  * BackupModal: Centralized Filesystem Database & Storage Management Studio.
- * Allows 1-click JSON snapshot export, drag-and-drop restore, and factory reset.
+ * Allows 1-click JSON snapshot export, drag-and-drop restore, soft data reset, and full factory reset.
  * Styled with authentic DS Touch theme aesthetics and full keyboard/gamepad accessibility.
  */
 export default function BackupModal({
@@ -42,11 +43,12 @@ export default function BackupModal({
   const [isLoading, setIsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showSoftResetConfirm, setShowSoftResetConfirm] = useState(false);
+  const [showHardResetConfirm, setShowHardResetConfirm] = useState(false);
   const [importPreview, setImportPreview] = useState(null);
   const [statusMessage, setStatusMessage] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
-  const [focusedSection, setFocusedSection] = useState(0); // 0: Export, 1: Import, 2: Reset
+  const [focusedSection, setFocusedSection] = useState(0); // 0: Export, 1: Import, 2: Soft Reset, 3: Hard Reset
   const fileInputRef = useRef(null);
   const modalRef = useRef(null);
   const isServerAvailable = checkServerDbStatus();
@@ -57,7 +59,8 @@ export default function BackupModal({
       setImportPreview(null);
       setStatusMessage(null);
       setErrorMessage(null);
-      setShowResetConfirm(false);
+      setShowSoftResetConfirm(false);
+      setShowHardResetConfirm(false);
       return;
     }
 
@@ -78,9 +81,9 @@ export default function BackupModal({
     loadStats();
   }, [isOpen]);
 
-  // Keyboard navigation
+  // Keyboard navigation across 2x2 grid
   useEffect(() => {
-    if (!isOpen || showResetConfirm) return;
+    if (!isOpen || showSoftResetConfirm || showHardResetConfirm) return;
 
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
@@ -90,143 +93,152 @@ export default function BackupModal({
         return;
       }
 
-      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      if (e.key === 'ArrowRight') {
         e.preventDefault();
-        setFocusedSection(prev => (prev + 1) % 3);
+        setFocusedSection(prev => (prev % 2 === 0 ? prev + 1 : prev));
         sfx?.playTileNav?.();
-      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        setFocusedSection(prev => (prev - 1 + 3) % 3);
+        setFocusedSection(prev => (prev % 2 === 1 ? prev - 1 : prev));
+        sfx?.playTileNav?.();
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setFocusedSection(prev => (prev < 2 ? prev + 2 : prev));
+        sfx?.playTileNav?.();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setFocusedSection(prev => (prev >= 2 ? prev - 2 : prev));
         sfx?.playTileNav?.();
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        if (focusedSection === 0) {
-          handleExportBackup();
-        } else if (focusedSection === 1) {
-          if (importPreview) {
-            handleExecuteImport();
-          } else {
-            fileInputRef.current?.click();
-          }
-        } else if (focusedSection === 2) {
-          setShowResetConfirm(true);
-          sfx?.playModalOpen?.();
+        if (focusedSection === 0) handleExportBackup();
+        else if (focusedSection === 1) {
+            if (importPreview) handleExecuteImport();
+            else fileInputRef.current?.click();
+        }
+        else if (focusedSection === 2) {
+            setShowSoftResetConfirm(true);
+            sfx?.playModalOpen?.();
+        }
+        else if (focusedSection === 3) {
+            setShowHardResetConfirm(true);
+            sfx?.playModalOpen?.();
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, showResetConfirm, focusedSection, importPreview, sfx, onClose]);
+  }, [isOpen, showSoftResetConfirm, showHardResetConfirm, focusedSection, importPreview, onClose, sfx]);
 
-  // Trigger export download
+  // Handle Export Backup
   const handleExportBackup = async () => {
-    setIsExporting(true);
-    setStatusMessage(null);
-    setErrorMessage(null);
     try {
-      sfx?.playTabSwitch?.();
-      const exportData = await exportFullDatabase();
-      const jsonString = JSON.stringify(exportData, null, 2);
+      setIsExporting(true);
+      setStatusMessage(null);
+      setErrorMessage(null);
+      sfx?.playThemeSwitch?.();
+      haptics.selection();
+
+      const dbData = await exportFullDatabase();
+      const jsonString = JSON.stringify(dbData, null, 2);
       const blob = new Blob([jsonString], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
-      
-      const now = new Date();
-      const dateStr = now.toISOString().split('T')[0];
-      const timeStr = `${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
-      const filename = `retroplayer-backup-${dateStr}-${timeStr}.json`;
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const fileName = `retroplayer-backup-${timestamp}.json`;
 
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      setStatusMessage(`Database successfully exported as "${filename}"`);
-      achievementsEngine?.triggerDatabaseBackup?.();
-      sfx?.playThemeSwitch?.();
+      setStatusMessage(`Backup exported successfully as "${fileName}".`);
+      setIsExporting(false);
+
+      if (achievementsEngine?.triggerBackupExported) {
+        achievementsEngine.triggerBackupExported();
+      }
     } catch (err) {
-      console.error('Export error:', err);
       setErrorMessage(`Export failed: ${err.message}`);
-    } finally {
       setIsExporting(false);
     }
   };
 
-  // Handle file selection / drop
+  // Handle File Input Selection
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    processBackupFile(file);
-  };
 
-  const processBackupFile = (file) => {
-    setErrorMessage(null);
     setStatusMessage(null);
-    if (!file.name.endsWith('.json')) {
-      setErrorMessage('Please select a valid .json backup file');
-      return;
-    }
+    setErrorMessage(null);
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = (evt) => {
       try {
-        const parsed = JSON.parse(event.target.result);
-        const database = parsed.database || parsed;
+        const rawContent = evt.target.result;
+        const parsed = JSON.parse(rawContent);
 
-        if (!database || typeof database !== 'object') {
-          throw new Error('Unrecognized backup format');
-        }
+        // Basic validation logic for file
+        const profilesCount = Array.isArray(parsed.profiles) ? parsed.profiles.length : 0;
+        const savesCount = Object.keys(parsed.game_saves || {}).length;
+        const statesCount = Object.keys(parsed.save_states || {}).length;
+        const userDataCount = Object.keys(parsed.user_data || {}).length;
 
-        const preview = {
+        setImportPreview({
           fileName: file.name,
           fileSize: `${(file.size / 1024).toFixed(1)} KB`,
-          exportedAt: parsed.exportedAt || 'Unknown date',
-          profilesCount: Array.isArray(database.profiles) ? database.profiles.length : Object.keys(database.profiles || {}).length,
-          userDataCount: Object.keys(database.user_data || {}).length,
-          savesCount: Object.keys(database.game_saves || {}).length,
-          statesCount: Object.keys(database.save_states || {}).length,
-          payload: parsed
-        };
+          profilesCount,
+          savesCount,
+          statesCount,
+          userDataCount,
+          parsedData: parsed
+        });
 
-        setImportPreview(preview);
         sfx?.playTileNav?.();
+        haptics.selection();
       } catch (err) {
-        console.error('Failed to parse backup JSON:', err);
-        setErrorMessage('Failed to read backup file. Invalid JSON structure.');
+        setErrorMessage(`Invalid backup file: ${err.message}`);
+        setImportPreview(null);
       }
     };
-    reader.onerror = () => setErrorMessage('Error reading selected file');
+    reader.onerror = () => {
+      setErrorMessage('Failed to read file.');
+    };
     reader.readAsText(file);
+    e.target.value = '';
   };
 
-  // Execute restore
+  // Execute Restore
   const handleExecuteImport = async () => {
-    if (!importPreview?.payload) return;
-    setIsImporting(true);
-    setStatusMessage(null);
-    setErrorMessage(null);
+    if (!importPreview?.parsedData) return;
 
     try {
-      sfx?.playTabSwitch?.();
-      const res = await importFullDatabase(importPreview.payload);
-      if (res && res.success) {
-        setStatusMessage('Database restored successfully! Reloading...');
-        sfx?.playThemeSwitch?.();
-        setTimeout(() => {
-          if (onDataRestored) {
-            onDataRestored();
-          } else {
-            window.location.reload();
-          }
-        }, 800);
+      setIsImporting(true);
+      setStatusMessage(null);
+      setErrorMessage(null);
+      sfx?.playThemeSwitch?.();
+      haptics.medium();
+
+      const result = await importFullDatabase(importPreview.parsedData);
+      
+      const refreshedData = await exportFullDatabase();
+      if (refreshedData?.stats) {
+        setStats(refreshedData.stats);
+      }
+
+      setStatusMessage(`Restored successfully.`);
+      setImportPreview(null);
+      setIsImporting(false);
+
+      if (onDataRestored) {
+        onDataRestored();
       } else {
-        throw new Error(res?.message || 'Restore failed');
+        window.location.reload();
       }
     } catch (err) {
-      console.error('Import error:', err);
       setErrorMessage(`Restore failed: ${err.message}`);
       setIsImporting(false);
     }
@@ -240,30 +252,23 @@ export default function BackupModal({
         className="scraper-modal-container animate-scale-up" 
         onClick={(e) => e.stopPropagation()}
         ref={modalRef}
-        style={{ maxWidth: '680px' }}
+        style={{ maxWidth: '820px' }}
       >
-        {/* Modal Header */}
         <header className="scraper-modal-header">
           <div className="scraper-modal-title-group">
             <div className="scraper-icon-bubble" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' }}>
               <Database size={22} color="#3b82f6" />
             </div>
             <div>
-              <h2>Storage &amp; Database Management</h2>
-              <p>Export full game saves &amp; stats, restore backups, or factory reset storage</p>
+              <h2>Data &amp; Storage Management</h2>
+              <p>Export data snapshots, restore backups, and manage browser storage</p>
             </div>
           </div>
         </header>
 
-        {/* Modal Scrollable Body */}
         <div className="backup-modal-body" style={{ overflowY: 'auto' }}>
-          {/* Database Overview Metric Chips */}
           {stats && (
-            <div className="backup-metrics-grid" style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
-              gap: '0.5rem'
-            }}>
+            <div className="backup-metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '0.5rem' }}>
               <div className="backup-metric-card">
                 <Users size={14} style={{ color: '#3b82f6' }} />
                 <span className="metric-count">{stats.profilesCount || 0}</span>
@@ -287,7 +292,6 @@ export default function BackupModal({
             </div>
           )}
 
-          {/* Status Alerts */}
           {statusMessage && (
             <div className="backup-alert is-success">
               <CheckCircle2 size={16} />
@@ -301,7 +305,6 @@ export default function BackupModal({
             </div>
           )}
 
-          {/* Modal Actions Body */}
           <div className="backup-actions-container">
             
             {/* Action 1: Export Full Database */}
@@ -314,8 +317,8 @@ export default function BackupModal({
                   <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)', display: 'block' }}>
                     Export Database Snapshot
                   </strong>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>
-                    Download a full backup JSON file containing all profiles, playtime, favorites, and game saves.
+                  <span style={{ fontSize: '0.74rem', color: 'var(--text-sub)', lineHeight: 1.4, display: 'block', marginTop: '2px' }}>
+                    Download a full JSON backup containing saves, states, profiles, and favorites.
                   </span>
                 </div>
               </div>
@@ -333,15 +336,15 @@ export default function BackupModal({
             {/* Action 2: Import / Restore Database */}
             <div className={`backup-action-card ${focusedSection === 1 ? 'is-focused' : ''}`}>
               <div className="backup-card-info">
-                <div className="backup-card-icon" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
+                <div className="backup-card-icon" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderColor: 'rgba(59, 130, 246, 0.25)' }}>
                   <Upload size={20} />
                 </div>
                 <div style={{ flex: 1 }}>
                   <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)', display: 'block' }}>
                     Restore from JSON Backup
                   </strong>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>
-                    Load a previously exported backup file to restore or migrate data across devices.
+                  <span style={{ fontSize: '0.74rem', color: 'var(--text-sub)', lineHeight: 1.4, display: 'block', marginTop: '2px' }}>
+                    Upload a previously exported backup file to restore or migrate data.
                   </span>
                 </div>
               </div>
@@ -365,67 +368,107 @@ export default function BackupModal({
                 </button>
               ) : (
                 <div className="backup-import-preview-box">
-                  <div className="preview-header">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                      <CheckCircle2 size={16} style={{ color: '#10b981' }} />
-                      <strong style={{ fontSize: '0.82rem', color: 'var(--text-main)' }}>{importPreview.fileName}</strong>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)' }}>({importPreview.fileSize})</span>
+                  <div className="preview-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', overflow: 'hidden' }}>
+                      <CheckCircle2 size={15} style={{ color: '#10b981', flexShrink: 0 }} />
+                      <strong style={{ fontSize: '0.78rem', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {importPreview.fileName}
+                      </strong>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-sub)', flexShrink: 0 }}>({importPreview.fileSize})</span>
                     </div>
                     <button 
                       type="button" 
                       className="preview-clear-btn" 
                       onClick={() => setImportPreview(null)}
                       aria-label="Clear selection"
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-sub)', padding: '2px' }}
                     >
                       <X size={14} />
                     </button>
                   </div>
 
-                  <div className="preview-stats-row">
-                    <span>{importPreview.profilesCount} Profiles</span> • 
-                    <span>{importPreview.savesCount} Battery Saves</span> • 
-                    <span>{importPreview.statesCount} Save States</span>
+                  <div className="preview-stats-row" style={{ fontSize: '0.7rem', color: 'var(--text-sub)', marginBottom: '6px' }}>
+                    <span>{importPreview.profilesCount} Profiles</span> • <span>{importPreview.savesCount} Saves</span> • <span>{importPreview.statesCount} States</span>
                   </div>
 
-                  <div className="preview-actions-row">
-                    <button
-                      type="button"
-                      className="backup-action-btn is-success"
-                      onClick={handleExecuteImport}
-                      disabled={isImporting}
-                    >
-                      {isImporting ? <RefreshCw size={15} className="animate-spin" /> : <Upload size={15} />}
-                      <span>{isImporting ? 'Restoring Database...' : 'Confirm & Restore Backup'}</span>
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    className="backup-action-btn is-success"
+                    onClick={handleExecuteImport}
+                    disabled={isImporting}
+                  >
+                    {isImporting ? <RefreshCw size={15} className="animate-spin" /> : <Upload size={15} />}
+                    <span>{isImporting ? 'Restoring...' : 'Confirm Restore'}</span>
+                  </button>
                 </div>
               )}
             </div>
 
-            {/* Action 3: Factory Reset & Wipe Storage (Danger Zone) */}
-            <div className={`backup-action-card is-danger-card ${focusedSection === 2 ? 'is-focused' : ''}`}>
+            {/* Action 3: Reset Browser Data & Saves (Preserves ROMs) */}
+            <div className={`backup-action-card is-warning-card ${focusedSection === 2 ? 'is-focused' : ''}`}>
               <div className="backup-card-info">
-                <div className="backup-card-icon" style={{ background: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)' }}>
+                <div className="backup-card-icon" style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#d97706', borderColor: 'rgba(245, 158, 11, 0.35)' }}>
                   <RotateCcw size={20} />
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                     <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>
-                      Factory Reset &amp; Clear Storage
+                      Reset Data &amp; Saves
                     </strong>
                     <span style={{
-                      fontSize: '0.65rem',
-                      padding: '0.1rem 0.4rem',
+                      fontSize: '0.62rem',
+                      padding: '0.1rem 0.35rem',
+                      borderRadius: '4px',
+                      background: '#f59e0b',
+                      color: '#fff',
+                      fontWeight: 800
+                    }}>
+                      PRESERVES ROMS
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--text-sub)', lineHeight: 1.4, display: 'block', marginTop: '2px' }}>
+                    Clears in-game saves, profiles, settings, and browser caches back to defaults, while keeping all imported ROMs in your library.
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="backup-action-btn is-warning"
+                onClick={() => {
+                  setShowSoftResetConfirm(true);
+                  sfx?.playModalOpen?.();
+                  haptics.medium();
+                }}
+              >
+                <RotateCcw size={15} />
+                <span>Reset Data (Keep ROMs)...</span>
+              </button>
+            </div>
+
+            {/* Action 4: Full Factory Reset (Wipes Everything) */}
+            <div className={`backup-action-card is-danger-card ${focusedSection === 3 ? 'is-focused' : ''}`}>
+              <div className="backup-card-info">
+                <div className="backup-card-icon" style={{ background: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)' }}>
+                  <Trash2 size={20} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                    <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>
+                      Full Factory Reset
+                    </strong>
+                    <span style={{
+                      fontSize: '0.62rem',
+                      padding: '0.1rem 0.35rem',
                       borderRadius: '4px',
                       background: '#ef4444',
                       color: '#fff',
                       fontWeight: 800
                     }}>
-                      DANGER ZONE
+                      WIPES EVERYTHING
                     </span>
                   </div>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)', lineHeight: 1.4, display: 'block', marginTop: '2px' }}>
-                    Reset all profiles, battery saves, save states, and browser caches back to defaults. ROMs and covers on disk will not be deleted.
+                  <span style={{ fontSize: '0.74rem', color: 'var(--text-sub)', lineHeight: 1.4, display: 'block', marginTop: '2px' }}>
+                    Completely wipes all browser storage, imported ROMs, battery saves, offline caches, and settings for a 100% fresh start.
                   </span>
                 </div>
               </div>
@@ -433,52 +476,55 @@ export default function BackupModal({
                 type="button"
                 className="backup-action-btn is-danger"
                 onClick={() => {
-                  setShowResetConfirm(true);
+                  setShowHardResetConfirm(true);
                   sfx?.playModalOpen?.();
                   haptics.medium();
                 }}
               >
-                <RotateCcw size={15} />
-                <span>Factory Reset &amp; Clear Storage...</span>
+                <Trash2 size={15} />
+                <span>Factory Reset &amp; Wipe All...</span>
               </button>
             </div>
 
           </div>
         </div>
-
-        {/* Modal Footer */}
-        <footer className="scraper-modal-footer" style={{ justifyContent: 'flex-end' }}>
-          <div className="scraper-footer-actions">
-            <button
-              type="button"
-              className="settings-action-btn folder-btn"
-              onClick={() => {
-                onClose?.();
-                sfx?.playModalClose?.();
-                haptics.selection();
-              }}
-            >
-              <span>Close</span>
-            </button>
-          </div>
-        </footer>
       </div>
 
-      {/* Factory Reset Nested Confirmation Modal */}
+      {/* Soft Reset Confirmation Modal (Keeps ROMs) */}
       <ConfirmModal
-        isOpen={showResetConfirm}
-        title="Factory Reset & Clear Storage?"
-        message="This will reset all player profiles, battery saves, save states, and browser caches back to defaults. Your ROM files and cover artwork on disk will not be deleted."
-        confirmLabel="Reset & Reload"
+        isOpen={showSoftResetConfirm}
+        title="Reset Browser Data & Saves?"
+        message="This will reset all player profiles, battery saves, save states, settings, and browser caches back to defaults. All your imported ROMs in the library will be safely preserved."
+        confirmLabel="Reset Data & Reload"
+        cancelLabel="Cancel"
+        isDestructive={false}
+        onConfirm={async () => {
+          setShowSoftResetConfirm(false);
+          sfx?.playDelete?.();
+          await resetUserDataPreserveRoms();
+        }}
+        onCancel={() => {
+          setShowSoftResetConfirm(false);
+          sfx?.playModalClose?.();
+        }}
+        sfx={sfx}
+      />
+
+      {/* Hard Factory Reset Confirmation Modal (Wipes Everything) */}
+      <ConfirmModal
+        isOpen={showHardResetConfirm}
+        title="Full Factory Reset & Storage Wipe?"
+        message="This will completely erase all player profiles, battery saves, save states, offline caches, and browser-imported ROMs from local storage. Server ROM files on disk will not be deleted."
+        confirmLabel="Wipe Everything & Reload"
         cancelLabel="Cancel"
         isDestructive={true}
         onConfirm={async () => {
-          setShowResetConfirm(false);
+          setShowHardResetConfirm(false);
           sfx?.playDelete?.();
           await resetEntireApp();
         }}
         onCancel={() => {
-          setShowResetConfirm(false);
+          setShowHardResetConfirm(false);
           sfx?.playModalClose?.();
         }}
         sfx={sfx}

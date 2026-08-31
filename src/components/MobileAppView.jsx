@@ -2551,9 +2551,9 @@ export default function MobileAppView({
                       <Database size={18} />
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
-                      <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Storage &amp; Database Studio</strong>
+                      <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Data &amp; Storage Management</strong>
                       <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
-                        Export full game saves &amp; stats, restore backups, or factory reset storage
+                        Export data snapshots, restore backups, and manage browser storage
                       </span>
                     </div>
                   </div>
@@ -3187,9 +3187,9 @@ export default function MobileAppView({
                     <Database size={18} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
-                    <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Storage &amp; Database Studio</strong>
+                    <strong style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>Data &amp; Storage Management</strong>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-sub)', lineHeight: 1.35 }}>
-                      Export full game saves &amp; stats, restore backups, or factory reset storage
+                      Export data snapshots, restore backups, and manage browser storage
                     </span>
                   </div>
                 </div>

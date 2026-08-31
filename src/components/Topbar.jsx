@@ -374,7 +374,7 @@ export default function Topbar({
           </button>
         )}
 
-        {/* 8. Storage & Database Management Studio (Backup, Restore & Reset) */}
+        {/* 8. Data & Storage Management (Backup, Restore & Reset) */}
         <button
           className={`status-pill status-backup-app ${focusedTarget.zone === 'topbar' && focusedTarget.id === 'backup' ? 'gamepad-focused' : ''}`}
           onClick={() => {
@@ -382,8 +382,8 @@ export default function Topbar({
             sfx?.playModalOpen?.();
             haptics.medium();
           }}
-          title="Storage & Database Studio (Backup, Restore & Reset Storage)"
-          aria-label="Storage and Database Studio"
+          title="Data & Storage Management (Backup, Restore & Reset Storage)"
+          aria-label="Data and Storage Management"
         >
           <Database size={17} color="#2563eb" />
         </button>

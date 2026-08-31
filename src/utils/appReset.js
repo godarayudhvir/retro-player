@@ -1,4 +1,58 @@
-import { clearAllIndexedDbStores, closeDB } from '../services/db';
+import { clearAllIndexedDbStores, clearUserDataStoresPreserveRoms, closeDB } from '../services/db';
+
+/**
+ * Soft Reset Utility for Retro Player.
+ * Wipes player profiles, saves, save states, history, settings, and browser caches
+ * while strictly PRESERVING all in-app imported ROMs (custom_roms store).
+ */
+export async function resetUserDataPreserveRoms() {
+  try {
+    console.log('🧹 [APP RESET] Initiating soft data reset (preserving custom ROMs)...');
+
+    // 0. Clear backend server DB stores if server is active (server saves/history)
+    try {
+      await fetch('/api/db/reset', { method: 'POST' }).catch(() => {});
+    } catch (e) {
+      console.warn('⚠️ [APP RESET] Server DB purge warn:', e);
+    }
+
+    // 1. Empties all stores EXCEPT custom_roms
+    try {
+      await clearUserDataStoresPreserveRoms();
+    } catch (e) {
+      console.warn('⚠️ [APP RESET] Stores clear warn:', e);
+    }
+
+    // 2. Clear LocalStorage and SessionStorage (preferences, theme, audio settings)
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+      console.log('🧹 [APP RESET] LocalStorage & SessionStorage cleared');
+    } catch (e) {
+      console.warn('⚠️ [APP RESET] Storage clear warn:', e);
+    }
+
+    // 3. Clear CacheStorage (PWA assets & thumbnails)
+    if ('caches' in window) {
+      try {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+        console.log('🧹 [APP RESET] CacheStorage purged');
+      } catch (e) {
+        console.warn('⚠️ [APP RESET] CacheStorage delete warn:', e);
+      }
+    }
+
+    // 4. Brief 250ms buffer
+    await new Promise(resolve => setTimeout(resolve, 250));
+
+    // 5. Hard reload to origin
+    window.location.href = window.location.origin + window.location.pathname;
+  } catch (err) {
+    console.error('🚨 [APP RESET ERROR]:', err);
+    window.location.reload();
+  }
+}
 
 /**
  * Full Client-Side Factory Reset Utility for Retro Player.
