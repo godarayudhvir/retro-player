@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import fs from 'fs';
 import path from 'path';
 import https from 'https';
+import { discordRpc } from './src/server/discordRpc.js';
 
 // Supported System Mappings with RomM SVG icon references
 const SYSTEM_MAP = {
@@ -1321,6 +1322,70 @@ function multiConsoleScannerPlugin() {
           res.statusCode = 500;
           res.end(JSON.stringify({ error: err.message }));
         }
+      });
+
+      // API Endpoint for Game Presence & Discord RPC in Development (Vite)
+      let devPresence = {
+        action: 'IDLE',
+        gameTitle: null,
+        systemKey: null,
+        systemName: null,
+        coverUrl: null,
+        startTimestamp: null,
+        updatedAt: Date.now()
+      };
+
+      server.middlewares.use('/api/presence', (req, res) => {
+        if (req.method === 'GET') {
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify(devPresence));
+          return;
+        }
+
+        if (req.method === 'POST') {
+          let body = '';
+          req.on('data', chunk => { body += chunk; });
+          req.on('end', () => {
+            try {
+              const data = JSON.parse(body || '{}');
+              const { action, gameTitle, systemKey, systemName, coverUrl, startTimestamp } = data;
+
+              if (action === 'PLAYING') {
+                devPresence = {
+                  action: 'PLAYING',
+                  gameTitle: gameTitle || 'Retro Game',
+                  systemKey: systemKey || '',
+                  systemName: systemName || (systemKey ? systemKey.toUpperCase() : 'Retro Console'),
+                  coverUrl: coverUrl || '',
+                  startTimestamp: startTimestamp || Date.now(),
+                  updatedAt: Date.now()
+                };
+                discordRpc.setActivity(devPresence);
+              } else {
+                devPresence = {
+                  action: 'IDLE',
+                  gameTitle: null,
+                  systemKey: null,
+                  systemName: null,
+                  coverUrl: null,
+                  startTimestamp: null,
+                  updatedAt: Date.now()
+                };
+                discordRpc.clearActivity();
+              }
+
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ success: true, presence: devPresence }));
+            } catch (err) {
+              res.statusCode = 500;
+              res.end(JSON.stringify({ error: err.message }));
+            }
+          });
+          return;
+        }
+
+        res.statusCode = 405;
+        res.end(JSON.stringify({ error: 'Method Not Allowed' }));
       });
     }
   };

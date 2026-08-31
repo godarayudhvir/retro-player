@@ -4,6 +4,7 @@ import fs from 'fs';
 import http from 'http';
 import https from 'https';
 import { fileURLToPath } from 'url';
+import { discordRpc } from './src/server/discordRpc.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -1292,6 +1293,62 @@ app.get('/api/proxy-rawg', (req, res) => {
       res.status(502).json({ error: e.message });
     });
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Game Activity & Rich Presence State
+let currentPresence = {
+  isPlaying: false,
+  gameTitle: null,
+  systemKey: null,
+  systemName: null,
+  coverUrl: null,
+  startTimestamp: null,
+  updatedAt: Date.now()
+};
+
+// GET /api/presence: Get active game presence and broadcast status
+app.get('/api/presence', (req, res) => {
+  res.json(currentPresence);
+});
+
+// POST /api/presence: Update active game presence across Discord and Webhooks
+app.post('/api/presence', express.json(), (req, res) => {
+  try {
+    const { action, gameTitle, systemKey, systemName, coverUrl, startTimestamp } = req.body || {};
+
+    if (action === 'PLAYING' && gameTitle) {
+      currentPresence = {
+        isPlaying: true,
+        gameTitle,
+        systemKey: systemKey || null,
+        systemName: systemName || (systemKey ? systemKey.toUpperCase() : 'Retro Console'),
+        coverUrl: coverUrl || null,
+        startTimestamp: startTimestamp || Date.now(),
+        updatedAt: Date.now()
+      };
+
+      // Broadcast to Discord Desktop Rich Presence
+      discordRpc.setActivity(currentPresence);
+    } else {
+      currentPresence = {
+        isPlaying: false,
+        gameTitle: null,
+        systemKey: null,
+        systemName: null,
+        coverUrl: null,
+        startTimestamp: null,
+        updatedAt: Date.now()
+      };
+
+      // Clear Discord Desktop Rich Presence
+      discordRpc.clearActivity();
+    }
+
+    res.json({ success: true, presence: currentPresence });
+  } catch (err) {
+    console.error('Error updating game presence:', err);
     res.status(500).json({ error: err.message });
   }
 });

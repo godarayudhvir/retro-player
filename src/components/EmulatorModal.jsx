@@ -88,6 +88,10 @@ export default function EmulatorModal({
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [showSubToolbar, setShowSubToolbar] = useState(false);
   const [isGamePaused, setIsGamePaused] = useState(false);
+  const isGamePausedRef = useRef(false);
+  useEffect(() => {
+    isGamePausedRef.current = isGamePaused;
+  }, [isGamePaused]);
   const [isGameMuted, setIsGameMuted] = useState(false);
   const isGameMutedRef = useRef(false);
   const volumeRef = useRef(1.0);
@@ -705,11 +709,21 @@ export default function EmulatorModal({
         /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '')
       );
 
-      const htmlContent = `
+      let rawCover = currentGame.coverUrl || currentGame.cover || currentGame.boxArt || currentGame.metadata?.coverUrl || '';
+        if (rawCover && rawCover.endsWith('.svg')) rawCover = '';
+        if (rawCover && !rawCover.startsWith('http') && typeof window !== 'undefined') {
+          rawCover = `${window.location.origin}${rawCover.startsWith('/') ? '' : '/'}${rawCover}`;
+        }
+        const resolvedCoverUrl = rawCover;
+        const currentTitle = currentGame.title || currentGame.name || 'Retro Game';
+        const currentSystem = currentGame.systemName || currentGame.systemTitle || (currentGame.systemKey ? currentGame.systemKey.toUpperCase() : 'Retro Console');
+
+        const htmlContent = `
         <!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8">
+          <title>${currentTitle}</title>
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
           <style>
             *, *::before, *::after {
@@ -2517,6 +2531,40 @@ export default function EmulatorModal({
     sfx?.play?.('click');
   };
 
+  const toggleEmulatorPause = useCallback((forceState) => {
+    const nextPaused = typeof forceState === 'boolean' ? forceState : !isGamePausedRef.current;
+    if (typeof forceState === 'boolean' && nextPaused === isGamePausedRef.current) return;
+
+    isGamePausedRef.current = nextPaused;
+    setIsGamePaused(nextPaused);
+
+    try {
+      const win = iframeRef.current?.contentWindow;
+      const emu = win?.EJS_emulator;
+
+      if (typeof emu?.togglePlaying === 'function') {
+        emu.togglePlaying();
+      } else if (typeof emu?.togglePlay === 'function') {
+        emu.togglePlay();
+      } else if (nextPaused && typeof emu?.pause === 'function') {
+        emu.pause();
+      } else if (!nextPaused && typeof emu?.play === 'function') {
+        emu.play();
+      } else if (emu?.gameManager?.functions?.toggleMainLoop) {
+        emu.gameManager.functions.toggleMainLoop(nextPaused ? 0 : 1);
+      } else if (emu?.gameManager?.pause && nextPaused) {
+        emu.gameManager.pause();
+      } else if (emu?.gameManager?.resume && !nextPaused) {
+        emu.gameManager.resume();
+      }
+
+      showToast(nextPaused ? 'Emulation Paused' : 'Emulation Resumed');
+      sfx?.play?.('click');
+    } catch (e) {
+      console.warn('Pause/resume error:', e);
+    }
+  }, [sfx]);
+
   const handleEmulatorAction = async (action) => {
     try {
       const win = iframeRef.current?.contentWindow;
@@ -2548,21 +2596,7 @@ export default function EmulatorModal({
         }
 
         case 'pause': {
-          const nextPaused = !isGamePaused;
-          setIsGamePaused(nextPaused);
-          if (typeof emu?.togglePlaying === 'function') {
-            emu.togglePlaying();
-          } else if (typeof emu?.togglePlay === 'function') {
-            emu.togglePlay();
-          } else if (nextPaused && typeof emu?.pause === 'function') {
-            emu.pause();
-          } else if (!nextPaused && typeof emu?.play === 'function') {
-            emu.play();
-          } else if (emu?.gameManager?.functions?.toggleMainLoop) {
-            emu.gameManager.functions.toggleMainLoop(nextPaused ? 0 : 1);
-          }
-          showToast(nextPaused ? 'Emulation Paused' : 'Emulation Resumed');
-          sfx?.play?.('click');
+          toggleEmulatorPause();
           break;
         }
 
@@ -2870,6 +2904,43 @@ export default function EmulatorModal({
     window.addEventListener('keydown', handleResumeKeys, { capture: true });
     return () => window.removeEventListener('keydown', handleResumeKeys, { capture: true });
   }, [showResumePrompt, handleApplyResumeState, handleDismissResumePrompt]);
+
+  // OS Media Control Key & Control Center Actions Listener (Play/Pause, Fast-Forward, Step-Down)
+  useEffect(() => {
+    const handleMediaPlay = () => {
+      toggleEmulatorPause(false);
+    };
+    const handleMediaPause = () => {
+      toggleEmulatorPause(true);
+    };
+    const handleMediaTogglePause = () => {
+      toggleEmulatorPause();
+    };
+    const handleMediaSpeedUp = () => {
+      const curIdx = SPEED_PRESETS.indexOf(emulationSpeed);
+      const nextIdx = curIdx >= 0 ? (curIdx + 1) % SPEED_PRESETS.length : 1;
+      handleSpeedChange(SPEED_PRESETS[nextIdx]);
+    };
+    const handleMediaSpeedDown = () => {
+      const curIdx = SPEED_PRESETS.indexOf(emulationSpeed);
+      const nextIdx = curIdx > 0 ? curIdx - 1 : SPEED_PRESETS.length - 1;
+      handleSpeedChange(SPEED_PRESETS[nextIdx]);
+    };
+
+    window.addEventListener('retro:media-play', handleMediaPlay);
+    window.addEventListener('retro:media-pause', handleMediaPause);
+    window.addEventListener('retro:media-toggle-pause', handleMediaTogglePause);
+    window.addEventListener('retro:media-speed-up', handleMediaSpeedUp);
+    window.addEventListener('retro:media-speed-down', handleMediaSpeedDown);
+
+    return () => {
+      window.removeEventListener('retro:media-play', handleMediaPlay);
+      window.removeEventListener('retro:media-pause', handleMediaPause);
+      window.removeEventListener('retro:media-toggle-pause', handleMediaTogglePause);
+      window.removeEventListener('retro:media-speed-up', handleMediaSpeedUp);
+      window.removeEventListener('retro:media-speed-down', handleMediaSpeedDown);
+    };
+  }, [emulationSpeed, handleSpeedChange, toggleEmulatorPause]);
 
   // Gamepad listener for Auto-Resume banner: Button 0 (A) to Resume, Button 1 (B) to Dismiss
   useEffect(() => {

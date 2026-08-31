@@ -34,6 +34,7 @@ import { useBgmEngine } from './hooks/useBgmEngine';
 import { useDeviceDetection } from './hooks/useDeviceDetection';
 import { usePwaInstall } from './hooks/usePwaInstall';
 import { useMobileHistoryNavigation } from './hooks/useMobileHistoryNavigation';
+import { useGamePresence } from './hooks/useGamePresence';
 import { syncAllStoresFromBackend, getLinkedDirectoryHandles, removeLinkedDirectoryHandle } from './services/db';
 import { scanDirectoryHandle, extractRomsFromInput } from './utils/folderScanner';
 import { BatteryWarning, Zap, X } from 'lucide-react';
@@ -258,6 +259,9 @@ export default function App() {
       document.title = 'Retro Player';
     }
   }, [activeGame]);
+
+  // Multi-Platform Game Presence & OS MediaSession Integration
+  useGamePresence(activeGame);
 
   // Persistent Desktop Zero-Copy Linked Directory Handles
   const [linkedDirectoryHandles, setLinkedDirectoryHandles] = useState([]);

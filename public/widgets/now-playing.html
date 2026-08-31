@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retro Player — OBS Stream Overlay Widget</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 16px;
+      height: 100vh;
+    }
+
+    .widget-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(18, 20, 29, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 14px 20px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      color: #fff;
+      min-width: 340px;
+      max-width: 480px;
+      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity: 0;
+      transform: translateY(10px) scale(0.98);
+      pointer-events: none;
+    }
+
+    .widget-card.active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .cover-art-container {
+      position: relative;
+      width: 64px;
+      height: 64px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #0f111a;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .cover-art {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .cover-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
+
+    .game-details {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-grow: 1;
+      min-width: 0;
+    }
+
+    .system-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .system-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      border: 1px solid rgba(96, 165, 250, 0.3);
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .game-title {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #f8fafc;
+    }
+
+    .elapsed-time {
+      font-size: 11px;
+      color: #94a3b8;
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body>
+  <div id="widget" class="widget-card">
+    <div class="cover-art-container">
+      <img id="coverImg" class="cover-art" src="" alt="Cover" style="display: none;" />
+      <div id="coverFallback" class="cover-fallback">🎮</div>
+    </div>
+    <div class="game-details">
+      <div class="system-badge-row">
+        <div class="live-dot"></div>
+        <span id="systemBadge" class="system-badge">RETRO</span>
+      </div>
+      <div id="gameTitle" class="game-title">Loading...</div>
+      <div id="elapsedTime" class="elapsed-time">00:00:00</div>
+    </div>
+  </div>
+
+  <script>
+    let currentStartTime = null;
+    let timerInterval = null;
+
+    function formatTime(ms) {
+      const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      const pad = (n) => String(n).padStart(2, '0');
+      return hours > 0
+        ? `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+        : `${pad(minutes)}:${pad(seconds)}`;
+    }
+
+    function updateTimer() {
+      if (!currentStartTime) return;
+      const elapsed = Date.now() - currentStartTime;
+      const el = document.getElementById('elapsedTime');
+      if (el) el.textContent = `Playing: ${formatTime(elapsed)}`;
+    }
+
+    async function pollPresence() {
+      try {
+        const res = await fetch('/api/presence');
+        if (!res.ok) return;
+        const data = await res.json();
+
+        const widget = document.getElementById('widget');
+        const coverImg = document.getElementById('coverImg');
+        const coverFallback = document.getElementById('coverFallback');
+        const systemBadge = document.getElementById('systemBadge');
+        const gameTitle = document.getElementById('gameTitle');
+
+        if (data && data.isPlaying && data.gameTitle) {
+          gameTitle.textContent = data.gameTitle;
+          systemBadge.textContent = (data.systemName || data.systemKey || 'RETRO').toUpperCase();
+
+          if (data.coverUrl) {
+            coverImg.src = data.coverUrl;
+            coverImg.style.display = 'block';
+            coverFallback.style.display = 'none';
+          } else {
+            coverImg.style.display = 'none';
+            coverFallback.style.display = 'flex';
+          }
+
+          if (data.startTimestamp !== currentStartTime) {
+            currentStartTime = data.startTimestamp || Date.now();
+          }
+
+          if (!timerInterval) {
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
+          }
+
+          widget.classList.add('active');
+        } else {
+          widget.classList.remove('active');
+          if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+          }
+          currentStartTime = null;
+        }
+      } catch (err) {
+        // Ignore network polling hiccups
+      }
+    }
+
+    pollPresence();
+    setInterval(pollPresence, 2500);
+  </script>
+</body>
+</html>
