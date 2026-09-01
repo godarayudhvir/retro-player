@@ -136,8 +136,10 @@ export function parsePokemonRed(data) {
   // 6. S.S. Anne Set Sail (Tended to captain & stepped off ship)
   const hasDepartedSSAnne = Boolean(data[0x2A00] & 0x01) || hasHM01 || Boolean(badges[2]);
 
-  // 7. Nugget Bridge 5-Trainer Gauntlet Cleared
-  const hasClearedNuggetBridge = Boolean(data[0x29F2] & 0x01) || Boolean(badges[1]);
+  // 7. Nugget Bridge 5-Trainer Gauntlet Cleared (Route 24)
+  // Requires passing Pewter City (Boulder Badge 0) AND having the Route 24 Nugget event flag or S.S. Ticket from Bill past the bridge
+  const hasReachedCerulean = Boolean(badges[0]);
+  const hasClearedNuggetBridge = hasReachedCerulean && (Boolean(data[0x2A10] & 0x20) || allItems.has(0x3F) || Boolean(data[0x29F2] & 0x01));
 
   // 8. Mr. Fuji Rescued from Pokémon Tower
   const hasRescuedMrFuji = allItems.has(0x49) || Boolean(data[0x2A39] & 0x80);
