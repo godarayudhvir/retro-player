@@ -24,18 +24,26 @@ Gen 1 saves reside in Bank 1 (`0x2000` to `0x3FFF`):
 
 ---
 
+## 🎒 Starter Journey & Departure Milestones
+
+| Milestone ID | In-Game Name / Title | Description & Lore | Trigger Condition & Memory Offsets | Status |
+| :--- | :--- | :--- | :--- | :---: |
+| `poke_journey_begun` | **Pallet Town Departure** *(Red/Blue)*<br>**Pallet Town Departure (Partner Pikachu)** *(Yellow)* | Receive your starter companion from Professor Oak in Pallet Town (Partner Pikachu in *Pokémon Yellow*). | Starter flag at `0x29C3`, Party Count `0x2F2C >= 1`, Pokédex caught `0x25A3 >= 1`, or Badge Count `> 0`. | ✅ **Verified & Working** |
+
+---
+
 ## 🪪 Kanto Regional League Badge Case
 
-| Bit | Badge Name | Gym Leader | City | Specialization | Milestone ID |
-| :---: | :--- | :--- | :--- | :--- | :--- |
-| `0x01` | 🪨 **Boulder Badge** | Brock | Pewter City | Rock | `poke_badge_1` |
-| `0x02` | 💧 **Cascade Badge** | Misty | Cerulean City | Water | `poke_badge_2` |
-| `0x04` | ⚡ **Thunder Badge** | Lt. Surge | Vermilion City | Electric | `poke_badge_3` |
-| `0x08` | 🌸 **Rainbow Badge** | Erika | Celadon City | Grass | `poke_badge_4` |
-| `0x10` | 💖 **Soul Badge** | Koga | Fuchsia City | Poison | `poke_badge_5` |
-| `0x20` | 🔮 **Marsh Badge** | Sabrina | Saffron City | Psychic | `poke_badge_6` |
-| `0x40` | 🔥 **Volcano Badge** | Blaine | Cinnabar Island | Fire | `poke_badge_7` |
-| `0x80` | 🌍 **Earth Badge** | Giovanni | Viridian City | Ground | `poke_badge_8` |
+| Bit | Badge Name | Gym Leader | City | Specialization | Milestone ID | Verification Status |
+| :---: | :--- | :--- | :--- | :--- | :--- | :---: |
+| `0x01` | 🪨 **Boulder Badge** | Brock | Pewter City | Rock | `poke_badge_1` | ✅ **Verified & Working** |
+| `0x02` | 💧 **Cascade Badge** | Misty | Cerulean City | Water | `poke_badge_2` | — |
+| `0x04` | ⚡ **Thunder Badge** | Lt. Surge | Vermilion City | Electric | `poke_badge_3` | — |
+| `0x08` | 🌸 **Rainbow Badge** | Erika | Celadon City | Grass | `poke_badge_4` | — |
+| `0x10` | 💖 **Soul Badge** | Koga | Fuchsia City | Poison | `poke_badge_5` | — |
+| `0x20` | 🔮 **Marsh Badge** | Sabrina | Saffron City | Psychic | `poke_badge_6` | — |
+| `0x40` | 🔥 **Volcano Badge** | Blaine | Cinnabar Island | Fire | `poke_badge_7` | — |
+| `0x80` | 🌍 **Earth Badge** | Giovanni | Viridian City | Ground | `poke_badge_8` | — |
 
 ---
 
@@ -81,8 +89,10 @@ Gen 1 saves reside in Bank 1 (`0x2000` to `0x3FFF`):
 
 ---
 
-## 🟡 Pokémon Yellow Exclusives
+## 🟡 Pokémon Yellow Exclusives & Verified Milestones
 
+* **Pallet Town Departure (Partner Pikachu)** (`poke_journey_begun`): ✅ **Verified & Working** (Triggers upon receiving partner Pikachu from Professor Oak in Pallet Town).
+* **Boulder Badge** (`poke_badge_1`): ✅ **Verified & Working** (Triggers upon defeating Brock at Pewter City Gym).
 * **Max Pikachu Friendship** (`0x271C` $\ge 200$): *"Soulmates on Two Feet"* (`poke_yellow_soulmates`)
 * **Anime Gift Starter Trio** (Bulbasaur, Charmander, Squirtle): *"Anime Canon"* (`poke_yellow_starter_trio`)
 * **Jessie & James Rocket Encounters**: *"Blasting Off Again!"* (`poke_yellow_rocket_duo`)

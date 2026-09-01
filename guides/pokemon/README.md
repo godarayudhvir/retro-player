@@ -37,7 +37,7 @@ All 18 canonical Gen 1–5 cartridges have been verified against real battery sa
 | :---: | :---: | :--- | :---: | :---: | :--- |
 | **Gen 1** | GB | *Pokémon Red Version* | 32 KB SRAM | ✅ Verified | Checksum `0x3523`, Badges `0x2602`, Bag `0x25CA` |
 | **Gen 1** | GB | *Pokémon Blue Version* | 32 KB SRAM | ✅ Verified | Checksum `0x3523`, Badges `0x2602`, Bag `0x25CA` |
-| **Gen 1** | GB | *Pokémon Yellow Version* | 32 KB SRAM | ✅ Verified | Checksum `0x3523`, Pikachu Friendship `0x271C` |
+| **Gen 1** | GB | *Pokémon Yellow Version* | 32 KB SRAM | ✅ Verified | Checksum `0x3523`, Boulder Badge (`0x2602`), Starter `0x29C3`, Pikachu Friendship `0x271C` |
 | **Gen 2** | GBC | *Pokémon Gold Version* | 32 KB SRAM | ✅ Verified | Checksum `0x2D69`, Johto (`0x23E3`) & Kanto (`0x23E4`) 16 Badges |
 | **Gen 2** | GBC | *Pokémon Silver Version* | 32 KB SRAM | ✅ Verified | Checksum `0x2D69`, Johto (`0x23E3`) & Kanto (`0x23E4`) 16 Badges |
 | **Gen 2** | GBC | *Pokémon Crystal Version* | 32 KB SRAM | ✅ Verified | Checksum `0x2D0D`, Johto (`0x23E4`) & Kanto (`0x23E5`) 16 Badges |

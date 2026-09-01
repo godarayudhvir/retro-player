@@ -70,7 +70,7 @@ Retro Player integrates natively with the **W3C MediaSession API**, publishing l
 ### Interactive Hardware Media Actions:
 * **⏱️ Live Session Playtime Scrubber (`setPositionState`)**: Tracks your exact active session playtime (`00:00 ➔ 01:05:00`) continuously on the timeline without looping resets.
 * **⏯️ Play / Pause (`play` / `pause`)**: Freezes the active WebAssembly emulation frame loop and audio, and pauses the session playtime clock simultaneously. Seamlessly resumes upon press. Also triggered via Mac / keyboard Play/Pause media keys and bluetooth headphones.
-* **⏭️ Fast-Forward (`nexttrack` / `seekforward`)**: Cycles through emulation speed multipliers (`1.0x ➔ 1.5x ➔ 2.0x ➔ 3.0x ➔ 4.0x ➔ 5.0x`).
+* **⏭️ Fast-Forward (`nexttrack` / `seekforward`)**: Cycles through emulation speed multipliers (`1.0x ➔ 1.5x ➔ 2.0x ➔ 3.0x ➔ 4.0x ➔ 5.0x ➔ 10.0x`).
 * **⏮️ Step Down Speed (`previoustrack` / `seekbackward`)**: Decrements speed multiplier back down toward normal speed (`1.0x`).
 
 ### Platform & Browser Verification Status:

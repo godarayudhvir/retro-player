@@ -295,7 +295,7 @@ export default function EmulatorModal({
     }
   };
 
-  const SPEED_PRESETS = [1.0, 1.5, 2.0, 3.0, 4.0, 5.0];
+  const SPEED_PRESETS = [1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 10.0];
   const SHADERS = ['none', 'crt', 'smooth', 'vibrant'];
   const SHADER_LABELS = { none: 'Pixel', crt: 'CRT', smooth: 'Smooth', vibrant: 'Vibrant' };
 
@@ -2442,7 +2442,7 @@ export default function EmulatorModal({
   const fastForwardStartTimeRef = useRef(0);
   const fastForwardTimerRef = useRef(null);
 
-  // Speed Multiplier Handler [1.0, 1.5, 2.0, 3.0, 4.0, 5.0]
+  // Speed Multiplier Handler [1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 10.0]
   const handleSpeedChange = (newSpeed) => {
     const spd = parseFloat(newSpeed);
     const prevSpeed = emulationSpeed;
