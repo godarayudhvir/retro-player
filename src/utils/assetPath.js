@@ -19,9 +19,8 @@ export function resolveAssetPath(path) {
     return path;
   }
 
-  // Strip leading slash if present
   const cleanPath = path.startsWith('/') ? path.slice(1) : path;
-  const baseUrl = import.meta.env.BASE_URL || './';
+  const baseUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) || (typeof process !== 'undefined' && process.env && process.env.BASE_URL) || './';
   
   // Normalize double slashes
   const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;

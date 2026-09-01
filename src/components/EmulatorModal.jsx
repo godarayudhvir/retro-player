@@ -666,6 +666,7 @@ export default function EmulatorModal({
       if (core === 'gamegear' || core === 'game_gear') core = 'segaGG';
       if (core === 'arcade' || core === 'mame2003_plus') core = 'mame';
       if (core === 'atari_2600') core = 'atari2600';
+      if (core === 'nds') core = 'melonds';
 
       let romFilename = currentGame.filename || '';
       if (!romFilename || !romFilename.includes('.')) {
@@ -684,6 +685,7 @@ export default function EmulatorModal({
           gba: 'gba',
           n64: 'z64',
           nds: 'nds',
+          melonds: 'nds',
           psx: 'cue',
           atari2600: 'a26'
         };
@@ -1134,7 +1136,7 @@ export default function EmulatorModal({
               audio_sync: 'true',
               audio_max_timing_skew: '0.05',
               audio_rate_control: 'true',
-              ...((${JSON.stringify(core)} === 'nds' && isTabletOrAbove) ? {
+              ...(((${JSON.stringify(core)} === 'melonds' || ${JSON.stringify(core)} === 'nds') && isTabletOrAbove) ? {
                 desmume_screens_layout: 'left/right',
                 desmume_screen_layout: 'left/right',
                 desmume_screens_gap: '0',

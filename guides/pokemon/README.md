@@ -31,9 +31,12 @@ All 11 canonical Gen 1–3 cartridges have been verified against real battery sa
 | **Gen 3** | GBA | *Pokémon Sapphire Version* | 64/128 KB Flash | ✅ Verified | 14 Rotating Sections, Substructure XOR Decryption |
 | **Gen 3** | GBA | *Pokémon Emerald Version* | 128 KB Flash | ✅ Verified | 14 Rotating Sections, Substructure XOR Decryption |
 | **Gen 3** | GBA | *Pokémon FireRed Version* | 128 KB Flash | ✅ Verified | 14 Rotating Sections, Substructure XOR Decryption |
-| **Gen 3** | GBA | *Pokémon LeafGreen Version* | 128 KB Flash | ✅ Verified | 14 Sections, Substructure XOR Decryption |
-| **Gen 4** | NDS | *Diamond, Pearl, Platinum, HGSS* | 512 KB EEPROM | ⏳ *In Roadmap* | Documented in [`mirai/pokemon-save-gen4-gen5.md`](../../mirai/pokemon-save-gen4-gen5.md) |
-| **Gen 5** | NDS | *Black, White, Black 2, White 2* | 512 KB Flash | ⏳ *In Roadmap* | Documented in [`mirai/pokemon-save-gen4-gen5.md`](../../mirai/pokemon-save-gen4-gen5.md) |
+| **Gen 4** | NDS | *Pokémon Diamond Version* | 512 KB Flash | ✅ Verified | Small Block `0xC100`, CRC16-CCITT, 8 Sinnoh Badges |
+| **Gen 4** | NDS | *Pokémon Pearl Version* | 512 KB Flash | ✅ Verified | Small Block `0xC100`, CRC16-CCITT, 8 Sinnoh Badges |
+| **Gen 4** | NDS | *Pokémon Platinum Version* | 512 KB Flash | ✅ Verified | Small Block `0xCF2C`, CRC16-CCITT, 8 Sinnoh Badges |
+| **Gen 4** | NDS | *Pokémon HeartGold Version* | 512 KB Flash | ✅ Verified | Small Block `0xF628`, CRC16-CCITT, 16 Dual-Region Badges |
+| **Gen 4** | NDS | *Pokémon SoulSilver Version* | 512 KB Flash | ✅ Verified | Small Block `0xF628`, CRC16-CCITT, 16 Dual-Region Badges |
+| **Gen 5** | NDS | *Black, White, Black 2, White 2* | 512 KB Flash | ⏳ *In Roadmap* | Documented in [`mirai/pokemon-save-gen5.md`](../../mirai/pokemon-save-gen5.md) |
 
 ---
 

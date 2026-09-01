@@ -234,6 +234,11 @@ export default function MobileAppView({
   const [dsTab, setDsTab] = useState('overview');
   const [isLocalScraping, setIsLocalScraping] = useState(false);
 
+  // Reset save action toast when switching selected game
+  useEffect(() => {
+    setSaveActionStatus('');
+  }, [selectedGameForDetails?.id]);
+
   // Strategy Guides QR Companion State
   const [activeQrType, setActiveQrType] = useState(null); // 'written' | 'video' | null
   const [qrDataUrl, setQrDataUrl] = useState('');
@@ -1497,10 +1502,16 @@ export default function MobileAppView({
                 onConfirm={async () => {
                   setShowDeleteSaveConfirm(false);
                   if (onDeleteSave && selectedGameForDetails) {
-                    await onDeleteSave(selectedGameForDetails);
-                    sfx?.playDelete?.();
-                    setSaveActionStatus('Save data & states erased!');
-                    setTimeout(() => setSaveActionStatus(''), 4000);
+                    try {
+                      setSaveActionStatus('Deleting save data...');
+                      const ok = await onDeleteSave(selectedGameForDetails);
+                      sfx?.playDelete?.();
+                      setSaveActionStatus(ok ? 'Save data & states erased!' : 'Save data erased.');
+                    } catch (err) {
+                      setSaveActionStatus('Failed to erase save data.');
+                    } finally {
+                      setTimeout(() => setSaveActionStatus(''), 4000);
+                    }
                   }
                 }}
                 onCancel={() => setShowDeleteSaveConfirm(false)}

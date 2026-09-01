@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { dbGet, dbSet, dbDelete, dbGetAll, STORES } from '../services/db';
+import { dbGet, dbSet, dbDelete, dbBatchDelete, dbGetAll, STORES } from '../services/db';
 import { detectSystemFromExtension } from '../utils/systemDetector';
 
 /**
@@ -575,6 +575,8 @@ export function useSaveDataManager() {
         game.title
       ].filter(Boolean);
 
+      const deletionsMap = new Map();
+
       // 1. Direct keys delete across all identifiers and profile prefixes
       for (const id of identifiers) {
         for (const prof of profilePrefixes) {
@@ -582,15 +584,9 @@ export function useSaveDataManager() {
           const stateKey = prof ? `state_${prof}_${id}` : `state_${id}`;
           const autoKey = prof ? `state_auto_${prof}_${id}` : `state_auto_${id}`;
 
-          await dbDelete(STORES.GAME_SAVES, saveKey);
-          await dbDelete(STORES.SAVE_STATES, stateKey);
-          await dbDelete(STORES.SAVE_STATES, autoKey);
-
-          try {
-            localStorage.removeItem(saveKey);
-            localStorage.removeItem(stateKey);
-            localStorage.removeItem(autoKey);
-          } catch (e) {}
+          deletionsMap.set(`${STORES.GAME_SAVES}:${saveKey}`, { store: STORES.GAME_SAVES, key: saveKey });
+          deletionsMap.set(`${STORES.SAVE_STATES}:${stateKey}`, { store: STORES.SAVE_STATES, key: stateKey });
+          deletionsMap.set(`${STORES.SAVE_STATES}:${autoKey}`, { store: STORES.SAVE_STATES, key: autoKey });
         }
       }
 
@@ -609,11 +605,8 @@ export function useSaveDataManager() {
             const target = id.toLowerCase();
             return gId.toLowerCase() === target || String(rawKey).toLowerCase().includes(target);
           });
-          if (idMatches) {
-            if (rawKey) {
-              await dbDelete(STORES.GAME_SAVES, rawKey);
-              try { localStorage.removeItem(rawKey); } catch (e) {}
-            }
+          if (idMatches && rawKey) {
+            deletionsMap.set(`${STORES.GAME_SAVES}:${rawKey}`, { store: STORES.GAME_SAVES, key: rawKey });
           }
         }
 
@@ -630,15 +623,18 @@ export function useSaveDataManager() {
             const target = id.toLowerCase();
             return gId.toLowerCase() === target || String(rawKey).toLowerCase().includes(target);
           });
-          if (idMatches) {
-            if (rawKey) {
-              await dbDelete(STORES.SAVE_STATES, rawKey);
-              try { localStorage.removeItem(rawKey); } catch (e) {}
-            }
+          if (idMatches && rawKey) {
+            deletionsMap.set(`${STORES.SAVE_STATES}:${rawKey}`, { store: STORES.SAVE_STATES, key: rawKey });
           }
         }
       } catch (scanErr) {
         console.warn('⚠️ [SAVE SCAN PURGE ERROR]:', scanErr);
+      }
+
+      // Execute all deletions atomically in 1 single network and disk operation
+      const deletionsList = Array.from(deletionsMap.values());
+      if (deletionsList.length > 0) {
+        await dbBatchDelete(deletionsList);
       }
 
       // 3. Purge Emscripten IDBFS databases to prevent virtual FS resurrection

@@ -10,9 +10,9 @@
 
 | # | Impact | Specification | Domain | Description | Status |
 | :---: | :---: | :--- | :--- | :--- | :--- |
-| 1 | 🟢 Low-Med | **[Pokémon Save Inspector (Gen 4 & Gen 5 NDS)](pokemon-save-gen4-gen5.md)** | Milestone Inspector | Extend zero-overhead offline save parser to Nintendo DS 512KB saves (Sinnoh & Unova Gym Badges, Creation/Tao Trios, and Champions). | 📋 Planned |
-| 2 | 🟡 Medium | **[Mobile UI Gamepad & Spatial Navigation](mobile-gamepad-navigation.md)** | Mobile UX / Controls | Purpose-built, ergonomic 2D spatial gamepad navigation engine tailored specifically for mobile feeds, bottom sheets, search overlays, and drilldowns. | 📋 Planned |
-| 3 | 🟡 Medium | **[3D Cartridge & Media Design Blueprint](cartridge-designs-spec.md)** | Theme Engine | Master geometric and CSS blueprint for all 10+ authentic physical cartridge shells (NES, SNES, N64, GBA, NDS, Genesis, GB, Game Gear, Atari, PS1) for future theme designs. | 📋 Planned |
+| 1 | 🟢 Low-Med | **[Pokémon Save Inspector (Gen 5 NDS)](pokemon-save-gen5.md)** | Milestone Inspector | Extend zero-overhead offline save parser to Nintendo DS 512KB saves (Unova Gym Badges and League Champions Alder & Iris). | 📋 Planned |
+| 2 | 🟢 Low-Med | **[Pokémon Single-Player Milestones Expansion (Gen 1–5)](pokemon-milestones-expansion.md)** | Milestone Inspector | Offline single-player storyline milestones across Gen 1–5 (Starters, Key Items, Legendary Titans, and Mt. Silver Red). | 📋 Planned |
+| 3 | 🟡 Medium | **[Mobile UI Gamepad & Spatial Navigation](mobile-gamepad-navigation.md)** | Mobile UX / Controls | Purpose-built, ergonomic 2D spatial gamepad navigation engine tailored specifically for mobile feeds, bottom sheets, search overlays, and drilldowns. | 📋 Planned |
 | 4 | 🟡 Medium | **[Settings & Library Management Hub](settings-hub.md)** | System Hub & Tools | Clean console-native settings redesign: ROM library administration, BGM track manager, and IndexedDB storage diagnostics (wires into existing server REST endpoints). | 📋 Planned |
 | 5 | 🟡 Medium | **[Dynamic Emulation Core Switching](emulation-core-switching.md)** | Core Emulation | Per-system and per-game WebAssembly core override engine (mGBA vs VBA-M, Gambatte vs SameBoy, Snes9x vs bsnes, Beetle PSX vs PCSX ReARMed). | 📋 Planned |
 | 6 | 🟠 Med-High | **[Cross-Device Cloud Save Sync](cloud-saves.md)** | Save States & Sync | Bi-directional synchronization of single Quick Save / SRAM battery saves (`.sav`) to user Google Drive, S3/R2, or Supabase with conflict resolution dialog. | 📋 Planned |

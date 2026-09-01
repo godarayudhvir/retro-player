@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { dbGet, dbSet, STORES } from '../services/db';
 
 const THEME_STORAGE_KEY = 'retro_player_theme';
@@ -44,6 +44,9 @@ export function useThemeEngine() {
     return 'light';
   });
 
+  const lastSavedConfigRef = useRef(`${theme}_${colorMode}`);
+  const isInitialMountRef = useRef(true);
+
   // Async load from database on startup
   useEffect(() => {
     let isMounted = true;
@@ -57,6 +60,7 @@ export function useThemeEngine() {
           if (saved.colorMode === 'light' || saved.colorMode === 'dark') {
             setColorModeState(saved.colorMode);
           }
+          lastSavedConfigRef.current = `${saved.theme || 'ds'}_${saved.colorMode || 'light'}`;
         }
       } catch (e) {}
     })();
@@ -70,7 +74,18 @@ export function useThemeEngine() {
       document.documentElement.setAttribute('data-color-mode', colorMode);
       localStorage.setItem(THEME_STORAGE_KEY, theme);
       localStorage.setItem(COLOR_MODE_STORAGE_KEY, colorMode);
-      dbSet(STORES.SETTINGS, 'theme_config', { theme, colorMode });
+      
+      // Skip redundant cold boot database write
+      if (isInitialMountRef.current) {
+        isInitialMountRef.current = false;
+        return;
+      }
+
+      const configKey = `${theme}_${colorMode}`;
+      if (lastSavedConfigRef.current !== configKey) {
+        lastSavedConfigRef.current = configKey;
+        dbSet(STORES.SETTINGS, 'theme_config', { theme, colorMode });
+      }
     } catch (e) {
       console.error('Failed to persist theme & color mode:', e);
     }

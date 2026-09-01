@@ -979,7 +979,29 @@ app.get('/api/db/:store/:key', (req, res) => {
   res.json({ success: true, store, key, data: result });
 });
 
-// 3. POST / PUT single record in a store
+// 3. Batch delete multiple records across stores in 1 atomic write
+app.post('/api/db/batch-delete', express.json({ limit: '10mb' }), (req, res) => {
+  const { deletions } = req.body || {};
+  if (Array.isArray(deletions) && deletions.length > 0) {
+    const db = readServerDB();
+    for (const item of deletions) {
+      const { store: itemStore, key: itemKey } = item || {};
+      if (itemStore && itemKey && db[itemStore]) {
+        if (Array.isArray(db[itemStore])) {
+          db[itemStore] = db[itemStore].filter(x => x.id !== itemKey);
+        } else if (db[itemStore][itemKey] !== undefined) {
+          delete db[itemStore][itemKey];
+        }
+      }
+    }
+    writeServerDB(db);
+    console.log(`🗑️ [SERVER DB BATCH DELETE] Purged ${deletions.length} keys in 1 atomic write`);
+    return res.json({ success: true, count: deletions.length });
+  }
+  res.json({ success: true, count: 0 });
+});
+
+// 4. POST / PUT single record in a store
 app.post('/api/db/:store', express.json({ limit: '50mb' }), (req, res) => {
   const store = req.params.store;
   const { key, id, value } = req.body || {};
@@ -1009,7 +1031,9 @@ app.post('/api/db/:store', express.json({ limit: '50mb' }), (req, res) => {
   }
 
   writeServerDB(db);
-  console.log(`💾 [SERVER DB SAVED] Store: "${store}" | Key: "${effectiveKey}"`);
+  if (store !== 'game_metadata') {
+    console.log(`💾 [SERVER DB SAVED] Store: "${store}" | Key: "${effectiveKey}"`);
+  }
   res.json({ success: true, store, key: effectiveKey });
 });
 

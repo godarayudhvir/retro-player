@@ -959,6 +959,53 @@ function multiConsoleScannerPlugin() {
           return;
         }
 
+        if (req.url.startsWith('/api/db/reset')) {
+          const freshDb = {
+            profiles: [],
+            user_data: {},
+            app_settings: {},
+            game_saves: {},
+            save_states: {},
+            game_metadata: {}
+          };
+          writeDevDB(freshDb);
+          console.log('🧹 [DEV DB FACTORY RESET] Cleared all server DB stores (profiles, user_data, app_settings, game_saves, save_states, game_metadata)');
+          res.end(JSON.stringify({ success: true, message: 'Server database reset successfully' }));
+          return;
+        }
+
+        if (req.url === '/api/db/batch-delete' && req.method === 'POST') {
+          let body = '';
+          req.on('data', chunk => { body += chunk; });
+          req.on('end', () => {
+            try {
+              const { deletions } = JSON.parse(body || '{}');
+              if (Array.isArray(deletions) && deletions.length > 0) {
+                const db = readDevDB();
+                for (const item of deletions) {
+                  const { store: itemStore, key: itemKey } = item || {};
+                  if (itemStore && itemKey && db[itemStore]) {
+                    if (Array.isArray(db[itemStore])) {
+                      db[itemStore] = db[itemStore].filter(x => x.id !== itemKey);
+                    } else if (db[itemStore][itemKey] !== undefined) {
+                      delete db[itemStore][itemKey];
+                    }
+                  }
+                }
+                writeDevDB(db);
+                console.log(`🗑️ [DEV DB BATCH DELETE] Purged ${deletions.length} keys in 1 atomic write`);
+                res.end(JSON.stringify({ success: true, count: deletions.length }));
+              } else {
+                res.end(JSON.stringify({ success: true, count: 0 }));
+              }
+            } catch (err) {
+              res.statusCode = 500;
+              res.end(JSON.stringify({ error: err.message }));
+            }
+          });
+          return;
+        }
+
         if (!store) {
           res.statusCode = 400;
           res.end(JSON.stringify({ error: 'Missing store name' }));
@@ -1017,7 +1064,9 @@ function multiConsoleScannerPlugin() {
               }
 
               writeDevDB(db);
-              console.log(`💾 [DEV DB SAVED] Store: "${store}" | Key: "${effectiveKey}"`);
+              if (store !== 'game_metadata') {
+                console.log(`💾 [DEV DB SAVED] Store: "${store}" | Key: "${effectiveKey}"`);
+              }
               res.end(JSON.stringify({ success: true, store, key: effectiveKey }));
             } catch (err) {
               res.statusCode = 500;

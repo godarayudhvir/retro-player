@@ -252,6 +252,11 @@ export default function DsView({
   }
   const focusedIndex = lastGridIndexRef.current >= 0 && lastGridIndexRef.current < filteredGames.length ? lastGridIndexRef.current : 0;
   const selectedGame = filteredGames[focusedIndex] || filteredGames[0];
+
+  // Reset save action toast when switching selected game
+  useEffect(() => {
+    setSaveActionStatus('');
+  }, [selectedGame?.id]);
   const selectedMeta = selectedGame ? (
     metadataMap[selectedGame.id] ||
     metadataMap[`${selectedGame.systemKey}-${selectedGame.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')]
@@ -1065,14 +1070,18 @@ export default function DsView({
               onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (file && onImportSave && selectedGame) {
-                  setSaveActionStatus('Importing save...');
-                  const success = await onImportSave(file, selectedGame);
-                  if (success) {
-                    sfx?.playMenuConfirm?.();
-                    setSaveActionStatus('Save file imported successfully!');
-                    setTimeout(() => setSaveActionStatus(''), 4000);
-                  } else {
+                  try {
+                    setSaveActionStatus('Importing save...');
+                    const success = await onImportSave(file, selectedGame);
+                    if (success) {
+                      sfx?.playMenuConfirm?.();
+                      setSaveActionStatus('Save file imported successfully!');
+                    } else {
+                      setSaveActionStatus('Failed to import save file.');
+                    }
+                  } catch (err) {
                     setSaveActionStatus('Failed to import save file.');
+                  } finally {
                     setTimeout(() => setSaveActionStatus(''), 4000);
                   }
                 }
@@ -1093,15 +1102,19 @@ export default function DsView({
                 className={`ds-save-action-tile ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'save-export-battery' ? 'gamepad-focused' : ''}`}
                 onClick={async () => {
                   if (selectedGame) {
-                    setSaveActionStatus('Exporting battery save (.sav)...');
-                    const fn = onExportBatterySave || onExportSave;
-                    const success = await fn(selectedGame);
-                    if (success) {
-                      sfx?.playNotification?.();
-                      setSaveActionStatus('Downloaded .sav battery save file!');
-                      setTimeout(() => setSaveActionStatus(''), 4000);
-                    } else {
-                      setSaveActionStatus('No in-game battery save found. Save in-game first!');
+                    try {
+                      setSaveActionStatus('Exporting battery save (.sav)...');
+                      const fn = onExportBatterySave || onExportSave;
+                      const success = await fn(selectedGame);
+                      if (success) {
+                        sfx?.playNotification?.();
+                        setSaveActionStatus('Downloaded .sav battery save file!');
+                      } else {
+                        setSaveActionStatus('No in-game battery save found. Save in-game first!');
+                      }
+                    } catch (err) {
+                      setSaveActionStatus('Failed to export battery save.');
+                    } finally {
                       setTimeout(() => setSaveActionStatus(''), 4000);
                     }
                   }
@@ -1122,15 +1135,19 @@ export default function DsView({
                 className={`ds-save-action-tile ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'save-export-quick' ? 'gamepad-focused' : ''}`}
                 onClick={async () => {
                   if (selectedGame) {
-                    setSaveActionStatus('Exporting quick save (.state)...');
-                    const fn = onExportQuickSave || onExportSave;
-                    const success = await fn(selectedGame);
-                    if (success) {
-                      sfx?.playNotification?.();
-                      setSaveActionStatus('Downloaded .state quick save snapshot!');
-                      setTimeout(() => setSaveActionStatus(''), 4000);
-                    } else {
-                      setSaveActionStatus('No quick save snapshot found. Press Quick Save first!');
+                    try {
+                      setSaveActionStatus('Exporting quick save (.state)...');
+                      const fn = onExportQuickSave || onExportSave;
+                      const success = await fn(selectedGame);
+                      if (success) {
+                        sfx?.playNotification?.();
+                        setSaveActionStatus('Downloaded .state quick save snapshot!');
+                      } else {
+                        setSaveActionStatus('No quick save snapshot found. Press Quick Save first!');
+                      }
+                    } catch (err) {
+                      setSaveActionStatus('Failed to export quick save.');
+                    } finally {
                       setTimeout(() => setSaveActionStatus(''), 4000);
                     }
                   }
@@ -1168,11 +1185,16 @@ export default function DsView({
                 className={`ds-save-action-tile is-delete ${focusedTarget?.zone === 'cardModal' && focusedTarget?.id === 'save-delete' ? 'gamepad-focused' : ''}`}
                 onClick={async () => {
                   if (onDeleteSave && selectedGame) {
-                    setSaveActionStatus('Deleting save data...');
-                    await onDeleteSave(selectedGame);
-                    sfx?.playDelete?.();
-                    setSaveActionStatus('Save data & quick saves erased!');
-                    setTimeout(() => setSaveActionStatus(''), 4000);
+                    try {
+                      setSaveActionStatus('Deleting save data...');
+                      const ok = await onDeleteSave(selectedGame);
+                      sfx?.playDelete?.();
+                      setSaveActionStatus(ok ? 'Save data & quick saves erased!' : 'Save data erased.');
+                    } catch (err) {
+                      setSaveActionStatus('Failed to erase save data.');
+                    } finally {
+                      setTimeout(() => setSaveActionStatus(''), 4000);
+                    }
                   }
                 }}
               >

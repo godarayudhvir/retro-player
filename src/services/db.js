@@ -301,6 +301,58 @@ export async function dbDelete(storeName, key) {
 }
 
 /**
+ * Batch delete multiple records across one or more stores in a single atomic operation.
+ * @param {Array<{ store: string, key: string }>} deletions
+ */
+export async function dbBatchDelete(deletions) {
+  if (!Array.isArray(deletions) || deletions.length === 0) return true;
+
+  // 1. Commit batch delete to Server DB API in 1 single HTTP request
+  if (isServerDbAvailable) {
+    try {
+      fetch('/api/db/batch-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deletions })
+      }).catch(() => {
+        isServerDbAvailable = false;
+      });
+    } catch (e) {
+      isServerDbAvailable = false;
+    }
+  }
+
+  // 2. Delete across local IndexedDB stores in parallel
+  try {
+    const db = await getDB();
+    if (db) {
+      const storesNeeded = [...new Set(deletions.map(d => d.store).filter(s => db.objectStoreNames.contains(s)))];
+      if (storesNeeded.length > 0) {
+        const tx = db.transaction(storesNeeded, 'readwrite');
+        for (const item of deletions) {
+          if (item?.store && item?.key && db.objectStoreNames.contains(item.store)) {
+            try {
+              tx.objectStore(item.store).delete(item.key);
+            } catch (_) {}
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('[INDEXEDDB BATCH DELETE ERROR]:', e);
+  }
+
+  // 3. Clear LocalStorage keys
+  for (const item of deletions) {
+    if (item?.key) {
+      try { localStorage.removeItem(item.key); } catch (_) {}
+    }
+  }
+
+  return true;
+}
+
+/**
  * Get all items from a store.
  * Fetches authoritative dataset from Server DB API, syncing local IndexedDB cache.
  */

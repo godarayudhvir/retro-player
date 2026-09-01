@@ -68,7 +68,7 @@ export const SYSTEM_DEFINITIONS = {
   },
   nds: {
     key: 'nds',
-    core: 'nds',
+    core: 'melonds',
     name: 'Nintendo DS',
     color: '#06b6d4',
     icon: resolveAssetPath('assets/platforms/nds.svg'),

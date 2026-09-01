@@ -262,7 +262,7 @@ export const ACHIEVEMENTS_MANIFEST = [
 ];
 
 // ---------------------------------------------------------------------------
-import { resolveAssetPath } from '../utils/assetPath';
+import { resolveAssetPath } from '../utils/assetPath.js';
 
 // REGIONAL POKÉMON LEAGUE BADGE DIRECTORY (Gen 1 to 5)
 // ---------------------------------------------------------------------------
@@ -358,7 +358,6 @@ export function getPokemonBadgesForGame(game) {
 // ---------------------------------------------------------------------------
 
 export const POKEMON_ACHIEVEMENTS_MANIFEST = [
-  // Core Universal Milestones
   {
     id: 'poke_journey_begun',
     title: 'Journey Begun',
@@ -366,118 +365,6 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     category: 'pokemon',
     tier: 'bronze',
     icon: 'Compass',
-    isPerRom: true
-  },
-  {
-    id: 'poke_digital_cartographer',
-    title: 'Regional Cartographer',
-    description: 'Obtain your regional navigation guide (Town Map, Pokégear, or PokéNav).',
-    category: 'pokemon',
-    tier: 'bronze',
-    icon: 'Map',
-    isPerRom: true
-  },
-  {
-    id: 'poke_first_catch',
-    title: 'First Wild Catch',
-    description: 'Capture your first non-starter wild Pokémon with a Poké Ball.',
-    category: 'pokemon',
-    tier: 'bronze',
-    icon: 'PlusCircle',
-    isPerRom: true
-  },
-  {
-    id: 'poke_gone_fishin',
-    title: 'Inaugural Angler (Old Rod)',
-    description: 'Obtain your first fishing rod and cast lines into regional waterways.',
-    category: 'pokemon',
-    tier: 'bronze',
-    icon: 'Anchor',
-    isPerRom: true
-  },
-  {
-    id: 'poke_full_party',
-    title: 'Six-Slot Battle Squad',
-    description: 'Assemble a full battle team of 6 combat-ready Pokémon in your active party.',
-    category: 'pokemon',
-    tier: 'silver',
-    icon: 'Users',
-    isPerRom: true
-  },
-  {
-    id: 'poke_pedal_to_metal',
-    title: 'Regional Cyclist (Bicycle)',
-    description: 'Acquire your Bicycle to cruise across routes, slopes, and cycling roads.',
-    category: 'pokemon',
-    tier: 'silver',
-    icon: 'Bike',
-    isPerRom: true
-  },
-
-  // Tools & Items
-  {
-    id: 'poke_treasure_hunter',
-    title: 'Dowsing Detective (Itemfinder)',
-    description: 'Obtain the Itemfinder / Dowsing Machine to detect hidden items and buried treasures.',
-    category: 'pokemon',
-    tier: 'silver',
-    icon: 'Search',
-    isPerRom: true
-  },
-  {
-    id: 'poke_wake_up_call',
-    title: 'Awaken the Giant (Poké Flute)',
-    description: 'Acquire the Poké Flute to awaken slumbering giants and clear blocked routes.',
-    category: 'pokemon',
-    tier: 'silver',
-    icon: 'Volume2',
-    isPerRom: true
-  },
-  {
-    id: 'poke_revealer_of_mysteries',
-    title: 'Revealer of Mysteries (Scope)',
-    description: 'Acquire the Scope (Silph Scope / Devon Scope) to unmask hidden illusions and ghosts.',
-    category: 'pokemon',
-    tier: 'silver',
-    icon: 'Eye',
-    isPerRom: true
-  },
-  {
-    id: 'poke_shared_growth',
-    title: 'Shared Experience (Exp. Share)',
-    description: 'Acquire the Exp. All / Exp. Share to distribute battle experience across your team.',
-    category: 'pokemon',
-    tier: 'silver',
-    icon: 'Share2',
-    isPerRom: true
-  },
-  {
-    id: 'poke_jurassic_revival',
-    title: 'Prehistoric Revival (Fossil)',
-    description: 'Revive an ancient prehistoric Pokémon from a fossilized remnant in a research lab.',
-    category: 'pokemon',
-    tier: 'silver',
-    icon: 'Feather',
-    isPerRom: true
-  },
-  {
-    id: 'poke_master_angler',
-    title: 'Master Angler (Super Rod)',
-    description: 'Obtain the ultimate Super Rod to hook deep-water titans and legendary sea Pokémon.',
-    category: 'pokemon',
-    tier: 'gold',
-    icon: 'Waves',
-    isPerRom: true
-  },
-
-  // Climax & Victory
-  {
-    id: 'poke_master_ball',
-    title: 'Master Ball Acquired',
-    description: 'Obtain the legendary Master Ball with an infallible 100% capture rate.',
-    category: 'pokemon',
-    tier: 'gold',
-    icon: 'Disc',
     isPerRom: true
   },
   {
@@ -492,113 +379,19 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
   {
     id: 'poke_sixteen_badges',
     title: 'Dual-Region Master (16 Badges)',
-    description: 'Conquer both the Johto and Kanto leagues, assembling all 16 Regional Gym Badges to unlock Mt. Silver.',
+    description: 'Conquer both the Johto and Kanto Regional Leagues by collecting all 16 Gym Badges.',
     category: 'pokemon',
     tier: 'platinum',
-    icon: 'Crown',
-    isPerRom: true
-  },
-  {
-    id: 'poke_myth_and_legend',
-    title: 'Legendary Encounter',
-    description: 'Encounter and capture a legendary or mythical box-art Pokémon.',
-    category: 'pokemon',
-    tier: 'gold',
-    icon: 'Star',
+    icon: 'Award',
     isPerRom: true
   },
   {
     id: 'poke_hall_of_fame',
-    title: 'Regional League Champion',
-    description: 'Conquer the Elite Four and reigning Champion to enter the Hall of Fame.',
+    title: 'Pokémon League Champion',
+    description: 'Defeat the Elite Four and Champion to enter the Hall of Fame.',
     category: 'pokemon',
     tier: 'platinum',
     icon: 'Trophy',
-    isPerRom: true
-  },
-
-  // Special Exclusives & Endgame Mastery
-  {
-    id: 'poke_yellow_pika_friend',
-    title: "Pikachu's Best Companion",
-    description: "Maximize your Pikachu's happiness rating in Pokémon Yellow (Friendship >= 200).",
-    category: 'pokemon',
-    tier: 'gold',
-    icon: 'Heart',
-    isPerRom: true
-  },
-  {
-    id: 'poke_level_100',
-    title: 'Level 100 Ascension',
-    description: 'Train any single Pokémon to the maximum peak of Level 100.',
-    category: 'pokemon',
-    tier: 'platinum',
-    icon: 'Crown',
-    isPerRom: true
-  },
-  {
-    id: 'poke_star_trainer',
-    title: 'Star Trainer (Shiny)',
-    description: 'Register or own an ultra-rare Shiny Pokémon with alternate coloration.',
-    category: 'pokemon',
-    tier: 'platinum',
-    icon: 'Star',
-    isPerRom: true
-  },
-  {
-    id: 'poke_microscopic_miracle',
-    title: 'Microscopic Miracle',
-    description: 'Contract or harbor the rare, beneficial Pokérus virus on your team.',
-    category: 'pokemon',
-    tier: 'gold',
-    icon: 'Activity',
-    isPerRom: true
-  },
-  {
-    id: 'poke_high_roller',
-    title: 'High Roller (Max Wallet)',
-    description: 'Accumulate maximum wealth (₽999,999 PokéDollars) in your trainer wallet.',
-    category: 'pokemon',
-    tier: 'gold',
-    icon: 'DollarSign',
-    isPerRom: true
-  },
-
-  // Pokédex Collector Scaling
-  {
-    id: 'poke_dex_10',
-    title: 'Novice Collector (10 Caught)',
-    description: 'Register 10 caught Pokémon entries in your regional Pokédex.',
-    category: 'pokemon',
-    tier: 'bronze',
-    icon: 'BookOpen',
-    isPerRom: true
-  },
-  {
-    id: 'poke_dex_25',
-    title: 'Seasoned Collector (25 Caught)',
-    description: 'Register 25 caught Pokémon entries in your regional Pokédex.',
-    category: 'pokemon',
-    tier: 'silver',
-    icon: 'BookOpen',
-    isPerRom: true
-  },
-  {
-    id: 'poke_dex_50',
-    title: 'Master Collector (50 Caught)',
-    description: 'Register 50 caught Pokémon entries in your regional Pokédex.',
-    category: 'pokemon',
-    tier: 'gold',
-    icon: 'BookOpen',
-    isPerRom: true
-  },
-  {
-    id: 'poke_dex_100',
-    title: 'Grandmaster Collector (100 Caught)',
-    description: 'Register 100 caught Pokémon entries in your regional Pokédex.',
-    category: 'pokemon',
-    tier: 'platinum',
-    icon: 'BookOpen',
     isPerRom: true
   }
 ];
@@ -611,39 +404,52 @@ export function getPokemonMilestonesForGame(game) {
   const rawTitle = (game.title || game.name || game.fileName || '').toLowerCase();
   const sysKey = (game.systemKey || game.systemCore || '').toLowerCase();
 
-  const isYellow = rawTitle.includes('yellow');
-  const isJohto = rawTitle.includes('gold') || rawTitle.includes('silver') || rawTitle.includes('crystal') || rawTitle.includes('heartgold') || rawTitle.includes('soulsilver') || sysKey === 'gbc';
-  const isHoenn = rawTitle.includes('ruby') || rawTitle.includes('sapphire') || rawTitle.includes('emerald');
+  const isYellow = rawTitle.includes('yellow') || rawTitle.includes('special pikachu');
+  const isJohto = isJohtoPokemonGame(game);
+  const isHoenn = rawTitle.includes('ruby') || rawTitle.includes('sapphire') || rawTitle.includes('emerald') || (sysKey === 'gba' && !rawTitle.includes('fire') && !rawTitle.includes('leaf'));
   const isEmerald = rawTitle.includes('emerald');
-  const isFRLG = rawTitle.includes('fire') || rawTitle.includes('leaf');
+  const isSinnoh = rawTitle.includes('diamond') || rawTitle.includes('pearl') || rawTitle.includes('platinum');
+  const isUnova = rawTitle.includes('black') || rawTitle.includes('white');
 
   return POKEMON_ACHIEVEMENTS_MANIFEST.filter(item => {
-    // Only show Yellow-specific milestone for Pokemon Yellow
-    if (item.id === 'poke_yellow_pika_friend' && !isYellow) return false;
-    // Only show 16 Badges for Gen 2 Dual Region (Johto + Kanto)
+    // Only show 16 Badges for Gen 2 & HGSS Dual Region (Johto + Kanto)
     if (item.id === 'poke_sixteen_badges' && !isJohto) return false;
     return true;
   }).map(item => {
-    if (isJohto) {
-      if (item.id === 'poke_journey_begun') return { ...item, title: 'New Bark Departure', description: 'Receive your starter companion from Professor Elm in New Bark Town.' };
-      if (item.id === 'poke_digital_cartographer') return { ...item, title: 'Pokégear Navigation', description: 'Acquire your Pokégear with the Map Card to explore Johto and Kanto.' };
-      if (item.id === 'poke_pedal_to_metal') return { ...item, title: 'Goldenrod Cyclist (Bicycle)', description: 'Receive the Bicycle from the Goldenrod Bike Shop.' };
-      if (item.id === 'poke_hall_of_fame') return { ...item, title: 'Silver Conference Champion', description: 'Defeat the Elite Four and Champion Lance at the Indigo Plateau.' };
-      if (item.id === 'poke_myth_and_legend') return { ...item, title: 'Guardian of Sea & Sky', description: 'Encounter and capture Lugia (Whirl Islands) or Ho-Oh (Tin Tower).' };
-    } else if (isHoenn) {
-      if (item.id === 'poke_journey_begun') return { ...item, title: 'Littleroot Departure', description: 'Rescue Professor Birch with your starter companion in Littleroot Town.' };
-      if (item.id === 'poke_digital_cartographer') return { ...item, title: 'PokéNav Navigator', description: 'Acquire the PokéNav from the Devon Corporation President in Rustboro.' };
-      if (item.id === 'poke_pedal_to_metal') return { ...item, title: "Rydel's Dual Cycles (Mach/Acro)", description: 'Obtain the Mach or Acro Bike from Rydel in Mauville City.' };
-      if (item.id === 'poke_revealer_of_mysteries') return { ...item, title: 'Unseen Chameleon (Devon Scope)', description: 'Receive the Devon Scope from Steven on Route 120 to unmask camouflaged Kecleon.' };
-      if (item.id === 'poke_hall_of_fame') return { ...item, title: 'Ever Grande Champion', description: isEmerald ? 'Defeat Champion Wallace to claim the Hoenn League throne.' : 'Defeat Champion Steven Stone to conquer the Hoenn League.' };
-      if (item.id === 'poke_myth_and_legend') return { ...item, title: 'Sovereign of Land, Sea & Sky', description: 'Capture Groudon, Kyogre, or the dragon king Rayquaza at Sky Pillar.' };
-    } else if (isFRLG || (!isJohto && !isHoenn)) {
-      if (item.id === 'poke_journey_begun') return { ...item, title: 'Pallet Town Departure', description: 'Receive your starter companion from Professor Oak in Pallet Town.' };
-      if (item.id === 'poke_digital_cartographer') return { ...item, title: 'Cartographer of Kanto (Town Map)', description: 'Obtain the Town Map from Daisy Oak in Pallet Town.' };
-      if (item.id === 'poke_pedal_to_metal') return { ...item, title: 'Cerulean Cyclist (Bicycle)', description: 'Exchange your Bike Voucher for a Bicycle at the Cerulean Bike Shop.' };
-      if (item.id === 'poke_revealer_of_mysteries') return { ...item, title: 'Ghostbusters (Silph Scope)', description: 'Obtain the Silph Scope from Team Rocket Hideout to unveil ghosts in Pokémon Tower.' };
-      if (item.id === 'poke_hall_of_fame') return { ...item, title: 'Indigo Plateau Champion', description: 'Defeat the Elite Four and Rival Blue to enter the Hall of Fame.' };
-      if (item.id === 'poke_myth_and_legend') return { ...item, title: 'The Genetic Apex (Mewtwo/Birds)', description: 'Encounter and capture Articuno, Zapdos, Moltres, or Mewtwo in Cerulean Cave.' };
+    if (item.id === 'poke_journey_begun') {
+      if (isYellow) {
+        return { ...item, title: 'Pallet Town Departure (Partner Pikachu)', description: 'Receive your loyal partner Pikachu from Professor Oak in Pallet Town.' };
+      }
+      if (isJohto) {
+        return { ...item, title: 'New Bark Departure', description: 'Receive your starter companion from Professor Elm in New Bark Town.' };
+      }
+      if (isHoenn) {
+        return { ...item, title: 'Littleroot Departure', description: 'Rescue Professor Birch with your starter companion in Littleroot Town.' };
+      }
+      if (isSinnoh) {
+        return { ...item, title: 'Twinleaf Departure', description: 'Receive your starter companion from Professor Rowan at Lake Verity.' };
+      }
+      if (isUnova) {
+        return { ...item, title: 'Nuvema Departure', description: 'Unbox your starter gift from Professor Juniper in Nuvema Town.' };
+      }
+      // Gen 1 & FRLG (Kanto)
+      return { ...item, title: 'Pallet Town Departure', description: 'Receive your starter companion from Professor Oak in Pallet Town.' };
+    }
+    if (item.id === 'poke_hall_of_fame') {
+      if (isJohto) {
+        return { ...item, title: 'Silver Conference Champion', description: 'Defeat the Elite Four and Champion Lance at the Indigo Plateau.' };
+      }
+      if (isHoenn) {
+        return { ...item, title: 'Ever Grande Champion', description: isEmerald ? 'Defeat Champion Wallace to claim the Hoenn League throne.' : 'Defeat Champion Steven Stone to conquer the Hoenn League.' };
+      }
+      if (isSinnoh) {
+        return { ...item, title: 'Sinnoh League Champion', description: 'Defeat the Elite Four and Champion Cynthia to enter the Hall of Fame.' };
+      }
+      if (isUnova) {
+        return { ...item, title: 'Unova League Champion', description: 'Defeat the Elite Four and Champion Alder or Iris to conquer Unova.' };
+      }
+      // Gen 1 & FRLG (Kanto)
+      return { ...item, title: 'Indigo Plateau Champion', description: 'Defeat the Elite Four and Rival Blue to enter the Hall of Fame.' };
     }
     return item;
   });
@@ -652,3 +458,4 @@ export function getPokemonMilestonesForGame(game) {
 export const TOTAL_ACHIEVEMENT_POINTS = ACHIEVEMENTS_MANIFEST.reduce((acc, ach) => {
   return acc + (ACHIEVEMENT_TIERS[ach.tier.toUpperCase()]?.points || 5);
 }, 0);
+

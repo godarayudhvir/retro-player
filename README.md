@@ -200,7 +200,7 @@ Explore dedicated, step-by-step documentation located in the [`guides/`](guides/
 | **[🌐 Hardware & Platform Compatibility Matrix](guides/compatibility.md)** | Browser, OS, Smart TV (LG webOS, Samsung Tizen, Fire TV), Handheld (Steam Deck), and Console compatibility breakdown. |
 | **[📱 Cross-Device Experience Matrix](guides/device-experience-matrix.md)** | Feature sets, UI density, input modes, and admin capabilities compared across Mobile, Handheld, PC, and TV. |
 | **[🏆 Universal Achievements & Player Milestones Guide](guides/achievements.md)** | Master registry of 24 universal organic achievements (300G Gamerscore), points matrix, and persistence. |
-| **[⚡ Pokémon Save Inspector & Regional Milestones Hub](guides/pokemon/README.md)** | Binary SRAM/Flash save inspection specifications across Gen 1 (Kanto), Gen 2 (Johto 16 Badges), and Gen 3 (Hoenn & FRLG). |
+| **[⚡ Pokémon Save Inspector & Regional Milestones Hub](guides/pokemon/README.md)** | Binary SRAM/Flash save inspection specifications across Gen 1 (Kanto), Gen 2 (Johto 16 Badges), Gen 3 (Hoenn & FRLG), and Gen 4 (Sinnoh & HGSS). |
 | **[🎮 Rich Presence, OS Media Controls & Feeds](guides/presence.md)** | Real-time gaming presence across Discord Desktop (RPC), OS MediaSession (macOS/iOS/Android/Windows), and OBS stream overlays. |
 | **[🎮 ROM Management & Sidecar Metadata](guides/roms.md)** | Directory organization, folder mounting, and local companion sidecars (`.nfo`, `.json`, `cover.webp`) guide. |
 | **[🎵 Background Music (BGM) Architecture](guides/bgm.md)** | Virtual audio hierarchy, dual-layer directory scanning, codec formats, and smart in-game pause. |
@@ -226,7 +226,8 @@ Retro Player includes built-in AI agent skills and automated utility scripts und
 Upcoming feature designs, technical blueprints, and step-by-step implementation guides are organized under [`mirai/`](mirai/README.md):
 
 - **[Master Roadmap Index](mirai/README.md)**: Prioritized status index across all upcoming milestones.
-- **[Pokémon Save Inspector (Gen 4 & Gen 5 NDS)](mirai/pokemon-save-gen4-gen5.md)**: Zero-overhead binary save parser for 512KB NDS saves across Gen 4–5 (Sinnoh & Unova Gym Badges, Creation/Tao Trios, and Champions).
+- **[Pokémon Save Inspector (Gen 5 NDS)](mirai/pokemon-save-gen5.md)**: Zero-overhead binary save parser for 512KB NDS saves for Gen 5 (Unova Gym Badges and League Champions Alder & Iris).
+- **[Pokémon Single-Player Milestones Expansion (Gen 1–5)](mirai/pokemon-milestones-expansion.md)**: Offline single-player storyline milestones across Gen 1–5 (Starters, Key Items, Legendary Titans, and Mt. Silver Red).
 - **[Dynamic Emulation Core Switching](mirai/emulation-core-switching.md)**: Per-system and per-game WebAssembly core override engine (mGBA vs VBA-M, Gambatte vs SameBoy, Snes9x vs bsnes, Beetle PSX vs PCSX ReARMed).
 - **[Mobile UI Gamepad & Spatial Navigation](mirai/mobile-gamepad-navigation.md)**: Purpose-built 2D spatial navigation engine for mobile feeds and bottom sheets.
 - **[3D Cartridge & Media Designs](mirai/cartridge-designs-spec.md)**: Master geometric specifications for authentic physical cartridge shells.
