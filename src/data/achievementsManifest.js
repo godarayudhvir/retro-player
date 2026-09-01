@@ -363,7 +363,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Journey Begun',
     description: 'Receive your inaugural starter companion from the regional Professor.',
     category: 'pokemon',
-    tier: 'bronze',
+    type: 'story',
     icon: 'Compass',
     isPerRom: true
   },
@@ -372,7 +372,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Property Damage License',
     description: 'Acquire HM01 Cut. Shrubs and small trees across the region now fear your existence.',
     category: 'pokemon',
-    tier: 'bronze',
+    type: 'hm',
     icon: 'Activity',
     isPerRom: true
   },
@@ -381,7 +381,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Frequent Flyer Miles',
     description: 'Acquire HM02 Fly. Say goodbye to walking across long routes forever.',
     category: 'pokemon',
-    tier: 'bronze',
+    type: 'hm',
     icon: 'Feather',
     isPerRom: true
   },
@@ -390,7 +390,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'No Lifeguard on Duty',
     description: 'Acquire HM03 Surf. Who needs a luxury cruise when you can ride the open waves?',
     category: 'pokemon',
-    tier: 'bronze',
+    type: 'hm',
     icon: 'Waves',
     isPerRom: true
   },
@@ -399,7 +399,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Do You Even Lift, Bro?',
     description: 'Acquire HM04 Strength. You can now chuck massive ancient boulders like pebbles.',
     category: 'pokemon',
-    tier: 'bronze',
+    type: 'hm',
     icon: 'PlusCircle',
     isPerRom: true
   },
@@ -408,7 +408,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'High Beams On',
     description: 'Acquire HM05 Flash. Pitch-black cave tunnels are suddenly 100% less terrifying.',
     category: 'pokemon',
-    tier: 'bronze',
+    type: 'hm',
     icon: 'Zap',
     isPerRom: true
   },
@@ -417,7 +417,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Certified Swiss Army Trainer',
     description: 'Collect all 5 core Hidden Machines (HM01 through HM05). You are now a walking utility belt.',
     category: 'pokemon',
-    tier: 'silver',
+    type: 'hm',
     icon: 'Award',
     isPerRom: true
   },
@@ -426,7 +426,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Alarm Clock from Hell',
     description: 'Wake up and clear the gargantuan Snorlax blocking Route 12 or Route 16 with the Poké Flute.',
     category: 'pokemon',
-    tier: 'bronze',
+    type: 'story',
     icon: 'Activity',
     isPerRom: true
   },
@@ -435,7 +435,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Rest in Peace',
     description: 'Use the Silph Scope to unmask and soothe the restless spirit of Marowak in Pokémon Tower.',
     category: 'pokemon',
-    tier: 'bronze',
+    type: 'story',
     icon: 'Eye',
     isPerRom: true
   },
@@ -444,7 +444,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Hostile Takeover Denied',
     description: 'Defeat Giovanni on the 11th floor of Silph Co. and liberate corporate headquarters from Team Rocket.',
     category: 'pokemon',
-    tier: 'silver',
+    type: 'story',
     icon: 'Shield',
     isPerRom: true
   },
@@ -453,7 +453,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Mortal Wombat',
     description: 'Defeat the Karate Master at the Saffron Fighting Dojo and claim a fighting disciple for your squad.',
     category: 'pokemon',
-    tier: 'bronze',
+    type: 'story',
     icon: 'Award',
     isPerRom: true
   },
@@ -462,7 +462,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: "It's All About the Tea",
     description: 'Quench the thirsty security guard’s throat with a refreshing beverage to unlock Saffron City gates.',
     category: 'pokemon',
-    tier: 'bronze',
+    type: 'story',
     icon: 'Sparkles',
     isPerRom: true
   },
@@ -471,7 +471,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Bon Voyage, Sailor!',
     description: 'Tend to the seasick Captain and watch the luxury liner S.S. Anne depart from Vermilion Harbor.',
     category: 'pokemon',
-    tier: 'bronze',
+    type: 'story',
     icon: 'Waves',
     isPerRom: true
   },
@@ -480,7 +480,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Gold Digger',
     description: 'Defeat all 5 trainers on the Nugget Bridge gauntlet and reject Team Rocket’s recruitment flyer.',
     category: 'pokemon',
-    tier: 'bronze',
+    type: 'story',
     icon: 'Award',
     isPerRom: true
   },
@@ -489,7 +489,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Senior Citizen Extraction',
     description: 'Storm the top floor of Pokémon Tower and rescue Mr. Fuji from his Team Rocket captors.',
     category: 'pokemon',
-    tier: 'bronze',
+    type: 'story',
     icon: 'Shield',
     isPerRom: true
   },
@@ -498,7 +498,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Regional League Qualified',
     description: 'Assemble all 8 Regional Gym Badges and qualify for the Pokémon League.',
     category: 'pokemon',
-    tier: 'gold',
+    type: 'league',
     icon: 'Award',
     isPerRom: true
   },
@@ -507,7 +507,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Dual-Region Master (16 Badges)',
     description: 'Conquer both the Johto and Kanto Regional Leagues by collecting all 16 Gym Badges.',
     category: 'pokemon',
-    tier: 'platinum',
+    type: 'league',
     icon: 'Award',
     isPerRom: true
   },
@@ -516,7 +516,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Brain Freeze',
     description: 'Brave the freezing Seafoam Islands caverns and capture legendary Articuno.',
     category: 'pokemon',
-    tier: 'bronze',
+    type: 'legendary',
     icon: 'Feather',
     isPerRom: true
   },
@@ -525,7 +525,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'OSHA Violation',
     description: 'Infiltrate the abandoned Power Plant and capture legendary Zapdos.',
     category: 'pokemon',
-    tier: 'bronze',
+    type: 'legendary',
     icon: 'Zap',
     isPerRom: true
   },
@@ -534,7 +534,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Spicy Chicken',
     description: 'Scale Victory Road and capture legendary Moltres.',
     category: 'pokemon',
-    tier: 'bronze',
+    type: 'legendary',
     icon: 'Feather',
     isPerRom: true
   },
@@ -543,7 +543,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Avian Trifecta',
     description: 'Capture all three Legendary Birds of Kanto (Articuno, Zapdos, Moltres).',
     category: 'pokemon',
-    tier: 'silver',
+    type: 'legendary',
     icon: 'Crown',
     isPerRom: true
   },
@@ -552,7 +552,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Genetic Hubris',
     description: 'Descend into Cerulean Cave and capture Mewtwo. Science went too far, but your Pokéball went further.',
     category: 'pokemon',
-    tier: 'gold',
+    type: 'legendary',
     icon: 'Crown',
     isPerRom: true
   },
@@ -561,7 +561,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Praise Helix!',
     description: 'Revive an ancient prehistoric fossil (Omanyte, Kabuto, or Aerodactyl) back into living existence.',
     category: 'pokemon',
-    tier: 'silver',
+    type: 'legendary',
     icon: 'Star',
     isPerRom: true
   },
@@ -570,7 +570,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Soulmates on Two Feet',
     description: 'Maximize your partner Pikachu’s friendship score (score 200+). It literally radiates heart icons when you speak.',
     category: 'pokemon',
-    tier: 'gold',
+    type: 'exclusive',
     icon: 'Star',
     isPerRom: true
   },
@@ -579,7 +579,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Anime Canon',
     description: 'Receive all three original gift starters (Bulbasaur, Charmander, Squirtle) from NPCs in Yellow.',
     category: 'pokemon',
-    tier: 'silver',
+    type: 'exclusive',
     icon: 'Users',
     isPerRom: true
   },
@@ -588,7 +588,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Blasting Off Again!',
     description: 'Defeat Jessie, James, and Meowth across their Team Rocket ambushes.',
     category: 'pokemon',
-    tier: 'bronze',
+    type: 'exclusive',
     icon: 'Zap',
     isPerRom: true
   },
@@ -597,7 +597,7 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     title: 'Pokémon League Champion',
     description: 'Defeat the Elite Four and Champion to enter the Hall of Fame.',
     category: 'pokemon',
-    tier: 'platinum',
+    type: 'league',
     icon: 'Trophy',
     isPerRom: true
   }

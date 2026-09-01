@@ -1376,29 +1376,38 @@ export default function DsView({
                 });
                 return sorted.map(item => {
                   const isEarned = isPokemonMilestoneEarned(achievementsEngine?.unlocked, item.id, selectedGame);
-                  const tier = ACHIEVEMENT_TIERS[item.tier?.toUpperCase()] || ACHIEVEMENT_TIERS.BRONZE;
                   const IconComponent = POKE_ICON_MAP[item.icon] || Sparkles;
 
-                return (
-                  <div
-                    key={item.id}
-                    className={`ds-poke-milestone-tile tier-${item.tier} ${isEarned ? 'is-earned' : 'is-locked'}`}
-                  >
-                    {/* Left Milestone Icon Box */}
-                    <div 
-                      className="ds-poke-icon-box"
-                      style={{
-                        background: isEarned ? tier.bg : 'var(--bg-glass)',
-                        color: isEarned ? tier.color : 'var(--text-sub)',
-                        borderColor: isEarned ? tier.border : 'var(--panel-border)'
-                      }}
+                  // Thematic accent colors based on Pokémon in-game milestone type
+                  const typeColors = {
+                    story: { bg: 'rgba(16, 185, 129, 0.12)', color: '#10b981', border: 'rgba(16, 185, 129, 0.35)' },
+                    hm: { bg: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6', border: 'rgba(59, 130, 246, 0.35)' },
+                    legendary: { bg: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b', border: 'rgba(245, 158, 11, 0.35)' },
+                    league: { bg: 'rgba(234, 179, 8, 0.14)', color: '#eab308', border: 'rgba(234, 179, 8, 0.45)' },
+                    exclusive: { bg: 'rgba(168, 85, 247, 0.12)', color: '#a855f7', border: 'rgba(168, 85, 247, 0.35)' }
+                  };
+                  const accent = typeColors[item.type] || typeColors.story;
+
+                  return (
+                    <div
+                      key={item.id}
+                      className={`ds-poke-milestone-tile type-${item.type || 'story'} ${isEarned ? 'is-earned' : 'is-locked'}`}
                     >
-                      {isEarned ? (
-                        <IconComponent size={17} strokeWidth={2.4} />
-                      ) : (
-                        <Lock size={15} />
-                      )}
-                    </div>
+                      {/* Left Milestone Icon Box */}
+                      <div 
+                        className="ds-poke-icon-box"
+                        style={{
+                          background: isEarned ? accent.bg : 'var(--bg-glass)',
+                          color: isEarned ? accent.color : 'var(--text-sub)',
+                          borderColor: isEarned ? accent.border : 'var(--panel-border)'
+                        }}
+                      >
+                        {isEarned ? (
+                          <IconComponent size={17} strokeWidth={2.4} />
+                        ) : (
+                          <Lock size={15} />
+                        )}
+                      </div>
 
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.35rem' }}>

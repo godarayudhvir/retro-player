@@ -68,16 +68,16 @@ Gen 1 saves reside in Bank 1 (`0x2000` to `0x3FFF`):
 
 ## 🎬 Action Story Feats & Event Flag Milestones
 
-| Event Feat | Milestone Title | Tier | Milestone ID | Binary Verification / Event Flag |
+| Event Feat | Milestone Title | Milestone Type | Milestone ID | Binary Verification / Event Flag |
 | :--- | :--- | :---: | :--- | :--- |
-| **Snorlax Roadblocks** | **Alarm Clock from Hell** | 🥉 Bronze | `poke_snorlax_cleared` | Route 12 (`0x2A1E`) or Route 16 (`0x2A1F`) Snorlax cleared with Poké Flute |
-| **Ghost Marowak** | **Rest in Peace** | 🥉 Bronze | `poke_ghost_marowak` | 6F Pokémon Tower Ghost Marowak unmasked with Silph Scope (`0x2A39`) |
-| **Silph Co. Liberation** | **Hostile Takeover Denied** | 🥈 Silver | `poke_silph_co` | 11F Giovanni defeated & Silph President rescued (`0x2A53` / Master Ball) |
-| **Saffron Fighting Dojo** | **Mortal Wombat** | 🥉 Bronze | `poke_fighting_dojo` | Karate Master Koichi defeated (`0x2A5D` / Hitmonlee or Hitmonchan) |
-| **Saffron Guard Quenched** | **It's All About the Tea** | 🥉 Bronze | `poke_saffron_guard` | Parched guard given beverage to unlock Saffron gates (`0x2A4F`) |
-| **S.S. Anne Departure** | **Bon Voyage, Sailor!** | 🥉 Bronze | `poke_ss_anne_departed` | Captain cured of seasickness and luxury liner sets sail (`0x2A00`) |
-| **Nugget Bridge Gauntlet** | **Gold Digger** | 🥉 Bronze | `poke_nugget_bridge` | All 5 trainers defeated on Route 24 Nugget Bridge (`0x29F2`) |
-| **Mr. Fuji Rescue** | **Senior Citizen Extraction** | 🥉 Bronze | `poke_rescued_mr_fuji` | Top floor of Pokémon Tower stormed to save Mr. Fuji (`0x2A39` / Flute) |
+| **Snorlax Roadblocks** | **Alarm Clock from Hell** | 🗺️ Story Feat | `poke_snorlax_cleared` | Route 12 (`0x2A1E`) or Route 16 (`0x2A1F`) Snorlax cleared with Poké Flute |
+| **Ghost Marowak** | **Rest in Peace** | 🗺️ Story Feat | `poke_ghost_marowak` | 6F Pokémon Tower Ghost Marowak unmasked with Silph Scope (`0x2A39`) |
+| **Silph Co. Liberation** | **Hostile Takeover Denied** | 🏢 Boss Feat | `poke_silph_co` | 11F Giovanni defeated & Silph President rescued (`0x2A53` / Master Ball) |
+| **Saffron Fighting Dojo** | **Mortal Wombat** | 🥋 Dojo Feat | `poke_fighting_dojo` | Karate Master Koichi defeated (`0x2A5D` / Hitmonlee or Hitmonchan) |
+| **Saffron Guard Quenched** | **It's All About the Tea** | 🗺️ Story Feat | `poke_saffron_guard` | Parched guard given beverage to unlock Saffron gates (`0x2A4F`) |
+| **S.S. Anne Departure** | **Bon Voyage, Sailor!** | 🚢 Story Feat | `poke_ss_anne_departed` | Captain cured of seasickness and luxury liner sets sail (`0x2A00`) |
+| **Nugget Bridge Gauntlet** | **Gold Digger** | 🌉 Trainer Feat | `poke_nugget_bridge` | All 5 trainers defeated on Route 24 Nugget Bridge (`0x29F2`) |
+| **Mr. Fuji Rescue** | **Senior Citizen Extraction** | 👴 Story Feat | `poke_rescued_mr_fuji` | Top floor of Pokémon Tower stormed to save Mr. Fuji (`0x2A39` / Flute) |
 
 ---
 
