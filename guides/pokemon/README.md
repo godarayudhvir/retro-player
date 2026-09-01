@@ -1,6 +1,6 @@
-# 🏆 Pokémon Save Inspector & Regional Milestones Hub (Gen 1 – Gen 3)
+# 🏆 Pokémon Save Inspector & Regional Milestones Hub (Gen 1 – Gen 5)
 
-Welcome to the **Pokémon Save Inspector & Regional Milestones Guide Hub**. Retro Player features an authentic, zero-hack binary save analyzer capable of inspecting SRAM and Flash memory banks across 11 canonical Pokémon cartridges to unlock tailored storyline achievements, Pokédex progression bars, and 8/16-badge regional gym cases.
+Welcome to the **Pokémon Save Inspector & Regional Milestones Guide Hub**. Retro Player features an authentic, zero-hack binary save analyzer capable of inspecting SRAM and Flash memory banks across 18 canonical Pokémon cartridges to unlock tailored storyline achievements, Pokédex progression bars, and 8/16-badge regional gym cases.
 
 ---
 
@@ -36,7 +36,8 @@ All 11 canonical Gen 1–3 cartridges have been verified against real battery sa
 | **Gen 4** | NDS | *Pokémon Platinum Version* | 512 KB Flash | ✅ Verified | Small Block `0xCF2C`, CRC16-CCITT, 8 Sinnoh Badges |
 | **Gen 4** | NDS | *Pokémon HeartGold Version* | 512 KB Flash | ✅ Verified | Small Block `0xF628`, CRC16-CCITT, 16 Dual-Region Badges |
 | **Gen 4** | NDS | *Pokémon SoulSilver Version* | 512 KB Flash | ✅ Verified | Small Block `0xF628`, CRC16-CCITT, 16 Dual-Region Badges |
-| **Gen 5** | NDS | *Black, White, Black 2, White 2* | 512 KB Flash | ⏳ *In Roadmap* | Documented in [`mirai/pokemon-save-gen5.md`](../../mirai/pokemon-save-gen5.md) |
+| **Gen 5** | NDS | *Pokémon Black Version* | 512 KB Flash | ✅ Verified | Block 23 `0x19400`, Trainer Info & 8 Unova Badges |
+| **Gen 5** | NDS | *Pokémon White Version* | 512 KB Flash | ✅ Verified | Block 23 `0x19400`, Trainer Info & 8 Unova Badges |
 
 ---
 

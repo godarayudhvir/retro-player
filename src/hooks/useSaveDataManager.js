@@ -193,75 +193,102 @@ export function useSaveDataManager() {
   };
 
   /**
+   * Helper to retrieve raw battery save base64 string from IndexedDB / LocalStorage
+   */
+  const fetchBatteryBase64 = useCallback(async (game, activeProfileId = 'prof_default') => {
+    if (!game) return null;
+    const isMasterProfile = activeProfileId === 'prof_default' || activeProfileId === 'default';
+    const profilePrefixes = isMasterProfile
+      ? [activeProfileId, 'prof_default', 'default', '']
+      : [activeProfileId];
+
+    const identifiers = [
+      game.id,
+      game.slug,
+      game.rawTitle,
+      game.filename,
+      game.title
+    ].filter(Boolean);
+
+    let batteryBase64 = null;
+
+    // 1. Direct key search across profile prefixes & identifiers
+    for (const id of identifiers) {
+      for (const prof of profilePrefixes) {
+        const saveKey = prof ? `save_${prof}_${id}` : `save_${id}`;
+        const dbSave = await dbGet(STORES.GAME_SAVES, saveKey);
+        if (dbSave && dbSave.data) {
+          if (!dbSave.profileId || dbSave.profileId === activeProfileId || (isMasterProfile && (dbSave.profileId === 'prof_default' || dbSave.profileId === 'default'))) {
+            batteryBase64 = typeof dbSave.data === 'string' ? dbSave.data : (dbSave.data.save || dbSave.data.data || null);
+            break;
+          }
+        }
+        try {
+          const lsSave = localStorage.getItem(saveKey);
+          if (lsSave) {
+            const parsed = JSON.parse(lsSave);
+            if (parsed && parsed.data) {
+              if (!parsed.profileId || parsed.profileId === activeProfileId || (isMasterProfile && (parsed.profileId === 'prof_default' || parsed.profileId === 'default'))) {
+                batteryBase64 = typeof parsed.data === 'string' ? parsed.data : (parsed.data.save || parsed.data.data || null);
+                break;
+              }
+            }
+          }
+        } catch (e) {}
+      }
+      if (batteryBase64) break;
+    }
+
+    // 2. Comprehensive Store Scan fallback
+    if (!batteryBase64) {
+      try {
+        const allSaves = await dbGetAll(STORES.GAME_SAVES);
+        const match = (allSaves || []).find(item => {
+          if (!item) return false;
+          if (item.profileId && item.profileId !== activeProfileId) {
+            if (!isMasterProfile || (item.profileId !== 'prof_default' && item.profileId !== 'default')) return false;
+          }
+          const key = (item.id || item.key || '').toLowerCase();
+          const gId = (item.gameId || '').toLowerCase();
+          return identifiers.some(id => {
+            const target = id.toLowerCase();
+            return gId === target || key.includes(target);
+          });
+        });
+        if (match && match.data) {
+          batteryBase64 = typeof match.data === 'string' ? match.data : (match.data.save || match.data.data || null);
+        }
+      } catch (e) {}
+    }
+
+    return batteryBase64;
+  }, []);
+
+  /**
+   * Get raw battery RAM binary buffer (Uint8Array) for in-app evaluation
+   */
+  const getBatterySaveBuffer = useCallback(async (game, activeProfileId = 'prof_default') => {
+    try {
+      const b64 = await fetchBatteryBase64(game, activeProfileId);
+      if (!b64) return null;
+      const binStr = atob(b64);
+      const u8 = new Uint8Array(binStr.length);
+      for (let i = 0; i < binStr.length; i++) {
+        u8[i] = binStr.charCodeAt(i);
+      }
+      return u8;
+    } catch (e) {
+      return null;
+    }
+  }, [fetchBatteryBase64]);
+
+  /**
    * Export in-game battery RAM (.sav)
    */
   const exportBatterySave = useCallback(async (game, activeProfileId = 'prof_default') => {
     if (!game) return false;
     try {
-      const isMasterProfile = activeProfileId === 'prof_default' || activeProfileId === 'default';
-      const profilePrefixes = isMasterProfile
-        ? [activeProfileId, 'prof_default', 'default', '']
-        : [activeProfileId];
-
-      const identifiers = [
-        game.id,
-        game.slug,
-        game.rawTitle,
-        game.filename,
-        game.title
-      ].filter(Boolean);
-
-      let batteryBase64 = null;
-
-      // 1. Direct key search across profile prefixes & identifiers
-      for (const id of identifiers) {
-        for (const prof of profilePrefixes) {
-          const saveKey = prof ? `save_${prof}_${id}` : `save_${id}`;
-          const dbSave = await dbGet(STORES.GAME_SAVES, saveKey);
-          if (dbSave && dbSave.data) {
-            if (!dbSave.profileId || dbSave.profileId === activeProfileId || (isMasterProfile && (dbSave.profileId === 'prof_default' || dbSave.profileId === 'default'))) {
-              batteryBase64 = typeof dbSave.data === 'string' ? dbSave.data : (dbSave.data.save || dbSave.data.data || null);
-              break;
-            }
-          }
-          try {
-            const lsSave = localStorage.getItem(saveKey);
-            if (lsSave) {
-              const parsed = JSON.parse(lsSave);
-              if (parsed && parsed.data) {
-                if (!parsed.profileId || parsed.profileId === activeProfileId || (isMasterProfile && (parsed.profileId === 'prof_default' || parsed.profileId === 'default'))) {
-                  batteryBase64 = typeof parsed.data === 'string' ? parsed.data : (parsed.data.save || parsed.data.data || null);
-                  break;
-                }
-              }
-            }
-          } catch (e) {}
-        }
-        if (batteryBase64) break;
-      }
-
-      // 2. Comprehensive Store Scan fallback
-      if (!batteryBase64) {
-        try {
-          const allSaves = await dbGetAll(STORES.GAME_SAVES);
-          const match = (allSaves || []).find(item => {
-            if (!item) return false;
-            if (item.profileId && item.profileId !== activeProfileId) {
-              if (!isMasterProfile || (item.profileId !== 'prof_default' && item.profileId !== 'default')) return false;
-            }
-            const key = (item.id || item.key || '').toLowerCase();
-            const gId = (item.gameId || '').toLowerCase();
-            return identifiers.some(id => {
-              const target = id.toLowerCase();
-              return gId === target || key.includes(target);
-            });
-          });
-          if (match && match.data) {
-            batteryBase64 = typeof match.data === 'string' ? match.data : (match.data.save || match.data.data || null);
-          }
-        } catch (e) {}
-      }
-
+      const batteryBase64 = await fetchBatteryBase64(game, activeProfileId);
       if (!batteryBase64) return false;
 
       const sysInfo = detectSystemFromExtension(game.filename || game.slug || game.title || '');
@@ -283,7 +310,7 @@ export function useSaveDataManager() {
       console.warn('⚠️ [BATTERY SAVE EXPORT ERROR]:', err);
       return false;
     }
-  }, []);
+  }, [fetchBatteryBase64]);
 
   /**
    * Export Slot 1 Auto-Resume snapshot (.state)
@@ -670,6 +697,7 @@ export function useSaveDataManager() {
     checkSaveData,
     exportSaveFile,
     exportBatterySave,
+    getBatterySaveBuffer,
     exportQuickSave,
     importSaveFile,
     deleteSaveFile,

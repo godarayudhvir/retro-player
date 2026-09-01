@@ -228,8 +228,6 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
   // 4. Core Unlock Method
   const unlockAchievement = useCallback((achievementId, gameContext = null) => {
     if (!achievementId) return;
-    // Immediate synchronous guard against duplicate unlock execution
-    if (unlockedRef.current[achievementId]) return;
 
     let manifestItem = ACHIEVEMENTS_MANIFEST.find(a => a.id === achievementId);
     if (!manifestItem) {
@@ -271,8 +269,16 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
     }
     if (!manifestItem) return;
 
+    const isPerRom = Boolean(manifestItem.isPerRom || achievementId.startsWith('poke_') || manifestItem.category === 'pokemon');
+    const targetGameId = gameContext?.id || gameContext?.title || null;
+    const storeKey = isPerRom && targetGameId ? `${achievementId}__${targetGameId}` : achievementId;
+
+    // Immediate synchronous guard against duplicate unlock execution
+    if (unlockedRef.current[storeKey]) return;
+
     const newUnlockEntry = {
       id: achievementId,
+      key: storeKey,
       title: manifestItem.title,
       description: manifestItem.description,
       tier: manifestItem.tier,
@@ -282,23 +288,24 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       unlockedAt: new Date().toISOString(),
       gameId: gameContext?.id || gameContext?.title || null,
       gameTitle: gameContext?.title || null,
-      systemKey: gameContext?.systemKey || null
+      systemKey: gameContext?.systemKey || null,
+      isPerRom
     };
 
     // Mark in ref immediately to block re-entrant calls in the same tick
-    unlockedRef.current[achievementId] = newUnlockEntry;
+    unlockedRef.current[storeKey] = newUnlockEntry;
 
-    console.log(`🏆 [ACHIEVEMENT UNLOCKED] 🎉 "${manifestItem.title}" (${achievementId}) | Defer In-Game: ${isPlayingRef.current}`);
+    console.log(`🏆 [ACHIEVEMENT UNLOCKED] 🎉 "${manifestItem.title}" (${storeKey}) | Defer In-Game: ${isPlayingRef.current}`);
 
     // Update state
     setUnlocked(prevUnlocked => ({
       ...prevUnlocked,
-      [achievementId]: newUnlockEntry
+      [storeKey]: newUnlockEntry
     }));
 
     // Trigger toast or buffer for session exit OUTSIDE setState reducer
     if (isPlayingRef.current) {
-      if (!sessionUnlocksRef.current.some(x => x.id === achievementId)) {
+      if (!sessionUnlocksRef.current.some(x => x.key === storeKey || (x.id === achievementId && x.gameId === targetGameId))) {
         console.log(`🏆 [ACHIEVEMENT DEFERRED] Buffered for session exit: "${manifestItem.title}"`);
         sessionUnlocksRef.current.push(newUnlockEntry);
       }
@@ -308,7 +315,7 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
 
     // Persist to storage OUTSIDE setState reducer
     setStats(latestStats => {
-      persistState({ ...unlockedRef.current, [achievementId]: newUnlockEntry }, latestStats);
+      persistState({ ...unlockedRef.current, [storeKey]: newUnlockEntry }, latestStats);
       return latestStats;
     });
   }, [triggerToast, persistState]);
@@ -751,7 +758,7 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
         unlockAchievement('poke_journey_begun', game);
       }
 
-      // 2. Key Items
+      // 2. Key Items & HMs
       if (summary.keyItems?.bicycle) unlockAchievement('poke_pedal_to_metal', game);
       if (summary.keyItems?.oldRod || summary.keyItems?.goodRod) unlockAchievement('poke_gone_fishin', game);
       if (summary.keyItems?.superRod) unlockAchievement('poke_master_angler', game);
@@ -761,6 +768,14 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       if (summary.keyItems?.expShare) unlockAchievement('poke_shared_growth', game);
       if (summary.keyItems?.townMap) unlockAchievement('poke_digital_cartographer', game);
       if (summary.keyItems?.masterBall) unlockAchievement('poke_master_ball', game);
+
+      // Hidden Machines (HM01 - HM05)
+      if (summary.hms?.hm01) unlockAchievement('poke_hm01', game);
+      if (summary.hms?.hm02) unlockAchievement('poke_hm02', game);
+      if (summary.hms?.hm03) unlockAchievement('poke_hm03', game);
+      if (summary.hms?.hm04) unlockAchievement('poke_hm04', game);
+      if (summary.hms?.hm05) unlockAchievement('poke_hm05', game);
+      if (summary.hms?.hasAllHMs) unlockAchievement('poke_hms_master', game);
 
       // 3. Gym Badges (1 to 8 & Gen 2 Dual 16 Badges)
       if (summary.badges?.[0]) unlockAchievement('poke_badge_1', game);
@@ -792,18 +807,37 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
         unlockAchievement('poke_hall_of_fame', game);
       }
 
-      // 5. Catches, Party, Level 100
+      // 5. Catches, Party, Level 100, Legendaries, Fossils
       if (summary.hasFirstCatch) unlockAchievement('poke_first_catch', game);
       if (summary.hasFullParty) unlockAchievement('poke_full_party', game);
       if (summary.hasLevel100) unlockAchievement('poke_level_100', game);
       if (summary.hasLegendary) unlockAchievement('poke_myth_and_legend', game);
-      if (summary.hasFossil) unlockAchievement('poke_jurassic_revival', game);
+      if (summary.fossils?.hasAnyFossil || summary.hasFossil) unlockAchievement('poke_fossil_revival', game);
       if (summary.hasShiny) unlockAchievement('poke_star_trainer', game);
       if (summary.hasPokerus) unlockAchievement('poke_microscopic_miracle', game);
 
-      // 6. Finances & Special Exclusives
+      // Legendary Birds & Mewtwo
+      if (summary.legendaries?.articuno) unlockAchievement('poke_articuno', game);
+      if (summary.legendaries?.zapdos) unlockAchievement('poke_zapdos', game);
+      if (summary.legendaries?.moltres) unlockAchievement('poke_moltres', game);
+      if (summary.legendaries?.hasAllBirds) unlockAchievement('poke_legendary_birds', game);
+      if (summary.legendaries?.mewtwo) unlockAchievement('poke_mewtwo', game);
+
+      // Action Event Flags & Story Feats
+      if (summary.events?.snorlaxCleared) unlockAchievement('poke_snorlax_cleared', game);
+      if (summary.events?.ghostMarowakCalmed) unlockAchievement('poke_ghost_marowak', game);
+      if (summary.events?.silphCoLiberated) unlockAchievement('poke_silph_co', game);
+      if (summary.events?.fightingDojoWon) unlockAchievement('poke_fighting_dojo', game);
+      if (summary.events?.saffronGuardQuenched) unlockAchievement('poke_saffron_guard', game);
+      if (summary.events?.ssAnneDeparted) unlockAchievement('poke_ss_anne_departed', game);
+      if (summary.events?.nuggetBridgeCleared) unlockAchievement('poke_nugget_bridge', game);
+      if (summary.events?.mrFujiRescued) unlockAchievement('poke_rescued_mr_fuji', game);
+
+      // 6. Finances & Yellow Special Exclusives
       if (summary.isHighRoller) unlockAchievement('poke_high_roller', game);
-      if (summary.hasPikaFriend) unlockAchievement('poke_yellow_pika_friend', game);
+      if (summary.hasPikaFriend) unlockAchievement('poke_yellow_soulmates', game);
+      if (summary.hasStarterTrio) unlockAchievement('poke_yellow_starter_trio', game);
+      if (summary.hasDefeatedRocketDuo) unlockAchievement('poke_yellow_rocket_duo', game);
 
       // 7. Pokédex Scaling
       const dex = summary.pokedexCaught || 0;
@@ -832,8 +866,8 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       let changed = false;
 
       Object.entries(prevUnlocked).forEach(([key, val]) => {
-        const isTarget = (val.gameId === targetGameId || val.gameTitle === targetGameTitle) &&
-                         (key.startsWith('poke_') || val.category === 'pokemon');
+        const isTarget = (val.gameId === targetGameId || val.gameTitle === targetGameTitle || (targetGameId && key.endsWith(`__${targetGameId}`)) || (targetGameTitle && key.endsWith(`__${targetGameTitle}`))) &&
+                         (key.startsWith('poke_') || val.category === 'pokemon' || val.isPerRom);
         if (!isTarget) {
           nextUnlocked[key] = val;
         } else {

@@ -39,7 +39,50 @@ Gen 1 saves reside in Bank 1 (`0x2000` to `0x3FFF`):
 
 ---
 
-## 🦖 Gen 1 Special Species Recognition
+## 🪓 Hidden Machines (HMs 01–05) & Key Items
 
-* **Revived Prehistoric Fossils**: Omanyte (`0x62`), Omastar (`0x63`), Kabuto (`0x5A`), Kabutops (`0x5B`), Aerodactyl (`0xAB`).
-* **Legendary Encounters**: Mewtwo (`0x83`), Mew (`0x15`), Articuno (`0x4A`), Zapdos (`0x4B`), Moltres (`0x49`).
+| HM / Item | ID | In-Game Name | Milestone Title | Memory Location |
+| :---: | :---: | :--- | :--- | :--- |
+| **HM01** | `0xC4` | Cut | **Property Damage License** | Bag (`0x25C9`), PC (`0x27E6`), Move ID `15` |
+| **HM02** | `0xC5` | Fly | **Frequent Flyer Miles** | Bag (`0x25C9`), PC (`0x27E6`), Move ID `19` |
+| **HM03** | `0xC6` | Surf | **No Lifeguard on Duty** | Bag (`0x25C9`), PC (`0x27E6`), Move ID `57` |
+| **HM04** | `0xC7` | Strength | **Do You Even Lift, Bro?** | Bag (`0x25C9`), PC (`0x27E6`), Move ID `70` |
+| **HM05** | `0xC8` | Flash | **High Beams On** | Bag (`0x25C9`), PC (`0x27E6`), Move ID `148` |
+| **All 5 HMs** | — | Core HM Set | **Certified Swiss Army Trainer** | All 5 HM flags/items present in save |
+
+---
+
+## 🦅 Legendary Encounters & Prehistoric Science
+
+* **Legendary Birds**:
+  * ❄️ **Articuno** (#144, Species `0x4A`): *"Brain Freeze"* (`poke_articuno`)
+  * ⚡ **Zapdos** (#145, Species `0x4B`): *"OSHA Violation"* (`poke_zapdos`)
+  * 🔥 **Moltres** (#146, Species `0x49`): *"Spicy Chicken"* (`poke_moltres`)
+  * 👑 **All 3 Birds**: *"Avian Trifecta"* (`poke_legendary_birds`)
+* **The Genetic Apex**:
+  * 🧬 **Mewtwo** (#150, Species `0x83`): *"Genetic Hubris"* (`poke_mewtwo`)
+* **Revived Prehistoric Fossils**:
+  * 🐚 **Omanyte/Omastar** (`0x62`/`0x63`), **Kabuto/Kabutops** (`0x5A`/`0x5B`), **Aerodactyl** (`0xAB`): *"Praise Helix!"* (`poke_fossil_revival`)
+
+---
+
+## 🎬 Action Story Feats & Event Flag Milestones
+
+| Event Feat | Milestone Title | Tier | Milestone ID | Binary Verification / Event Flag |
+| :--- | :--- | :---: | :--- | :--- |
+| **Snorlax Roadblocks** | **Alarm Clock from Hell** | 🥉 Bronze | `poke_snorlax_cleared` | Route 12 (`0x2A1E`) or Route 16 (`0x2A1F`) Snorlax cleared with Poké Flute |
+| **Ghost Marowak** | **Rest in Peace** | 🥉 Bronze | `poke_ghost_marowak` | 6F Pokémon Tower Ghost Marowak unmasked with Silph Scope (`0x2A39`) |
+| **Silph Co. Liberation** | **Hostile Takeover Denied** | 🥈 Silver | `poke_silph_co` | 11F Giovanni defeated & Silph President rescued (`0x2A53` / Master Ball) |
+| **Saffron Fighting Dojo** | **Mortal Wombat** | 🥉 Bronze | `poke_fighting_dojo` | Karate Master Koichi defeated (`0x2A5D` / Hitmonlee or Hitmonchan) |
+| **Saffron Guard Quenched** | **It's All About the Tea** | 🥉 Bronze | `poke_saffron_guard` | Parched guard given beverage to unlock Saffron gates (`0x2A4F`) |
+| **S.S. Anne Departure** | **Bon Voyage, Sailor!** | 🥉 Bronze | `poke_ss_anne_departed` | Captain cured of seasickness and luxury liner sets sail (`0x2A00`) |
+| **Nugget Bridge Gauntlet** | **Gold Digger** | 🥉 Bronze | `poke_nugget_bridge` | All 5 trainers defeated on Route 24 Nugget Bridge (`0x29F2`) |
+| **Mr. Fuji Rescue** | **Senior Citizen Extraction** | 🥉 Bronze | `poke_rescued_mr_fuji` | Top floor of Pokémon Tower stormed to save Mr. Fuji (`0x2A39` / Flute) |
+
+---
+
+## 🟡 Pokémon Yellow Exclusives
+
+* **Max Pikachu Friendship** (`0x271C` $\ge 200$): *"Soulmates on Two Feet"* (`poke_yellow_soulmates`)
+* **Anime Gift Starter Trio** (Bulbasaur, Charmander, Squirtle): *"Anime Canon"* (`poke_yellow_starter_trio`)
+* **Jessie & James Rocket Encounters**: *"Blasting Off Again!"* (`poke_yellow_rocket_duo`)

@@ -61,6 +61,17 @@ import { POKEMON_ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, getPokemonBadgesForGa
 import { isPokemonRom } from '../../services/pokemonSaveParser';
 import ConfirmModal from '../ConfirmModal';
 
+function isPokemonMilestoneEarned(unlocked, milestoneId, game) {
+  if (!unlocked || !milestoneId || !game) return false;
+  const gId = game.id;
+  const gTitle = game.title;
+  if (gId && unlocked[`${milestoneId}__${gId}`]) return true;
+  if (gTitle && unlocked[`${milestoneId}__${gTitle}`]) return true;
+  const legacy = unlocked[milestoneId];
+  if (legacy && (legacy.gameId === gId || legacy.gameTitle === gTitle)) return true;
+  return false;
+}
+
 const POKE_ICON_MAP = {
   Compass,
   Bike,
@@ -153,6 +164,7 @@ export default function DsView({
   scraper,
   sfx,
   gamepadConnected = false,
+  getBatterySaveBuffer,
   achievementsEngine
 }) {
   const lastGridIndexRef = useRef(0);
@@ -257,6 +269,15 @@ export default function DsView({
   useEffect(() => {
     setSaveActionStatus('');
   }, [selectedGame?.id]);
+
+  // Auto-inspect & evaluate existing Pokémon save buffer when selecting game in DS view
+  useEffect(() => {
+    if (selectedGame && isPokemonRom(selectedGame) && getBatterySaveBuffer && achievementsEngine?.evaluatePokemonSave) {
+      getBatterySaveBuffer(selectedGame).then(u8 => {
+        if (u8) achievementsEngine.evaluatePokemonSave(selectedGame, u8);
+      }).catch(() => {});
+    }
+  }, [selectedGame, getBatterySaveBuffer, achievementsEngine]);
   const selectedMeta = selectedGame ? (
     metadataMap[selectedGame.id] ||
     metadataMap[`${selectedGame.systemKey}-${selectedGame.title}`.toLowerCase().replace(/[^a-z0-9]/g, '-')]
@@ -1239,10 +1260,7 @@ export default function DsView({
                             const num = idx + 1;
                             const badgeKey = `poke_badge_${num}`;
                             const badgeLabel = badge.name.replace(' Badge', '');
-                            const isBadgeEarned = !!achievementsEngine?.unlocked?.[badgeKey] && (
-                              achievementsEngine.unlocked[badgeKey].gameId === selectedGame?.id ||
-                              achievementsEngine.unlocked[badgeKey].gameTitle === selectedGame?.title
-                            );
+                            const isBadgeEarned = isPokemonMilestoneEarned(achievementsEngine?.unlocked, badgeKey, selectedGame);
                             return (
                               <div
                                 key={badge.name}
@@ -1277,10 +1295,7 @@ export default function DsView({
                             const num = idx + 1;
                             const badgeKey = `poke_badge_kanto_${num}`;
                             const badgeLabel = badge.name.replace(' Badge', '');
-                            const isBadgeEarned = !!achievementsEngine?.unlocked?.[badgeKey] && (
-                              achievementsEngine.unlocked[badgeKey].gameId === selectedGame?.id ||
-                              achievementsEngine.unlocked[badgeKey].gameTitle === selectedGame?.title
-                            );
+                            const isBadgeEarned = isPokemonMilestoneEarned(achievementsEngine?.unlocked, badgeKey, selectedGame);
                             return (
                               <div
                                 key={badge.name}
@@ -1320,10 +1335,7 @@ export default function DsView({
                         const num = idx + 1;
                         const badgeKey = `poke_badge_${num}`;
                         const badgeLabel = badge.name.replace(' Badge', '');
-                        const isBadgeEarned = !!achievementsEngine?.unlocked?.[badgeKey] && (
-                          achievementsEngine.unlocked[badgeKey].gameId === selectedGame?.id ||
-                          achievementsEngine.unlocked[badgeKey].gameTitle === selectedGame?.title
-                        );
+                        const isBadgeEarned = isPokemonMilestoneEarned(achievementsEngine?.unlocked, badgeKey, selectedGame);
                         return (
                           <div
                             key={badge.name}
@@ -1356,24 +1368,14 @@ export default function DsView({
               {(() => {
                 const milestones = getPokemonMilestonesForGame(selectedGame);
                 const sorted = [...milestones].sort((a, b) => {
-                  const aEarned = !!achievementsEngine?.unlocked?.[a.id] && (
-                    achievementsEngine.unlocked[a.id].gameId === selectedGame?.id ||
-                    achievementsEngine.unlocked[a.id].gameTitle === selectedGame?.title
-                  );
-                  const bEarned = !!achievementsEngine?.unlocked?.[b.id] && (
-                    achievementsEngine.unlocked[b.id].gameId === selectedGame?.id ||
-                    achievementsEngine.unlocked[b.id].gameTitle === selectedGame?.title
-                  );
+                  const aEarned = isPokemonMilestoneEarned(achievementsEngine?.unlocked, a.id, selectedGame);
+                  const bEarned = isPokemonMilestoneEarned(achievementsEngine?.unlocked, b.id, selectedGame);
                   if (aEarned && !bEarned) return -1;
                   if (!aEarned && bEarned) return 1;
                   return 0;
                 });
                 return sorted.map(item => {
-                  const unlockData = achievementsEngine?.unlocked?.[item.id];
-                  const isEarned = !!unlockData && (
-                    unlockData.gameId === selectedGame?.id ||
-                    unlockData.gameTitle === selectedGame?.title
-                  );
+                  const isEarned = isPokemonMilestoneEarned(achievementsEngine?.unlocked, item.id, selectedGame);
                   const tier = ACHIEVEMENT_TIERS[item.tier?.toUpperCase()] || ACHIEVEMENT_TIERS.BRONZE;
                   const IconComponent = POKE_ICON_MAP[item.icon] || Sparkles;
 

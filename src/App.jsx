@@ -20,6 +20,7 @@ import AchievementToast from './components/AchievementToast';
 import TrophyCabinetModal from './components/TrophyCabinetModal';
 
 import { useAchievements } from './hooks/useAchievements';
+import { isPokemonRom } from './services/pokemonSaveParser';
 
 import { useWebAudioSfx } from './hooks/useWebAudioSfx';
 import { useGamepadStatus } from './hooks/useGamepadStatus';
@@ -85,6 +86,7 @@ export default function App() {
   const { uiMode, setUiMode, isMobile } = useDeviceDetection();
 
   const searchInputRef = useRef(null);
+  const achievementsEngineRef = useRef(null);
 
   // Hook 1: Profile Manager & Multiavatar Avatars
   const {
@@ -134,6 +136,7 @@ export default function App() {
     checkSaveData,
     exportSaveFile,
     exportBatterySave,
+    getBatterySaveBuffer,
     exportQuickSave,
     importSaveFile,
     deleteSaveFile
@@ -142,8 +145,14 @@ export default function App() {
   // Selection Handler for game tile navigation & save detection
   const handleCheckSaveData = useCallback(async (game) => {
     if (!game) return false;
-    return checkSaveData(game, activeProfileId);
-  }, [checkSaveData, activeProfileId]);
+    const exists = await checkSaveData(game, activeProfileId);
+    if (exists && isPokemonRom(game) && achievementsEngineRef.current?.evaluatePokemonSave) {
+      getBatterySaveBuffer(game, activeProfileId).then(u8 => {
+        if (u8) achievementsEngineRef.current?.evaluatePokemonSave?.(game, u8);
+      }).catch(() => {});
+    }
+    return exists;
+  }, [checkSaveData, activeProfileId, getBatterySaveBuffer]);
 
   const handleGameSelect = useCallback(async (game) => {
     sfx.playTileNav();
@@ -231,7 +240,6 @@ export default function App() {
     isPlaying: Boolean(activeGame)
   });
 
-  const achievementsEngineRef = useRef(achievementsEngine);
   achievementsEngineRef.current = achievementsEngine;
 
   // Automatically record BGM track listen progress whenever a track plays
@@ -612,6 +620,7 @@ export default function App() {
           setShowLoadRomModal={setShowLoadRomModal}
           setShowVirtualKeyboard={setShowVirtualKeyboard}
           onDeleteGame={deleteGame}
+          getBatterySaveBuffer={getBatterySaveBuffer}
           achievementsEngine={achievementsEngine}
         />
       ) : (
@@ -712,6 +721,7 @@ export default function App() {
             linkedDirectoryHandles={linkedDirectoryHandles}
             onReconnectLinkedFolders={handleReconnectLinkedFolders}
             isReconnectingLinkedFolders={isReconnectingHandle}
+            getBatterySaveBuffer={getBatterySaveBuffer}
             achievementsEngine={achievementsEngine}
           />
         </>

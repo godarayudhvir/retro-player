@@ -82,6 +82,17 @@ import { POKEMON_ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, getPokemonBadgesForGa
 import { isPokemonRom } from '../services/pokemonSaveParser';
 import { haptics } from '../services/hapticsService';
 
+function isPokemonMilestoneEarned(unlocked, milestoneId, game) {
+  if (!unlocked || !milestoneId || !game) return false;
+  const gId = game.id;
+  const gTitle = game.title;
+  if (gId && unlocked[`${milestoneId}__${gId}`]) return true;
+  if (gTitle && unlocked[`${milestoneId}__${gTitle}`]) return true;
+  const legacy = unlocked[milestoneId];
+  if (legacy && (legacy.gameId === gId || legacy.gameTitle === gTitle)) return true;
+  return false;
+}
+
 const POKE_ICON_MAP = {
   Compass,
   Bike,
@@ -202,11 +213,21 @@ export default function MobileAppView({
   onOpenTrophyModal,
   setShowLoadRomModal,
   setShowVirtualKeyboard,
+  getBatterySaveBuffer,
   achievementsEngine
 }) {
   const fileInputRef = useRef(null);
   const saveFileInputRef = useRef(null);
   const coverImageInputRef = useRef(null);
+
+  // Auto-inspect & evaluate existing Pokémon save buffer when viewing game details
+  useEffect(() => {
+    if (selectedGameForDetails && isPokemonRom(selectedGameForDetails) && getBatterySaveBuffer && achievementsEngine?.evaluatePokemonSave) {
+      getBatterySaveBuffer(selectedGameForDetails, activeProfileId).then(u8 => {
+        if (u8) achievementsEngine.evaluatePokemonSave(selectedGameForDetails, u8);
+      }).catch(() => {});
+    }
+  }, [selectedGameForDetails, activeProfileId, getBatterySaveBuffer, achievementsEngine]);
   const sidecarInputRef = useRef(null);
   const logsEndRef = useRef(null);
 
@@ -1167,10 +1188,7 @@ export default function MobileAppView({
                               const num = idx + 1;
                               const badgeKey = `poke_badge_${num}`;
                               const badgeLabel = badge.name.replace(' Badge', '');
-                              const isBadgeEarned = !!achievementsEngine?.unlocked?.[badgeKey] && (
-                                achievementsEngine.unlocked[badgeKey].gameId === selectedGameForDetails?.id ||
-                                achievementsEngine.unlocked[badgeKey].gameTitle === selectedGameForDetails?.title
-                              );
+                              const isBadgeEarned = isPokemonMilestoneEarned(achievementsEngine?.unlocked, badgeKey, selectedGameForDetails);
                               return (
                                 <div
                                   key={badge.name}
@@ -1205,10 +1223,7 @@ export default function MobileAppView({
                               const num = idx + 1;
                               const badgeKey = `poke_badge_kanto_${num}`;
                               const badgeLabel = badge.name.replace(' Badge', '');
-                              const isBadgeEarned = !!achievementsEngine?.unlocked?.[badgeKey] && (
-                                achievementsEngine.unlocked[badgeKey].gameId === selectedGameForDetails?.id ||
-                                achievementsEngine.unlocked[badgeKey].gameTitle === selectedGameForDetails?.title
-                              );
+                              const isBadgeEarned = isPokemonMilestoneEarned(achievementsEngine?.unlocked, badgeKey, selectedGameForDetails);
                               return (
                                 <div
                                   key={badge.name}
@@ -1248,10 +1263,7 @@ export default function MobileAppView({
                           const num = idx + 1;
                           const badgeKey = `poke_badge_${num}`;
                           const badgeLabel = badge.name.replace(' Badge', '');
-                          const isBadgeEarned = !!achievementsEngine?.unlocked?.[badgeKey] && (
-                            achievementsEngine.unlocked[badgeKey].gameId === selectedGameForDetails?.id ||
-                            achievementsEngine.unlocked[badgeKey].gameTitle === selectedGameForDetails?.title
-                          );
+                          const isBadgeEarned = isPokemonMilestoneEarned(achievementsEngine?.unlocked, badgeKey, selectedGameForDetails);
                           return (
                             <div
                               key={badge.name}
@@ -1284,24 +1296,14 @@ export default function MobileAppView({
                 {(() => {
                   const milestones = getPokemonMilestonesForGame(selectedGameForDetails);
                   const sorted = [...milestones].sort((a, b) => {
-                    const aEarned = !!achievementsEngine?.unlocked?.[a.id] && (
-                      achievementsEngine.unlocked[a.id].gameId === selectedGameForDetails?.id ||
-                      achievementsEngine.unlocked[a.id].gameTitle === selectedGameForDetails?.title
-                    );
-                    const bEarned = !!achievementsEngine?.unlocked?.[b.id] && (
-                      achievementsEngine.unlocked[b.id].gameId === selectedGameForDetails?.id ||
-                      achievementsEngine.unlocked[b.id].gameTitle === selectedGameForDetails?.title
-                    );
+                    const aEarned = isPokemonMilestoneEarned(achievementsEngine?.unlocked, a.id, selectedGameForDetails);
+                    const bEarned = isPokemonMilestoneEarned(achievementsEngine?.unlocked, b.id, selectedGameForDetails);
                     if (aEarned && !bEarned) return -1;
                     if (!aEarned && bEarned) return 1;
                     return 0;
                   });
                   return sorted.map(item => {
-                    const unlockData = achievementsEngine?.unlocked?.[item.id];
-                    const isEarned = !!unlockData && (
-                      unlockData.gameId === selectedGameForDetails?.id ||
-                      unlockData.gameTitle === selectedGameForDetails?.title
-                    );
+                    const isEarned = isPokemonMilestoneEarned(achievementsEngine?.unlocked, item.id, selectedGameForDetails);
                     const tier = ACHIEVEMENT_TIERS[item.tier?.toUpperCase()] || ACHIEVEMENT_TIERS.BRONZE;
                     const IconComponent = POKE_ICON_MAP[item.icon] || Sparkles;
 

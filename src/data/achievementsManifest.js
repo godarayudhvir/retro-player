@@ -368,6 +368,132 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     isPerRom: true
   },
   {
+    id: 'poke_hm01',
+    title: 'Property Damage License',
+    description: 'Acquire HM01 Cut. Shrubs and small trees across the region now fear your existence.',
+    category: 'pokemon',
+    tier: 'bronze',
+    icon: 'Activity',
+    isPerRom: true
+  },
+  {
+    id: 'poke_hm02',
+    title: 'Frequent Flyer Miles',
+    description: 'Acquire HM02 Fly. Say goodbye to walking across long routes forever.',
+    category: 'pokemon',
+    tier: 'bronze',
+    icon: 'Feather',
+    isPerRom: true
+  },
+  {
+    id: 'poke_hm03',
+    title: 'No Lifeguard on Duty',
+    description: 'Acquire HM03 Surf. Who needs a luxury cruise when you can ride the open waves?',
+    category: 'pokemon',
+    tier: 'bronze',
+    icon: 'Waves',
+    isPerRom: true
+  },
+  {
+    id: 'poke_hm04',
+    title: 'Do You Even Lift, Bro?',
+    description: 'Acquire HM04 Strength. You can now chuck massive ancient boulders like pebbles.',
+    category: 'pokemon',
+    tier: 'bronze',
+    icon: 'PlusCircle',
+    isPerRom: true
+  },
+  {
+    id: 'poke_hm05',
+    title: 'High Beams On',
+    description: 'Acquire HM05 Flash. Pitch-black cave tunnels are suddenly 100% less terrifying.',
+    category: 'pokemon',
+    tier: 'bronze',
+    icon: 'Zap',
+    isPerRom: true
+  },
+  {
+    id: 'poke_hms_master',
+    title: 'Certified Swiss Army Trainer',
+    description: 'Collect all 5 core Hidden Machines (HM01 through HM05). You are now a walking utility belt.',
+    category: 'pokemon',
+    tier: 'silver',
+    icon: 'Award',
+    isPerRom: true
+  },
+  {
+    id: 'poke_snorlax_cleared',
+    title: 'Alarm Clock from Hell',
+    description: 'Wake up and clear the gargantuan Snorlax blocking Route 12 or Route 16 with the Poké Flute.',
+    category: 'pokemon',
+    tier: 'bronze',
+    icon: 'Activity',
+    isPerRom: true
+  },
+  {
+    id: 'poke_ghost_marowak',
+    title: 'Rest in Peace',
+    description: 'Use the Silph Scope to unmask and soothe the restless spirit of Marowak in Pokémon Tower.',
+    category: 'pokemon',
+    tier: 'bronze',
+    icon: 'Eye',
+    isPerRom: true
+  },
+  {
+    id: 'poke_silph_co',
+    title: 'Hostile Takeover Denied',
+    description: 'Defeat Giovanni on the 11th floor of Silph Co. and liberate corporate headquarters from Team Rocket.',
+    category: 'pokemon',
+    tier: 'silver',
+    icon: 'Shield',
+    isPerRom: true
+  },
+  {
+    id: 'poke_fighting_dojo',
+    title: 'Mortal Wombat',
+    description: 'Defeat the Karate Master at the Saffron Fighting Dojo and claim a fighting disciple for your squad.',
+    category: 'pokemon',
+    tier: 'bronze',
+    icon: 'Award',
+    isPerRom: true
+  },
+  {
+    id: 'poke_saffron_guard',
+    title: "It's All About the Tea",
+    description: 'Quench the thirsty security guard’s throat with a refreshing beverage to unlock Saffron City gates.',
+    category: 'pokemon',
+    tier: 'bronze',
+    icon: 'Sparkles',
+    isPerRom: true
+  },
+  {
+    id: 'poke_ss_anne_departed',
+    title: 'Bon Voyage, Sailor!',
+    description: 'Tend to the seasick Captain and watch the luxury liner S.S. Anne depart from Vermilion Harbor.',
+    category: 'pokemon',
+    tier: 'bronze',
+    icon: 'Waves',
+    isPerRom: true
+  },
+  {
+    id: 'poke_nugget_bridge',
+    title: 'Gold Digger',
+    description: 'Defeat all 5 trainers on the Nugget Bridge gauntlet and reject Team Rocket’s recruitment flyer.',
+    category: 'pokemon',
+    tier: 'bronze',
+    icon: 'Award',
+    isPerRom: true
+  },
+  {
+    id: 'poke_rescued_mr_fuji',
+    title: 'Senior Citizen Extraction',
+    description: 'Storm the top floor of Pokémon Tower and rescue Mr. Fuji from his Team Rocket captors.',
+    category: 'pokemon',
+    tier: 'bronze',
+    icon: 'Shield',
+    isPerRom: true
+  },
+  {
     id: 'poke_eight_badges',
     title: 'Regional League Qualified',
     description: 'Assemble all 8 Regional Gym Badges and qualify for the Pokémon League.',
@@ -383,6 +509,87 @@ export const POKEMON_ACHIEVEMENTS_MANIFEST = [
     category: 'pokemon',
     tier: 'platinum',
     icon: 'Award',
+    isPerRom: true
+  },
+  {
+    id: 'poke_articuno',
+    title: 'Brain Freeze',
+    description: 'Brave the freezing Seafoam Islands caverns and capture legendary Articuno.',
+    category: 'pokemon',
+    tier: 'bronze',
+    icon: 'Feather',
+    isPerRom: true
+  },
+  {
+    id: 'poke_zapdos',
+    title: 'OSHA Violation',
+    description: 'Infiltrate the abandoned Power Plant and capture legendary Zapdos.',
+    category: 'pokemon',
+    tier: 'bronze',
+    icon: 'Zap',
+    isPerRom: true
+  },
+  {
+    id: 'poke_moltres',
+    title: 'Spicy Chicken',
+    description: 'Scale Victory Road and capture legendary Moltres.',
+    category: 'pokemon',
+    tier: 'bronze',
+    icon: 'Feather',
+    isPerRom: true
+  },
+  {
+    id: 'poke_legendary_birds',
+    title: 'Avian Trifecta',
+    description: 'Capture all three Legendary Birds of Kanto (Articuno, Zapdos, Moltres).',
+    category: 'pokemon',
+    tier: 'silver',
+    icon: 'Crown',
+    isPerRom: true
+  },
+  {
+    id: 'poke_mewtwo',
+    title: 'Genetic Hubris',
+    description: 'Descend into Cerulean Cave and capture Mewtwo. Science went too far, but your Pokéball went further.',
+    category: 'pokemon',
+    tier: 'gold',
+    icon: 'Crown',
+    isPerRom: true
+  },
+  {
+    id: 'poke_fossil_revival',
+    title: 'Praise Helix!',
+    description: 'Revive an ancient prehistoric fossil (Omanyte, Kabuto, or Aerodactyl) back into living existence.',
+    category: 'pokemon',
+    tier: 'silver',
+    icon: 'Star',
+    isPerRom: true
+  },
+  {
+    id: 'poke_yellow_soulmates',
+    title: 'Soulmates on Two Feet',
+    description: 'Maximize your partner Pikachu’s friendship score (score 200+). It literally radiates heart icons when you speak.',
+    category: 'pokemon',
+    tier: 'gold',
+    icon: 'Star',
+    isPerRom: true
+  },
+  {
+    id: 'poke_yellow_starter_trio',
+    title: 'Anime Canon',
+    description: 'Receive all three original gift starters (Bulbasaur, Charmander, Squirtle) from NPCs in Yellow.',
+    category: 'pokemon',
+    tier: 'silver',
+    icon: 'Users',
+    isPerRom: true
+  },
+  {
+    id: 'poke_yellow_rocket_duo',
+    title: 'Blasting Off Again!',
+    description: 'Defeat Jessie, James, and Meowth across their Team Rocket ambushes.',
+    category: 'pokemon',
+    tier: 'bronze',
+    icon: 'Zap',
     isPerRom: true
   },
   {
@@ -405,6 +612,7 @@ export function getPokemonMilestonesForGame(game) {
   const sysKey = (game.systemKey || game.systemCore || '').toLowerCase();
 
   const isYellow = rawTitle.includes('yellow') || rawTitle.includes('special pikachu');
+  const isKanto = isYellow || rawTitle.includes('red') || rawTitle.includes('blue') || rawTitle.includes('fire') || rawTitle.includes('leaf');
   const isJohto = isJohtoPokemonGame(game);
   const isHoenn = rawTitle.includes('ruby') || rawTitle.includes('sapphire') || rawTitle.includes('emerald') || (sysKey === 'gba' && !rawTitle.includes('fire') && !rawTitle.includes('leaf'));
   const isEmerald = rawTitle.includes('emerald');
@@ -414,6 +622,17 @@ export function getPokemonMilestonesForGame(game) {
   return POKEMON_ACHIEVEMENTS_MANIFEST.filter(item => {
     // Only show 16 Badges for Gen 2 & HGSS Dual Region (Johto + Kanto)
     if (item.id === 'poke_sixteen_badges' && !isJohto) return false;
+
+    // Yellow-Exclusive milestones
+    if ((item.id === 'poke_yellow_soulmates' || item.id === 'poke_yellow_starter_trio' || item.id === 'poke_yellow_rocket_duo') && !isYellow) {
+      return false;
+    }
+
+    // Kanto / Gen 1 Specific Milestones (Birds, Mewtwo)
+    if ((item.id === 'poke_articuno' || item.id === 'poke_zapdos' || item.id === 'poke_moltres' || item.id === 'poke_legendary_birds' || item.id === 'poke_mewtwo') && !isKanto && !isJohto) {
+      return false;
+    }
+
     return true;
   }).map(item => {
     if (item.id === 'poke_journey_begun') {
