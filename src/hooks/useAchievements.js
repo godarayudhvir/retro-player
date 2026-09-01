@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { ACHIEVEMENTS_MANIFEST, POKEMON_ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, TOTAL_ACHIEVEMENT_POINTS, getPokemonMilestonesForGame, getPokemonBadgesForGame, REGIONAL_BADGES, isJohtoPokemonGame } from '../data/achievementsManifest';
+import { ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, TOTAL_ACHIEVEMENT_POINTS, getPokemonMilestonesForGame, getPokemonBadgesForGame, getPokemonKantoBadgesForGame, isJohtoPokemonGame } from '../data/achievementsManifest';
 import { parsePokemonSave, isPokemonRom } from '../services/pokemonSaveParser';
 import { dbGet, dbSet, STORES } from '../services/db';
 import { haptics } from '../services/hapticsService';
@@ -233,13 +233,14 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
     if (!manifestItem) {
       if (achievementId.startsWith('poke_badge_kanto_')) {
         const badgeNum = parseInt(achievementId.replace('poke_badge_kanto_', ''), 10);
-        const badge = REGIONAL_BADGES.kanto[badgeNum - 1];
+        const kantoBadges = getPokemonKantoBadgesForGame(gameContext);
+        const badge = kantoBadges[badgeNum - 1];
         if (badge) {
           manifestItem = {
             id: achievementId,
             title: `Kanto ${badge.name}`,
             description: `Defeat Kanto Gym Leader ${badge.leader} in ${badge.city} (${badge.type} Type).`,
-            tier: badge.tier || 'bronze',
+            tier: 'bronze',
             category: 'pokemon',
             icon: 'Shield',
             image: badge.image,
@@ -255,7 +256,7 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
             id: achievementId,
             title: badge.name,
             description: `Defeat Gym Leader ${badge.leader} in ${badge.city} (${badge.type} Type).`,
-            tier: badge.tier || 'bronze',
+            tier: 'bronze',
             category: 'pokemon',
             icon: 'Shield',
             image: badge.image,
@@ -263,8 +264,8 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
           };
         }
       } else {
-        const pokeList = gameContext ? getPokemonMilestonesForGame(gameContext) : POKEMON_ACHIEVEMENTS_MANIFEST;
-        manifestItem = pokeList.find(a => a.id === achievementId) || POKEMON_ACHIEVEMENTS_MANIFEST.find(a => a.id === achievementId);
+        const pokeList = getPokemonMilestonesForGame(gameContext);
+        manifestItem = pokeList.find(a => a.id === achievementId);
       }
     }
     if (!manifestItem) return;
@@ -809,12 +810,14 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       if (summary.keyItems?.townMap) unlockAchievement('poke_digital_cartographer', game);
       if (summary.keyItems?.masterBall) unlockAchievement('poke_master_ball', game);
 
-      // Hidden Machines (HM01 - HM05)
+      // Hidden Machines (HM01 - HM07)
       if (summary.hms?.hm01) unlockAchievement('poke_hm01', game);
       if (summary.hms?.hm02) unlockAchievement('poke_hm02', game);
       if (summary.hms?.hm03) unlockAchievement('poke_hm03', game);
       if (summary.hms?.hm04) unlockAchievement('poke_hm04', game);
       if (summary.hms?.hm05) unlockAchievement('poke_hm05', game);
+      if (summary.hms?.hm06) unlockAchievement('poke_hm06', game);
+      if (summary.hms?.hm07) unlockAchievement('poke_hm07', game);
       if (summary.hms?.hasAllHMs) unlockAchievement('poke_hms_master', game);
 
       // 3. Gym Badges (1 to 8 & Gen 2 Dual 16 Badges)
@@ -856,14 +859,22 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       if (summary.hasShiny) unlockAchievement('poke_star_trainer', game);
       if (summary.hasPokerus) unlockAchievement('poke_microscopic_miracle', game);
 
-      // Legendary Birds & Mewtwo
+      // Legendary Birds & Mewtwo (Gen 1)
       if (summary.legendaries?.articuno) unlockAchievement('poke_articuno', game);
       if (summary.legendaries?.zapdos) unlockAchievement('poke_zapdos', game);
       if (summary.legendaries?.moltres) unlockAchievement('poke_moltres', game);
       if (summary.legendaries?.hasAllBirds) unlockAchievement('poke_legendary_birds', game);
       if (summary.legendaries?.mewtwo) unlockAchievement('poke_mewtwo', game);
 
-      // Action Event Flags & Story Feats
+      // Legendary Beasts & Tower Duo (Gen 2)
+      if (summary.legendaries?.hasBeasts || summary.legendaries?.raikou || summary.legendaries?.entei || summary.legendaries?.suicune) {
+        unlockAchievement('poke_legendary_beasts', game);
+      }
+      if (summary.legendaries?.hasTowerDuo || summary.legendaries?.hoOh || summary.legendaries?.lugia) {
+        unlockAchievement('poke_tower_duo', game);
+      }
+
+      // Action Event Flags & Story Feats (Gen 1 & Gen 2)
       if (summary.events?.snorlaxCleared) unlockAchievement('poke_snorlax_cleared', game);
       if (summary.events?.ghostMarowakCalmed) unlockAchievement('poke_ghost_marowak', game);
       if (summary.events?.silphCoLiberated) unlockAchievement('poke_silph_co', game);
@@ -873,11 +884,24 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       if (summary.events?.nuggetBridgeCleared) unlockAchievement('poke_nugget_bridge', game);
       if (summary.events?.mrFujiRescued) unlockAchievement('poke_rescued_mr_fuji', game);
 
-      // 6. Finances & Yellow Special Exclusives
+      // Gen 2 Action Story Feats
+      if (summary.events?.sudowoodoCleared) unlockAchievement('poke_sudowoodo_cleared', game);
+      if (summary.events?.lakeOfRage) unlockAchievement('poke_lake_of_rage', game);
+      if (summary.events?.goldenrodLiberated) unlockAchievement('poke_goldenrod_liberation', game);
+      if (summary.events?.sproutTower) unlockAchievement('poke_sprout_tower', game);
+      if (summary.events?.moomooFarm) unlockAchievement('poke_moomoo_farm', game);
+      if (summary.events?.bugContest) unlockAchievement('poke_bug_contest', game);
+      if (summary.events?.championRed) unlockAchievement('poke_champion_red', game);
+
+      // 6. Finances, Yellow & Crystal Special Exclusives
       if (summary.isHighRoller) unlockAchievement('poke_high_roller', game);
       if (summary.hasPikaFriend) unlockAchievement('poke_yellow_soulmates', game);
       if (summary.hasStarterTrio) unlockAchievement('poke_yellow_starter_trio', game);
       if (summary.hasDefeatedRocketDuo) unlockAchievement('poke_yellow_rocket_duo', game);
+
+      // Crystal Exclusives
+      if (summary.hasCrystalSuicune || summary.events?.crystalSuicune) unlockAchievement('poke_crystal_suicune', game);
+      if (summary.hasUnownDex || summary.events?.crystalUnown) unlockAchievement('poke_crystal_unown', game);
 
       // 7. Pokédex Scaling
       const dex = summary.pokedexCaught || 0;

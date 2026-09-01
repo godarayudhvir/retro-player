@@ -31,7 +31,7 @@ All Pokémon cartridge milestones follow a unified, authentic Trainer Card schem
 
 ## 📌 Mainline Cartridge Verification Matrix
 
-All 18 canonical Gen 1–5 cartridges have been verified against real battery save files in `ref_save_files/`:
+All 20 canonical Gen 1–5 cartridges have been verified against real battery save files in `test_save_states/`:
 
 | Generation | System | Game Title | Save Format | Test Verification | Core Memory Signatures |
 | :---: | :---: | :--- | :---: | :---: | :--- |

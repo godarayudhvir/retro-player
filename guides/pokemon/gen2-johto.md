@@ -8,7 +8,7 @@ This specification details the dual-region 16-badge save format, multi-pocket in
 
 | Data Field | Pokémon Crystal Offset | Pokémon Gold / Silver Offset | Encoding & Parsing Logic |
 | :--- | :---: | :---: | :--- |
-| **Checksum Word** | `0x2D0D` (sum `0x2009`–`0x2D0C`) | `0x2D69` (sum `0x2009`–`0x2D68`) | 16-bit little-endian word sum |
+| **Checksum Word** | `0x2D0D` (sum `0x2009`–`0x2B82`) | `0x2D69` (sum `0x2009`–`0x2D68`) | 16-bit little-endian word sum |
 | **Trainer Money** | `0x23DC`–`0x23DE` | `0x23DB`–`0x23DD` | 3-Byte Big-Endian Integer (Max cap: ¥999,999) |
 | **Johto Badges (1–8)** | `0x23E4` | `0x23E3` | 1-Byte Bitmask (Zephyr `0x01` to Rising `0x80`) |
 | **Kanto Badges (9–16)** | `0x23E5` | `0x23E4` | 1-Byte Bitmask (Boulder `0x01` to Earth `0x80`) |

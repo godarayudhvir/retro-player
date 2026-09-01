@@ -57,7 +57,8 @@ import QRCode from 'qrcode';
 import { resolveAssetPath } from '../../utils/assetPath';
 import { getGameDescription, getReleaseDate } from '../../gameDescriptions';
 import { saveCachedMetadata } from '../../services/metadataScraper';
-import { POKEMON_ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, getPokemonBadgesForGame, getPokemonMilestonesForGame, REGIONAL_BADGES, isJohtoPokemonGame } from '../../data/achievementsManifest';
+import { ACHIEVEMENT_TIERS } from '../../data/achievementsManifest';
+import { getPokemonBadgesForGame, getPokemonKantoBadgesForGame, getPokemonMilestonesForGame, isJohtoPokemonGame } from '../../services/pokemon-save-inspector/index.js';
 import { isPokemonRom } from '../../services/pokemonSaveParser';
 import ConfirmModal from '../ConfirmModal';
 
@@ -1248,6 +1249,8 @@ export default function DsView({
               {(() => {
                 const isJohto = isJohtoPokemonGame(selectedGame);
                 if (isJohto) {
+                  const johtoBadges = getPokemonBadgesForGame(selectedGame);
+                  const kantoBadges = getPokemonKantoBadgesForGame(selectedGame);
                   return (
                     <div style={{ padding: '0.2rem 0 0.1rem 0', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                       {/* 1. Johto League Case (8 Badges) */}
@@ -1256,7 +1259,7 @@ export default function DsView({
                           Johto League Badge Case (8)
                         </span>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.35rem' }}>
-                          {REGIONAL_BADGES.johto.map((badge, idx) => {
+                          {johtoBadges.map((badge, idx) => {
                             const num = idx + 1;
                             const badgeKey = `poke_badge_${num}`;
                             const badgeLabel = badge.name.replace(' Badge', '');
@@ -1291,7 +1294,7 @@ export default function DsView({
                           Kanto Return League Badge Case (8)
                         </span>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.35rem' }}>
-                          {REGIONAL_BADGES.kanto.map((badge, idx) => {
+                          {kantoBadges.map((badge, idx) => {
                             const num = idx + 1;
                             const badgeKey = `poke_badge_kanto_${num}`;
                             const badgeLabel = badge.name.replace(' Badge', '');

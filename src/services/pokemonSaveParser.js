@@ -1,32 +1,16 @@
 /**
  * Universal Pokémon Save Inspector & Router Façade (Gen 1 – Gen 5).
- * Re-exports the modular per-game save parsers from src/services/pokemon/.
+ * Re-exports from src/services/pokemon-save-inspector/.
  */
 
 export {
   parsePokemonSave,
   isPokemonRom,
   identifyPokemonGame,
+  getPokemonGameModule,
+  getPokemonMilestonesForGame,
+  getPokemonBadgesForGame,
+  isJohtoPokemonGame,
   POKEMON_GAMES,
-  NON_CANONICAL_KEYWORDS,
-
-  // Modular Parsers
-  parsePokemonRed,
-  parsePokemonBlue,
-  parsePokemonYellow,
-  parsePokemonGold,
-  parsePokemonSilver,
-  parsePokemonCrystal,
-  parsePokemonRuby,
-  parsePokemonSapphire,
-  parsePokemonEmerald,
-  parsePokemonFireRed,
-  parsePokemonLeafGreen,
-  parsePokemonDiamond,
-  parsePokemonPearl,
-  parsePokemonPlatinum,
-  parsePokemonHeartGold,
-  parsePokemonSoulSilver,
-  parsePokemonBlack,
-  parsePokemonWhite
-} from './pokemon/index.js';
+  NON_CANONICAL_KEYWORDS
+} from './pokemon-save-inspector/index.js';
