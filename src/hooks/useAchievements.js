@@ -744,14 +744,54 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
   }, [unlockAchievement]);
 
   /**
-   * Universal Pokémon Save File Evaluator.
-   * Inspects SRAM / Flash raw bytes and retroactively / in-real-time unlocks milestones.
+   * Resets all per-cartridge Pokémon milestones for a specific game (e.g. when deleting save data or booting fresh 0-state).
+   */
+  const resetPokemonMilestones = useCallback((game) => {
+    if (!game) return;
+    const targetGameId = game.id || game.title;
+    const targetGameTitle = game.title;
+
+    setUnlocked(prevUnlocked => {
+      const nextUnlocked = {};
+      let changed = false;
+
+      Object.entries(prevUnlocked).forEach(([key, val]) => {
+        const isTarget = (val.gameId === targetGameId || val.gameTitle === targetGameTitle || (targetGameId && key.endsWith(`__${targetGameId}`)) || (targetGameTitle && key.endsWith(`__${targetGameTitle}`))) &&
+                         (key.startsWith('poke_') || val.category === 'pokemon' || val.isPerRom);
+        if (!isTarget) {
+          nextUnlocked[key] = val;
+        } else {
+          changed = true;
+        }
+      });
+
+      if (changed) {
+        unlockedRef.current = nextUnlocked;
+        setStats(latestStats => {
+          persistState(nextUnlocked, latestStats);
+          return latestStats;
+        });
+      }
+
+      return changed ? nextUnlocked : prevUnlocked;
+    });
+  }, [persistState]);
+
+  /**
+   * Evaluates a binary Pokémon save file from SRAM or Flash memory (.sav) and unlocks
+   * regional gym badges, starter milestones, and Hall of Fame achievements.
    */
   const evaluatePokemonSave = useCallback((game, sramBuffer) => {
     if (!game || !sramBuffer) return null;
     try {
       const summary = parsePokemonSave(sramBuffer, game);
       if (!summary || !summary.isPokemon) return null;
+
+      // If this is a pristine new save (0 party, 0 caught, 0 badges, no starter), reset any stale cartridge milestones
+      if (summary.partyCount === 0 && (summary.pokedexCaught || 0) === 0 && (summary.badgeCount || 0) === 0 && !summary.hasStarter) {
+        resetPokemonMilestones(game);
+        return summary;
+      }
 
       // 1. Starter chosen
       if (summary.hasStarter) {
@@ -851,41 +891,7 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       console.warn('[useAchievements] Failed to evaluate Pokémon save buffer:', err);
       return null;
     }
-  }, [unlockAchievement]);
-
-  /**
-   * Resets all per-cartridge Pokémon milestones for a specific game (e.g. when deleting save data).
-   */
-  const resetPokemonMilestones = useCallback((game) => {
-    if (!game) return;
-    const targetGameId = game.id || game.title;
-    const targetGameTitle = game.title;
-
-    setUnlocked(prevUnlocked => {
-      const nextUnlocked = {};
-      let changed = false;
-
-      Object.entries(prevUnlocked).forEach(([key, val]) => {
-        const isTarget = (val.gameId === targetGameId || val.gameTitle === targetGameTitle || (targetGameId && key.endsWith(`__${targetGameId}`)) || (targetGameTitle && key.endsWith(`__${targetGameTitle}`))) &&
-                         (key.startsWith('poke_') || val.category === 'pokemon' || val.isPerRom);
-        if (!isTarget) {
-          nextUnlocked[key] = val;
-        } else {
-          changed = true;
-        }
-      });
-
-      if (changed) {
-        unlockedRef.current = nextUnlocked;
-        setStats(latestStats => {
-          persistState(nextUnlocked, latestStats);
-          return latestStats;
-        });
-      }
-
-      return changed ? nextUnlocked : prevUnlocked;
-    });
-  }, [persistState]);
+  }, [unlockAchievement, resetPokemonMilestones]);
 
   // ---------------------------------------------------------------------------
   // PER-ROM MILESTONES GETTER (Universal platform achievements only)

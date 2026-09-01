@@ -150,7 +150,7 @@ export function parsePokemonYellow(data) {
   const hasDepartedSSAnne = Boolean(data[0x2A00] & 0x01) || hasHM01 || Boolean(badges[2]);
 
   // 7. Nugget Bridge 5-Trainer Gauntlet Cleared
-  const hasClearedNuggetBridge = Boolean(data[0x29F2] & 0x01) || Boolean(badges[1]) || hasStarter;
+  const hasClearedNuggetBridge = Boolean(data[0x29F2] & 0x01) || Boolean(badges[1]);
 
   // 8. Mr. Fuji Rescued from Pokémon Tower
   const hasRescuedMrFuji = allItems.has(0x49) || Boolean(data[0x2A39] & 0x80);
