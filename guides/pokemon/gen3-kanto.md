@@ -56,13 +56,40 @@ Party Pokémon records in *FireRed/LeafGreen* store 48 encrypted data bytes at b
 
 ---
 
-## 🎒 Key Items & Story Devices (FRLG)
+---
 
-* **Town Map**: Acquired in Pallet Town from Daisy Oak
-* **Bicycle**: Acquired at Cerulean Bike Shop with Bike Voucher
-* **Old Rod / Good Rod / Super Rod**: Acquired in Vermilion City, Fuchsia City, and Route 12
-* **Silph Scope**: Acquired after defeating Giovanni in Celadon Rocket Hideout
-* **Poké Flute**: Given by Mr. Fuji in Lavender Town after completing Pokémon Tower
-* **Master Ball**: Given by Silph Co. President in Saffron City
-* **Exp. Share**: Received from Professor Oak's Aide on Route 15 (requires 50 Pokédex catches)
-* **Tri-Pass / Rainbow Pass**: Unlocks Sevii Islands post-game exploration
+## 🪓 Hidden Machines (HMs 01–07) & Utility
+
+| HM / Item | In-Game Name | Milestone Title | Memory Location |
+| :---: | :--- | :--- | :--- |
+| **HM01** | Cut | **Property Damage License** | S.S. Anne Captain in Vermilion Port |
+| **HM02** | Fly | **Frequent Flyer Miles** | Route 16 Secret House |
+| **HM03** | Surf | **No Lifeguard on Duty** | Safari Zone Secret House |
+| **HM04** | Strength | **Do You Even Lift, Bro?** | Fuchsia City Warden (Gold Teeth) |
+| **HM05** | Flash | **High Beams On** | Route 2 Oak's Aide (requires 10 catches) |
+| **HM06** | Rock Smash | **Ember Spa Geothermal** | One Island Ember Spa Master |
+| **HM07** | Waterfall | **Icefall Cavern Climber** | Four Island Icefall Cave |
+| **All 7 HMs** | Kanto Remake HM Set | **Kanto Master Outdoorsman** | All 7 HM flags/items present in save |
+
+---
+
+## 🎬 Action Story Feats & Event Flag Milestones
+
+| Event Feat | Milestone Title | Milestone Type | Milestone ID | Binary Verification / Event Flag |
+| :--- | :--- | :---: | :--- | :--- |
+| **Snorlax Roadblocks** | **Alarm Clock from Hell** | 🗺️ Story Feat | `poke_snorlax_cleared` | Route 12 or Route 16 Snorlax cleared with Poké Flute |
+| **Ghost Marowak** | **Rest in Peace** | 🗺️ Story Feat | `poke_ghost_marowak` | 6F Pokémon Tower Ghost Marowak unmasked with Silph Scope |
+| **Silph Co. Liberation** | **Hostile Takeover Denied** | 🏢 Boss Feat | `poke_silph_co` | 11F Giovanni defeated & Silph President rescued |
+| **Saffron Fighting Dojo** | **Mortal Wombat** | 🥋 Dojo Feat | `poke_fighting_dojo` | Karate Master Koichi defeated (Hitmonlee/Hitmonchan earned) |
+| **Saffron Guard Quenched** | **It's All About the Tea** | 🗺️ Story Feat | `poke_saffron_guard` | Celadon Mansion Old Lady Tea given to thirsty guard |
+| **S.S. Anne Departure** | **Bon Voyage, Sailor!** | 🚢 Story Feat | `poke_ss_anne_departed` | Captain cured of seasickness and luxury liner sets sail |
+| **Sevii Islands Connection** | **Network Machine Linked** | 🏝️ Story Feat | `poke_network_machine` | Deliver Ruby (Mt. Ember) & Sapphire (Dotted Hole) to Celio on One Island |
+| **Genetic Apex Encounter** | **Genetic Hubris** | 🦅 Legendary | `poke_mewtwo` | Descend into Cerulean Cave and capture Mewtwo |
+| **Indigo Plateau Rematch** | **Indigo Plateau Champion** | 👑 League Feat | `poke_hall_of_fame` | Defeat upgraded Elite Four and Rival to enter the Hall of Fame |
+
+---
+
+## 🦕 Recognized Species & Sevii Extensions
+
+* **Legendary Pokémon**: Mewtwo (`150`), Mew (`151`), Articuno (`144`), Zapdos (`145`), Moltres (`146`), Raikou (`243`), Entei (`244`), Suicune (`245`), Lugia (`249`), Ho-Oh (`250`), Deoxys (`386`).
+* **Prehistoric Fossils**: Omanyte (`138`), Omastar (`139`), Kabuto (`140`), Kabutops (`141`), Aerodactyl (`142`).
