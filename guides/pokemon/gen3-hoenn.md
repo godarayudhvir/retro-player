@@ -58,19 +58,39 @@ Each 100-byte party Pokémon structure contains 48 encrypted data bytes at byte 
 
 ---
 
-## 🎒 Key Items & Story Devices (RSE)
+---
 
-* **PokéNav**: Given by Mr. Stone at Devon Corporation in Rustboro City
-* **Mach / Acro Bike**: Given by Rydel at Mauville City Cycles
-* **Old Rod / Good Rod / Super Rod**: Dewford Town, Route 118, and Mossdeep City
-* **Devon Scope**: Given by Steven Stone on Route 120 to unmask invisible Kecleon
-* **Magma Emblem / Red & Blue Orbs**: Mt. Chimney / Mt. Pyre storyline events
-* **Exp. Share**: Received from Mr. Stone after delivering the Devon Letter
-* **Master Ball**: Team Aqua / Team Magma Hideout in Lilycove City
+## 🪓 Hidden Machines (HMs 01–08) & Utility
+
+| HM / Item | ID | In-Game Name | Milestone Title | Memory Location |
+| :---: | :---: | :--- | :--- | :--- |
+| **HM01** | `0x153` | Cut | **Rustboro Landscaping** | Rustboro Cutter's House |
+| **HM02** | `0x154` | Fly | **Airspace Cleared** | Rival battle on Route 119 |
+| **HM03** | `0x155` | Surf | **Wally's Gratitude** | Wally's Uncle after defeating Petalburg Gym |
+| **HM04** | `0x156` | Strength | **Tunnel Demolition** | Rusturf Tunnel cleared with Rock Smash |
+| **HM05** | `0x157` | Flash | **Granite Cave Lantern** | Hiker at Granite Cave entrance |
+| **HM06** | `0x158` | Rock Smash | **Mauville Gravel** | Mauville City Scientist |
+| **HM07** | `0x159` | Waterfall | **Cave of Origin Ascent** | Cave of Origin / Sootopolis Gym |
+| **HM08** | `0x15A` | Dive | **Submarine Depths** | Steven's gift in Mossdeep City |
+| **All 8 HMs** | — | Hoenn HM Master Set | **Hoenn Nautical Master** | All 8 HM flags/items present in save |
+
+---
+
+## 🎬 Action Story Feats & Event Flag Milestones
+
+| Event Feat | Milestone Title | Milestone Type | Milestone ID | Binary Verification / Event Flag |
+| :--- | :--- | :---: | :--- | :--- |
+| **Kecleon Unmasked** | **Camouflage Broken** | 🗺️ Story Feat | `poke_kecleon_scope` | Route 120 invisible Kecleon revealed with Devon Scope |
+| **Mt. Chimney Volcano** | **Meteorite Crisis** | 🌋 Boss Feat | `poke_mt_chimney` | Maxie / Archie defeated at Mt. Chimney crater & Meteorite saved |
+| **Weather Trio Awakening** | **Primal Clashing** | 🦅 Legendary | `poke_weather_trio` | Kyogre or Groudon calmed/captured in Cave of Origin |
+| **Sky Pillar Ascent** | **Dragon of the Ozone** | 🦅 Legendary | `poke_rayquaza_ascend` | Traverse Mach Bike fractures and awaken Rayquaza atop Sky Pillar |
+| **Sealed Chamber Braille** | **Ancient Cryptography** | 🗿 Mystery Feat | `poke_sealed_chamber` | Decipher Braille chamber with Relicanth & Wailord to open Regi tombs |
+| **Trick House Master** | **Trick Master Outsmarted** | 🎪 Puzzle Feat | `poke_trick_house` | Clear all 8 puzzle scroll mazes in the Route 110 Trick House |
+| **Battle Frontier Silver** | **Frontier Symbolist** | 🏆 League Feat | `poke_frontier_silver` | Defeat any Frontier Brain to claim a Silver Frontier Symbol (*Emerald*) |
 
 ---
 
 ## 🦕 Hoenn Recognized Species (National Dex IDs)
 
-* **Legendary Pokémon**: Rayquaza (`384`), Kyogre (`382`), Groudon (`383`), Latios (`381`), Latias (`380`), Regirock (`377`), Regice (`378`), Registeel (`379`), Jirachi (`385`), Deoxys (`386`), Mewtwo (`150`), Mew (`151`), Articuno (`144`), Zapdos (`145`), Moltres (`146`), Raikou (`243`), Entei (`244`), Suicune (`245`), Lugia (`249`), Ho-Oh (`250`), Celebi (`251`).
-* **Prehistoric Fossils**: Lileep (`345`), Cradily (`346`), Anorith (`347`), Armaldo (`348`), Omanyte (`138`), Omastar (`139`), Kabuto (`140`), Kabutops (`141`), Aerodactyl (`142`).
+* **Legendary Pokémon**: Rayquaza (`384`), Kyogre (`382`), Groudon (`383`), Latios (`381`), Latias (`380`), Regirock (`377`), Regice (`378`), Registeel (`379`), Jirachi (`385`), Deoxys (`386`).
+* **Prehistoric Fossils**: Lileep (`345`), Cradily (`346`), Anorith (`347`), Armaldo (`348`).

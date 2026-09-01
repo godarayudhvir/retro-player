@@ -51,18 +51,40 @@ After defeating Lance at Indigo Plateau, players cross to Kanto to assemble the 
 
 ---
 
-## 🎒 Inventory & Key Items Recognized
+## 🪓 Hidden Machines (HMs 01–07) & Utility
 
-* **Bicycle**: `0x07`
-* **Old Rod / Good Rod / Super Rod**: `0x3C` / `0x3D` / `0x3E`
-* **Itemfinder**: `0x36`
-* **Squirtbottle / Poké Flute Channel**: `0x56` / `0x28`
-* **Exp. Share**: `0x96`
-* **Master Ball**: `0x01`
+| HM / Item | ID | In-Game Name | Milestone Title | Memory Location |
+| :---: | :---: | :--- | :--- | :--- |
+| **HM01** | `0xF3` | Cut | **Arbor Day Nightmare** | Ilex Forest Charcoal Apprentice rescue |
+| **HM02** | `0xF4` | Fly | **Commuter Pass** | Chuck's Wife after 5th Gym (Cianwood) |
+| **HM03** | `0xF5` | Surf | **Kimono Connoisseur** | Ecruteak Dance Theater after defeating 5 Kimono Girls |
+| **HM04** | `0xF6` | Strength | **Milk Drinker** | Route 42 Sailor / Moomoo Farm |
+| **HM05** | `0xF7` | Flash | **Sprout Tower Enlightenment** | Sage Li at the top of Sprout Tower |
+| **HM06** | `0xF8` | Whirlpool | **Whirlpool Navigator** | Lance gift after Rocket Hideout in Mahogany Town |
+| **HM07** | `0xF9` | Waterfall | **Ice Path Hiker** | Ice Path B1F navigation |
+| **All 7 HMs** | — | Johto HM Utility Set | **Johto Swiss Army Knife** | All 7 HM flags/items present in save |
 
 ---
 
-## 🦕 Gen 2 Legendary & Fossil Species (National Dex IDs)
+## 🎬 Action Story Feats & Event Flag Milestones
 
+| Event Feat | Milestone Title | Milestone Type | Milestone ID | Binary Verification / Event Flag |
+| :--- | :--- | :---: | :--- | :--- |
+| **Sudowoodo Roadblock** | **Tree Pruner** | 🗺️ Story Feat | `poke_sudowoodo_cleared` | Route 36 Sudowoodo sprayed with Squirtbottle & defeated/caught |
+| **Red Gyarados** | **Seeing Red** | 🐲 Boss Feat | `poke_lake_of_rage` | Lake of Rage Shiny Gyarados caught/defeated & Red Scale obtained |
+| **Radio Tower Liberation** | **Broadcast Interrupted** | 🏢 Boss Feat | `poke_goldenrod_liberation` | Goldenrod Radio Tower liberated from Executive Archer & Director saved |
+| **Sprout Tower Sage** | **Towering Ambition** | 🗺️ Story Feat | `poke_sprout_tower` | Sage Li defeated atop the swaying Sprout Tower pillar |
+| **Moomoo Farm Rescue** | **Got Milk?** | 🐮 Story Feat | `poke_moomoo_farm` | Sick Miltank fed 7 Oran Berries until fully recovered |
+| **Bug-Catching Contest** | **Entomology Champion** | 🐝 Trainer Feat | `poke_bug_contest` | Win 1st place Sun Stone in National Park Bug-Catching Contest |
+| **Legendary Beasts** | **Roamers of Johto** | 🦅 Legendary | `poke_legendary_beasts` | Awaken and capture Raikou, Entei, or Suicune |
+| **Tower Duo Guardian** | **Wings of Legend** | 🦅 Legendary | `poke_tower_duo` | Summon and capture Ho-Oh (Tin Tower) or Lugia (Whirl Islands) |
+| **Mt. Silver Pinnacle** | **Living Legend** | 👑 League Feat | `poke_champion_red` | Ascend the deepest peak of Mt. Silver and defeat Pokémon Trainer Red |
+
+---
+
+## 🪪 Special Feats & Rarity
+
+* **Shiny Pokémon & Pokérus**: Validated dynamically via Divergent DVs (`0x15`..`0x16`) and viral strains (`+0x1C`).
+* **16-Badge Mastery**: Unlocked upon gathering all 8 Johto Badges and all 8 Kanto Badges (`poke_sixteen_badges`).
 * **Legendary Pokémon**: Raikou (`243`), Entei (`244`), Suicune (`245`), Lugia (`249`), Ho-Oh (`250`), Celebi (`251`), Articuno (`144`), Zapdos (`145`), Moltres (`146`), Mewtwo (`150`), Mew (`151`).
 * **Prehistoric Fossils**: Omanyte (`138`), Omastar (`139`), Kabuto (`140`), Kabutops (`141`), Aerodactyl (`142`).

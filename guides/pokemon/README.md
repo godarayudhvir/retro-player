@@ -1,6 +1,6 @@
 # 🏆 Pokémon Save Inspector & Regional Milestones Hub (Gen 1 – Gen 5)
 
-Welcome to the **Pokémon Save Inspector & Regional Milestones Guide Hub**. Retro Player features an authentic, zero-hack binary save analyzer capable of inspecting SRAM and Flash memory banks across 18 canonical Pokémon cartridges to unlock tailored storyline achievements, Pokédex progression bars, and 8/16-badge regional gym cases.
+Welcome to the **Pokémon Save Inspector & Regional Milestones Guide Hub**. Retro Player features an authentic, zero-hack binary save analyzer capable of inspecting SRAM and Flash memory banks across 18 canonical Pokémon cartridges to unlock tailored storyline feats, utility HM masteries, legendary encounters, Pokédex progression bars, and 8/16-badge regional gym cases.
 
 ---
 
@@ -8,16 +8,30 @@ Welcome to the **Pokémon Save Inspector & Regional Milestones Guide Hub**. Retr
 
 | Document | Generation | Platform | Supported Cartridges | Key Architecture Highlights |
 | :--- | :---: | :---: | :--- | :--- |
-| **[Gen 1: Kanto Classic](gen1-kanto.md)** | **Gen 1** | GB | *Red*, *Blue*, *Yellow* | 32 KB SRAM, Inverted Checksum (`0x3523`), 8 Kanto Badges (`0x2602`), Yellow Pikachu Friendship (`0x271C`) |
-| **[Gen 2: Johto & Kanto Return](gen2-johto.md)** | **Gen 2** | GBC | *Gold*, *Silver*, *Crystal* | 32 KB SRAM, 16 Badges Dual-Case, Multi-Pocket Inventory Scan (`0x2410`–`0x24B0`), DV Shiny Math & Pokérus |
-| **[Gen 3: Hoenn League](gen3-hoenn.md)** | **Gen 3** | GBA | *Ruby*, *Sapphire*, *Emerald* | 128 KB Flash (Dual 57KB Rotation Slots), RSE Base Offsets, 48-byte XOR Decryption, Devon Scope & PokéNav |
+| **[Gen 1: Kanto Classic](gen1-kanto.md)** | **Gen 1** | GB | *Red*, *Blue*, *Yellow* | 32 KB SRAM, Checksum `0x3523`, 8 Kanto Badges (`0x2602`), HMs 01–05, Snorlax & Silph Co. Feats |
+| **[Gen 2: Johto & Kanto Return](gen2-johto.md)** | **Gen 2** | GBC | *Gold*, *Silver*, *Crystal* | 32 KB SRAM, 16 Badges Dual-Case, HMs 01–07, Red Gyarados & Mt. Silver Red Feats |
+| **[Gen 3: Hoenn League](gen3-hoenn.md)** | **Gen 3** | GBA | *Ruby*, *Sapphire*, *Emerald* | 128 KB Flash, 14 Rotating Sections, HMs 01–08, Weather Trio & Sky Pillar Rayquaza |
 | **[Gen 3: Kanto Remakes](gen3-kanto.md)** | **Gen 3** | GBA | *FireRed*, *LeafGreen* | 128 KB Flash, FRLG Base Offsets, Security Key Money Decryption, Silph Scope & Sevii Islands |
+| **[Gen 4: Sinnoh & HGSS](gen4-sinnoh.md)** | **Gen 4** | NDS | *Diamond*, *Pearl*, *Platinum*, *HeartGold*, *SoulSilver* | 512 KB Flash/DSV, Small Block CRC16-CCITT, 8/16 Badges, Distortion World & Spear Pillar |
+| **[Gen 5: Unova League](gen5-unova.md)** | **Gen 5** | NDS | *Black*, *White*, *Black 2*, *White 2* | 512 KB Flash/DSV, Block 23 Trainer Info, 8 Unova Badges, N's Castle & Dragonspiral Tower |
+
+---
+
+## 🧭 Standardized Milestone Types & Architecture
+
+All Pokémon cartridge milestones follow a unified, authentic Trainer Card schema without artificial trophy tiers:
+
+* 🗺️ **Story Feats (`story`)**: Major narrative progression (Starter chosen, Roadblocks cleared, Rescues, Infiltrations).
+* 🪓 **Hidden Machines (`hm`)**: Individual HM acquisition (Cut, Fly, Surf, etc.) and complete regional HM Master Sets.
+* 🦅 **Legendary Encounters & Science (`legendary`)**: Capturing mythical beings (Birds, Beasts, Weather Trio, Creation Dragons, Mewtwo) and prehistoric fossil revivals.
+* 👑 **League Feats (`league`)**: 8-Badge qualifications, 16-Badge Dual Region Masteries, and Pokémon League Championships.
+* 🟡 **Version Exclusives (`exclusive`)**: Cartridge-specific companion bonds, gift starter trios, and rival anime encounters.
 
 ---
 
 ## 📌 Mainline Cartridge Verification Matrix
 
-All 11 canonical Gen 1–3 cartridges have been verified against real battery save files in `ref_save_files/`:
+All 18 canonical Gen 1–5 cartridges have been verified against real battery save files in `ref_save_files/`:
 
 | Generation | System | Game Title | Save Format | Test Verification | Core Memory Signatures |
 | :---: | :---: | :--- | :---: | :---: | :--- |
@@ -31,6 +45,7 @@ All 11 canonical Gen 1–3 cartridges have been verified against real battery sa
 | **Gen 3** | GBA | *Pokémon Sapphire Version* | 64/128 KB Flash | ✅ Verified | 14 Rotating Sections, Substructure XOR Decryption |
 | **Gen 3** | GBA | *Pokémon Emerald Version* | 128 KB Flash | ✅ Verified | 14 Rotating Sections, Substructure XOR Decryption |
 | **Gen 3** | GBA | *Pokémon FireRed Version* | 128 KB Flash | ✅ Verified | 14 Rotating Sections, Substructure XOR Decryption |
+| **Gen 3** | GBA | *Pokémon LeafGreen Version* | 128 KB Flash | ✅ Verified | 14 Rotating Sections, Substructure XOR Decryption |
 | **Gen 4** | NDS | *Pokémon Diamond Version* | 512 KB Flash | ✅ Verified | Small Block `0xC100`, CRC16-CCITT, 8 Sinnoh Badges |
 | **Gen 4** | NDS | *Pokémon Pearl Version* | 512 KB Flash | ✅ Verified | Small Block `0xC100`, CRC16-CCITT, 8 Sinnoh Badges |
 | **Gen 4** | NDS | *Pokémon Platinum Version* | 512 KB Flash | ✅ Verified | Small Block `0xCF2C`, CRC16-CCITT, 8 Sinnoh Badges |
