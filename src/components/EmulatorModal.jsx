@@ -295,7 +295,7 @@ export default function EmulatorModal({
     }
   };
 
-  const SPEED_PRESETS = [1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 10.0];
+  const SPEED_PRESETS = [1.0, 2.0, 5.0];
   const SHADERS = ['none', 'crt', 'smooth', 'vibrant'];
   const SHADER_LABELS = { none: 'Pixel', crt: 'CRT', smooth: 'Smooth', vibrant: 'Vibrant' };
 

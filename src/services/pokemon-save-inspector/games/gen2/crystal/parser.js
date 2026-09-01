@@ -165,7 +165,7 @@ export function parsePokemonCrystal(data) {
   const hasUnownDex = isDexCaught(201) || partySpeciesList.includes(201) || keyItemsSet.has(0x43);
 
   const hasValidTrainer = data[0x200B] !== 0x00 && data[0x200B] !== 0xFF && data[0x200B] !== 0x50;
-  const hasStarter = partyCount > 0 || pokedexCaught > 0;
+  const hasStarter = (partyCount > 0 || pokedexCaught > 0) || totalBadgeCount > 0;
 
   return {
     isPokemon: true,

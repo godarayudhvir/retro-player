@@ -158,10 +158,14 @@ export default function AchievementToast({ toast, onDismiss, onOpenCabinet }) {
       title={isPokemon ? `${toast.title} (Pokémon Milestone)` : "Click to open Trophy Cabinet"}
     >
       <div className="achievement-toast-ds-card">
-        {/* Glowing Tier Badge Icon Box */}
+        {/* Glowing Badge / Trophy Icon Box */}
         <div 
           className="achievement-toast-icon-box" 
-          style={{ background: tier.bg, color: tier.color, borderColor: tier.border }}
+          style={{
+            background: isPokemon ? 'rgba(6, 182, 212, 0.12)' : tier.bg,
+            color: isPokemon ? '#06b6d4' : tier.color,
+            borderColor: isPokemon ? 'rgba(6, 182, 212, 0.35)' : tier.border
+          }}
         >
           {toast.image ? (
             <img src={toast.image} alt={toast.title} className="achievement-toast-badge-img" />
@@ -173,11 +177,11 @@ export default function AchievementToast({ toast, onDismiss, onOpenCabinet }) {
         {/* Content Details */}
         <div className="achievement-toast-body">
           <div className="achievement-toast-top-row">
-            <span className="achievement-toast-kicker" style={{ color: tier.color }}>
+            <span className="achievement-toast-kicker" style={{ color: isPokemon ? 'var(--accent-cyan, #06b6d4)' : tier.color }}>
               {isPokemon ? (
                 <>
                   <Award size={11} style={{ marginRight: '3px' }} />
-                  POKÉMON MILESTONE
+                  {toast.type === 'league' ? 'GYM BADGE UNLOCKED' : 'POKÉMON MILESTONE'}
                 </>
               ) : (
                 <>
@@ -186,9 +190,11 @@ export default function AchievementToast({ toast, onDismiss, onOpenCabinet }) {
                 </>
               )}
             </span>
-            <span className="achievement-toast-points-badge" style={{ background: tier.bg, color: tier.color, borderColor: tier.border }}>
-              {isPokemon ? (toast.tier ? toast.tier.toUpperCase() : 'TRAINER') : `+${tier.points}G`}
-            </span>
+            {!isPokemon && (
+              <span className="achievement-toast-points-badge" style={{ background: tier.bg, color: tier.color, borderColor: tier.border }}>
+                +{tier.points}G
+              </span>
+            )}
           </div>
 
           <strong className="achievement-toast-title">{toast.title}</strong>

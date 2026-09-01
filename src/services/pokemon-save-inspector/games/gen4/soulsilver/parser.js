@@ -83,7 +83,7 @@ export function parsePokemonSoulSilver(data) {
     badges,
     badgeCount,
     hasAllBadges: badgeCount === 8,
-    hasStarter: Boolean(trainerName && trainerName.length > 0) || totalBadgeCount > 0,
+    hasStarter: totalBadgeCount > 0,
     kantoBadges,
     totalBadgeCount,
     has16Badges,

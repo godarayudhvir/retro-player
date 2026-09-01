@@ -67,7 +67,7 @@ export function parsePokemonPlatinum(data) {
     badges,
     badgeCount,
     hasAllBadges: badgeCount === 8,
-    hasStarter: Boolean(trainerName && trainerName.length > 0) || badgeCount > 0,
+    hasStarter: badgeCount > 0,
     kantoBadges: null,
     totalBadgeCount: badgeCount,
     has16Badges: false,

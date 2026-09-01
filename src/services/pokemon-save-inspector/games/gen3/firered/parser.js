@@ -159,7 +159,7 @@ export function parsePokemonFireRed(data) {
     }
   }
 
-  const hasStarter = partyCount > 0 || pokedexCaught > 0 || hasValidTrainer;
+  const hasStarter = (partyCount > 0 || pokedexCaught > 0) || badgeCount > 0;
 
   return {
     isPokemon: true,

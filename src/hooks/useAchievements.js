@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, TOTAL_ACHIEVEMENT_POINTS, getPokemonMilestonesForGame, getPokemonBadgesForGame, getPokemonKantoBadgesForGame, isJohtoPokemonGame } from '../data/achievementsManifest';
-import { parsePokemonSave, isPokemonRom } from '../services/pokemonSaveParser';
-import { dbGet, dbSet, STORES } from '../services/db';
-import { haptics } from '../services/hapticsService';
+import { ACHIEVEMENTS_MANIFEST, ACHIEVEMENT_TIERS, TOTAL_ACHIEVEMENT_POINTS, getPokemonMilestonesForGame, getPokemonBadgesForGame, getPokemonKantoBadgesForGame, isJohtoPokemonGame } from '../data/achievementsManifest.js';
+import { parsePokemonSave, isPokemonRom } from '../services/pokemonSaveParser.js';
+import { dbGet, dbSet, STORES } from '../services/db.js';
+import { haptics } from '../services/hapticsService.js';
 
 const STORAGE_PREFIX = 'achievements_';
 
@@ -240,8 +240,8 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
             id: achievementId,
             title: `Kanto ${badge.name}`,
             description: `Defeat Kanto Gym Leader ${badge.leader} in ${badge.city} (${badge.type} Type).`,
-            tier: 'bronze',
             category: 'pokemon',
+            type: 'league',
             icon: 'Shield',
             image: badge.image,
             isPerRom: true
@@ -256,8 +256,8 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
             id: achievementId,
             title: badge.name,
             description: `Defeat Gym Leader ${badge.leader} in ${badge.city} (${badge.type} Type).`,
-            tier: 'bronze',
             category: 'pokemon',
+            type: 'league',
             icon: 'Shield',
             image: badge.image,
             isPerRom: true
@@ -282,7 +282,8 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       key: storeKey,
       title: manifestItem.title,
       description: manifestItem.description,
-      tier: manifestItem.tier,
+      tier: manifestItem.tier || null,
+      type: manifestItem.type || null,
       category: manifestItem.category,
       icon: manifestItem.icon,
       image: manifestItem.image || null,
