@@ -94,24 +94,22 @@ export function useMetadataScraper(games = [], options = {}) {
               systemKey: g.systemKey,
               coverUrl: resolvedCover,
               hasCustomCover: Boolean(resolvedCover),
-              description: sidecar.description || cachedEntry?.description || `Experience ${g.title} on ${g.systemName}.`,
-              releaseDate: (sidecar.releaseYear ? `${sidecar.releaseYear}-01-01` : (sidecar.year ? `${sidecar.year}-01-01` : null)) || cachedEntry?.releaseDate || null,
-              releaseYear: sidecar.releaseYear || sidecar.year || cachedEntry?.releaseYear || cachedEntry?.year || null,
-              developer: sidecar.developer || cachedEntry?.developer || null,
-              publisher: sidecar.publisher || cachedEntry?.publisher || null,
-              genre: sidecar.genre || cachedEntry?.genre || null,
+              description: hasLocalSidecar ? (sidecar.description !== undefined ? sidecar.description : '') : (cachedEntry?.description || `Experience ${g.title} on ${g.systemName}.`),
+              releaseDate: (sidecar.releaseYear ? `${sidecar.releaseYear}-01-01` : (sidecar.year ? `${sidecar.year}-01-01` : (sidecar.releaseDate || null))) || cachedEntry?.releaseDate || null,
+              releaseYear: sidecar.releaseYear || sidecar.year || (sidecar.releaseDate ? sidecar.releaseDate.split('-')[0] : null) || cachedEntry?.releaseYear || null,
+              developer: hasLocalSidecar ? (sidecar.developer || null) : (cachedEntry?.developer || null),
+              publisher: hasLocalSidecar ? (sidecar.publisher || null) : (cachedEntry?.publisher || null),
+              genre: hasLocalSidecar ? (sidecar.genre || null) : (cachedEntry?.genre || null),
               walkthrough: sidecar.walkthrough || cachedEntry?.walkthrough || undefined,
               writtenWalkthroughUrl: sidecar.walkthrough?.written || cachedEntry?.writtenWalkthroughUrl || undefined,
               videoWalkthroughUrl: sidecar.walkthrough?.video || cachedEntry?.videoWalkthroughUrl || undefined,
               source: (sidecar.description || sidecar.releaseYear || sidecar.developer) ? 'Local Sidecar' : (cachedEntry?.source || 'Local Companion'),
               hasSidecar: hasLocalSidecar,
-              scrapedAt: cachedEntry?.scrapedAt || new Date().toISOString()
+              scrapedAt: new Date().toISOString()
             };
             merged[id] = updatedMeta;
-            // Persist companion cover updates into IndexedDB cache
-            if (sidecarCover && (!cached[id] || cached[id].coverUrl !== sidecarCover)) {
-              saveCachedMetadata(id, updatedMeta).catch(() => {});
-            }
+            // Always synchronize local sidecar to IndexedDB cache so stale records are overwritten
+            saveCachedMetadata(id, updatedMeta).catch(() => {});
           }
         });
       }

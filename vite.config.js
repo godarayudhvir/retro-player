@@ -143,9 +143,9 @@ function parseCompanionMetadata(dirPath, baseName, entries) {
     'metadata.nfo'
   ];
   const jsonCandidates = [
+    'metadata.json',
     `${baseName}.json`,
-    'game.json',
-    'metadata.json'
+    'game.json'
   ];
 
   const entryNames = new Set(entries.map(e => e.name));

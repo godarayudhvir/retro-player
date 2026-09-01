@@ -457,25 +457,33 @@ export function generateThumbnailCandidates(game) {
   if (raw) add(raw);
   if (fileNoExt) add(fileNoExt);
 
-  // 2. Fallback 1: Strip auxiliary compilation/re-release/aftermarket tags while preserving region
-  const auxTagRegex = /\s*\((?:e-Reader|Evercade|Wii U Virtual Console|Virtual Console|Castlevania Anniversary Collection|Capcom Classics Mini Mix|Limited Run Games|SNK 40th Anniversary Collection|Namcot Collection|Namco Museum Archives Vol \d+|Contra Anniversary Collection|Collection of Mana|Hudson|Kemco|Mindscape|NESDev \d+|Kickstarter|Aftermarket|Unl|Demo(?:\s*\d+)?|Beta|Digital|Proto|SGB Enhanced|GB Compatible|Rumble Version)\)/gi;
+  // 2. Patch / Anti-piracy / Fix tag stripping (e.g., _apfix, _ap_fix, _fix, _patched, (AP Fix), etc.)
+  const patchSuffixRegex = /(?:[_\s]+(?:apfix|ap_fix|ap|fix|patched|v\d+(?:\.\d+)*)|\s*\((?:AP Fix|AP-Fix|AP_Fix|Patched|Fix)\))$/gi;
+  const rawNoPatch = raw.replace(patchSuffixRegex, '').trim();
+  const fileNoPatch = fileNoExt.replace(patchSuffixRegex, '').trim();
+  if (rawNoPatch && rawNoPatch !== raw) add(rawNoPatch);
+  if (fileNoPatch && fileNoPatch !== fileNoExt) add(fileNoPatch);
+
+  // 3. Fallback 1: Strip auxiliary compilation/re-release/aftermarket tags while preserving region
+  const auxTagRegex = /\s*\((?:e-Reader|Evercade|Wii U Virtual Console|Virtual Console|Castlevania Anniversary Collection|Capcom Classics Mini Mix|Limited Run Games|SNK 40th Anniversary Collection|Namcot Collection|Namco Museum Archives Vol \d+|Contra Anniversary Collection|Collection of Mana|Hudson|Kemco|Mindscape|NESDev \d+|Kickstarter|Aftermarket|Unl|Demo(?:\s*\d+)?|Beta|Digital|Proto|SGB Enhanced|GB Compatible|Rumble Version|AP Fix|AP-Fix|AP_Fix|Patched|Fix)\)/gi;
   const bracketTagRegex = /\s*\[.*?\]/g;
 
-  if (raw) {
-    const strippedAux = raw.replace(auxTagRegex, '').replace(bracketTagRegex, '').replace(/\s+/g, ' ').trim();
-    if (strippedAux && strippedAux !== raw) add(strippedAux);
-  }
-  if (fileNoExt) {
-    const strippedAuxFile = fileNoExt.replace(auxTagRegex, '').replace(bracketTagRegex, '').replace(/\s+/g, ' ').trim();
-    if (strippedAuxFile && strippedAuxFile !== fileNoExt) add(strippedAuxFile);
+  const targetStrings = [raw, fileNoExt, rawNoPatch, fileNoPatch].filter(Boolean);
+  for (const s of targetStrings) {
+    const strippedAux = s.replace(auxTagRegex, '').replace(bracketTagRegex, '').replace(/\s+/g, ' ').trim();
+    if (strippedAux && strippedAux !== s) add(strippedAux);
   }
 
-  // 3. Fallback 2: Clean base titles with standard region variants
+  // 4. Fallback 2: Clean base titles with standard region variants
   const baseSet = new Set();
 
   function addBaseVariants(str) {
     if (!str) return;
-    const clean = str.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+    const clean = str
+      .replace(patchSuffixRegex, '')
+      .replace(/_/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
     if (!clean) return;
     baseSet.add(clean);
 
@@ -499,10 +507,10 @@ export function generateThumbnailCandidates(game) {
 
   addBaseVariants(cleanDisplay);
 
-  const rawStripped = raw.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').trim();
+  const rawStripped = raw.replace(patchSuffixRegex, '').replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').trim();
   addBaseVariants(rawStripped);
 
-  const fileStripped = fileNoExt.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').trim();
+  const fileStripped = fileNoExt.replace(patchSuffixRegex, '').replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').trim();
   addBaseVariants(fileStripped);
 
   // Region / Language / Flag variants for every base variant
@@ -510,9 +518,13 @@ export function generateThumbnailCandidates(game) {
     '',
     ' (USA)',
     ' (USA, Europe)',
+    ' (USA, Europe) (NDSi Enhanced)',
+    ' (Europe) (NDSi Enhanced)',
+    ' (USA) (NDSi Enhanced)',
     ' (World)',
     ' (Japan, USA)',
     ' (Europe)',
+    ' (Europe) (En,Fr,De,Es,It)',
     ' (World) (Rev A)',
     ' (USA) (Rev 1)',
     ' (USA) (Rev A)',
@@ -964,14 +976,13 @@ export async function scrapeGame(game, force = false) {
       return cached;
     }
 
-    // 2. If cached metadata already has both details and a valid cover, use it
+    // 2. If cached metadata already has both details and a valid cover, and no on-disk sidecar to sync, use it
     const hasValidCachedCover = Boolean(cached.coverUrl && !cached.coverUrl.endsWith('.svg'));
     const hasValidCachedDetails = Boolean(
-      (sidecar.developer && (sidecar.releaseYear || sidecar.year)) || 
       (cached.developer && cached.releaseYear && cached.developer !== (game.systemName || 'Classic') && cached.developer !== 'Classic')
     );
 
-    if ((hasValidCachedCover || hasLocalCoverFile) && (hasValidCachedDetails || (hasLocalSidecarJson && sidecar.developer))) {
+    if (!hasLocalSidecarJson && (hasValidCachedCover || hasLocalCoverFile) && hasValidCachedDetails) {
       addScraperLog(`📦 Loaded "${game.title}" from IndexedDB cache`, 'info', { gameId: id, title: game.title, systemKey: game.systemKey });
       return cached;
     }

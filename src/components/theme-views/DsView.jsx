@@ -265,12 +265,19 @@ export default function DsView({
   const rawScreenshot = meta.screenshotUrl;
   const screenshotSrc = rawScreenshot ? resolveAssetPath(rawScreenshot) : null;
 
-  const description = meta.description || selectedGame?.sidecarMetadata?.description || (selectedGame ? getGameDescription(selectedGame) : '');
-  const releaseYear = meta.releaseYear || selectedGame?.sidecarMetadata?.releaseYear || meta.releaseDate?.split('-')[0] || (selectedGame && getReleaseDate(selectedGame) !== '2000-01-01' ? getReleaseDate(selectedGame).split('-')[0] : null);
+  const description = (selectedGame?.sidecarMetadata && selectedGame.sidecarMetadata.description !== undefined)
+    ? selectedGame.sidecarMetadata.description
+    : (meta.description !== undefined ? meta.description : (selectedGame ? getGameDescription(selectedGame) : ''));
+
+  const releaseYear = selectedGame?.sidecarMetadata?.releaseYear ||
+    (selectedGame?.sidecarMetadata?.releaseDate ? selectedGame.sidecarMetadata.releaseDate.split('-')[0] : null) ||
+    meta.releaseYear ||
+    meta.releaseDate?.split('-')[0] ||
+    (selectedGame && getReleaseDate(selectedGame) !== '2000-01-01' ? getReleaseDate(selectedGame).split('-')[0] : null);
   
-  const rawDeveloper = meta.developer || selectedGame?.sidecarMetadata?.developer || null;
-  const rawPublisher = meta.publisher || selectedGame?.sidecarMetadata?.publisher || null;
-  const rawGenre = meta.genre || selectedGame?.sidecarMetadata?.genre || null;
+  const rawDeveloper = selectedGame?.sidecarMetadata?.developer || meta.developer || null;
+  const rawPublisher = selectedGame?.sidecarMetadata?.publisher || meta.publisher || null;
+  const rawGenre = selectedGame?.sidecarMetadata?.genre || meta.genre || null;
 
   const isDummyName = (str) => !str || str === 'Classic' || str === selectedGame?.systemName || str === selectedGame?.systemKey || str === 'Game Boy' || str === 'Game Boy Advance' || str === 'Game Boy Color' || str === 'Nintendo DS' || str === 'Super Nintendo' || str === 'Nintendo (NES)' || str === 'Nintendo 64' || str === 'Sega Genesis' || str === 'Sega Game Gear' || str === 'Sony PlayStation' || str === 'Arcade' || str === 'Atari 2600';
   const developer = isDummyName(rawDeveloper) ? null : rawDeveloper;
@@ -828,7 +835,7 @@ export default function DsView({
         <div className="ds-screen-frame bottom-screen" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '0.6rem' }}>
           <div className="ds-synopsis-content" style={{ overflowY: 'auto', flex: 1 }}>
             <p className="ds-synopsis-text">
-              {description || 'Touch to launch emulation, inspect metadata, or manage battery save RAM directly.'}
+              {description || 'No description available yet. Use the Scraper button above or click Edit (✏️) to add your own synopsis.'}
             </p>
           </div>
 

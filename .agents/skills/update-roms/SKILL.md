@@ -26,10 +26,11 @@ Retro Player maintains two completely independent metadata enrichment layers:
 - **High-Throughput Parallel Concurrency**: Features a built-in async worker concurrency pool (5 workers) for sub-second directory scanning and batch cover updates.
 - **Layered Fallback Matching & Checksum Verification**: The scraper queries exact matching titles first. If not found, it activates layered fallback candidate generation:
   1. *Libretro Sanitization*: Special characters sanitized according to Libretro rules (`&` $\rightarrow$ `_`, `: / \ * ? " < > |` $\rightarrow$ `_`).
-  2. *Auxiliary Tag Stripping*: Strips compilation/re-release/aftermarket tags (e.g. `(e-Reader)`, `(Evercade)`, `(Wii U Virtual Console)`, `(Castlevania Anniversary Collection)`, `(Limited Run Games)`, `(Aftermarket)`) while preserving region tags.
-  3. *Regional & Revision Fallbacks*: Tries alternate regions and revisions (`(USA)`, `(USA, Europe)`, `(World)`, `(Japan, USA)`, `(Europe)`, `(World) (Rev A)`).
-  4. *Article Inversion*: Tries `Title, The` $\leftrightarrow$ `The Title`.
-  5. *CRC32 Checksum Matching*: Computes internal ROM checksums for renamed or truncated files.
+  2. *Patch & Anti-Piracy Suffix Stripping*: Strips `_apfix`, `_ap_fix`, `_fix`, `_patched`, `_v...`, and `(AP Fix)` tags while preserving region.
+  3. *Auxiliary Tag Stripping*: Strips compilation/re-release/aftermarket tags (e.g. `(e-Reader)`, `(Evercade)`, `(Wii U Virtual Console)`, `(Castlevania Anniversary Collection)`, `(Limited Run Games)`, `(Aftermarket)`) while preserving region tags.
+  4. *Regional, NDSi Enhanced & Revision Fallbacks*: Tries alternate regions and revisions (`(USA)`, `(USA, Europe)`, `(World)`, `(Japan, USA)`, `(Europe)`, `(Europe) (En,Fr,De,Es,It)`, `(USA, Europe) (NDSi Enhanced)`).
+  5. *Article Inversion*: Tries `Title, The` $\leftrightarrow$ `The Title`.
+  6. *CRC32 Checksum Matching*: Computes internal ROM checksums for renamed or truncated files.
 - **File Names as Title**: The `metadata.json` sidecar strictly uses the exact ROM file base name as its `"title"` (e.g. `"Super Mario Bros. 3 (USA)"`), preserving authentic region, revision, and version indicators without artificial stripping or truncation.
 - **Local Codebase Sidecars Take Precedence**: Whenever `metadata.json` or companion covers exist on disk inside the game folder, the web application immediately serves and renders them, completely bypassing the browser scraper.
 
