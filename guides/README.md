@@ -19,6 +19,7 @@ Complete collection of deployment, configuration, controls, platform compatibili
 | **[⚡ Pokémon Save Inspector & Regional Milestones](pokemon/README.md)** | Binary SRAM/Flash save inspection specifications across Gen 1 (Kanto), Gen 2 (Johto 16 Badges), and Gen 3 (Hoenn/FRLG). | Cartridge SRAM, Badge Cases, Pokédex, Pokérus |
 | **[🎮 Rich Presence & OS Media Controls](presence.md)** | Real-time gaming presence across Discord Desktop (RPC), OS MediaSession (macOS/iOS/Android/Windows), and OBS stream overlays. | Discord RPC, macOS Control Center, Hardware Keys, Stream Overlays |
 | **[🎮 ROM Management & Sidecar Metadata](roms.md)** | Directory organization, folder mounting, and local companion sidecars (`.nfo`, `.json`, `cover.webp`) guide. | Self-Hosters, Romhacks, Offline Collections |
+| **[🎵 Background Music (BGM) Architecture](bgm.md)** | Virtual audio hierarchy, dual-layer directory scanning, codec formats, and smart in-game pause. | Custom Playlists, Audiophiles, Lobby Audio |
 
 ---
 

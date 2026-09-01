@@ -203,6 +203,7 @@ Explore dedicated, step-by-step documentation located in the [`guides/`](guides/
 | **[⚡ Pokémon Save Inspector & Regional Milestones Hub](guides/pokemon/README.md)** | Binary SRAM/Flash save inspection specifications across Gen 1 (Kanto), Gen 2 (Johto 16 Badges), and Gen 3 (Hoenn & FRLG). |
 | **[🎮 Rich Presence, OS Media Controls & Feeds](guides/presence.md)** | Real-time gaming presence across Discord Desktop (RPC), OS MediaSession (macOS/iOS/Android/Windows), and OBS stream overlays. |
 | **[🎮 ROM Management & Sidecar Metadata](guides/roms.md)** | Directory organization, folder mounting, and local companion sidecars (`.nfo`, `.json`, `cover.webp`) guide. |
+| **[🎵 Background Music (BGM) Architecture](guides/bgm.md)** | Virtual audio hierarchy, dual-layer directory scanning, codec formats, and smart in-game pause. |
 
 ---
 
