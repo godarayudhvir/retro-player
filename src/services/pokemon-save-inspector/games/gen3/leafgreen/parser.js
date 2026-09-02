@@ -159,7 +159,7 @@ export function parsePokemonLeafGreen(data) {
     }
   }
 
-  const hasStarter = (partyCount > 0 || pokedexCaught > 0) || badgeCount > 0;
+  const hasStarter = partyCount > 0;
 
   return {
     isPokemon: true,
@@ -184,6 +184,31 @@ export function parsePokemonLeafGreen(data) {
     isChampion: badgeCount === 8,
     isHighRoller: money >= 999999,
     hasPikaFriend: false,
+    hms: {
+      hm01: badgeCount >= 2,
+      hm02: badgeCount >= 4,
+      hm03: badgeCount >= 5,
+      hm04: badgeCount >= 5,
+      hm05: badgeCount >= 2,
+      hm06: badgeCount >= 7,
+      hm07: badgeCount >= 7,
+      hasAllHMs: badgeCount >= 7
+    },
+    events: {
+      nuggetBridgeCleared: badgeCount >= 1,
+      ssAnneDeparted: badgeCount >= 2,
+      ghostMarowakCalmed: badgeCount >= 4,
+      snorlaxCleared: badgeCount >= 4,
+      silphCoLiberated: badgeCount >= 6,
+      seviiLostelle: badgeCount >= 7,
+      rubySapphirePlates: badgeCount >= 8,
+      rocketWarehouse: badgeCount >= 8
+    },
+    legendaries: {
+      hasAllBirds: hasLegendary || badgeCount >= 8,
+      mewtwo: hasLegendary || badgeCount >= 8,
+      roamingBeast: hasLegendary || badgeCount >= 8
+    },
     keyItems: {
       bicycle: badgeCount >= 3,
       oldRod: badgeCount >= 2 || pokedexCaught >= 5,

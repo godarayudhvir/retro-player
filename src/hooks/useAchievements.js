@@ -359,17 +359,6 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
     return activeDates;
   }, [unlockAchievement]);
 
-  // Check mounted library size
-  useEffect(() => {
-    if (!mountedGames || mountedGames.length === 0) return;
-    if (mountedGames.length >= 25) {
-      unlockAchievement('cartridge_collector');
-    }
-    if (mountedGames.length >= 100) {
-      unlockAchievement('grand_archivist');
-    }
-  }, [mountedGames?.length, unlockAchievement]);
-
   // ---------------------------------------------------------------------------
   // PUBLIC EVENT TRIGGERS
   // ---------------------------------------------------------------------------
@@ -418,10 +407,10 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
         unlockAchievement('console_hopper');
       }
 
-      // 2.5 Full Spectrum (Play game on every supported system present in mounted library)
+      // 2.5 Full Spectrum (Play game on every supported system present in mounted library, min 3 systems)
       if (mountedGames && mountedGames.length > 0) {
         const availableLibrarySystems = Array.from(new Set(mountedGames.map(g => g.systemKey).filter(Boolean)));
-        if (availableLibrarySystems.length > 0 && availableLibrarySystems.every(sys => systems.includes(sys))) {
+        if (availableLibrarySystems.length >= 3 && availableLibrarySystems.every(sys => systems.includes(sys))) {
           unlockAchievement('full_spectrum');
         }
       }
@@ -434,27 +423,13 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
         unlockAchievement('gen_traveler');
       }
 
-      // 4. Indecisive Swapper (3 distinct launches within 3 minutes = 180s)
-      if (recentLaunches.length >= 3) {
-        const last3 = recentLaunches.slice(-3);
-        const uniqueTitles = new Set(last3.map(l => l.gameId));
-        if (uniqueTitles.size >= 3 && (last3[2].timestamp - last3[0].timestamp <= 180000)) {
-          unlockAchievement('indecisive_swapper');
-        }
-      }
-
-      // 5. Library Tourist (5 launches in session)
-      if (recentLaunches.length >= 5) {
-        unlockAchievement('library_tourist');
-      }
-
-      // 6. Local time habits & streaks
+      // 4. Local time habits & streaks
       updatedStats.activeDates = evaluateLocalHabitsAndStreaks(updatedStats);
 
       persistState(unlocked, updatedStats);
       return updatedStats;
     });
-  }, [unlockAchievement, evaluateLocalHabitsAndStreaks, persistState, unlocked]);
+  }, [unlockAchievement, evaluateLocalHabitsAndStreaks, persistState, unlocked, mountedGames]);
 
   /**
    * Called when emulator exits.
@@ -558,7 +533,6 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
    * Quick Load executed.
    */
   const triggerQuickLoad = useCallback((game) => {
-    unlockAchievement('time_traveler', game);
     if (!game) return;
     const gameKey = game.id || game.title;
 
@@ -605,36 +579,36 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
    * Authentic Battery SRAM Export (.sav).
    */
   const triggerBatteryExport = useCallback((game) => {
-    unlockAchievement('cartridge_keeper', game);
-  }, [unlockAchievement]);
+    // Registered battery export hook
+  }, []);
 
   /**
    * Authentic Battery SRAM Import (.sav).
    */
   const triggerBatteryImport = useCallback((game) => {
-    unlockAchievement('memory_rebirth', game);
-  }, [unlockAchievement]);
+    // Registered battery import hook
+  }, []);
 
   /**
    * Screenshot captured.
    */
   const triggerScreenshot = useCallback((game) => {
-    unlockAchievement('memory_keeper', game);
-  }, [unlockAchievement]);
+    // Registered screenshot hook
+  }, []);
 
   /**
    * Video clip recorded.
    */
   const triggerVideoRecording = useCallback((game) => {
-    unlockAchievement('clip_master', game);
-  }, [unlockAchievement]);
+    // Registered video recording hook
+  }, []);
 
   /**
-   * Read Strategy Guide / Opened Walkthrough or QR.
+   * Read Strategy Guide / Opened Walkthrough.
    */
   const triggerStrategyGuideRead = useCallback((game, durationSeconds = 60) => {
-    unlockAchievement('strategy_scholar', game);
-  }, [unlockAchievement]);
+    // Registered guide read hook
+  }, []);
 
   /**
    * Physical hardware gamepad axis/button pressed.
@@ -678,14 +652,11 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
   const triggerAvatarUpdated = useCallback(() => {
     setStats(prev => {
       const nextCount = (prev.avatarChangeCount || 0) + 1;
-      if (nextCount >= 3) {
-        unlockAchievement('identity_crisis');
-      }
       const updatedStats = { ...prev, avatarChangeCount: nextCount };
       persistState(unlocked, updatedStats);
       return updatedStats;
     });
-  }, [unlockAchievement, persistState, unlocked]);
+  }, [persistState, unlocked]);
 
   /**
    * Dark/Light mode theme switched.
@@ -728,13 +699,11 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
   }, [unlockAchievement]);
 
   /**
-   * Pause for > 10 minutes (600s).
+   * Pause hook.
    */
   const triggerPause = useCallback((durationSeconds) => {
-    if (durationSeconds >= 600) {
-      unlockAchievement('pause_for_thought');
-    }
-  }, [unlockAchievement]);
+    // Registered pause hook
+  }, []);
 
   /**
    * Idle browse in menu with BGM for > 5 minutes (300s).
@@ -781,7 +750,7 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
 
   /**
    * Evaluates a binary Pokémon save file from SRAM or Flash memory (.sav) and unlocks
-   * regional gym badges, starter milestones, and Hall of Fame achievements.
+   * regional gym badges, starter milestones, and Hall of Fame achievements across Gen 1 - Gen 5.
    */
   const evaluatePokemonSave = useCallback((game, sramBuffer) => {
     if (!game || !sramBuffer) return null;
@@ -795,12 +764,18 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
         return summary;
       }
 
-      // 1. Starter chosen
-      if (summary.hasStarter) {
-        unlockAchievement('poke_journey_begun', game);
-      }
+      // 1. Starter & Core Feats
+      if (summary.hasStarter) unlockAchievement('poke_journey_begun', game);
+      if (summary.hasFirstCatch) unlockAchievement('poke_first_catch', game);
+      if (summary.hasFullParty) unlockAchievement('poke_full_party', game);
+      if (summary.hasLevel100) unlockAchievement('poke_level_100', game);
+      if (summary.hasShiny) unlockAchievement('poke_star_trainer', game);
+      if (summary.hasPokerus) unlockAchievement('poke_microscopic_miracle', game);
+      if (summary.hasLegendary) unlockAchievement('poke_myth_and_legend', game);
+      if (summary.fossils?.hasAnyFossil || summary.hasFossil) unlockAchievement('poke_fossil_revival', game);
+      if (summary.isHighRoller) unlockAchievement('poke_high_roller', game);
 
-      // 2. Key Items & HMs
+      // 2. Key Items
       if (summary.keyItems?.bicycle) unlockAchievement('poke_pedal_to_metal', game);
       if (summary.keyItems?.oldRod || summary.keyItems?.goodRod) unlockAchievement('poke_gone_fishin', game);
       if (summary.keyItems?.superRod) unlockAchievement('poke_master_angler', game);
@@ -811,7 +786,7 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       if (summary.keyItems?.townMap) unlockAchievement('poke_digital_cartographer', game);
       if (summary.keyItems?.masterBall) unlockAchievement('poke_master_ball', game);
 
-      // Hidden Machines (HM01 - HM07)
+      // 3. Hidden Machines (HM01 - HM08)
       if (summary.hms?.hm01) unlockAchievement('poke_hm01', game);
       if (summary.hms?.hm02) unlockAchievement('poke_hm02', game);
       if (summary.hms?.hm03) unlockAchievement('poke_hm03', game);
@@ -819,9 +794,10 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       if (summary.hms?.hm05) unlockAchievement('poke_hm05', game);
       if (summary.hms?.hm06) unlockAchievement('poke_hm06', game);
       if (summary.hms?.hm07) unlockAchievement('poke_hm07', game);
+      if (summary.hms?.hm08) unlockAchievement('poke_hm08', game);
       if (summary.hms?.hasAllHMs) unlockAchievement('poke_hms_master', game);
 
-      // 3. Gym Badges (1 to 8 & Gen 2 Dual 16 Badges)
+      // 4. Gym Badges (1 to 8 & Gen 2 / HGSS Dual 16 Badges)
       if (summary.badges?.[0]) unlockAchievement('poke_badge_1', game);
       if (summary.badges?.[1]) unlockAchievement('poke_badge_2', game);
       if (summary.badges?.[2]) unlockAchievement('poke_badge_3', game);
@@ -831,7 +807,7 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       if (summary.badges?.[6]) unlockAchievement('poke_badge_7', game);
       if (summary.badges?.[7]) unlockAchievement('poke_badge_8', game);
 
-      // Gen 2 Kanto Return Badges (9 to 16)
+      // Kanto Return Badges (9 to 16 in Gen 2 / HGSS)
       if (summary.kantoBadges) {
         if (summary.kantoBadges[0]) unlockAchievement('poke_badge_kanto_1', game);
         if (summary.kantoBadges[1]) unlockAchievement('poke_badge_kanto_2', game);
@@ -846,36 +822,17 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       if (summary.hasAllBadges || summary.badgeCount >= 8) unlockAchievement('poke_eight_badges', game);
       if (summary.has16Badges || summary.totalBadgeCount >= 16) unlockAchievement('poke_sixteen_badges', game);
 
-      // 4. Hall of Fame / Champion
+      // 5. Hall of Fame / Champion
       if (summary.isChampion || summary.hallOfFameCount > 0) {
         unlockAchievement('poke_hall_of_fame', game);
       }
 
-      // 5. Catches, Party, Level 100, Legendaries, Fossils
-      if (summary.hasFirstCatch) unlockAchievement('poke_first_catch', game);
-      if (summary.hasFullParty) unlockAchievement('poke_full_party', game);
-      if (summary.hasLevel100) unlockAchievement('poke_level_100', game);
-      if (summary.hasLegendary) unlockAchievement('poke_myth_and_legend', game);
-      if (summary.fossils?.hasAnyFossil || summary.hasFossil) unlockAchievement('poke_fossil_revival', game);
-      if (summary.hasShiny) unlockAchievement('poke_star_trainer', game);
-      if (summary.hasPokerus) unlockAchievement('poke_microscopic_miracle', game);
-
-      // Legendary Birds & Mewtwo (Gen 1)
+      // 6. Gen 1 Specific Feats & Legendaries
       if (summary.legendaries?.articuno) unlockAchievement('poke_articuno', game);
       if (summary.legendaries?.zapdos) unlockAchievement('poke_zapdos', game);
       if (summary.legendaries?.moltres) unlockAchievement('poke_moltres', game);
       if (summary.legendaries?.hasAllBirds) unlockAchievement('poke_legendary_birds', game);
       if (summary.legendaries?.mewtwo) unlockAchievement('poke_mewtwo', game);
-
-      // Legendary Beasts & Tower Duo (Gen 2)
-      if (summary.legendaries?.hasBeasts || summary.legendaries?.raikou || summary.legendaries?.entei || summary.legendaries?.suicune) {
-        unlockAchievement('poke_legendary_beasts', game);
-      }
-      if (summary.legendaries?.hasTowerDuo || summary.legendaries?.hoOh || summary.legendaries?.lugia) {
-        unlockAchievement('poke_tower_duo', game);
-      }
-
-      // Action Event Flags & Story Feats (Gen 1 & Gen 2)
       if (summary.events?.snorlaxCleared) unlockAchievement('poke_snorlax_cleared', game);
       if (summary.events?.ghostMarowakCalmed) unlockAchievement('poke_ghost_marowak', game);
       if (summary.events?.silphCoLiberated) unlockAchievement('poke_silph_co', game);
@@ -884,8 +841,11 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       if (summary.events?.ssAnneDeparted) unlockAchievement('poke_ss_anne_departed', game);
       if (summary.events?.nuggetBridgeCleared) unlockAchievement('poke_nugget_bridge', game);
       if (summary.events?.mrFujiRescued) unlockAchievement('poke_rescued_mr_fuji', game);
+      if (summary.hasPikaFriend) unlockAchievement('poke_yellow_soulmates', game);
+      if (summary.hasStarterTrio) unlockAchievement('poke_yellow_starter_trio', game);
+      if (summary.hasDefeatedRocketDuo) unlockAchievement('poke_yellow_rocket_duo', game);
 
-      // Gen 2 Action Story Feats
+      // 7. Gen 2 Specific Feats & Legendaries
       if (summary.events?.sudowoodoCleared) unlockAchievement('poke_sudowoodo_cleared', game);
       if (summary.events?.lakeOfRage) unlockAchievement('poke_lake_of_rage', game);
       if (summary.events?.goldenrodLiberated) unlockAchievement('poke_goldenrod_liberation', game);
@@ -893,18 +853,77 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       if (summary.events?.moomooFarm) unlockAchievement('poke_moomoo_farm', game);
       if (summary.events?.bugContest) unlockAchievement('poke_bug_contest', game);
       if (summary.events?.championRed) unlockAchievement('poke_champion_red', game);
-
-      // 6. Finances, Yellow & Crystal Special Exclusives
-      if (summary.isHighRoller) unlockAchievement('poke_high_roller', game);
-      if (summary.hasPikaFriend) unlockAchievement('poke_yellow_soulmates', game);
-      if (summary.hasStarterTrio) unlockAchievement('poke_yellow_starter_trio', game);
-      if (summary.hasDefeatedRocketDuo) unlockAchievement('poke_yellow_rocket_duo', game);
-
-      // Crystal Exclusives
+      if (summary.legendaries?.hasBeasts || summary.legendaries?.raikou || summary.legendaries?.entei || summary.legendaries?.suicune) {
+        unlockAchievement('poke_legendary_beasts', game);
+      }
+      if (summary.legendaries?.hasTowerDuo || summary.legendaries?.hoOh || summary.legendaries?.lugia) {
+        unlockAchievement('poke_tower_duo', game);
+      }
       if (summary.hasCrystalSuicune || summary.events?.crystalSuicune) unlockAchievement('poke_crystal_suicune', game);
       if (summary.hasUnownDex || summary.events?.crystalUnown) unlockAchievement('poke_crystal_unown', game);
 
-      // 7. Pokédex Scaling
+      // 8. Gen 3 Specific Feats & Legendaries (Hoenn & Kanto Remakes)
+      if (summary.events?.devonGoods) unlockAchievement('poke_devon_goods', game);
+      if (summary.events?.trickHouse) unlockAchievement('poke_trick_house', game);
+      if (summary.events?.teamMagma) unlockAchievement('poke_team_magma', game);
+      if (summary.events?.teamAqua) unlockAchievement('poke_team_aqua', game);
+      if (summary.events?.teamMagmaAqua) unlockAchievement('poke_team_magma_aqua', game);
+      if (summary.events?.mirageTower) unlockAchievement('poke_mirage_tower', game);
+      if (summary.events?.abandonedShip) unlockAchievement('poke_abandoned_ship', game);
+      if (summary.events?.cataclysmAwakening) unlockAchievement('poke_cataclysm_awakening', game);
+      if (summary.events?.emeraldRayquazaSoothe) unlockAchievement('poke_emerald_rayquaza_soothe', game);
+      if (summary.legendaries?.groudon) unlockAchievement('poke_groudon', game);
+      if (summary.legendaries?.kyogre) unlockAchievement('poke_kyogre', game);
+      if (summary.legendaries?.rayquaza) unlockAchievement('poke_rayquaza', game);
+      if (summary.legendaries?.weatherTrio || summary.legendaries?.hasWeatherTrio) unlockAchievement('poke_weather_trio', game);
+      if (summary.legendaries?.regiTrio || summary.legendaries?.hasRegis) unlockAchievement('poke_regi_trio', game);
+      if (summary.legendaries?.eonRoamer || summary.legendaries?.hasEon) unlockAchievement('poke_eon_roamer', game);
+      if (summary.events?.battleFrontier) unlockAchievement('poke_battle_frontier', game);
+      if (summary.events?.seviiLostelle) unlockAchievement('poke_sevii_lostelle', game);
+      if (summary.events?.rubySapphirePlates) unlockAchievement('poke_ruby_sapphire_plates', game);
+      if (summary.events?.rocketWarehouse) unlockAchievement('poke_rocket_warehouse', game);
+      if (summary.legendaries?.roamingBeast || summary.legendaries?.hasBeasts) unlockAchievement('poke_roaming_beast', game);
+
+      // 9. Gen 4 Specific Feats & Legendaries (Sinnoh & HGSS)
+      if (summary.events?.valleyWindworks) unlockAchievement('poke_valley_windworks', game);
+      if (summary.events?.galacticHq) unlockAchievement('poke_galactic_hq', game);
+      if (summary.events?.spearPillar) unlockAchievement('poke_spear_pillar', game);
+      if (summary.legendaries?.dialga) unlockAchievement('poke_dialga', game);
+      if (summary.legendaries?.palkia) unlockAchievement('poke_palkia', game);
+      if (summary.events?.distortionWorld) unlockAchievement('poke_distortion_world', game);
+      if (summary.legendaries?.giratina) unlockAchievement('poke_giratina_origin', game);
+      if (summary.legendaries?.creationDuo || (summary.legendaries?.dialga && summary.legendaries?.palkia)) unlockAchievement('poke_creation_duo', game);
+      if (summary.legendaries?.lakeGuardians || summary.legendaries?.hasLakeGuardians) unlockAchievement('poke_lake_guardians', game);
+      if (summary.legendaries?.heatran) unlockAchievement('poke_heatran', game);
+      if (summary.legendaries?.cresselia) unlockAchievement('poke_cresselia', game);
+      if (summary.events?.kimonoTrial) unlockAchievement('poke_kimono_trial', game);
+      if (summary.legendaries?.hoOh) unlockAchievement('poke_ho_oh', game);
+      if (summary.legendaries?.lugia) unlockAchievement('poke_lugia', game);
+      if (summary.events?.suicuneTracking || summary.legendaries?.suicune) unlockAchievement('poke_suicune_tracking', game);
+      if (summary.events?.pokeathlonChampion) unlockAchievement('poke_pokeathlon_champion', game);
+
+      // 10. Gen 5 Specific Feats & Legendaries (Unova & B2W2)
+      if (summary.events?.dreamyard) unlockAchievement('poke_dreamyard', game);
+      if (summary.events?.relicCastle) unlockAchievement('poke_relic_castle', game);
+      if (summary.events?.opelucidGym) unlockAchievement('poke_opelucid_gym', game);
+      if (summary.events?.nsCastle) unlockAchievement('poke_ns_castle', game);
+      if (summary.legendaries?.reshiram) unlockAchievement('poke_reshiram', game);
+      if (summary.legendaries?.zekrom) unlockAchievement('poke_zekrom', game);
+      if (summary.events?.defeatN) unlockAchievement('poke_defeat_n', game);
+      if (summary.events?.plasmaGhetsis) unlockAchievement('poke_plasma_ghetsis', game);
+      if (summary.legendaries?.swordsOfJustice || summary.legendaries?.hasSwordsOfJustice) unlockAchievement('poke_swords_of_justice', game);
+      if (summary.legendaries?.kyurem) unlockAchievement('poke_kyurem', game);
+      if (summary.events?.floccesyRanch) unlockAchievement('poke_floccesy_ranch', game);
+      if (summary.events?.pokestarStudios) unlockAchievement('poke_pokestar_studios', game);
+      if (summary.events?.pwtChampion) unlockAchievement('poke_pwt_champion', game);
+      if (summary.events?.plasmaFrigate) unlockAchievement('poke_plasma_frigate', game);
+      if (summary.events?.colressDefeated) unlockAchievement('poke_colress_defeated', game);
+      if (summary.events?.kyuremFusion || summary.legendaries?.kyuremFusion) unlockAchievement('poke_kyurem_fusion', game);
+      if (summary.events?.ghetsisB2W2) unlockAchievement('poke_ghetsis_b2w2', game);
+      if (summary.legendaries?.zekromReshiramB2W2 || (summary.legendaries?.zekrom || summary.legendaries?.reshiram)) unlockAchievement('poke_zekrom_reshiram_b2w2', game);
+      if (summary.events?.dnaSplicers || summary.keyItems?.dnaSplicers) unlockAchievement('poke_dna_splicers', game);
+
+      // 11. Pokédex Scaling
       const dex = summary.pokedexCaught || 0;
       if (dex >= 10) unlockAchievement('poke_dex_10', game);
       if (dex >= 25) unlockAchievement('poke_dex_25', game);
@@ -976,6 +995,7 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
     triggerCrtToggled,
     triggerPhysicalGamepadUsed,
     triggerDatabaseBackup,
+    triggerBackupExported: triggerDatabaseBackup,
     triggerInputMash,
     triggerFastForward,
     triggerPause,

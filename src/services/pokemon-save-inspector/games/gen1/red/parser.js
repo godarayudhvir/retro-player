@@ -157,7 +157,7 @@ export function parsePokemonRed(data) {
     partyCount,
     maxPartyLevel,
     hasLevel100: maxPartyLevel >= 100,
-    hasStarter: (partyCount > 0 || pokedexCaught > 0) || badgeCount > 0,
+    hasStarter: partyCount > 0,
     hasFirstCatch: pokedexCaught >= 2,
     hasFullParty: partyCount >= 6,
     hasShiny: false,

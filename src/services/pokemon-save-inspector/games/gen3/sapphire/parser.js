@@ -159,7 +159,7 @@ export function parsePokemonSapphire(data) {
     }
   }
 
-  const hasStarter = (partyCount > 0 || pokedexCaught > 0) || badgeCount > 0;
+  const hasStarter = partyCount > 0;
 
   return {
     isPokemon: true,
@@ -184,6 +184,29 @@ export function parsePokemonSapphire(data) {
     isChampion: badgeCount === 8,
     isHighRoller: money >= 999999,
     hasPikaFriend: false,
+    hms: {
+      hm01: badgeCount >= 1,
+      hm02: badgeCount >= 6,
+      hm03: badgeCount >= 5,
+      hm04: badgeCount >= 4,
+      hm05: badgeCount >= 2,
+      hm06: badgeCount >= 3,
+      hm07: badgeCount >= 8,
+      hm08: badgeCount >= 7,
+      hasAllHMs: badgeCount >= 8
+    },
+    events: {
+      devonGoods: badgeCount >= 1,
+      trickHouse: badgeCount >= 2,
+      teamAqua: badgeCount >= 7,
+      abandonedShip: badgeCount >= 5
+    },
+    legendaries: {
+      kyogre: hasLegendary || badgeCount >= 8,
+      regiTrio: hasLegendary || pokedexCaught >= 100,
+      rayquaza: hasLegendary || badgeCount >= 8,
+      eonRoamer: hasLegendary || badgeCount >= 8
+    },
     keyItems: {
       bicycle: badgeCount >= 3,
       oldRod: badgeCount >= 2 || pokedexCaught >= 5,
@@ -191,7 +214,7 @@ export function parsePokemonSapphire(data) {
       superRod: badgeCount >= 6,
       itemfinder: badgeCount >= 3,
       pokeFlute: false,
-      scope: badgeCount >= 4,
+      scope: badgeCount >= 6,
       expShare: badgeCount >= 1 || pokedexCaught >= 10,
       townMap: hasValidTrainer,
       masterBall: badgeCount >= 7

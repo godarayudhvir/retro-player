@@ -159,7 +159,7 @@ export function parsePokemonSilver(data) {
   const hasDefeatedRed = has16Badges;
 
   const hasValidTrainer = data[0x200B] !== 0x00 && data[0x200B] !== 0xFF && data[0x200B] !== 0x50;
-  const hasStarter = (partyCount > 0 || pokedexCaught > 0) || totalBadgeCount > 0;
+  const hasStarter = partyCount > 0;
 
   return {
     isPokemon: true,

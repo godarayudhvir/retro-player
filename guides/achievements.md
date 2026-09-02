@@ -31,9 +31,9 @@ The achievement system features a balanced **6 Categories × 4 Tiers (1 Bronze, 
 | Status | Tier | Points | ID | Title | Universal Requirement | Evaluation Logic | Scope |
 | :---: | :---: | :---: | :--- | :--- | :--- | :--- | :---: |
 | ✅ | 🥉 Bronze | +5G | `warming_up` | **Warming Up** | Log 15 cumulative minutes of gameplay across any games. | Cumulative playtime `>= 900s` (15m) | Global |
-|  | 🥈 Silver | +10G | `marathon_runner` | **Marathon Runner** | Play a single game continuously for 1 hour in one sitting. | Single session duration `>= 3600s` (1h) | Per-ROM |
-|  | 🥇 Gold | +15G | `loyal_companion` | **Loyal Companion** | Spend 2 total hours played on a single title. | Cumulative single-game playtime `>= 7200s` (2h) | Per-ROM |
-|  | 💎 Platinum | +20G | `ironman_endurance` | **Ironman Endurance** | Play a single game continuously for 7 hours in one sitting. | Single session duration `>= 25200s` (7h) | Per-ROM |
+| ✅ | 🥈 Silver | +10G | `marathon_runner` | **Marathon Runner** | Play a single game continuously for 1 hour in one sitting. | Single session duration `>= 3600s` (1h) | Per-ROM |
+| ✅ | 🥇 Gold | +15G | `loyal_companion` | **Loyal Companion** | Spend 2 total hours played on a single title. | Cumulative single-game playtime `>= 7200s` (2h) | Per-ROM |
+| ✅ | 💎 Platinum | +20G | `ironman_endurance` | **Ironman Endurance** | Play a single game continuously for 7 hours in one sitting. | Single session duration `>= 25200s` (7h) | Per-ROM |
 
 ---
 
@@ -41,10 +41,10 @@ The achievement system features a balanced **6 Categories × 4 Tiers (1 Bronze, 
 
 | Status | Tier | Points | ID | Title | Universal Requirement | Evaluation Logic | Scope |
 | :---: | :---: | :---: | :--- | :--- | :--- | :--- | :---: |
-|  | 🥉 Bronze | +5G | `weekend_warrior` | **Weekend Warrior** | Play games on both Saturday and Sunday of the same weekend. | Active calendar dates include Sat & Sun | Global |
+| ✅ | 🥉 Bronze | +5G | `weekend_warrior` | **Weekend Warrior** | Play games on both Saturday and Sunday of the same weekend. | Active calendar dates include Sat & Sun | Global |
 | ✅ | 🥈 Silver | +10G | `night_owl` | **Night Owl** | Boot any retro game between 11:00 PM and 4:00 AM local time. | Browser local hour `h >= 23 || h < 4` | Global |
-|  | 🥇 Gold | +15G | `daily_streak_3` | **Dedicated Gamer** | Play games for 3 consecutive days in a row. | Consecutive active calendar days `>= 3` | Global |
-|  | 💎 Platinum | +20G | `weekly_streak_7` | **Relentless Habit** | Play games for 7 consecutive days in a row. | Consecutive active calendar days `>= 7` | Global |
+| ✅ | 🥇 Gold | +15G | `daily_streak_3` | **Dedicated Gamer** | Play games for 3 consecutive days in a row. | Consecutive active calendar days `>= 3` | Global |
+| ✅ | 💎 Platinum | +20G | `weekly_streak_7` | **Relentless Habit** | Play games for 7 consecutive days in a row. | Consecutive active calendar days `>= 7` | Global |
 
 ---
 
@@ -54,8 +54,8 @@ The achievement system features a balanced **6 Categories × 4 Tiers (1 Bronze, 
 | :---: | :---: | :---: | :--- | :--- | :--- | :--- | :---: |
 | ✅ | 🥉 Bronze | +5G | `rage_quit` | **Instant Regret?** | Exit a game in under 45 seconds of launching. | Session duration `3s < s < 45s` | Global |
 | ✅ | 🥈 Silver | +10G | `need_for_speed` | **Need for Speed** | Keep Fast-Forward active continuously for over 45 seconds. | Continuous fast-forward `>= 45s` | Global |
-|  | 🥇 Gold | +15G | `window_shopper` | **Window Shopper** | Idle in the cartridge library with BGM playing for > 5 minutes. | Menu idle duration `>= 300s` | Global |
-|  | 💎 Platinum | +20G | `button_masher` | **Button Masher** | Register 1,500+ total gamepad/keyboard input events in a single session. | Active session button count `>= 1500` | Per-ROM |
+| ✅ | 🥇 Gold | +15G | `window_shopper` | **Window Shopper** | Idle in the cartridge library with BGM playing for > 5 minutes. | Menu idle duration `>= 300s` | Global |
+| ✅ | 💎 Platinum | +20G | `button_masher` | **Button Masher** | Register 1,500+ total gamepad/keyboard input events in a single session. | Active session button count `>= 1500` | Per-ROM |
 
 ---
 
@@ -83,9 +83,9 @@ The achievement system features a balanced **6 Categories × 4 Tiers (1 Bronze, 
 
 ## 🎯 Pokémon Save Inspector & Regional Badge Cases
 
-For cartridge-specific memory maps, 16-badge dual cases, and generation-by-generation specifications across Gen 1 (*Red, Blue, Yellow*), Gen 2 (*Gold, Silver, Crystal*), and Gen 3 (*Ruby, Sapphire, Emerald, FireRed, LeafGreen*), see the dedicated documentation hub:
+For cartridge-specific memory maps, 16-badge dual cases, and generation-by-generation specifications across Gen 1 (*Red, Blue, Yellow*), Gen 2 (*Gold, Silver, Crystal*), Gen 3 (*Ruby, Sapphire, Emerald, FireRed, LeafGreen*), Gen 4 (*Diamond, Pearl, Platinum, HeartGold, SoulSilver*), and Gen 5 (*Black, White, Black 2, White 2*), see the dedicated documentation hub:
 
-👉 **[Pokémon Milestones & Save Inspector Guide Hub (Gen 1 – Gen 3)](pokemon/README.md)**
+👉 **[Pokémon Milestones & Save Inspector Guide Hub (Gen 1 – Gen 5)](pokemon/README.md)**
 
 ---
 

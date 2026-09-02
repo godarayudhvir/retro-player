@@ -166,6 +166,10 @@ export default function EmulatorModal({
     window.addEventListener('keydown', handleKeyActivity);
     return () => {
       if (toolbarHideTimeoutRef.current) clearTimeout(toolbarHideTimeoutRef.current);
+      if (fastForwardTimerRef.current) {
+        clearInterval(fastForwardTimerRef.current);
+        fastForwardTimerRef.current = null;
+      }
       window.removeEventListener('mousemove', handlePointerActivity);
       window.removeEventListener('keydown', handleKeyActivity);
     };
@@ -2191,6 +2195,9 @@ export default function EmulatorModal({
       document.exitFullscreen().catch(() => {});
     }
     reportSessionEnd();
+    if (sessionInputCountRef.current >= 1500) {
+      achievementsEngine?.triggerInputMash?.(game, sessionInputCountRef.current);
+    }
     setIsGameMuted(false);
     setVolumeState(1.0);
     if (iframeRef.current) {
@@ -2438,11 +2445,36 @@ export default function EmulatorModal({
     }
   };
 
+  // Session input event counter for button_masher achievement (1,500+ inputs in session)
+  const sessionInputCountRef = useRef(0);
+  const buttonMasherUnlockedRef = useRef(false);
+
+  useEffect(() => {
+    const handleRawInput = () => {
+      sessionInputCountRef.current++;
+      if (sessionInputCountRef.current >= 1500 && !buttonMasherUnlockedRef.current) {
+        buttonMasherUnlockedRef.current = true;
+        achievementsEngine?.triggerInputMash?.(game, sessionInputCountRef.current);
+      }
+    };
+
+    window.addEventListener('keydown', handleRawInput, { passive: true });
+    window.addEventListener('touchstart', handleRawInput, { passive: true });
+    window.addEventListener('mousedown', handleRawInput, { passive: true });
+
+    return () => {
+      window.removeEventListener('keydown', handleRawInput);
+      window.removeEventListener('touchstart', handleRawInput);
+      window.removeEventListener('mousedown', handleRawInput);
+    };
+  }, [game, achievementsEngine]);
+
   // Fast-Forward & Speed Multiplier Tracking
   const fastForwardStartTimeRef = useRef(0);
   const fastForwardTimerRef = useRef(null);
+  const fastForwardUnlockedRef = useRef(false);
 
-  // Speed Multiplier Handler [1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 10.0]
+  // Speed Multiplier Handler [1.0, 2.0, 5.0]
   const handleSpeedChange = (newSpeed) => {
     const spd = parseFloat(newSpeed);
     const prevSpeed = emulationSpeed;
@@ -2455,14 +2487,24 @@ export default function EmulatorModal({
         if (fastForwardTimerRef.current) clearInterval(fastForwardTimerRef.current);
         fastForwardTimerRef.current = setInterval(() => {
           if (fastForwardStartTimeRef.current && (Date.now() - fastForwardStartTimeRef.current >= 45000)) {
-            achievementsEngine?.triggerFastForward?.(45);
+            if (!fastForwardUnlockedRef.current) {
+              fastForwardUnlockedRef.current = true;
+              achievementsEngine?.triggerFastForward?.(45);
+            }
+            if (fastForwardTimerRef.current) {
+              clearInterval(fastForwardTimerRef.current);
+              fastForwardTimerRef.current = null;
+            }
           }
         }, 1000);
       }
     } else {
       if (fastForwardStartTimeRef.current) {
         const elapsed = (Date.now() - fastForwardStartTimeRef.current) / 1000;
-        achievementsEngine?.triggerFastForward?.(elapsed);
+        if (elapsed >= 45 && !fastForwardUnlockedRef.current) {
+          fastForwardUnlockedRef.current = true;
+          achievementsEngine?.triggerFastForward?.(elapsed);
+        }
         fastForwardStartTimeRef.current = 0;
       }
       if (fastForwardTimerRef.current) {

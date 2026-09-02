@@ -46,10 +46,29 @@ export default function ConfirmModal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onConfirm, onCancel, sfx]);
 
+  const [isProcessing, setIsProcessing] = React.useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setIsProcessing(false);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
+  const handleExecute = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+    try {
+      sfx?.playMenuConfirm?.();
+      await onConfirm?.();
+    } catch (e) {
+      setIsProcessing(false);
+    }
+  };
+
   return (
-    <div className="confirm-modal-backdrop animate-fade-in" onClick={onCancel}>
+    <div className="confirm-modal-backdrop animate-fade-in" onClick={isProcessing ? undefined : onCancel}>
       <div className="confirm-modal-container" onClick={(e) => e.stopPropagation()}>
         <div className="confirm-modal-icon-wrapper" style={{ background: isDestructive ? 'rgba(239, 68, 68, 0.15)' : 'rgba(59, 130, 246, 0.15)' }}>
           {isDestructive ? (
@@ -65,7 +84,9 @@ export default function ConfirmModal({
         <div className="confirm-modal-actions">
           <button
             className="confirm-modal-btn cancel-btn"
+            disabled={isProcessing}
             onClick={() => {
+              if (isProcessing) return;
               onCancel?.();
               sfx?.playModalClose?.();
             }}
@@ -76,14 +97,18 @@ export default function ConfirmModal({
 
           <button
             ref={confirmBtnRef}
+            disabled={isProcessing}
             className={`confirm-modal-btn confirm-btn ${isDestructive ? 'destructive' : 'primary'}`}
-            onClick={() => {
-              onConfirm?.();
-              sfx?.playMenuConfirm?.();
-            }}
+            onClick={handleExecute}
           >
-            {isDestructive ? <Trash2 size={16} /> : <Check size={16} />}
-            <span>{confirmLabel}</span>
+            {isProcessing ? (
+              <div className="animate-spin" style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%' }} />
+            ) : isDestructive ? (
+              <Trash2 size={16} />
+            ) : (
+              <Check size={16} />
+            )}
+            <span>{isProcessing ? 'Processing...' : confirmLabel}</span>
           </button>
         </div>
       </div>

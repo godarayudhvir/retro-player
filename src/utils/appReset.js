@@ -1,4 +1,4 @@
-import { clearAllIndexedDbStores, clearUserDataStoresPreserveRoms, closeDB } from '../services/db';
+import { clearAllIndexedDbStores, clearUserDataStoresPreserveRoms, closeDB } from '../services/db.js';
 
 /**
  * Soft Reset Utility for Retro Player.
@@ -6,52 +6,36 @@ import { clearAllIndexedDbStores, clearUserDataStoresPreserveRoms, closeDB } fro
  * while strictly PRESERVING all in-app imported ROMs (custom_roms store).
  */
 export async function resetUserDataPreserveRoms() {
+  console.log('🧹 [APP RESET] Initiating soft data reset (preserving custom ROMs)...');
+
+  // 1. Fire-and-forget backend server DB purge
+  fetch('/api/db/reset', { method: 'POST' }).catch(() => {});
+
+  // 2. Clear LocalStorage and SessionStorage immediately (synchronous)
   try {
-    console.log('🧹 [APP RESET] Initiating soft data reset (preserving custom ROMs)...');
+    localStorage.clear();
+    sessionStorage.clear();
+    console.log('🧹 [APP RESET] LocalStorage & SessionStorage cleared');
+  } catch (e) {}
 
-    // 0. Clear backend server DB stores if server is active (server saves/history)
+  // 3. Clear IndexedDB stores (with 600ms hard safety timeout)
+  try {
+    await Promise.race([
+      clearUserDataStoresPreserveRoms(),
+      new Promise(resolve => setTimeout(resolve, 600))
+    ]);
+  } catch (e) {}
+
+  // 4. Purge CacheStorage in background
+  if ('caches' in window) {
     try {
-      await fetch('/api/db/reset', { method: 'POST' }).catch(() => {});
-    } catch (e) {
-      console.warn('⚠️ [APP RESET] Server DB purge warn:', e);
-    }
-
-    // 1. Empties all stores EXCEPT custom_roms
-    try {
-      await clearUserDataStoresPreserveRoms();
-    } catch (e) {
-      console.warn('⚠️ [APP RESET] Stores clear warn:', e);
-    }
-
-    // 2. Clear LocalStorage and SessionStorage (preferences, theme, audio settings)
-    try {
-      localStorage.clear();
-      sessionStorage.clear();
-      console.log('🧹 [APP RESET] LocalStorage & SessionStorage cleared');
-    } catch (e) {
-      console.warn('⚠️ [APP RESET] Storage clear warn:', e);
-    }
-
-    // 3. Clear CacheStorage (PWA assets & thumbnails)
-    if ('caches' in window) {
-      try {
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames.map(name => caches.delete(name)));
-        console.log('🧹 [APP RESET] CacheStorage purged');
-      } catch (e) {
-        console.warn('⚠️ [APP RESET] CacheStorage delete warn:', e);
-      }
-    }
-
-    // 4. Brief 250ms buffer
-    await new Promise(resolve => setTimeout(resolve, 250));
-
-    // 5. Hard reload to origin
-    window.location.href = window.location.origin + window.location.pathname;
-  } catch (err) {
-    console.error('🚨 [APP RESET ERROR]:', err);
-    window.location.reload();
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map(name => caches.delete(name)));
+    } catch (e) {}
   }
+
+  // 5. Clean, immediate reload
+  window.location.href = window.location.origin + window.location.pathname;
 }
 
 /**
@@ -60,57 +44,47 @@ export async function resetUserDataPreserveRoms() {
  * without modifying any codebase or server files on disk, then cleanly reloads.
  */
 export async function resetEntireApp() {
+  console.log('🧹 [APP RESET] Initiating full client-side factory reset & cache purge...');
+
+  // 1. Fire-and-forget backend server DB reset
+  fetch('/api/db/reset', { method: 'POST' }).catch(() => {});
+
+  // 2. Clear LocalStorage and SessionStorage immediately (synchronous)
   try {
-    console.log('🧹 [APP RESET] Initiating full client-side factory reset & cache purge...');
+    localStorage.clear();
+    sessionStorage.clear();
+    console.log('🧹 [APP RESET] LocalStorage & SessionStorage cleared');
+  } catch (e) {}
 
-    // 0. Clear backend server DB stores if server is active
+  // 3. Purge IndexedDB databases with explicit connection close (with 600ms safety timeout)
+  try {
+    await Promise.race([
+      clearAllIndexedDbStores(),
+      new Promise(resolve => setTimeout(resolve, 600))
+    ]);
+    closeDB();
+  } catch (e) {}
+
+  // 4. Unregister Service Workers in parallel
+  if ('serviceWorker' in navigator) {
     try {
-      await fetch('/api/db/reset', { method: 'POST' }).catch(() => {});
-    } catch (e) {
-      console.warn('⚠️ [APP RESET] Server DB purge warn:', e);
-    }
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(r => r.unregister());
+      }).catch(() => {});
+    } catch (e) {}
+  }
 
-    // 1. Empties all object stores inside RetroPlayerDB immediately and closes active connections
+  // 5. Purge CacheStorage
+  if ('caches' in window) {
     try {
-      await clearAllIndexedDbStores();
-    } catch (e) {
-      console.warn('⚠️ [APP RESET] IndexedDB store clear warn:', e);
-    }
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map(name => caches.delete(name)));
+    } catch (e) {}
+  }
 
-    // 2. Unregister all service workers
-    if ('serviceWorker' in navigator) {
-      try {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(registrations.map(reg => reg.unregister()));
-        console.log('🧹 [APP RESET] Service workers unregistered');
-      } catch (e) {
-        console.warn('⚠️ [APP RESET] Service worker unregister warn:', e);
-      }
-    }
-
-    // 3. Delete all CacheStorage entries (PWA assets, cached ROMs, images)
-    if ('caches' in window) {
-      try {
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames.map(name => caches.delete(name)));
-        console.log('🧹 [APP RESET] CacheStorage purged');
-      } catch (e) {
-        console.warn('⚠️ [APP RESET] CacheStorage delete warn:', e);
-      }
-    }
-
-    // 4. Clear LocalStorage and SessionStorage
-    try {
-      localStorage.clear();
-      sessionStorage.clear();
-      console.log('🧹 [APP RESET] LocalStorage & SessionStorage cleared');
-    } catch (e) {
-      console.warn('⚠️ [APP RESET] Storage clear warn:', e);
-    }
-
-    // 5. Delete all IndexedDB databases
-    try {
-      closeDB();
+  // 6. Delete active databases non-blocking
+  try {
+    if (typeof indexedDB !== 'undefined') {
       const knownDbs = [
         'RetroPlayerDB',
         'RetroPlayerMetadataDB',
@@ -119,42 +93,16 @@ export async function resetEntireApp() {
         'localforage',
         'keyval-store',
         'workbox-expiration-cache',
-        'workbox-precache-v2',
-        '/home/web_user/retroarch/userdata'
+        'workbox-precache-v2'
       ];
-
-      // Dynamically discover all active IndexedDB databases in the browser
-      if (typeof indexedDB !== 'undefined' && typeof indexedDB.databases === 'function') {
-        try {
-          const dbs = await indexedDB.databases();
-          for (const dbInfo of dbs) {
-            if (dbInfo.name) {
-              indexedDB.deleteDatabase(dbInfo.name);
-            }
-          }
-        } catch (dbErr) {
-          console.warn('⚠️ [APP RESET] Dynamic databases scan warn:', dbErr);
-        }
-      }
-
-      // Explicitly delete known databases
       for (const name of knownDbs) {
-        try {
-          indexedDB.deleteDatabase(name);
-        } catch (e) {}
+        try { indexedDB.deleteDatabase(name); } catch (_) {}
       }
-      console.log('🧹 [APP RESET] IndexedDB databases purged');
-    } catch (e) {
-      console.warn('⚠️ [APP RESET] IndexedDB purge warn:', e);
     }
+  } catch (e) {}
 
-    // 6. Brief 250ms buffer for browser storage engines to finalize deletions
-    await new Promise(resolve => setTimeout(resolve, 250));
-
-    // 7. Hard reload to origin for a fresh start
+  // 7. Brief 150ms buffer and hard reload
+  setTimeout(() => {
     window.location.href = window.location.origin + window.location.pathname;
-  } catch (err) {
-    console.error('🚨 [APP RESET ERROR]:', err);
-    window.location.reload();
-  }
+  }, 150);
 }

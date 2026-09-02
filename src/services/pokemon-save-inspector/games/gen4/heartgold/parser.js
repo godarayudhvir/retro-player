@@ -83,7 +83,35 @@ export function parsePokemonHeartGold(data) {
     badges,
     badgeCount,
     hasAllBadges: badgeCount === 8,
-    hasStarter: totalBadgeCount > 0,
+    hasStarter: (data[activeSlot + 0x9C] >= 1 && data[activeSlot + 0x9C] <= 6) || badgeCount > 0,
+    hasFirstCatch: badgeCount >= 1,
+    hasFullParty: (data[activeSlot + 0x9C] >= 6) || badgeCount >= 2,
+    hms: {
+      hm01: badgeCount >= 2,
+      hm02: badgeCount >= 5,
+      hm03: badgeCount >= 4,
+      hm04: badgeCount >= 4,
+      hm05: badgeCount >= 1,
+      hm06: badgeCount >= 7,
+      hm07: badgeCount >= 8,
+      hm08: totalBadgeCount >= 16,
+      hasAllHMs: totalBadgeCount >= 16
+    },
+    events: {
+      sproutTower: badgeCount >= 1,
+      sudowoodoCleared: badgeCount >= 3,
+      moomooFarm: badgeCount >= 4,
+      lakeOfRage: badgeCount >= 7,
+      goldenrodLiberated: badgeCount >= 8,
+      kimonoTrial: badgeCount >= 8,
+      suicuneTracking: badgeCount >= 8,
+      pokeathlonChampion: badgeCount >= 3,
+      championRed: has16Badges
+    },
+    legendaries: {
+      hoOh: badgeCount >= 8,
+      hasBeasts: badgeCount >= 4
+    },
     kantoBadges,
     totalBadgeCount,
     has16Badges,

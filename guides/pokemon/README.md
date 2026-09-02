@@ -1,6 +1,6 @@
 # 🏆 Pokémon Save Inspector & Regional Milestones Hub (Gen 1 – Gen 5)
 
-Welcome to the **Pokémon Save Inspector & Regional Milestones Guide Hub**. Retro Player features an authentic, zero-hack binary save analyzer capable of inspecting SRAM and Flash memory banks across 18 canonical Pokémon cartridges to unlock tailored storyline feats, utility HM masteries, legendary encounters, Pokédex progression bars, and 8/16-badge regional gym cases.
+Welcome to the **Pokémon Save Inspector & Regional Milestones Guide Hub**. Retro Player features an authentic, zero-hack binary save analyzer capable of inspecting SRAM and Flash memory banks across 20 canonical Pokémon cartridges to unlock tailored storyline feats, utility HM masteries, legendary encounters, Pokédex progression bars, and 8/16-badge regional gym cases.
 
 ---
 
@@ -53,6 +53,8 @@ All 20 canonical Gen 1–5 cartridges have been verified against real battery sa
 | **Gen 4** | NDS | *Pokémon SoulSilver Version* | 512 KB Flash | ✅ Verified | Small Block `0xF628`, CRC16-CCITT, 16 Dual-Region Badges |
 | **Gen 5** | NDS | *Pokémon Black Version* | 512 KB Flash | ✅ Verified | Block 23 `0x19400`, Trainer Info & 8 Unova Badges |
 | **Gen 5** | NDS | *Pokémon White Version* | 512 KB Flash | ✅ Verified | Block 23 `0x19400`, Trainer Info & 8 Unova Badges |
+| **Gen 5** | NDS | *Pokémon Black Version 2* | 512 KB Flash | ✅ Verified | Block 23 `0x19400`, Trainer Info, 8 Unova Badges, PWT & Kyurem Fusion |
+| **Gen 5** | NDS | *Pokémon White Version 2* | 512 KB Flash | ✅ Verified | Block 23 `0x19400`, Trainer Info, 8 Unova Badges, PWT & Kyurem Fusion |
 
 ---
 

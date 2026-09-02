@@ -250,6 +250,31 @@ export default function App() {
     }
   }, [currentBgmTrackKey]);
 
+  // Window Shopper Achievement: Idle in the library with BGM active for > 5 minutes
+  useEffect(() => {
+    if (!bgm?.isPlaying || activeGame) return;
+
+    let idleTimer = null;
+    const resetIdleTimer = () => {
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        if (bgm?.isPlaying && !activeGame) {
+          achievementsEngineRef.current?.triggerBrowseIdle?.(300);
+        }
+      }, 300000); // 5 minutes (300,000 ms)
+    };
+
+    resetIdleTimer();
+
+    const events = ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll'];
+    events.forEach(ev => window.addEventListener(ev, resetIdleTimer, { passive: true }));
+
+    return () => {
+      if (idleTimer) clearTimeout(idleTimer);
+      events.forEach(ev => window.removeEventListener(ev, resetIdleTimer));
+    };
+  }, [bgm?.isPlaying, activeGame]);
+
   // Game Launch Orchestration: Check if keyboard splash prompt should show on UI before booting into emulator
   const handleLaunchGameImmediately = useCallback((game) => {
     if (!game) return;

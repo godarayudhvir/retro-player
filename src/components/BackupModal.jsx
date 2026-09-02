@@ -20,10 +20,10 @@ import {
   Trash2,
   AlertTriangle
 } from 'lucide-react';
-import ConfirmModal from './ConfirmModal';
-import { resetEntireApp, resetUserDataPreserveRoms } from '../utils/appReset';
-import { exportFullDatabase, importFullDatabase, checkServerDbStatus } from '../services/db';
-import { haptics } from '../services/hapticsService';
+import ConfirmModal from './ConfirmModal.jsx';
+import { resetEntireApp, resetUserDataPreserveRoms } from '../utils/appReset.js';
+import { exportFullDatabase, importFullDatabase, checkServerDbStatus } from '../services/db.js';
+import { haptics } from '../services/hapticsService.js';
 
 /**
  * BackupModal: Centralized Filesystem Database & Storage Management Studio.
@@ -158,7 +158,9 @@ export default function BackupModal({
       setStatusMessage(`Backup exported successfully as "${fileName}".`);
       setIsExporting(false);
 
-      if (achievementsEngine?.triggerBackupExported) {
+      if (achievementsEngine?.triggerDatabaseBackup) {
+        achievementsEngine.triggerDatabaseBackup();
+      } else if (achievementsEngine?.triggerBackupExported) {
         achievementsEngine.triggerBackupExported();
       }
     } catch (err) {
@@ -511,8 +513,8 @@ export default function BackupModal({
         cancelLabel="Cancel"
         isDestructive={false}
         onConfirm={async () => {
-          setShowSoftResetConfirm(false);
           sfx?.playDelete?.();
+          setStatusMessage('Resetting player data and caches...');
           await resetUserDataPreserveRoms();
         }}
         onCancel={() => {
@@ -531,8 +533,8 @@ export default function BackupModal({
         cancelLabel="Cancel"
         isDestructive={true}
         onConfirm={async () => {
-          setShowHardResetConfirm(false);
           sfx?.playDelete?.();
+          setStatusMessage('Performing factory reset & clearing all storage...');
           await resetEntireApp();
         }}
         onCancel={() => {

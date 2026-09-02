@@ -67,7 +67,35 @@ export function parsePokemonPlatinum(data) {
     badges,
     badgeCount,
     hasAllBadges: badgeCount === 8,
-    hasStarter: badgeCount > 0,
+    hasStarter: (data[activeSlot + 0x9C] >= 1 && data[activeSlot + 0x9C] <= 6) || badgeCount > 0,
+    hasFirstCatch: badgeCount >= 1,
+    hasFullParty: (data[activeSlot + 0x9C] >= 6) || badgeCount >= 2,
+    hasFossil: badgeCount >= 2,
+    hms: {
+      hm01: badgeCount >= 1,
+      hm02: badgeCount >= 2,
+      hm03: badgeCount >= 5,
+      hm04: badgeCount >= 6,
+      hm05: badgeCount >= 4,
+      hm06: badgeCount >= 6,
+      hm07: badgeCount >= 8,
+      hm08: badgeCount >= 7,
+      hasAllHMs: badgeCount >= 8
+    },
+    events: {
+      valleyWindworks: badgeCount >= 1,
+      galacticHq: badgeCount >= 7,
+      spearPillar: badgeCount >= 7,
+      distortionWorld: badgeCount >= 7,
+      battleFrontier: badgeCount >= 8
+    },
+    legendaries: {
+      giratina: badgeCount >= 7,
+      creationDuo: badgeCount >= 8,
+      lakeGuardians: badgeCount >= 7,
+      heatran: badgeCount >= 8,
+      cresselia: badgeCount >= 8
+    },
     kantoBadges: null,
     totalBadgeCount: badgeCount,
     has16Badges: false,
