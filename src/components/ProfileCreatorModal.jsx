@@ -40,10 +40,10 @@ export default function ProfileCreatorModal({
       setFavoriteColor(initialProfile.favoriteColor || '#ef4444');
     } else {
       const defaultSuggested = suggestedName || 'Player';
-      const defaultPreset = CHARACTER_ARCHETYPES[0].presets[0];
+      const defaultPreset = CHARACTER_ARCHETYPES?.[0];
       setName('');
-      setAvatarSeed(defaultPreset.avatarSeed || defaultSuggested);
-      setFavoriteColor(defaultPreset.favoriteColor);
+      setAvatarSeed(defaultPreset?.avatarSeed || defaultSuggested);
+      setFavoriteColor(defaultPreset?.favoriteColor || '#ef4444');
     }
   }, [isOpen, initialProfile, suggestedName]);
 

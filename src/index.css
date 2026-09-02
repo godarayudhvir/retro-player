@@ -25174,11 +25174,11 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   margin-left: -10%;
   margin-top: -10%;
   transform: rotate(-3deg) scale(1.05);
-  opacity: 0.32;
+  opacity: 0.45;
 }
 
 [data-color-mode="dark"] .mobile-ob-poster-grid {
-  opacity: 0.38;
+  opacity: 0.42;
 }
 
 .mobile-ob-poster-cell {
@@ -25206,23 +25206,23 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 .mobile-ob-poster-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(248, 250, 252, 0.65) 0%,
-    rgba(248, 250, 252, 0.35) 25%,
-    rgba(248, 250, 252, 0.9) 65%,
-    #f8fafc 96%
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(248, 250, 252, 0.4) 0%,
+    rgba(248, 250, 252, 0.72) 100%
   );
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
 }
 
 [data-color-mode="dark"] .mobile-ob-poster-overlay {
-  background: linear-gradient(
-    180deg,
-    rgba(11, 14, 20, 0.65) 0%,
-    rgba(11, 14, 20, 0.35) 25%,
-    rgba(11, 14, 20, 0.9) 65%,
-    #0b0e14 96%
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(11, 14, 20, 0.4) 0%,
+    rgba(11, 14, 20, 0.76) 100%
   );
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
 }
 
 .mobile-ob-hero-stage {

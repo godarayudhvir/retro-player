@@ -164,7 +164,7 @@ export default function MobileOnboardingScreen({
           {/* Ambient Wall Backdrop of Retro Game Art */}
           <div className="mobile-ob-poster-wall" aria-hidden="true">
             <div className="mobile-ob-poster-grid">
-              {POSTER_WALL_COVERS.concat(POSTER_WALL_COVERS).map((src, i) => (
+              {[...POSTER_WALL_COVERS, ...POSTER_WALL_COVERS, ...POSTER_WALL_COVERS, ...POSTER_WALL_COVERS].map((src, i) => (
                 <div key={i} className="mobile-ob-poster-cell">
                   <img src={resolveAssetPath(src)} alt="" loading="lazy" />
                 </div>

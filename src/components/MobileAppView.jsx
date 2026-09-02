@@ -363,6 +363,7 @@ export default function MobileAppView({
   const rawCover = (dsTab === 'manage' && editCoverUrl) ? editCoverUrl : (selectedMeta?.coverUrl || (selectedGameForDetails?.coverUrl && !selectedGameForDetails?.coverUrl.endsWith('.svg') ? selectedGameForDetails.coverUrl : null));
   const coverSrc = rawCover ? resolveAssetPath(rawCover) : null;
   const rawScreenshot = selectedMeta?.screenshotUrl;
+  const screenshotSrc = rawScreenshot ? resolveAssetPath(rawScreenshot) : null;
   const description = (selectedGameForDetails?.sidecarMetadata && selectedGameForDetails.sidecarMetadata.description !== undefined)
     ? selectedGameForDetails.sidecarMetadata.description
     : (selectedMeta?.description !== undefined ? selectedMeta.description : (selectedGameForDetails ? getGameDescription(selectedGameForDetails) : ''));
