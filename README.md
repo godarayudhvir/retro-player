@@ -140,6 +140,7 @@ Unlike cloud gaming services that stream heavy 25Mbps video feeds and melt your 
 
 - **🔥 Server Resource Usage is ~0%**: The host only serves static files and streams the raw ROM binary once. Even a free-tier container or Raspberry Pi can serve hundreds of concurrent players.
 - **⚡ Low-Latency Local Input**: Controllers and keyboards are polled directly in the client browser with zero network streaming delay.
+- **📊 Real-Time Telemetry & Diagnostics HUD**: Genuine low-overhead canvas draw-call monitoring, per-system frame targets, hardware audio buffer latency, and native vs HiDPI presentation resolution display.
 - **💾 Automatic Auto-Sorting Disk Persistence**: Load any ROM from your browser—it is automatically sorted and saved to your host disk (`/roms/<system>/`) for future sessions.
 - **🛡️ Air-Gapped Offline Support**: Features dual-mode fallback to local core bundles when offline.
 

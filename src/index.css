@@ -7254,7 +7254,12 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   position: absolute;
   top: 68px;
   right: 20px;
-  width: 340px;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 189, 248, 0.3) transparent;
   background: #ffffff;
   border: 1.5px solid rgba(14, 165, 233, 0.4);
   border-radius: 14px;
@@ -7347,6 +7352,16 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   gap: 0.65rem;
 }
 
+@media (max-width: 480px) {
+  .emulator-diag-panel {
+    right: 16px;
+    left: 16px;
+    width: auto;
+    top: 60px;
+    padding: 0.9rem;
+  }
+}
+
 .diag-card {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
@@ -7385,7 +7400,9 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 }
 
 .diag-card-val.audio-val,
-.diag-card-val.input-val {
+.diag-card-val.input-val,
+.diag-card-val.res-val,
+.diag-card-val.mem-val {
   font-size: 0.8rem;
   font-weight: 700;
   color: #0284c7;
@@ -7395,7 +7412,9 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 }
 
 [data-color-mode="dark"] .diag-card-val.audio-val,
-[data-color-mode="dark"] .diag-card-val.input-val {
+[data-color-mode="dark"] .diag-card-val.input-val,
+[data-color-mode="dark"] .diag-card-val.res-val,
+[data-color-mode="dark"] .diag-card-val.mem-val {
   color: #38bdf8;
 }
 

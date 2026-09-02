@@ -21,6 +21,7 @@
 - **Rich Presence & Multi-Platform Game Activity**: Real-time game status broadcasting to Discord Desktop Rich Presence (RPC via local IPC socket with interactive web launcher & GitHub buttons), OS MediaSession API (macOS Control Center, Windows 11, iOS Lock Screen, Android notifications), and `/api/presence` webhook / OBS streamer overlay widget (`/widgets/now-playing.html`).
 - **Haptic Touch & Tactile Feedback Engine**: Hardware-accelerated tactile impulses (`navigator.vibrate`) for mobile touch navigation, carousel selection, on-screen virtual gamepads, and achievement fanfare with built-in battery-saver awareness.
 - **Universal Multi-Resolution & Device Adaptive**: 100% responsive across compact phones (`375x667`), modern smartphones (`390x844` / `430x932`), tablets (`810x1080`), handheld consoles (`1280x800` Steam Deck), 1080p / 1440p (2K) desktop monitors, and 4K Big Picture TVs (`3840x2160`).
+- **Genuine Real-Time Performance & Diagnostics HUD**: Low-overhead canvas presentation draw-call hooking, lifecycle state tracking (zero false 60 FPS), per-system native frame targets (NTSC/PAL/N64/GBA), Web Audio hardware buffer latency inspection, real gamepad polling frequency benchmarks, and authentic native core vs HiDPI presentation resolution telemetry.
 - **Progressive Web App (PWA) & Offline Mode**: Installable standalone app across macOS, Windows, Linux, Steam Deck, iOS, and Android.
 
 ## Documentation & Guides

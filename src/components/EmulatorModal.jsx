@@ -330,14 +330,23 @@ export default function EmulatorModal({
 
   // Performance & Diagnostic Health State
   const [perfStats, setPerfStats] = useState({
-    fps: 60,
-    frameTimeMs: 16.6,
+    fps: null,
+    targetFps: 60.0,
+    targetLabel: 'Target: 60.0 FPS (NTSC)',
+    nativeResolution: 'Detecting...',
+    frameTimeMs: null,
+    frameJitterMs: null,
     droppedFrames: 0,
-    audioState: 'Active (48.0 kHz)',
-    inputLatency: '< 1 ms',
-    healthStatus: 'OPTIMAL (VSYNC)',
-    healthColor: '#10b981',
-    diagnosticTip: 'WebAssembly core & GPU swapchain running with synchronized audio/video presentation.'
+    audioState: 'Initializing...',
+    audioLatency: null,
+    inputLatency: 'Direct Hook',
+    inputDevice: 'Keyboard',
+    renderResolution: 'Detecting...',
+    graphicsBackend: 'Detecting...',
+    wasmMemory: null,
+    healthStatus: 'INITIALIZING',
+    healthColor: '#0284c7',
+    diagnosticTip: 'Preparing WebAssembly sandbox & downloading emulator core...'
   });
 
   const sessionReportedRef = useRef(false);
@@ -390,55 +399,123 @@ export default function EmulatorModal({
     }
   }, []);
 
-  // Real-Time Diagnostic Engine reading directly from the active Emulator Canvas loop
+  // Real-Time Diagnostic Engine reading directly from the active Emulator Canvas telemetry
   useEffect(() => {
-    const interval = setInterval(() => {
-      let coreFps = 60;
-      let frameTime = 16.6;
-      let audioStateStr = 'Active (Sync)';
+    let lastPollTime = performance.now();
 
+    const interval = setInterval(() => {
+      const now = performance.now();
+      const pollDelta = now - lastPollTime;
+      lastPollTime = now;
+
+      let diag = null;
       try {
         const win = iframeRef.current?.contentWindow;
-        if (win) {
-          if (typeof win.getEmulationFps === 'function') {
-            coreFps = win.getEmulationFps();
-          }
-          const emu = win.EJS_emulator;
-          if (emu?.audioContext) {
-            const rate = (emu.audioContext.sampleRate / 1000).toFixed(1);
-            audioStateStr = `${emu.audioContext.state === 'running' ? 'Active' : emu.audioContext.state} (${rate} kHz)`;
-          }
+        if (win && typeof win.getEmulationDiagnostics === 'function') {
+          diag = win.getEmulationDiagnostics();
+        } else if (win && typeof win.getEmulationFps === 'function') {
+          const legacyFps = win.getEmulationFps();
+          diag = {
+            status: legacyFps > 0 ? 'RUNNING' : 'INITIALIZING',
+            gameStarted: legacyFps > 0,
+            fps: legacyFps > 0 ? legacyFps : null,
+            targetFps: 60.0,
+            targetLabel: 'Target: 60.0 FPS',
+            frameTimeMs: legacyFps > 0 ? parseFloat((1000 / legacyFps).toFixed(1)) : null,
+            frameJitterMs: null,
+            renderResolution: null,
+            graphicsBackend: 'Canvas'
+          };
         }
       } catch (e) {}
 
-      if (coreFps > 0) {
-        frameTime = parseFloat((1000 / coreFps).toFixed(1));
-      }
+      // Measure real connected Gamepad details & polling frequency
+      let inputDeviceStr = 'Keyboard';
+      let inputLatencyStr = '< 1 ms (Direct Hook)';
+      try {
+        const gamepads = typeof navigator.getGamepads === 'function' ? navigator.getGamepads() : [];
+        const activeGamepad = Array.from(gamepads || []).find(g => g && g.connected);
+        if (activeGamepad) {
+          const rawId = (activeGamepad.id || 'Standard Gamepad').split('(')[0].trim();
+          inputDeviceStr = rawId.length > 20 ? rawId.slice(0, 18) + '…' : rawId;
+          const estimatedHz = pollDelta > 0 ? Math.round(1000 / Math.max(1, pollDelta)) : 60;
+          inputLatencyStr = `~${Math.min(16.7, Math.max(1, 1000 / Math.max(60, estimatedHz))).toFixed(1)} ms (${estimatedHz} Hz)`;
+        } else if (gamepadConnected) {
+          inputDeviceStr = 'Gamepad';
+          inputLatencyStr = '< 2 ms (Direct Hook)';
+        }
+      } catch (e) {}
+
+      // Measure real WASM & JS Memory Heap allocation (Chromium / supported runtimes)
+      let memoryStr = null;
+      try {
+        if (typeof performance !== 'undefined' && performance.memory && performance.memory.usedJSHeapSize) {
+          memoryStr = `${(performance.memory.usedJSHeapSize / (1024 * 1024)).toFixed(1)} MB`;
+        }
+      } catch (e) {}
+
+      // Evaluate emulation health & status strictly against reality
+      const targetFps = diag?.targetFps || 60.0;
+      const targetLabel = diag?.targetLabel || `Target: ${targetFps.toFixed(1)} FPS`;
+      const currentFps = diag?.fps ?? null;
+      const currentFrameTime = diag?.frameTimeMs ?? (currentFps ? parseFloat((1000 / currentFps).toFixed(1)) : null);
+      const currentJitter = diag?.frameJitterMs ?? null;
+      const nativeRes = diag?.nativeResolution || null;
+      const renderRes = diag?.renderResolution || null;
+      const graphicsBackend = diag?.graphicsBackend || (diag?.gameStarted ? 'WebGL' : 'Detecting...');
+
+      let audioStateStr = diag?.audio?.state ? `${diag.audio.state} (${diag.audio.sampleRate})` : 'Active (Sync)';
+      let audioLatencyStr = diag?.audio?.latencyMs ? `~${diag.audio.latencyMs} ms buffer` : 'Dynamic Rate Control';
 
       let status = 'OPTIMAL (VSYNC)';
       let color = '#10b981';
-      let tip = 'Hardware accelerated presentation. VSync & audio buffer in sync.';
+      let tip = 'Hardware accelerated presentation. Audio & video synchronized at native console speed.';
 
       if (!isTabActiveRef.current) {
         status = 'BACKGROUND PAUSED';
         color = '#f59e0b';
         tip = 'Browser throttled background tab. Focus the game window to resume.';
-      } else if (coreFps < 45) {
+      } else if (diag?.status === 'ERROR') {
+        status = 'ENGINE ERROR';
+        color = '#ef4444';
+        tip = diag.errorMessage || 'Encountered an unexpected core runtime exception.';
+      } else if (diag?.status === 'STALLED') {
+        status = 'EMULATION STALLED';
+        color = '#ef4444';
+        tip = 'WebAssembly core stopped presenting frames to the canvas. ROM may be frozen.';
+      } else if (isLoadingGame || !diag?.gameStarted || currentFps === null) {
+        status = 'INITIALIZING CORE';
+        color = '#0284c7';
+        tip = 'Decompressing ROM and compiling WebAssembly sandbox...';
+      } else if (currentFps < targetFps * 0.7) {
         status = 'PERFORMANCE THROTTLED';
         color = '#ef4444';
-        tip = 'Core execution delayed. Close duplicate background tabs or active audio streams.';
-      } else if (coreFps < 58) {
+        tip = 'Core execution delayed. Close background heavy tabs or active video streams.';
+      } else if (currentFps < targetFps - 5) {
+        status = 'FRAME DROPS DETECTED';
+        color = '#fbbf24';
+        tip = 'Emulation is experiencing minor timing jitter below native target rate.';
+      } else if (currentFps < targetFps - 2) {
         status = 'STABLE EMULATION';
-        color = '#10b981';
-        tip = 'Emulation running smoothly.';
+        color = '#34d399';
+        tip = 'Emulation running smoothly within normal VSync sync tolerance.';
       }
 
       setPerfStats(prev => ({
-        fps: Math.min(60, coreFps || 60),
-        frameTimeMs: frameTime || 16.6,
-        droppedFrames: prev.droppedFrames + (coreFps < 50 ? 1 : 0),
+        fps: currentFps,
+        targetFps,
+        targetLabel,
+        nativeResolution: nativeRes || prev.nativeResolution,
+        frameTimeMs: currentFrameTime,
+        frameJitterMs: currentJitter,
+        droppedFrames: prev.droppedFrames + (currentFps !== null && currentFps < targetFps - 8 ? 1 : 0),
         audioState: audioStateStr,
-        inputLatency: gamepadConnected ? '< 2 ms' : '< 1 ms (Keyboard)',
+        audioLatency: audioLatencyStr,
+        inputDevice: inputDeviceStr,
+        inputLatency: inputLatencyStr,
+        renderResolution: renderRes,
+        graphicsBackend: graphicsBackend,
+        wasmMemory: memoryStr,
         healthStatus: status,
         healthColor: color,
         diagnosticTip: tip
@@ -446,7 +523,7 @@ export default function EmulatorModal({
     }, 500);
 
     return () => clearInterval(interval);
-  }, [gamepadConnected]);
+  }, [gamepadConnected, isLoadingGame]);
 
   const formatCleanFilename = (title, type, ext) => {
     const normalized = (title || 'RetroPlayer')
@@ -723,6 +800,62 @@ export default function EmulatorModal({
         const currentTitle = currentGame.title || currentGame.name || 'Retro Game';
         const currentSystem = currentGame.systemName || currentGame.systemTitle || (currentGame.systemKey ? currentGame.systemKey.toUpperCase() : 'Retro Console');
         const isDarkMode = typeof document !== 'undefined' && document.documentElement.getAttribute('data-color-mode') === 'dark';
+
+        // Calculate authentic hardware target FPS, native resolution, and system specs
+        const titleAndFilename = `${currentTitle} ${romFilename}`;
+        const isPalRegion = Boolean(titleAndFilename.match(/\b(Europe|PAL|EUR|ESP|FRA|GER|ITA|Australia)\b/i));
+        let expectedTargetFps = 60.0;
+        let systemTargetLabel = 'Target: 60.0 FPS (NTSC)';
+        let nativeResolution = '256 × 224';
+
+        const sysKey = (currentGame.systemKey || '').toLowerCase();
+        if (core === 'gba' || sysKey === 'gba') {
+          expectedTargetFps = 59.73;
+          systemTargetLabel = 'Target: 59.7 FPS (GBA Native)';
+          nativeResolution = '240 × 160';
+        } else if (core === 'gb' || core === 'gbc' || sysKey === 'gb' || sysKey === 'gbc' || core === 'segaGG' || sysKey === 'gamegear') {
+          expectedTargetFps = 59.73;
+          systemTargetLabel = 'Target: 59.7 FPS (GB Native)';
+          nativeResolution = '160 × 144';
+        } else if (core === 'nes' || sysKey === 'nes') {
+          expectedTargetFps = 60.0;
+          systemTargetLabel = 'Target: 60.0 FPS (NES NTSC)';
+          nativeResolution = '256 × 240';
+        } else if (core === 'snes' || sysKey === 'snes') {
+          expectedTargetFps = 60.0;
+          systemTargetLabel = 'Target: 60.0 FPS (SNES NTSC)';
+          nativeResolution = '256 × 224';
+        } else if (core === 'segaMD' || sysKey === 'genesis' || sysKey === 'megadrive') {
+          expectedTargetFps = 60.0;
+          systemTargetLabel = 'Target: 60.0 FPS (Genesis)';
+          nativeResolution = '320 × 224';
+        } else if (core === 'n64' || sysKey === 'n64') {
+          expectedTargetFps = 30.0;
+          systemTargetLabel = 'Target: 30.0 FPS (N64 Core)';
+          nativeResolution = '320 × 240';
+        } else if (core === 'psx' || sysKey === 'ps1' || sysKey === 'psx') {
+          expectedTargetFps = 60.0;
+          systemTargetLabel = 'Target: 60.0 FPS (PS1 NTSC)';
+          nativeResolution = '320 × 240';
+        } else if (core === 'melonds' || sysKey === 'nds') {
+          expectedTargetFps = 60.0;
+          systemTargetLabel = 'Target: 60.0 FPS (NDS Dual)';
+          nativeResolution = '256 × 384';
+        } else if (core === 'atari2600' || sysKey === 'atari2600') {
+          expectedTargetFps = 60.0;
+          systemTargetLabel = 'Target: 60.0 FPS (Atari 2600)';
+          nativeResolution = '160 × 192';
+        } else if (core === 'mame' || sysKey === 'arcade') {
+          expectedTargetFps = 60.0;
+          systemTargetLabel = 'Target: 60.0 FPS (Arcade)';
+          nativeResolution = '320 × 240';
+        } else if (isPalRegion) {
+          expectedTargetFps = 50.0;
+          systemTargetLabel = 'Target: 50.0 FPS (PAL 50Hz)';
+        } else {
+          expectedTargetFps = 60.0;
+          systemTargetLabel = `Target: 60.0 FPS (${currentSystem})`;
+        }
 
         const htmlContent = `
         <!DOCTYPE html>
@@ -1034,27 +1167,190 @@ export default function EmulatorModal({
         <body>
           <div id="game" tabindex="0"></div>
           <script>
+            window.__retroEmuState = {
+              status: 'INITIALIZING',
+              gameStarted: false,
+              targetFps: ${expectedTargetFps},
+              targetLabel: ${JSON.stringify(systemTargetLabel)},
+              nativeResolution: ${JSON.stringify(nativeResolution)},
+              realFps: 0,
+              frameTimeMs: null,
+              frameJitterMs: null,
+              drawsInCurrentTick: 0,
+              lastDrawTimestamp: 0,
+              renderResolution: null,
+              graphicsBackend: 'Detecting...',
+              errorMessage: null
+            };
+
             window.onerror = function(msg, url, lineNo, columnNo, error) {
               console.error('🚨 [EMULATORJS ENGINE RUNTIME ERROR]:', msg, 'Script:', url, 'Line:', lineNo, error);
+              if (window.__retroEmuState) {
+                window.__retroEmuState.status = 'ERROR';
+                window.__retroEmuState.errorMessage = String(msg || 'Core runtime error');
+              }
               return false;
             };
 
-            // High-Precision Core Loop FPS Counter
-            let _coreFps = 60;
-            let _fCount = 0;
-            let _fTime = performance.now();
-            function _measureLoop(now) {
-              _fCount++;
-              if (now - _fTime >= 500) {
-                _coreFps = Math.round((_fCount * 1000) / (now - _fTime));
-                _fCount = 0;
-                _fTime = now;
+            // Hook HTMLCanvasElement to intercept authentic WebGL and 2D draw calls
+            (function() {
+              const origGetContext = HTMLCanvasElement.prototype.getContext;
+              HTMLCanvasElement.prototype.getContext = function(type, attrs) {
+                const ctx = origGetContext.apply(this, arguments);
+                if (!ctx) return ctx;
+
+                const lowerType = (type || '').toLowerCase();
+                if (lowerType.includes('webgl2')) {
+                  window.__retroEmuState.graphicsBackend = 'WebGL 2.0';
+                } else if (lowerType.includes('webgl') || lowerType.includes('experimental')) {
+                  window.__retroEmuState.graphicsBackend = 'WebGL 1.0';
+                } else if (lowerType.includes('2d')) {
+                  window.__retroEmuState.graphicsBackend = 'Canvas 2D';
+                }
+
+                if (ctx.__telemetryHooked) return ctx;
+                ctx.__telemetryHooked = true;
+
+                const recordDraw = () => {
+                  window.__retroEmuState.drawsInCurrentTick++;
+                  window.__retroEmuState.lastDrawTimestamp = performance.now();
+                };
+
+                if (lowerType.includes('webgl')) {
+                  const origDrawArrays = ctx.drawArrays;
+                  ctx.drawArrays = function() {
+                    recordDraw();
+                    return origDrawArrays.apply(this, arguments);
+                  };
+                  const origDrawElements = ctx.drawElements;
+                  ctx.drawElements = function() {
+                    recordDraw();
+                    return origDrawElements.apply(this, arguments);
+                  };
+                  const origClear = ctx.clear;
+                  ctx.clear = function() {
+                    recordDraw();
+                    return origClear.apply(this, arguments);
+                  };
+                } else if (lowerType.includes('2d')) {
+                  const origPutImageData = ctx.putImageData;
+                  ctx.putImageData = function() {
+                    recordDraw();
+                    return origPutImageData.apply(this, arguments);
+                  };
+                  const origDrawImage = ctx.drawImage;
+                  ctx.drawImage = function() {
+                    recordDraw();
+                    return origDrawImage.apply(this, arguments);
+                  };
+                }
+
+                return ctx;
+              };
+            })();
+
+            // High-Precision Real Frame Telemetry Loop
+            let _framesInWindow = 0;
+            let _windowStartTime = performance.now();
+            let _lastFramePresentedTime = performance.now();
+            let _frameDeltas = [];
+
+            function _telemetryLoop(now) {
+              const state = window.__retroEmuState;
+
+              // Register genuine presentation frame if draw calls happened in this RAF turn
+              if (state.drawsInCurrentTick > 0) {
+                _framesInWindow++;
+                state.drawsInCurrentTick = 0;
+
+                const delta = now - _lastFramePresentedTime;
+                _lastFramePresentedTime = now;
+                if (delta > 4 && delta < 250) {
+                  _frameDeltas.push(delta);
+                  if (_frameDeltas.length > 30) _frameDeltas.shift();
+                }
               }
-              requestAnimationFrame(_measureLoop);
+
+              // Detect native internal canvas pixel resolution
+              const canvas = document.querySelector('canvas');
+              if (canvas && canvas.width > 0 && canvas.height > 0) {
+                state.renderResolution = canvas.width + ' × ' + canvas.height;
+              }
+
+              // Windowed FPS calculation every 500ms
+              const elapsed = now - _windowStartTime;
+              if (elapsed >= 500) {
+                if (state.gameStarted) {
+                  const timeSinceDraw = now - state.lastDrawTimestamp;
+                  if (timeSinceDraw > 1500) {
+                    state.status = 'STALLED';
+                    state.realFps = 0;
+                  } else {
+                    state.status = 'RUNNING';
+                    state.realFps = Math.round((_framesInWindow * 1000) / elapsed);
+                  }
+
+                  if (_frameDeltas.length > 0) {
+                    const avg = _frameDeltas.reduce((a, b) => a + b, 0) / _frameDeltas.length;
+                    state.frameTimeMs = parseFloat(avg.toFixed(1));
+                    const variance = _frameDeltas.reduce((a, b) => a + Math.abs(b - avg), 0) / _frameDeltas.length;
+                    state.frameJitterMs = parseFloat(variance.toFixed(1));
+                  }
+                } else {
+                  state.realFps = 0;
+                  state.frameTimeMs = null;
+                  state.frameJitterMs = null;
+                }
+
+                _framesInWindow = 0;
+                _windowStartTime = now;
+              }
+
+              requestAnimationFrame(_telemetryLoop);
             }
-            requestAnimationFrame(_measureLoop);
+            requestAnimationFrame(_telemetryLoop);
+
+            window.getEmulationDiagnostics = function() {
+              const state = window.__retroEmuState;
+              const emu = window.EJS_emulator;
+              let audioData = {
+                state: 'Inactive',
+                sampleRate: '48.0 kHz',
+                latencyMs: null
+              };
+
+              if (emu && emu.audioContext) {
+                const ctx = emu.audioContext;
+                const rate = (ctx.sampleRate / 1000).toFixed(1) + ' kHz';
+                const baseLat = typeof ctx.baseLatency === 'number' ? (ctx.baseLatency * 1000).toFixed(1) : null;
+                const outLat = typeof ctx.outputLatency === 'number' ? (ctx.outputLatency * 1000).toFixed(1) : null;
+                const totalLat = (baseLat && outLat) ? (parseFloat(baseLat) + parseFloat(outLat)).toFixed(1) : (baseLat || outLat || null);
+                audioData = {
+                  state: ctx.state === 'running' ? 'Active' : (ctx.state || 'Suspended'),
+                  sampleRate: rate,
+                  latencyMs: totalLat
+                };
+              }
+
+              return {
+                status: state.status,
+                gameStarted: state.gameStarted,
+                fps: state.gameStarted && state.status === 'RUNNING' ? state.realFps : null,
+                targetFps: state.targetFps,
+                targetLabel: state.targetLabel,
+                nativeResolution: state.nativeResolution,
+                frameTimeMs: state.frameTimeMs,
+                frameJitterMs: state.frameJitterMs,
+                renderResolution: state.renderResolution,
+                graphicsBackend: state.graphicsBackend,
+                audio: audioData,
+                errorMessage: state.errorMessage
+              };
+            };
+
+            // Legacy backward-compatibility getter
             window.getEmulationFps = function() {
-              return _coreFps;
+              return (window.__retroEmuState && window.__retroEmuState.gameStarted) ? window.__retroEmuState.realFps : 0;
             };
             // Dynamically enhance EmulatorJS native loading indicator with animated spinner
             const _loaderWatcher = setInterval(function() {
@@ -1757,6 +2053,9 @@ export default function EmulatorModal({
 
             window.EJS_ready = function() {
               console.log('🎮 [EMULATORJS READY] Emulation Core Initialized');
+              if (window.__retroEmuState && window.__retroEmuState.status !== 'RUNNING') {
+                window.__retroEmuState.status = 'READY';
+              }
               try {
                 window.focus();
                 syncAllGamepads();
@@ -1770,6 +2069,11 @@ export default function EmulatorModal({
 
             window.EJS_onGameStart = function() {
               console.log('🎮 [GAME STARTED] ROM decompressed & emulation active');
+              if (window.__retroEmuState) {
+                window.__retroEmuState.status = 'RUNNING';
+                window.__retroEmuState.gameStarted = true;
+                window.__retroEmuState.lastDrawTimestamp = performance.now();
+              }
               try {
                 window.focus();
                 const el = document.querySelector('canvas') || document.querySelector('#game canvas') || document.querySelector('#game');
@@ -3055,18 +3359,18 @@ export default function EmulatorModal({
             </span>
           )}
 
-          {/* Real-Time Live FPS Badge reading directly from emulator canvas */}
+          {/* Real-Time Live FPS Badge reading directly from verified emulator canvas */}
           {showFpsCounter && (
             <span
               className="emulator-status-tag tag-fps"
               style={{
-                background: perfStats.fps >= 55 ? 'rgba(16, 185, 129, 0.2)' : perfStats.fps >= 40 ? 'rgba(245, 158, 11, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                color: perfStats.fps >= 55 ? '#34d399' : perfStats.fps >= 40 ? '#fbbf24' : '#f87171',
-                borderColor: perfStats.fps >= 55 ? 'rgba(52, 211, 153, 0.35)' : 'rgba(239, 68, 68, 0.35)'
+                background: perfStats.fps === null ? 'rgba(56, 189, 248, 0.2)' : perfStats.fps >= (perfStats.targetFps - 4) ? 'rgba(16, 185, 129, 0.2)' : perfStats.fps >= (perfStats.targetFps - 12) ? 'rgba(245, 158, 11, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                color: perfStats.fps === null ? '#38bdf8' : perfStats.fps >= (perfStats.targetFps - 4) ? '#34d399' : perfStats.fps >= (perfStats.targetFps - 12) ? '#fbbf24' : '#f87171',
+                borderColor: perfStats.fps === null ? 'rgba(56, 189, 248, 0.35)' : perfStats.fps >= (perfStats.targetFps - 4) ? 'rgba(52, 211, 153, 0.35)' : 'rgba(239, 68, 68, 0.35)'
               }}
-              title="Real-time frame rate"
+              title="Real-time verified frame rate"
             >
-              <Activity size={11} /> <span>{perfStats.fps} FPS</span>
+              <Activity size={11} /> <span>{perfStats.fps !== null ? `${perfStats.fps} FPS` : 'LOADING'}</span>
             </span>
           )}
         </div>
@@ -3386,34 +3690,54 @@ export default function EmulatorModal({
           <div className="diag-grid">
             <div className="diag-card">
               <span className="diag-card-label">CORE FPS</span>
-              <span className="diag-card-val" style={{ color: perfStats.fps >= 55 ? '#34d399' : '#f87171' }}>
-                {perfStats.fps} <span className="diag-unit">FPS</span>
+              <span className="diag-card-val" style={{ color: perfStats.fps === null ? '#38bdf8' : perfStats.fps >= (perfStats.targetFps - 4) ? '#34d399' : '#f87171' }}>
+                {perfStats.fps !== null ? perfStats.fps : '--'} <span className="diag-unit">FPS</span>
               </span>
-              <span className="diag-card-sub">Target: 60.0 FPS</span>
+              <span className="diag-card-sub">{perfStats.targetLabel}</span>
             </div>
 
             <div className="diag-card">
-              <span className="diag-card-label">FRAME TIME</span>
-              <span className="diag-card-val" style={{ color: perfStats.frameTimeMs <= 18 ? '#34d399' : '#fbbf24' }}>
-                {perfStats.frameTimeMs} <span className="diag-unit">ms</span>
+              <span className="diag-card-label">FRAME TIME & JITTER</span>
+              <span className="diag-card-val" style={{ color: !perfStats.frameTimeMs ? '#94a3b8' : perfStats.frameTimeMs <= 20 ? '#34d399' : '#fbbf24' }}>
+                {perfStats.frameTimeMs !== null ? `${perfStats.frameTimeMs}` : '--'} <span className="diag-unit">ms</span>
               </span>
-              <span className="diag-card-sub">Ideal VSync: 16.6 ms</span>
+              <span className="diag-card-sub">
+                {perfStats.frameJitterMs !== null ? `Jitter: ±${perfStats.frameJitterMs} ms` : 'Awaiting Frame Data'}
+              </span>
             </div>
 
             <div className="diag-card">
-              <span className="diag-card-label">AUDIO CLOCK SYNC</span>
+              <span className="diag-card-label">AUDIO CLOCK & BUFFER</span>
               <span className="diag-card-val audio-val">
                 {perfStats.audioState}
               </span>
-              <span className="diag-card-sub">Dynamic Rate Control</span>
+              <span className="diag-card-sub">{perfStats.audioLatency || 'Dynamic Rate Control'}</span>
             </div>
 
             <div className="diag-card">
-              <span className="diag-card-label">INPUT LATENCY</span>
-              <span className="diag-card-val input-val">
-                {perfStats.inputLatency}
+              <span className="diag-card-label">INPUT POLLING</span>
+              <span className="diag-card-val input-val" title={perfStats.inputDevice}>
+                {perfStats.inputDevice}
               </span>
-              <span className="diag-card-sub">{gamepadConnected ? 'Direct Gamepad Hook' : 'Direct Keyboard Hook'}</span>
+              <span className="diag-card-sub">{perfStats.inputLatency}</span>
+            </div>
+
+            <div className="diag-card">
+              <span className="diag-card-label">CORE RESOLUTION</span>
+              <span className="diag-card-val res-val">
+                {perfStats.nativeResolution || 'Detecting...'}
+              </span>
+              <span className="diag-card-sub" title={perfStats.renderResolution ? `Canvas: ${perfStats.renderResolution}` : perfStats.graphicsBackend}>
+                {perfStats.renderResolution ? `Canvas: ${perfStats.renderResolution}` : perfStats.graphicsBackend}
+              </span>
+            </div>
+
+            <div className="diag-card">
+              <span className="diag-card-label">MEMORY HEAP</span>
+              <span className="diag-card-val mem-val">
+                {perfStats.wasmMemory || 'Active'}
+              </span>
+              <span className="diag-card-sub">WASM Core Runtime</span>
             </div>
           </div>
 

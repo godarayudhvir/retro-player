@@ -30,6 +30,7 @@ Dedicated mobile experience powered by `MobileAppView.jsx` and `MobileOnboarding
   - Compact (`<= 350px`): 2 Columns
   - Standard (`351px – 480px`): 3 Columns
   - Large (`481px+`): 4 Columns
+* **Diagnostics Performance HUD Overlay**: Bounded viewport sizing (`width: 360px; max-width: calc(100vw - 32px); max-height: calc(100vh - 90px); overflow-y: auto`) and mobile-edge alignment (`@media (max-width: 480px) { left: 16px; right: 16px; width: auto; }`) guaranteeing zero viewport overflow or cut-off metrics across all handheld and mobile viewports.
 
 ---
 
