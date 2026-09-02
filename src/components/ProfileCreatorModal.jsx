@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Check, User, Sparkles, Trash2 } from 'lucide-react';
 import CharacterStudio from './CharacterStudio';
+import ConfirmModal from './ConfirmModal';
 import { CHARACTER_ARCHETYPES } from '../utils/characterPresets';
 import { haptics } from '../services/hapticsService';
 
@@ -25,9 +26,13 @@ export default function ProfileCreatorModal({
   const [name, setName] = useState('');
   const [avatarSeed, setAvatarSeed] = useState(suggestedName);
   const [favoriteColor, setFavoriteColor] = useState('#ef4444');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      setShowDeleteConfirm(false);
+      return;
+    }
 
     if (initialProfile) {
       setName(initialProfile.name || 'Player');
@@ -107,7 +112,23 @@ export default function ProfileCreatorModal({
           </div>
 
           {/* Footer Actions */}
-          <footer className="scraper-modal-footer" style={{ justifyContent: 'flex-end' }}>
+          <footer className="scraper-modal-footer" style={{ justifyContent: canDelete && initialProfile ? 'space-between' : 'flex-end' }}>
+            {canDelete && initialProfile && (
+              <div className="scraper-footer-left">
+                <button
+                  type="button"
+                  className={`settings-action-btn profile-btn-danger ${focusedTarget?.zone === 'profileModal' && focusedTarget?.id === 'delete' ? 'gamepad-focused' : ''}`}
+                  onClick={() => {
+                    sfx?.playTileNav?.();
+                    setShowDeleteConfirm(true);
+                  }}
+                  title={`Delete Profile (${initialProfile.name})`}
+                >
+                  <Trash2 size={16} />
+                  <span>Delete Profile</span>
+                </button>
+              </div>
+            )}
             <div className="scraper-footer-actions">
               <button
                 type="button"
@@ -139,6 +160,23 @@ export default function ProfileCreatorModal({
           </footer>
         </div>
       </div>
+
+      {/* In-App Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        title="Delete Profile?"
+        message={`Are you sure you want to permanently delete profile "${initialProfile?.name}"? All profile favorites, recents, in-game saves, save states, and playtime data will be permanently erased.`}
+        confirmLabel="Delete Profile"
+        onConfirm={() => {
+          setShowDeleteConfirm(false);
+          if (initialProfile) {
+            onDelete?.(initialProfile.id);
+            sfx?.playModalClose?.();
+          }
+        }}
+        onCancel={() => setShowDeleteConfirm(false)}
+        sfx={sfx}
+      />
     </>
   );
 }
