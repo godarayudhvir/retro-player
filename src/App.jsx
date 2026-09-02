@@ -1090,8 +1090,20 @@ export default function App() {
         <OnboardingScreen
           isOpen={showOnboarding}
           onComplete={() => {
+            try {
+              localStorage.setItem('retro_onboarding_completed', 'true');
+              localStorage.setItem('retro_demo_dismissed', 'true');
+            } catch { }
             setShowOnboarding(false);
             setFocusedTarget({ zone: 'grid', index: 0 });
+          }}
+          onOpenLoadRomModal={() => {
+            try {
+              localStorage.setItem('retro_onboarding_completed', 'true');
+              localStorage.setItem('retro_demo_dismissed', 'true');
+            } catch { }
+            setShowOnboarding(false);
+            setShowLoadRomModal(true);
           }}
           activeProfile={activeProfile}
           onSaveCreatedProfile={(name, avatarSeed, favoriteColor) => {

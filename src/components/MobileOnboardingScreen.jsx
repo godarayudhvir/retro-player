@@ -8,6 +8,7 @@ import {
   HardDrive,
   Download,
   Upload,
+  FolderUp,
   Trash2,
   Zap,
   ArrowDownToLine,
@@ -74,6 +75,7 @@ const KANTO_BADGES = [
 export default function MobileOnboardingScreen({
   isOpen,
   onComplete,
+  onOpenLoadRomModal,
   activeProfile,
   onSaveCreatedProfile,
   sfx,
@@ -465,24 +467,24 @@ export default function MobileOnboardingScreen({
                 {/* 3 Status Pills Showcase: Connected, Low Battery, Charging */}
                 <div className="controls-pills-showcase">
                   <div className="status-pill status-gamepad is-connected is-charging demo-pill" title="Gamepad Connected (Charging)">
-                    <Gamepad2 size={16} />
+                    <Gamepad2 size={14} />
                     <span className="battery-badge">
-                      <BatteryCharging size={14} className="battery-icon is-charging" />
+                      <BatteryCharging size={12} className="battery-icon is-charging" />
                       <span className="battery-percent-text">100%</span>
                       <span className="charging-tag">⚡</span>
                     </span>
                   </div>
 
                   <div className="status-pill status-gamepad is-connected is-battery-low demo-pill" title="Gamepad Low Battery (15%)">
-                    <Gamepad2 size={16} />
+                    <Gamepad2 size={14} />
                     <span className="battery-badge">
-                      <BatteryLow size={14} className="battery-icon is-low" />
+                      <BatteryLow size={12} className="battery-icon is-low" />
                       <span className="battery-percent-text">15%</span>
                     </span>
                   </div>
 
                   <div className="status-pill status-gamepad is-connected demo-pill" title="Gamepad Connected">
-                    <Gamepad2 size={16} />
+                    <Gamepad2 size={14} />
                     <span className="battery-badge">
                       <span className="battery-percent-text">READY</span>
                     </span>
@@ -840,7 +842,7 @@ export default function MobileOnboardingScreen({
             )}
 
             {/* -------------------------------------------------------------
-                SCREEN 6: In the App (Ready Pass Handoff)
+                SCREEN 6: In the App (Ready Pass Handoff & Load ROM)
                 ------------------------------------------------------------- */}
             {currentScreen === 6 && (
               <div className="mobile-ob-story-card animate-fade-in">
@@ -850,7 +852,7 @@ export default function MobileOnboardingScreen({
                   </div>
                   <h2 className="mobile-ob-card-title">You're All Set!</h2>
                   <p className="mobile-ob-card-desc">
-                    Your customized profile is ready. Boot into the game library to launch classics instantly.
+                    Your customized profile is ready. Load your favorite retro ROMs to jump straight into gameplay.
                   </p>
                 </div>
 
@@ -870,15 +872,40 @@ export default function MobileOnboardingScreen({
 
                     <div className="ticket-meta">
                       <strong className="ticket-name">{playerName || 'Player 1'}</strong>
-                      <span className="ticket-sub">Profile #1 · 12 Systems Online</span>
+                      <span className="ticket-sub">Profile Ready</span>
                     </div>
                   </div>
+                </div>
 
-                  <div className="ticket-features-footer">
-                    <span>⚡ 60 FPS V-Sync</span>
-                    <span>💾 Auto-Resume</span>
-                    <span>🏆 Badges</span>
-                  </div>
+                {/* Direct Load ROM Action Card */}
+                <div className="mobile-ob-load-rom-prompt">
+                  <button
+                    type="button"
+                    className="mobile-ob-load-rom-btn"
+                    onClick={() => {
+                      try {
+                        localStorage.setItem('retro_onboarding_completed', 'true');
+                        localStorage.setItem('retro_demo_dismissed', 'true');
+                      } catch { }
+                      if (onSaveCreatedProfile) {
+                        const finalName = playerName.trim() || 'Player 1';
+                        const finalSeed = avatarSeed.trim() || finalName;
+                        onSaveCreatedProfile(finalName, finalSeed, favoriteColor);
+                      }
+                      onOpenLoadRomModal?.();
+                      haptics.selection();
+                      sfx?.playModalOpen?.();
+                    }}
+                  >
+                    <div className="load-rom-btn-icon">
+                      <FolderUp size={22} />
+                    </div>
+                    <div className="load-rom-btn-text">
+                      <strong>Load Your Favorite ROMs</strong>
+                      <span>Pick ROM files (.gba, .nds, .sfc) or an entire game folder to play</span>
+                    </div>
+                    <ChevronRight size={18} className="load-rom-btn-arrow" />
+                  </button>
                 </div>
               </div>
             )}
@@ -901,7 +928,7 @@ export default function MobileOnboardingScreen({
               className="mobile-ob-next-btn"
               onClick={handleNext}
             >
-              <span>{currentScreen === 6 ? 'Start Playing' : currentScreen === 5 ? 'Ready' : 'Continue'}</span>
+              <span>{currentScreen === 6 ? 'Explore Library' : currentScreen === 5 ? 'Ready' : 'Continue'}</span>
               {currentScreen === 6 ? <Play size={16} fill="currentColor" /> : <ChevronRight size={18} />}
             </button>
           </footer>

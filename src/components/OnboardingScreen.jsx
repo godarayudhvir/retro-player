@@ -51,6 +51,7 @@ const isSmartTv = typeof navigator !== 'undefined' && /SmartTV|Tizen|Web0S|BRAVI
 export default function OnboardingScreen({
   isOpen,
   onComplete,
+  onOpenLoadRomModal,
   activeProfile,
   onSaveCreatedProfile,
   sfx,
@@ -66,6 +67,7 @@ export default function OnboardingScreen({
       <MobileOnboardingScreen
         isOpen={isOpen}
         onComplete={onComplete}
+        onOpenLoadRomModal={onOpenLoadRomModal}
         activeProfile={activeProfile}
         onSaveCreatedProfile={onSaveCreatedProfile}
         sfx={sfx}

@@ -24841,11 +24841,43 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
    Screen 4 & Desktop Card 4: Controls Visual Showcase
    ------------------------------------------------------------- */
 .controls-pills-showcase {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.35rem;
+  width: 100%;
+  align-items: stretch;
+}
+
+.controls-pills-showcase .status-pill {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.35rem 0.25rem;
+  border-radius: 10px;
+  height: 38px;
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  width: 100%;
+  justify-content: center;
+  gap: 0.25rem;
+  box-sizing: border-box;
+}
+
+.controls-pills-showcase .status-pill svg {
+  flex-shrink: 0;
+}
+
+.controls-pills-showcase .battery-badge {
+  padding: 2px 4px;
+  font-size: 0.68rem;
+  gap: 2px;
+  margin-left: 0;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.controls-pills-showcase .charging-tag {
+  font-size: 0.7rem;
+  margin-left: 1px;
 }
 
 .desktop-controls-pills-row {
@@ -24854,18 +24886,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   gap: 0.55rem;
   width: 100%;
   align-items: stretch;
-}
-
-.controls-pills-showcase .status-pill {
-  font-size: 0.82rem;
-  font-weight: 800;
-  padding: 0.45rem 0.85rem;
-  border-radius: 20px;
-  height: 34px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  box-sizing: border-box;
 }
 
 .desktop-controls-pills-row .status-pill {
@@ -25398,15 +25418,43 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   width: 100%;
   max-height: 280px;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   padding: 4px 2px;
+  box-sizing: border-box;
 }
 
-.mobile-ob-archetypes-4col {
+.mobile-ob-archetypes-4col,
+.mobile-ob-archetypes-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.55rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.45rem;
   width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 350px) {
+  .mobile-ob-archetypes-4col,
+  .mobile-ob-archetypes-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.4rem;
+  }
+}
+
+@media (min-width: 351px) and (max-width: 480px) {
+  .mobile-ob-archetypes-4col,
+  .mobile-ob-archetypes-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.45rem;
+  }
+}
+
+@media (min-width: 481px) {
+  .mobile-ob-archetypes-4col,
+  .mobile-ob-archetypes-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.55rem;
+  }
 }
 
 .mobile-archetype-card {
@@ -25416,7 +25464,7 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   justify-content: center;
   gap: 0.35rem;
   padding: 0.55rem 0.25rem;
-  aspect-ratio: 1 / 1;
+  min-height: 84px;
   border-radius: 8px;
   background: #ffffff;
   border: 1.5px solid #e2e8f0;
@@ -25424,6 +25472,8 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   text-align: center;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
   transition: all 0.15s ease;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 [data-color-mode="dark"] .mobile-archetype-card {
@@ -25645,20 +25695,68 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   color: #94a3b8;
 }
 
-.ticket-features-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 0.65rem;
-  border-top: 1.5px dashed #cbd5e1;
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: #475569;
+.mobile-ob-load-rom-prompt {
+  width: 100%;
+  margin-top: 0.35rem;
 }
 
-[data-color-mode="dark"] .ticket-features-footer {
-  border-top-color: #334155;
-  color: #94a3b8;
+.mobile-ob-load-rom-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.95rem 1rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  border: 1.5px solid #3b82f6;
+  color: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+
+.mobile-ob-load-rom-btn:active {
+  transform: scale(0.98);
+}
+
+.load-rom-btn-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.load-rom-btn-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.load-rom-btn-text strong {
+  font-size: 0.92rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.load-rom-btn-text span {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.3;
+}
+
+.load-rom-btn-arrow {
+  color: rgba(255, 255, 255, 0.8);
+  flex-shrink: 0;
 }
 
 /* -------------------------------------------------------------
