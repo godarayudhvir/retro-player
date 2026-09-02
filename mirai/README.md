@@ -10,7 +10,7 @@
 
 | # | Impact | Specification | Domain | Description | Status |
 | :---: | :---: | :--- | :--- | :--- | :--- |
-| 1 | 🟡 Medium | **[Mobile UI Gamepad & Spatial Navigation](mobile-gamepad-navigation.md)** | Mobile UX / Controls | Purpose-built, ergonomic 2D spatial gamepad navigation engine tailored specifically for mobile feeds, bottom sheets, search overlays, and drilldowns. | 📋 Planned |
+| 1 | 🟡 Medium | **[App UI Gamepad & Keyboard Navigation Re-Architecture](gamepad-ui-navigation-rearchitecture.md)** | UI Navigation / Controls | 3-phase initiative: Archive complete ledger of existing UI shortcuts, cleanly remove broken in-app spatial navigation (keeping emulator controls 100% intact), and rebuild geometry-aware 2D bounding-box spatial navigation for Desktop then Mobile. | 📋 Planned |
 | 2 | 🟡 Medium | **[Settings & Library Management Hub](settings-hub.md)** | System Hub & Tools | Clean console-native settings redesign: ROM library administration, BGM track manager, and IndexedDB storage diagnostics (wires into existing server REST endpoints). | 📋 Planned |
 | 3 | 🟡 Medium | **[Dynamic Emulation Core Switching](emulation-core-switching.md)** | Core Emulation | Per-system and per-game WebAssembly core override engine (mGBA vs VBA-M, Gambatte vs SameBoy, Snes9x vs bsnes, Beetle PSX vs PCSX ReARMed). | 📋 Planned |
 | 4 | 🟠 Med-High | **[Cross-Device Cloud Save Sync](cloud-saves.md)** | Save States & Sync | Bi-directional synchronization of single Quick Save / SRAM battery saves (`.sav`) to user Google Drive, S3/R2, or Supabase with conflict resolution dialog. | 📋 Planned |
