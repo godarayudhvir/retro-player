@@ -25395,6 +25395,8 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   align-items: flex-start;
   text-align: left;
   gap: 0.65rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .mobile-ob-card-title {
@@ -26635,11 +26637,7 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
 .mobile-ob-archetype-grid-wrap {
   width: 100%;
-  max-height: 280px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  padding: 4px 2px;
+  padding: 4px 2px 0.75rem;
   box-sizing: border-box;
 }
 
