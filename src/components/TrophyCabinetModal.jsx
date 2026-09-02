@@ -549,12 +549,12 @@ export default function TrophyCabinetModal({
           <div className="trophy-profile-avatar-row">
             <div className="trophy-avatar-frame">
               <MultiAvatar seed={activeProfile?.avatarSeed || activeProfile?.name || 'RetroGamer'} size={46} />
-              <span className="trophy-level-pill">Lv.{gamerRank.level}</span>
             </div>
 
             <div className="trophy-profile-info">
               <div className="trophy-profile-top">
                 <strong className="trophy-player-name">{activeProfile?.name || 'Player 1'}</strong>
+                <span className="trophy-level-pill">Lv.{gamerRank.level}</span>
                 <span className="trophy-rank-badge">{gamerRank.title}</span>
               </div>
 

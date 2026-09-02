@@ -249,6 +249,14 @@ export default function OnboardingScreen({
                     <p>Zero installation, zero server lag. Runs locally in your browser with hardware-accelerated 60 FPS V-Sync, CRT scanline shaders, and turbo fast-forward.</p>
                   </div>
 
+                  {/* Performance Feature Tags */}
+                  <div className="pillar-highlight-chips" style={{ margin: '0.15rem 0 0.35rem', display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                    <span className="pillar-badge-tag">60 FPS V-SYNC</span>
+                    <span className="pillar-badge-tag green">0ms LOCAL WASM</span>
+                    <span className="pillar-badge-tag purple">CRT SHADERS</span>
+                    <span className="pillar-badge-tag gold">TURBO SPEED</span>
+                  </div>
+
                   {/* Graphic: 12 Consoles in a Clean 4x3 Grid with Larger SVGs */}
                   <div className="pillar-visual-graphic-wrap">
                     <div className="pillar-system-icons-grid-4x3">
@@ -282,7 +290,7 @@ export default function OnboardingScreen({
                 {/* Card 2: Battery RAM, Auto-Resume & Quick States (In-App UX Demo) */}
                 <div className="onboarding-pillar-card">
                   <div className="pillar-header-row">
-                    <div className="pillar-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
+                    <div className="pillar-icon-wrap" style={{ background: 'rgba(160, 185, 129, 0.15)', color: '#10b981' }}>
                       <Save size={22} />
                     </div>
                     <h3 className="pillar-card-title">Universal Saves &amp; Auto-Resume</h3>
@@ -301,18 +309,18 @@ export default function OnboardingScreen({
                         </div>
                         <div className="save-tile-content">
                           <strong className="save-tile-title">Export Battery Save (.sav)</strong>
-                          <span className="save-tile-sub">Download in-game cartridge SRAM save file</span>
+                          <span className="save-tile-desc">Download in-game cartridge SRAM save file</span>
                         </div>
                       </div>
 
                       {/* Tile 2: Export Quick Save */}
                       <div className="desktop-pillar-save-tile">
-                        <div className="save-tile-icon export-blue">
-                          <Download size={14} />
+                        <div className="save-tile-icon export-cyan">
+                          <ArrowDownToLine size={14} />
                         </div>
                         <div className="save-tile-content">
                           <strong className="save-tile-title">Export Quick Save (.state)</strong>
-                          <span className="save-tile-sub">Download emulator snapshot state file</span>
+                          <span className="save-tile-desc">Download emulator snapshot state file</span>
                         </div>
                       </div>
 
@@ -323,7 +331,7 @@ export default function OnboardingScreen({
                         </div>
                         <div className="save-tile-content">
                           <strong className="save-tile-title">Import Save / State (.sav / .state)</strong>
-                          <span className="save-tile-sub">Upload an existing .sav battery save or .state snapshot</span>
+                          <span className="save-tile-desc">Upload an existing .sav battery save or .state snapshot</span>
                         </div>
                       </div>
 
@@ -334,23 +342,23 @@ export default function OnboardingScreen({
                         </div>
                         <div className="save-tile-content">
                           <strong className="save-tile-title">Delete All Saved Data</strong>
-                          <span className="save-tile-sub">Erase in-game saves &amp; quick save states</span>
+                          <span className="save-tile-desc">Erase in-game saves &amp; quick save states</span>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Auto-Resume Prompt Banner (Light Console Theme) */}
-                    <div className="desktop-pillar-resume-banner">
-                      <div className="erp-icon-wrap">
-                        <Zap size={14} color="#f59e0b" />
-                      </div>
-                      <div className="erp-content">
-                        <div className="erp-title">Resume where you left off?</div>
-                        <div className="erp-sub">Auto-Save snapshot available from last session</div>
-                      </div>
-                      <div className="erp-btn is-resume">
-                        <Zap size={12} />
-                        <span>Resume (5s)</span>
+                      {/* Tile 5: Smart Auto-Resume Banner Simulation */}
+                      <div className="desktop-pillar-resume-banner">
+                        <div className="erp-icon-wrap">
+                          <Zap size={14} />
+                        </div>
+                        <div className="erp-text-wrap">
+                          <strong>Resume where you left off?</strong>
+                          <span>Auto-Save snapshot available from last session</span>
+                        </div>
+                        <div className="erp-btn is-resume">
+                          <Zap size={12} />
+                          <span>Resume (5s)</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -375,12 +383,12 @@ export default function OnboardingScreen({
                       <div className="desktop-pillar-hof-profile">
                         <div className="trophy-avatar-frame">
                           <MultiAvatar seed={activeProfile?.avatarSeed || activeProfile?.name || 'RetroGamer'} size={32} />
-                          <span className="trophy-level-pill">Lv.2</span>
                         </div>
 
                         <div className="desktop-pillar-hof-info">
                           <div className="desktop-pillar-hof-top">
                             <strong className="desktop-pillar-hof-name">{activeProfile?.name || 'Player 1'}</strong>
+                            <span className="trophy-level-pill">Lv.2</span>
                             <span className="trophy-rank-badge">Apprentice</span>
                           </div>
 
@@ -561,8 +569,11 @@ export default function OnboardingScreen({
                       {/* Column 1: In-Game Mobile Haptic Touch Pad Overlay Preview */}
                       <div className="desktop-touch-pad-showcase">
                         <div className="touch-pad-label-row">
-                          <span className="touch-pad-title">📱 IN-GAME TOUCH CONTROLS</span>
-                          <span className="touch-pad-sub">Touchscreens</span>
+                          <span className="touch-pad-title" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <Smartphone size={12} color="#3b82f6" />
+                            <span>TOUCH HUD</span>
+                          </span>
+                          <span className="touch-pad-sub">Touchscreen</span>
                         </div>
                         <div className="touch-pad-demo-surface">
                           {/* Left D-Pad Virtual Overlay */}
@@ -591,8 +602,11 @@ export default function OnboardingScreen({
                       {/* Column 2: Keyboard Controls Card */}
                       <div className="desktop-controls-keyboard-card">
                         <div className="touch-pad-label-row">
-                          <span className="touch-pad-title">⌨️ KEYBOARD CONTROLS</span>
-                          <span className="touch-pad-sub">Spatial Keys</span>
+                          <span className="touch-pad-title" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <Keyboard size={12} color="#a855f7" />
+                            <span>KEYBOARD</span>
+                          </span>
+                          <span className="touch-pad-sub">Spatial</span>
                         </div>
                         <div className="desktop-keyboard-keys-surface">
                           <div className="desktop-kc-row">
@@ -608,11 +622,11 @@ export default function OnboardingScreen({
                           <div className="desktop-kc-grid-row">
                             <div className="desktop-kc-sub-item">
                               <span className="kc-keycap is-action">Z</span>
-                              <span className="desktop-kc-label">B Button</span>
+                              <span className="desktop-kc-label">B</span>
                             </div>
                             <div className="desktop-kc-sub-item">
                               <span className="kc-keycap is-action">X</span>
-                              <span className="desktop-kc-label">A Button</span>
+                              <span className="desktop-kc-label">A</span>
                             </div>
                           </div>
 
@@ -624,7 +638,7 @@ export default function OnboardingScreen({
                             </div>
                             <div className="desktop-kc-sub-item">
                               <span className="kc-keycap is-system">Shift</span>
-                              <span className="kc-keycap is-system">Enter</span>
+                              <span className="kc-keycap is-system">↵</span>
                               <span className="desktop-kc-label">Start/Select</span>
                             </div>
                           </div>

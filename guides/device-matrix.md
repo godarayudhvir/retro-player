@@ -7,7 +7,7 @@ Comprehensive architectural specification for target viewports, responsive form 
 ## 📱 1. Mobile Phones & Foldables (`<= 640px`)
 
 Dedicated mobile experience powered by `MobileAppView.jsx` and `MobileOnboardingScreen.jsx`:
-* **UI Structure**: Single-column vertical swipe story cards, touch virtual gamepad overlay, single-row 3-column controller status HUD, and dynamic 2–4 column character archetype grid.
+* **UI Structure**: Stage-based Nintendo DS Touch navigation (Profile Gate, 2-Column Console Cards Grid with authentic SVG vector artwork, 3-Column Square Game Buttons Matrix, Game Details Screen), single-column vertical swipe story onboarding cards, touch virtual gamepad overlay, single-row 3-column controller status HUD, and dynamic 2–4 column character archetype grid.
 
 | Device Tier | Reference Devices | Logical Resolution (Viewport) | Aspect Ratio | Native Pixel Density |
 | :--- | :--- | :--- | :--- | :--- |

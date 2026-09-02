@@ -394,12 +394,12 @@ export default function MobileOnboardingScreen({
                   <div className="mobile-ob-hof-profile-strip">
                     <div className="trophy-avatar-frame">
                       <MultiAvatar seed={activeProfile?.avatarSeed || activeProfile?.name || 'RetroGamer'} size={38} />
-                      <span className="trophy-level-pill">Lv.2</span>
                     </div>
 
                     <div className="mobile-ob-hof-info">
                       <div className="mobile-ob-hof-top">
                         <strong className="mobile-ob-hof-player">{activeProfile?.name || 'Player 1'}</strong>
+                        <span className="trophy-level-pill">Lv.2</span>
                         <span className="trophy-rank-badge">Apprentice</span>
                       </div>
 

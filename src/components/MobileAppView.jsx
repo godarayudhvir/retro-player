@@ -3430,9 +3430,9 @@ export default function MobileAppView({
                 }}
               >
                 <Layers size={18} color="#e11d48" />
-                <div className="mobile-quick-cat-text">
-                  <strong>All Games</strong>
-                  <span>Browse complete library ({games.length} titles)</span>
+                <div className="mobile-quick-cat-text" style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1, minWidth: 0 }}>
+                  <strong style={{ display: 'block' }}>All Games</strong>
+                  <span style={{ display: 'block' }}>Browse complete library ({games.length} titles)</span>
                 </div>
                 <ChevronRight size={16} className="mobile-quick-arrow" />
               </button>
@@ -3467,10 +3467,10 @@ export default function MobileAppView({
                     </div>
 
                     {/* Info Footer */}
-                    <div className="mobile-console-card-footer">
-                      <div className="mobile-console-text-wrap">
-                        <span className="mobile-console-name">{sys.name}</span>
-                        <span className="mobile-console-category">{sys.category || 'Console'}</span>
+                    <div className="mobile-console-card-footer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', boxSizing: 'border-box' }}>
+                      <div className="mobile-console-text-wrap" style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
+                        <span className="mobile-console-name" style={{ display: 'block' }}>{sys.name}</span>
+                        <span className="mobile-console-category" style={{ display: 'block' }}>{sys.category || 'Console'}</span>
                       </div>
                       <span className="mobile-console-count-pill">{count}</span>
                     </div>
