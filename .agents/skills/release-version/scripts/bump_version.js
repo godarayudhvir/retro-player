@@ -174,4 +174,81 @@ if (fs.existsSync(homeImgPath)) {
   updatedCount++;
 }
 
-console.log(`\n🎉 Successfully synchronized ${updatedCount} files to ${tagVer}!\n`);
+// 9. Docker Multi-Stage Runtime Parity Verification
+const dockerfilePath = path.join(ROOT_DIR, 'Dockerfile');
+if (fs.existsSync(dockerfilePath)) {
+  let dockerContent = fs.readFileSync(dockerfilePath, 'utf8');
+
+  // Find all runtime imports from server.js and src/server/**/*.js
+  const requiredRuntimeDirs = new Set(['dist', 'public', 'src/server']);
+
+  const serverFiles = [path.join(ROOT_DIR, 'server.js')];
+  const serverDir = path.join(ROOT_DIR, 'src/server');
+  if (fs.existsSync(serverDir)) {
+    const scanDir = (dir) => {
+      for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
+        const fullPath = path.join(dir, item.name);
+        if (item.isDirectory()) scanDir(fullPath);
+        else if (item.name.endsWith('.js') || item.name.endsWith('.mjs')) serverFiles.push(fullPath);
+      }
+    };
+    scanDir(serverDir);
+  }
+
+  for (const sFile of serverFiles) {
+    if (!fs.existsSync(sFile)) continue;
+    const fileContent = fs.readFileSync(sFile, 'utf8');
+    const importRegex = /(?:import\s+(?:[\w*\s{},]+from\s+)?['"](\.[^'"]+)['"]|require\(['"](\.[^'"]+)['"]\))/g;
+    let match;
+    while ((match = importRegex.exec(fileContent)) !== null) {
+      const relImport = match[1] || match[2];
+      const resolved = path.resolve(path.dirname(sFile), relImport);
+      const relToRoot = path.relative(ROOT_DIR, resolved);
+      if (!relToRoot.startsWith('..') && !relToRoot.startsWith('node_modules')) {
+        const parts = relToRoot.split(path.sep);
+        if (parts.length > 1) {
+          if (parts[0] === 'src') {
+            requiredRuntimeDirs.add(`src/${parts[1]}`);
+          } else {
+            requiredRuntimeDirs.add(parts[0]);
+          }
+        }
+      }
+    }
+  }
+
+  // Check which required directories are missing from the Docker runner stage
+  let dockerUpdated = false;
+  for (const reqDir of requiredRuntimeDirs) {
+    const copyPattern = new RegExp(`COPY\\s+--from=builder\\s+/app/${reqDir.replace('/', '\\/')}\\s+`, 'i');
+    if (!copyPattern.test(dockerContent)) {
+      console.log(`⚠️  Docker Parity Alert: Runtime directory "${reqDir}" is missing in Dockerfile runner stage!`);
+      const insertLine = `COPY --from=builder /app/${reqDir} ./${reqDir}\n`;
+      if (dockerContent.includes('COPY --from=builder /app/public ./public')) {
+        dockerContent = dockerContent.replace(
+          'COPY --from=builder /app/public ./public',
+          `COPY --from=builder /app/public ./public\n${insertLine.trim()}`
+        );
+        dockerUpdated = true;
+      } else if (dockerContent.includes('VOLUME')) {
+        dockerContent = dockerContent.replace(/VOLUME/, `${insertLine}\nVOLUME`);
+        dockerUpdated = true;
+      }
+      console.log(`🔧 Automatically added: ${insertLine.trim()} to Dockerfile`);
+    }
+  }
+
+  if (dockerUpdated) {
+    fs.writeFileSync(dockerfilePath, dockerContent, 'utf8');
+    console.log(`✅ Dockerfile updated with runtime directory parity`);
+    updatedCount++;
+  } else {
+    console.log(`✅ Dockerfile runner stage verified: 100% runtime parity`);
+  }
+}
+
+console.log(`\n🎉 Successfully synchronized ${updatedCount} release touchpoints to ${tagVer}!\n`);
+console.log(`📌 Recommended Next Steps:`);
+console.log(`  1. git commit -m "release: ${tagVer}"`);
+console.log(`  2. git tag -a ${tagVer} -m "Release ${tagVer}"`);
+console.log(`  3. git push origin main --tags (Triggers GitHub Actions Docker SemVer build)\n`);

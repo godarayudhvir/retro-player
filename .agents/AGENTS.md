@@ -6,16 +6,14 @@
    - Docker / Server / Deployment changes -> update [guides/docker.md](file:///Users/godarayudhvir/Github/retro-player/guides/docker.md) and [guides/hosting.md](file:///Users/godarayudhvir/Github/retro-player/guides/hosting.md)
    - ROM Ingestion / Scraping / Sidecar metadata changes -> update [guides/roms.md](file:///Users/godarayudhvir/Github/retro-player/guides/roms.md)
    - Input / Controller / Hotkey / Keyboard changes -> update [guides/controls.md](file:///Users/godarayudhvir/Github/retro-player/guides/controls.md)
+   - UI Layout / Responsive Breakpoints / Viewport changes -> update [guides/device-matrix.md](file:///Users/godarayudhvir/Github/retro-player/guides/device-matrix.md)
    - General features, highlights, and platform stats -> update [README.md](file:///Users/godarayudhvir/Github/retro-player/README.md) and [public/llms.txt](file:///Users/godarayudhvir/Github/retro-player/public/llms.txt)
    - Completed `mirai/` roadmap features -> remove completed items from [mirai/README.md](file:///Users/godarayudhvir/Github/retro-player/mirai/README.md) and delete their completed spec files from `mirai/`. Do NOT add completed features to `mirai/` — `mirai/` is strictly a backlog for future/planned milestones.
+   - **New Feature / Subsystem Guides**: If code changes introduce an entirely new subsystem, major architectural feature, or capability that might warrant a brand-new guide in `guides/`, always proactively ask the user first before creating the file, suggest the proposed title and scope, and obtain the user's explicit permission before creating any new markdown document.
 2. Never use automated browser testing tools like Playwright or subagent browser execution for testing. The user will handle all manual browser testing personally.
 3. Ensure the entire application (every view, modal, wizard, button, and interactive component) is 100% navigable and controllable via both keyboard navigation (Arrow keys, Enter, Esc, Tab, Hotkeys) and USB/Bluetooth gamepads (D-Pad, Analog sticks, A/B/X/Y, L1/R1, Start/Select).
 4. Never use native browser dialog popups (`alert()`, `confirm()`, `prompt()`). All user confirmations, alerts, warnings, and prompts MUST use custom styled in-app modal dialogs or status banners that match the console theme and support 100% keyboard and gamepad spatial navigation.
-5. Ensure every page, module, modal, wizard, and component is 100% mobile-responsive and adaptive across all form factors and resolutions with zero modal overflow, unstyled elements, or cut-off actions:
-   - **Mobile Phones (<=640px)**: Compact (`375 x 667`), Standard Modern (`390 x 844` portrait / `844 x 390` landscape), Large (`430 x 932` portrait / `932 x 430` landscape).
-   - **Tablets & Handhelds (641px - 1024px)**: iPad/Tablets (`810 x 1080` portrait / `1080 x 810` landscape), Gaming Handhelds / Steam Deck (`1280 x 800`).
-   - **Desktop PCs & Laptops (1025px - 1600px)**: Full HD (`1920 x 1080`), 1440p / 2K / QHD (`2560 x 1440`).
-   - **TVs & Ultra-wide Displays (1601px+)**: 4K Ultra HD TV (`3840 x 2160`) with couch-distance legibility and 100% spatial gamepad navigation.
+5. Ensure every page, module, modal, wizard, and component is 100% responsive and adaptive across all form factors and resolutions with zero modal overflow, unstyled elements, or cut-off actions. Strictly adhere to the target viewports, breakpoints, and layout specifications detailed in [guides/device-matrix.md](file:///Users/godarayudhvir/Github/retro-player/guides/device-matrix.md).
 6. When the user asks a question, always provide a direct, informative answer first. Never proactively execute code edits or modifications when answering a question. Always explain clearly what actions and changes you intend to perform, and obtain the user's explicit permission/approval before proceeding with execution.
 7. Never execute `git commit` or `git push` unless the user specifically and explicitly requests you to commit or push in their prompt. Whenever executing a git commit requested by the user, always format the commit with a concise title and a comprehensive multi-line description detailing the exact changes and rationale (e.g. `git commit -m '<type>(<scope>): <summary>' -m '- <detail 1>' -m '- <detail 2>'`). Never push any commits without the user's explicit request and approval.
 8. Never use generic AI design clichés and tropes. Never include floating pill badges with sparkles/stars/emojis above headings (e.g. `✨ FEATURE NAME`, `✨ LIVE DEMO`, `✨ EMULATION STATION`), cheesy multi-color gradient buzzwords in headings, or generic SaaS marketing filler. Always build bespoke, authentic, human-crafted interfaces with clean typography, purposeful visual hierarchy, and genuine console-grade craftsmanship.
@@ -38,4 +36,5 @@
     - `public/llms.txt`
     - `README.md` (Version status badge)
     - Cover showcase images (`home.webp` -> `public/og-image.webp` & `public/screenshots/desktop-1.webp`)
+    - [Dockerfile](file:///Users/godarayudhvir/Github/retro-player/Dockerfile) (Multi-stage runner runtime directory parity verification)
 

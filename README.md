@@ -217,7 +217,8 @@ Retro Player includes built-in AI agent skills and automated utility scripts und
 | **[Update ROMs](.agents/skills/update-roms/SKILL.md)** | [`.agents/skills/update-roms/`](.agents/skills/update-roms/) | High-throughput parallel ROM organizer and unified multi-source scraper with layered fallback matching and WebP conversion. |
 | **[Convert WebP](.agents/skills/convert-webp/SKILL.md)** | [`.agents/skills/convert-webp/`](.agents/skills/convert-webp/) | Scans ROM directories for PNG/JPG images, batch converts to WebP via cwebp/sips, and purges source files. |
 | **[ROM Cleanup](.agents/skills/rom-cleanup/SKILL.md)** | [`.agents/skills/rom-cleanup/`](.agents/skills/rom-cleanup/) | Deduplicates dated builds, prunes non-English regions, and filters obscure releases with structured keep/remove approval. |
-| **[Release Version](.agents/skills/release-version/SKILL.md)** | [`.agents/skills/release-version/`](.agents/skills/release-version/) | Synchronizes app version across Service Worker caches, PWA manifest, package configs, in-app About modal, and documentation. |
+| **[Onboarding Flow](.agents/skills/onboarding-flow/SKILL.md)** | [`.agents/skills/onboarding-flow/`](.agents/skills/onboarding-flow/) | UX heuristics, 3-act storytelling, and progressive profiling patterns for high-conversion user onboarding. |
+| **[Release Version](.agents/skills/release-version/SKILL.md)** | [`.agents/skills/release-version/`](.agents/skills/release-version/) | Synchronizes app version across Service Worker, PWA manifest, package configs, in-app modals, badges, and Docker runtime parity. |
 
 ---
 

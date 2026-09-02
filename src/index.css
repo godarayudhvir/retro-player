@@ -15291,24 +15291,241 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top left;
+  object-position: top center;
   display: block;
 }
 
-/* Mobile & Handheld (<=1024px or max-height <= 850px) Fallback to standard 1-column */
-@media (max-width: 1024px), (max-height: 850px) {
+/* Tablets & Handhelds (641px - 1024px, plus iPad landscape 1080x810 and Steam Deck 1280x800):
+   Strictly display the 4-card grid across full width; hide the 2 screenshot preview frames */
+@media (max-width: 1024px), (max-width: 1280px) and (max-height: 850px) {
   .onboarding-slide.onboarding-hero-layout {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 100%;
+    gap: 0.65rem;
+    height: 100%;
   }
 
   .onboarding-hero-right {
     display: none !important;
   }
 
+  .onboarding-hero-left {
+    width: 100%;
+    height: 100%;
+    gap: 0.65rem;
+    justify-content: flex-start;
+  }
+
+  .onboarding-hero-left .onboarding-header-card {
+    flex-shrink: 0;
+  }
+
   .onboarding-hero-left .onboarding-pillars-grid {
     grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+    gap: 0.65rem;
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+/* iPad & Tablets in Portrait Mode (e.g. 810 x 1080) */
+@media (max-width: 900px) and (min-height: 900px) {
+  .onboarding-hero-left .onboarding-pillars-grid {
+    gap: 0.85rem;
+  }
+
+  .onboarding-pillar-card {
+    padding: 0.85rem 0.95rem;
+  }
+
+  .desktop-controls-pills-row {
+    gap: 0.3rem;
+  }
+
+  .desktop-controls-pills-row .status-pill {
+    padding: 0 0.35rem;
+    font-size: 0.76rem;
+    height: 56px;
+  }
+
+  .desktop-controller-square-badge {
+    height: 56px;
+  }
+
+  .desktop-controller-square-badge .ctrl-square-svg {
+    width: 44px;
+    height: 44px;
+  }
+
+  .desktop-controls-dual-grid {
+    gap: 0.45rem;
+  }
+
+  .desktop-touch-pad-showcase,
+  .desktop-controls-keyboard-card {
+    padding: 0.45rem 0.55rem;
+  }
+
+  .desktop-kc-label {
+    font-size: 0.62rem;
+  }
+
+  .kc-keycap {
+    min-width: 19px;
+    height: 20px;
+    font-size: 0.64rem;
+    padding: 0 3px;
+  }
+}
+
+/* Handhelds & Tablets in Landscape Mode (Steam Deck 1280x800, iPad Landscape 1080x810) */
+@media (max-width: 1280px) and (max-height: 850px) {
+  .onboarding-header-card {
+    padding: 0.55rem 1rem;
+  }
+
+  .onboarding-slide-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .onboarding-slide-desc {
+    font-size: 0.82rem;
+    line-height: 1.35;
+  }
+
+  .onboarding-pillar-card {
+    padding: 0.55rem 0.75rem;
+  }
+
+  .pillar-header-row {
+    margin-bottom: 0.25rem;
+  }
+
+  .pillar-icon-wrap {
+    width: 28px;
+    height: 28px;
+  }
+
+  .pillar-icon-wrap svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .pillar-card-title {
+    font-size: 0.95rem;
+  }
+
+  .pillar-text p {
+    font-size: 0.76rem;
+    line-height: 1.3;
+    margin-bottom: 0.35rem;
+  }
+
+  .pillar-console-card-item {
+    padding: 0.25rem 0.45rem;
+  }
+
+  .pillar-console-svg-large {
+    width: 16px;
+    height: 16px;
+  }
+
+  .pillar-console-label {
+    font-size: 0.72rem;
+  }
+
+  .desktop-pillar-saves-stack {
+    gap: 0.25rem;
+  }
+
+  .desktop-save-action-btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.72rem;
+    height: 28px;
+  }
+
+  .desktop-pillar-resume-banner {
+    padding: 0.3rem 0.6rem;
+  }
+
+  .desktop-pillar-resume-banner .erp-title {
+    font-size: 0.76rem;
+  }
+
+  .desktop-pillar-resume-banner .erp-sub {
+    font-size: 0.66rem;
+  }
+
+  .desktop-pillar-resume-banner .erp-btn.is-resume {
+    padding: 0.25rem 0.55rem;
+    font-size: 0.7rem;
+  }
+
+  .desktop-pillar-hof-card {
+    padding: 0.35rem 0.6rem;
+  }
+
+  .pillar-ux-trophy-card {
+    padding: 0.35rem 0.6rem;
+  }
+
+  .pillar-gym-badge-box {
+    width: 24px;
+    height: 24px;
+  }
+
+  .pillar-gym-badge-img {
+    width: 16px;
+    height: 16px;
+  }
+
+  .desktop-controls-pills-row {
+    gap: 0.3rem;
+  }
+
+  .desktop-controls-pills-row .status-pill {
+    height: 48px;
+    padding: 0 0.35rem;
+    font-size: 0.74rem;
+  }
+
+  .desktop-controller-square-badge {
+    height: 48px;
+  }
+
+  .desktop-controller-square-badge .ctrl-square-svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .desktop-touch-pad-showcase,
+  .desktop-controls-keyboard-card {
+    padding: 0.35rem 0.45rem;
+  }
+
+  .desktop-touch-pad-showcase .touch-pad-demo-surface {
+    min-height: 52px;
+  }
+
+  .desktop-keyboard-keys-surface {
+    padding: 0.25rem 0.35rem;
+    gap: 0.2rem;
+  }
+
+  .desktop-keyboard-keys-surface .kc-keycap {
+    min-width: 18px;
+    height: 18px;
+    font-size: 0.6rem;
+    padding: 0 3px;
+  }
+
+  .desktop-kc-label {
+    font-size: 0.58rem;
   }
 }
 
@@ -22994,6 +23211,13 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
     max-width: 95vw;
   }
 
+  .onboarding-slide.onboarding-hero-layout {
+    grid-template-columns: 1.25fr 1fr;
+    gap: 1.35rem;
+    width: 96vw;
+    max-width: 96vw;
+  }
+
   .onboarding-slide.slide-controls {
     width: 95vw;
     max-width: 95vw;
@@ -23004,77 +23228,129 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   }
 
   .onboarding-slide-desc {
-    font-size: 1.1rem;
-    max-width: 1000px;
+    font-size: 1.05rem;
+    max-width: 1050px;
+    line-height: 1.5;
   }
 
   .onboarding-pillars-grid {
     width: 100%;
     max-width: 100%;
-    gap: 1.25rem;
+    gap: 1.15rem;
   }
 
   .onboarding-pillar-card {
-    padding: 1.25rem 1.45rem;
+    padding: 1.15rem 1.35rem;
   }
 
-  .pillar-text h3 {
-    font-size: 1.35rem;
+  .pillar-card-title {
+    font-size: 1.22rem;
   }
 
   .pillar-text p {
-    font-size: 1.05rem;
-    line-height: 1.55;
-  }
-
-  .pillar-badge-tag {
-    font-size: 0.78rem;
-    padding: 3px 9px;
-  }
-
-  .highlight-chip,
-  .pillar-console-pill {
-    font-size: 0.82rem;
-    padding: 0.3rem 0.65rem;
-  }
-
-  .pillar-console-svg {
-    width: 17px;
-    height: 17px;
+    font-size: 0.96rem;
+    line-height: 1.5;
   }
 
   .pillar-console-card-item {
-    padding: 0.45rem 0.65rem;
-    font-size: 0.82rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.92rem;
   }
 
   .pillar-console-svg-large {
+    width: 26px;
+    height: 26px;
+  }
+
+  .desktop-save-action-btn {
+    padding: 0.5rem 0.85rem;
+    font-size: 0.86rem;
+    height: 38px;
+  }
+
+  .desktop-pillar-resume-banner {
+    padding: 0.55rem 0.85rem;
+  }
+
+  .desktop-pillar-resume-banner .erp-title {
+    font-size: 0.9rem;
+  }
+
+  .desktop-pillar-resume-banner .erp-sub {
+    font-size: 0.78rem;
+  }
+
+  .desktop-pillar-resume-banner .erp-btn.is-resume {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.84rem;
+  }
+
+  .desktop-pillar-hof-card {
+    padding: 0.6rem 0.85rem;
+  }
+
+  .pillar-ux-trophy-card {
+    padding: 0.6rem 0.85rem;
+  }
+
+  .trophy-mini-title {
+    font-size: 0.96rem;
+  }
+
+  .trophy-mini-sub {
+    font-size: 0.82rem;
+  }
+
+  .pillar-gym-badge-box {
+    width: 36px;
+    height: 36px;
+  }
+
+  .pillar-gym-badge-img {
     width: 24px;
     height: 24px;
   }
 
-  .pillar-save-chip,
-  .pillar-keycap-btn {
-    font-size: 0.82rem;
-    padding: 0.28rem 0.65rem;
-  }
-
-  .pillar-gym-badge-box {
-    width: 34px;
-    height: 34px;
-  }
-
-  .pillar-gym-badge-img {
-    width: 22px;
-    height: 22px;
-  }
-
-  .hero-preview-pill {
+  .desktop-controls-pills-row .status-pill {
+    height: 78px;
     font-size: 0.92rem;
   }
 
+  .desktop-controller-square-badge {
+    height: 78px;
+  }
+
+  .ctrl-square-svg {
+    width: 62px;
+    height: 62px;
+  }
+
+  .desktop-touch-pad-showcase,
+  .desktop-controls-keyboard-card {
+    padding: 0.65rem 0.85rem;
+  }
+
+  .touch-pad-title {
+    font-size: 0.82rem;
+  }
+
+  .desktop-kc-label {
+    font-size: 0.76rem;
+  }
+
+  .desktop-keyboard-keys-surface .kc-keycap {
+    min-width: 26px;
+    height: 26px;
+    font-size: 0.78rem;
+    padding: 0 5px;
+  }
+
+  .hero-preview-pill {
+    font-size: 0.95rem;
+  }
+
   .hero-preview-live-tag {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
   }
 
   .character-studio-container {
@@ -23319,153 +23595,286 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
     height: 42px;
   }
 
-  /* Save Demo on 4K */
-  .pillar-ux-demo-card.save-demo {
-    padding: 1.15rem 1.45rem;
+  /* Card 1: 4x3 Console Grid on 4K */
+  .pillar-system-icons-grid-4x3 {
+    gap: 0.75rem;
+  }
+
+  .pillar-console-card-item {
+    padding: 0.85rem 1.15rem;
+    font-size: 1.35rem;
     border-radius: 10px;
     border-width: 2.5px;
     gap: 0.85rem;
   }
 
-  .save-demo-filename {
-    font-size: 1.45rem;
-  }
-
-  .save-demo-size {
-    font-size: 1.15rem;
-    padding: 3px 10px;
-  }
-
-  .save-demo-status {
-    font-size: 1.15rem;
-    padding: 4px 12px;
-    border-radius: 6px;
-  }
-
-  .save-demo-btn {
-    padding: 0.65rem 1.25rem;
-    font-size: 1.3rem;
-    border-radius: 8px;
-    gap: 0.65rem;
-  }
-
-  .save-demo-btn svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .resume-dot {
-    width: 10px;
-    height: 10px;
-  }
-
-  /* Badge Case on 4K */
-  .badge-case-title {
-    font-size: 1.35rem;
-  }
-
-  .badge-case-progress {
-    font-size: 1.25rem;
-    padding: 3px 12px;
-    border-radius: 6px;
-  }
-
-  .pillar-badges-showcase-row {
-    padding: 0.75rem 1rem;
-    gap: 0.75rem;
-    border-radius: 10px;
-    border-width: 2.5px;
-  }
-
-  .pillar-gym-badge-box {
-    width: 56px;
-    height: 56px;
-    border-radius: 10px;
-    border-width: 2.5px;
-  }
-
-  .pillar-gym-badge-img {
+  .pillar-console-svg-large {
     width: 38px;
     height: 38px;
   }
 
-  /* Trophy Card on 4K */
+  .pillar-console-label {
+    font-size: 1.15rem;
+    font-weight: 800;
+  }
+
+  /* Card 2: Universal Saves Stack & Auto-Resume Banner on 4K */
+  .desktop-pillar-saves-stack {
+    gap: 0.65rem;
+  }
+
+  .desktop-save-action-btn {
+    padding: 0.75rem 1.25rem;
+    font-size: 1.1rem;
+    height: 48px;
+    border-radius: 10px;
+    border-width: 2px;
+    gap: 0.85rem;
+  }
+
+  .desktop-save-action-btn svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .desktop-pillar-resume-banner {
+    padding: 0.85rem 1.25rem;
+    border-radius: 12px;
+    border-width: 2.5px;
+    gap: 1rem;
+  }
+
+  .desktop-pillar-resume-banner .erp-icon-wrap {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+  }
+
+  .desktop-pillar-resume-banner .erp-icon-wrap svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .desktop-pillar-resume-banner .erp-title {
+    font-size: 1.2rem;
+  }
+
+  .desktop-pillar-resume-banner .erp-sub {
+    font-size: 0.98rem;
+  }
+
+  .desktop-pillar-resume-banner .erp-btn.is-resume {
+    padding: 0.55rem 1.15rem;
+    font-size: 1.05rem;
+    border-radius: 8px;
+    gap: 0.5rem;
+  }
+
+  .desktop-pillar-resume-banner .erp-btn.is-resume svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Card 3: Hall of Fame, Trophy Card & Badge Case on 4K */
+  .desktop-pillar-hof-card {
+    padding: 0.85rem 1.25rem;
+    border-radius: 12px;
+    border-width: 2.5px;
+  }
+
+  .trophy-avatar-frame {
+    width: 52px;
+    height: 52px;
+  }
+
+  .trophy-level-pill {
+    font-size: 0.78rem;
+    padding: 2px 7px;
+  }
+
+  .desktop-pillar-hof-name {
+    font-size: 1.25rem;
+  }
+
+  .trophy-rank-badge {
+    font-size: 0.95rem;
+    padding: 3px 10px;
+    border-radius: 6px;
+  }
+
+  .trophy-meter-track {
+    height: 10px;
+    border-radius: 6px;
+  }
+
+  .trophy-meter-labels {
+    font-size: 0.98rem;
+  }
+
+  .trophy-points-tag {
+    font-size: 0.98rem;
+  }
+
+  .trophy-points-tag svg {
+    width: 16px;
+    height: 16px;
+  }
+
   .pillar-ux-trophy-card {
     padding: 0.85rem 1.25rem;
     gap: 1rem;
-    border-radius: 10px;
+    border-radius: 12px;
     border-width: 2.5px;
   }
 
   .trophy-mini-icon-box {
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
   }
 
   .trophy-mini-icon-box svg {
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
   }
 
   .trophy-mini-title {
-    font-size: 1.45rem;
+    font-size: 1.2rem;
   }
 
   .trophy-mini-pts {
-    font-size: 1.2rem;
+    font-size: 1.05rem;
     padding: 3px 10px;
     border-radius: 6px;
   }
 
   .trophy-mini-sub {
-    font-size: 1.2rem;
+    font-size: 0.98rem;
   }
 
-  /* Gamepad HUD & Keycaps on 4K */
-  .pillar-topbar-hud-demo-row {
-    gap: 1rem;
-  }
-
-  .status-pill.demo-pill {
-    padding: 0.65rem 1.25rem;
-    font-size: 1.35rem;
-    border-radius: 8px;
-    gap: 0.75rem;
-  }
-
-  .status-pill.demo-pill svg {
-    width: 26px;
-    height: 26px;
-  }
-
-  .battery-percent-text {
-    font-size: 1.25rem;
-  }
-
-  .pillar-keybinds-showcase-row {
+  .pillar-badges-showcase-row {
     padding: 0.75rem 1rem;
-    gap: 0.65rem;
+    gap: 0.75rem;
+    border-radius: 12px;
+    border-width: 2.5px;
+  }
+
+  .pillar-gym-badge-box {
+    width: 52px;
+    height: 52px;
     border-radius: 10px;
     border-width: 2.5px;
   }
 
-  .pillar-keycap-btn {
-    font-size: 1.25rem;
-    padding: 0.45rem 1.1rem;
-    border-radius: 6px;
+  .pillar-gym-badge-img {
+    width: 34px;
+    height: 34px;
+  }
+
+  /* Card 4: Gamepad HUD, Touch Controls & Keyboard Keys on 4K */
+  .desktop-controls-pills-row {
+    gap: 0.85rem;
+  }
+
+  .desktop-controls-pills-row .status-pill {
+    height: 92px;
+    font-size: 1.15rem;
+    padding: 0 0.85rem;
+    border-radius: 12px;
     border-width: 2.5px;
-    border-bottom-width: 4px;
+    gap: 0.75rem;
+  }
+
+  .desktop-controls-pills-row .status-pill svg {
+    transform: scale(1.4);
+  }
+
+  .desktop-controls-pills-row .battery-badge {
+    padding: 5px 12px;
+    font-size: 1.05rem;
+    border-radius: 10px;
+    gap: 6px;
+  }
+
+  .desktop-controller-square-badge {
+    height: 92px;
+    border-radius: 12px;
+    border-width: 2.5px;
+  }
+
+  .ctrl-square-svg {
+    width: 76px;
+    height: 76px;
+  }
+
+  .desktop-controls-dual-grid {
+    gap: 0.85rem;
+  }
+
+  .desktop-touch-pad-showcase,
+  .desktop-controls-keyboard-card {
+    padding: 0.85rem 1.15rem;
+    border-radius: 12px;
+    border-width: 2.5px;
+  }
+
+  .touch-pad-title {
+    font-size: 0.95rem;
+  }
+
+  .touch-pad-sub {
+    font-size: 0.85rem;
+  }
+
+  .desktop-touch-pad-showcase .touch-pad-demo-surface {
+    min-height: 80px;
+    padding: 0 0.85rem;
+  }
+
+  .v-dpad-btn,
+  .v-action-btn,
+  .v-meta-btn {
+    font-size: 0.88rem;
+  }
+
+  .desktop-keyboard-keys-surface {
+    padding: 0.65rem 0.85rem;
+    gap: 0.5rem;
+  }
+
+  .desktop-keyboard-keys-surface .kc-keycap {
+    min-width: 32px;
+    height: 32px;
+    font-size: 0.95rem;
+    padding: 0 6px;
+    border-radius: 6px;
+    border-width: 2px;
+    border-bottom-width: 3.5px;
+  }
+
+  .desktop-kc-label {
+    font-size: 0.88rem;
+  }
+
+  /* Right Column: Preview Frames on 4K */
+  .onboarding-hero-preview-frame {
+    border-radius: 14px;
+    border-width: 3px;
+  }
+
+  .onboarding-hero-preview-header {
+    padding: 0.75rem 1.25rem;
   }
 
   .hero-preview-pill {
-    font-size: 1.55rem;
-    padding: 0.55rem 1.2rem;
+    font-size: 1.2rem;
+    font-weight: 900;
   }
 
   .hero-preview-live-tag {
-    font-size: 1.35rem;
-    padding: 0.4rem 1rem;
+    font-size: 1rem;
+    padding: 4px 10px;
+    border-radius: 6px;
   }
 
   .character-studio-container {
