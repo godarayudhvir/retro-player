@@ -6,7 +6,7 @@
  * External scraper probes (Libretro CDN, Wikipedia) are NEVER cached to prevent Chrome quota padding.
  */
 
-const CACHE_NAME = 'retro-player-v1.1.1';
+const CACHE_NAME = 'retro-player-v1.1.2';
 
 // Critical core assets to pre-cache on service worker installation
 const PRECACHE_ASSETS = [
@@ -67,6 +67,20 @@ self.addEventListener('fetch', (event) => {
 
   // Bypass non-http(s) requests (e.g. chrome-extension://)
   if (!url.protocol.startsWith('http')) {
+    return;
+  }
+
+  // RULE 0: Vite Dev Server & HMR internals - NEVER intercept or cache
+  if (
+    url.pathname.includes('/node_modules/') ||
+    url.pathname.includes('/@vite/') ||
+    url.pathname.includes('/@id/') ||
+    url.pathname.includes('/@fs/') ||
+    url.pathname.includes('/@react-refresh') ||
+    url.pathname.includes('/src/') ||
+    url.searchParams.has('v') ||
+    url.searchParams.has('t')
+  ) {
     return;
   }
 

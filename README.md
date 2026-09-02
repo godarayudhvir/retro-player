@@ -15,7 +15,7 @@
 [![Docker Multi-Arch Build](https://github.com/godarayudhvir/retro-player/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/godarayudhvir/retro-player/actions)
 [![GitHub Container Registry](https://img.shields.io/badge/GHCR.io-retro--player-blue?logo=docker&logoColor=white)](https://github.com/godarayudhvir/retro-player/pkgs/container/retro-player)
 [![PWABuilder Compliant](https://img.shields.io/badge/PWA-100%25%20PWABuilder-success?logo=pwa&logoColor=white)](https://www.pwabuilder.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
 [![React 18](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Vite 5](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![WASM Powered](https://img.shields.io/badge/Emulation-WebAssembly-654FF0?logo=webassembly&logoColor=white)](https://webassembly.org/)
@@ -198,9 +198,9 @@ Explore dedicated, step-by-step documentation located in the [`guides/`](guides/
 | **[🎮 Controls & Keybindings Guide](guides/controls.md)** | Full gamepad button mappings, dashboard spatial navigation, virtual keyboard, and in-game controls. |
 | **[💾 Save States & In-Game Save Architecture](guides/save-states.md)** | Snapshot quick saves vs in-game battery saves (`.sav`) breakdown across all 12 console platforms. |
 | **[🌐 Hardware & Platform Compatibility Matrix](guides/compatibility.md)** | Browser, OS, Smart TV (LG webOS, Samsung Tizen, Fire TV), Handheld (Steam Deck), and Console compatibility breakdown. |
-| **[📱 Cross-Device Experience Matrix](guides/device-experience-matrix.md)** | Feature sets, UI density, input modes, and admin capabilities compared across Mobile, Handheld, PC, and TV. |
+| **[📱 Cross-Device Experience Matrix](guides/device-matrix.md)** | Feature sets, UI density, input modes, and admin capabilities compared across Mobile, Handheld, PC, and TV. |
 | **[🏆 Universal Achievements & Player Milestones Guide](guides/achievements.md)** | Master registry of 24 universal organic achievements (300G Gamerscore), points matrix, and persistence. |
-| **[⚡ Pokémon Save Inspector & Regional Milestones Hub](guides/pokemon/README.md)** | Binary SRAM/Flash save inspection specifications across Gen 1 (Kanto), Gen 2 (Johto 16 Badges), Gen 3 (Hoenn & FRLG), and Gen 4 (Sinnoh & HGSS). |
+| **[⚡ Pokémon Save Inspector & Regional Milestones Hub](guides/pokemon/README.md)** | Binary SRAM/Flash save inspection specifications across Gen 1 (Kanto), Gen 2 (Johto 16 Badges), Gen 3 (Hoenn & FRLG), Gen 4 (Sinnoh & HGSS), and Gen 5 (Unova). |
 | **[🎮 Rich Presence, OS Media Controls & Feeds](guides/presence.md)** | Real-time gaming presence across Discord Desktop (RPC), OS MediaSession (macOS/iOS/Android/Windows), and OBS stream overlays. |
 | **[🎮 ROM Management & Sidecar Metadata](guides/roms.md)** | Directory organization, folder mounting, and local companion sidecars (`.nfo`, `.json`, `cover.webp`) guide. |
 | **[🎵 Background Music (BGM) Architecture](guides/bgm.md)** | Virtual audio hierarchy, dual-layer directory scanning, codec formats, and smart in-game pause. |
@@ -219,6 +219,7 @@ Retro Player includes built-in AI agent skills and automated utility scripts und
 | **[ROM Cleanup](.agents/skills/rom-cleanup/SKILL.md)** | [`.agents/skills/rom-cleanup/`](.agents/skills/rom-cleanup/) | Deduplicates dated builds, prunes non-English regions, and filters obscure releases with structured keep/remove approval. |
 | **[Onboarding Flow](.agents/skills/onboarding-flow/SKILL.md)** | [`.agents/skills/onboarding-flow/`](.agents/skills/onboarding-flow/) | UX heuristics, 3-act storytelling, and progressive profiling patterns for high-conversion user onboarding. |
 | **[Release Version](.agents/skills/release-version/SKILL.md)** | [`.agents/skills/release-version/`](.agents/skills/release-version/) | Synchronizes app version across Service Worker, PWA manifest, package configs, in-app modals, badges, and Docker runtime parity. |
+| **[Repo Audit](.agents/skills/repo-audit/SKILL.md)** | [`.agents/skills/repo-audit/`](.agents/skills/repo-audit/) | Comprehensive multi-domain audit across security, performance, PWA, accessibility, SEO, and AI search with date-organized tracking. |
 
 ---
 
@@ -227,12 +228,10 @@ Retro Player includes built-in AI agent skills and automated utility scripts und
 Upcoming feature designs, technical blueprints, and step-by-step implementation guides are organized under [`mirai/`](mirai/README.md):
 
 - **[Master Roadmap Index](mirai/README.md)**: Prioritized status index across all upcoming milestones.
-- **[Pokémon Save Inspector (Gen 5 NDS)](mirai/pokemon-save-gen5.md)**: Zero-overhead binary save parser for 512KB NDS saves for Gen 5 (Unova Gym Badges and League Champions Alder & Iris).
-- **[Pokémon Single-Player Milestones Expansion (Gen 1–5)](mirai/pokemon-milestones-expansion.md)**: Offline single-player storyline milestones across Gen 1–5 (Starters, Key Items, Legendary Titans, and Mt. Silver Red).
+- **[App UI Gamepad Navigation Re-Architecture](mirai/gamepad-ui-navigation-rearchitecture.md)**: Purpose-built 2D spatial bounding-box navigation engine.
+- **[Settings & Library Management Hub](mirai/settings-hub.md)**: Enhanced console library management, BGM track manager, and diagnostic tools.
 - **[Dynamic Emulation Core Switching](mirai/emulation-core-switching.md)**: Per-system and per-game WebAssembly core override engine (mGBA vs VBA-M, Gambatte vs SameBoy, Snes9x vs bsnes, Beetle PSX vs PCSX ReARMed).
-- **[Mobile UI Gamepad & Spatial Navigation](mirai/mobile-gamepad-navigation.md)**: Purpose-built 2D spatial navigation engine for mobile feeds and bottom sheets.
 - **[3D Cartridge & Media Designs](mirai/cartridge-designs-spec.md)**: Master geometric specifications for authentic physical cartridge shells.
-- **[Settings Hub Redesign](mirai/settings-hub.md)**: Enhanced console library management, BGM track manager, and diagnostic tools.
 - **[Cross-Device Cloud Saves](mirai/cloud-saves.md)**: Cloud synchronization for quick saves and battery SRAM states.
 - **[BYOS Cloud Storage](mirai/byos-cloud-storage.md)**: Bring-Your-Own-Storage streaming (Google Drive, AWS S3, Cloudflare R2).
 - **[Self-Hosted User Management](mirai/self-hosted-user-management.md)**: Multi-user auth, admin dashboard, and role permissions.
@@ -243,7 +242,7 @@ Upcoming feature designs, technical blueprints, and step-by-step implementation 
 
 ## 📄 License
 
-Distributed under the **MIT License**. See `LICENSE` for more information.
+Distributed under the **GNU General Public License v3.0 (GPL-3.0)**. See `LICENSE` for more information.
 
 <div align="center">
 Made with ❤️ for classic gaming enthusiasts worldwide.

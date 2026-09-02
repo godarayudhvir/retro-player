@@ -6,3 +6,8 @@ dist
 *.log
 .DS_Store
 data
+.env
+.env.*
+test_save_states
+marketing
+audit

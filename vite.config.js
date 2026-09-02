@@ -243,6 +243,29 @@ function findCompanionCover(baseName, currentSubdir, entries, sidecarMeta) {
   return null;
 }
 
+/**
+ * Resolves a file path strictly within a parent directory boundary.
+ * Prevents directory traversal attacks via '..' or absolute paths.
+ * 
+ * @param {string} baseDir - Trusted parent directory
+ * @param {string} relativePath - Untrusted user input
+ * @returns {string} - Validated absolute path
+ * @throws {Error} - If traversal outside baseDir is attempted
+ */
+function safeResolve(baseDir, relativePath) {
+  if (!relativePath || typeof relativePath !== 'string') {
+    throw new Error('Invalid path argument');
+  }
+  const sanitized = relativePath.replace(/\0/g, '');
+  const resolvedBase = path.resolve(baseDir);
+  const resolvedTarget = path.resolve(resolvedBase, sanitized);
+
+  if (!resolvedTarget.startsWith(resolvedBase + path.sep) && resolvedTarget !== resolvedBase) {
+    throw new Error('Access denied: Path traversal detected');
+  }
+  return resolvedTarget;
+}
+
 function getRomsManifest(romsBaseDir) {
   const gameMap = new Map();
 
@@ -713,24 +736,25 @@ function multiConsoleScannerPlugin() {
             let targetPath = null;
 
             if (relativePath) {
-              const decodedRel = decodeURIComponent(relativePath);
-              const candidate = path.join(romsBaseDir, decodedRel);
+              const decodedRel = decodeURIComponent(relativePath).replace(/^\/roms\//, '').replace(/^\/+/, '');
+              const candidate = safeResolve(romsBaseDir, decodedRel);
               if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
                 targetPath = candidate;
               }
             }
 
             if (!targetPath && systemKey && filename) {
-              const decodedName = decodeURIComponent(filename);
-              const candidate = path.join(romsBaseDir, systemKey, path.basename(decodedName));
+              const decodedName = path.basename(decodeURIComponent(filename));
+              const sysDir = safeResolve(romsBaseDir, systemKey);
+              const candidate = safeResolve(sysDir, decodedName);
               if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
                 targetPath = candidate;
               }
             }
 
             if (!targetPath && filename) {
-              const decodedName = decodeURIComponent(filename);
-              const candidate = path.join(romsBaseDir, path.basename(decodedName));
+              const decodedName = path.basename(decodeURIComponent(filename));
+              const candidate = safeResolve(romsBaseDir, decodedName);
               if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
                 targetPath = candidate;
               }
@@ -762,11 +786,15 @@ function multiConsoleScannerPlugin() {
               return;
             }
 
+            // Double check targetPath boundary
+            targetPath = safeResolve(romsBaseDir, path.relative(romsBaseDir, targetPath));
+
             const parentDir = path.dirname(targetPath);
-            const systemDir = systemKey ? path.join(romsBaseDir, systemKey) : null;
+            const systemDir = systemKey ? safeResolve(romsBaseDir, systemKey) : null;
             const isDedicatedFolder = parentDir !== romsBaseDir && (!systemDir || parentDir !== systemDir);
 
             if (isDedicatedFolder && fs.existsSync(parentDir)) {
+              safeResolve(romsBaseDir, path.relative(romsBaseDir, parentDir));
               fs.rmSync(parentDir, { recursive: true, force: true });
               console.log(`🗑️ [DEV ROM DELETE] Successfully deleted entire game directory: ${parentDir}`);
             } else {
@@ -787,7 +815,7 @@ function multiConsoleScannerPlugin() {
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify({ success: true, message: 'Game deleted successfully' }));
           } catch (e) {
-            res.statusCode = 500;
+            res.statusCode = e.message.includes('Access denied') ? 403 : 500;
             res.end(JSON.stringify({ error: e.message }));
           }
         });
@@ -814,7 +842,8 @@ function multiConsoleScannerPlugin() {
               return;
             }
 
-            const targetPath = path.join(bgmBaseDir, path.basename(filename));
+            const safeFilename = path.basename(filename);
+            const targetPath = safeResolve(bgmBaseDir, safeFilename);
 
             if (!fs.existsSync(targetPath)) {
               res.statusCode = 404;
@@ -827,7 +856,7 @@ function multiConsoleScannerPlugin() {
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify({ success: true, message: 'Audio track deleted successfully' }));
           } catch (e) {
-            res.statusCode = 500;
+            res.statusCode = e.message.includes('Access denied') ? 403 : 500;
             res.end(JSON.stringify({ error: e.message }));
           }
         });
@@ -1116,12 +1145,12 @@ function multiConsoleScannerPlugin() {
             const { gameId, systemKey, romPath, title, description, developer, publisher, year, releaseYear, genre, players, coverDataUrl } = data;
             const effectiveYear = (releaseYear || year || '').toString();
 
-            let targetDir = path.resolve(process.cwd(), 'public/roms', systemKey || '');
+            let targetDir = systemKey ? safeResolve(romsBaseDir, systemKey) : romsBaseDir;
             let baseFileName = 'game';
 
             if (romPath) {
-              const decodedPath = decodeURIComponent(romPath).replace(/^\/roms\//, '');
-              const fullRomPath = path.resolve(process.cwd(), 'public/roms', decodedPath);
+              const decodedPath = decodeURIComponent(romPath).replace(/^\/roms\//, '').replace(/^\/+/, '');
+              const fullRomPath = safeResolve(romsBaseDir, decodedPath);
               if (fs.existsSync(fullRomPath)) {
                 targetDir = path.dirname(fullRomPath);
                 baseFileName = path.parse(fullRomPath).name;
@@ -1132,6 +1161,8 @@ function multiConsoleScannerPlugin() {
               baseFileName = title.toLowerCase().replace(/[^a-z0-9]/g, '-');
             }
 
+            targetDir = safeResolve(romsBaseDir, path.relative(romsBaseDir, targetDir));
+
             if (!fs.existsSync(targetDir)) {
               fs.mkdirSync(targetDir, { recursive: true });
             }
@@ -1141,11 +1172,11 @@ function multiConsoleScannerPlugin() {
             if (data.deleteCover) {
               const coverExts = ['.webp', '.png', '.jpg', '.jpeg', '.gif', '.bmp'];
               for (const ext of coverExts) {
-                const coverPath = path.join(targetDir, `${baseFileName}${ext}`);
+                const coverPath = safeResolve(targetDir, `${baseFileName}${ext}`);
                 if (fs.existsSync(coverPath)) {
                   try { fs.unlinkSync(coverPath); } catch (_) {}
                 }
-                const genericPath = path.join(targetDir, `cover${ext}`);
+                const genericPath = safeResolve(targetDir, `cover${ext}`);
                 if (fs.existsSync(genericPath)) {
                   try { fs.unlinkSync(genericPath); } catch (_) {}
                 }
@@ -1164,7 +1195,7 @@ function multiConsoleScannerPlugin() {
               const base64Data = coverDataUrl.replace(/^data:image\/[a-zA-Z0-9+]+;base64,/, '');
               const imageBuffer = Buffer.from(base64Data, 'base64');
               const coverFileName = `${baseFileName}${ext}`;
-              const coverFilePath = path.join(targetDir, coverFileName);
+              const coverFilePath = safeResolve(targetDir, coverFileName);
 
               fs.writeFileSync(coverFilePath, imageBuffer);
               const relToPublic = path.relative(path.resolve(process.cwd(), 'public'), coverFilePath);
@@ -1190,7 +1221,7 @@ function multiConsoleScannerPlugin() {
                   }
 
                   const coverFileName = `${baseFileName}${ext}`;
-                  const coverFilePath = path.join(targetDir, coverFileName);
+                  const coverFilePath = safeResolve(targetDir, coverFileName);
 
                   fs.writeFileSync(coverFilePath, imageBuffer);
                   const relToPublic = path.relative(path.resolve(process.cwd(), 'public'), coverFilePath);
@@ -1216,12 +1247,12 @@ function multiConsoleScannerPlugin() {
               updatedAt: new Date().toISOString()
             };
 
-            const sidecarPath = path.join(targetDir, `${baseFileName}.json`);
+            const sidecarPath = safeResolve(targetDir, `${baseFileName}.json`);
             fs.writeFileSync(sidecarPath, JSON.stringify(sidecarJson, null, 2), 'utf-8');
             console.log(`💾 [SIDECAR JSON SAVED] -> ${sidecarPath}`);
 
             // If a generic metadata.json exists in target directory, keep it in sync as well
-            const legacyMetaPath = path.join(targetDir, 'metadata.json');
+            const legacyMetaPath = safeResolve(targetDir, 'metadata.json');
             if (fs.existsSync(legacyMetaPath)) {
               try {
                 fs.writeFileSync(legacyMetaPath, JSON.stringify(sidecarJson, null, 2), 'utf-8');
@@ -1237,7 +1268,7 @@ function multiConsoleScannerPlugin() {
             }));
           } catch (err) {
             console.error('[SIDE CAR SAVE ERROR]', err);
-            res.statusCode = 500;
+            res.statusCode = err.message.includes('Access denied') ? 403 : 500;
             res.end(JSON.stringify({ error: err.message }));
           }
         });
@@ -1258,12 +1289,12 @@ function multiConsoleScannerPlugin() {
             const data = JSON.parse(body || '{}');
             const { systemKey, romPath, title } = data;
 
-            let targetDir = path.resolve(process.cwd(), 'public/roms', systemKey || '');
+            let targetDir = systemKey ? safeResolve(romsBaseDir, systemKey) : romsBaseDir;
             let baseFileName = 'game';
 
             if (romPath) {
-              const decodedPath = decodeURIComponent(romPath).replace(/^\/roms\//, '');
-              const fullRomPath = path.resolve(process.cwd(), 'public/roms', decodedPath);
+              const decodedPath = decodeURIComponent(romPath).replace(/^\/roms\//, '').replace(/^\/+/, '');
+              const fullRomPath = safeResolve(romsBaseDir, decodedPath);
               if (fs.existsSync(fullRomPath)) {
                 targetDir = path.dirname(fullRomPath);
                 baseFileName = path.parse(fullRomPath).name;
@@ -1274,11 +1305,12 @@ function multiConsoleScannerPlugin() {
               baseFileName = title.toLowerCase().replace(/[^a-z0-9]/g, '-');
             }
 
-            const sidecarPath = path.join(targetDir, `${baseFileName}.json`);
+            targetDir = safeResolve(romsBaseDir, path.relative(romsBaseDir, targetDir));
+            const sidecarPath = safeResolve(targetDir, `${baseFileName}.json`);
             if (fs.existsSync(sidecarPath)) {
               try { fs.unlinkSync(sidecarPath); } catch (_) {}
             }
-            const legacyPath = path.join(targetDir, 'metadata.json');
+            const legacyPath = safeResolve(targetDir, 'metadata.json');
             if (fs.existsSync(legacyPath)) {
               try { fs.unlinkSync(legacyPath); } catch (_) {}
             }
@@ -1288,7 +1320,7 @@ function multiConsoleScannerPlugin() {
             res.end(JSON.stringify({ success: true, message: 'Sidecar JSON deleted from disk' }));
           } catch (err) {
             console.error('[DEV SIDE CAR DELETE ERROR]', err);
-            res.statusCode = 500;
+            res.statusCode = err.message.includes('Access denied') ? 403 : 500;
             res.end(JSON.stringify({ error: err.message }));
           }
         });
@@ -1443,6 +1475,12 @@ function multiConsoleScannerPlugin() {
 export default defineConfig({
   base: './',
   plugins: [react(), multiConsoleScannerPlugin()],
+  resolve: {
+    dedupe: ['react', 'react-dom']
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime']
+  },
   server: {
     port: 3000,
     open: true

@@ -2,6 +2,7 @@
   "name": "retro-player",
   "private": true,
   "version": "1.1.1",
+  "license": "GPL-3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

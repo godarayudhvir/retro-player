@@ -57,17 +57,37 @@ export function usePwaInstall() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
-    // 4. Register Service Worker in production/local environment
+    // 4. Register Service Worker in production environment (Unregister in Vite dev)
     if ('serviceWorker' in navigator) {
-      const swUrl = (import.meta.env.BASE_URL || './') + 'sw.js';
-      navigator.serviceWorker.register(swUrl)
-        .then((registration) => {
-          setSwRegistered(true);
-          console.log('⚡ [PWA] ServiceWorker registered successfully with scope:', registration.scope);
-        })
-        .catch((err) => {
-          console.warn('⚠️ [PWA] ServiceWorker registration failed:', err);
+      if (import.meta.env.DEV) {
+        // Automatically unregister lingering dev service workers to prevent Vite chunk caching collisions
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (const reg of registrations) {
+            reg.unregister();
+            console.log('🧹 [PWA] Development mode: Unregistered active ServiceWorker');
+          }
         });
+        if (typeof window !== 'undefined' && 'caches' in window) {
+          caches.keys().then((keys) => {
+            for (const key of keys) {
+              if (key.startsWith('retro-player')) {
+                caches.delete(key);
+                console.log(`🧹 [PWA] Development mode: Purged cache: ${key}`);
+              }
+            }
+          });
+        }
+      } else {
+        const swUrl = (import.meta.env.BASE_URL || './') + 'sw.js';
+        navigator.serviceWorker.register(swUrl)
+          .then((registration) => {
+            setSwRegistered(true);
+            console.log('⚡ [PWA] ServiceWorker registered successfully with scope:', registration.scope);
+          })
+          .catch((err) => {
+            console.warn('⚠️ [PWA] ServiceWorker registration failed:', err);
+          });
+      }
     }
 
     return () => {

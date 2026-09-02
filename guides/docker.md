@@ -232,14 +232,16 @@ docker exec -it retro-player ls -lah /bgm
 docker exec -it retro-player ls -lah /data
 ```
 
-### Fix Linux Permissions (If Docker needs root or volume access)
-If running on Linux without rootless Docker setup, ensure permissions:
+### Fix Linux Volume Permissions (Non-Root Container)
+The production Docker image runs as the unprivileged `node` user (`UID 1000`) for container security hardening. Ensure host directories are accessible:
 ```bash
 # Allow running Docker without sudo
 sudo usermod -aG docker $USER
 newgrp docker
 
-# Fix host directory permissions for uploads
+# Fix host directory ownership and permissions for node user (UID 1000)
+sudo chown -R 1000:1000 ./roms ./bgm ./data
+# Or grant read/write access:
 chmod -R a+rwX ./roms ./bgm ./data
 ```
 

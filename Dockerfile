@@ -22,15 +22,21 @@ ENV DATA_DIR=/data
 ENV INCLUDE_DEMO_ROMS=true
 ENV INCLUDE_DEMO_BGM=true
 
+# Create persistent directories and set ownership to node user
+RUN mkdir -p /roms /bgm /data /app/dist /app/public && \
+    chown -R node:node /roms /bgm /data /app
+
 # Install only production dependencies
-COPY package*.json ./
+COPY --chown=node:node package*.json ./
 RUN npm ci --omit=dev
 
 # Copy server, server helpers, and built static frontend from builder stage
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/server.js ./server.js
-COPY --from=builder /app/src/server ./src/server
-COPY --from=builder /app/public ./public
+COPY --chown=node:node --from=builder /app/dist ./dist
+COPY --chown=node:node --from=builder /app/server.js ./server.js
+COPY --chown=node:node --from=builder /app/src/server ./src/server
+COPY --chown=node:node --from=builder /app/public ./public
+
+USER node
 
 # Default volume mount points for ROMs, BGM, and persistent SQLite/JSON metadata
 VOLUME ["/roms", "/bgm", "/data"]

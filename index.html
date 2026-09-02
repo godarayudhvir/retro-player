@@ -46,13 +46,59 @@
     <meta property="twitter:description" content="Your favorite retro classics, beautifully organized and ready to play anywhere. Retro Player turns any browser into a dedicated retro console with tactile navigation, save management, and customizable profiles." />
     <meta property="twitter:image" content="https://godarayudhvir.github.io/retro-player/og-image.webp" />
 
-    <!-- Google Fonts Preconnect -->
+    <link rel="canonical" href="https://godarayudhvir.github.io/retro-player/" />
+    <link rel="alternate" type="text/markdown" href="./llms.txt" />
+
+    <!-- Google Fonts Preconnect & Optimized Font Loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
+
+    <!-- Schema.org WebApplication JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Retro Player",
+      "url": "https://godarayudhvir.github.io/retro-player/",
+      "applicationCategory": "GameApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires WebAssembly and Web Audio API support",
+      "description": "High-performance, zero-overhead web emulation station supporting 12 classic console platforms with native WebAssembly speed, universal save state persistence, and full gamepad spatial navigation.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Yudhvir Godara",
+        "url": "https://github.com/godarayudhvir"
+      }
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <div style="font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; color: #1e293b;">
+        <h1>Retro Player — Web Emulation Station</h1>
+        <p>
+          Retro Player is a high-performance web emulation station supporting 12 classic gaming systems (NES, SNES, Game Boy, Game Boy Color, Game Boy Advance, Sega Genesis, Game Gear, Master System, Nintendo 64, PlayStation, Nintendo DS, and Arcade) directly in the browser via WebAssembly.
+        </p>
+        <h2>Core Capabilities</h2>
+        <ul>
+          <li><strong>12 Console Emulators:</strong> Native WebAssembly cores with zero server-side rendering latency.</li>
+          <li><strong>Save Persistence:</strong> Battery SRAM (.sav) and instant Quick Save snapshot states stored permanently in IndexedDB.</li>
+          <li><strong>Universal Gamepad Engine:</strong> 100% spatial UI navigation and gameplay support for Xbox, PlayStation, Switch, and 8BitDo controllers.</li>
+          <li><strong>PWA & Offline Play:</strong> Installable to desktop and mobile home screens with offline ROM caching.</li>
+        </ul>
+        <h2>Documentation & Source Code</h2>
+        <p>
+          Explore the documentation guides on <a href="https://github.com/godarayudhvir/retro-player">GitHub Repository</a>.
+        </p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -33,6 +33,29 @@ if (!fs.existsSync(BGM_DIR)) {
   fs.mkdirSync(BGM_DIR, { recursive: true });
 }
 
+/**
+ * Resolves a file path strictly within a parent directory boundary.
+ * Prevents directory traversal attacks via '..' or absolute paths.
+ * 
+ * @param {string} baseDir - Trusted parent directory
+ * @param {string} relativePath - Untrusted user input
+ * @returns {string} - Validated absolute path
+ * @throws {Error} - If traversal outside baseDir is attempted
+ */
+function safeResolve(baseDir, relativePath) {
+  if (!relativePath || typeof relativePath !== 'string') {
+    throw new Error('Invalid path argument');
+  }
+  const sanitized = relativePath.replace(/\0/g, '');
+  const resolvedBase = path.resolve(baseDir);
+  const resolvedTarget = path.resolve(resolvedBase, sanitized);
+
+  if (!resolvedTarget.startsWith(resolvedBase + path.sep) && resolvedTarget !== resolvedBase) {
+    throw new Error('Access denied: Path traversal detected');
+  }
+  return resolvedTarget;
+}
+
 // System definition mapping with canonical keys and platform aliases
 const SYSTEM_MAP = {
   // NES
@@ -139,18 +162,35 @@ const VALID_EXTENSIONS = [
 ];
 const VALID_AUDIO_EXTENSIONS = ['.mp3', '.ogg', '.wav', '.m4a', '.flac', '.aac'];
 
+// HTTP Security Defense Headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  next();
+});
+
 // Serve raw ROM binaries with CORS & octet-stream headers (with fallback to bundled demos)
 app.use('/roms', (req, res, next) => {
   try {
-    const relativePath = decodeURIComponent(req.url.split('?')[0]);
-    let targetPath = path.join(ROMS_DIR, relativePath);
+    const rawPath = decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '');
+    if (!rawPath) return next();
+    let targetPath;
+    try {
+      targetPath = safeResolve(ROMS_DIR, rawPath);
+    } catch {
+      return res.status(403).json({ error: 'Access denied: Invalid path' });
+    }
 
     if (!fs.existsSync(targetPath) || !fs.statSync(targetPath).isFile()) {
       if (INCLUDE_DEMO_ROMS && path.resolve(ROMS_DIR) !== path.resolve(BUNDLED_ROMS_DIR)) {
-        const bundledPath = path.join(BUNDLED_ROMS_DIR, relativePath);
-        if (fs.existsSync(bundledPath) && fs.statSync(bundledPath).isFile()) {
-          targetPath = bundledPath;
-        }
+        try {
+          const bundledPath = safeResolve(BUNDLED_ROMS_DIR, rawPath);
+          if (fs.existsSync(bundledPath) && fs.statSync(bundledPath).isFile()) {
+            targetPath = bundledPath;
+          }
+        } catch (_) {}
       }
     }
 
@@ -187,15 +227,23 @@ app.use('/roms', (req, res, next) => {
 // Serve Background Music (BGM) audio files (with fallback to bundled tracks)
 app.use('/bgm', (req, res, next) => {
   try {
-    const relativePath = decodeURIComponent(req.url.split('?')[0]);
-    let targetPath = path.join(BGM_DIR, relativePath);
+    const rawPath = decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '');
+    if (!rawPath) return next();
+    let targetPath;
+    try {
+      targetPath = safeResolve(BGM_DIR, rawPath);
+    } catch {
+      return res.status(403).json({ error: 'Access denied: Invalid path' });
+    }
 
     if (!fs.existsSync(targetPath) || !fs.statSync(targetPath).isFile()) {
       if (INCLUDE_DEMO_BGM && path.resolve(BGM_DIR) !== path.resolve(BUNDLED_BGM_DIR)) {
-        const bundledPath = path.join(BUNDLED_BGM_DIR, relativePath);
-        if (fs.existsSync(bundledPath) && fs.statSync(bundledPath).isFile()) {
-          targetPath = bundledPath;
-        }
+        try {
+          const bundledPath = safeResolve(BUNDLED_BGM_DIR, rawPath);
+          if (fs.existsSync(bundledPath) && fs.statSync(bundledPath).isFile()) {
+            targetPath = bundledPath;
+          }
+        } catch (_) {}
       }
     }
 
@@ -708,24 +756,25 @@ app.post('/api/delete-rom', express.json(), (req, res) => {
     let targetPath = null;
 
     if (relativePath) {
-      const decodedRel = decodeURIComponent(relativePath);
-      const candidate = path.join(ROMS_DIR, decodedRel);
+      const decodedRel = decodeURIComponent(relativePath).replace(/^\/roms\//, '').replace(/^\/+/, '');
+      const candidate = safeResolve(ROMS_DIR, decodedRel);
       if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
         targetPath = candidate;
       }
     }
 
     if (!targetPath && systemKey && filename) {
-      const decodedName = decodeURIComponent(filename);
-      const candidate = path.join(ROMS_DIR, systemKey, path.basename(decodedName));
+      const decodedName = path.basename(decodeURIComponent(filename));
+      const sysDir = safeResolve(ROMS_DIR, systemKey);
+      const candidate = safeResolve(sysDir, decodedName);
       if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
         targetPath = candidate;
       }
     }
 
     if (!targetPath && filename) {
-      const decodedName = decodeURIComponent(filename);
-      const candidate = path.join(ROMS_DIR, path.basename(decodedName));
+      const decodedName = path.basename(decodeURIComponent(filename));
+      const candidate = safeResolve(ROMS_DIR, decodedName);
       if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
         targetPath = candidate;
       }
@@ -756,11 +805,15 @@ app.post('/api/delete-rom', express.json(), (req, res) => {
       return res.status(404).json({ error: 'ROM file not found on disk' });
     }
 
+    // Double check targetPath boundary
+    targetPath = safeResolve(ROMS_DIR, path.relative(ROMS_DIR, targetPath));
+
     const parentDir = path.dirname(targetPath);
-    const systemDir = systemKey ? path.join(ROMS_DIR, systemKey) : null;
+    const systemDir = systemKey ? safeResolve(ROMS_DIR, systemKey) : null;
     const isDedicatedFolder = parentDir !== ROMS_DIR && (!systemDir || parentDir !== systemDir);
 
     if (isDedicatedFolder && fs.existsSync(parentDir)) {
+      safeResolve(ROMS_DIR, path.relative(ROMS_DIR, parentDir));
       fs.rmSync(parentDir, { recursive: true, force: true });
       console.log(`🗑️ [API ROM DELETE] Successfully deleted entire game directory: ${parentDir}`);
     } else {
@@ -781,7 +834,7 @@ app.post('/api/delete-rom', express.json(), (req, res) => {
     res.json({ success: true, message: 'Game deleted successfully' });
   } catch (err) {
     console.error('🚨 [API ROM DELETE ERROR]:', err);
-    res.status(500).json({ error: err.message });
+    res.status(err.message.includes('Access denied') ? 403 : 500).json({ error: err.message });
   }
 });
 
@@ -794,7 +847,7 @@ app.post('/api/delete-bgm', express.json(), (req, res) => {
     }
 
     const safeFilename = path.basename(filename);
-    const targetPath = path.join(BGM_DIR, safeFilename);
+    const targetPath = safeResolve(BGM_DIR, safeFilename);
 
     if (!fs.existsSync(targetPath)) {
       return res.status(404).json({ error: 'Audio track not found on disk' });
@@ -805,7 +858,7 @@ app.post('/api/delete-bgm', express.json(), (req, res) => {
     res.json({ success: true, message: 'Audio track deleted successfully' });
   } catch (err) {
     console.error('🚨 [API BGM DELETE ERROR]:', err);
-    res.status(500).json({ error: err.message });
+    res.status(err.message.includes('Access denied') ? 403 : 500).json({ error: err.message });
   }
 });
 
@@ -1061,12 +1114,12 @@ app.post('/api/metadata/save-sidecar', express.json({ limit: '50mb' }), async (r
     const { gameId, systemKey, romPath, title, description, developer, publisher, year, releaseYear, genre, players, coverDataUrl } = data;
     const effectiveYear = (releaseYear || year || '').toString();
 
-    let targetDir = path.resolve(ROMS_DIR, systemKey || '');
+    let targetDir = systemKey ? safeResolve(ROMS_DIR, systemKey) : ROMS_DIR;
     let baseFileName = 'game';
 
     if (romPath) {
-      const decodedPath = decodeURIComponent(romPath).replace(/^\/roms\//, '');
-      const fullRomPath = path.resolve(ROMS_DIR, decodedPath);
+      const decodedPath = decodeURIComponent(romPath).replace(/^\/roms\//, '').replace(/^\/+/, '');
+      const fullRomPath = safeResolve(ROMS_DIR, decodedPath);
       if (fs.existsSync(fullRomPath)) {
         targetDir = path.dirname(fullRomPath);
         baseFileName = path.parse(fullRomPath).name;
@@ -1077,6 +1130,8 @@ app.post('/api/metadata/save-sidecar', express.json({ limit: '50mb' }), async (r
       baseFileName = title.toLowerCase().replace(/[^a-z0-9]/g, '-');
     }
 
+    targetDir = safeResolve(ROMS_DIR, path.relative(ROMS_DIR, targetDir));
+
     if (!fs.existsSync(targetDir)) {
       fs.mkdirSync(targetDir, { recursive: true });
     }
@@ -1086,11 +1141,11 @@ app.post('/api/metadata/save-sidecar', express.json({ limit: '50mb' }), async (r
     if (data.deleteCover) {
       const coverExts = ['.webp', '.png', '.jpg', '.jpeg', '.gif', '.bmp'];
       for (const ext of coverExts) {
-        const coverPath = path.join(targetDir, `${baseFileName}${ext}`);
+        const coverPath = safeResolve(targetDir, `${baseFileName}${ext}`);
         if (fs.existsSync(coverPath)) {
           try { fs.unlinkSync(coverPath); } catch (_) {}
         }
-        const genericPath = path.join(targetDir, `cover${ext}`);
+        const genericPath = safeResolve(targetDir, `cover${ext}`);
         if (fs.existsSync(genericPath)) {
           try { fs.unlinkSync(genericPath); } catch (_) {}
         }
@@ -1109,7 +1164,7 @@ app.post('/api/metadata/save-sidecar', express.json({ limit: '50mb' }), async (r
       const base64Data = coverDataUrl.replace(/^data:image\/[a-zA-Z0-9+]+;base64,/, '');
       const imageBuffer = Buffer.from(base64Data, 'base64');
       const coverFileName = `${baseFileName}${ext}`;
-      const coverFilePath = path.join(targetDir, coverFileName);
+      const coverFilePath = safeResolve(targetDir, coverFileName);
 
       fs.writeFileSync(coverFilePath, imageBuffer);
       const relToPublic = path.relative(path.resolve(__dirname, 'public'), coverFilePath);
@@ -1135,7 +1190,7 @@ app.post('/api/metadata/save-sidecar', express.json({ limit: '50mb' }), async (r
           }
 
           const coverFileName = `${baseFileName}${ext}`;
-          const coverFilePath = path.join(targetDir, coverFileName);
+          const coverFilePath = safeResolve(targetDir, coverFileName);
 
           fs.writeFileSync(coverFilePath, imageBuffer);
           const relToPublic = path.relative(path.resolve(__dirname, 'public'), coverFilePath);
@@ -1166,7 +1221,7 @@ app.post('/api/metadata/save-sidecar', express.json({ limit: '50mb' }), async (r
       delete sidecarJson.walkthrough;
     }
 
-    const sidecarPath = path.join(targetDir, `${baseFileName}.json`);
+    const sidecarPath = safeResolve(targetDir, `${baseFileName}.json`);
     fs.writeFileSync(sidecarPath, JSON.stringify(sidecarJson, null, 2), 'utf-8');
     console.log(`💾 [SERVER SIDECAR JSON SAVED] -> ${sidecarPath}`);
 
@@ -1178,7 +1233,7 @@ app.post('/api/metadata/save-sidecar', express.json({ limit: '50mb' }), async (r
     });
   } catch (err) {
     console.error('[SERVER SIDE CAR SAVE ERROR]', err);
-    res.status(500).json({ error: err.message });
+    res.status(err.message.includes('Access denied') ? 403 : 500).json({ error: err.message });
   }
 });
 
@@ -1188,12 +1243,12 @@ app.post('/api/metadata/delete-sidecar', express.json(), (req, res) => {
     const data = req.body || {};
     const { systemKey, romPath, title } = data;
 
-    let targetDir = path.resolve(ROMS_DIR, systemKey || '');
+    let targetDir = systemKey ? safeResolve(ROMS_DIR, systemKey) : ROMS_DIR;
     let baseFileName = 'game';
 
     if (romPath) {
-      const decodedPath = decodeURIComponent(romPath).replace(/^\/roms\//, '');
-      const fullRomPath = path.resolve(ROMS_DIR, decodedPath);
+      const decodedPath = decodeURIComponent(romPath).replace(/^\/roms\//, '').replace(/^\/+/, '');
+      const fullRomPath = safeResolve(ROMS_DIR, decodedPath);
       if (fs.existsSync(fullRomPath)) {
         targetDir = path.dirname(fullRomPath);
         baseFileName = path.parse(fullRomPath).name;
@@ -1204,11 +1259,12 @@ app.post('/api/metadata/delete-sidecar', express.json(), (req, res) => {
       baseFileName = title.toLowerCase().replace(/[^a-z0-9]/g, '-');
     }
 
-    const sidecarPath = path.join(targetDir, `${baseFileName}.json`);
+    targetDir = safeResolve(ROMS_DIR, path.relative(ROMS_DIR, targetDir));
+    const sidecarPath = safeResolve(targetDir, `${baseFileName}.json`);
     if (fs.existsSync(sidecarPath)) {
       try { fs.unlinkSync(sidecarPath); } catch (_) {}
     }
-    const legacyPath = path.join(targetDir, 'metadata.json');
+    const legacyPath = safeResolve(targetDir, 'metadata.json');
     if (fs.existsSync(legacyPath)) {
       try { fs.unlinkSync(legacyPath); } catch (_) {}
     }
@@ -1217,7 +1273,7 @@ app.post('/api/metadata/delete-sidecar', express.json(), (req, res) => {
     res.json({ success: true, message: 'Sidecar JSON deleted from disk' });
   } catch (err) {
     console.error('[SERVER SIDE CAR DELETE ERROR]', err);
-    res.status(500).json({ error: err.message });
+    res.status(err.message.includes('Access denied') ? 403 : 500).json({ error: err.message });
   }
 });
 
