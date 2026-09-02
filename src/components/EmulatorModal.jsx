@@ -716,13 +716,13 @@ export default function EmulatorModal({
       );
 
       let rawCover = currentGame.coverUrl || currentGame.cover || currentGame.boxArt || currentGame.metadata?.coverUrl || '';
-        if (rawCover && rawCover.endsWith('.svg')) rawCover = '';
         if (rawCover && !rawCover.startsWith('http') && typeof window !== 'undefined') {
           rawCover = `${window.location.origin}${rawCover.startsWith('/') ? '' : '/'}${rawCover}`;
         }
         const resolvedCoverUrl = rawCover;
         const currentTitle = currentGame.title || currentGame.name || 'Retro Game';
         const currentSystem = currentGame.systemName || currentGame.systemTitle || (currentGame.systemKey ? currentGame.systemKey.toUpperCase() : 'Retro Console');
+        const isDarkMode = typeof document !== 'undefined' && document.documentElement.getAttribute('data-color-mode') === 'dark';
 
         const htmlContent = `
         <!DOCTYPE html>
@@ -805,16 +805,16 @@ export default function EmulatorModal({
 
             .ejs_virtualGamepad_right {
               position: absolute !important;
-              bottom: calc(140px + env(safe-area-inset-bottom, 0px)) !important;
+              bottom: calc(48px + env(safe-area-inset-bottom, 0px)) !important;
               right: 16px !important;
-              width: 136px !important;
-              height: 136px !important;
+              width: 160px !important;
+              height: 160px !important;
               z-index: 100000 !important;
             }
 
             .ejs_virtualGamepad_top {
               position: absolute !important;
-              bottom: calc(290px + env(safe-area-inset-bottom, 0px)) !important;
+              bottom: calc(215px + env(safe-area-inset-bottom, 0px)) !important;
               top: auto !important;
               left: 0 !important;
               width: 100% !important;
@@ -951,8 +951,8 @@ export default function EmulatorModal({
             }
 
             @keyframes retroPulse {
-              0% { box-shadow: 0 16px 48px rgba(0, 0, 0, 0.85), 0 0 20px rgba(59, 130, 246, 0.3); }
-              100% { box-shadow: 0 24px 64px rgba(0, 0, 0, 0.95), 0 0 36px rgba(59, 130, 246, 0.55); }
+              0% { box-shadow: ${isDarkMode ? '0 16px 48px rgba(0, 0, 0, 0.85), 0 0 20px rgba(59, 130, 246, 0.3)' : '0 14px 36px rgba(59, 130, 246, 0.14), 0 2px 8px rgba(0, 0, 0, 0.06)'}; }
+              100% { box-shadow: ${isDarkMode ? '0 24px 64px rgba(0, 0, 0, 0.95), 0 0 36px rgba(59, 130, 246, 0.55)' : '0 20px 48px rgba(59, 130, 246, 0.25), 0 4px 14px rgba(0, 0, 0, 0.08)'}; }
             }
 
             @keyframes retroSpin {
@@ -983,12 +983,12 @@ export default function EmulatorModal({
               justify-content: center !important;
               text-align: center !important;
               gap: 12px !important;
-              background: rgba(15, 23, 42, 0.95) !important;
-              border: 1.5px solid rgba(59, 130, 246, 0.65) !important;
-              border-radius: 24px !important;
+              background: ${isDarkMode ? 'rgba(15, 23, 42, 0.95)' : '#ffffff'} !important;
+              border: 1.5px solid ${isDarkMode ? 'rgba(59, 130, 246, 0.65)' : 'rgba(59, 130, 246, 0.45)'} !important;
+              border-radius: 20px !important;
               padding: 24px 36px !important;
-              box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(59, 130, 246, 0.35) !important;
-              color: #ffffff !important;
+              box-shadow: ${isDarkMode ? '0 20px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(59, 130, 246, 0.35)' : '0 20px 50px rgba(59, 130, 246, 0.18), 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)'} !important;
+              color: ${isDarkMode ? '#ffffff' : '#0f172a'} !important;
               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
               font-size: 0.95rem !important;
               font-weight: 700 !important;
@@ -1007,14 +1007,14 @@ export default function EmulatorModal({
               height: 8px !important;
               border-radius: 4px !important;
               border: none !important;
-              background: rgba(255, 255, 255, 0.15) !important;
+              background: ${isDarkMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)'} !important;
               overflow: hidden !important;
               margin-top: 6px !important;
             }
 
             #ejs_loading progress::-webkit-progress-bar,
             .ejs_loading progress::-webkit-progress-bar {
-              background: rgba(255, 255, 255, 0.15) !important;
+              background: ${isDarkMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)'} !important;
               border-radius: 4px !important;
             }
 
@@ -1063,7 +1063,7 @@ export default function EmulatorModal({
                 if (!loadingEl.querySelector('.retro-loader-spinner')) {
                   const sp = document.createElement('div');
                   sp.className = 'retro-loader-spinner';
-                  sp.style.cssText = 'width: 32px; height: 32px; border-radius: 50%; border: 3px solid rgba(59, 130, 246, 0.25); border-top-color: #38bdf8; animation: retroSpin 0.8s linear infinite; margin-bottom: 8px; display: inline-block;';
+                  sp.style.cssText = 'width: 32px; height: 32px; border-radius: 50%; border: 3px solid ${isDarkMode ? 'rgba(59, 130, 246, 0.25)' : 'rgba(59, 130, 246, 0.2)'}; border-top-color: ${isDarkMode ? '#38bdf8' : '#0284c7'}; animation: retroSpin 0.8s linear infinite; margin-bottom: 8px; display: inline-block;';
                   loadingEl.insertBefore(sp, loadingEl.firstChild);
                 }
               }
