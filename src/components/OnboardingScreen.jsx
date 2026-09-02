@@ -461,7 +461,7 @@ export default function OnboardingScreen({
 
                   {/* Graphic: In-App UX Demo with Controller, Keyboard & Status Pills */}
                   <div className="pillar-visual-graphic-wrap">
-                    {/* Top Row: 3 Status Pills + Square Controller Icon */}
+                    {/* Top Row: 3 Gamepad Status Pills */}
                     <div className="desktop-controls-pills-row">
                       <div className="status-pill status-gamepad is-connected is-charging demo-pill" title="Gamepad Connected (Charging)">
                         <Gamepad2 size={15} />
@@ -485,82 +485,6 @@ export default function OnboardingScreen({
                         <span className="battery-badge">
                           <span className="battery-percent-text">READY</span>
                         </span>
-                      </div>
-
-                      {/* Square Controller Icon Box */}
-                      <div className="desktop-controller-square-badge" title="DualShock 4 Controller">
-                        <svg viewBox="0 0 700 420" className="ctrl-square-svg">
-                          <g transform="translate(10, 5)">
-                            {/* L2 / R2 Triggers */}
-                            <path d="M 175 48 C 175 22, 230 20, 242 42 L 235 70 C 215 62, 185 64, 175 48 Z" className="ctrl-trigger" />
-                            <text x="210" y="44" className="ctrl-trigger-text">L2</text>
-                            <path d="M 505 48 C 505 22, 450 20, 438 42 L 445 70 C 465 62, 495 64, 505 48 Z" className="ctrl-trigger" />
-                            <text x="470" y="44" className="ctrl-trigger-text">R2</text>
-
-                            {/* Controller Body Shell & Grips */}
-                            <path d="M 170 78 C 240 68, 440 68, 510 78 C 555 88, 595 130, 580 190 C 560 235, 520 258, 470 258 C 420 258, 395 295, 340 295 C 285 295, 260 258, 210 258 C 160 258, 120 235, 100 190 C 85 130, 125 88, 170 78 Z" className="ctrl-shell-body" />
-                            <path d="M 100 150 C 70 190, 45 270, 70 355 C 85 400, 130 410, 160 375 C 185 345, 205 280, 215 235 Z" className="ctrl-shell-grip" />
-                            <path d="M 580 150 C 610 190, 635 270, 610 355 C 595 400, 550 410, 520 375 C 495 345, 475 280, 465 235 Z" className="ctrl-shell-grip" />
-
-                            {/* L1 / R1 Bumpers */}
-                            <path d="M 155 76 C 155 58, 235 55, 245 74 L 240 92 C 215 84, 170 84, 155 76 Z" className="ctrl-bumper" />
-                            <text x="195" y="80" className="ctrl-bumper-text">L1</text>
-                            <path d="M 525 76 C 525 58, 445 55, 435 74 L 440 92 C 465 84, 510 84, 525 76 Z" className="ctrl-bumper" />
-                            <text x="485" y="80" className="ctrl-bumper-text">R1</text>
-
-                            {/* Touchpad */}
-                            <rect x="250" y="76" width="180" height="90" rx="6" className="ctrl-touchpad" />
-
-                            {/* Share & Options */}
-                            <rect x="225" y="105" width="12" height="26" rx="6" className="ctrl-meta-btn" />
-                            <rect x="443" y="105" width="12" height="26" rx="6" className="ctrl-meta-btn" />
-
-                            {/* D-Pad Cluster */}
-                            <g className="ctrl-dpad-cluster" transform="translate(135, 125)">
-                              <path d="M 36 6 L 60 6 C 64 6, 66 8, 66 12 L 66 36 L 30 36 L 30 12 C 30 8, 32 6, 36 6 Z" />
-                              <polygon points="48,14 41,24 55,24" className="dpad-arrow-glyph" />
-                              <path d="M 30 60 L 66 60 L 66 84 C 66 88, 64 90, 60 90 L 36 90 C 32 90, 30 88, 30 84 Z" />
-                              <polygon points="48,82 41,72 55,72" className="dpad-arrow-glyph" />
-                              <path d="M 6 36 C 6 32, 8 30, 12 30 L 36 30 L 36 66 L 12 66 C 8 66, 6 64, 6 60 Z" />
-                              <polygon points="14,48 24,41 24,55" className="dpad-arrow-glyph" />
-                              <path d="M 60 30 L 84 30 C 88 30, 90 32, 90 36 L 90 60 C 90 64, 88 66, 84 66 L 60 66 Z" />
-                              <polygon points="82,48 72,41 72,55" className="dpad-arrow-glyph" />
-                              <rect x="34" y="34" width="28" height="28" className="ctrl-dpad-center" />
-                            </g>
-
-                            {/* Action Face Buttons Cluster */}
-                            <g className="ctrl-action-cluster" transform="translate(485, 125)">
-                              <circle cx="48" cy="18" r="17" />
-                              <polygon points="48,9 39,24 57,24" className="glyph-triangle" />
-                              <circle cx="78" cy="48" r="17" />
-                              <circle cx="78" cy="48" r="7.5" className="glyph-circle" />
-                              <circle cx="48" cy="78" r="17" />
-                              <line x1="41" y1="71" x2="55" y2="85" className="glyph-cross" />
-                              <line x1="55" y1="71" x2="41" y2="85" className="glyph-cross" />
-                              <circle cx="18" cy="48" r="17" />
-                              <rect x="11.5" y="41.5" width="13" height="13" rx="1.5" className="glyph-square" />
-                            </g>
-
-                            {/* Dual Sticks */}
-                            <circle cx="250" cy="255" r="42" className="ctrl-stick-base" />
-                            <circle cx="250" cy="255" r="32" className="ctrl-stick-pad" />
-                            <circle cx="250" cy="255" r="22" className="ctrl-stick-inner" />
-                            <text x="250" y="259" className="ctrl-stick-text">L3</text>
-
-                            <circle cx="340" cy="235" r="11" className="ctrl-home-btn" />
-
-                            <circle cx="430" cy="255" r="42" className="ctrl-stick-base" />
-                            <circle cx="430" cy="255" r="32" className="ctrl-stick-pad" />
-                            <circle cx="430" cy="255" r="22" className="ctrl-stick-inner" />
-                            <text x="430" y="259" className="ctrl-stick-text">R3</text>
-
-                            {/* L3 + R3 Exit Game Combo */}
-                            <g transform="translate(340, 325)" className="ctrl-combo-tag">
-                              <rect x="-70" y="-12" width="140" height="24" rx="12" />
-                              <text x="0" y="4" textAnchor="middle">L3 + R3 EXIT GAME</text>
-                            </g>
-                          </g>
-                        </svg>
                       </div>
                     </div>
 
@@ -639,7 +563,7 @@ export default function OnboardingScreen({
                             <div className="desktop-kc-sub-item">
                               <span className="kc-keycap is-system">Shift</span>
                               <span className="kc-keycap is-system">↵</span>
-                              <span className="desktop-kc-label">Start/Select</span>
+                              <span className="desktop-kc-label">Start / Sel</span>
                             </div>
                           </div>
                         </div>

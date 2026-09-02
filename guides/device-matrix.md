@@ -37,7 +37,7 @@ Dedicated mobile experience powered by `MobileAppView.jsx` and `MobileOnboarding
 
 Desktop engine scaled down with **4-Card Grid ONLY** (2 preview screenshot frames hidden):
 * **UI Structure**: Full-width 2x2 grid of value pillars (Native WASM, Universal Saves, Achievements, Universal Controls).
-* **CSS Boundary**: `@media (max-width: 1024px), (max-width: 1440px) and (max-height: 900px), (max-height: 850px)`
+* **CSS Boundary**: `@media (max-width: 1440px), (max-height: 950px), (pointer: coarse) and (max-width: 1600px)`
 
 | Device Tier | Reference Devices | Portrait Viewport | Landscape Viewport | Aspect Ratio |
 | :--- | :--- | :--- | :--- | :--- |
