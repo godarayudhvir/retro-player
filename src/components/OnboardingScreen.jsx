@@ -41,12 +41,11 @@ import { resolveAssetPath } from '../utils/assetPath';
 
 const isApplePlatform = typeof navigator !== 'undefined' && (/Macintosh|iPhone|iPad|iPod/i.test(navigator.userAgent || ''));
 const isSafariBrowser = typeof navigator !== 'undefined' && (/Safari/i.test(navigator.userAgent || '') && !/Chrome|Chromium|CriOS|FxiOS|Edg/i.test(navigator.userAgent || ''));
-const isMobileDevice = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent || '');
 const isSmartTv = typeof navigator !== 'undefined' && /SmartTV|Tizen|Web0S|BRAVIA|NetCast|Viera|AppleTV|HbbTV|CrKey/i.test(navigator.userAgent || '');
 
 /**
- * Modern Full-Screen Responsive Onboarding Experience for Desktop & Mobile.
- * Automatically delegates to dedicated MobileOnboardingScreen on mobile touch devices.
+ * Modern Full-Screen Responsive Onboarding Experience for Desktop, Tablets & TVs.
+ * Automatically delegates to dedicated MobileOnboardingScreen on mobile touch phones (<= 640px).
  */
 export default function OnboardingScreen({
   isOpen,
@@ -61,8 +60,10 @@ export default function OnboardingScreen({
   setFocusedTarget,
   isMobile = false
 }) {
-  // If explicitly flagged as mobile or matched via mobile viewport, render dedicated MobileOnboardingScreen
-  if (isMobile || isMobileDevice) {
+  // If explicitly flagged as mobile or matched via mobile phone viewport (<= 640px), render dedicated MobileOnboardingScreen
+  const shouldRenderMobile = isMobile || (typeof window !== 'undefined' && window.innerWidth <= 640);
+
+  if (shouldRenderMobile) {
     return (
       <MobileOnboardingScreen
         isOpen={isOpen}
@@ -134,7 +135,7 @@ export default function OnboardingScreen({
         viewportRef.current.scrollTop = 0;
       }
       if (currentStep === 0) {
-        setFocusedTarget?.({ zone: 'onboarding', id: 'pillar_0' });
+        setFocusedTarget?.({ zone: 'onboarding', id: 'next' });
       } else if (currentStep === 1) {
         setFocusedTarget?.({ zone: 'onboarding', id: 'random' });
       } else if (currentStep === 2) {
@@ -164,7 +165,7 @@ export default function OnboardingScreen({
       setCurrentStep(prevStep);
       sfx?.playTabSwitch?.();
       if (prevStep === 0) {
-        setFocusedTarget?.({ zone: 'onboarding', id: 'pillar_0' });
+        setFocusedTarget?.({ zone: 'onboarding', id: 'next' });
       } else if (prevStep === 1) {
         setFocusedTarget?.({ zone: 'onboarding', id: 'random' });
       } else {
@@ -237,12 +238,7 @@ export default function OnboardingScreen({
               {/* 4 Feature Pillars (2x2 Grid) */}
               <div className="onboarding-pillars-grid">
                 {/* Card 1: 12 Emulated Systems & Native WASM Cores */}
-                <div
-                  className={`onboarding-pillar-card ${gamepadConnected && focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'pillar_0' ? 'gamepad-focused' : ''}`}
-                  tabIndex={0}
-                  data-onboarding-id="pillar_0"
-                  onClick={() => { setFocusedTarget?.({ zone: 'onboarding', id: 'pillar_0' }); sfx?.playTileNav?.(); }}
-                >
+                <div className="onboarding-pillar-card">
                   <div className="pillar-header-row">
                     <div className="pillar-icon-wrap" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' }}>
                       <Cpu size={22} />
@@ -284,12 +280,7 @@ export default function OnboardingScreen({
                 </div>
 
                 {/* Card 2: Battery RAM, Auto-Resume & Quick States (In-App UX Demo) */}
-                <div
-                  className={`onboarding-pillar-card ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'pillar_1' ? 'gamepad-focused' : ''}`}
-                  tabIndex={0}
-                  data-onboarding-id="pillar_1"
-                  onClick={() => { setFocusedTarget?.({ zone: 'onboarding', id: 'pillar_1' }); sfx?.playTileNav?.(); }}
-                >
+                <div className="onboarding-pillar-card">
                   <div className="pillar-header-row">
                     <div className="pillar-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
                       <Save size={22} />
@@ -366,12 +357,7 @@ export default function OnboardingScreen({
                 </div>
 
                 {/* Card 3: Universal Achievements & Pokémon Milestones (In-App UX Demo) */}
-                <div
-                  className={`onboarding-pillar-card ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'pillar_2' ? 'gamepad-focused' : ''}`}
-                  tabIndex={0}
-                  data-onboarding-id="pillar_2"
-                  onClick={() => { setFocusedTarget?.({ zone: 'onboarding', id: 'pillar_2' }); sfx?.playTileNav?.(); }}
-                >
+                <div className="onboarding-pillar-card">
                   <div className="pillar-header-row">
                     <div className="pillar-icon-wrap" style={{ background: 'rgba(234, 179, 8, 0.15)', color: '#ca8a04' }}>
                       <Trophy size={22} />
@@ -454,12 +440,7 @@ export default function OnboardingScreen({
                 </div>
 
                 {/* Card 4: Gamepad, Keyboard, Touch UI & Battery Alert (In-App UX Demo) */}
-                <div
-                  className={`onboarding-pillar-card ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'pillar_3' ? 'gamepad-focused' : ''}`}
-                  tabIndex={0}
-                  data-onboarding-id="pillar_3"
-                  onClick={() => { setFocusedTarget?.({ zone: 'onboarding', id: 'pillar_3' }); sfx?.playTileNav?.(); }}
-                >
+                <div className="onboarding-pillar-card">
                   <div className="pillar-header-row">
                     <div className="pillar-icon-wrap" style={{ background: 'rgba(168, 85, 247, 0.15)', color: '#a855f7' }}>
                       <Gamepad2 size={22} />
@@ -655,7 +636,7 @@ export default function OnboardingScreen({
               </div>
 
               {/* Mobile-only Standalone Install & Platform Guidance Cards (Hidden on Desktop & Smart TVs) */}
-              {isMobileDevice && !pwa?.isStandalone && !isSmartTv && (pwa?.canInstall || (isSafariBrowser && isApplePlatform)) && (
+              {isMobile && !pwa?.isStandalone && !isSmartTv && (pwa?.canInstall || (isSafariBrowser && isApplePlatform)) && (
                 <div className="onboarding-pwa-cta-container">
                   {pwa?.canInstall ? (
                     <button
@@ -812,7 +793,7 @@ export default function OnboardingScreen({
         {/* =========================================================
             SLIDE 2: GAMEPAD CONTROLS & DUALSHOCK VISUALIZER (Desktop & TV only)
             ========================================================= */}
-        {!isMobileDevice && currentStep === 2 && (
+        {currentStep === 2 && (
           <div className="onboarding-slide slide-controls animate-slide-up">
             <div className="onboarding-header-card is-compact">
               <h1 className="onboarding-slide-title">
@@ -834,8 +815,8 @@ export default function OnboardingScreen({
         )}
       </main>
 
-      {/* Bottom Sticky Action Footer (Hidden on Phase 3 on Desktop to give the visualizer full height; visible on Phase 2 on Mobile) */}
-      {(!isMobileDevice ? currentStep < totalSteps - 1 : true) && (
+      {/* Bottom Sticky Action Footer (Hidden on Phase 3 on Desktop to give the visualizer full height) */}
+      {currentStep < totalSteps - 1 && (
         <footer className="onboarding-footer">
           {/* Step Indicator Dots */}
           <div className="onboarding-dots-indicator" role="tablist" aria-label="Onboarding Progress">
@@ -868,9 +849,9 @@ export default function OnboardingScreen({
             <button
               className={`onboarding-primary-btn ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'next' ? 'gamepad-focused' : ''}`}
               onClick={handleNext}
-              title={currentStep === 0 ? 'Create Character' : isMobileDevice ? 'Start Playing' : 'View Controls Guide'}
+              title={currentStep === 0 ? 'Create Character' : 'View Controls Guide'}
             >
-              <span>{currentStep === 0 ? 'Create Character' : isMobileDevice ? 'Start Playing' : 'View Controls'}</span>
+              <span>{currentStep === 0 ? 'Create Character' : 'View Controls'}</span>
               {currentStep === totalSteps - 1 ? <Play size={16} fill="currentColor" /> : <ChevronRight size={18} />}
             </button>
           </div>

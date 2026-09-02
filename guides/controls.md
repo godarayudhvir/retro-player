@@ -33,8 +33,8 @@ During first-time startup or when revisiting the Onboarding wizard:
 
 | Screen / Phase | Gamepad Action | Function |
 | :--- | :--- | :--- |
-| **Phase 1: Welcome & Overview** | **`D-Pad / Left Stick`** | 2D spatial navigation across value pillar cards (including **Universal Controls & Battery HUD** pillar with live battery pills, DualShock icon, virtual touch pad preview, and dual-column keyboard mapping) |
-| | **`[A]` Button / `Enter`** | Open repository / Trigger PWA installation / Advance to next phase |
+| **Phase 1: Welcome & Overview** | **`D-Pad / Left Stick`** | Navigate between "Skip to Games" header button and "Create Character" action button with sleek console-grade focus rings |
+| | **`[A]` Button / `Enter`** | Advance to next phase ("Create Character") / Trigger action |
 | | **`START` Button** | Skip onboarding immediately and boot into library |
 | **Phase 2: Character Studio** | **`D-Pad / Left Stick`** | Navigate between archetype cards, randomizer dice, name inputs, and color circles |
 | | **`[A]` Button / `Enter`** | Select archetype preset, pick color, or roll dice |

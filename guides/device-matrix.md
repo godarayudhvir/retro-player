@@ -116,3 +116,16 @@ Full **10-Foot Couch-Distance Legibility Overhaul** with 100% spatial gamepad na
 /* 6. 4K & 8K Ultra HD TVs (2561px+) */
 @media (min-width: 2561px) { ... }
 ```
+
+---
+
+## 🛠️ Automated Testing & Responsively App Import
+
+An export profile containing all 23 custom devices and 5 pre-configured testing suites is available at [guides/responsively-device-matrix.json](file:///Users/godarayudhvir/Github/retro-player/guides/responsively-device-matrix.json).
+
+### How to Import:
+1. Open **[Responsively App](https://responsively.app/)**.
+2. Click **Preferences** (⚙️) / **Manage Devices** &rarr; **Import Devices/Suites**.
+3. Select `guides/responsively-device-matrix.json`.
+4. Switch to the **`Retro Player — Core 6 Fast Test`** suite to test all breakpoints simultaneously side-by-side.
+

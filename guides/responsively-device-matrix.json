@@ -1,0 +1,350 @@
+{
+  "customDevices": [
+    {
+      "id": "retro_fold_cover",
+      "name": "Galaxy Z Fold Cover (344x882)",
+      "width": 344,
+      "height": 882,
+      "type": "phone",
+      "dpr": 3,
+      "os": "Android"
+    },
+    {
+      "id": "retro_iphone_13_mini",
+      "name": "iPhone 12/13 mini (360x780)",
+      "width": 360,
+      "height": 780,
+      "type": "phone",
+      "dpr": 3,
+      "os": "iOS"
+    },
+    {
+      "id": "retro_iphone_se",
+      "name": "iPhone SE 2nd/3rd Gen (375x667)",
+      "width": 375,
+      "height": 667,
+      "type": "phone",
+      "dpr": 2,
+      "os": "iOS"
+    },
+    {
+      "id": "retro_pixel_fold_outer",
+      "name": "Pixel Fold Outer (384x904)",
+      "width": 384,
+      "height": 904,
+      "type": "phone",
+      "dpr": 3,
+      "os": "Android"
+    },
+    {
+      "id": "retro_iphone_15_standard",
+      "name": "iPhone 12-16 Standard (390x844)",
+      "width": 390,
+      "height": 844,
+      "type": "phone",
+      "dpr": 3,
+      "os": "iOS"
+    },
+    {
+      "id": "retro_iphone_16_pro",
+      "name": "iPhone 15/16 Pro Dynamic Island (393x852)",
+      "width": 393,
+      "height": 852,
+      "type": "phone",
+      "dpr": 3,
+      "os": "iOS"
+    },
+    {
+      "id": "retro_galaxy_s24_ultra",
+      "name": "Galaxy S24/S25 Ultra (412x915)",
+      "width": 412,
+      "height": 915,
+      "type": "phone",
+      "dpr": 3,
+      "os": "Android"
+    },
+    {
+      "id": "retro_iphone_16_plus",
+      "name": "iPhone 14-16 Plus & Max (430x932)",
+      "width": 430,
+      "height": 932,
+      "type": "phone",
+      "dpr": 3,
+      "os": "iOS"
+    },
+    {
+      "id": "retro_iphone_16_promax",
+      "name": "iPhone 16 Pro Max (440x956)",
+      "width": 440,
+      "height": 956,
+      "type": "phone",
+      "dpr": 3,
+      "os": "iOS"
+    },
+    {
+      "id": "retro_ipad_mini_6_p",
+      "name": "iPad mini 6 Portrait (744x1133)",
+      "width": 744,
+      "height": 1133,
+      "type": "tablet",
+      "dpr": 2,
+      "os": "iOS"
+    },
+    {
+      "id": "retro_fold_inner_p",
+      "name": "Galaxy Z Fold Inner (768x1024)",
+      "width": 768,
+      "height": 1024,
+      "type": "tablet",
+      "dpr": 2,
+      "os": "Android"
+    },
+    {
+      "id": "retro_ipad_10_portrait",
+      "name": "iPad 10.2\" Portrait (810x1080)",
+      "width": 810,
+      "height": 1080,
+      "type": "tablet",
+      "dpr": 2,
+      "os": "iOS"
+    },
+    {
+      "id": "retro_ipad_air_p",
+      "name": "iPad Air 10.9\" Portrait (820x1180)",
+      "width": 820,
+      "height": 1180,
+      "type": "tablet",
+      "dpr": 2,
+      "os": "iOS"
+    },
+    {
+      "id": "retro_ipad_pro_11_p",
+      "name": "iPad Pro 11\" Portrait (834x1194)",
+      "width": 834,
+      "height": 1194,
+      "type": "tablet",
+      "dpr": 2,
+      "os": "iOS"
+    },
+    {
+      "id": "retro_pixel_fold_inner_p",
+      "name": "Pixel Fold Inner (884x1104)",
+      "width": 884,
+      "height": 1104,
+      "type": "tablet",
+      "dpr": 2,
+      "os": "Android"
+    },
+    {
+      "id": "retro_ipad_10_landscape",
+      "name": "iPad 10.2\" Landscape (1080x810)",
+      "width": 1080,
+      "height": 810,
+      "type": "tablet",
+      "dpr": 2,
+      "os": "iOS"
+    },
+    {
+      "id": "retro_ipad_pro_129_p",
+      "name": "iPad Pro 12.9\" Portrait (1024x1366)",
+      "width": 1024,
+      "height": 1366,
+      "type": "tablet",
+      "dpr": 2,
+      "os": "iOS"
+    },
+    {
+      "id": "retro_ipad_pro_129_l",
+      "name": "iPad Pro 12.9\" Landscape (1366x1024)",
+      "width": 1366,
+      "height": 1024,
+      "type": "tablet",
+      "dpr": 2,
+      "os": "iOS"
+    },
+    {
+      "id": "retro_rog_ally",
+      "name": "ASUS ROG Ally (1280x720 @150%)",
+      "width": 1280,
+      "height": 720,
+      "type": "desktop",
+      "dpr": 1.5,
+      "os": "Windows"
+    },
+    {
+      "id": "retro_steam_deck",
+      "name": "Steam Deck / Legion Go (1280x800)",
+      "width": 1280,
+      "height": 800,
+      "type": "desktop",
+      "dpr": 1,
+      "os": "Linux"
+    },
+    {
+      "id": "retro_laptop_768p",
+      "name": "Laptop 768p / MacBook Air (1366x768)",
+      "width": 1366,
+      "height": 768,
+      "type": "desktop",
+      "dpr": 1,
+      "os": "Mac"
+    },
+    {
+      "id": "retro_laptop_900p",
+      "name": "Laptop 900p (1440x900)",
+      "width": 1440,
+      "height": 900,
+      "type": "desktop",
+      "dpr": 1,
+      "os": "Mac"
+    },
+    {
+      "id": "retro_macbook_pro_14",
+      "name": "MacBook Pro 14\" Retina (1512x982)",
+      "width": 1512,
+      "height": 982,
+      "type": "desktop",
+      "dpr": 2,
+      "os": "Mac"
+    },
+    {
+      "id": "retro_macbook_pro_16",
+      "name": "MacBook Pro 16\" Retina (1728x1117)",
+      "width": 1728,
+      "height": 1117,
+      "type": "desktop",
+      "dpr": 2,
+      "os": "Mac"
+    },
+    {
+      "id": "retro_desktop_1080p",
+      "name": "Desktop 1080p Full HD (1920x1080)",
+      "width": 1920,
+      "height": 1080,
+      "type": "desktop",
+      "dpr": 1,
+      "os": "Windows"
+    },
+    {
+      "id": "retro_desktop_1440p",
+      "name": "1440p / 2K QHD Display (2560x1440)",
+      "width": 2560,
+      "height": 1440,
+      "type": "desktop",
+      "dpr": 1,
+      "os": "Windows"
+    },
+    {
+      "id": "retro_ultrawide_219",
+      "name": "Ultra-Wide 21:9 UW-QHD (3440x1440)",
+      "width": 3440,
+      "height": 1440,
+      "type": "desktop",
+      "dpr": 1,
+      "os": "Windows"
+    },
+    {
+      "id": "retro_tv_4k",
+      "name": "4K Ultra HD TV (3840x2160)",
+      "width": 3840,
+      "height": 2160,
+      "type": "desktop",
+      "dpr": 1,
+      "os": "Windows"
+    }
+  ],
+  "suites": [
+    {
+      "id": "suite_core_6",
+      "name": "Retro Player — Core 6 Fast Test",
+      "devices": [
+        "retro_fold_cover",
+        "retro_iphone_16_pro",
+        "retro_ipad_10_landscape",
+        "retro_steam_deck",
+        "retro_desktop_1080p",
+        "retro_desktop_1440p"
+      ]
+    },
+    {
+      "id": "suite_tier_1_mobile",
+      "name": "Tier 1: Mobile & Foldables (<= 640px)",
+      "devices": [
+        "retro_fold_cover",
+        "retro_iphone_13_mini",
+        "retro_iphone_se",
+        "retro_pixel_fold_outer",
+        "retro_iphone_15_standard",
+        "retro_iphone_16_pro",
+        "retro_galaxy_s24_ultra",
+        "retro_iphone_16_plus",
+        "retro_iphone_16_promax"
+      ]
+    },
+    {
+      "id": "suite_tier_2_tablets_handhelds",
+      "name": "Tier 2: Tablets & Handhelds (641px - 1024px & 1280x800)",
+      "devices": [
+        "retro_ipad_mini_6_p",
+        "retro_fold_inner_p",
+        "retro_ipad_10_portrait",
+        "retro_ipad_10_landscape",
+        "retro_ipad_air_p",
+        "retro_ipad_pro_11_p",
+        "retro_pixel_fold_inner_p",
+        "retro_ipad_pro_129_p",
+        "retro_ipad_pro_129_l",
+        "retro_rog_ally",
+        "retro_steam_deck"
+      ]
+    },
+    {
+      "id": "suite_tier_3_4_desktop_tv",
+      "name": "Tier 3 & 4: Desktop, 1440p & 4K TVs",
+      "devices": [
+        "retro_laptop_768p",
+        "retro_laptop_900p",
+        "retro_macbook_pro_14",
+        "retro_macbook_pro_16",
+        "retro_desktop_1080p",
+        "retro_desktop_1440p",
+        "retro_ultrawide_219",
+        "retro_tv_4k"
+      ]
+    },
+    {
+      "id": "suite_master_all",
+      "name": "Retro Player — Complete Master Matrix",
+      "devices": [
+        "retro_fold_cover",
+        "retro_iphone_13_mini",
+        "retro_iphone_se",
+        "retro_pixel_fold_outer",
+        "retro_iphone_15_standard",
+        "retro_iphone_16_pro",
+        "retro_galaxy_s24_ultra",
+        "retro_iphone_16_plus",
+        "retro_iphone_16_promax",
+        "retro_ipad_mini_6_p",
+        "retro_fold_inner_p",
+        "retro_ipad_10_portrait",
+        "retro_ipad_10_landscape",
+        "retro_ipad_air_p",
+        "retro_ipad_pro_11_p",
+        "retro_pixel_fold_inner_p",
+        "retro_ipad_pro_129_p",
+        "retro_ipad_pro_129_l",
+        "retro_rog_ally",
+        "retro_steam_deck",
+        "retro_laptop_768p",
+        "retro_laptop_900p",
+        "retro_macbook_pro_14",
+        "retro_macbook_pro_16",
+        "retro_desktop_1080p",
+        "retro_desktop_1440p",
+        "retro_ultrawide_219",
+        "retro_tv_4k"
+      ]
+    }
+  ]
+}
