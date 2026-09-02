@@ -39,6 +39,7 @@ export function useGamepadStatus(options = {}) {
 
   // Inspect and extract battery telemetry from the primary active connected gamepad
   const inspectGamepadBattery = useCallback(() => {
+    if (typeof window !== 'undefined' && window.__mockGamepadBatteryData) return;
     if (typeof navigator === 'undefined' || !navigator.getGamepads) return;
     const pads = navigator.getGamepads();
     let foundPad = null;
@@ -142,6 +143,77 @@ export function useGamepadStatus(options = {}) {
       clearInterval(interval);
     };
   }, [inspectGamepadBattery]);
+
+  // Dev testing helper exposed to window for manual UI & telemetry verification
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    window.__mockGamepadBattery = (mockData) => {
+      if (mockData === null || mockData === undefined) {
+        console.log('🔄 [GAMEPAD TELEMETRY] Restoring real hardware battery inspection.');
+        window.__mockGamepadBatteryData = null;
+        inspectGamepadBattery();
+        return;
+      }
+
+      const levelNum = typeof mockData === 'number' ? mockData : (mockData.level ?? 85);
+      const level = Math.max(0, Math.min(1, levelNum > 1 ? levelNum / 100 : levelNum));
+      const charging = Boolean(mockData.charging || mockData.isCharging);
+      const padId = mockData.id || mockData.gamepadId || 'Wireless Controller (Simulated)';
+      const levelPercent = Math.round(level * 100);
+
+      window.__mockGamepadBatteryData = { level, charging, padId };
+      setGamepadConnected(true);
+      setGamepadId(padId);
+      setBatteryLevel(level);
+      setIsCharging(charging);
+      setHasBatteryInfo(true);
+
+      if (!charging) {
+        if (level <= 0.10) {
+          const alertData = {
+            levelPercent,
+            isCritical: true,
+            message: `Gamepad battery is critically low (${levelPercent}%)! Connect USB charger now.`,
+            timestamp: Date.now()
+          };
+          setLowBatteryAlert(alertData);
+          sfxRef.current?.playBatteryLow?.();
+          onLowBatteryRef.current?.(alertData);
+        } else if (level <= 0.20) {
+          const alertData = {
+            levelPercent,
+            isCritical: false,
+            message: `Gamepad battery low (${levelPercent}%). Consider plugging in soon.`,
+            timestamp: Date.now()
+          };
+          setLowBatteryAlert(alertData);
+          sfxRef.current?.playBatteryLow?.();
+          onLowBatteryRef.current?.(alertData);
+        } else {
+          setLowBatteryAlert(null);
+        }
+      } else {
+        setLowBatteryAlert(null);
+      }
+
+      console.log(`🔋 [GAMEPAD TELEMETRY SIMULATED] Level: ${levelPercent}%, Charging: ${charging}, Controller: "${padId}"`);
+    };
+
+    return () => {
+      delete window.__mockGamepadBattery;
+      delete window.__mockGamepadBatteryData;
+    };
+  }, [inspectGamepadBattery]);
+
+  // Auto-dismiss low battery alert after 6 seconds to avoid blocking viewport
+  useEffect(() => {
+    if (!lowBatteryAlert) return;
+    const timer = setTimeout(() => {
+      setLowBatteryAlert(null);
+    }, 6000);
+    return () => clearTimeout(timer);
+  }, [lowBatteryAlert]);
 
   // Method to dismiss an active low battery alert notification
   const dismissBatteryAlert = useCallback(() => {

@@ -186,3 +186,50 @@ For mobile touch and handheld PWA players, Retro Player integrates a console-gra
 - **Battery-Saver Awareness**: Automatically throttles/disables vibration when device battery is $\le 15\%$.
 - **User Toggle**: Customizable anytime in the **Mobile Tools Drawer $\rightarrow$ Emulation Preferences & Haptics**.
 
+---
+
+## 🔋 Controller Battery Telemetry & Diagnostics
+
+Retro Player includes built-in battery telemetry tracking (`src/hooks/useGamepadStatus.js`) for wireless Bluetooth and USB gamepads using the standard W3C Gamepad Battery Extension (`gamepad.battery`).
+
+### 1. Simultaneous Charging & Gameplay
+- **Yes**, modern controllers (Xbox Wireless, PlayStation DualSense / DualShock 4, Nintendo Switch Pro Controller, 8BitDo) can charge over USB cable while simultaneously transmitting input commands to the browser.
+- When charging, Retro Player dynamically renders the **`⚡` Charging icon** in the topbar and automatically suppresses low-battery warning alerts.
+
+### 2. Status Indicator States
+| Status / Level | Topbar Indicator | Behavior |
+| :--- | :--- | :--- |
+| **Charging (⚡)** | `BatteryCharging` (Cyan / Pulse) | USB power connected; low-battery warnings suppressed. |
+| **High (> 70%)** | `BatteryFull` (Green) | Healthy battery level. |
+| **Medium (31% – 70%)** | `BatteryMedium` (Yellow) | Normal operation. |
+| **Low (11% – 20%)** | `BatteryLow` (Orange) | Displays slide-up **Low Gamepad Battery** warning toast & plays chime. |
+| **Critical ($\le$ 10%)** | `BatteryWarning` (Red Pulse) | Displays high-priority **Critical Gamepad Battery** banner & warning chime. |
+| **Hardware Unsupported / Wired** | Controller Name Tooltip | Battery icon gracefully hidden; controller name and USB connection state retained. |
+
+### 3. Developer & Troubleshooting Mock Commands
+Because certain generic controllers or older browser drivers do not expose the `gamepad.battery` API property, developers and testers can verify the telemetry UI/UX in real time using DevTools Console (`F12` / `Cmd + Option + I` $\rightarrow$ **Console**):
+
+```javascript
+// Simulate High Battery (90%)
+window.__mockGamepadBattery(90);
+
+// Simulate Medium Battery (50%)
+window.__mockGamepadBattery(50);
+
+// Simulate Low Battery Warning (18% - Triggers Toast + Chime)
+window.__mockGamepadBattery(18);
+
+// Simulate Critical Battery Alert (8% - Triggers Red Banner + Chime)
+window.__mockGamepadBattery(8);
+
+// Simulate Simultaneous USB Charging (⚡ Charging icon)
+window.__mockGamepadBattery({ level: 65, isCharging: true });
+
+// Simulate Custom Controller Hardware Name
+window.__mockGamepadBattery({ level: 80, isCharging: false, id: "DualSense Wireless Controller" });
+
+// Reset / Restore Real Hardware Detection
+window.__mockGamepadBattery(null);
+```
+
+
