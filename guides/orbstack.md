@@ -28,12 +28,13 @@ brew install orbstack
 ### 2. Download `docker-compose.yml` & Launch
 ```bash
 # Create project folder
-mkdir retro-player && cd retro-player
+mkdir -p retro-player && cd retro-player
 
 # Download Compose file
 curl -O https://raw.githubusercontent.com/godarayudhvir/retro-player/main/docker-compose.yml
 
-# Start the container in background
+# Pull latest release image & start container in background
+docker compose pull
 docker compose up -d
 ```
 

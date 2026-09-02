@@ -8,16 +8,21 @@ Complete documentation for deploying **Retro Player** using Docker and Docker Co
 
 1. **Download [`docker-compose.yml`](../docker-compose.yml)**:
    ```bash
-   mkdir retro-player && cd retro-player
+   mkdir -p retro-player && cd retro-player
    curl -O https://raw.githubusercontent.com/godarayudhvir/retro-player/main/docker-compose.yml
    ```
 
-2. **Launch the container**:
+2. **Pull the latest image & launch the container**:
    ```bash
+   docker compose pull
    docker compose up -d
    ```
 
 3. **Access in browser**: `http://localhost:3000` (or `http://<server-ip>:3000`).
+
+> [!TIP]
+> **Version Pinning vs. Latest**:
+> By default, `docker-compose.yml` points to `:latest`. You can also pin your container to a specific SemVer release tag (e.g. `image: ghcr.io/godarayudhvir/retro-player:1.1.1`) to ensure deterministic deployments and prevent unexpected breaking updates. Official images are published automatically to GHCR with every `v*` release.
 
 ---
 
