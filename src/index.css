@@ -13948,6 +13948,7 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
 .status-gamepad.is-connected svg {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+  flex-shrink: 0;
 }
 
 .status-gamepad .battery-badge {
@@ -24868,26 +24869,31 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 }
 
 .desktop-controls-pills-row .status-pill {
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   font-weight: 800;
-  padding: 0 0.85rem;
+  padding: 0 0.45rem;
   border-radius: 10px;
   height: 72px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.55rem;
+  gap: 0.35rem;
   box-sizing: border-box;
 }
 
 .desktop-controls-pills-row .status-pill svg {
-  transform: scale(1.2);
+  transform: scale(1.15);
+  flex-shrink: 0;
 }
 
 .desktop-controls-pills-row .battery-badge {
-  padding: 4px 9px;
-  font-size: 0.84rem;
+  margin-left: 0;
+  padding: 3px 6px;
+  font-size: 0.8rem;
+  gap: 3px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* Square / Tile Controller Icon Matching Height & Column Styling */
