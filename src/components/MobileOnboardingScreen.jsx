@@ -1,21 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Cpu,
-  Save,
-  Trophy,
   Gamepad2,
   ChevronRight,
   ArrowLeft,
   Play,
   Check,
   HardDrive,
+  Download,
+  Upload,
+  Trash2,
+  Zap,
   ArrowDownToLine,
   BatteryCharging,
   BatteryLow,
   Dices,
   Tag,
   Sparkles,
-  Flame
+  Flame,
+  Trophy,
+  Info
 } from 'lucide-react';
 import MultiAvatar from './MultiAvatar';
 import { CHARACTER_ARCHETYPES, COLOR_PALETTE, RANDOM_CHARACTER_SEEDS } from '../utils/characterPresets';
@@ -263,17 +266,13 @@ export default function MobileOnboardingScreen({
                 ------------------------------------------------------------- */}
             {currentScreen === 1 && (
               <div className="mobile-ob-story-card animate-fade-in">
-                <div className="mobile-ob-card-badge blue">
-                  <Cpu size={14} />
-                  <span>12 NATIVE SYSTEMS · 60 FPS</span>
-                </div>
 
                 <h2 className="mobile-ob-card-title">
-                  Console-Grade Performance
+                  Native WebAssembly Emulation
                 </h2>
 
                 <p className="mobile-ob-card-desc">
-                  Powered by WebAssembly emulation cores. Enjoy buttery smooth 60 FPS V-Sync, CRT scanline filters, and instantaneous fast-forward directly in your mobile browser.
+                  Zero installation, zero server lag. Runs locally on your device with hardware-accelerated 60 FPS V-Sync, authentic display shaders, and instant fast-forward.
                 </p>
 
                 {/* 12 Consoles 4x3 Grid */}
@@ -297,38 +296,77 @@ export default function MobileOnboardingScreen({
                 ------------------------------------------------------------- */}
             {currentScreen === 2 && (
               <div className="mobile-ob-story-card animate-fade-in">
-                <div className="mobile-ob-card-badge green">
-                  <Save size={14} />
-                  <span>SAVE ENGINE · ZERO DATA LOSS</span>
-                </div>
 
                 <h2 className="mobile-ob-card-title">
-                  Save Anywhere, Never Lose Progress
+                  Universal Saves &amp; Auto-Resume
                 </h2>
 
                 <p className="mobile-ob-card-desc">
-                  Real in-game cartridge battery RAM (.sav) exports you can transfer to real hardware, plus quick save states and seamless auto-resume right where you left off.
+                  Transfer real cartridge saves to physical hardware, capture instant snapshot states, and jump back into gameplay seamlessly with smart auto-resume.
                 </p>
 
-                {/* In-App Save Demo Visual */}
-                <div className="mobile-ob-ux-card save-ux-card">
-                  <div className="save-ux-top">
-                    <div className="save-ux-file">
-                      <HardDrive size={16} color="#10b981" />
-                      <span className="save-ux-name">pokemon-emerald.sav</span>
-                      <span className="save-ux-size">128 KB</span>
+                {/* Save Studio Action Tiles (Matching Console Save Manager) */}
+                <div className="mobile-ob-save-tiles-stack">
+                  {/* Tile 1: Export Battery Save */}
+                  <div className="mobile-ob-save-tile">
+                    <div className="save-tile-icon export-blue">
+                      <Download size={18} />
                     </div>
-                    <span className="save-ux-status">SAVED</span>
+                    <div className="save-tile-content">
+                      <strong className="save-tile-title">Export Battery Save (.sav)</strong>
+                      <span className="save-tile-sub">Download in-game cartridge SRAM save file</span>
+                    </div>
                   </div>
 
-                  <div className="save-ux-buttons">
-                    <div className="save-ux-btn export">
-                      <ArrowDownToLine size={14} />
-                      <span>Export .SAV</span>
+                  {/* Tile 2: Export Quick Save */}
+                  <div className="mobile-ob-save-tile">
+                    <div className="save-tile-icon export-blue">
+                      <Download size={18} />
                     </div>
-                    <div className="save-ux-btn resume">
-                      <span className="live-dot" />
-                      <span>Auto-Resume Active</span>
+                    <div className="save-tile-content">
+                      <strong className="save-tile-title">Export Quick Save (.state)</strong>
+                      <span className="save-tile-sub">Download emulator snapshot state file</span>
+                    </div>
+                  </div>
+
+                  {/* Tile 3: Import Save / State */}
+                  <div className="mobile-ob-save-tile">
+                    <div className="save-tile-icon import-green">
+                      <Upload size={18} />
+                    </div>
+                    <div className="save-tile-content">
+                      <strong className="save-tile-title">Import Save / State (.sav / .state)</strong>
+                      <span className="save-tile-sub">Upload an existing .sav battery save or .state snapshot</span>
+                    </div>
+                  </div>
+
+                  {/* Tile 4: Delete All Saved Data */}
+                  <div className="mobile-ob-save-tile is-danger">
+                    <div className="save-tile-icon delete-red">
+                      <Trash2 size={18} />
+                    </div>
+                    <div className="save-tile-content">
+                      <strong className="save-tile-title">Delete All Saved Data</strong>
+                      <span className="save-tile-sub">Erase in-game saves &amp; quick save states</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* In-Game Auto-Resume Prompt Banner Showcase */}
+                <div className="mobile-ob-resume-showcase">
+                  <div className="mobile-ob-resume-banner">
+                    <div className="erp-icon-wrap">
+                      <Zap size={16} color="#f59e0b" />
+                    </div>
+                    <div className="erp-content">
+                      <div className="erp-title">Resume where you left off?</div>
+                      <div className="erp-sub">Auto-Save snapshot available from last session</div>
+                    </div>
+                    <div className="erp-actions">
+                      <div className="erp-btn is-resume">
+                        <Zap size={12} />
+                        <span>Resume (5s)</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -340,10 +378,6 @@ export default function MobileOnboardingScreen({
                 ------------------------------------------------------------- */}
             {currentScreen === 3 && (
               <div className="mobile-ob-story-card animate-fade-in">
-                <div className="mobile-ob-card-badge gold">
-                  <Trophy size={14} />
-                  <span>TROPHIES &amp; MILESTONES</span>
-                </div>
 
                 <h2 className="mobile-ob-card-title">
                   Earn Trophies as You Play
@@ -353,24 +387,37 @@ export default function MobileOnboardingScreen({
                   Unlock trophies for gaming habits like <em>Night Owl</em> sessions, <em>Rage Quits</em>, and <em>Button Mashing</em> — plus authentic cartridge milestones like conquering Pokémon Gyms.
                 </p>
 
-                {/* Badge Case Strip (3/8 Unlocked) */}
-                <div className="mobile-ob-badges-card">
-                  <div className="badges-card-header">
-                    <span className="badges-header-title">🪪 KANTO LEAGUE</span>
-                    <span className="badges-header-count">3 / 8 BADGES</span>
-                  </div>
-                  <div className="badges-grid-strip">
-                    {KANTO_BADGES.map((b) => (
-                      <div key={b.id} className={`badge-box ${b.unlocked ? 'is-earned' : 'is-locked'}`} title={b.name}>
-                        <img
-                          src={resolveAssetPath(`assets/badges/kanto/${b.id}.webp`)}
-                          alt={b.name}
-                          className={`badge-icon ${b.unlocked ? 'earned' : 'locked'}`}
-                        />
-                      </div>
-                    ))}
-                  </div>
+                {/* Player Profile & Trophy Meter Strip */}
+                <div className="mobile-ob-hof-container">
+                  <div className="mobile-ob-hof-profile-strip">
+                    <div className="trophy-avatar-frame">
+                      <MultiAvatar seed={activeProfile?.avatarSeed || activeProfile?.name || 'RetroGamer'} size={38} />
+                      <span className="trophy-level-pill">Lv.2</span>
+                    </div>
 
+                    <div className="mobile-ob-hof-info">
+                      <div className="mobile-ob-hof-top">
+                        <strong className="mobile-ob-hof-player">{activeProfile?.name || 'Player 1'}</strong>
+                        <span className="trophy-rank-badge">Apprentice</span>
+                      </div>
+
+                      <div className="trophy-meter-wrap">
+                        <div className="trophy-meter-track">
+                          <div className="trophy-meter-fill" style={{ width: '13%' }} />
+                        </div>
+                        <div className="trophy-meter-labels">
+                          <span>3 / 24 Unlocked (13%)</span>
+                          <span className="trophy-points-tag">
+                            <Trophy size={10} color="#f59e0b" />
+                            <strong>25</strong> / 300 G
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mobile-ob-badges-card">
                   {/* Trophy Card: Ironman Endurance */}
                   <div className="mobile-ob-trophy-banner">
                     <div className="trophy-badge-icon">
@@ -384,6 +431,19 @@ export default function MobileOnboardingScreen({
                       <span>Play a single game continuously for 7 hours</span>
                     </div>
                   </div>
+
+                  {/* Badge Case Strip (3/8 Unlocked) */}
+                  <div className="badges-grid-strip">
+                    {KANTO_BADGES.map((b) => (
+                      <div key={b.id} className={`badge-box ${b.unlocked ? 'is-earned' : 'is-locked'}`} title={b.name}>
+                        <img
+                          src={resolveAssetPath(`assets/badges/kanto/${b.id}.webp`)}
+                          alt={b.name}
+                          className={`badge-icon ${b.unlocked ? 'earned' : 'locked'}`}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
@@ -393,10 +453,6 @@ export default function MobileOnboardingScreen({
                 ------------------------------------------------------------- */}
             {currentScreen === 4 && (
               <div className="mobile-ob-story-card animate-fade-in">
-                <div className="mobile-ob-card-badge purple">
-                  <Gamepad2 size={14} />
-                  <span>UNIVERSAL CONTROLS</span>
-                </div>
 
                 <h2 className="mobile-ob-card-title">
                   Touch, Gamepad, or Keyboard
@@ -406,29 +462,228 @@ export default function MobileOnboardingScreen({
                   Engineered with haptic on-screen controls for mobile touchscreens, plus instant plug &amp; play pairing for PlayStation, Xbox, Switch, and Steam Deck Bluetooth controllers.
                 </p>
 
-                {/* Gamepad HUD Visual Card */}
-                <div className="mobile-ob-controls-visual">
-                  <div className="controls-pills-row">
-                    <div className="hud-pill is-charging">
-                      <Gamepad2 size={16} />
-                      <BatteryCharging size={14} className="charging-icon" />
-                      <span>100% ⚡</span>
+                {/* 3 Status Pills Showcase: Connected, Low Battery, Charging */}
+                <div className="controls-pills-showcase">
+                  <div className="status-pill status-gamepad is-connected is-charging demo-pill" title="Gamepad Connected (Charging)">
+                    <Gamepad2 size={16} />
+                    <span className="battery-badge">
+                      <BatteryCharging size={14} className="battery-icon is-charging" />
+                      <span className="battery-percent-text">100%</span>
+                      <span className="charging-tag">⚡</span>
+                    </span>
+                  </div>
+
+                  <div className="status-pill status-gamepad is-connected is-battery-low demo-pill" title="Gamepad Low Battery (15%)">
+                    <Gamepad2 size={16} />
+                    <span className="battery-badge">
+                      <BatteryLow size={14} className="battery-icon is-low" />
+                      <span className="battery-percent-text">15%</span>
+                    </span>
+                  </div>
+
+                  <div className="status-pill status-gamepad is-connected demo-pill" title="Gamepad Connected">
+                    <Gamepad2 size={16} />
+                    <span className="battery-badge">
+                      <span className="battery-percent-text">READY</span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* 1. Vector Gamepad Visualizer (No Labels) */}
+                <div className="controls-controller-wrap">
+                  <svg viewBox="0 0 700 420" className="controls-controller-svg">
+                    <g transform="translate(10, 5)">
+                      {/* L2 / R2 Triggers */}
+                      <path d="M 175 48 C 175 22, 230 20, 242 42 L 235 70 C 215 62, 185 64, 175 48 Z" className="ctrl-trigger" />
+                      <text x="210" y="44" className="ctrl-trigger-text">L2</text>
+                      <path d="M 505 48 C 505 22, 450 20, 438 42 L 445 70 C 465 62, 495 64, 505 48 Z" className="ctrl-trigger" />
+                      <text x="470" y="44" className="ctrl-trigger-text">R2</text>
+
+                      {/* Controller Body Shell & Grips */}
+                      <path d="M 170 78 C 240 68, 440 68, 510 78 C 555 88, 595 130, 580 190 C 560 235, 520 258, 470 258 C 420 258, 395 295, 340 295 C 285 295, 260 258, 210 258 C 160 258, 120 235, 100 190 C 85 130, 125 88, 170 78 Z" className="ctrl-shell-body" />
+                      <path d="M 100 150 C 70 190, 45 270, 70 355 C 85 400, 130 410, 160 375 C 185 345, 205 280, 215 235 Z" className="ctrl-shell-grip" />
+                      <path d="M 580 150 C 610 190, 635 270, 610 355 C 595 400, 550 410, 520 375 C 495 345, 475 280, 465 235 Z" className="ctrl-shell-grip" />
+
+                      {/* L1 / R1 Bumpers */}
+                      <path d="M 155 76 C 155 58, 235 55, 245 74 L 240 92 C 215 84, 170 84, 155 76 Z" className="ctrl-bumper" />
+                      <text x="195" y="80" className="ctrl-bumper-text">L1</text>
+                      <path d="M 525 76 C 525 58, 445 55, 435 74 L 440 92 C 465 84, 510 84, 525 76 Z" className="ctrl-bumper" />
+                      <text x="485" y="80" className="ctrl-bumper-text">R1</text>
+
+                      {/* Touchpad */}
+                      <rect x="250" y="76" width="180" height="90" rx="6" className="ctrl-touchpad" />
+
+                      {/* Share & Options */}
+                      <rect x="225" y="105" width="12" height="26" rx="6" className="ctrl-meta-btn" />
+                      <rect x="443" y="105" width="12" height="26" rx="6" className="ctrl-meta-btn" />
+
+                      {/* D-Pad Cluster */}
+                      <g className="ctrl-dpad-cluster" transform="translate(135, 125)">
+                        <path d="M 36 6 L 60 6 C 64 6, 66 8, 66 12 L 66 36 L 30 36 L 30 12 C 30 8, 32 6, 36 6 Z" />
+                        <polygon points="48,14 41,24 55,24" className="dpad-arrow-glyph" />
+                        <path d="M 30 60 L 66 60 L 66 84 C 66 88, 64 90, 60 90 L 36 90 C 32 90, 30 88, 30 84 Z" />
+                        <polygon points="48,82 41,72 55,72" className="dpad-arrow-glyph" />
+                        <path d="M 6 36 C 6 32, 8 30, 12 30 L 36 30 L 36 66 L 12 66 C 8 66, 6 64, 6 60 Z" />
+                        <polygon points="14,48 24,41 24,55" className="dpad-arrow-glyph" />
+                        <path d="M 60 30 L 84 30 C 88 30, 90 32, 90 36 L 90 60 C 90 64, 88 66, 84 66 L 60 66 Z" />
+                        <polygon points="82,48 72,41 72,55" className="dpad-arrow-glyph" />
+                        <rect x="34" y="34" width="28" height="28" className="ctrl-dpad-center" />
+                      </g>
+
+                      {/* Action Face Buttons Cluster */}
+                      <g className="ctrl-action-cluster" transform="translate(485, 125)">
+                        <circle cx="48" cy="18" r="17" />
+                        <polygon points="48,9 39,24 57,24" className="glyph-triangle" />
+                        <circle cx="78" cy="48" r="17" />
+                        <circle cx="78" cy="48" r="7.5" className="glyph-circle" />
+                        <circle cx="48" cy="78" r="17" />
+                        <line x1="41" y1="71" x2="55" y2="85" className="glyph-cross" />
+                        <line x1="55" y1="71" x2="41" y2="85" className="glyph-cross" />
+                        <circle cx="18" cy="48" r="17" />
+                        <rect x="11.5" y="41.5" width="13" height="13" rx="1.5" className="glyph-square" />
+                      </g>
+
+                      {/* Dual Sticks */}
+                      <circle cx="250" cy="255" r="42" className="ctrl-stick-base" />
+                      <circle cx="250" cy="255" r="32" className="ctrl-stick-pad" />
+                      <circle cx="250" cy="255" r="22" className="ctrl-stick-inner" />
+                      <text x="250" y="259" className="ctrl-stick-text">L3</text>
+
+                      <circle cx="340" cy="235" r="11" className="ctrl-home-btn" />
+
+                      <circle cx="430" cy="255" r="42" className="ctrl-stick-base" />
+                      <circle cx="430" cy="255" r="32" className="ctrl-stick-pad" />
+                      <circle cx="430" cy="255" r="22" className="ctrl-stick-inner" />
+                      <text x="430" y="259" className="ctrl-stick-text">R3</text>
+
+                      {/* L3 + R3 Exit Game Combo */}
+                      <g transform="translate(340, 325)" className="ctrl-combo-tag">
+                        <rect x="-70" y="-12" width="140" height="24" rx="12" />
+                        <text x="0" y="4" textAnchor="middle">L3 + R3 EXIT GAME</text>
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+
+                {/* In-Game Mobile Haptic Touch Pad Overlay Preview */}
+                <div className="mobile-touch-pad-showcase">
+                  <div className="touch-pad-label-row">
+                    <span className="touch-pad-title">📱 IN-GAME TOUCH CONTROLS</span>
+                    <span className="touch-pad-sub">Auto-enabled on touchscreens</span>
+                  </div>
+                  <div className="touch-pad-demo-surface">
+                    {/* Left D-Pad Virtual Overlay */}
+                    <div className="touch-v-dpad">
+                      <div className="v-dpad-btn up">▲</div>
+                      <div className="v-dpad-btn left">◄</div>
+                      <div className="v-dpad-center" />
+                      <div className="v-dpad-btn right">►</div>
+                      <div className="v-dpad-btn down">▼</div>
                     </div>
-                    <div className="hud-pill is-low">
-                      <Gamepad2 size={16} />
-                      <BatteryLow size={14} className="low-icon" />
-                      <span>15%</span>
+
+                    {/* Center Select & Start */}
+                    <div className="touch-v-meta">
+                      <div className="v-meta-btn">SELECT</div>
+                      <div className="v-meta-btn">START</div>
+                    </div>
+
+                    {/* Right Action Face Buttons (B / A) */}
+                    <div className="touch-v-actions">
+                      <div className="v-action-btn b">B</div>
+                      <div className="v-action-btn a">A</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Compact Keyboard Controls Grid */}
+                <div className="controls-keyboard-compact">
+                  {/* Movement */}
+                  <div className="kc-compact-section">
+                    <div className="kc-compact-label">MOVEMENT / DIRECTION</div>
+                    <div className="kc-compact-row">
+                      <div className="kc-keycap-group">
+                        <span className="kc-keycap">▲</span>
+                        <span className="kc-keycap">▼</span>
+                        <span className="kc-keycap">◄</span>
+                        <span className="kc-keycap">►</span>
+                      </div>
+                      <div className="kc-key-info">
+                        <span className="kc-key-title">Arrow Keys</span>
+                        <span className="kc-key-desc">D-Pad / Analog Navigation</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="controls-touch-keys">
-                    <span className="keycap">D-PAD</span>
-                    <span className="keycap action">A / ✕</span>
-                    <span className="keycap action">B / ◯</span>
-                    <span className="keycap">START</span>
-                    <span className="keycap">SELECT</span>
+                  {/* Actions */}
+                  <div className="kc-compact-section">
+                    <div className="kc-compact-label">ACTION BUTTONS</div>
+                    <div className="kc-compact-grid-2">
+                      <div className="kc-compact-row">
+                        <span className="kc-keycap is-action">Z</span>
+                        <div className="kc-key-info">
+                          <span className="kc-key-title">B Button</span>
+                          <span className="kc-key-desc">Cancel / Run</span>
+                        </div>
+                      </div>
+                      <div className="kc-compact-row">
+                        <span className="kc-keycap is-action">X</span>
+                        <div className="kc-key-info">
+                          <span className="kc-key-title">A Button</span>
+                          <span className="kc-key-desc">Confirm / Jump</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Shoulders */}
+                  <div className="kc-compact-section">
+                    <div className="kc-compact-label">SHOULDERS &amp; TRIGGERS</div>
+                    <div className="kc-compact-grid-2">
+                      <div className="kc-compact-row">
+                        <span className="kc-keycap is-shoulder">Q</span>
+                        <div className="kc-key-info">
+                          <span className="kc-key-title">L Shoulder</span>
+                          <span className="kc-key-desc">Left Bumper</span>
+                        </div>
+                      </div>
+                      <div className="kc-compact-row">
+                        <span className="kc-keycap is-shoulder">W</span>
+                        <div className="kc-key-info">
+                          <span className="kc-key-title">R Shoulder</span>
+                          <span className="kc-key-desc">Right Bumper</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* System */}
+                  <div className="kc-compact-section">
+                    <div className="kc-compact-label">SYSTEM / UTILITY</div>
+                    <div className="kc-compact-grid-2">
+                      <div className="kc-compact-row">
+                        <span className="kc-keycap is-system">Shift</span>
+                        <div className="kc-key-info">
+                          <span className="kc-key-title">Select</span>
+                          <span className="kc-key-desc">Select / Coin</span>
+                        </div>
+                      </div>
+                      <div className="kc-compact-row">
+                        <span className="kc-keycap is-system">Enter</span>
+                        <div className="kc-key-info">
+                          <span className="kc-key-title">Start</span>
+                          <span className="kc-key-desc">Start / Pause</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
+
+                {/* Bottom Note Banner */}
+                <div className="mobile-ob-controls-note">
+                  <Info size={14} className="controls-note-icon" />
+                  <span>Controls differ across games and consoles.</span>
+                </div>
+
               </div>
             )}
 

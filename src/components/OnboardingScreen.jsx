@@ -24,6 +24,9 @@ import {
   Cpu,
   FileJson,
   ArrowDownToLine,
+  Upload,
+  Trash2,
+  Zap,
   Radio,
   Flame,
   Sparkles,
@@ -33,6 +36,7 @@ import {
 import CharacterStudio from './CharacterStudio';
 import DualShockVisualizer from './DualShockVisualizer';
 import MobileOnboardingScreen from './MobileOnboardingScreen';
+import MultiAvatar from './MultiAvatar';
 import { resolveAssetPath } from '../utils/assetPath';
 
 const isApplePlatform = typeof navigator !== 'undefined' && (/Macintosh|iPhone|iPad|iPod/i.test(navigator.userAgent || ''));
@@ -241,11 +245,10 @@ export default function OnboardingScreen({
                     <div className="pillar-icon-wrap" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' }}>
                       <Cpu size={22} />
                     </div>
-                    <span className="pillar-badge-tag">12 SYSTEMS</span>
+                    <h3 className="pillar-card-title">Native WebAssembly Emulation</h3>
                   </div>
                   <div className="pillar-text">
-                    <h3>12 Native WASM Cores</h3>
-                    <p>Low-latency WebAssembly emulation cores with smooth 60 FPS V-Sync, CRT scanline shaders, and fast-forward.</p>
+                    <p>Zero installation, zero server lag. Runs locally in your browser with hardware-accelerated 60 FPS V-Sync, CRT scanline shaders, and turbo fast-forward.</p>
                   </div>
 
                   {/* Graphic: 12 Consoles in a Clean 4x3 Grid with Larger SVGs */}
@@ -286,36 +289,75 @@ export default function OnboardingScreen({
                   onClick={() => { setFocusedTarget?.({ zone: 'onboarding', id: 'pillar_1' }); sfx?.playTileNav?.(); }}
                 >
                   <div className="pillar-header-row">
-                    <div className="pillar-icon-wrap" style={{ background: 'rgba(168, 85, 247, 0.15)', color: '#10b981' }}>
+                    <div className="pillar-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
                       <Save size={22} />
                     </div>
-                    <span className="pillar-badge-tag green">SAVE ENGINE</span>
+                    <h3 className="pillar-card-title">Universal Saves &amp; Auto-Resume</h3>
                   </div>
                   <div className="pillar-text">
-                    <h3>Battery Saves &amp; Auto-Resume</h3>
-                    <p>Real in-game battery RAM (.sav) exports, instant quick save states, and auto-resume right where you left off.</p>
+                    <p>Transfer real cartridge saves to physical hardware, capture instant snapshot states, and jump back into gameplay seamlessly with smart auto-resume.</p>
                   </div>
 
-                  {/* Graphic: In-App UX Demo for Battery RAM & Storage Studio Export */}
+                  {/* Graphic: Save Studio Actions & In-Game Auto-Resume Demo */}
                   <div className="pillar-visual-graphic-wrap">
-                    <div className="pillar-ux-demo-card save-demo">
-                      <div className="save-demo-header">
-                        <div className="save-demo-file-info">
-                          <HardDrive size={15} color="#10b981" />
-                          <span className="save-demo-filename">pokemon-emerald.sav</span>
-                          <span className="save-demo-size">128 KB</span>
+                    <div className="desktop-pillar-save-grid">
+                      {/* Tile 1: Export Battery Save */}
+                      <div className="desktop-pillar-save-tile">
+                        <div className="save-tile-icon export-blue">
+                          <Download size={14} />
                         </div>
-                        <span className="save-demo-status">SAVED</span>
+                        <div className="save-tile-content">
+                          <strong className="save-tile-title">Export Battery Save (.sav)</strong>
+                          <span className="save-tile-sub">Download in-game cartridge SRAM save file</span>
+                        </div>
                       </div>
-                      <div className="save-demo-actions-row">
-                        <div className="save-demo-btn export-btn">
-                          <ArrowDownToLine size={13} />
-                          <span>Export .SAV</span>
+
+                      {/* Tile 2: Export Quick Save */}
+                      <div className="desktop-pillar-save-tile">
+                        <div className="save-tile-icon export-blue">
+                          <Download size={14} />
                         </div>
-                        <div className="save-demo-btn resume-btn">
-                          <span className="resume-dot" />
-                          <span>Auto-Resume Active</span>
+                        <div className="save-tile-content">
+                          <strong className="save-tile-title">Export Quick Save (.state)</strong>
+                          <span className="save-tile-sub">Download emulator snapshot state file</span>
                         </div>
+                      </div>
+
+                      {/* Tile 3: Import Save / State */}
+                      <div className="desktop-pillar-save-tile">
+                        <div className="save-tile-icon import-green">
+                          <Upload size={14} />
+                        </div>
+                        <div className="save-tile-content">
+                          <strong className="save-tile-title">Import Save / State (.sav / .state)</strong>
+                          <span className="save-tile-sub">Upload an existing .sav battery save or .state snapshot</span>
+                        </div>
+                      </div>
+
+                      {/* Tile 4: Delete All Saved Data */}
+                      <div className="desktop-pillar-save-tile is-danger">
+                        <div className="save-tile-icon delete-red">
+                          <Trash2 size={14} />
+                        </div>
+                        <div className="save-tile-content">
+                          <strong className="save-tile-title">Delete All Saved Data</strong>
+                          <span className="save-tile-sub">Erase in-game saves &amp; quick save states</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Auto-Resume Prompt Banner (Light Console Theme) */}
+                    <div className="desktop-pillar-resume-banner">
+                      <div className="erp-icon-wrap">
+                        <Zap size={14} color="#f59e0b" />
+                      </div>
+                      <div className="erp-content">
+                        <div className="erp-title">Resume where you left off?</div>
+                        <div className="erp-sub">Auto-Save snapshot available from last session</div>
+                      </div>
+                      <div className="erp-btn is-resume">
+                        <Zap size={12} />
+                        <span>Resume (5s)</span>
                       </div>
                     </div>
                   </div>
@@ -332,20 +374,59 @@ export default function OnboardingScreen({
                     <div className="pillar-icon-wrap" style={{ background: 'rgba(234, 179, 8, 0.15)', color: '#ca8a04' }}>
                       <Trophy size={22} />
                     </div>
-                    <span className="pillar-badge-tag gold">TROPHIES</span>
+                    <h3 className="pillar-card-title">Achievements &amp; Milestones</h3>
                   </div>
                   <div className="pillar-text">
-                    <h3>Achievements &amp; Milestones</h3>
                     <p>Earn trophies for gaming habits like <em>Night Owl</em> sessions, <em>Rage Quits</em>, and <em>Button Mashing</em> — plus authentic cartridge milestones like conquering Pokémon Gyms and becoming Champion.</p>
                   </div>
 
-                  {/* Graphic: In-App UX Demo with Kanto 3/8 Badge Case & Ironman Trophy */}
+                  {/* Graphic: In-App UX Demo with Hall of Fame, Kanto Badge Case & Ironman Trophy */}
                   <div className="pillar-visual-graphic-wrap">
-                    {/* Badge Case Strip (3/8 Unlocked) */}
-                    <div className="pillar-badge-case-header">
-                      <span className="badge-case-title">🪪 KANTO LEAGUE</span>
-                      <span className="badge-case-progress">3 / 8 BADGES</span>
+                    {/* Player Profile & Trophy Meter Strip */}
+                    <div className="desktop-pillar-hof-card">
+                      <div className="desktop-pillar-hof-profile">
+                        <div className="trophy-avatar-frame">
+                          <MultiAvatar seed={activeProfile?.avatarSeed || activeProfile?.name || 'RetroGamer'} size={32} />
+                          <span className="trophy-level-pill">Lv.2</span>
+                        </div>
+
+                        <div className="desktop-pillar-hof-info">
+                          <div className="desktop-pillar-hof-top">
+                            <strong className="desktop-pillar-hof-name">{activeProfile?.name || 'Player 1'}</strong>
+                            <span className="trophy-rank-badge">Apprentice</span>
+                          </div>
+
+                          <div className="trophy-meter-wrap">
+                            <div className="trophy-meter-track">
+                              <div className="trophy-meter-fill" style={{ width: '13%' }} />
+                            </div>
+                            <div className="trophy-meter-labels">
+                              <span>3 / 24 Unlocked (13%)</span>
+                              <span className="trophy-points-tag">
+                                <Trophy size={9} color="#f59e0b" />
+                                <strong>25</strong> / 300 G
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Real-time In-App Trophy Card: Ironman Endurance */}
+                    <div className="pillar-ux-trophy-card tier-platinum">
+                      <div className="trophy-mini-icon-box">
+                        <Flame size={15} color="#38bdf8" />
+                      </div>
+                      <div className="trophy-mini-body">
+                        <div className="trophy-mini-top">
+                          <strong className="trophy-mini-title">Ironman Endurance</strong>
+                          <span className="trophy-mini-pts">+20G</span>
+                        </div>
+                        <span className="trophy-mini-sub">Play a single game continuously for 7 hours</span>
+                      </div>
+                    </div>
+
+                    {/* Badge Case Strip (3/8 Unlocked) */}
                     <div className="pillar-badges-showcase-row">
                       {[
                         { id: 'boulder', unlocked: true },
@@ -367,20 +448,6 @@ export default function OnboardingScreen({
                         </div>
                       ))}
                     </div>
-
-                    {/* Real-time In-App Trophy Card: Ironman Endurance */}
-                    <div className="pillar-ux-trophy-card tier-platinum">
-                      <div className="trophy-mini-icon-box">
-                        <Flame size={15} color="#38bdf8" />
-                      </div>
-                      <div className="trophy-mini-body">
-                        <div className="trophy-mini-top">
-                          <strong className="trophy-mini-title">Ironman Endurance</strong>
-                          <span className="trophy-mini-pts">+20G</span>
-                        </div>
-                        <span className="trophy-mini-sub">Play a single game continuously for 7 hours</span>
-                      </div>
-                    </div>
                   </div>
                 </div>
 
@@ -395,45 +462,191 @@ export default function OnboardingScreen({
                     <div className="pillar-icon-wrap" style={{ background: 'rgba(168, 85, 247, 0.15)', color: '#a855f7' }}>
                       <Gamepad2 size={22} />
                     </div>
-                    <span className="pillar-badge-tag purple">CONTROLS</span>
+                    <h3 className="pillar-card-title">Universal Controls &amp; Battery HUD</h3>
                   </div>
                   <div className="pillar-text">
-                    <h3>Universal Controls &amp; Battery HUD</h3>
                     <p>Plug &amp; play PlayStation (DualShock/DualSense), Xbox, Switch Pro, and Steam Deck controllers, haptic mobile touch overlays, full keyboard spatial navigation, and live low-battery gamepad warnings.</p>
                   </div>
 
-                  {/* Graphic: In-App UX Demo with Real Topbar Gamepad & Battery HUD Widgets */}
+                  {/* Graphic: In-App UX Demo with Controller, Keyboard & Status Pills */}
                   <div className="pillar-visual-graphic-wrap">
-                    {/* Topbar Gamepad HUD Demo Row */}
-                    <div className="pillar-topbar-hud-demo-row">
-                      {/* Real In-App Gamepad Pill (Active & Charging) */}
-                      <div className="status-pill status-gamepad is-connected demo-pill" title="Wireless Controller (Charging)">
-                        <Gamepad2 size={16} />
+                    {/* Top Row: 3 Status Pills + Square Controller Icon */}
+                    <div className="desktop-controls-pills-row">
+                      <div className="status-pill status-gamepad is-connected is-charging demo-pill" title="Gamepad Connected (Charging)">
+                        <Gamepad2 size={15} />
                         <span className="battery-badge">
-                          <BatteryCharging size={15} className="battery-icon is-charging" />
+                          <BatteryCharging size={13} className="battery-icon is-charging" />
                           <span className="battery-percent-text">100%</span>
                           <span className="charging-tag">⚡</span>
                         </span>
                       </div>
 
-                      {/* Real In-App Gamepad Pill (Low Battery Warning) */}
-                      <div className="status-pill status-gamepad is-connected is-battery-low demo-pill" title="DualSense Controller (15% Low Battery)">
-                        <Gamepad2 size={16} />
+                      <div className="status-pill status-gamepad is-connected is-battery-low demo-pill" title="Gamepad Low Battery (15%)">
+                        <Gamepad2 size={15} />
                         <span className="battery-badge">
-                          <BatteryLow size={15} className="battery-icon is-low" />
+                          <BatteryLow size={13} className="battery-icon is-low" />
                           <span className="battery-percent-text">15%</span>
                         </span>
                       </div>
+
+                      <div className="status-pill status-gamepad is-connected demo-pill" title="Gamepad Connected">
+                        <Gamepad2 size={15} />
+                        <span className="battery-badge">
+                          <span className="battery-percent-text">READY</span>
+                        </span>
+                      </div>
+
+                      {/* Square Controller Icon Box */}
+                      <div className="desktop-controller-square-badge" title="DualShock 4 Controller">
+                        <svg viewBox="0 0 700 420" className="ctrl-square-svg">
+                          <g transform="translate(10, 5)">
+                            {/* L2 / R2 Triggers */}
+                            <path d="M 175 48 C 175 22, 230 20, 242 42 L 235 70 C 215 62, 185 64, 175 48 Z" className="ctrl-trigger" />
+                            <text x="210" y="44" className="ctrl-trigger-text">L2</text>
+                            <path d="M 505 48 C 505 22, 450 20, 438 42 L 445 70 C 465 62, 495 64, 505 48 Z" className="ctrl-trigger" />
+                            <text x="470" y="44" className="ctrl-trigger-text">R2</text>
+
+                            {/* Controller Body Shell & Grips */}
+                            <path d="M 170 78 C 240 68, 440 68, 510 78 C 555 88, 595 130, 580 190 C 560 235, 520 258, 470 258 C 420 258, 395 295, 340 295 C 285 295, 260 258, 210 258 C 160 258, 120 235, 100 190 C 85 130, 125 88, 170 78 Z" className="ctrl-shell-body" />
+                            <path d="M 100 150 C 70 190, 45 270, 70 355 C 85 400, 130 410, 160 375 C 185 345, 205 280, 215 235 Z" className="ctrl-shell-grip" />
+                            <path d="M 580 150 C 610 190, 635 270, 610 355 C 595 400, 550 410, 520 375 C 495 345, 475 280, 465 235 Z" className="ctrl-shell-grip" />
+
+                            {/* L1 / R1 Bumpers */}
+                            <path d="M 155 76 C 155 58, 235 55, 245 74 L 240 92 C 215 84, 170 84, 155 76 Z" className="ctrl-bumper" />
+                            <text x="195" y="80" className="ctrl-bumper-text">L1</text>
+                            <path d="M 525 76 C 525 58, 445 55, 435 74 L 440 92 C 465 84, 510 84, 525 76 Z" className="ctrl-bumper" />
+                            <text x="485" y="80" className="ctrl-bumper-text">R1</text>
+
+                            {/* Touchpad */}
+                            <rect x="250" y="76" width="180" height="90" rx="6" className="ctrl-touchpad" />
+
+                            {/* Share & Options */}
+                            <rect x="225" y="105" width="12" height="26" rx="6" className="ctrl-meta-btn" />
+                            <rect x="443" y="105" width="12" height="26" rx="6" className="ctrl-meta-btn" />
+
+                            {/* D-Pad Cluster */}
+                            <g className="ctrl-dpad-cluster" transform="translate(135, 125)">
+                              <path d="M 36 6 L 60 6 C 64 6, 66 8, 66 12 L 66 36 L 30 36 L 30 12 C 30 8, 32 6, 36 6 Z" />
+                              <polygon points="48,14 41,24 55,24" className="dpad-arrow-glyph" />
+                              <path d="M 30 60 L 66 60 L 66 84 C 66 88, 64 90, 60 90 L 36 90 C 32 90, 30 88, 30 84 Z" />
+                              <polygon points="48,82 41,72 55,72" className="dpad-arrow-glyph" />
+                              <path d="M 6 36 C 6 32, 8 30, 12 30 L 36 30 L 36 66 L 12 66 C 8 66, 6 64, 6 60 Z" />
+                              <polygon points="14,48 24,41 24,55" className="dpad-arrow-glyph" />
+                              <path d="M 60 30 L 84 30 C 88 30, 90 32, 90 36 L 90 60 C 90 64, 88 66, 84 66 L 60 66 Z" />
+                              <polygon points="82,48 72,41 72,55" className="dpad-arrow-glyph" />
+                              <rect x="34" y="34" width="28" height="28" className="ctrl-dpad-center" />
+                            </g>
+
+                            {/* Action Face Buttons Cluster */}
+                            <g className="ctrl-action-cluster" transform="translate(485, 125)">
+                              <circle cx="48" cy="18" r="17" />
+                              <polygon points="48,9 39,24 57,24" className="glyph-triangle" />
+                              <circle cx="78" cy="48" r="17" />
+                              <circle cx="78" cy="48" r="7.5" className="glyph-circle" />
+                              <circle cx="48" cy="78" r="17" />
+                              <line x1="41" y1="71" x2="55" y2="85" className="glyph-cross" />
+                              <line x1="55" y1="71" x2="41" y2="85" className="glyph-cross" />
+                              <circle cx="18" cy="48" r="17" />
+                              <rect x="11.5" y="41.5" width="13" height="13" rx="1.5" className="glyph-square" />
+                            </g>
+
+                            {/* Dual Sticks */}
+                            <circle cx="250" cy="255" r="42" className="ctrl-stick-base" />
+                            <circle cx="250" cy="255" r="32" className="ctrl-stick-pad" />
+                            <circle cx="250" cy="255" r="22" className="ctrl-stick-inner" />
+                            <text x="250" y="259" className="ctrl-stick-text">L3</text>
+
+                            <circle cx="340" cy="235" r="11" className="ctrl-home-btn" />
+
+                            <circle cx="430" cy="255" r="42" className="ctrl-stick-base" />
+                            <circle cx="430" cy="255" r="32" className="ctrl-stick-pad" />
+                            <circle cx="430" cy="255" r="22" className="ctrl-stick-inner" />
+                            <text x="430" y="259" className="ctrl-stick-text">R3</text>
+
+                            {/* L3 + R3 Exit Game Combo */}
+                            <g transform="translate(340, 325)" className="ctrl-combo-tag">
+                              <rect x="-70" y="-12" width="140" height="24" rx="12" />
+                              <text x="0" y="4" textAnchor="middle">L3 + R3 EXIT GAME</text>
+                            </g>
+                          </g>
+                        </svg>
+                      </div>
                     </div>
 
-                    {/* Spatial Navigation Keycaps */}
-                    <div className="pillar-keybinds-showcase-row">
-                      <span className="pillar-keycap-btn">D-PAD</span>
-                      <span className="pillar-keycap-btn primary">A / ✕</span>
-                      <span className="pillar-keycap-btn primary">B / ◯</span>
-                      <span className="pillar-keycap-btn">START</span>
-                      <span className="pillar-keycap-btn keyb">ENTER ↵</span>
-                      <span className="pillar-keycap-btn keyb">ESC</span>
+                    {/* Dual Column Row: In-Game Touch Controls (50%) + Keyboard Controls (50%) */}
+                    <div className="desktop-controls-dual-grid">
+                      {/* Column 1: In-Game Mobile Haptic Touch Pad Overlay Preview */}
+                      <div className="desktop-touch-pad-showcase">
+                        <div className="touch-pad-label-row">
+                          <span className="touch-pad-title">📱 IN-GAME TOUCH CONTROLS</span>
+                          <span className="touch-pad-sub">Touchscreens</span>
+                        </div>
+                        <div className="touch-pad-demo-surface">
+                          {/* Left D-Pad Virtual Overlay */}
+                          <div className="touch-v-dpad">
+                            <div className="v-dpad-btn up">▲</div>
+                            <div className="v-dpad-btn left">◄</div>
+                            <div className="v-dpad-center" />
+                            <div className="v-dpad-btn right">►</div>
+                            <div className="v-dpad-btn down">▼</div>
+                          </div>
+
+                          {/* Center Select & Start */}
+                          <div className="touch-v-meta">
+                            <div className="v-meta-btn">SELECT</div>
+                            <div className="v-meta-btn">START</div>
+                          </div>
+
+                          {/* Right Action Face Buttons (B / A) */}
+                          <div className="touch-v-actions">
+                            <div className="v-action-btn b">B</div>
+                            <div className="v-action-btn a">A</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Column 2: Keyboard Controls Card */}
+                      <div className="desktop-controls-keyboard-card">
+                        <div className="touch-pad-label-row">
+                          <span className="touch-pad-title">⌨️ KEYBOARD CONTROLS</span>
+                          <span className="touch-pad-sub">Spatial Keys</span>
+                        </div>
+                        <div className="desktop-keyboard-keys-surface">
+                          <div className="desktop-kc-row">
+                            <div className="kc-keycap-group">
+                              <span className="kc-keycap">▲</span>
+                              <span className="kc-keycap">▼</span>
+                              <span className="kc-keycap">◄</span>
+                              <span className="kc-keycap">►</span>
+                            </div>
+                            <span className="desktop-kc-label">D-Pad / Arrows</span>
+                          </div>
+
+                          <div className="desktop-kc-grid-row">
+                            <div className="desktop-kc-sub-item">
+                              <span className="kc-keycap is-action">Z</span>
+                              <span className="desktop-kc-label">B Button</span>
+                            </div>
+                            <div className="desktop-kc-sub-item">
+                              <span className="kc-keycap is-action">X</span>
+                              <span className="desktop-kc-label">A Button</span>
+                            </div>
+                          </div>
+
+                          <div className="desktop-kc-grid-row">
+                            <div className="desktop-kc-sub-item">
+                              <span className="kc-keycap is-shoulder">Q</span>
+                              <span className="kc-keycap is-shoulder">W</span>
+                              <span className="desktop-kc-label">L / R</span>
+                            </div>
+                            <div className="desktop-kc-sub-item">
+                              <span className="kc-keycap is-system">Shift</span>
+                              <span className="kc-keycap is-system">Enter</span>
+                              <span className="desktop-kc-label">Start/Select</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

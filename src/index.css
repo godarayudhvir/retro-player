@@ -14435,8 +14435,21 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 .pillar-header-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.65rem;
   width: 100%;
+}
+
+.pillar-card-title {
+  font-size: 1.02rem;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.015em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+[data-color-mode="dark"] .pillar-card-title {
+  color: #f8fafc;
 }
 
 .pillar-badge-tag {
@@ -14508,116 +14521,158 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   gap: 0.45rem;
 }
 
-/* 1. Save Engine & Storage Studio In-App UX Demo */
-.pillar-ux-demo-card.save-demo {
-  padding: 0.55rem 0.75rem;
-  border-radius: 6px;
-  background: rgba(16, 185, 129, 0.08);
-  border: 1.5px solid rgba(16, 185, 129, 0.28);
+/* 1. Save Studio & Auto-Resume In-App Graphic Demo (Desktop Card 2) */
+.desktop-pillar-save-grid {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
-}
-
-[data-color-mode="dark"] .pillar-ux-demo-card.save-demo {
-  background: rgba(16, 185, 129, 0.12);
-  border-color: rgba(16, 185, 129, 0.35);
-}
-
-.save-demo-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  gap: 0.38rem;
   width: 100%;
 }
 
-.save-demo-file-info {
+.desktop-pillar-save-tile {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.55rem;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 0.38rem 0.6rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  box-sizing: border-box;
+  min-width: 0;
+  transition: all 0.15s ease;
 }
 
-.save-demo-filename {
-  font-size: 0.78rem;
+[data-color-mode="dark"] .desktop-pillar-save-tile {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.desktop-pillar-save-tile.is-danger {
+  border-color: #cbd5e1;
+}
+
+[data-color-mode="dark"] .desktop-pillar-save-tile.is-danger {
+  border-color: #334155;
+}
+
+.desktop-pillar-save-tile .save-tile-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.desktop-pillar-save-tile .save-tile-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  text-align: left;
+}
+
+.desktop-pillar-save-tile .save-tile-title {
+  font-size: 0.74rem;
   font-weight: 800;
-  font-family: monospace;
+  line-height: 1.2;
   color: #0f172a;
 }
 
-[data-color-mode="dark"] .save-demo-filename {
+[data-color-mode="dark"] .desktop-pillar-save-tile .save-tile-title {
   color: #f8fafc;
 }
 
-.save-demo-size {
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 1px 5px;
-  border-radius: 3px;
-  background: rgba(0, 0, 0, 0.06);
+.desktop-pillar-save-tile .save-tile-sub {
+  font-size: 0.64rem;
+  line-height: 1.2;
   color: #64748b;
+  font-weight: 500;
 }
 
-[data-color-mode="dark"] .save-demo-size {
-  background: rgba(255, 255, 255, 0.1);
+[data-color-mode="dark"] .desktop-pillar-save-tile .save-tile-sub {
   color: #94a3b8;
 }
 
-.save-demo-status {
-  font-size: 0.62rem;
-  font-weight: 900;
-  letter-spacing: 0.05em;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: #10b981;
-  color: #ffffff;
-}
-
-.save-demo-actions-row {
+.desktop-pillar-resume-banner {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
+  background: #ffffff;
+  border: 1.5px solid #f59e0b;
+  box-shadow: 0 1px 4px rgba(245, 158, 11, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.save-demo-btn {
+[data-color-mode="dark"] .desktop-pillar-resume-banner {
+  background: rgba(15, 23, 42, 0.94);
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.desktop-pillar-resume-banner .erp-icon-wrap {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.desktop-pillar-resume-banner .erp-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.desktop-pillar-resume-banner .erp-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+[data-color-mode="dark"] .desktop-pillar-resume-banner .erp-title {
+  color: #f8fafc;
+}
+
+.desktop-pillar-resume-banner .erp-sub {
+  font-size: 0.62rem;
+  color: #64748b;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+[data-color-mode="dark"] .desktop-pillar-resume-banner .erp-sub {
+  color: #94a3b8;
+}
+
+.desktop-pillar-resume-banner .erp-btn.is-resume {
+  background: #f59e0b;
+  border: 1px solid #d97706;
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 0.65rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.25rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  font-weight: 800;
-  cursor: default;
+  gap: 0.25rem;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.3);
 }
 
-.save-demo-btn.export-btn {
-  background: #ffffff;
-  border: 1.5px solid #10b981;
-  color: #059669;
-  box-shadow: 0 1px 2px rgba(16, 185, 129, 0.15);
-}
-
-[data-color-mode="dark"] .save-demo-btn.export-btn {
-  background: #1e293b;
-  border-color: #10b981;
-  color: #34d399;
-}
-
-.save-demo-btn.resume-btn {
-  background: rgba(59, 130, 246, 0.12);
-  border: 1px solid rgba(59, 130, 246, 0.25);
-  color: #2563eb;
-}
-
-[data-color-mode="dark"] .save-demo-btn.resume-btn {
-  color: #60a5fa;
-}
-
-.resume-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #2563eb;
-  animation: pulse-dot 1.5s infinite;
+[data-color-mode="dark"] .desktop-pillar-resume-banner .erp-btn.is-resume {
+  color: #000000;
 }
 
 /* 2. Badge Case Header & Badges Row */
@@ -14655,14 +14710,15 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 }
 
 .pillar-badges-showcase-row {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 0.45rem;
+  padding: 0.45rem 0.6rem;
   border-radius: 6px;
   background: rgba(234, 179, 8, 0.08);
   border: 1.5px solid rgba(234, 179, 8, 0.25);
-  overflow-x: auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 [data-color-mode="dark"] .pillar-badges-showcase-row {
@@ -14671,15 +14727,15 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 }
 
 .pillar-gym-badge-box {
-  width: 26px;
-  height: 26px;
-  border-radius: 4px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  min-height: 32px;
+  border-radius: 5px;
   background: #ffffff;
   border: 1.5px solid rgba(234, 179, 8, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
@@ -14694,8 +14750,8 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 }
 
 .pillar-gym-badge-img {
-  width: 17px;
-  height: 17px;
+  width: 22px;
+  height: 22px;
   object-fit: contain;
   transition: all 0.2s ease;
 }
@@ -14842,20 +14898,20 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
 .pillar-system-icons-grid-4x3 {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.4rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.45rem;
   width: 100%;
 }
 
 .pillar-console-card-item {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.3rem 0.45rem;
-  border-radius: 5px;
+  gap: 0.45rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 6px;
   background: #ffffff;
   border: 1.5px solid #cbd5e1;
-  font-size: 0.7rem;
+  font-size: 0.76rem;
   font-weight: 800;
   color: #334155;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 2px rgba(0, 0, 0, 0.03);
@@ -14869,8 +14925,8 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 }
 
 .pillar-console-svg-large {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -16988,6 +17044,234 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
   .archetype-info strong {
     font-size: 0.72rem;
+  }
+
+  /* Slide 0 Overview & 4 Pillars Responsiveness for 1280x800 Handheld & Tablet */
+  .onboarding-topbar {
+    padding: 0.6rem 1.25rem;
+  }
+
+  .onboarding-body-viewport {
+    padding: 0.4rem 1rem;
+  }
+
+  .onboarding-slide.onboarding-hero-layout {
+    gap: 0.85rem;
+    width: 98vw;
+    max-width: 98vw;
+  }
+
+  .onboarding-header-card {
+    padding: 0.4rem 0.9rem;
+    gap: 0.15rem;
+  }
+
+  .onboarding-slide-title {
+    font-size: 1.1rem;
+    line-height: 1.15;
+  }
+
+  .onboarding-slide-desc {
+    font-size: 0.76rem;
+    line-height: 1.35;
+  }
+
+  .onboarding-hero-left {
+    gap: 0.5rem;
+  }
+
+  .onboarding-hero-left .onboarding-pillars-grid {
+    gap: 0.5rem;
+  }
+
+  .onboarding-hero-left .onboarding-pillar-card {
+    padding: 0.55rem 0.75rem;
+    gap: 0.3rem;
+  }
+
+  .pillar-icon-wrap {
+    width: 32px;
+    height: 32px;
+  }
+
+  .pillar-icon-wrap svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .pillar-badge-tag {
+    font-size: 0.58rem;
+    padding: 1px 5px;
+  }
+
+  .pillar-card-title {
+    font-size: 0.88rem;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .pillar-text h3 {
+    font-size: 0.88rem;
+    line-height: 1.2;
+    margin: 0 0 0.15rem 0;
+  }
+
+  .pillar-text p {
+    font-size: 0.72rem;
+    line-height: 1.3;
+  }
+
+  .pillar-system-icons-grid-4x3 {
+    gap: 0.25rem;
+  }
+
+  .pillar-console-card-item {
+    padding: 0.2rem 0.35rem;
+    font-size: 0.62rem;
+    gap: 0.25rem;
+  }
+
+  .pillar-console-svg-large {
+    width: 16px;
+    height: 16px;
+  }
+
+  .pillar-visual-graphic-wrap {
+    margin: 0.25rem 0 0;
+    gap: 0.3rem;
+  }
+
+  .desktop-pillar-save-grid {
+    gap: 0.35rem;
+  }
+
+  .desktop-pillar-save-tile {
+    padding: 0.25rem 0.4rem;
+    gap: 0.35rem;
+  }
+
+  .desktop-pillar-save-tile .save-tile-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .desktop-pillar-save-tile .save-tile-title {
+    font-size: 0.65rem;
+  }
+
+  .desktop-pillar-save-tile .save-tile-sub {
+    font-size: 0.55rem;
+  }
+
+  .desktop-pillar-resume-banner {
+    padding: 0.25rem 0.5rem;
+    gap: 0.35rem;
+  }
+
+  .desktop-pillar-resume-banner .erp-icon-wrap {
+    width: 20px;
+    height: 20px;
+  }
+
+  .desktop-pillar-resume-banner .erp-title {
+    font-size: 0.65rem;
+  }
+
+  .desktop-pillar-resume-banner .erp-sub {
+    font-size: 0.55rem;
+  }
+
+  .desktop-pillar-resume-banner .erp-btn.is-resume {
+    font-size: 0.6rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .pillar-badge-case-header {
+    padding: 0;
+  }
+
+  .badge-case-title {
+    font-size: 0.62rem;
+  }
+
+  .badge-case-progress {
+    font-size: 0.58rem;
+    padding: 1px 4px;
+  }
+
+  .pillar-badges-showcase-row {
+    padding: 0.35rem 0.45rem;
+    gap: 0.3rem;
+  }
+
+  .pillar-gym-badge-box {
+    width: 100%;
+    min-height: 26px;
+  }
+
+  .pillar-gym-badge-img {
+    width: 18px;
+    height: 18px;
+  }
+
+  .desktop-controls-pills-row {
+    gap: 0.35rem;
+  }
+
+  .desktop-controls-pills-row .status-pill {
+    padding: 0 0.45rem;
+    font-size: 0.76rem;
+    height: 56px;
+  }
+
+  .desktop-controller-square-badge {
+    width: 100%;
+    height: 56px;
+    border-radius: 10px;
+    padding: 3px;
+  }
+
+  .desktop-controller-square-badge .ctrl-square-svg {
+    width: 44px;
+    height: 44px;
+  }
+
+  .desktop-controls-dual-grid {
+    gap: 0.45rem;
+  }
+
+  .desktop-touch-pad-showcase,
+  .desktop-controls-keyboard-card {
+    padding: 0.45rem 0.55rem;
+  }
+
+  .desktop-touch-pad-showcase .touch-pad-demo-surface {
+    min-height: 60px;
+    padding: 0 0.5rem;
+  }
+
+  .desktop-keyboard-keys-surface {
+    padding: 0.35rem 0.45rem;
+    gap: 0.25rem;
+  }
+
+  .desktop-keyboard-keys-surface .kc-keycap {
+    min-width: 20px;
+    height: 20px;
+    font-size: 0.64rem;
+    padding: 0 4px;
+  }
+
+  .desktop-kc-label {
+    font-size: 0.58rem;
+  }
+
+  .onboarding-hero-right {
+    gap: 0.5rem;
+  }
+
+  .onboarding-footer {
+    padding: 0.5rem 1.25rem;
   }
 }
 
@@ -23929,62 +24213,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   gap: 0.65rem;
 }
 
-.mobile-ob-card-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.68rem;
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  padding: 0.25rem 0.65rem;
-  border-radius: 6px;
-  text-transform: uppercase;
-}
-
-.mobile-ob-card-badge.blue {
-  background: rgba(37, 99, 235, 0.1);
-  border: 1px solid rgba(37, 99, 235, 0.25);
-  color: #2563eb;
-}
-
-.mobile-ob-card-badge.green {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  color: #059669;
-}
-
-.mobile-ob-card-badge.gold {
-  background: rgba(234, 179, 8, 0.1);
-  border: 1px solid rgba(234, 179, 8, 0.25);
-  color: #ca8a04;
-}
-
-.mobile-ob-card-badge.purple {
-  background: rgba(168, 85, 247, 0.1);
-  border: 1px solid rgba(168, 85, 247, 0.25);
-  color: #9333ea;
-}
-
-[data-color-mode="dark"] .mobile-ob-card-badge.blue {
-  color: #60a5fa;
-  border-color: rgba(96, 165, 250, 0.3);
-}
-
-[data-color-mode="dark"] .mobile-ob-card-badge.green {
-  color: #34d399;
-  border-color: rgba(52, 211, 153, 0.3);
-}
-
-[data-color-mode="dark"] .mobile-ob-card-badge.gold {
-  color: #fde047;
-  border-color: rgba(253, 224, 71, 0.3);
-}
-
-[data-color-mode="dark"] .mobile-ob-card-badge.purple {
-  color: #c084fc;
-  border-color: rgba(192, 132, 252, 0.3);
-}
-
 .mobile-ob-card-title {
   font-size: 1.45rem;
   font-weight: 900;
@@ -24048,123 +24276,404 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 }
 
 /* -------------------------------------------------------------
-   Screen 2: Save Engine Visual
+   Screen 2: Save Studio Action Tiles (Matching Console Save Manager)
    ------------------------------------------------------------- */
-.mobile-ob-ux-card.save-ux-card {
-  width: 100%;
-  padding: 1.15rem;
-  border-radius: 12px;
-  background: rgba(16, 185, 129, 0.08);
-  border: 1.5px solid rgba(16, 185, 129, 0.28);
+.mobile-ob-save-tiles-stack {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.55rem;
+  width: 100%;
   box-sizing: border-box;
 }
 
-[data-color-mode="dark"] .mobile-ob-ux-card.save-ux-card {
-  background: rgba(16, 185, 129, 0.12);
-  border-color: rgba(16, 185, 129, 0.35);
-}
-
-.save-ux-top {
+.mobile-ob-save-tile {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
+  gap: 0.75rem;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  text-align: left;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: all 0.15s ease;
+  box-sizing: border-box;
 }
 
-.save-ux-file {
+[data-color-mode="dark"] .mobile-ob-save-tile {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.mobile-ob-save-tile:active {
+  transform: scale(0.99);
+}
+
+.mobile-ob-save-tile.is-danger {
+  border-color: #cbd5e1;
+}
+
+[data-color-mode="dark"] .mobile-ob-save-tile.is-danger {
+  border-color: #334155;
+}
+
+.save-tile-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.save-tile-icon.export-blue {
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.save-tile-icon.import-green {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.save-tile-icon.delete-red {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+[data-color-mode="dark"] .save-tile-icon.export-blue {
+  background: rgba(37, 99, 235, 0.18);
+  color: #60a5fa;
+  border-color: rgba(96, 165, 250, 0.3);
+}
+
+[data-color-mode="dark"] .save-tile-icon.import-green {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+[data-color-mode="dark"] .save-tile-icon.delete-red {
+  background: rgba(239, 68, 68, 0.18);
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.3);
+}
+
+.save-tile-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.save-tile-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+[data-color-mode="dark"] .save-tile-title {
+  color: #f8fafc;
+}
+
+.save-tile-sub {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+[data-color-mode="dark"] .save-tile-sub {
+  color: #94a3b8;
+}
+
+/* In-Game Auto-Resume Prompt Banner Showcase in Mobile Onboarding */
+.mobile-ob-resume-showcase {
+  width: 100%;
+  margin-top: 0.35rem;
+}
+
+.mobile-ob-resume-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: #ffffff;
+  border: 1.5px solid #f59e0b;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  padding: 0.6rem 0.85rem;
+  border-radius: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+[data-color-mode="dark"] .mobile-ob-resume-banner {
+  background: rgba(15, 23, 42, 0.94);
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), 0 0 12px rgba(245, 158, 11, 0.2);
+}
+
+.mobile-ob-resume-banner .erp-icon-wrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+[data-color-mode="dark"] .mobile-ob-resume-banner .erp-icon-wrap {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+.mobile-ob-resume-banner .erp-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  text-align: left;
+  flex: 1;
+  min-width: 0;
+}
+
+.mobile-ob-resume-banner .erp-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+[data-color-mode="dark"] .mobile-ob-resume-banner .erp-title {
+  color: #f8fafc;
+}
+
+.mobile-ob-resume-banner .erp-sub {
+  font-size: 0.68rem;
+  color: #64748b;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+[data-color-mode="dark"] .mobile-ob-resume-banner .erp-sub {
+  color: #94a3b8;
+}
+
+.mobile-ob-resume-banner .erp-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: 0.35rem;
+}
+
+.mobile-ob-resume-banner .erp-btn.is-resume {
+  background: #f59e0b;
+  border: 1.5px solid #d97706;
+  color: #ffffff;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  font-weight: 900;
+  font-size: 0.72rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
+}
+
+[data-color-mode="dark"] .mobile-ob-resume-banner .erp-btn.is-resume {
+  color: #000000;
+  text-shadow: none;
+}
+
+/* -------------------------------------------------------------
+   Screen 3: Hall of Fame & Badges Visual
+   ------------------------------------------------------------- */
+.mobile-ob-hof-container {
+  width: 100%;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+[data-color-mode="dark"] .mobile-ob-hof-container {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.mobile-ob-hof-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.85rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #edf2f7 100%);
+  border-bottom: 1.5px solid #cbd5e1;
+}
+
+[data-color-mode="dark"] .mobile-ob-hof-header {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-bottom-color: #334155;
+}
+
+.mobile-ob-hof-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  text-align: left;
+}
+
+.mobile-ob-hof-title {
+  font-size: 0.92rem;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+
+[data-color-mode="dark"] .mobile-ob-hof-title {
+  color: #f8fafc;
+}
+
+.mobile-ob-hof-sub {
+  font-size: 0.65rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+[data-color-mode="dark"] .mobile-ob-hof-sub {
+  color: #94a3b8;
+}
+
+.mobile-ob-hof-profile-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.85rem;
+  text-align: left;
+}
+
+.mobile-ob-hof-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.mobile-ob-hof-top {
   display: flex;
   align-items: center;
   gap: 0.45rem;
 }
 
-.save-ux-name {
-  font-size: 0.84rem;
+.mobile-ob-hof-player {
+  font-size: 0.86rem;
   font-weight: 800;
-  font-family: monospace;
   color: #0f172a;
 }
 
-[data-color-mode="dark"] .save-ux-name {
+[data-color-mode="dark"] .mobile-ob-hof-player {
   color: #f8fafc;
 }
 
-.save-ux-size {
-  font-size: 0.68rem;
-  font-weight: 700;
-  padding: 1px 6px;
-  border-radius: 3px;
-  background: rgba(0, 0, 0, 0.06);
-  color: #64748b;
+/* Desktop Card 3: Hall of Fame Mini Card */
+.desktop-pillar-hof-card {
+  width: 100%;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-[data-color-mode="dark"] .save-ux-size {
-  background: rgba(255, 255, 255, 0.1);
+[data-color-mode="dark"] .desktop-pillar-hof-card {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.desktop-pillar-hof-header {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.6rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #edf2f7 100%);
+  border-bottom: 1.5px solid #cbd5e1;
+}
+
+[data-color-mode="dark"] .desktop-pillar-hof-header {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-bottom-color: #334155;
+}
+
+.desktop-pillar-hof-title {
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: #0f172a;
+  line-height: 1.15;
+}
+
+[data-color-mode="dark"] .desktop-pillar-hof-title {
+  color: #f8fafc;
+}
+
+.desktop-pillar-hof-sub {
+  font-size: 0.58rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+[data-color-mode="dark"] .desktop-pillar-hof-sub {
   color: #94a3b8;
 }
 
-.save-ux-status {
-  font-size: 0.65rem;
-  font-weight: 900;
-  letter-spacing: 0.05em;
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: #10b981;
-  color: #ffffff;
-}
-
-.save-ux-buttons {
+.desktop-pillar-hof-profile {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  flex-wrap: wrap;
+  padding: 0.4rem 0.6rem;
+  text-align: left;
 }
 
-.save-ux-btn {
-  display: inline-flex;
+.desktop-pillar-hof-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.desktop-pillar-hof-top {
+  display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.85rem;
-  border-radius: 6px;
+  gap: 0.35rem;
+}
+
+.desktop-pillar-hof-name {
   font-size: 0.76rem;
   font-weight: 800;
+  color: #0f172a;
 }
 
-.save-ux-btn.export {
-  background: #ffffff;
-  border: 1.5px solid #10b981;
-  color: #059669;
+[data-color-mode="dark"] .desktop-pillar-hof-name {
+  color: #f8fafc;
 }
 
-[data-color-mode="dark"] .save-ux-btn.export {
-  background: #1e293b;
-  border-color: #10b981;
-  color: #34d399;
-}
-
-.save-ux-btn.resume {
-  background: rgba(59, 130, 246, 0.12);
-  border: 1px solid rgba(59, 130, 246, 0.25);
-  color: #2563eb;
-}
-
-[data-color-mode="dark"] .save-ux-btn.resume {
-  color: #60a5fa;
-}
-
-.live-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #2563eb;
-  animation: pulse-dot 1.5s infinite;
-}
-
-/* -------------------------------------------------------------
-   Screen 3: Badges & Trophies Visual
-   ------------------------------------------------------------- */
 .mobile-ob-badges-card {
   width: 100%;
   display: flex;
@@ -24328,95 +24837,411 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 }
 
 /* -------------------------------------------------------------
-   Screen 4: Controls & HUD Visual
+   Screen 4 & Desktop Card 4: Controls Visual Showcase
    ------------------------------------------------------------- */
-.mobile-ob-controls-visual {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.controls-pills-row {
+.controls-pills-showcase {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
+  width: 100%;
 }
 
-.hud-pill {
+.desktop-controls-pills-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.55rem;
+  width: 100%;
+  align-items: stretch;
+}
+
+.controls-pills-showcase .status-pill {
+  font-size: 0.82rem;
+  font-weight: 800;
+  padding: 0.45rem 0.85rem;
+  border-radius: 20px;
+  height: 34px;
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.45rem 0.85rem;
-  border-radius: 20px;
-  font-size: 0.78rem;
+  box-sizing: border-box;
+}
+
+.desktop-controls-pills-row .status-pill {
+  font-size: 0.88rem;
   font-weight: 800;
-  border: 1.5px solid transparent;
-}
-
-.hud-pill.is-charging {
-  background: rgba(16, 185, 129, 0.12);
-  border-color: rgba(16, 185, 129, 0.35);
-  color: #059669;
-}
-
-[data-color-mode="dark"] .hud-pill.is-charging {
-  color: #34d399;
-}
-
-.hud-pill.is-low {
-  background: rgba(239, 68, 68, 0.12);
-  border-color: rgba(239, 68, 68, 0.35);
-  color: #dc2626;
-}
-
-[data-color-mode="dark"] .hud-pill.is-low {
-  color: #f87171;
-}
-
-.controls-touch-keys {
+  padding: 0 0.85rem;
+  border-radius: 10px;
+  height: 72px;
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-  padding: 0.75rem;
-  border-radius: 8px;
-  background: rgba(168, 85, 247, 0.08);
-  border: 1.5px solid rgba(168, 85, 247, 0.25);
+  justify-content: center;
+  gap: 0.55rem;
+  box-sizing: border-box;
 }
 
-[data-color-mode="dark"] .controls-touch-keys {
-  background: rgba(168, 85, 247, 0.12);
-  border-color: rgba(168, 85, 247, 0.35);
+.desktop-controls-pills-row .status-pill svg {
+  transform: scale(1.2);
 }
 
-.keycap {
-  padding: 0.35rem 0.65rem;
-  border-radius: 6px;
+.desktop-controls-pills-row .battery-badge {
+  padding: 4px 9px;
+  font-size: 0.84rem;
+}
+
+/* Square / Tile Controller Icon Matching Height & Column Styling */
+.desktop-controller-square-badge {
+  width: 100%;
+  height: 72px;
+  border-radius: 10px;
   background: #ffffff;
   border: 1.5px solid #cbd5e1;
-  border-bottom-width: 3px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  color: #334155;
-  font-family: monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  padding: 4px;
 }
 
-[data-color-mode="dark"] .keycap {
+[data-color-mode="dark"] .desktop-controller-square-badge {
   background: #1e293b;
   border-color: #475569;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.ctrl-square-svg {
+  width: 58px;
+  height: 58px;
+  display: block;
+}
+
+/* 1. Vector Gamepad Visualizer (No Labels) */
+.controls-controller-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.35rem 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+}
+
+[data-color-mode="dark"] .controls-controller-wrap {
+  background: #141822;
+  border-color: #334155;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.controls-controller-svg {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  display: block;
+}
+
+/* Dual Column Layout: In-Game Touch Controls (50%) + Keyboard Controls (50%) */
+.desktop-controls-dual-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  width: 100%;
+  align-items: stretch;
+}
+
+/* 2. In-Game Mobile Haptic Touch Pad Overlay Preview */
+.mobile-touch-pad-showcase,
+.desktop-touch-pad-showcase,
+.desktop-controls-keyboard-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+}
+
+[data-color-mode="dark"] .mobile-touch-pad-showcase,
+[data-color-mode="dark"] .desktop-touch-pad-showcase,
+[data-color-mode="dark"] .desktop-controls-keyboard-card {
+  background: #141822;
+  border-color: #334155;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.touch-pad-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.touch-pad-title {
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  color: #0f172a;
+}
+
+[data-color-mode="dark"] .touch-pad-title {
+  color: #f8fafc;
+}
+
+.touch-pad-sub {
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+[data-color-mode="dark"] .touch-pad-sub {
+  color: #94a3b8;
+}
+
+.touch-pad-demo-surface {
+  width: 100%;
+  flex: 1;
+  min-height: 70px;
+  background: radial-gradient(circle at center, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.98));
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.85rem;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* Virtual D-Pad */
+.touch-v-dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 17px);
+  grid-template-rows: repeat(3, 17px);
+  gap: 1px;
+  align-items: center;
+  justify-items: center;
+}
+
+.v-dpad-btn {
+  width: 17px;
+  height: 17px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  color: #f8fafc;
+  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.v-dpad-btn.up { grid-column: 2; grid-row: 1; }
+.v-dpad-btn.left { grid-column: 1; grid-row: 2; }
+.v-dpad-center { grid-column: 2; grid-row: 2; width: 15px; height: 15px; background: rgba(255, 255, 255, 0.08); border-radius: 2px; }
+.v-dpad-btn.right { grid-column: 3; grid-row: 2; }
+.v-dpad-btn.down { grid-column: 2; grid-row: 3; }
+
+/* Virtual Center Meta */
+.touch-v-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.v-meta-btn {
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  padding: 2px 6px;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Virtual Action Buttons (B / A) */
+.touch-v-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.v-action-btn {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  font-size: 10.5px;
+  font-weight: 900;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+.v-action-btn.b {
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  border: 1.5px solid #f87171;
+  transform: translateY(3px);
+}
+
+.v-action-btn.a {
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+  border: 1.5px solid #34d399;
+  transform: translateY(-3px);
+}
+
+/* Desktop Keyboard Surface Inside Column 2 */
+.desktop-keyboard-keys-surface {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.35rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.45rem 0.6rem;
+  box-sizing: border-box;
+}
+
+[data-color-mode="dark"] .desktop-keyboard-keys-surface {
+  background: rgba(15, 23, 42, 0.65);
+  border-color: #334155;
+}
+
+.desktop-kc-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.desktop-kc-grid-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+}
+
+.desktop-kc-sub-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.desktop-kc-label {
+  font-size: 0.64rem;
+  font-weight: 800;
+  color: #475569;
+  white-space: nowrap;
+}
+
+[data-color-mode="dark"] .desktop-kc-label {
   color: #cbd5e1;
 }
 
-.keycap.action {
-  background: rgba(168, 85, 247, 0.15);
-  border-color: rgba(168, 85, 247, 0.4);
-  color: #9333ea;
+/* Compact Keyboard Controls Sections (Used on Mobile Screen 4) */
+.controls-keyboard-compact {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-sizing: border-box;
 }
 
-[data-color-mode="dark"] .keycap.action {
-  color: #c084fc;
+.kc-compact-section {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 7px;
+  padding: 0.5rem 0.7rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+}
+
+[data-color-mode="dark"] .kc-compact-section {
+  background: rgba(30, 41, 59, 0.55);
+  border-color: #334155;
+  box-shadow: none;
+}
+
+.kc-compact-label {
+  font-size: 0.62rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  margin-bottom: 0.4rem;
+}
+
+[data-color-mode="dark"] .kc-compact-label {
+  color: #94a3b8;
+}
+
+.kc-compact-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.45rem;
+}
+
+.kc-compact-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 5px;
+  padding: 0.35rem 0.5rem;
+  min-width: 0;
+}
+
+[data-color-mode="dark"] .kc-compact-row {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: #334155;
+}
+
+/* Mobile Screen 4 Bottom Notice */
+.mobile-ob-controls-note {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #065f46;
+  line-height: 1.35;
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+[data-color-mode="dark"] .mobile-ob-controls-note {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
+}
+
+.controls-note-icon {
+  flex-shrink: 0;
+  color: #059669;
+}
+
+[data-color-mode="dark"] .controls-note-icon {
+  color: #34d399;
 }
 
 /* -------------------------------------------------------------

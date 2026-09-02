@@ -33,7 +33,7 @@ During first-time startup or when revisiting the Onboarding wizard:
 
 | Screen / Phase | Gamepad Action | Function |
 | :--- | :--- | :--- |
-| **Phase 1: Welcome & Overview** | **`D-Pad / Left Stick`** | 2D spatial navigation across value pillar cards and PWA installer banner |
+| **Phase 1: Welcome & Overview** | **`D-Pad / Left Stick`** | 2D spatial navigation across value pillar cards (including **Universal Controls & Battery HUD** pillar with live battery pills, DualShock icon, virtual touch pad preview, and dual-column keyboard mapping) |
 | | **`[A]` Button / `Enter`** | Open repository / Trigger PWA installation / Advance to next phase |
 | | **`START` Button** | Skip onboarding immediately and boot into library |
 | **Phase 2: Character Studio** | **`D-Pad / Left Stick`** | Navigate between archetype cards, randomizer dice, name inputs, and color circles |
