@@ -309,7 +309,7 @@ export default function OnboardingScreen({
                         </div>
                         <div className="save-tile-content">
                           <strong className="save-tile-title">Export Battery Save (.sav)</strong>
-                          <span className="save-tile-desc">Download in-game cartridge SRAM save file</span>
+                          <span className="save-tile-sub">Download in-game cartridge SRAM save file</span>
                         </div>
                       </div>
 
@@ -320,7 +320,7 @@ export default function OnboardingScreen({
                         </div>
                         <div className="save-tile-content">
                           <strong className="save-tile-title">Export Quick Save (.state)</strong>
-                          <span className="save-tile-desc">Download emulator snapshot state file</span>
+                          <span className="save-tile-sub">Download emulator snapshot state file</span>
                         </div>
                       </div>
 
@@ -331,7 +331,7 @@ export default function OnboardingScreen({
                         </div>
                         <div className="save-tile-content">
                           <strong className="save-tile-title">Import Save / State (.sav / .state)</strong>
-                          <span className="save-tile-desc">Upload an existing .sav battery save or .state snapshot</span>
+                          <span className="save-tile-sub">Upload an existing .sav battery save or .state snapshot</span>
                         </div>
                       </div>
 
@@ -342,7 +342,7 @@ export default function OnboardingScreen({
                         </div>
                         <div className="save-tile-content">
                           <strong className="save-tile-title">Delete All Saved Data</strong>
-                          <span className="save-tile-desc">Erase in-game saves &amp; quick save states</span>
+                          <span className="save-tile-sub">Erase in-game saves &amp; quick save states</span>
                         </div>
                       </div>
 
@@ -351,9 +351,9 @@ export default function OnboardingScreen({
                         <div className="erp-icon-wrap">
                           <Zap size={14} />
                         </div>
-                        <div className="erp-text-wrap">
-                          <strong>Resume where you left off?</strong>
-                          <span>Auto-Save snapshot available from last session</span>
+                        <div className="erp-content">
+                          <strong className="erp-title">Resume where you left off?</strong>
+                          <span className="erp-sub">Auto-Save snapshot available from last session</span>
                         </div>
                         <div className="erp-btn is-resume">
                           <Zap size={12} />
@@ -656,10 +656,10 @@ export default function OnboardingScreen({
                 <div className="onboarding-hero-preview-header">
                   <div className="onboarding-hero-preview-tabs">
                     <span className="hero-preview-pill active">
-                      🎮 DUAL-SCREEN CONSOLE FIRMWARE
+                      DUAL-SCREEN CONSOLE FIRMWARE
                     </span>
                   </div>
-                  <span className="hero-preview-live-tag">⚡ LIVE WASM</span>
+                  <span className="hero-preview-live-tag">LIVE WASM</span>
                 </div>
 
                 <div className="onboarding-hero-img-wrap">
@@ -677,10 +677,10 @@ export default function OnboardingScreen({
                 <div className="onboarding-hero-preview-header">
                   <div className="onboarding-hero-preview-tabs">
                     <span className="hero-preview-pill active">
-                      ⚡ INSTANT LOW-LATENCY GAMEPLAY
+                      INSTANT LOW-LATENCY GAMEPLAY
                     </span>
                   </div>
-                  <span className="hero-preview-live-tag">🎮 60 FPS</span>
+                  <span className="hero-preview-live-tag">60 FPS</span>
                 </div>
 
                 <div className="onboarding-hero-img-wrap">
