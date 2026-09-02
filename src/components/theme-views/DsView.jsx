@@ -1007,7 +1007,7 @@ export default function DsView({
               </div>
             </div>
 
-            {/* Per-ROM Mastered Milestones Card */}
+            {/* Per-ROM Mastered Trophies Card */}
             {(() => {
               const perRomMilestones = selectedGame && achievementsEngine?.getGameMilestones 
                 ? achievementsEngine.getGameMilestones(selectedGame.id || selectedGame.title) 
@@ -1017,7 +1017,7 @@ export default function DsView({
                 <div className="ds-per-rom-trophies-card animate-fade-in">
                   <div className="ds-trophies-header">
                     <Trophy size={13} color="#f59e0b" />
-                    <span>Milestones Mastered ({perRomMilestones.length})</span>
+                    <span>Trophies Mastered ({perRomMilestones.length})</span>
                   </div>
                   <div className="ds-trophies-badge-row">
                     {perRomMilestones.map(t => (

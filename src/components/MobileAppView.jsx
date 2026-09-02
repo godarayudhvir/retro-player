@@ -1134,7 +1134,7 @@ export default function MobileAppView({
                   <div className="ds-per-rom-trophies-card animate-fade-in" style={{ marginBottom: '0.5rem' }}>
                     <div className="ds-trophies-header">
                       <Trophy size={13} color="#f59e0b" />
-                      <span>Milestones Mastered ({perRomMilestones.length})</span>
+                      <span>Trophies Mastered ({perRomMilestones.length})</span>
                     </div>
                     <div className="ds-trophies-badge-row">
                       {perRomMilestones.map(t => (

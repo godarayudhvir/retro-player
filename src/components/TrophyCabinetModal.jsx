@@ -172,7 +172,9 @@ export default function TrophyCabinetModal({
   const totalPossiblePoints = achievementsEngine?.totalPossiblePoints || 1000;
   const completionPercentage = achievementsEngine?.completionPercentage || 0;
 
-  const unlockedCount = Object.keys(unlocked).length;
+  const unlockedCount = useMemo(() => {
+    return ACHIEVEMENTS_MANIFEST.filter(item => !!unlocked[item.id]).length;
+  }, [unlocked]);
   const totalCount = ACHIEVEMENTS_MANIFEST.length;
   const gamerRank = useMemo(() => getGamerLevel(totalEarnedPoints), [totalEarnedPoints]);
 
@@ -520,7 +522,7 @@ export default function TrophyCabinetModal({
             </div>
             <div>
               <h2 className="trophy-modal-title">HALL OF FAME</h2>
-              <span className="trophy-modal-subtitle">Universal Milestones &amp; Trophies</span>
+              <span className="trophy-modal-subtitle">Universal Trophies</span>
             </div>
           </div>
 

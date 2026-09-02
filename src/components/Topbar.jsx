@@ -397,8 +397,8 @@ export default function Topbar({
             sfx?.playModalOpen?.();
             haptics.medium();
           }}
-          title={`Trophy Cabinet & Milestones (${achievementsEngine?.totalEarnedPoints || 0} G Earned)`}
-          aria-label="Trophy Cabinet and Milestones"
+          title={`Trophy Cabinet (${achievementsEngine?.totalEarnedPoints || 0} G Earned)`}
+          aria-label="Trophy Cabinet"
         >
           <Trophy size={18} color="#f59e0b" />
         </button>

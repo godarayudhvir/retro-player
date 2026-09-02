@@ -1,8 +1,8 @@
-# 🏆 Universal Achievements & Player Milestones Guide
+# 🏆 Universal Trophies Guide
 
-This guide contains the master registry of all **24 Universal Organic Achievements & Milestones** in Retro Player. Every achievement is 100% universal across all 12 retro systems and works out-of-the-box with any standard ROM file without requiring emulator memory hacking.
+This guide contains the master registry of all **24 Universal Trophies** in Retro Player. Every trophy is 100% universal across all 12 retro systems and works out-of-the-box with any standard ROM file without requiring emulator memory hacking.
 
-The achievement system features a balanced **6 Categories × 4 Tiers (1 Bronze, 1 Silver, 1 Gold, 1 Platinum)** distribution:
+The trophy system features a balanced **6 Categories × 4 Tiers (1 Bronze, 1 Silver, 1 Gold, 1 Platinum)** distribution:
 - 🥉 **Bronze (+5G)**: 6 Trophies = 30G
 - 🥈 **Silver (+10G)**: 6 Trophies = 60G
 - 🥇 **Gold (+15G)**: 6 Trophies = 90G

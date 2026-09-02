@@ -966,8 +966,8 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
   const completionPercentage = useMemo(() => {
     const totalCount = ACHIEVEMENTS_MANIFEST.length;
     if (totalCount === 0) return 0;
-    const unlockedCount = Object.keys(unlocked).length;
-    return Math.min(100, Math.round((unlockedCount / totalCount) * 100));
+    const universalUnlockedCount = ACHIEVEMENTS_MANIFEST.filter(item => !!unlocked[item.id]).length;
+    return Math.min(100, Math.round((universalUnlockedCount / totalCount) * 100));
   }, [unlocked]);
 
   return {
