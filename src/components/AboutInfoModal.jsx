@@ -1,9 +1,25 @@
 import React, { useEffect } from 'react';
-import { Gamepad2, Github, ExternalLink, Info, X } from 'lucide-react';
+import { Gamepad2, Github, ExternalLink, Info, X, Cpu } from 'lucide-react';
 import { haptics } from '../services/hapticsService';
+import { resolveAssetPath } from '../utils/assetPath';
+
+const EMULATION_SYSTEMS = [
+  { name: 'Atari 2600', core: 'Stella', icon: 'atari2600.svg', year: '1977' },
+  { name: 'Arcade (MAME)', core: 'MAME 2003+', icon: 'arcade.svg', year: '1978' },
+  { name: 'NES / Famicom', core: 'FCEUmm', icon: 'nes.svg', year: '1983' },
+  { name: 'Sega Genesis / MD', core: 'Genesis Plus GX', icon: 'genesis.svg', year: '1988' },
+  { name: 'Game Boy', core: 'Gambatte', icon: 'gb.svg', year: '1989' },
+  { name: 'Super Nintendo', core: 'Snes9x', icon: 'snes.svg', year: '1990' },
+  { name: 'Sega Game Gear', core: 'Genesis Plus GX', icon: 'gamegear.svg', year: '1990' },
+  { name: 'PlayStation', core: 'Beetle PSX', icon: 'psx.svg', year: '1994' },
+  { name: 'Nintendo 64', core: 'Mupen64Plus', icon: 'n64.svg', year: '1996' },
+  { name: 'Game Boy Color', core: 'Gambatte', icon: 'gbc.svg', year: '1998' },
+  { name: 'Game Boy Advance', core: 'mGBA', icon: 'gba.svg', year: '2001' },
+  { name: 'Nintendo DS', core: 'melonDS', icon: 'nds.svg', year: '2004' },
+];
 
 /**
- * About & Controls Reference Modal displaying system capabilities, repository source, and full keyboard / gamepad mappings.
+ * About & System Specs Modal displaying emulation engines and repository source.
  */
 export default function AboutInfoModal({ isOpen, focusedTarget, onClose, sfx }) {
   // Listen for Escape key to close modal
@@ -29,7 +45,7 @@ export default function AboutInfoModal({ isOpen, focusedTarget, onClose, sfx }) 
       <div 
         className="scraper-modal-container animate-scale-up" 
         onClick={(e) => e.stopPropagation()} 
-        style={{ maxWidth: '580px' }}
+        style={{ maxWidth: '640px', width: '92%' }}
       >
         {/* Modal Header */}
         <header className="scraper-modal-header">
@@ -60,11 +76,30 @@ export default function AboutInfoModal({ isOpen, focusedTarget, onClose, sfx }) 
         </header>
         
         {/* Modal Body */}
-        <div className="backup-modal-body" style={{ padding: '1.25rem 1.75rem', overflowY: 'auto' }}>
-          <p className="info-tagline" style={{ marginTop: 0, marginBottom: '1rem' }}>
-            Your favorite retro classics, beautifully organized and ready to play anywhere. A dedicated retro console experience directly in your browser.
-          </p>
+        <div className="backup-modal-body" style={{ padding: '1.25rem 1.75rem', maxHeight: '78vh', overflowY: 'auto' }}>
+          {/* Supported Emulation Systems & WebAssembly Cores Matrix */}
+          <div className="info-section-title">
+            <Cpu size={15} color="#10b981" />
+            <span>Supported Systems &amp; WebAssembly Cores</span>
+          </div>
 
+          <div className="info-systems-grid">
+            {EMULATION_SYSTEMS.map((sys) => (
+              <div key={sys.name} className="info-system-chip">
+                <div className="info-system-chip-left">
+                  <img 
+                    src={resolveAssetPath(`assets/platforms/${sys.icon}`)} 
+                    alt={sys.name} 
+                    className="info-system-chip-icon" 
+                  />
+                  <span className="info-system-chip-name">{sys.name}</span>
+                </div>
+                <span className="info-system-chip-core">{sys.core}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Open Source Repository Card */}
           <div className="info-repo-card" style={{ marginBottom: 0 }}>
             <div className="info-repo-icon-wrap">
               <Github size={24} />
