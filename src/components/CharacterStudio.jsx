@@ -19,9 +19,23 @@ export default function CharacterStudio({
   focusedTarget,
   setFocusedTarget,
   focusZone = 'profileModal',
-  gamepadConnected = false
+  gamepadConnected = false,
+  activeTab: controlledTab,
+  onTabChange
 }) {
-  const [activeTab, setActiveTab] = useState('archetypes'); // 'archetypes' | 'custom'
+  const [internalTab, setInternalTab] = useState('archetypes'); // 'archetypes' | 'custom'
+  const activeTab = controlledTab !== undefined ? controlledTab : internalTab;
+
+  const handleTabSwitch = (tab) => {
+    if (onTabChange) {
+      onTabChange(tab);
+    } else {
+      setInternalTab(tab);
+    }
+    sfx?.playTabSwitch?.();
+  };
+
+  const hasGamepad = gamepadConnected || (typeof navigator !== 'undefined' && Boolean(navigator.getGamepads?.()?.some?.(g => g && g.connected)));
 
   // Full random character generator
   const handleRollDice = () => {
@@ -82,9 +96,11 @@ export default function CharacterStudio({
               <div className="character-passport-name">{playerName || suggestedName || 'Player'}</div>
               <button
                 type="button"
-                className={`character-dice-btn avatar-random-btn ${gamepadConnected && focusedTarget?.zone === focusZone && focusedTarget?.id === 'random' ? 'gamepad-focused' : ''}`}
+                className={`character-dice-btn avatar-random-btn ${(focusedTarget?.zone === focusZone || focusedTarget?.zone === 'onboarding') && focusedTarget?.id === 'random' ? 'gamepad-focused' : ''}`}
                 onClick={handleRollDice}
                 title="Roll Random Character"
+                data-nav="onboarding"
+                data-nav-id="random"
               >
                 <Dices size={15} />
                 <span>Randomize</span>
@@ -100,24 +116,24 @@ export default function CharacterStudio({
         <div className="character-studio-tabs" role="tablist">
           <button
             type="button"
-            className={`character-studio-tab ${activeTab === 'archetypes' ? 'is-active' : ''} ${gamepadConnected && focusedTarget?.zone === focusZone && focusedTarget?.id === 'archetypeTab' ? 'gamepad-focused' : ''}`}
-            onClick={() => { setActiveTab('archetypes'); sfx?.playTabSwitch?.(); }}
+            className={`character-studio-tab ${activeTab === 'archetypes' ? 'is-active' : ''} ${(focusedTarget?.zone === focusZone || focusedTarget?.zone === 'onboarding') && focusedTarget?.id === 'archetypeTab' ? 'gamepad-focused' : ''}`}
+            onClick={() => handleTabSwitch('archetypes')}
+            data-nav="onboarding"
+            data-nav-id="archetypeTab"
           >
-            {gamepadConnected && (
-              <span className="tab-bumper-key">L</span>
-            )}
+            <span className="tab-bumper-key">{hasGamepad ? 'L1' : 'Q'}</span>
             <Gamepad2 size={15} />
             <span>Character Archetypes ({CHARACTER_ARCHETYPES.length})</span>
           </button>
 
           <button
             type="button"
-            className={`character-studio-tab ${activeTab === 'custom' ? 'is-active' : ''} ${gamepadConnected && focusedTarget?.zone === focusZone && focusedTarget?.id === 'customTab' ? 'gamepad-focused' : ''}`}
-            onClick={() => { setActiveTab('custom'); sfx?.playTabSwitch?.(); }}
+            className={`character-studio-tab ${activeTab === 'custom' ? 'is-active' : ''} ${(focusedTarget?.zone === focusZone || focusedTarget?.zone === 'onboarding') && focusedTarget?.id === 'customTab' ? 'gamepad-focused' : ''}`}
+            onClick={() => handleTabSwitch('custom')}
+            data-nav="onboarding"
+            data-nav-id="customTab"
           >
-            {gamepadConnected && (
-              <span className="tab-bumper-key">R</span>
-            )}
+            <span className="tab-bumper-key">{hasGamepad ? 'R1' : 'E'}</span>
             <Tag size={15} />
             <span>Custom Name &amp; Color</span>
           </button>
@@ -134,13 +150,16 @@ export default function CharacterStudio({
                   <button
                     key={preset.id}
                     type="button"
-                    className={`archetype-card-chip ${isSelected ? 'is-active' : ''} ${(focusedTarget?.zone === focusZone || focusedTarget?.zone === 'profileModal') && focusedTarget?.id === `preset_${idx}` ? 'gamepad-focused' : ''}`}
+                    className={`archetype-card-chip ${isSelected ? 'is-active' : ''} ${(focusedTarget?.zone === focusZone || focusedTarget?.zone === 'profileModal' || focusedTarget?.zone === 'onboarding') && focusedTarget?.id === `preset_${idx}` ? 'gamepad-focused' : ''}`}
                     onClick={() => {
                       setAvatarSeed(preset.avatarSeed);
                       setFavoriteColor(preset.favoriteColor);
                       setPlayerName(preset.name);
                       sfx?.playTileNav?.();
                     }}
+                    data-nav="onboarding"
+                    data-nav-id={`preset_${idx}`}
+                    data-preset-index={idx}
                   >
                     <div className="archetype-avatar-wrap">
                       <MultiAvatar seed={preset.avatarSeed} size={48} />
@@ -165,7 +184,9 @@ export default function CharacterStudio({
                 id="player-name-input"
                 type="text"
                 data-character-field="name"
-                className={`character-text-input ${(focusedTarget?.zone === focusZone || focusedTarget?.zone === 'profileModal') && focusedTarget?.id === 'nameInput' ? 'gamepad-focused' : ''}`}
+                data-nav="onboarding"
+                data-nav-id="nameInput"
+                className={`character-text-input ${(focusedTarget?.zone === focusZone || focusedTarget?.zone === 'profileModal' || focusedTarget?.zone === 'onboarding') && focusedTarget?.id === 'nameInput' ? 'gamepad-focused' : ''}`}
                 value={playerName}
                 onChange={(e) => {
                   const val = e.target.value;
@@ -186,7 +207,9 @@ export default function CharacterStudio({
                 id="avatar-seed-input"
                 type="text"
                 data-character-field="seed"
-                className={`character-text-input ${(focusedTarget?.zone === focusZone || focusedTarget?.zone === 'profileModal') && focusedTarget?.id === 'seedInput' ? 'gamepad-focused' : ''}`}
+                data-nav="onboarding"
+                data-nav-id="seedInput"
+                className={`character-text-input ${(focusedTarget?.zone === focusZone || focusedTarget?.zone === 'profileModal' || focusedTarget?.zone === 'onboarding') && focusedTarget?.id === 'seedInput' ? 'gamepad-focused' : ''}`}
                 value={avatarSeed}
                 onChange={(e) => setAvatarSeed(e.target.value)}
                 placeholder="Type any word or code..."
@@ -198,16 +221,18 @@ export default function CharacterStudio({
             <div className="character-form-row">
               <label className="character-field-label">Console Accent Color</label>
               <div className="character-palette-row">
-                {COLOR_PALETTE.map((col) => (
+                {COLOR_PALETTE.map((col, cIdx) => (
                   <button
                     key={col}
                     type="button"
-                    className={`character-color-circle ${favoriteColor === col ? 'is-active' : ''} ${(focusedTarget?.zone === focusZone || focusedTarget?.zone === 'profileModal') && focusedTarget?.id === `color_${COLOR_PALETTE.indexOf(col)}` ? 'gamepad-focused' : ''}`}
+                    className={`character-color-circle ${favoriteColor === col ? 'is-active' : ''} ${(focusedTarget?.zone === focusZone || focusedTarget?.zone === 'profileModal' || focusedTarget?.zone === 'onboarding') && focusedTarget?.id === `color_${cIdx}` ? 'gamepad-focused' : ''}`}
                     style={{ background: col }}
                     onClick={() => {
                       setFavoriteColor(col);
                       sfx?.playTileNav?.();
                     }}
+                    data-nav="onboarding"
+                    data-nav-id={`color_${cIdx}`}
                   >
                     {favoriteColor === col && <Check size={14} color="#ffffff" strokeWidth={3} />}
                   </button>

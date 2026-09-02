@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Gamepad2,
   ChevronRight,
@@ -25,6 +25,7 @@ import MultiAvatar from './MultiAvatar';
 import { CHARACTER_ARCHETYPES, COLOR_PALETTE, RANDOM_CHARACTER_SEEDS } from '../utils/characterPresets';
 import { resolveAssetPath } from '../utils/assetPath';
 import { haptics } from '../services/hapticsService';
+import { findNextSpatialElement } from '../utils/spatialNavigation';
 
 // Curated poster-wall cover art paths for the Netflix-style Screen 0 background
 const POSTER_WALL_COVERS = [
@@ -87,6 +88,79 @@ export default function MobileOnboardingScreen({
   const [currentScreen, setCurrentScreen] = useState(0);
   const totalScreens = 7;
 
+  // Reactive Gamepad State Detection
+  const [hasGamepad, setHasGamepad] = useState(() => {
+    if (gamepadConnected) return true;
+    if (typeof navigator !== 'undefined' && navigator.getGamepads) {
+      const gps = navigator.getGamepads();
+      for (let i = 0; i < gps.length; i++) {
+        if (gps[i] && gps[i].connected) return true;
+      }
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    setHasGamepad(gamepadConnected);
+  }, [gamepadConnected]);
+
+  useEffect(() => {
+    const handleConnect = () => setHasGamepad(true);
+    const handleDisconnect = () => {
+      const gps = navigator.getGamepads ? navigator.getGamepads() : [];
+      let anyConnected = false;
+      for (let i = 0; i < gps.length; i++) {
+        if (gps[i] && gps[i].connected) {
+          anyConnected = true;
+          break;
+        }
+      }
+      setHasGamepad(anyConnected);
+    };
+
+    window.addEventListener('gamepadconnected', handleConnect);
+    window.addEventListener('gamepaddisconnected', handleDisconnect);
+    return () => {
+      window.removeEventListener('gamepadconnected', handleConnect);
+      window.removeEventListener('gamepaddisconnected', handleDisconnect);
+    };
+  }, []);
+
+  // Reactive Keyboard Activity Detection
+  const [isKeyboardActive, setIsKeyboardActive] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const hasCoarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+      const hasFine = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+      // If fine pointer or not purely coarse, assume desktop / laptop keyboard environment
+      if (hasFine || !hasCoarse) return true;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    const handleKeyDown = () => {
+      setIsKeyboardActive(true);
+    };
+
+    const handlePointerDown = (e) => {
+      if (e.pointerType === 'touch') {
+        setIsKeyboardActive(false);
+      } else if (e.pointerType === 'mouse' || e.pointerType === 'pen') {
+        setIsKeyboardActive(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('pointerdown', handlePointerDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, []);
+
+  // Mode: 'gamepad' | 'keyboard' | 'touch'
+  const inputMode = hasGamepad ? 'gamepad' : isKeyboardActive ? 'keyboard' : 'touch';
+
   // Multiavatar Profile Customization State
   const [playerName, setPlayerName] = useState(() => activeProfile?.name || 'Player 1');
   const [avatarSeed, setAvatarSeed] = useState(() => activeProfile?.avatarSeed || activeProfile?.name || 'RetroGamer');
@@ -95,34 +169,19 @@ export default function MobileOnboardingScreen({
 
   const scrollRef = useRef(null);
 
-  // Scroll to top upon navigating to a new screen
+  // Auto-focus logic & scroll to top upon navigating to a new screen
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = 0;
     }
-  }, [currentScreen]);
-
-  const handleNext = () => {
-    if (currentScreen < totalScreens - 1) {
-      const next = currentScreen + 1;
-      setCurrentScreen(next);
-      haptics.selection();
-      sfx?.playTabSwitch?.();
+    if (currentScreen === 5) {
+      setFocusedTarget?.({ zone: 'mobile_ob', id: 'random' });
     } else {
-      handleFinish();
+      setFocusedTarget?.({ zone: 'mobile_ob', id: 'next' });
     }
-  };
+  }, [currentScreen, setFocusedTarget]);
 
-  const handleBack = () => {
-    if (currentScreen > 0) {
-      const prev = currentScreen - 1;
-      setCurrentScreen(prev);
-      haptics.light();
-      sfx?.playTabSwitch?.();
-    }
-  };
-
-  const handleFinish = () => {
+  const handleFinish = useCallback(() => {
     try {
       localStorage.setItem('retro_onboarding_completed', 'true');
       localStorage.setItem('retro_demo_dismissed', 'true');
@@ -138,7 +197,401 @@ export default function MobileOnboardingScreen({
     sfx?.playGameLaunch?.();
     setFocusedTarget?.({ zone: 'grid', index: 0 });
     onComplete();
-  };
+  }, [playerName, avatarSeed, favoriteColor, onSaveCreatedProfile, sfx, setFocusedTarget, onComplete]);
+
+  const handleNext = useCallback(() => {
+    if (currentScreen < totalScreens - 1) {
+      const next = currentScreen + 1;
+      setCurrentScreen(next);
+      haptics.selection();
+      sfx?.playTabSwitch?.();
+    } else {
+      handleFinish();
+    }
+  }, [currentScreen, totalScreens, sfx, handleFinish]);
+
+  const handleBack = useCallback(() => {
+    if (currentScreen > 0) {
+      const prev = currentScreen - 1;
+      setCurrentScreen(prev);
+      haptics.light();
+      sfx?.playTabSwitch?.();
+    }
+  }, [currentScreen, sfx]);
+
+  const handleLoadRom = useCallback(() => {
+    try {
+      localStorage.setItem('retro_onboarding_completed', 'true');
+      localStorage.setItem('retro_demo_dismissed', 'true');
+    } catch { }
+    if (onSaveCreatedProfile) {
+      const finalName = playerName.trim() || 'Player 1';
+      const finalSeed = avatarSeed.trim() || finalName;
+      onSaveCreatedProfile(finalName, finalSeed, favoriteColor);
+    }
+    onOpenLoadRomModal?.();
+    haptics.selection();
+    sfx?.playModalOpen?.();
+  }, [playerName, avatarSeed, favoriteColor, onSaveCreatedProfile, onOpenLoadRomModal, sfx]);
+
+  // Keyboard navigation for Mobile Onboarding
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e) => {
+      const isInputFocused = e.target?.tagName === 'INPUT' || e.target?.tagName === 'TEXTAREA';
+
+      // ESC -> Skip to game library
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleFinish();
+        return;
+      }
+
+      // DEL / Backspace -> Go back
+      if (!isInputFocused && (e.key === 'Backspace' || e.key === 'Delete')) {
+        if (currentScreen > 0) {
+          e.preventDefault();
+          handleBack();
+          return;
+        }
+      }
+
+      // SPACE -> Continue / Get Started / Ready
+      if (!isInputFocused && e.key === ' ') {
+        e.preventDefault();
+        handleNext();
+        return;
+      }
+
+      // SCREEN 5: Character Customization Specials
+      if (currentScreen === 5) {
+        // Tab switching: Q -> Archetypes, E (or R) -> Custom Name & Color
+        if (!isInputFocused && (e.key === 'q' || e.key === 'Q')) {
+          e.preventDefault();
+          setCharacterTab('archetypes');
+          setFocusedTarget?.({ zone: 'mobile_ob', id: 'archetypeTab' });
+          haptics.selection();
+          sfx?.playTabSwitch?.();
+          return;
+        }
+        if (!isInputFocused && (e.key === 'e' || e.key === 'E' || e.key === 'r' || e.key === 'R')) {
+          e.preventDefault();
+          setCharacterTab('custom');
+          setFocusedTarget?.({ zone: 'mobile_ob', id: 'customTab' });
+          haptics.selection();
+          sfx?.playTabSwitch?.();
+          return;
+        }
+
+        // Enter key on Screen 5: activates currently focused element
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const curId = focusedTarget?.id;
+          if (curId === 'next') {
+            handleNext();
+          } else if (curId === 'back') {
+            handleBack();
+          } else if (curId === 'skip') {
+            handleFinish();
+          } else if (curId === 'random') {
+            handleRollDice();
+          } else if (curId === 'archetypeTab') {
+            setCharacterTab('archetypes');
+            haptics.selection();
+            sfx?.playTabSwitch?.();
+          } else if (curId === 'customTab') {
+            setCharacterTab('custom');
+            haptics.selection();
+            sfx?.playTabSwitch?.();
+          } else if (curId?.startsWith('preset_')) {
+            const el = document.querySelector(`.mobile-ob-root [data-nav-id="${curId}"]`);
+            if (el) el.click();
+          } else if (curId?.startsWith('color_')) {
+            const el = document.querySelector(`.mobile-ob-root [data-nav-id="${curId}"]`);
+            if (el) el.click();
+          } else {
+            handleNext();
+          }
+          return;
+        }
+
+        // Arrow Key 2D Spatial Navigation on Screen 5 & Screen 6
+        if (!isInputFocused && (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+          e.preventDefault();
+          const dir = e.key === 'ArrowUp' ? 'UP' : e.key === 'ArrowDown' ? 'DOWN' : e.key === 'ArrowLeft' ? 'LEFT' : 'RIGHT';
+          const container = document.querySelector('.mobile-ob-root');
+          const currentEl = container?.querySelector('.gamepad-focused') ||
+                            container?.querySelector(`[data-nav-id="${focusedTarget?.id}"]`);
+          const nextEl = findNextSpatialElement({ container, currentEl, direction: dir, selector: '[data-nav="mobile_ob"]' });
+          if (nextEl && nextEl.dataset.navId) {
+            setFocusedTarget?.({ zone: 'mobile_ob', id: nextEl.dataset.navId });
+            nextEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+            sfx?.playTileNav?.();
+            haptics.selection();
+            if (nextEl.dataset.navId.startsWith('preset_')) {
+              const pId = nextEl.dataset.navId.replace('preset_', '');
+              const targetPreset = CHARACTER_ARCHETYPES.find(p => p.id === pId);
+              if (targetPreset) {
+                setAvatarSeed(targetPreset.avatarSeed);
+                setFavoriteColor(targetPreset.favoriteColor);
+                setPlayerName(targetPreset.name);
+              }
+            }
+          }
+          return;
+        }
+      }
+
+      // SCREEN 6 Arrow Key 2D Spatial Navigation
+      if (currentScreen === 6 && !isInputFocused && (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+        e.preventDefault();
+        const dir = e.key === 'ArrowUp' ? 'UP' : e.key === 'ArrowDown' ? 'DOWN' : e.key === 'ArrowLeft' ? 'LEFT' : 'RIGHT';
+        const container = document.querySelector('.mobile-ob-root');
+        const currentEl = container?.querySelector('.gamepad-focused') ||
+                          container?.querySelector(`[data-nav-id="${focusedTarget?.id}"]`);
+        const nextEl = findNextSpatialElement({ container, currentEl, direction: dir, selector: '[data-nav="mobile_ob"]' });
+        if (nextEl && nextEl.dataset.navId) {
+          setFocusedTarget?.({ zone: 'mobile_ob', id: nextEl.dataset.navId });
+          nextEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+          sfx?.playTileNav?.();
+          haptics.selection();
+        }
+        return;
+      }
+
+      // SCREEN 6: Load ROM trigger via L key
+      if (currentScreen === 6 && (e.key === 'l' || e.key === 'L') && !isInputFocused) {
+        e.preventDefault();
+        handleLoadRom();
+        return;
+      }
+
+      // Enter -> Continue or activate focused element on screens 0-4 and 6
+      if (e.key === 'Enter' && !isInputFocused) {
+        e.preventDefault();
+        if (currentScreen === 6 && focusedTarget?.id === 'loadRom') {
+          handleLoadRom();
+        } else if (focusedTarget?.id === 'back') {
+          handleBack();
+        } else if (focusedTarget?.id === 'skip') {
+          handleFinish();
+        } else {
+          handleNext();
+        }
+        return;
+      }
+
+      // Arrow Down / S -> Scroll down content
+      if (!isInputFocused && (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S')) {
+        e.preventDefault();
+        scrollRef.current?.scrollBy({ top: 120, behavior: 'smooth' });
+        return;
+      }
+
+      // Arrow Up / W -> Scroll up content
+      if (!isInputFocused && (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W')) {
+        e.preventDefault();
+        scrollRef.current?.scrollBy({ top: -120, behavior: 'smooth' });
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, currentScreen, focusedTarget?.id, handleNext, handleBack, handleFinish, handleLoadRom, setFocusedTarget, sfx]);
+
+  // Gamepad polling loop for Mobile Onboarding
+  useEffect(() => {
+    if (!isOpen) return;
+
+    let animId = null;
+    let prevButtons = {};
+    const STICK_DEADZONE = 0.45;
+    let lastNavTime = 0;
+    const NAV_COOLDOWN = 160;
+
+    const pollGamepad = (timestamp) => {
+      const now = (typeof timestamp === 'number') ? timestamp : performance.now();
+      const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+      let gp = null;
+      for (let i = 0; i < gamepads.length; i++) {
+        if (gamepads[i] && gamepads[i].connected) {
+          gp = gamepads[i];
+          break;
+        }
+      }
+
+      if (gp) {
+        const b = gp.buttons;
+        const btnA = !!b[0]?.pressed;      // A / Cross -> Continue / Select
+        const btnB = !!b[1]?.pressed;      // B / Circle -> Back
+        const btnX = !!b[2]?.pressed;      // X / Square -> Load ROM on Screen 6
+        const btnStart = !!b[9]?.pressed;  // Start / Menu -> Skip to Games
+        const shoulderL = !!b[4]?.pressed; // L1 / Left Shoulder
+        const shoulderR = !!b[5]?.pressed; // R1 / Right Shoulder
+        const dpadUp = !!(b[12]?.pressed || (gp.axes[1] < -STICK_DEADZONE));
+        const dpadDown = !!(b[13]?.pressed || (gp.axes[1] > STICK_DEADZONE));
+        const dpadLeft = !!(b[14]?.pressed || (gp.axes[0] < -STICK_DEADZONE));
+        const dpadRight = !!(b[15]?.pressed || (gp.axes[0] > STICK_DEADZONE));
+
+        // Start -> Skip
+        if (btnStart && !prevButtons.btnStart) {
+          handleFinish();
+        }
+        // B -> Back
+        else if (btnB && !prevButtons.btnB) {
+          if (currentScreen > 0) {
+            handleBack();
+          }
+        }
+        // SCREEN 5 Gamepad Specials
+        else if (currentScreen === 5) {
+          // L1 -> Archetypes Tab
+          if (shoulderL && !prevButtons.shoulderL) {
+            setCharacterTab('archetypes');
+            setFocusedTarget?.({ zone: 'mobile_ob', id: 'archetypeTab' });
+            haptics.selection();
+            sfx?.playTabSwitch?.();
+          }
+          // R1 -> Custom Tab
+          else if (shoulderR && !prevButtons.shoulderR) {
+            setCharacterTab('custom');
+            setFocusedTarget?.({ zone: 'mobile_ob', id: 'customTab' });
+            haptics.selection();
+            sfx?.playTabSwitch?.();
+          }
+          // A -> Confirm / Select
+          else if (btnA && !prevButtons.btnA) {
+            const curId = focusedTarget?.id;
+            if (curId === 'next') {
+              handleNext();
+            } else if (curId === 'back') {
+              handleBack();
+            } else if (curId === 'skip') {
+              handleFinish();
+            } else if (curId === 'random') {
+              handleRollDice();
+            } else if (curId === 'archetypeTab') {
+              setCharacterTab('archetypes');
+              haptics.selection();
+              sfx?.playTabSwitch?.();
+            } else if (curId === 'customTab') {
+              setCharacterTab('custom');
+              haptics.selection();
+              sfx?.playTabSwitch?.();
+            } else if (curId?.startsWith('preset_')) {
+              const el = document.querySelector(`.mobile-ob-root [data-nav-id="${curId}"]`);
+              if (el) el.click();
+            } else if (curId?.startsWith('color_')) {
+              const el = document.querySelector(`.mobile-ob-root [data-nav-id="${curId}"]`);
+              if (el) el.click();
+            } else {
+              handleNext();
+            }
+          }
+          // Directional Navigation via D-pad and Left Stick
+          else if (now - lastNavTime > NAV_COOLDOWN) {
+            let dir = null;
+            if (dpadUp) dir = 'UP';
+            else if (dpadDown) dir = 'DOWN';
+            else if (dpadLeft) dir = 'LEFT';
+            else if (dpadRight) dir = 'RIGHT';
+
+            if (dir) {
+              const container = document.querySelector('.mobile-ob-root');
+              const currentEl = container?.querySelector('.gamepad-focused') ||
+                                container?.querySelector(`[data-nav-id="${focusedTarget?.id}"]`);
+              const nextEl = findNextSpatialElement({ container, currentEl, direction: dir, selector: '[data-nav="mobile_ob"]' });
+              if (nextEl && nextEl.dataset.navId) {
+                setFocusedTarget?.({ zone: 'mobile_ob', id: nextEl.dataset.navId });
+                nextEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                sfx?.playTileNav?.();
+                haptics.selection();
+                if (nextEl.dataset.navId.startsWith('preset_')) {
+                  const pId = nextEl.dataset.navId.replace('preset_', '');
+                  const targetPreset = CHARACTER_ARCHETYPES.find(p => p.id === pId);
+                  if (targetPreset) {
+                    setAvatarSeed(targetPreset.avatarSeed);
+                    setFavoriteColor(targetPreset.favoriteColor);
+                    setPlayerName(targetPreset.name);
+                  }
+                }
+                lastNavTime = now;
+              }
+            }
+          }
+        }
+        // SCREEN 6 Gamepad Specials
+        else if (currentScreen === 6) {
+          // X Button -> Load ROMs
+          if (btnX && !prevButtons.btnX) {
+            handleLoadRom();
+          }
+          // A -> Continue / Action
+          else if (btnA && !prevButtons.btnA) {
+            if (focusedTarget?.id === 'loadRom') {
+              handleLoadRom();
+            } else if (focusedTarget?.id === 'back') {
+              handleBack();
+            } else if (focusedTarget?.id === 'skip') {
+              handleFinish();
+            } else {
+              handleNext();
+            }
+          }
+          // Directional Navigation on Screen 6 (loadRom, back, next, skip)
+          else if (now - lastNavTime > NAV_COOLDOWN) {
+            let dir = null;
+            if (dpadUp) dir = 'UP';
+            else if (dpadDown) dir = 'DOWN';
+            else if (dpadLeft) dir = 'LEFT';
+            else if (dpadRight) dir = 'RIGHT';
+
+            if (dir) {
+              const container = document.querySelector('.mobile-ob-root');
+              const currentEl = container?.querySelector('.gamepad-focused') ||
+                                container?.querySelector(`[data-nav-id="${focusedTarget?.id}"]`);
+              const nextEl = findNextSpatialElement({ container, currentEl, direction: dir, selector: '[data-nav="mobile_ob"]' });
+              if (nextEl && nextEl.dataset.navId) {
+                setFocusedTarget?.({ zone: 'mobile_ob', id: nextEl.dataset.navId });
+                nextEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                sfx?.playTileNav?.();
+                haptics.selection();
+                lastNavTime = now;
+              }
+            }
+          }
+        }
+        // Other Screens (0, 1, 2, 3, 4):
+        else {
+          // A -> Continue / Get Started
+          if (btnA && !prevButtons.btnA) {
+            handleNext();
+          }
+          // Directional Scroll via D-pad or Left Stick
+          else if (now - lastNavTime > NAV_COOLDOWN) {
+            if (dpadDown) {
+              scrollRef.current?.scrollBy({ top: 100, behavior: 'smooth' });
+              lastNavTime = now;
+            } else if (dpadUp) {
+              scrollRef.current?.scrollBy({ top: -100, behavior: 'smooth' });
+              lastNavTime = now;
+            }
+          }
+        }
+
+        prevButtons = { btnA, btnB, btnX, btnStart, shoulderL, shoulderR, dpadUp, dpadDown, dpadLeft, dpadRight };
+      }
+
+      animId = requestAnimationFrame(pollGamepad);
+    };
+
+    animId = requestAnimationFrame(pollGamepad);
+    return () => {
+      if (animId) cancelAnimationFrame(animId);
+    };
+  }, [isOpen, currentScreen, focusedTarget?.id, handleNext, handleBack, handleFinish, handleLoadRom, setFocusedTarget, sfx]);
 
   const handleRollDice = () => {
     const randomSeedBase = RANDOM_CHARACTER_SEEDS[Math.floor(Math.random() * RANDOM_CHARACTER_SEEDS.length)];
@@ -178,10 +631,22 @@ export default function MobileOnboardingScreen({
           <header className="mobile-ob-header transparent-header screen-0-header">
             <button
               type="button"
-              className="mobile-ob-skip-btn pill screen-0-skip-btn"
+              className={`mobile-ob-skip-btn pill screen-0-skip-btn ${inputMode !== 'touch' && focusedTarget?.id === 'skip' ? 'gamepad-focused' : ''}`}
               onClick={handleFinish}
               title="Skip directly to game library"
+              data-nav="mobile_ob"
+              data-nav-id="skip"
             >
+              {inputMode === 'gamepad' && (
+                <span className="onboarding-btn-gamepad-badge">
+                  <span className="gamepad-badge-key">START</span>
+                </span>
+              )}
+              {inputMode === 'keyboard' && (
+                <span className="onboarding-btn-gamepad-badge">
+                  <span className="gamepad-badge-key">ESC</span>
+                </span>
+              )}
               <span>Skip</span>
               <ChevronRight size={14} />
             </button>
@@ -211,9 +676,19 @@ export default function MobileOnboardingScreen({
 
               <button
                 type="button"
-                className="mobile-ob-cta-btn"
+                className={`mobile-ob-cta-btn ${inputMode !== 'touch' ? 'gamepad-focused' : ''}`}
                 onClick={handleNext}
               >
+                {inputMode === 'gamepad' && (
+                  <span className="onboarding-btn-gamepad-badge is-primary">
+                    <span className="gamepad-badge-key">A</span>
+                  </span>
+                )}
+                {inputMode === 'keyboard' && (
+                  <span className="onboarding-btn-gamepad-badge is-primary">
+                    <span className="gamepad-badge-key">SPACE</span>
+                  </span>
+                )}
                 <span>Get Started</span>
                 <ChevronRight size={18} />
               </button>
@@ -241,10 +716,22 @@ export default function MobileOnboardingScreen({
 
             <button
               type="button"
-              className="mobile-ob-skip-btn"
+              className={`mobile-ob-skip-btn ${inputMode !== 'touch' && focusedTarget?.id === 'skip' ? 'gamepad-focused' : ''}`}
               onClick={handleFinish}
               title="Skip to game library"
+              data-nav="mobile_ob"
+              data-nav-id="skip"
             >
+              {inputMode === 'gamepad' && (
+                <span className="onboarding-btn-gamepad-badge">
+                  <span className="gamepad-badge-key">START</span>
+                </span>
+              )}
+              {inputMode === 'keyboard' && (
+                <span className="onboarding-btn-gamepad-badge">
+                  <span className="gamepad-badge-key">ESC</span>
+                </span>
+              )}
               <span>Skip</span>
               <ChevronRight size={14} />
             </button>
@@ -722,8 +1209,10 @@ export default function MobileOnboardingScreen({
                       <strong className="passport-name">{playerName || 'Player 1'}</strong>
                       <button
                         type="button"
-                        className="passport-dice-btn"
+                        className={`passport-dice-btn ${inputMode !== 'touch' && focusedTarget?.id === 'random' ? 'gamepad-focused' : ''}`}
                         onClick={handleRollDice}
+                        data-nav="mobile_ob"
+                        data-nav-id="random"
                       >
                         <Dices size={14} />
                         <span>Randomize</span>
@@ -736,18 +1225,34 @@ export default function MobileOnboardingScreen({
                 <div className="mobile-ob-tabs-row" role="tablist">
                   <button
                     type="button"
-                    className={`mobile-ob-tab-btn ${characterTab === 'archetypes' ? 'is-active' : ''}`}
+                    className={`mobile-ob-tab-btn ${characterTab === 'archetypes' ? 'is-active' : ''} ${inputMode !== 'touch' && focusedTarget?.id === 'archetypeTab' ? 'gamepad-focused' : ''}`}
                     onClick={() => { setCharacterTab('archetypes'); haptics.selection(); sfx?.playTabSwitch?.(); }}
+                    data-nav="mobile_ob"
+                    data-nav-id="archetypeTab"
                   >
+                    {inputMode === 'gamepad' && (
+                      <span className="tab-bumper-key">L1</span>
+                    )}
+                    {inputMode === 'keyboard' && (
+                      <span className="tab-bumper-key">Q</span>
+                    )}
                     <Gamepad2 size={14} />
                     <span>Archetypes ({CHARACTER_ARCHETYPES.length})</span>
                   </button>
 
                   <button
                     type="button"
-                    className={`mobile-ob-tab-btn ${characterTab === 'custom' ? 'is-active' : ''}`}
+                    className={`mobile-ob-tab-btn ${characterTab === 'custom' ? 'is-active' : ''} ${inputMode !== 'touch' && focusedTarget?.id === 'customTab' ? 'gamepad-focused' : ''}`}
                     onClick={() => { setCharacterTab('custom'); haptics.selection(); sfx?.playTabSwitch?.(); }}
+                    data-nav="mobile_ob"
+                    data-nav-id="customTab"
                   >
+                    {inputMode === 'gamepad' && (
+                      <span className="tab-bumper-key">R1</span>
+                    )}
+                    {inputMode === 'keyboard' && (
+                      <span className="tab-bumper-key">E</span>
+                    )}
                     <Tag size={14} />
                     <span>Custom Name &amp; Color</span>
                   </button>
@@ -763,7 +1268,7 @@ export default function MobileOnboardingScreen({
                           <button
                             key={preset.id}
                             type="button"
-                            className={`mobile-archetype-card ${isSelected ? 'is-selected' : ''}`}
+                            className={`mobile-archetype-card ${isSelected ? 'is-selected' : ''} ${inputMode !== 'touch' && focusedTarget?.id === `preset_${preset.id}` ? 'gamepad-focused' : ''}`}
                             onClick={() => {
                               setAvatarSeed(preset.avatarSeed);
                               setFavoriteColor(preset.favoriteColor);
@@ -771,6 +1276,8 @@ export default function MobileOnboardingScreen({
                               haptics.selection();
                               sfx?.playTileNav?.();
                             }}
+                            data-nav="mobile_ob"
+                            data-nav-id={`preset_${preset.id}`}
                           >
                             <div className="archetype-avatar">
                               <MultiAvatar seed={preset.avatarSeed} size={42} />
@@ -790,7 +1297,7 @@ export default function MobileOnboardingScreen({
                       <label className="custom-label">Player Name</label>
                       <input
                         type="text"
-                        className="custom-text-input"
+                        className={`custom-text-input ${inputMode !== 'touch' && focusedTarget?.id === 'nameInput' ? 'gamepad-focused' : ''}`}
                         value={playerName}
                         onChange={(e) => {
                           const val = e.target.value;
@@ -801,6 +1308,8 @@ export default function MobileOnboardingScreen({
                         }}
                         placeholder="Enter player handle..."
                         maxLength={16}
+                        data-nav="mobile_ob"
+                        data-nav-id="nameInput"
                       />
                     </div>
 
@@ -808,28 +1317,32 @@ export default function MobileOnboardingScreen({
                       <label className="custom-label">Custom Avatar Seed</label>
                       <input
                         type="text"
-                        className="custom-text-input"
+                        className={`custom-text-input ${inputMode !== 'touch' && focusedTarget?.id === 'seedInput' ? 'gamepad-focused' : ''}`}
                         value={avatarSeed}
                         onChange={(e) => setAvatarSeed(e.target.value)}
                         placeholder="Type any word or code..."
                         maxLength={32}
+                        data-nav="mobile_ob"
+                        data-nav-id="seedInput"
                       />
                     </div>
 
                     <div className="custom-input-group">
                       <label className="custom-label">Console Accent Color</label>
                       <div className="custom-palette-row">
-                        {COLOR_PALETTE.map((col) => (
+                        {COLOR_PALETTE.map((col, cIdx) => (
                           <button
                             key={col}
                             type="button"
-                            className={`palette-circle ${favoriteColor === col ? 'is-active' : ''}`}
+                            className={`palette-circle ${favoriteColor === col ? 'is-active' : ''} ${inputMode !== 'touch' && focusedTarget?.id === `color_${cIdx}` ? 'gamepad-focused' : ''}`}
                             style={{ background: col }}
                             onClick={() => {
                               setFavoriteColor(col);
                               haptics.selection();
                               sfx?.playTileNav?.();
                             }}
+                            data-nav="mobile_ob"
+                            data-nav-id={`color_${cIdx}`}
                           >
                             {favoriteColor === col && <Check size={14} color="#ffffff" strokeWidth={3} />}
                           </button>
@@ -881,21 +1394,10 @@ export default function MobileOnboardingScreen({
                 <div className="mobile-ob-load-rom-prompt">
                   <button
                     type="button"
-                    className="mobile-ob-load-rom-btn"
-                    onClick={() => {
-                      try {
-                        localStorage.setItem('retro_onboarding_completed', 'true');
-                        localStorage.setItem('retro_demo_dismissed', 'true');
-                      } catch { }
-                      if (onSaveCreatedProfile) {
-                        const finalName = playerName.trim() || 'Player 1';
-                        const finalSeed = avatarSeed.trim() || finalName;
-                        onSaveCreatedProfile(finalName, finalSeed, favoriteColor);
-                      }
-                      onOpenLoadRomModal?.();
-                      haptics.selection();
-                      sfx?.playModalOpen?.();
-                    }}
+                    className={`mobile-ob-load-rom-btn ${inputMode !== 'touch' && focusedTarget?.id === 'loadRom' ? 'gamepad-focused' : ''}`}
+                    onClick={handleLoadRom}
+                    data-nav="mobile_ob"
+                    data-nav-id="loadRom"
                   >
                     <div className="load-rom-btn-icon">
                       <FolderUp size={22} />
@@ -904,6 +1406,16 @@ export default function MobileOnboardingScreen({
                       <strong>Load Your Favorite ROMs</strong>
                       <span>Pick ROM files (.gba, .nds, .sfc) or an entire game folder to play</span>
                     </div>
+                    {inputMode === 'gamepad' && (
+                      <span className="onboarding-btn-gamepad-badge is-primary">
+                        <span className="gamepad-badge-key">X</span>
+                      </span>
+                    )}
+                    {inputMode === 'keyboard' && (
+                      <span className="onboarding-btn-gamepad-badge is-primary">
+                        <span className="gamepad-badge-key">L</span>
+                      </span>
+                    )}
                     <ChevronRight size={18} className="load-rom-btn-arrow" />
                   </button>
                 </div>
@@ -915,19 +1427,43 @@ export default function MobileOnboardingScreen({
           <footer className="mobile-ob-footer">
             <button
               type="button"
-              className="mobile-ob-back-btn"
+              className={`mobile-ob-back-btn ${inputMode !== 'touch' && focusedTarget?.id === 'back' ? 'gamepad-focused' : ''}`}
               onClick={handleBack}
               title="Previous screen"
+              data-nav="mobile_ob"
+              data-nav-id="back"
             >
+              {inputMode === 'gamepad' && (
+                <span className="onboarding-btn-gamepad-badge">
+                  <span className="gamepad-badge-key">B</span>
+                </span>
+              )}
+              {inputMode === 'keyboard' && (
+                <span className="onboarding-btn-gamepad-badge">
+                  <span className="gamepad-badge-key">DEL</span>
+                </span>
+              )}
               <ArrowLeft size={18} />
               <span>Back</span>
             </button>
 
             <button
               type="button"
-              className="mobile-ob-next-btn"
+              className={`mobile-ob-next-btn ${inputMode !== 'touch' && (focusedTarget?.id === 'next' || !focusedTarget?.id) ? 'gamepad-focused' : ''}`}
               onClick={handleNext}
+              data-nav="mobile_ob"
+              data-nav-id="next"
             >
+              {inputMode === 'gamepad' && (
+                <span className="onboarding-btn-gamepad-badge is-primary">
+                  <span className="gamepad-badge-key">A</span>
+                </span>
+              )}
+              {inputMode === 'keyboard' && (
+                <span className="onboarding-btn-gamepad-badge is-primary">
+                  <span className="gamepad-badge-key">SPACE</span>
+                </span>
+              )}
               <span>{currentScreen === 6 ? 'Explore Library' : currentScreen === 5 ? 'Ready' : 'Continue'}</span>
               {currentScreen === 6 ? <Play size={16} fill="currentColor" /> : <ChevronRight size={18} />}
             </button>

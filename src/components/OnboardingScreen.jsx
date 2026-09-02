@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Gamepad2,
   ShieldCheck,
@@ -38,6 +38,7 @@ import DualShockVisualizer from './DualShockVisualizer';
 import MobileOnboardingScreen from './MobileOnboardingScreen';
 import MultiAvatar from './MultiAvatar';
 import { resolveAssetPath } from '../utils/assetPath';
+import { findNextSpatialElement } from '../utils/spatialNavigation';
 
 const isApplePlatform = typeof navigator !== 'undefined' && (/Macintosh|iPhone|iPad|iPod/i.test(navigator.userAgent || ''));
 const isSafariBrowser = typeof navigator !== 'undefined' && (/Safari/i.test(navigator.userAgent || '') && !/Chrome|Chromium|CriOS|FxiOS|Edg/i.test(navigator.userAgent || ''));
@@ -82,7 +83,46 @@ export default function OnboardingScreen({
 
   const totalSteps = 3;
   const [currentStep, setCurrentStep] = useState(0); // Desktop: 0: Overview, 1: Character Studio, 2: Gamepad Controls
+  const [characterStudioTab, setCharacterStudioTab] = useState('archetypes'); // 'archetypes' | 'custom'
   const [copiedLink, setCopiedLink] = useState(false);
+
+  // Reactive Gamepad State Detection
+  const [hasGamepad, setHasGamepad] = useState(() => {
+    if (gamepadConnected) return true;
+    if (typeof navigator !== 'undefined' && navigator.getGamepads) {
+      const gps = navigator.getGamepads();
+      for (let i = 0; i < gps.length; i++) {
+        if (gps[i] && gps[i].connected) return true;
+      }
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    setHasGamepad(gamepadConnected);
+  }, [gamepadConnected]);
+
+  useEffect(() => {
+    const handleConnect = () => setHasGamepad(true);
+    const handleDisconnect = () => {
+      const gps = navigator.getGamepads ? navigator.getGamepads() : [];
+      let anyConnected = false;
+      for (let i = 0; i < gps.length; i++) {
+        if (gps[i] && gps[i].connected) {
+          anyConnected = true;
+          break;
+        }
+      }
+      setHasGamepad(anyConnected);
+    };
+
+    window.addEventListener('gamepadconnected', handleConnect);
+    window.addEventListener('gamepaddisconnected', handleDisconnect);
+    return () => {
+      window.removeEventListener('gamepadconnected', handleConnect);
+      window.removeEventListener('gamepaddisconnected', handleDisconnect);
+    };
+  }, []);
 
   // Multiavatar Profile Setup State
   const [playerName, setPlayerName] = useState(() => activeProfile?.name || 'Player 1');
@@ -126,55 +166,9 @@ export default function OnboardingScreen({
     }
   };
 
-  const viewportRef = React.useRef(null);
+  const viewportRef = useRef(null);
 
-  // Auto-focus logic & scroll-to-top when opening or changing steps
-  useEffect(() => {
-    if (isOpen) {
-      if (viewportRef.current) {
-        viewportRef.current.scrollTop = 0;
-      }
-      if (currentStep === 0) {
-        setFocusedTarget?.({ zone: 'onboarding', id: 'next' });
-      } else if (currentStep === 1) {
-        setFocusedTarget?.({ zone: 'onboarding', id: 'random' });
-      } else if (currentStep === 2) {
-        setFocusedTarget?.({ zone: 'onboarding', id: 'next' });
-      }
-    }
-  }, [isOpen, currentStep, setFocusedTarget]);
-
-  const handleNext = () => {
-    if (currentStep < totalSteps - 1) {
-      const nextStep = currentStep + 1;
-      setCurrentStep(nextStep);
-      sfx?.playTabSwitch?.();
-      if (nextStep === 1) {
-        setFocusedTarget?.({ zone: 'onboarding', id: 'random' });
-      } else if (nextStep === 2) {
-        setFocusedTarget?.({ zone: 'onboarding', id: 'next' });
-      }
-    } else {
-      handleFinish();
-    }
-  };
-
-  const handleBack = () => {
-    if (currentStep > 0) {
-      const prevStep = currentStep - 1;
-      setCurrentStep(prevStep);
-      sfx?.playTabSwitch?.();
-      if (prevStep === 0) {
-        setFocusedTarget?.({ zone: 'onboarding', id: 'next' });
-      } else if (prevStep === 1) {
-        setFocusedTarget?.({ zone: 'onboarding', id: 'random' });
-      } else {
-        setFocusedTarget?.({ zone: 'onboarding', id: 'next' });
-      }
-    }
-  };
-
-  const handleFinish = () => {
+  const handleFinish = useCallback(() => {
     try {
       localStorage.setItem('retro_onboarding_completed', 'true');
       localStorage.setItem('retro_demo_dismissed', 'true');
@@ -190,7 +184,362 @@ export default function OnboardingScreen({
     sfx?.playGameLaunch?.();
     setFocusedTarget?.({ zone: 'grid', index: 0 });
     onComplete();
-  };
+  }, [playerName, avatarSeed, favoriteColor, onSaveCreatedProfile, sfx, setFocusedTarget, onComplete]);
+
+  const handleNext = useCallback(() => {
+    if (currentStep < totalSteps - 1) {
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+      sfx?.playTabSwitch?.();
+      if (nextStep === 1) {
+        setFocusedTarget?.({ zone: 'onboarding', id: 'random' });
+      } else if (nextStep === 2) {
+        setFocusedTarget?.({ zone: 'onboarding', id: 'skip' });
+      }
+    } else {
+      handleFinish();
+    }
+  }, [currentStep, totalSteps, sfx, setFocusedTarget, handleFinish]);
+
+  const handleBack = useCallback(() => {
+    if (currentStep > 0) {
+      const prevStep = currentStep - 1;
+      setCurrentStep(prevStep);
+      sfx?.playTabSwitch?.();
+      if (prevStep === 0) {
+        setFocusedTarget?.({ zone: 'onboarding', id: 'next' });
+      } else if (prevStep === 1) {
+        setFocusedTarget?.({ zone: 'onboarding', id: 'random' });
+      } else {
+        setFocusedTarget?.({ zone: 'onboarding', id: 'skip' });
+      }
+    }
+  }, [currentStep, sfx, setFocusedTarget]);
+
+  // Auto-focus logic & scroll-to-top when opening or changing steps
+  useEffect(() => {
+    if (isOpen) {
+      if (viewportRef.current) {
+        viewportRef.current.scrollTop = 0;
+      }
+      if (currentStep === 0) {
+        setFocusedTarget?.({ zone: 'onboarding', id: 'next' });
+      } else if (currentStep === 1) {
+        setFocusedTarget?.({ zone: 'onboarding', id: 'random' });
+      } else if (currentStep === 2) {
+        setFocusedTarget?.({ zone: 'onboarding', id: 'skip' });
+      }
+    }
+  }, [isOpen, currentStep, setFocusedTarget]);
+
+  // Desktop Onboarding Keyboard Navigation (Screen 01 & Screen 02)
+  useEffect(() => {
+    if (!isOpen || shouldRenderMobile) return;
+
+    const handleKeyDown = (e) => {
+      const isInputFocused = e.target?.tagName === 'INPUT' || e.target?.tagName === 'TEXTAREA';
+
+      // --- SCREEN 01 ---
+      if (currentStep === 0) {
+        if (isInputFocused) return;
+        if (e.key === ' ') {
+          e.preventDefault();
+          handleNext();
+          return;
+        }
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (focusedTarget?.id === 'skip') {
+            handleFinish();
+          } else {
+            handleNext();
+          }
+          return;
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          handleFinish();
+          return;
+        } else if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+          e.preventDefault();
+          setFocusedTarget?.({ zone: 'onboarding', id: 'skip' });
+          sfx?.playTileNav?.();
+          return;
+        } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+          e.preventDefault();
+          setFocusedTarget?.({ zone: 'onboarding', id: 'next' });
+          sfx?.playTileNav?.();
+          return;
+        }
+        return;
+      }
+
+      // --- SCREEN 02: Character Studio ---
+      if (currentStep === 1) {
+        // Space key: Dedicated shortcut to advance to next page (View Controls)
+        if (!isInputFocused && e.key === ' ') {
+          e.preventDefault();
+          handleNext();
+          return;
+        }
+
+        // Tab switching: Q / L1 -> Character Archetypes, E / R1 -> Custom Name & Color
+        if (!isInputFocused && (e.key === 'q' || e.key === 'Q')) {
+          e.preventDefault();
+          setCharacterStudioTab('archetypes');
+          setFocusedTarget?.({ zone: 'onboarding', id: 'archetypeTab' });
+          sfx?.playTabSwitch?.();
+          return;
+        }
+        if (!isInputFocused && (e.key === 'e' || e.key === 'E' || e.key === 'r' || e.key === 'R')) {
+          e.preventDefault();
+          setCharacterStudioTab('custom');
+          setFocusedTarget?.({ zone: 'onboarding', id: 'customTab' });
+          sfx?.playTabSwitch?.();
+          return;
+        }
+
+        // Global Action: ESC -> Skip to Games
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          handleFinish();
+          return;
+        }
+
+        // Global Action: Delete / Backspace -> Go back to Screen 01 (when not actively typing in an input)
+        if (!isInputFocused && (e.key === 'Backspace' || e.key === 'Delete')) {
+          e.preventDefault();
+          handleBack();
+          return;
+        }
+
+        // Enter Action: activates currently focused element
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const curId = focusedTarget?.id;
+          if (curId === 'next') {
+            handleNext();
+          } else if (curId === 'back') {
+            handleBack();
+          } else if (curId === 'skip') {
+            handleFinish();
+          } else if (curId === 'random') {
+            const randomBtn = document.querySelector('.onboarding-root [data-nav-id="random"]');
+            if (randomBtn) randomBtn.click();
+            sfx?.playDiceRoll?.();
+          } else if (curId === 'archetypeTab') {
+            setCharacterStudioTab('archetypes');
+            sfx?.playTabSwitch?.();
+          } else if (curId === 'customTab') {
+            setCharacterStudioTab('custom');
+            sfx?.playTabSwitch?.();
+          } else if (curId?.startsWith('preset_')) {
+            const el = document.querySelector(`.onboarding-root [data-nav-id="${curId}"]`);
+            if (el) el.click();
+          } else if (curId?.startsWith('color_')) {
+            const el = document.querySelector(`.onboarding-root [data-nav-id="${curId}"]`);
+            if (el) el.click();
+          } else {
+            handleNext();
+          }
+          return;
+        }
+
+        // Arrow Key 2D Spatial Navigation
+        if (!isInputFocused && (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+          e.preventDefault();
+          const dir = e.key === 'ArrowUp' ? 'UP' : e.key === 'ArrowDown' ? 'DOWN' : e.key === 'ArrowLeft' ? 'LEFT' : 'RIGHT';
+          const container = document.querySelector('.onboarding-root');
+          const currentEl = container?.querySelector(`.gamepad-focused`) ||
+                            container?.querySelector(`[data-nav-id="${focusedTarget?.id}"]`);
+
+          const nextEl = findNextSpatialElement({ container, currentEl, direction: dir });
+          if (nextEl && nextEl.dataset.navId) {
+            setFocusedTarget?.({ zone: 'onboarding', id: nextEl.dataset.navId });
+            nextEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+            sfx?.playTileNav?.();
+          }
+          return;
+        }
+      }
+
+      // --- SCREEN 03: Interactive Gamepad Controls ---
+      if (currentStep === 2) {
+        // ESC -> Skip to Games
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          handleFinish();
+          return;
+        }
+        // Delete / Backspace -> Go back to Screen 02 (Character Studio)
+        if (!isInputFocused && (e.key === 'Backspace' || e.key === 'Delete')) {
+          e.preventDefault();
+          handleBack();
+          return;
+        }
+        // Enter / Space on Screen 03 -> Skip to Games & Boot Library
+        if (e.key === 'Enter' || (e.key === ' ' && !isInputFocused)) {
+          e.preventDefault();
+          handleFinish();
+          return;
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, shouldRenderMobile, currentStep, focusedTarget?.id, handleNext, handleBack, handleFinish, setFocusedTarget, sfx]);
+
+  // Desktop Onboarding Gamepad Polling Loop (Screen 01 & Screen 02)
+  useEffect(() => {
+    if (!isOpen || shouldRenderMobile) return;
+
+    let animId = null;
+    let prevButtons = {};
+    const STICK_DEADZONE = 0.45;
+    let lastNavTime = 0;
+    const NAV_COOLDOWN = 180;
+
+    const pollGamepad = (timestamp) => {
+      const now = (typeof timestamp === 'number') ? timestamp : performance.now();
+      const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+      let gp = null;
+      for (let i = 0; i < gamepads.length; i++) {
+        if (gamepads[i] && gamepads[i].connected) {
+          gp = gamepads[i];
+          break;
+        }
+      }
+
+      if (gp) {
+        const b = gp.buttons;
+        const btnA = !!b[0]?.pressed;      // A / Cross
+        const btnB = !!b[1]?.pressed;      // B / Circle
+        const btnStart = !!b[9]?.pressed;  // Start / Options / Menu
+        const shoulderL = !!b[4]?.pressed; // L1 / Left Bumper
+        const shoulderR = !!b[5]?.pressed; // R1 / Right Bumper
+        const dpadUp = !!(b[12]?.pressed || (gp.axes[1] < -STICK_DEADZONE));
+        const dpadDown = !!(b[13]?.pressed || (gp.axes[1] > STICK_DEADZONE));
+        const dpadLeft = !!(b[14]?.pressed || (gp.axes[0] < -STICK_DEADZONE));
+        const dpadRight = !!(b[15]?.pressed || (gp.axes[0] > STICK_DEADZONE));
+
+        // --- SCREEN 01 ---
+        if (currentStep === 0) {
+          if (btnA && !prevButtons.btnA) {
+            if (focusedTarget?.id === 'skip') {
+              handleFinish();
+            } else {
+              handleNext();
+            }
+          } else if (btnStart && !prevButtons.btnStart) {
+            handleFinish();
+          } else if (btnB && !prevButtons.btnB) {
+            handleFinish();
+          } else if (dpadUp && !prevButtons.dpadUp) {
+            setFocusedTarget?.({ zone: 'onboarding', id: 'skip' });
+            sfx?.playTileNav?.();
+          } else if (dpadDown && !prevButtons.dpadDown) {
+            setFocusedTarget?.({ zone: 'onboarding', id: 'next' });
+            sfx?.playTileNav?.();
+          }
+        }
+
+        // --- SCREEN 02: Character Studio ---
+        else if (currentStep === 1) {
+          // L1 -> Character Archetypes tab
+          if (shoulderL && !prevButtons.shoulderL) {
+            setCharacterStudioTab('archetypes');
+            setFocusedTarget?.({ zone: 'onboarding', id: 'archetypeTab' });
+            sfx?.playTabSwitch?.();
+          }
+          // R1 -> Custom Name & Color tab
+          else if (shoulderR && !prevButtons.shoulderR) {
+            setCharacterStudioTab('custom');
+            setFocusedTarget?.({ zone: 'onboarding', id: 'customTab' });
+            sfx?.playTabSwitch?.();
+          }
+          // START -> Skip to Games
+          else if (btnStart && !prevButtons.btnStart) {
+            handleFinish();
+          }
+          // B button -> Go Back to Screen 01
+          else if (btnB && !prevButtons.btnB) {
+            handleBack();
+          }
+          // A button -> Confirm / Select
+          else if (btnA && !prevButtons.btnA) {
+            const curId = focusedTarget?.id;
+            if (curId === 'next') {
+              handleNext();
+            } else if (curId === 'back') {
+              handleBack();
+            } else if (curId === 'skip') {
+              handleFinish();
+            } else if (curId === 'random') {
+              const randomBtn = document.querySelector('.onboarding-root [data-nav-id="random"]');
+              if (randomBtn) randomBtn.click();
+              sfx?.playDiceRoll?.();
+            } else if (curId === 'archetypeTab') {
+              setCharacterStudioTab('archetypes');
+              sfx?.playTabSwitch?.();
+            } else if (curId === 'customTab') {
+              setCharacterStudioTab('custom');
+              sfx?.playTabSwitch?.();
+            } else if (curId?.startsWith('preset_')) {
+              const el = document.querySelector(`.onboarding-root [data-nav-id="${curId}"]`);
+              if (el) el.click();
+            } else if (curId?.startsWith('color_')) {
+              const el = document.querySelector(`.onboarding-root [data-nav-id="${curId}"]`);
+              if (el) el.click();
+            } else {
+              handleNext();
+            }
+          }
+          // Directional Navigation
+          else if (now - lastNavTime > NAV_COOLDOWN) {
+            let dir = null;
+            if (dpadUp && (!prevButtons.dpadUp || now - lastNavTime > NAV_COOLDOWN)) dir = 'UP';
+            else if (dpadDown && (!prevButtons.dpadDown || now - lastNavTime > NAV_COOLDOWN)) dir = 'DOWN';
+            else if (dpadLeft && (!prevButtons.dpadLeft || now - lastNavTime > NAV_COOLDOWN)) dir = 'LEFT';
+            else if (dpadRight && (!prevButtons.dpadRight || now - lastNavTime > NAV_COOLDOWN)) dir = 'RIGHT';
+
+            if (dir) {
+              const container = document.querySelector('.onboarding-root');
+              const currentEl = container?.querySelector(`.gamepad-focused`) ||
+                                container?.querySelector(`[data-nav-id="${focusedTarget?.id}"]`);
+              const nextEl = findNextSpatialElement({ container, currentEl, direction: dir });
+              if (nextEl && nextEl.dataset.navId) {
+                setFocusedTarget?.({ zone: 'onboarding', id: nextEl.dataset.navId });
+                nextEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                sfx?.playTileNav?.();
+                lastNavTime = now;
+              }
+            }
+          }
+        }
+
+        // --- SCREEN 03: Interactive Gamepad Controls ---
+        else if (currentStep === 2) {
+          // START button -> Skip to Games & Boot Library
+          if (btnStart && !prevButtons.btnStart) {
+            handleFinish();
+          }
+          // A button on Skip -> Skip to Games
+          else if (btnA && !prevButtons.btnA && focusedTarget?.id === 'skip') {
+            handleFinish();
+          }
+        }
+
+        prevButtons = { btnA, btnB, btnStart, shoulderL, shoulderR, dpadUp, dpadDown, dpadLeft, dpadRight };
+      }
+
+      animId = requestAnimationFrame(pollGamepad);
+    };
+
+    animId = requestAnimationFrame(pollGamepad);
+    return () => {
+      if (animId) cancelAnimationFrame(animId);
+    };
+  }, [isOpen, shouldRenderMobile, currentStep, focusedTarget?.id, handleNext, handleBack, handleFinish, setFocusedTarget, sfx]);
 
   if (!isOpen) return null;
 
@@ -207,10 +556,12 @@ export default function OnboardingScreen({
           <button
             className={`onboarding-skip-btn ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'skip' ? 'gamepad-focused' : ''}`}
             onClick={handleFinish}
-            title="Skip Onboarding & Explore Library (START Button)"
+            title={hasGamepad ? 'Skip Onboarding & Explore Library (START Button)' : 'Skip Onboarding & Explore Library (ESC Key)'}
+            data-nav="onboarding"
+            data-nav-id="skip"
           >
             <span className="onboarding-btn-gamepad-badge">
-              <span className="gamepad-badge-key">START</span>
+              <span className="gamepad-badge-key">{hasGamepad ? 'START' : 'ESC'}</span>
             </span>
             <span>Skip to Games</span>
             <ChevronRight size={16} />
@@ -724,6 +1075,8 @@ export default function OnboardingScreen({
               setFocusedTarget={setFocusedTarget}
               focusZone="onboarding"
               gamepadConnected={gamepadConnected}
+              activeTab={characterStudioTab}
+              onTabChange={setCharacterStudioTab}
             />
           </div>
         )}
@@ -777,8 +1130,13 @@ export default function OnboardingScreen({
               <button
                 className={`onboarding-back-btn ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'back' ? 'gamepad-focused' : ''}`}
                 onClick={handleBack}
-                title="Previous Step"
+                title={hasGamepad ? 'Previous Step (B Button)' : 'Previous Step (DEL / BACKSPACE Key)'}
+                data-nav="onboarding"
+                data-nav-id="back"
               >
+                <span className="onboarding-btn-gamepad-badge">
+                  <span className="gamepad-badge-key">{hasGamepad ? 'B' : 'DEL'}</span>
+                </span>
                 <ArrowLeft size={18} />
                 <span>Back</span>
               </button>
@@ -787,8 +1145,15 @@ export default function OnboardingScreen({
             <button
               className={`onboarding-primary-btn ${focusedTarget?.zone === 'onboarding' && focusedTarget?.id === 'next' ? 'gamepad-focused' : ''}`}
               onClick={handleNext}
-              title={currentStep === 0 ? 'Create Character' : 'View Controls Guide'}
+              title={currentStep === 0 
+                ? (hasGamepad ? 'Create Character (A Button)' : 'Create Character (SPACE Key)')
+                : (hasGamepad ? 'View Controls (A Button)' : 'View Controls (SPACE Key)')}
+              data-nav="onboarding"
+              data-nav-id="next"
             >
+              <span className="onboarding-btn-gamepad-badge is-primary">
+                <span className="gamepad-badge-key">{hasGamepad ? 'A' : 'SPACE'}</span>
+              </span>
               <span>{currentStep === 0 ? 'Create Character' : 'View Controls'}</span>
               {currentStep === totalSteps - 1 ? <Play size={16} fill="currentColor" /> : <ChevronRight size={18} />}
             </button>

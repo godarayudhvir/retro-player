@@ -10,7 +10,7 @@
 
 | # | Impact | Specification | Domain | Description | Status |
 | :---: | :---: | :--- | :--- | :--- | :--- |
-| 1 | 🟡 Medium | **[App UI Gamepad & Keyboard Navigation Re-Architecture](gamepad-ui-navigation-rearchitecture.md)** | UI Navigation / Controls | 3-phase initiative: Archive complete ledger of existing UI shortcuts, cleanly remove broken in-app spatial navigation (keeping emulator controls 100% intact), and rebuild geometry-aware 2D bounding-box spatial navigation for Desktop then Mobile. | 📋 Planned |
+| 1 | 🟡 Medium | **[App UI Gamepad & Keyboard Navigation Re-Architecture](gamepad-ui-navigation-rearchitecture.md)** | UI Navigation / Controls | Universal accessibility initiative: Onboarding & modals 100% completed with 2D spatial engine & adaptive badges; Main Desktop and Mobile UI navigation up next. | 🔄 In Progress |
 | 2 | 🟡 Medium | **[Settings & Library Management Hub](settings-hub.md)** | System Hub & Tools | Clean console-native settings redesign: ROM library administration, BGM track manager, and IndexedDB storage diagnostics (wires into existing server REST endpoints). | 📋 Planned |
 | 3 | 🟡 Medium | **[Dynamic Emulation Core Switching](emulation-core-switching.md)** | Core Emulation | Per-system and per-game WebAssembly core override engine (mGBA vs VBA-M, Gambatte vs SameBoy, Snes9x vs bsnes, Beetle PSX vs PCSX ReARMed). | 📋 Planned |
 | 4 | 🟡 Medium | **[3D Cartridge & Media Designs](cartridge-designs-spec.md)** | UI / 3D Graphics | Master geometric and SVG/WebGL specifications for authentic physical cartridge shells (Game Boy, GBA, NES, SNES, NDS) with holographic labels. | 📋 Planned |

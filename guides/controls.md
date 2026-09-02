@@ -28,19 +28,53 @@ Retro Player supports standard USB, Bluetooth, and 2.4GHz wireless controllers (
 
 ---
 
-## 🚀 Onboarding & Interactive Controller Guide Controls
+## 🚀 Onboarding & Modal Dialog Controls
 
-During first-time startup or when revisiting the Onboarding wizard:
+Retro Player features 100% controller, keyboard, and touch accessibility across the Onboarding wizard and in-app modal dialogs. For the complete multimodal heuristics and touch rules, see the dedicated **[Universal Accessibility Guide](accessibility.md)**.
 
-| Screen / Phase | Gamepad Action | Function |
-| :--- | :--- | :--- |
-| **Phase 1: Welcome & Overview** | **`D-Pad / Left Stick`** | Navigate between "Skip to Games" header button and "Create Character" action button with sleek console-grade focus rings |
-| | **`[A]` Button / `Enter`** | Advance to next phase ("Create Character") / Trigger action |
-| | **`START` Button** | Skip onboarding immediately and boot into library |
-| **Phase 2: Character Studio** | **`D-Pad / Left Stick`** | Navigate between archetype cards, randomizer dice, name inputs, and color circles |
-| | **`[A]` Button / `Enter`** | Select archetype preset, pick color, or roll dice |
-| **Phase 3: Interactive Visualizer** | **Controller Buttons & Sticks** | Live vector DualShock schematic highlights active inputs with Web Audio SFX |
-| | **`START` Button** | **Exclusive button to complete onboarding and launch into the game library** |
+### A. Desktop Onboarding Wizard
+| Screen / Phase | Gamepad Action | Keyboard Key | Function |
+| :--- | :--- | :--- | :--- |
+| **Phase 1: Welcome & Overview** | `D-Pad` / `Left Stick` | `Arrow Keys` | Move focus between "Skip to Games" and "Create Character" |
+| | `[ A ]` Button | `Space` / `Enter` | Advance to Phase 2 ("Create Character") |
+| | `START` Button | `Escape` | Skip onboarding immediately and boot into library |
+| **Phase 2: Character Studio** | Focus starts on `Randomize` | Focus starts on `Randomize` | Immediate roll of randomized avatar and name |
+| | `L1` (Left Bumper) | `Q` | Switch to Archetypes tab |
+| | `R1` (Right Bumper) | `E` | Switch to Custom Name & Color tab |
+| | `D-Pad` / `Left Stick` | `Arrow Keys` | 2D spatial navigation across 48 avatars, color circles, and inputs |
+| | `[ A ]` Button | `Enter` | Select archetype preset, pick color, or roll dice |
+| | `[ A ]` on "Continue" | `Space` / `Enter` | Save passport profile and advance to Phase 3 |
+| **Phase 3: Interactive Visualizer** | Controller Buttons & Sticks | Keyboard Keys | Live vector DualShock schematic highlights active inputs with Web Audio SFX |
+| | `START` Button | `Escape` / `Space` | Complete onboarding and launch into the game library |
+
+### B. Mobile Onboarding Wizard (Screens 0 through 6)
+| Screen | Gamepad Action | Keyboard Key | Function |
+| :--- | :--- | :--- | :--- |
+| **Screen 0: Welcome Poster** | `[ A ]` Button | `Space` / `Enter` | Begin onboarding flow ("Get Started") |
+| | `START` Button | `Escape` | Skip directly to game library |
+| **Screens 1–4: Feature Showcases** | `[ A ]` Button | `Space` / `Enter` | Advance to next showcase screen ("Continue") |
+| | `[ B ]` Button | `Delete` / `Backspace` | Return to previous screen ("Back") |
+| | `START` Button | `Escape` | Skip remaining tour directly to library |
+| | `D-Pad Up/Down` / `Stick` | `Arrow Up / Down` | Scroll long card content smoothly |
+| **Screen 5: Create Character** | Focus starts on `Randomize` | Focus starts on `Randomize` | Roll dice for instant avatar and name |
+| | `L1` (Left Bumper) | `Q` | Switch to Archetypes tab |
+| | `R1` (Right Bumper) | `E` | Switch to Custom tab |
+| | `D-Pad` / `Left Stick` | `Arrow Keys` | Full 2D spatial navigation across 48 avatars and color circles |
+| | `[ A ]` on "Ready" | `Space` / `Enter` | Advance to Screen 6 |
+| | `[ B ]` Button | `Delete` / `Backspace` | Return to Screen 4 |
+| **Screen 6: You're All Set!** | `D-Pad` / `Left Stick` | `Arrow Keys` | Spatial navigation between Load ROMs card, Explore Library, Back, and Skip |
+| | `[ X ]` Button | `L` Key | Direct shortcut from anywhere to open Load ROM modal |
+| | `[ A ]` Button | `Space` / `Enter` | Launch directly into game library |
+| | `[ B ]` Button | `Delete` / `Backspace` | Return to Screen 5 |
+
+### C. Load Custom ROM or Folder Modal (`LoadRomModal`)
+| Element / Action | Gamepad Action | Keyboard Key | Function |
+| :--- | :--- | :--- | :--- |
+| **Initial Focus** | Focus starts on `Choose File(s)` | Focus starts on `Choose File(s)` | Ready for immediate confirmation |
+| **Spatial Navigation** | `D-Pad` / `Left Stick` | `Arrow Keys` | Moves between Close (✕), Choose File(s), Choose ROMs Folder, and all 12 platform chips |
+| **Confirm Action** | `[ A ]` Button | `Space` / `Enter` | Trigger focused button or open platform-filtered file picker |
+| **Exit / Dismiss** | `[ B ]` Button | `Escape` | Closes modal and returns to previous view with audio SFX |
+| **Auto-Scroll Reset** | Navigating to `[✕]` or top buttons | Navigating to `[✕]` or top buttons | Automatically resets scroll to top (0px) so dropzone is 100% visible |
 
 ---
 

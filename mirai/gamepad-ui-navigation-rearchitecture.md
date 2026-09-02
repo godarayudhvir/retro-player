@@ -80,37 +80,56 @@ The following controls belong to the active emulation runtime and **must remain 
 
 ---
 
-## 3. Phase Plan & Detailed Logic
+## 3. Phase Plan & Implementation Progress
 
-### Phase 1: Complete UI Navigation Removal
-- **Goal**: Cleanly isolate emulator inputs from UI navigation.
-- **Actions**:
-  - Remove all UI spatial navigation loops, DOM queries (`.ds-rail-action-btn`, `.cardModal`, `.scraper-scope-tab`, `.character-studio-tab`), and synthetic keyboard event handlers that drive UI focus from `useGamepadNavigation.js`.
-  - Disable legacy keyboard spatial navigation (`Arrow Keys`, `WASD`, `Q`, `E`) inside the UI shell so focus cannot jump to broken pseudo-coordinates.
-  - Retain the gamepad connection status listener, battery telemetry, audio SFX triggers, and in-game controls (`activeGame` guards, `L3`, `L3 + R3`, `Escape`).
+### Phase 1: Engine Foundation & Legacy Cleanup (✅ COMPLETED)
+- **Goal**: Cleanly isolate emulator inputs from UI navigation and create modular 2D spatial utilities.
+- **Accomplishments**:
+  - Removed obsolete index-based UI navigation loops from `useGamepadNavigation.js`.
+  - Created `src/utils/spatialNavigation.js` delivering geometric nearest-neighbor bounding-box scoring with directional bias (`UP`, `DOWN`, `LEFT`, `RIGHT`).
+  - Preserved in-game emulator controls (`L3`, `L3 + R3`, audio SFX, battery telemetry) with 100% stability.
 
-### Phase 2: Desktop UI Re-Implementation
-- **Goal**: Build a deterministic 2D spatial navigation engine for desktop viewports.
-- **Logic**:
-  - Replace index-based guessing with **geometric bounding-box projection**:
-    ```javascript
-    // Calculate distance and angular alignment between current focused element and candidate elements
-    const getCandidateDistance = (rectFrom, rectTo, direction) => {
-      // Vector projection & nearest-neighbor collision detection
-    };
-    ```
-  - Define clear spatial zones with explicit exit/entry ports:
-    - `systemRibbon` ↔ `cartridgeGrid` ↔ `topbarIcons` ↔ `modalDialog`
-  - Trap navigation strictly inside active modals and overlay drawers.
+### Phase 2: Desktop Onboarding Wizard Navigation (✅ COMPLETED)
+- **Goal**: Fully controllable desktop onboarding with keyboard, gamepad, and mouse.
+- **Accomplishments**:
+  - Phase 1 (Welcome & Platform Showcase): `Space`/`Enter` or Gamepad `A` to advance, `Esc`/`Start` to skip.
+  - Phase 2 (Character Studio): Focus initializes on `Randomize`; `Q`/`L1` and `E`/`R1` bumper navigation between Archetypes and Custom tabs; 2D spatial navigation across 48 avatars, color circles, and inputs.
+  - Phase 3 (DualShock Controls Visualizer): Full-height layout fitting all viewports; `Start`/`Escape` to complete.
 
-### Phase 3: Mobile UI Re-Implementation
+### Phase 3: Mobile Onboarding (Screens 0–6) Navigation (✅ COMPLETED)
+- **Goal**: Responsive, accessible mobile onboarding across all 7 screens with adaptive input detection.
+- **Accomplishments**:
+  - Tri-modal input detection: Automatic switching between Gamepad (`[ A ]`, `[ B ]`, `[ START ]`), Keyboard (`[ SPACE ]`, `[ DEL ]`, `[ ESC ]`), and Touch (zero badge clutter).
+  - Screen 0 (Welcome): `Space`/`A` to Get Started, `Esc`/`Start` to Skip.
+  - Screens 1–4 (Feature Showcases): `Space`/`A` Continue, `DEL`/`Backspace`/`B` Back, `Esc`/`Start` Skip, Arrow Up/Down & D-Pad vertical scroll.
+  - Screen 5 (Character Studio): Starts on `Randomize`; `Q`/`L1` to Archetypes, `E`/`R1` to Custom; 2D spatial navigation across avatars and color palettes.
+  - Screen 6 (You're All Set!): 2D spatial navigation between Load Custom ROM card, Explore Library button, Back, and Skip. Direct `L` (Keyboard) / `X` (Gamepad) to open Load ROM modal.
+
+### Phase 4: Load Custom ROM & Ingestion Modal (✅ COMPLETED)
+- **Goal**: Console-grade modal interaction for custom ROM loading.
+- **Accomplishments**:
+  - 2D spatial navigation between "Close" (✕), "Choose File(s)", "Choose ROMs Folder", and all 12 Supported Console Formats chips.
+  - High-contrast visual badges: `[ A ]` (gamepad) and `[ SPACE ]` (keyboard) with bespoke blue/purple palettes.
+  - Auto-scroll reset: Reaching the close button or top actions automatically smooth-scrolls modal body to top.
+  - Confirmation via `Space` / `Enter` / Gamepad `A`; dismiss/exit via `Esc` / Gamepad `B`.
+
+### Phase 5: Desktop App UI Spatial Navigation (📋 NEXT UP)
+- **Goal**: Deterministic 2D spatial navigation across the main desktop application interface.
+- **Scope**:
+  - System Ribbon: `Q` / `E` or `[` / `]` or bumpers `L1` / `R1` to cycle consoles.
+  - Cartridge Grid: D-pad / Arrow navigation across game tiles with smooth container scrolling.
+  - Topbar Actions: Search, BGM music drawer, Settings, Hall of Fame.
+  - Detail Drawers: Full keyboard & gamepad navigation inside game detail modal / Save Data Studio.
+
+### Phase 6: Mobile App UI Spatial Navigation (📋 UPCOMING)
 - **Goal**: Extend the spatial engine to mobile viewports (portrait feeds, bottom sheets, search overlays).
-- **Logic**:
-  - Handle smooth scrolling for horizontal system chip carousels and vertical mobile cards:
-    ```javascript
-    candidateEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    ```
-  - Mobile bottom sheets: Auto-focus the primary **Play** action, with `D-Pad Left/Right` toggling Favorite and Close.
+- **Scope**:
+  - Horizontal system chip carousels with centered auto-scroll.
+  - Mobile bottom sheets: Auto-focus primary action, D-Pad Left/Right for secondary actions.
+  - Mobile search modal & filter trays.
+
+### Phase 7: Emulator Controls & Hotkey Harmonization (📋 UPCOMING)
+- **Goal**: Finalize and unify all in-game emulator controls, hotkey remapping, and gamepad configurations across all 12 emulated cores.
 
 ---
 
@@ -118,11 +137,15 @@ The following controls belong to the active emulation runtime and **must remain 
 
 1. **Keep In-Game Engine Untouched**:
    - Verify `if (stateRef.current.activeGame)` block in `useGamepadNavigation.js` remains the primary bypass route.
-2. **Implement New Modular Hook**:
-   - Create `src/hooks/useSpatialNavigation.js` containing the pure DOM bounding-box calculation.
-3. **Register Focusable Elements via Data Attributes**:
-   - Use declarative markup: `data-nav="grid-card"`, `data-nav="system-tab"`, `data-nav="modal-action"` rather than fragile CSS class selectors.
+2. **Modular Helper Architecture**:
+   - Pure DOM bounding-box calculation lives in `src/utils/spatialNavigation.js`.
+3. **Declarative Markup Standard**:
+   - Every focusable component MUST declare `data-nav="<zone>"` and `data-nav-id="<unique-id>"`.
 4. **Validation Checklist**:
-   - [ ] No ghost focus or pseudo-location outlines appear in library UI.
+   - [x] Desktop Onboarding 100% accessible via Keyboard and Gamepad.
+   - [x] Mobile Onboarding Screens 0–6 100% accessible via Keyboard and Gamepad.
+   - [x] Load ROM Modal 100% accessible with auto-scroll and glitch-free badges.
+   - [ ] Main Library Cartridge Grid 100% navigable with D-Pad and Arrow Keys.
    - [ ] In-game emulator controls (`L3`, `L3 + R3`, gameplay buttons) function with zero regressions.
    - [ ] Modals and drawers maintain 100% input isolation.
+
