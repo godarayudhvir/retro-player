@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Gamepad2, Github, ExternalLink, Info, X, Cpu } from 'lucide-react';
+import { Gamepad2, Github, ExternalLink, Info, X } from 'lucide-react';
 import { haptics } from '../services/hapticsService';
 import { resolveAssetPath } from '../utils/assetPath';
 
@@ -79,7 +79,6 @@ export default function AboutInfoModal({ isOpen, focusedTarget, onClose, sfx }) 
         <div className="backup-modal-body" style={{ padding: '1.25rem 1.75rem', maxHeight: '78vh', overflowY: 'auto' }}>
           {/* Supported Emulation Systems & WebAssembly Cores Matrix */}
           <div className="info-section-title">
-            <Cpu size={15} color="#10b981" />
             <span>Supported Systems &amp; WebAssembly Cores</span>
           </div>
 
