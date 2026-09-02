@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dices, Check, Tag, Shield, Zap, Sword, Gamepad2, User, Sparkles } from 'lucide-react';
+import { Dices, Check, Tag, Shield, Zap, Sword, Gamepad2, User, Sparkles, Info } from 'lucide-react';
 import MultiAvatar from './MultiAvatar';
 import { CHARACTER_ARCHETYPES, COLOR_PALETTE, RANDOM_CHARACTER_SEEDS } from '../utils/characterPresets';
 
@@ -213,6 +213,16 @@ export default function CharacterStudio({
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Tip Card — fills dead vertical space at desktop/TV sizes */}
+            <div className="character-custom-tip">
+              <span className="character-custom-tip-icon">
+                <Info size={15} />
+              </span>
+              <span>
+                <strong>Avatar Seed:</strong> Any word, name, or code generates a unique avatar. Try your gamertag, a favourite character's name, or even a random phrase — each seed produces a completely different look.
+              </span>
             </div>
           </div>
         )}

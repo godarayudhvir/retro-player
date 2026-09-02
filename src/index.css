@@ -15233,7 +15233,8 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 .onboarding-hero-img {
   width: 100%;
   height: 100%;
-  object-fit: fill;
+  object-fit: cover;
+  object-position: top left;
   display: block;
 }
 
@@ -16600,6 +16601,37 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   box-shadow: 0 0 0 2px #ffffff, 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
+/* Custom tab tip card — fills dead vertical space on desktop */
+.character-custom-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  background: rgba(37, 99, 235, 0.05);
+  border: 1.5px solid rgba(37, 99, 235, 0.15);
+  font-size: 0.8rem;
+  color: #475569;
+  font-weight: 600;
+  line-height: 1.5;
+  margin-top: auto;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.character-custom-tip-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #2563eb;
+  opacity: 0.7;
+}
+
+[data-color-mode="dark"] .character-custom-tip {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.2);
+  color: #94a3b8;
+}
+
 /* Modal Custom Studio Specifics */
 .custom-studio-modal {
   max-width: 900px !important;
@@ -16875,6 +16907,21 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
   .feature-tuner-actions {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Allow content to scroll through the body viewport instead of clipping */
+  .character-studio-controls {
+    overflow: visible;
+  }
+
+  .character-tab-content {
+    overflow: visible;
+    min-height: 0;
+  }
+
+  /* Hide tip card on mobile — no dead space, height is auto */
+  .character-custom-tip {
+    display: none;
   }
 
   .onboarding-footer {
@@ -22617,6 +22664,31 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   }
 }
 
+/* 1. Full HD Desktop (1920 x 1080) — FHD Refinements */
+@media (min-width: 1025px) and (max-width: 1920px) {
+  .onboarding-slide-title {
+    font-size: 1.5rem;
+  }
+
+  .onboarding-slide-desc {
+    font-size: 0.95rem;
+  }
+
+  /* Ensure hero layout uses a slightly wider left column at FHD */
+  .onboarding-slide.onboarding-hero-layout {
+    grid-template-columns: 1.25fr 1fr;
+    gap: 1.25rem;
+    width: 96vw;
+    max-width: 96vw;
+  }
+
+  /* Custom tab tip — slightly tighter at 1080p */
+  .character-custom-tip {
+    font-size: 0.82rem;
+    padding: 0.8rem 1.05rem;
+  }
+}
+
 /* 2. 1440p QHD / 2K Desktop Displays (2560 x 1440) */
 @media (min-width: 1921px) and (max-width: 2560px) {
   .console-container {
@@ -22784,6 +22856,20 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   .character-color-circle {
     width: 36px;
     height: 36px;
+  }
+
+  .character-custom-tip {
+    font-size: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    border-width: 2px;
+    line-height: 1.5;
+    gap: 0.65rem;
+  }
+
+  .character-custom-tip-icon svg {
+    width: 20px;
+    height: 20px;
   }
 
   .ds-theme-container {
@@ -23219,6 +23305,20 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
     width: 52px;
     height: 52px;
     border-radius: 8px;
+  }
+
+  .character-custom-tip {
+    font-size: 1.3rem;
+    padding: 1.25rem 1.5rem;
+    border-radius: 10px;
+    border-width: 2.5px;
+    gap: 0.85rem;
+    line-height: 1.55;
+  }
+
+  .character-custom-tip-icon svg {
+    width: 26px;
+    height: 26px;
   }
 
   .onboarding-footer {
