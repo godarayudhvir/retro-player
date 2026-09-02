@@ -14254,8 +14254,7 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 .onboarding-body-viewport {
   flex: 1 1 auto;
   min-height: 0;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14264,68 +14263,83 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 }
 
 .onboarding-slide {
-  max-width: 960px;
+  max-width: 100%;
   width: 100%;
   height: 100%;
   max-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
   text-align: center;
-  gap: 0.6rem;
-  margin: auto;
+  gap: 0.55rem;
+  margin: 0;
   box-sizing: border-box;
 }
 
+.onboarding-slide.slide-character {
+  max-width: 100%;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.75rem;
+}
+
 .onboarding-slide.slide-controls {
-  max-width: 1060px;
+  max-width: 100%;
+  width: 100%;
   justify-content: space-between;
 }
 
 .onboarding-header-card {
-  background: var(--tile-bg, linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%));
-  border: 2px solid var(--panel-border, #94a3b8);
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
   border-radius: 8px;
-  padding: 0.6rem 1.25rem;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 3px 8px rgba(0, 0, 0, 0.08);
+  padding: 0.65rem 1.45rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 2px 6px rgba(0, 0, 0, 0.04);
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  text-align: center;
+  text-align: left;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
+  gap: 0.25rem;
   flex-shrink: 0;
 }
 
 .onboarding-header-card.is-compact {
-  padding: 0.45rem 1rem;
+  padding: 0.45rem 1.15rem;
 }
 
 [data-color-mode="dark"] .onboarding-header-card {
-  background: var(--tile-bg, linear-gradient(180deg, #2d3748 0%, #1a202c 100%));
-  border-color: #475569;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 3px 8px rgba(0, 0, 0, 0.35);
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 3px 8px rgba(0, 0, 0, 0.3);
 }
 
 .onboarding-slide-title {
-  font-size: clamp(1.15rem, 2.5vw, 1.45rem);
+  font-size: 1.3rem;
   font-weight: 900;
-  color: var(--text-main, #0f172a);
+  color: #0f172a;
   line-height: 1.2;
   margin: 0;
   letter-spacing: -0.02em;
 }
 
 [data-color-mode="dark"] .onboarding-slide-title {
-  color: #ffffff;
+  color: #f8fafc;
 }
 
 .onboarding-slide-desc {
-  font-size: 0.82rem;
-  color: var(--text-sub, #475569);
-  max-width: 680px;
-  line-height: 1.35;
+  font-size: 0.85rem;
+  color: #64748b;
+  max-width: 900px;
+  line-height: 1.4;
   margin: 0;
   font-weight: 600;
 }
@@ -14366,28 +14380,38 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 [data-color-mode="dark"] .onboarding-hero-badge svg {
   color: #fbbf24;
 }
-/* 4 Feature Pillars Grid — DS Beveled Panels */
+/* 4 Feature Pillars Grid — DS Beveled Panels (Fluid Responsive) */
 .onboarding-pillars-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.85rem;
   width: 100%;
-  max-width: 840px;
+  max-width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+@media (max-width: 1200px) {
+  .onboarding-pillars-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.65rem;
+  }
 }
 
 .onboarding-pillar-card {
   background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
-  border: 2.5px solid #cbd5e1;
+  border: 2px solid #cbd5e1;
   border-radius: 8px;
-  padding: 1.25rem 1.4rem;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 0.75rem 1rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 3px 8px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
-  gap: 0.75rem;
+  gap: 0.45rem;
   transition: all 0.15s ease;
   box-sizing: border-box;
+  height: 100%;
 }
 
 .onboarding-pillar-card:hover {
@@ -14408,9 +14432,601 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   background: #1e293b;
 }
 
+.pillar-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.pillar-badge-tag {
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.pillar-badge-tag.green {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.pillar-badge-tag.gold {
+  background: rgba(234, 179, 8, 0.12);
+  color: #ca8a04;
+  border-color: rgba(234, 179, 8, 0.25);
+}
+
+.pillar-badge-tag.purple {
+  background: rgba(168, 85, 247, 0.12);
+  color: #9333ea;
+  border-color: rgba(168, 85, 247, 0.25);
+}
+
+[data-color-mode="dark"] .pillar-badge-tag {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+[data-color-mode="dark"] .pillar-badge-tag.green {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+[data-color-mode="dark"] .pillar-badge-tag.gold {
+  background: rgba(234, 179, 8, 0.2);
+  color: #fde047;
+  border-color: rgba(234, 179, 8, 0.4);
+}
+
+[data-color-mode="dark"] .pillar-badge-tag.purple {
+  background: rgba(168, 85, 247, 0.2);
+  color: #c084fc;
+  border-color: rgba(168, 85, 247, 0.4);
+}
+
+.pillar-highlight-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+
+.pillar-visual-graphic-wrap {
+  margin: 0.5rem 0 0.15rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+/* 1. Save Engine & Storage Studio In-App UX Demo */
+.pillar-ux-demo-card.save-demo {
+  padding: 0.55rem 0.75rem;
+  border-radius: 6px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1.5px solid rgba(16, 185, 129, 0.28);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+[data-color-mode="dark"] .pillar-ux-demo-card.save-demo {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.save-demo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.save-demo-file-info {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.save-demo-filename {
+  font-size: 0.78rem;
+  font-weight: 800;
+  font-family: monospace;
+  color: #0f172a;
+}
+
+[data-color-mode="dark"] .save-demo-filename {
+  color: #f8fafc;
+}
+
+.save-demo-size {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.06);
+  color: #64748b;
+}
+
+[data-color-mode="dark"] .save-demo-size {
+  background: rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+}
+
+.save-demo-status {
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #10b981;
+  color: #ffffff;
+}
+
+.save-demo-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.save-demo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  cursor: default;
+}
+
+.save-demo-btn.export-btn {
+  background: #ffffff;
+  border: 1.5px solid #10b981;
+  color: #059669;
+  box-shadow: 0 1px 2px rgba(16, 185, 129, 0.15);
+}
+
+[data-color-mode="dark"] .save-demo-btn.export-btn {
+  background: #1e293b;
+  border-color: #10b981;
+  color: #34d399;
+}
+
+.save-demo-btn.resume-btn {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  color: #2563eb;
+}
+
+[data-color-mode="dark"] .save-demo-btn.resume-btn {
+  color: #60a5fa;
+}
+
+.resume-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2563eb;
+  animation: pulse-dot 1.5s infinite;
+}
+
+/* 2. Badge Case Header & Badges Row */
+.pillar-badge-case-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 0.1rem;
+}
+
+.badge-case-title {
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  color: #ca8a04;
+}
+
+[data-color-mode="dark"] .badge-case-title {
+  color: #fde047;
+}
+
+.badge-case-progress {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(234, 179, 8, 0.15);
+  color: #ca8a04;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+[data-color-mode="dark"] .badge-case-progress {
+  color: #fde047;
+}
+
+.pillar-badges-showcase-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(234, 179, 8, 0.08);
+  border: 1.5px solid rgba(234, 179, 8, 0.25);
+  overflow-x: auto;
+}
+
+[data-color-mode="dark"] .pillar-badges-showcase-row {
+  background: rgba(234, 179, 8, 0.12);
+  border-color: rgba(234, 179, 8, 0.35);
+}
+
+.pillar-gym-badge-box {
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1.5px solid rgba(234, 179, 8, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+[data-color-mode="dark"] .pillar-gym-badge-box {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.pillar-gym-badge-box.is-unlocked {
+  border-color: #eab308;
+  background: rgba(234, 179, 8, 0.15);
+}
+
+.pillar-gym-badge-img {
+  width: 17px;
+  height: 17px;
+  object-fit: contain;
+  transition: all 0.2s ease;
+}
+
+.pillar-gym-badge-img.is-earned {
+  filter: drop-shadow(0 1px 3px rgba(234, 179, 8, 0.45));
+}
+
+.pillar-gym-badge-img.is-locked {
+  filter: grayscale(100%) opacity(0.22);
+}
+
+/* 3. In-App Trophy Mini Card: Ironman Endurance */
+.pillar-ux-trophy-card {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1.5px solid #38bdf8;
+  box-shadow: 0 1px 3px rgba(56, 189, 248, 0.15);
+}
+
+[data-color-mode="dark"] .pillar-ux-trophy-card {
+  background: #1e293b;
+  border-color: #0284c7;
+}
+
+.trophy-mini-icon-box {
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.trophy-mini-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.trophy-mini-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.trophy-mini-title {
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+[data-color-mode="dark"] .trophy-mini-title {
+  color: #f8fafc;
+}
+
+.trophy-mini-pts {
+  font-size: 0.65rem;
+  font-weight: 900;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(56, 189, 248, 0.15);
+  color: #0284c7;
+}
+
+[data-color-mode="dark"] .trophy-mini-pts {
+  color: #38bdf8;
+}
+
+.trophy-mini-sub {
+  font-size: 0.65rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+[data-color-mode="dark"] .trophy-mini-sub {
+  color: #94a3b8;
+}
+
+/* 4. Gamepad Low Battery Alert Banner Demo */
+.pillar-battery-alert-demo {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 6px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1.5px solid rgba(239, 68, 68, 0.3);
+}
+
+[data-color-mode="dark"] .pillar-battery-alert-demo {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+.battery-alert-icon-wrap {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: #ef4444;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pulse-alert {
+  animation: pulse-dot 1s infinite;
+}
+
+.battery-alert-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.battery-alert-text strong {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #dc2626;
+}
+
+[data-color-mode="dark"] .battery-alert-text strong {
+  color: #f87171;
+}
+
+.battery-alert-text span {
+  font-size: 0.65rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+[data-color-mode="dark"] .battery-alert-text span {
+  color: #94a3b8;
+}
+
+.pillar-system-icons-grid-4x3 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.pillar-console-card-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.45rem;
+  border-radius: 5px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #334155;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: all 0.15s ease;
+}
+
+[data-color-mode="dark"] .pillar-console-card-item {
+  background: #1e293b;
+  border-color: #475569;
+  color: #cbd5e1;
+}
+
+.pillar-console-svg-large {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* Real Topbar HUD Demo Row in Card 4 */
+.pillar-topbar-hud-demo-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.status-pill.demo-pill {
+  cursor: default;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Keycaps & Controls Showcase Row */
+.pillar-keybinds-showcase-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  background: rgba(168, 85, 247, 0.08);
+  border: 1.5px solid rgba(168, 85, 247, 0.25);
+}
+
+[data-color-mode="dark"] .pillar-keybinds-showcase-row {
+  background: rgba(168, 85, 247, 0.12);
+  border-color: rgba(168, 85, 247, 0.35);
+}
+
+.pillar-keycap-btn {
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-bottom-width: 2.5px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #334155;
+  font-family: monospace;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+[data-color-mode="dark"] .pillar-keycap-btn {
+  background: #1e293b;
+  border-color: #475569;
+  color: #cbd5e1;
+}
+
+.pillar-keycap-btn.primary {
+  background: rgba(168, 85, 247, 0.15);
+  border-color: rgba(168, 85, 247, 0.4);
+  color: #9333ea;
+}
+
+[data-color-mode="dark"] .pillar-keycap-btn.primary {
+  color: #c084fc;
+}
+
+.pillar-keycap-btn.keyb {
+  background: rgba(30, 41, 59, 0.08);
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+[data-color-mode="dark"] .pillar-keycap-btn.keyb {
+  background: #0f172a;
+  border-color: #475569;
+  color: #f8fafc;
+}
+
+.pillar-system-icons-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+
+.pillar-console-pill {
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+[data-color-mode="dark"] .pillar-console-pill {
+  background: #1e293b;
+  border-color: #475569;
+  color: #cbd5e1;
+}
+
+.pillar-console-svg {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.pillar-gamepad-hud-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #22c55e;
+}
+
+[data-color-mode="light"] .pillar-gamepad-hud-preview {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.hud-battery-text {
+  font-size: 0.65rem;
+  font-weight: 900;
+  font-family: monospace;
+  color: #22c55e;
+}
+
+.highlight-chip {
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+[data-color-mode="dark"] .highlight-chip {
+  background: #1e293b;
+  border-color: #475569;
+  color: #cbd5e1;
+}
+
 .pillar-icon-wrap {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 6px;
   display: flex;
   align-items: center;
@@ -14420,11 +15036,17 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
+.pillar-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .pillar-text h3 {
   font-size: 1.05rem;
   font-weight: 900;
   color: #0f172a;
-  margin: 0 0 0.3rem 0;
+  margin: 0 0 0.35rem 0;
   letter-spacing: -0.01em;
 }
 
@@ -14449,7 +15071,7 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem;
-  margin-top: 0.25rem;
+  margin-top: 0.4rem;
 }
 
 .system-pill {
@@ -14484,8 +15106,152 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 /* Standalone PWA Install CTA Card — DS Beveled Action */
 .onboarding-pwa-cta-container {
   width: 100%;
-  max-width: 840px;
+  max-width: 100%;
   margin-top: 0.4rem;
+  box-sizing: border-box;
+}
+
+/* Option A: 2-Column Hero Showcase Layout (Desktop & TV) */
+.onboarding-slide.onboarding-hero-layout {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 1.5rem;
+  width: 95vw;
+  max-width: 95vw;
+  height: 100%;
+  max-height: 100%;
+  align-items: stretch;
+  box-sizing: border-box;
+}
+
+.onboarding-hero-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: 100%;
+  min-height: 0;
+  justify-content: space-between;
+}
+
+.onboarding-hero-left .onboarding-pillars-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  flex: 1;
+  min-height: 0;
+}
+
+.onboarding-hero-left .onboarding-pillar-card {
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.onboarding-hero-right {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: 100%;
+  min-height: 0;
+  justify-content: space-between;
+}
+
+.onboarding-hero-preview-frame {
+  background: var(--tile-bg, linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%));
+  border: 2px solid #cbd5e1;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  transition: all 0.2s ease;
+}
+
+[data-color-mode="dark"] .onboarding-hero-preview-frame {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-color: #475569;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.onboarding-hero-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0.85rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+  border-bottom: 1.5px solid #cbd5e1;
+  flex-shrink: 0;
+}
+
+[data-color-mode="dark"] .onboarding-hero-preview-header {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-bottom-color: #334155;
+}
+
+.hero-preview-pill {
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: #1e293b;
+}
+
+[data-color-mode="dark"] .hero-preview-pill {
+  color: #f1f5f9;
+}
+
+.hero-preview-live-tag {
+  font-size: 0.65rem;
+  font-weight: 900;
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(37, 99, 235, 0.25);
+}
+
+[data-color-mode="dark"] .hero-preview-live-tag {
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.12);
+  border-color: rgba(96, 165, 250, 0.3);
+}
+
+.onboarding-hero-img-wrap {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  background: #000000;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.onboarding-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  display: block;
+}
+
+/* Mobile & Handheld (<=1024px or max-height <= 850px) Fallback to standard 1-column */
+@media (max-width: 1024px), (max-height: 850px) {
+  .onboarding-slide.onboarding-hero-layout {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .onboarding-hero-right {
+    display: none !important;
+  }
+
+  .onboarding-hero-left .onboarding-pillars-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* In-grid PWA install slot — visible only on mobile (overridden in <=640px breakpoint) */
@@ -15283,39 +16049,47 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 .character-studio-container {
   display: grid;
   grid-template-columns: 280px 1fr;
-  gap: 1.5rem;
+  gap: 1.25rem;
   width: 100%;
-  max-width: 860px;
-  background: #f8fafc;
-  border: 3px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 1.35rem;
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.9), 0 8px 24px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 16px rgba(0, 0, 0, 0.06);
   box-sizing: border-box;
   text-align: left;
 }
 
 [data-color-mode="dark"] .character-studio-container {
-  background: #1a202c;
-  border-color: #475569;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 30px rgba(0, 0, 0, 0.5);
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 .character-studio-hero {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  min-height: 0;
 }
 
 .character-passport-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #ffffff;
+  justify-content: flex-start;
+  background: #f8fafc;
   border: 2px solid #cbd5e1;
-  border-radius: 6px;
-  padding: 1.15rem;
+  border-radius: 10px;
+  padding: 1.5rem 1.25rem;
   text-align: center;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
 }
 
 [data-color-mode="dark"] .character-passport-card {
@@ -15328,35 +16102,43 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1.25rem;
 }
 
 .character-passport-chip {
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 900;
   letter-spacing: 0.06em;
-  padding: 0.2rem 0.5rem;
+  padding: 0.25rem 0.6rem;
   border-radius: 4px;
 }
 
 .character-passport-id {
-  font-size: 0.74rem;
+  font-size: 0.78rem;
   font-family: monospace;
   font-weight: 800;
   color: #64748b;
 }
 
+.character-passport-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
 .character-avatar-portal {
-  width: 124px;
-  height: 124px;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
   border: 4px solid #e11d48;
-  background: #f8fafc;
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.25rem;
 }
 
 [data-color-mode="dark"] .character-avatar-portal {
@@ -15367,12 +16149,12 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  margin-bottom: 0.85rem;
+  gap: 0.75rem;
+  width: 100%;
 }
 
 .character-passport-name {
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 900;
   color: #0f172a;
   letter-spacing: -0.01em;
@@ -15382,68 +16164,22 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   color: #f8fafc;
 }
 
-.character-passport-title {
-  font-size: 0.82rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-}
-
-.character-quick-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 100%;
-}
-
-.character-dice-btn,
-.character-mutate-btn {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  padding: 0.55rem 0.65rem;
-  border-radius: 4px;
-  font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 4px rgba(0, 0, 0, 0.08);
-  transition: all 0.15s ease;
-}
-
-.character-dice-btn {
-  background: #2563eb;
-  border: 1.5px solid #1d4ed8;
-  color: #ffffff;
-}
-
-.character-dice-btn:hover {
-  background: #1d4ed8;
-}
-
-.character-mutate-btn {
-  background: #f1f5f9;
-  border: 1.5px solid #cbd5e1;
-  color: #334155;
-}
-
-.character-mutate-btn:hover {
-  background: #e2e8f0;
-  color: #0f172a;
-}
-
-[data-color-mode="dark"] .character-mutate-btn {
-  background: #1e293b;
-  border-color: #475569;
-  color: #cbd5e1;
-}
-
 .character-studio-controls {
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
   min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  flex: 1;
+}
+
+.character-tab-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .character-studio-tabs {
@@ -15632,26 +16368,33 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
 .archetype-grid-scrollable {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.65rem;
-  max-height: 240px;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  align-content: start;
+  gap: 0.75rem;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  padding: 6px 6px 6px 6px;
-  margin: -4px -4px 0 -4px;
+  overflow-x: clip;
+  padding: 0.5rem 0.5rem 0.5rem 0.25rem;
+  box-sizing: border-box;
 }
 
 .archetype-card-chip {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.65rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 4px;
-  background: #ffffff;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 0.65rem;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  background: #f8fafc;
   border: 1.5px solid #e2e8f0;
   cursor: pointer;
-  text-align: left;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  text-align: center;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 3px rgba(0, 0, 0, 0.04);
   transition: all 0.15s ease;
+  box-sizing: border-box;
 }
 
 [data-color-mode="dark"] .archetype-card-chip {
@@ -15662,6 +16405,8 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 .archetype-card-chip:hover {
   border-color: #2563eb;
   background: #eff6ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
 }
 
 [data-color-mode="dark"] .archetype-card-chip:hover {
@@ -15673,6 +16418,8 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   background: #2563eb;
   border-color: #1d4ed8;
   color: #ffffff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+  transform: translateY(-2px);
 }
 
 .archetype-card-chip.is-active strong,
@@ -15680,32 +16427,34 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   color: #ffffff !important;
 }
 
+.archetype-avatar-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .archetype-info {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 1px;
+  width: 100%;
   min-width: 0;
 }
 
 .archetype-info strong {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 900;
   color: #0f172a;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
+  text-align: center;
 }
 
 [data-color-mode="dark"] .archetype-info strong {
   color: #f8fafc;
-}
-
-.archetype-info span {
-  font-size: 0.72rem;
-  font-weight: 800;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 /* Feature Tuner */
@@ -15993,8 +16742,8 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
-/* Mobile Responsiveness (<=640px) */
-@media (max-width: 640px) {
+/* Mobile & Tablet Portrait Responsiveness (<=860px) */
+@media (max-width: 860px) {
   .onboarding-topbar {
     padding: 0.65rem 0.9rem;
     gap: 0.5rem;
@@ -16027,12 +16776,24 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
     padding: 0.75rem 0.75rem 1.5rem;
     align-items: flex-start;
     justify-content: flex-start;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .onboarding-slide {
     height: auto;
     max-height: none;
     gap: 0.75rem;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .onboarding-slide.slide-character {
+    height: auto;
+    max-height: none;
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
   }
 
   .onboarding-pillars-grid {
@@ -16070,22 +16831,46 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
   .character-studio-container {
     grid-template-columns: 1fr;
+    width: 100%;
+    max-width: 100%;
     padding: 1rem;
     gap: 1rem;
+    height: auto;
   }
 
-  .archetype-category-chips {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.45rem !important;
+  .character-passport-card {
+    padding: 1rem;
   }
 
-  .archetype-category-btn {
-    font-size: 0.76rem !important;
-    padding: 0.45rem 0.5rem !important;
+  .character-avatar-portal {
+    width: 110px;
+    height: 110px;
   }
 
   .archetype-grid-scrollable {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+    align-content: start;
+    max-height: 380px;
+    height: auto;
+    gap: 0.5rem;
+    padding: 2px;
+  }
+
+  .archetype-card-chip {
+    padding: 0.5rem 0.35rem;
+    aspect-ratio: 1 / 1;
+    gap: 0.35rem;
+  }
+
+  .archetype-avatar-wrap .multiavatar-wrapper {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+  }
+
+  .archetype-info strong {
+    font-size: 0.7rem;
   }
 
   .feature-tuner-actions {
@@ -16094,6 +16879,68 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
   .onboarding-footer {
     padding: 0.85rem 1.15rem calc(0.85rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Tablet Landscape & Handheld Responsiveness (861px - 1280px) */
+@media (min-width: 861px) and (max-width: 1280px) {
+  .onboarding-slide.slide-character {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    justify-content: flex-start;
+  }
+
+  .character-studio-container {
+    grid-template-columns: 220px 1fr;
+    max-width: 100%;
+    width: 100%;
+    padding: 1rem 1.15rem;
+    gap: 1rem;
+    height: 100%;
+    flex: 1;
+    min-height: 0;
+    box-sizing: border-box;
+  }
+
+  .character-passport-card {
+    padding: 1rem 0.75rem;
+  }
+
+  .character-avatar-portal {
+    width: 100px;
+    height: 100px;
+  }
+
+  .character-passport-name {
+    font-size: 1.05rem;
+  }
+
+  .archetype-grid-scrollable {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    align-content: start;
+    flex: 1;
+    min-height: 0;
+    gap: 0.65rem;
+    padding: 2px;
+  }
+
+  .archetype-card-chip {
+    padding: 0.65rem 0.45rem;
+    aspect-ratio: 1 / 1;
+    gap: 0.4rem;
+  }
+
+  .archetype-avatar-wrap .multiavatar-wrapper {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  .archetype-info strong {
+    font-size: 0.72rem;
   }
 }
 
@@ -21703,4 +22550,845 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
   user-select: none;
 }
+
+/* ==========================================================================
+   MULTI-RESOLUTION DISPLAY SCALING: 800p Handheld, 1440p 2K, and 4K TV
+   ========================================================================== */
+
+/* 1. 800p Handheld & Compact Landscape Viewports (Steam Deck, ROG Ally, Switch) */
+@media (min-width: 1025px) and (max-width: 1366px) and (max-height: 850px) {
+  .console-container {
+    padding: 0.65rem 1.25rem 0.85rem;
+    gap: 0.45rem;
+    max-width: 100vw;
+  }
+
+  .console-topbar {
+    gap: 0.75rem;
+  }
+
+  .system-ribbon-container {
+    padding: 0.15rem 0;
+  }
+
+  .ds-theme-container {
+    gap: 0.65rem;
+    padding: 0.25rem 0;
+  }
+
+  .ds-rail-header {
+    height: 36px;
+    min-height: 36px;
+    margin-bottom: 0.35rem;
+  }
+
+  .ds-game-title-card {
+    min-height: 36px;
+    padding: 0.35rem 0.65rem;
+  }
+
+  .ds-game-header-title {
+    font-size: 0.95rem;
+  }
+
+  .ds-action-toolbar {
+    height: 36px;
+    min-height: 36px;
+  }
+
+  .ds-tool-btn {
+    height: 36px;
+    min-height: 36px;
+    font-size: 0.7rem;
+  }
+
+  .ds-play-now-btn {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.82rem;
+  }
+
+  .ds-stat-item .stat-value {
+    font-size: 0.78rem;
+  }
+
+  .ds-spec-card {
+    padding: 0.35rem 0.55rem;
+    font-size: 0.72rem;
+  }
+}
+
+/* 2. 1440p QHD / 2K Desktop Displays (2560 x 1440) */
+@media (min-width: 1921px) and (max-width: 2560px) {
+  .console-container {
+    width: 96vw;
+    max-width: 96vw;
+    padding: 1.25rem 2rem 1.5rem;
+    gap: 0.85rem;
+  }
+
+  .settings-page-container {
+    width: 96vw;
+    max-width: 96vw;
+  }
+
+  /* Onboarding 1440p Scaling */
+  .onboarding-slide {
+    width: 95vw;
+    max-width: 95vw;
+  }
+
+  .onboarding-slide.slide-controls {
+    width: 95vw;
+    max-width: 95vw;
+  }
+
+  .onboarding-slide-title {
+    font-size: 1.85rem;
+  }
+
+  .onboarding-slide-desc {
+    font-size: 1.1rem;
+    max-width: 1000px;
+  }
+
+  .onboarding-pillars-grid {
+    width: 100%;
+    max-width: 100%;
+    gap: 1.25rem;
+  }
+
+  .onboarding-pillar-card {
+    padding: 1.25rem 1.45rem;
+  }
+
+  .pillar-text h3 {
+    font-size: 1.35rem;
+  }
+
+  .pillar-text p {
+    font-size: 1.05rem;
+    line-height: 1.55;
+  }
+
+  .pillar-badge-tag {
+    font-size: 0.78rem;
+    padding: 3px 9px;
+  }
+
+  .highlight-chip,
+  .pillar-console-pill {
+    font-size: 0.82rem;
+    padding: 0.3rem 0.65rem;
+  }
+
+  .pillar-console-svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .pillar-console-card-item {
+    padding: 0.45rem 0.65rem;
+    font-size: 0.82rem;
+  }
+
+  .pillar-console-svg-large {
+    width: 24px;
+    height: 24px;
+  }
+
+  .pillar-save-chip,
+  .pillar-keycap-btn {
+    font-size: 0.82rem;
+    padding: 0.28rem 0.65rem;
+  }
+
+  .pillar-gym-badge-box {
+    width: 34px;
+    height: 34px;
+  }
+
+  .pillar-gym-badge-img {
+    width: 22px;
+    height: 22px;
+  }
+
+  .hero-preview-pill {
+    font-size: 0.92rem;
+  }
+
+  .hero-preview-live-tag {
+    font-size: 0.8rem;
+  }
+
+  .character-studio-container {
+    max-width: 100%;
+    grid-template-columns: 360px 1fr;
+    padding: 1.75rem 2rem;
+    gap: 1.75rem;
+    border-radius: 16px;
+  }
+
+  .character-avatar-portal {
+    width: 160px;
+    height: 160px;
+  }
+
+  .character-passport-name {
+    font-size: 1.45rem;
+  }
+
+  .character-studio-tab {
+    font-size: 1.05rem;
+    padding: 0.65rem 1.2rem;
+  }
+
+  .archetype-category-btn {
+    font-size: 0.95rem;
+    padding: 0.6rem 0.85rem;
+  }
+
+  .archetype-grid-scrollable {
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    align-content: start;
+    flex: 1;
+    min-height: 0;
+    gap: 1rem;
+  }
+
+  .archetype-card-chip {
+    padding: 1.15rem 0.85rem;
+    aspect-ratio: 1 / 1;
+    gap: 0.75rem;
+  }
+
+  .archetype-avatar-wrap .multiavatar-wrapper {
+    width: 72px !important;
+    height: 72px !important;
+    min-width: 72px !important;
+    min-height: 72px !important;
+  }
+
+  .archetype-info strong {
+    font-size: 1rem;
+  }
+
+  .character-field-label {
+    font-size: 0.95rem;
+  }
+
+  .character-text-input {
+    font-size: 1.15rem;
+    padding: 0.8rem 1.1rem;
+  }
+
+  .character-color-circle {
+    width: 36px;
+    height: 36px;
+  }
+
+  .ds-theme-container {
+    grid-template-columns: 1.15fr 1.35fr 0.95fr;
+    gap: 1.25rem;
+  }
+
+  .ds-buttons-grid.ds-density-3 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  .ds-buttons-grid.ds-density-4 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .ds-buttons-grid.ds-density-5 {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .ds-game-header-title {
+    font-size: 1.2rem;
+  }
+
+  .ds-synopsis-text {
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
+  .ds-play-now-btn {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.98rem;
+  }
+
+  .ds-spec-card {
+    font-size: 0.86rem;
+    padding: 0.55rem 0.85rem;
+  }
+}
+
+/* 3. 4K Ultra HD TV & Big Picture Living Room Displays (3840 x 2160+) */
+@media (min-width: 2561px) {
+  .console-container {
+    width: 96vw;
+    max-width: 96vw;
+    padding: 1.75rem 3rem 2rem;
+    gap: 1.25rem;
+  }
+
+  .settings-page-container {
+    width: 96vw;
+    max-width: 96vw;
+  }
+
+  /* Onboarding 4K TV 10-Foot Couch UI Scaling */
+  .onboarding-topbar {
+    padding: 2.25rem 4rem;
+  }
+
+  .onboarding-brand {
+    font-size: 2.8rem;
+  }
+
+  .onboarding-brand-logo {
+    width: 54px;
+    height: 54px;
+  }
+
+  .onboarding-skip-btn {
+    padding: 1.1rem 2.25rem;
+    font-size: 1.6rem;
+    border-radius: 8px;
+  }
+
+  .onboarding-slide {
+    width: 96vw;
+    max-width: 96vw;
+    gap: 1.75rem;
+  }
+
+  .onboarding-slide.slide-controls {
+    width: 96vw;
+    max-width: 96vw;
+  }
+
+  .onboarding-header-card {
+    padding: 1.75rem 3rem;
+  }
+
+  .onboarding-slide-title {
+    font-size: 3.2rem;
+  }
+
+  .onboarding-slide-desc {
+    font-size: 1.75rem;
+    max-width: 1800px;
+    line-height: 1.5;
+  }
+
+  .onboarding-pillars-grid {
+    width: 100%;
+    max-width: 100%;
+    gap: 2rem;
+  }
+
+  .onboarding-pillar-card {
+    padding: 2.25rem 2.5rem;
+    border-radius: 16px;
+    border-width: 4px;
+    gap: 0.85rem;
+  }
+
+  .pillar-icon-wrap {
+    width: 68px;
+    height: 68px;
+    border-radius: 10px;
+  }
+
+  .pillar-icon-wrap svg {
+    width: 38px;
+    height: 38px;
+  }
+
+  .pillar-text h3 {
+    font-size: 2.2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .pillar-text p {
+    font-size: 1.55rem;
+    line-height: 1.6;
+  }
+
+  .pillar-badge-tag {
+    font-size: 1.25rem;
+    padding: 5px 16px;
+    border-radius: 6px;
+  }
+
+  .pillar-visual-graphic-wrap {
+    margin: 0.85rem 0 0.35rem;
+    gap: 0.85rem;
+  }
+
+  /* 4x3 Console Grid on 4K */
+  .pillar-system-icons-grid-4x3 {
+    gap: 0.75rem;
+  }
+
+  .pillar-console-card-item {
+    padding: 0.85rem 1.15rem;
+    font-size: 1.35rem;
+    border-radius: 10px;
+    border-width: 2.5px;
+    gap: 0.85rem;
+  }
+
+  .pillar-console-svg-large {
+    width: 42px;
+    height: 42px;
+  }
+
+  /* Save Demo on 4K */
+  .pillar-ux-demo-card.save-demo {
+    padding: 1.15rem 1.45rem;
+    border-radius: 10px;
+    border-width: 2.5px;
+    gap: 0.85rem;
+  }
+
+  .save-demo-filename {
+    font-size: 1.45rem;
+  }
+
+  .save-demo-size {
+    font-size: 1.15rem;
+    padding: 3px 10px;
+  }
+
+  .save-demo-status {
+    font-size: 1.15rem;
+    padding: 4px 12px;
+    border-radius: 6px;
+  }
+
+  .save-demo-btn {
+    padding: 0.65rem 1.25rem;
+    font-size: 1.3rem;
+    border-radius: 8px;
+    gap: 0.65rem;
+  }
+
+  .save-demo-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .resume-dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  /* Badge Case on 4K */
+  .badge-case-title {
+    font-size: 1.35rem;
+  }
+
+  .badge-case-progress {
+    font-size: 1.25rem;
+    padding: 3px 12px;
+    border-radius: 6px;
+  }
+
+  .pillar-badges-showcase-row {
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+    border-radius: 10px;
+    border-width: 2.5px;
+  }
+
+  .pillar-gym-badge-box {
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    border-width: 2.5px;
+  }
+
+  .pillar-gym-badge-img {
+    width: 38px;
+    height: 38px;
+  }
+
+  /* Trophy Card on 4K */
+  .pillar-ux-trophy-card {
+    padding: 0.85rem 1.25rem;
+    gap: 1rem;
+    border-radius: 10px;
+    border-width: 2.5px;
+  }
+
+  .trophy-mini-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+  }
+
+  .trophy-mini-icon-box svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .trophy-mini-title {
+    font-size: 1.45rem;
+  }
+
+  .trophy-mini-pts {
+    font-size: 1.2rem;
+    padding: 3px 10px;
+    border-radius: 6px;
+  }
+
+  .trophy-mini-sub {
+    font-size: 1.2rem;
+  }
+
+  /* Gamepad HUD & Keycaps on 4K */
+  .pillar-topbar-hud-demo-row {
+    gap: 1rem;
+  }
+
+  .status-pill.demo-pill {
+    padding: 0.65rem 1.25rem;
+    font-size: 1.35rem;
+    border-radius: 8px;
+    gap: 0.75rem;
+  }
+
+  .status-pill.demo-pill svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .battery-percent-text {
+    font-size: 1.25rem;
+  }
+
+  .pillar-keybinds-showcase-row {
+    padding: 0.75rem 1rem;
+    gap: 0.65rem;
+    border-radius: 10px;
+    border-width: 2.5px;
+  }
+
+  .pillar-keycap-btn {
+    font-size: 1.25rem;
+    padding: 0.45rem 1.1rem;
+    border-radius: 6px;
+    border-width: 2.5px;
+    border-bottom-width: 4px;
+  }
+
+  .hero-preview-pill {
+    font-size: 1.55rem;
+    padding: 0.55rem 1.2rem;
+  }
+
+  .hero-preview-live-tag {
+    font-size: 1.35rem;
+    padding: 0.4rem 1rem;
+  }
+
+  .character-studio-container {
+    max-width: 100%;
+    grid-template-columns: 460px 1fr;
+    padding: 3rem;
+    gap: 3rem;
+    border-radius: 20px;
+    border-width: 4px;
+  }
+
+  .character-passport-card {
+    padding: 2.5rem 2rem;
+    border-radius: 16px;
+    border-width: 3px;
+  }
+
+  .character-passport-chip {
+    font-size: 1.15rem;
+    padding: 0.4rem 1rem;
+  }
+
+  .character-passport-id {
+    font-size: 1.2rem;
+  }
+
+  .character-avatar-portal {
+    width: 220px;
+    height: 220px;
+    border-width: 6px;
+  }
+
+  .character-passport-name {
+    font-size: 2.2rem;
+  }
+
+  .character-dice-btn {
+    font-size: 1.35rem;
+    padding: 0.85rem 1.6rem;
+    border-radius: 8px;
+    gap: 0.75rem;
+  }
+
+  .character-dice-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .character-studio-tab {
+    font-size: 1.45rem;
+    padding: 0.85rem 1.75rem;
+    border-radius: 8px;
+    gap: 0.75rem;
+  }
+
+  .character-studio-tab svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .archetype-category-chips {
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .archetype-category-btn {
+    font-size: 1.35rem;
+    padding: 0.85rem 1.25rem;
+    border-radius: 8px;
+    border-width: 2.5px;
+    gap: 0.65rem;
+  }
+
+  .archetype-category-btn svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .archetype-grid-scrollable {
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    align-content: start;
+    flex: 1;
+    min-height: 0;
+    gap: 1.5rem;
+  }
+
+  .archetype-card-chip {
+    padding: 2rem 1.25rem;
+    aspect-ratio: 1 / 1;
+    border-radius: 16px;
+    border-width: 3.5px;
+    gap: 1.25rem;
+  }
+
+  .archetype-avatar-wrap .multiavatar-wrapper {
+    width: 140px !important;
+    height: 140px !important;
+    min-width: 140px !important;
+    min-height: 140px !important;
+  }
+
+  .archetype-info strong {
+    font-size: 1.65rem;
+  }
+
+  .character-field-label {
+    font-size: 1.3rem;
+  }
+
+  .character-text-input {
+    font-size: 1.55rem;
+    padding: 1.1rem 1.5rem;
+    border-radius: 8px;
+    border-width: 3px;
+  }
+
+  .character-palette-row {
+    gap: 0.85rem;
+  }
+
+  .character-color-circle {
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
+  }
+
+  .onboarding-footer {
+    padding: 1.75rem 3.5rem;
+  }
+
+  .onboarding-dot {
+    width: 14px;
+    height: 14px;
+  }
+
+  .onboarding-dot.is-active {
+    width: 42px;
+  }
+
+  .onboarding-back-btn,
+  .onboarding-primary-btn {
+    padding: 1.1rem 2.5rem;
+    font-size: 1.45rem;
+    border-radius: 8px;
+  }
+
+  /* 10-Foot Couch UI Typography & Scaled Topbar */
+  .topbar-brand-logo {
+    width: 44px;
+    height: 44px;
+  }
+
+  .topbar-brand-text {
+    font-size: 1.75rem;
+  }
+
+  .avatar-badge {
+    width: 48px;
+    height: 48px;
+  }
+
+  .user-tag {
+    font-size: 1.2rem;
+  }
+
+  .topbar-profile-pill {
+    padding: 6px 18px 6px 8px;
+  }
+
+  .search-box-wrap {
+    height: 46px;
+  }
+
+  .search-input {
+    font-size: 1.1rem;
+    padding-left: 2.75rem;
+  }
+
+  .status-pill {
+    padding: 0.55rem 1rem;
+    font-size: 1rem;
+    border-radius: 30px;
+  }
+
+  .system-tab {
+    padding: 0.65rem 1.35rem;
+    font-size: 1.1rem;
+  }
+
+  .tab-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 4K DS Firmware Geometry */
+  .ds-theme-container {
+    grid-template-columns: 1.25fr 1.4fr 1fr;
+    gap: 1.75rem;
+    padding: 0.75rem 0;
+  }
+
+  .ds-rail-header {
+    height: 54px;
+    min-height: 54px;
+    padding: 0 1.25rem;
+  }
+
+  .ds-rail-count-badge {
+    font-size: 1.05rem;
+  }
+
+  .ds-rail-action-btn {
+    height: 38px;
+    padding: 6px 14px;
+    font-size: 0.95rem;
+  }
+
+  .ds-buttons-grid.ds-density-3 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.85rem;
+  }
+
+  .ds-buttons-grid.ds-density-4 {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .ds-buttons-grid.ds-density-5 {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  .ds-touch-btn {
+    border-radius: 12px;
+    border-width: 3px;
+  }
+
+  .ds-game-title-card {
+    min-height: 54px;
+    padding: 0.75rem 1.25rem;
+  }
+
+  .ds-game-header-title {
+    font-size: 1.45rem;
+  }
+
+  .ds-screen-frame {
+    border-width: 4px;
+    border-radius: 10px;
+  }
+
+  .ds-synopsis-text {
+    font-size: 1.15rem;
+    line-height: 1.6;
+  }
+
+  .ds-play-now-btn {
+    padding: 0.95rem 1.5rem;
+    font-size: 1.25rem;
+    border-radius: 10px;
+  }
+
+  .ds-action-toolbar {
+    height: 54px;
+    min-height: 54px;
+    gap: 0.65rem;
+  }
+
+  .ds-tool-btn {
+    height: 54px;
+    min-height: 54px;
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+
+  .ds-stats-card {
+    padding: 0.85rem 1.15rem;
+  }
+
+  .ds-stat-item .stat-label {
+    font-size: 0.85rem;
+  }
+
+  .ds-stat-item .stat-value {
+    font-size: 1.05rem;
+  }
+
+  .ds-spec-card {
+    padding: 0.75rem 1rem;
+    font-size: 1.05rem;
+    border-radius: 8px;
+  }
+}
+
+
+
 

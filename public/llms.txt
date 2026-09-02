@@ -18,6 +18,7 @@
 - **Universal Organic Achievements & Pokémon Save Inspector**: Master registry of 24 universal organic achievements across 6 categories (300G Gamerscore), in-game unlock buffering, session exit toast flushing with Web Audio chiptune fanfare, and a zero-overhead binary Pokémon Save Inspector across Gen 1–5 (.sav/.dsv) unlocking 8/16 Gym Badges, League Champions, HM utilities, and story event milestones.
 - **Rich Presence & Multi-Platform Game Activity**: Real-time game status broadcasting to Discord Desktop Rich Presence (RPC via local IPC socket with interactive web launcher & GitHub buttons), OS MediaSession API (macOS Control Center, Windows 11, iOS Lock Screen, Android notifications), and `/api/presence` webhook / OBS streamer overlay widget (`/widgets/now-playing.html`).
 - **Haptic Touch & Tactile Feedback Engine**: Hardware-accelerated tactile impulses (`navigator.vibrate`) for mobile touch navigation, carousel selection, on-screen virtual gamepads, and achievement fanfare with built-in battery-saver awareness.
+- **Universal Multi-Resolution & Device Adaptive**: 100% responsive across compact phones (`375x667`), modern smartphones (`390x844` / `430x932`), tablets (`810x1080`), handheld consoles (`1280x800` Steam Deck), 1080p / 1440p (2K) desktop monitors, and 4K Big Picture TVs (`3840x2160`).
 - **Progressive Web App (PWA) & Offline Mode**: Installable standalone app across macOS, Windows, Linux, Steam Deck, iOS, and Android.
 
 ## Documentation & Guides

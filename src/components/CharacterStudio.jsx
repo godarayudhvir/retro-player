@@ -22,7 +22,6 @@ export default function CharacterStudio({
   gamepadConnected = false
 }) {
   const [activeTab, setActiveTab] = useState('archetypes'); // 'archetypes' | 'custom'
-  const [activeCategory, setActiveCategory] = useState('heroes');
 
   // Full random character generator
   const handleRollDice = () => {
@@ -36,7 +35,20 @@ export default function CharacterStudio({
     sfx?.playFavoriteToggle?.(true);
   };
 
-  const currentArchetypeGroup = CHARACTER_ARCHETYPES.find(a => a.id === activeCategory) || CHARACTER_ARCHETYPES[0];
+  // Auto-update character identity when navigating via gamepad/keyboard focus
+  React.useEffect(() => {
+    if (focusedTarget && (focusedTarget.zone === focusZone || focusedTarget.zone === 'profileModal' || focusedTarget.zone === 'onboarding')) {
+      if (focusedTarget.id?.startsWith('preset_')) {
+        const pIdx = parseInt(focusedTarget.id.replace('preset_', ''), 10);
+        const targetPreset = CHARACTER_ARCHETYPES[pIdx];
+        if (targetPreset) {
+          setAvatarSeed(targetPreset.avatarSeed);
+          setFavoriteColor(targetPreset.favoriteColor);
+          setPlayerName(targetPreset.name);
+        }
+      }
+    }
+  }, [focusedTarget, focusZone, setAvatarSeed, setFavoriteColor, setPlayerName]);
 
   return (
     <div className="character-studio-container">
@@ -95,7 +107,7 @@ export default function CharacterStudio({
               <span className="tab-bumper-key">L</span>
             )}
             <Gamepad2 size={15} />
-            <span>Character Archetypes</span>
+            <span>Character Archetypes ({CHARACTER_ARCHETYPES.length})</span>
           </button>
 
           <button
@@ -107,52 +119,31 @@ export default function CharacterStudio({
               <span className="tab-bumper-key">R</span>
             )}
             <Tag size={15} />
-            <span>Custom Name & Color</span>
+            <span>Custom Name &amp; Color</span>
           </button>
         </div>
 
-        {/* Tab 1: Archetypes & Presets */}
+        {/* Tab 1: Archetypes & Presets Catalog (48 Iconic Options) */}
         {activeTab === 'archetypes' && (
           <div className="character-tab-content animate-fade-in">
-            {/* Category Filter Chips — 4 inline categories */}
-            <div className="archetype-category-chips">
-              {CHARACTER_ARCHETYPES.map((arch) => (
-                <button
-                  key={arch.id}
-                  type="button"
-                  data-category-id={arch.id}
-                  className={`archetype-category-btn ${activeCategory === arch.id ? 'is-active' : ''} ${(focusedTarget?.zone === focusZone || focusedTarget?.zone === 'profileModal') && focusedTarget?.id === `category-${arch.id}` ? 'gamepad-focused' : ''}`}
-                  onClick={() => { setActiveCategory(arch.id); sfx?.playTileNav?.(); }}
-                >
-                  {arch.id === 'heroes' && <Sword size={14} />}
-                  {arch.id === 'cyber' && <Zap size={14} />}
-                  {arch.id === 'rpg' && <Shield size={14} />}
-                  {arch.id === 'arcade' && <Gamepad2 size={14} />}
-                  <span>{arch.label}</span>
-                </button>
-              ))}
-            </div>
-
             {/* Presets Grid */}
             <div className="archetype-grid-scrollable">
-              {currentArchetypeGroup.presets.map((preset) => {
+              {CHARACTER_ARCHETYPES.map((preset, idx) => {
                 const isSelected = avatarSeed === preset.avatarSeed;
                 return (
                   <button
                     key={preset.id}
                     type="button"
-                    className={`archetype-card-chip ${isSelected ? 'is-active' : ''} ${(focusedTarget?.zone === focusZone || focusedTarget?.zone === 'profileModal') && focusedTarget?.id === `preset_${currentArchetypeGroup.presets.indexOf(preset)}` ? 'gamepad-focused' : ''}`}
+                    className={`archetype-card-chip ${isSelected ? 'is-active' : ''} ${(focusedTarget?.zone === focusZone || focusedTarget?.zone === 'profileModal') && focusedTarget?.id === `preset_${idx}` ? 'gamepad-focused' : ''}`}
                     onClick={() => {
                       setAvatarSeed(preset.avatarSeed);
                       setFavoriteColor(preset.favoriteColor);
-                      if (!playerName || playerName === 'Player 1' || playerName === 'Player') {
-                        setPlayerName(preset.name);
-                      }
+                      setPlayerName(preset.name);
                       sfx?.playTileNav?.();
                     }}
                   >
                     <div className="archetype-avatar-wrap">
-                      <MultiAvatar seed={preset.avatarSeed} size={36} />
+                      <MultiAvatar seed={preset.avatarSeed} size={48} />
                     </div>
                     <div className="archetype-info">
                       <strong>{preset.name}</strong>
