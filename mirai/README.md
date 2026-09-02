@@ -10,16 +10,14 @@
 
 | # | Impact | Specification | Domain | Description | Status |
 | :---: | :---: | :--- | :--- | :--- | :--- |
-| 1 | 🟢 Low-Med | **[Pokémon Save Inspector (Gen 5 NDS)](pokemon-save-gen5.md)** | Milestone Inspector | Extend zero-overhead offline save parser to Nintendo DS 512KB saves (Unova Gym Badges and League Champions Alder & Iris). | 📋 Planned |
-| 2 | 🟢 Low-Med | **[Pokémon Single-Player Milestones Expansion (Gen 1–5)](pokemon-milestones-expansion.md)** | Milestone Inspector | Offline single-player storyline milestones across Gen 1–5 (Starters, Key Items, Legendary Titans, and Mt. Silver Red). | 📋 Planned |
-| 3 | 🟡 Medium | **[Mobile UI Gamepad & Spatial Navigation](mobile-gamepad-navigation.md)** | Mobile UX / Controls | Purpose-built, ergonomic 2D spatial gamepad navigation engine tailored specifically for mobile feeds, bottom sheets, search overlays, and drilldowns. | 📋 Planned |
-| 4 | 🟡 Medium | **[Settings & Library Management Hub](settings-hub.md)** | System Hub & Tools | Clean console-native settings redesign: ROM library administration, BGM track manager, and IndexedDB storage diagnostics (wires into existing server REST endpoints). | 📋 Planned |
-| 5 | 🟡 Medium | **[Dynamic Emulation Core Switching](emulation-core-switching.md)** | Core Emulation | Per-system and per-game WebAssembly core override engine (mGBA vs VBA-M, Gambatte vs SameBoy, Snes9x vs bsnes, Beetle PSX vs PCSX ReARMed). | 📋 Planned |
-| 6 | 🟠 Med-High | **[Cross-Device Cloud Save Sync](cloud-saves.md)** | Save States & Sync | Bi-directional synchronization of single Quick Save / SRAM battery saves (`.sav`) to user Google Drive, S3/R2, or Supabase with conflict resolution dialog. | 📋 Planned |
-| 7 | 🟠 Med-High | **[BYOS Cloud Storage Providers](byos-cloud-storage.md)** | Cloud & Streaming | Bring-Your-Own-Storage: Google Drive (OAuth2 PKCE) and Cloudflare R2 / AWS S3 client-side bucket streaming with zero server hosting or API costs. | 📋 Planned |
-| 8 | 🔴 High | **[Self-Hosted Supabase & Multi-User Admin](self-hosted-user-management.md)** | Self-Hosted / Auth | Docker Supabase multi-user auth, first-run Super Admin onboarding wizard, and user role management portal (ROMs excluded from DB). | 📋 Planned |
-| 9 | 🔴 High | **[Hardware 3D WebGL2 Upscaling](hardware-3d-upscaling.md)** | Core Rendering | Hardware-accelerated WebAssembly WebGL2 multi-core pipeline (melonDS HW, Beetle PSX HW, GlideN64, PPSSPP) with internal resolution scaling and PGXP geometry. | 📋 Planned |
-| 10 | 🔴 High | **[WebRTC Netplay & P2P Multiplayer](multiplayer.md)** | Multiplayer & Social | Peer-to-peer online multiplayer room creation, low-latency DataChannels, and real-time input rollback synchronization. | 📋 Planned |
+| 1 | 🟡 Medium | **[Mobile UI Gamepad & Spatial Navigation](mobile-gamepad-navigation.md)** | Mobile UX / Controls | Purpose-built, ergonomic 2D spatial gamepad navigation engine tailored specifically for mobile feeds, bottom sheets, search overlays, and drilldowns. | 📋 Planned |
+| 2 | 🟡 Medium | **[Settings & Library Management Hub](settings-hub.md)** | System Hub & Tools | Clean console-native settings redesign: ROM library administration, BGM track manager, and IndexedDB storage diagnostics (wires into existing server REST endpoints). | 📋 Planned |
+| 3 | 🟡 Medium | **[Dynamic Emulation Core Switching](emulation-core-switching.md)** | Core Emulation | Per-system and per-game WebAssembly core override engine (mGBA vs VBA-M, Gambatte vs SameBoy, Snes9x vs bsnes, Beetle PSX vs PCSX ReARMed). | 📋 Planned |
+| 4 | 🟠 Med-High | **[Cross-Device Cloud Save Sync](cloud-saves.md)** | Save States & Sync | Bi-directional synchronization of single Quick Save / SRAM battery saves (`.sav`) to user Google Drive, S3/R2, or Supabase with conflict resolution dialog. | 📋 Planned |
+| 5 | 🟠 Med-High | **[BYOS Cloud Storage Providers](byos-cloud-storage.md)** | Cloud & Streaming | Bring-Your-Own-Storage: Google Drive (OAuth2 PKCE) and Cloudflare R2 / AWS S3 client-side bucket streaming with zero server hosting or API costs. | 📋 Planned |
+| 6 | 🔴 High | **[Self-Hosted Supabase & Multi-User Admin](self-hosted-user-management.md)** | Self-Hosted / Auth | Docker Supabase multi-user auth, first-run Super Admin onboarding wizard, and user role management portal (ROMs excluded from DB). | 📋 Planned |
+| 7 | 🔴 High | **[Hardware 3D WebGL2 Upscaling](hardware-3d-upscaling.md)** | Core Rendering | Hardware-accelerated WebAssembly WebGL2 multi-core pipeline (melonDS HW, Beetle PSX HW, GlideN64, PPSSPP) with internal resolution scaling and PGXP geometry. | 📋 Planned |
+| 8 | 🔴 High | **[WebRTC Netplay & P2P Multiplayer](multiplayer.md)** | Multiplayer & Social | Peer-to-peer online multiplayer room creation, low-latency DataChannels, and real-time input rollback synchronization. | 📋 Planned |
 
 ---
 
