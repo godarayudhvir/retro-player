@@ -1,4 +1,5 @@
 # Retro Player (v1.1.0)
+### *The High-Performance, Zero-Overhead Web Emulation Station*
 
 > Your favorite retro classics, beautifully organized and ready to play anywhere. Retro Player turns any browser into a dedicated retro console. Experience tactile navigation, authentic save management, customizable player profiles, and curated game libraries tailored for both living-room couch play and on-the-go handheld sessions.
 

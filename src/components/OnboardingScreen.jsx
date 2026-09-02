@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import CharacterStudio from './CharacterStudio';
 import DualShockVisualizer from './DualShockVisualizer';
+import MobileOnboardingScreen from './MobileOnboardingScreen';
 import { resolveAssetPath } from '../utils/assetPath';
 
 const isApplePlatform = typeof navigator !== 'undefined' && (/Macintosh|iPhone|iPad|iPod/i.test(navigator.userAgent || ''));
@@ -41,8 +42,7 @@ const isSmartTv = typeof navigator !== 'undefined' && /SmartTV|Tizen|Web0S|BRAVI
 
 /**
  * Modern Full-Screen Responsive Onboarding Experience for Desktop & Mobile.
- * Step 1: Console Overview & Value Proposition (with PWA install & Safari guides)
- * Step 2: Exhaustive Character Creation Studio & Profile Passport
+ * Automatically delegates to dedicated MobileOnboardingScreen on mobile touch devices.
  */
 export default function OnboardingScreen({
   isOpen,
@@ -53,10 +53,28 @@ export default function OnboardingScreen({
   pwa,
   gamepadConnected = false,
   focusedTarget,
-  setFocusedTarget
+  setFocusedTarget,
+  isMobile = false
 }) {
-  const totalSteps = isMobileDevice ? 2 : 3;
-  const [currentStep, setCurrentStep] = useState(0); // Mobile: 0: Overview, 1: Character Studio | Desktop: 0: Overview, 1: Character Studio, 2: Gamepad Controls
+  // If explicitly flagged as mobile or matched via mobile viewport, render dedicated MobileOnboardingScreen
+  if (isMobile || isMobileDevice) {
+    return (
+      <MobileOnboardingScreen
+        isOpen={isOpen}
+        onComplete={onComplete}
+        activeProfile={activeProfile}
+        onSaveCreatedProfile={onSaveCreatedProfile}
+        sfx={sfx}
+        pwa={pwa}
+        gamepadConnected={gamepadConnected}
+        focusedTarget={focusedTarget}
+        setFocusedTarget={setFocusedTarget}
+      />
+    );
+  }
+
+  const totalSteps = 3;
+  const [currentStep, setCurrentStep] = useState(0); // Desktop: 0: Overview, 1: Character Studio, 2: Gamepad Controls
   const [copiedLink, setCopiedLink] = useState(false);
 
   // Multiavatar Profile Setup State
@@ -203,10 +221,10 @@ export default function OnboardingScreen({
             <div className="onboarding-hero-left">
               <div className="onboarding-header-card">
                 <h1 className="onboarding-slide-title">
-                  Play 12 Classic Consoles in Your Browser
+                  The High-Performance, Zero-Overhead Web Emulation Station
                 </h1>
                 <p className="onboarding-slide-desc">
-                  Console-grade retro gaming running locally in WebAssembly with low input latency, instant battery saves, and gamepad support.
+                  Play classic retro consoles in your browser via low-latency WebAssembly. Real in-game battery saves, universal achievements, and full gamepad support.
                 </p>
               </div>
 

@@ -69,7 +69,7 @@ export default function DemoWelcomeModal({
         <div className="demo-modal-title-group">
           <h2>Welcome to Retro Player</h2>
           <p className="demo-modal-subtitle">
-            A high-performance retro console station running 100% in your web browser via WebAssembly.
+            The High-Performance, Zero-Overhead Web Emulation Station.
           </p>
         </div>
 

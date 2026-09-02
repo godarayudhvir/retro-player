@@ -1103,6 +1103,7 @@ export default function App() {
           gamepadConnected={gamepadConnected}
           focusedTarget={focusedTarget}
           setFocusedTarget={setFocusedTarget}
+          isMobile={isMobile}
         />
       )}
 
