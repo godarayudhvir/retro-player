@@ -1,6 +1,34 @@
-# 🎮 Controls, Keybindings & Gamepad Mapping Guide
+# 🎮 Controls, Keybindings & Accessibility Guide
 
-Retro Player is designed from the ground up for **100% controller and keyboard controllability**. Every view, modal, virtual keyboard, and in-game menu can be navigated seamlessly without touching a mouse.
+Retro Player is engineered from the ground up for **100% universal accessibility across all input devices**. Every screen, flow, modal dialog, and in-game menu can be navigated seamlessly via **physical gamepads**, **hardware keyboards**, and **touch screens**, with zero dependency on mouse pointers.
+
+---
+
+## 🕹️ Tri-Modal Input Architecture & Heuristics
+
+Retro Player features an adaptive tri-modal input detection engine that dynamically identifies the user's active input device and updates the user interface in real time:
+
+```
+                  ┌───────────────────────────────┐
+                  │    Active Input Detection     │
+                  └───────────────┬───────────────┘
+                                  │
+         ┌────────────────────────┼────────────────────────┐
+         ▼                        ▼                        ▼
+┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+│   Gamepad Mode   │    │  Keyboard Mode   │    │    Touch Mode    │
+│  USB / Bluetooth │    │ Desktop / Laptop │    │ Phone / Tablet   │
+├──────────────────┤    ├──────────────────┤    ├──────────────────┤
+│ Shows [A] [B] [X]│    │ Shows [SPACE]    │    │ Hides all keycap │
+│ L1/R1, D-Pad     │    │ [DEL] [ESC] [Q/E]│    │ badges; clean,   │
+│ focus rings      │    │ & Arrow spatial  │    │ uncluttered touch│
+└──────────────────┘    └──────────────────┘    └──────────────────┘
+```
+
+### Dynamic Input Heuristics:
+1. **Gamepad Mode**: Activated automatically when any connected USB, Bluetooth, or 2.4GHz controller presses a button or moves an analog stick. All interactive action buttons display console-grade controller keycap badges (`[ A ]`, `[ B ]`, `[ X ]`, `[ L1 ]`, `[ R1 ]`, `[ START ]`).
+2. **Keyboard Mode**: Activated on devices with fine pointer devices (desktop/laptop) or immediately when any keyboard key is pressed. Interactive buttons display keyboard shortcut badges (`[ SPACE ]`, `[ DEL ]`, `[ ESC ]`, `[ Q ]`, `[ E ]`, `[ L ]`).
+3. **Touch Mode**: Activated when pointer input originates from a capacitive touchscreen. All button badges are cleanly removed from the DOM so the interface remains uncluttered, touch-friendly, and lightweight.
 
 ---
 
@@ -28,9 +56,9 @@ Retro Player supports standard USB, Bluetooth, and 2.4GHz wireless controllers (
 
 ---
 
-## 🚀 Onboarding & Modal Dialog Controls
+## 🚀 Onboarding & Modal Dialog Controls (Fully Implemented)
 
-Retro Player features 100% controller, keyboard, and touch accessibility across the Onboarding wizard and in-app modal dialogs. For the complete multimodal heuristics and touch rules, see the dedicated **[Universal Accessibility Guide](accessibility.md)**.
+Retro Player features 100% controller, keyboard, and touch accessibility across both Desktop and Mobile Onboarding wizards and in-app modal dialogs.
 
 ### A. Desktop Onboarding Wizard
 | Screen / Phase | Gamepad Action | Keyboard Key | Function |
@@ -75,6 +103,19 @@ Retro Player features 100% controller, keyboard, and touch accessibility across 
 | **Confirm Action** | `[ A ]` Button | `Space` / `Enter` | Trigger focused button or open platform-filtered file picker |
 | **Exit / Dismiss** | `[ B ]` Button | `Escape` | Closes modal and returns to previous view with audio SFX |
 | **Auto-Scroll Reset** | Navigating to `[✕]` or top buttons | Navigating to `[✕]` or top buttons | Automatically resets scroll to top (0px) so dropzone is 100% visible |
+
+---
+
+## 🗺️ Phased Accessibility & Navigation Roadmap
+
+To guarantee deterministic, bug-free spatial navigation without ghost coordinates or trapped focus, application UI controls are being rolled out across structured engineering milestones:
+
+| Phase | Domain | Status | Scope |
+| :---: | :--- | :---: | :--- |
+| **Phase 1** | **Onboarding & Modals** | ✅ **Completed** | Desktop Onboarding, Mobile Onboarding (Screens 0–6), and Load Custom ROM modal with tri-modal adaptive badges and auto-scroll reset. |
+| **Phase 2** | **Desktop Library UI** | 📋 **Next Up** | Bounding-box 2D navigation across Cartridge Grid, System Ribbon (`Q`/`E`, `[`/`]`, `L1`/`R1`), Search (`/`), and Topbar Hub. |
+| **Phase 3** | **Mobile Library UI** | 📋 **Upcoming** | System chip carousels, mobile bottom sheets, and search overlays. |
+| **Phase 4** | **Emulator Harmonization**| 📋 **Upcoming** | Unifying in-game hotkeys, HUD actions (`L3`/`Tab`), and custom gamepad mapping persistence across all 12 WASM cores. |
 
 ---
 
