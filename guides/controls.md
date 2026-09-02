@@ -22,6 +22,7 @@ Retro Player supports standard USB, Bluetooth, and 2.4GHz wireless controllers (
 | **`L3` (Left Stick Click)** | **`L3`** | **`L3`** | **Cycle Tile Size Density** (`S` $\rightarrow$ `M` $\rightarrow$ `L` $\rightarrow$ `XL` $\rightarrow$ `XXL`) in Library / **Toggle In-Game Topbar HUD Menu** (In-Game) |
 | **`R3` (Right Stick Click)** | **`R3`** | **`R3`** | **Toggle Panoramic Wide Grid Mode** (Library) |
 | **`L3 + R3` (Both Clicks)** | **`L3 + R3`** | **`L3 + R3`** | **Direct Exit Active Game to Library** (In-Game) |
+| **`Touchpad / Click`** | **`Touchpad`** | **`Touch Screen`** | **NDS Stylus & Touch Screen Input** (Nintendo DS Emulation) / Interactive Visualizer |
 | **`Select` / `Share`** | **`Share` / `Select`** | **`-` Minus** | **Toggle Favorite ⭐** (Library) / Standard Game Input (In-Game) |
 | **`Start` / `Menu`** | **`Options` / `Start`** | **`+` Plus** | **Quick-Launch Game** (Library) / **Submit** (OSK) / **Complete Onboarding** / Standard Game Input (In-Game) |
 

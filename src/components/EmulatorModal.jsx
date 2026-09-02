@@ -983,10 +983,8 @@ export default function EmulatorModal({
               justify-content: center !important;
               text-align: center !important;
               gap: 12px !important;
-              background: rgba(15, 23, 42, 0.92) !important;
+              background: rgba(15, 23, 42, 0.95) !important;
               border: 1.5px solid rgba(59, 130, 246, 0.65) !important;
-              backdrop-filter: blur(24px) !important;
-              -webkit-backdrop-filter: blur(24px) !important;
               border-radius: 24px !important;
               padding: 24px 36px !important;
               box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(59, 130, 246, 0.35) !important;

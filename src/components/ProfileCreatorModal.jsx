@@ -66,7 +66,7 @@ export default function ProfileCreatorModal({
   return (
     <>
       <div className="info-modal-backdrop animate-fade-in" onClick={onClose}>
-        <div className="scraper-modal-container custom-studio-modal animate-scale-up" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '860px', width: '92%' }}>
+        <div className="scraper-modal-container custom-studio-modal animate-scale-up" onClick={(e) => e.stopPropagation()}>
           {/* Header */}
           <header className="scraper-modal-header">
             <div className="scraper-modal-title-group">
@@ -94,7 +94,7 @@ export default function ProfileCreatorModal({
           </header>
 
           {/* Modal Body: Character Studio */}
-          <div className="profile-creator-body custom-studio-body" style={{ padding: '1.25rem 1.75rem', overflowY: 'auto' }}>
+          <div className="profile-creator-body custom-studio-body">
             <CharacterStudio
               playerName={name}
               setPlayerName={setName}

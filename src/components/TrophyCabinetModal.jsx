@@ -173,7 +173,9 @@ export default function TrophyCabinetModal({
   const completionPercentage = achievementsEngine?.completionPercentage || 0;
 
   const unlockedCount = useMemo(() => {
-    return ACHIEVEMENTS_MANIFEST.filter(item => !!unlocked[item.id]).length;
+    return ACHIEVEMENTS_MANIFEST.filter(item => {
+      return Object.entries(unlocked).some(([k, u]) => k === item.id || k.startsWith(`${item.id}__`) || u?.id === item.id);
+    }).length;
   }, [unlocked]);
   const totalCount = ACHIEVEMENTS_MANIFEST.length;
   const gamerRank = useMemo(() => getGamerLevel(totalEarnedPoints), [totalEarnedPoints]);
@@ -181,7 +183,7 @@ export default function TrophyCabinetModal({
   // Filtered achievements list
   const filteredAchievements = useMemo(() => {
     return ACHIEVEMENTS_MANIFEST.filter(item => {
-      const isUnlocked = !!unlocked[item.id];
+      const isUnlocked = Object.entries(unlocked).some(([k, u]) => k === item.id || k.startsWith(`${item.id}__`) || u?.id === item.id);
       if (statusFilter === 'unlocked' && !isUnlocked) return false;
       if (statusFilter === 'locked' && isUnlocked) return false;
       if (categoryFilter !== 'all' && item.category !== categoryFilter) return false;
@@ -200,7 +202,9 @@ export default function TrophyCabinetModal({
       if (targetItem) {
         setStatusFilter('unlocked');
         setCategoryFilter('all');
-        const unlockedList = ACHIEVEMENTS_MANIFEST.filter(item => !!unlocked[item.id]);
+        const unlockedList = ACHIEVEMENTS_MANIFEST.filter(item => {
+          return Object.entries(unlocked).some(([k, u]) => k === item.id || k.startsWith(`${item.id}__`) || u?.id === item.id);
+        });
         const idx = unlockedList.findIndex(item => item.id === initialAchievementId);
         if (idx >= 0) {
           setFocusedIndex(idx);
@@ -690,7 +694,8 @@ export default function TrophyCabinetModal({
             </div>
           ) : (
             filteredAchievements.map((item, idx) => {
-              const unlockData = unlocked[item.id];
+              const unlockEntry = Object.entries(unlocked).find(([k, u]) => k === item.id || k.startsWith(`${item.id}__`) || u?.id === item.id);
+              const unlockData = unlockEntry ? unlockEntry[1] : null;
               const isUnlocked = !!unlockData;
               const tier = ACHIEVEMENT_TIERS[item.tier?.toUpperCase()] || ACHIEVEMENT_TIERS.BRONZE;
               const IconComponent = ICON_MAP[item.icon] || Trophy;

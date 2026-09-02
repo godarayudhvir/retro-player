@@ -25,6 +25,13 @@ export const DUALSHOCK_ACTIONS = {
     desc: 'Cycle left to previous console ribbon (GBA, SNES, N64...).',
     accent: '#8b5cf6'
   },
+  touchpad: {
+    id: 'touchpad',
+    label: 'TOUCHPAD / CLICK',
+    action: 'NDS Stylus & Touch',
+    desc: 'Acts as Nintendo DS interactive touchscreen stylus and menu cursor.',
+    accent: '#06b6d4'
+  },
   share: {
     id: 'share',
     label: 'SHARE / SELECT',
@@ -240,9 +247,9 @@ export default function DualShockVisualizer({
             className={`diagram-callout ${pressedButtons.l2 ? 'is-pressed' : ''} ${activeActionId === 'l2' ? 'is-active' : ''}`}
             onClick={() => handleSelectKey('l2')}
           >
-            <polyline points="290,35 200,35 150,45" className="diagram-line" />
+            <polyline points="290,35 200,35 150,35" className="diagram-line" />
             <circle cx="290" cy="35" r="4" className="diagram-anchor-dot" />
-            <g transform="translate(10, 26)">
+            <g transform="translate(10, 18)">
               <rect width="138" height="34" rx="6" className="diagram-pill-bg" />
               <text x="69" y="15" className="diagram-pill-key">L2 TRIGGER</text>
               <text x="69" y="27" className="diagram-pill-action">Analog Action</text>
@@ -254,12 +261,26 @@ export default function DualShockVisualizer({
             className={`diagram-callout ${pressedButtons.l1 ? 'is-pressed' : ''} ${activeActionId === 'l1' ? 'is-active' : ''}`}
             onClick={() => handleSelectKey('l1')}
           >
-            <polyline points="360,68 260,95 150,95" className="diagram-line" />
+            <polyline points="360,68 260,82 150,82" className="diagram-line" />
             <circle cx="360" cy="68" r="4" className="diagram-anchor-dot" />
-            <g transform="translate(10, 78)">
+            <g transform="translate(10, 65)">
               <rect width="138" height="34" rx="6" className="diagram-pill-bg" />
               <text x="69" y="15" className="diagram-pill-key">L1 BUMPER</text>
               <text x="69" y="27" className="diagram-pill-action">Prev System</text>
+            </g>
+          </g>
+
+          {/* TOUCHPAD / NDS STYLUS */}
+          <g
+            className={`diagram-callout ${pressedButtons.touchpad ? 'is-pressed' : ''} ${activeActionId === 'touchpad' ? 'is-active' : ''}`}
+            onClick={() => handleSelectKey('touchpad')}
+          >
+            <polyline points="475,130 300,129 150,129" className="diagram-line" />
+            <circle cx="475" cy="130" r="4" className="diagram-anchor-dot" />
+            <g transform="translate(10, 112)">
+              <rect width="138" height="34" rx="6" className="diagram-pill-bg" />
+              <text x="69" y="15" className="diagram-pill-key" style={{ fill: '#06b6d4' }}>TOUCHPAD</text>
+              <text x="69" y="27" className="diagram-pill-action">NDS Touch Stylus ✍️</text>
             </g>
           </g>
 
@@ -268,9 +289,9 @@ export default function DualShockVisualizer({
             className={`diagram-callout ${pressedButtons.share ? 'is-pressed' : ''} ${activeActionId === 'share' ? 'is-active' : ''}`}
             onClick={() => handleSelectKey('share')}
           >
-            <polyline points="418,125 290,155 150,155" className="diagram-line" />
-            <circle cx="418" cy="125" r="4" className="diagram-anchor-dot" />
-            <g transform="translate(10, 138)">
+            <polyline points="418,140 290,176 150,176" className="diagram-line" />
+            <circle cx="418" cy="140" r="4" className="diagram-anchor-dot" />
+            <g transform="translate(10, 159)">
               <rect width="138" height="34" rx="6" className="diagram-pill-bg" />
               <text x="69" y="15" className="diagram-pill-key">SHARE / SELECT</text>
               <text x="69" y="27" className="diagram-pill-action">Favorite ⭐</text>
@@ -282,9 +303,9 @@ export default function DualShockVisualizer({
             className={`diagram-callout ${pressedButtons.dpad ? 'is-pressed' : ''} ${activeActionId === 'dpad' ? 'is-active' : ''}`}
             onClick={() => handleSelectKey('dpad')}
           >
-            <polyline points="370,190 260,230 150,230" className="diagram-line" />
-            <circle cx="370" cy="190" r="4" className="diagram-anchor-dot" />
-            <g transform="translate(10, 213)">
+            <polyline points="370,195 260,223 150,223" className="diagram-line" />
+            <circle cx="370" cy="195" r="4" className="diagram-anchor-dot" />
+            <g transform="translate(10, 206)">
               <rect width="138" height="34" rx="6" className="diagram-pill-bg" />
               <text x="69" y="15" className="diagram-pill-key">D-PAD (ARROWS)</text>
               <text x="69" y="27" className="diagram-pill-action">Spatial Navigation</text>
@@ -296,9 +317,9 @@ export default function DualShockVisualizer({
             className={`diagram-callout ${pressedButtons.l3 ? 'is-pressed' : ''} ${activeActionId === 'l3' ? 'is-active' : ''}`}
             onClick={() => handleSelectKey('l3')}
           >
-            <polyline points="440,285 300,325 150,325" className="diagram-line" />
+            <polyline points="440,285 300,290 150,290" className="diagram-line" />
             <circle cx="440" cy="285" r="4" className="diagram-anchor-dot" />
-            <g transform="translate(10, 308)">
+            <g transform="translate(10, 273)">
               <rect width="138" height="34" rx="6" className="diagram-pill-bg" />
               <text x="69" y="15" className="diagram-pill-key">L3 STICK CLICK</text>
               <text x="69" y="27" className="diagram-pill-action">Density / HUD</text>
@@ -479,7 +500,8 @@ export default function DualShockVisualizer({
               width="180"
               height="90"
               rx="6"
-              className={`ctrl-part ctrl-touchpad ${pressedButtons.touchpad ? 'is-pressed' : ''}`}
+              className={`ctrl-part ctrl-touchpad ${pressedButtons.touchpad ? 'is-pressed' : ''} ${activeActionId === 'touchpad' ? 'is-active' : ''}`}
+              onClick={() => handleSelectKey('touchpad')}
             />
 
             {/* Share & Options Buttons */}
@@ -504,10 +526,10 @@ export default function DualShockVisualizer({
             />
 
             {/* D-Pad Cluster */}
-            <g className="ctrl-dpad-cluster" transform="translate(135, 125)">
+            <g className={`ctrl-dpad-cluster ${activeActionId === 'dpad' ? 'is-active' : ''}`} transform="translate(135, 125)">
               {/* Up */}
               <g
-                className={`ctrl-part ctrl-dpad-arm ${pressedButtons.dpad_up ? 'is-pressed' : ''}`}
+                className={`ctrl-part ctrl-dpad-arm ${pressedButtons.dpad_up ? 'is-pressed' : ''} ${activeActionId === 'dpad' ? 'is-active' : ''}`}
                 onClick={() => handleSelectKey('dpad')}
               >
                 <path d="M 36 6 L 60 6 C 64 6, 66 8, 66 12 L 66 36 L 30 36 L 30 12 C 30 8, 32 6, 36 6 Z" />
@@ -515,7 +537,7 @@ export default function DualShockVisualizer({
               </g>
               {/* Down */}
               <g
-                className={`ctrl-part ctrl-dpad-arm ${pressedButtons.dpad_down ? 'is-pressed' : ''}`}
+                className={`ctrl-part ctrl-dpad-arm ${pressedButtons.dpad_down ? 'is-pressed' : ''} ${activeActionId === 'dpad' ? 'is-active' : ''}`}
                 onClick={() => handleSelectKey('dpad')}
               >
                 <path d="M 30 60 L 66 60 L 66 84 C 66 88, 64 90, 60 90 L 36 90 C 32 90, 30 88, 30 84 Z" />
@@ -523,7 +545,7 @@ export default function DualShockVisualizer({
               </g>
               {/* Left */}
               <g
-                className={`ctrl-part ctrl-dpad-arm ${pressedButtons.dpad_left ? 'is-pressed' : ''}`}
+                className={`ctrl-part ctrl-dpad-arm ${pressedButtons.dpad_left ? 'is-pressed' : ''} ${activeActionId === 'dpad' ? 'is-active' : ''}`}
                 onClick={() => handleSelectKey('dpad')}
               >
                 <path d="M 6 36 C 6 32, 8 30, 12 30 L 36 30 L 36 66 L 12 66 C 8 66, 6 64, 6 60 Z" />
@@ -531,13 +553,13 @@ export default function DualShockVisualizer({
               </g>
               {/* Right */}
               <g
-                className={`ctrl-part ctrl-dpad-arm ${pressedButtons.dpad_right ? 'is-pressed' : ''}`}
+                className={`ctrl-part ctrl-dpad-arm ${pressedButtons.dpad_right ? 'is-pressed' : ''} ${activeActionId === 'dpad' ? 'is-active' : ''}`}
                 onClick={() => handleSelectKey('dpad')}
               >
                 <path d="M 60 30 L 84 30 C 88 30, 90 32, 90 36 L 90 60 C 90 64, 88 66, 84 66 L 60 66 Z" />
                 <polygon points="82,48 72,41 72,55" className="dpad-arrow-glyph" />
               </g>
-              <rect x="34" y="34" width="28" height="28" className="ctrl-dpad-center" />
+              <rect x="34" y="34" width="28" height="28" className={`ctrl-dpad-center ${activeActionId === 'dpad' ? 'is-active' : ''} ${pressedButtons.dpad ? 'is-pressed' : ''}`} />
             </g>
 
             {/* Action Face Buttons Cluster (Vibrant PlayStation Icons) */}

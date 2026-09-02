@@ -426,10 +426,10 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       // 4. Local time habits & streaks
       updatedStats.activeDates = evaluateLocalHabitsAndStreaks(updatedStats);
 
-      persistState(unlocked, updatedStats);
+      persistState(unlockedRef.current, updatedStats);
       return updatedStats;
     });
-  }, [unlockAchievement, evaluateLocalHabitsAndStreaks, persistState, unlocked, mountedGames]);
+  }, [unlockAchievement, evaluateLocalHabitsAndStreaks, persistState, mountedGames]);
 
   /**
    * Called when emulator exits.
@@ -500,10 +500,10 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
         }, 300);
       }
 
-      persistState(unlocked, updatedStats);
+      persistState(unlockedRef.current, updatedStats);
       return updatedStats;
     });
-  }, [unlockAchievement, persistState, unlocked, processNextToast]);
+  }, [unlockAchievement, persistState, processNextToast]);
 
   /**
    * Quick Save executed.
@@ -524,10 +524,10 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       }
 
       const updatedStats = { ...prev, perGameStats: perGame };
-      persistState(unlocked, updatedStats);
+      persistState(unlockedRef.current, updatedStats);
       return updatedStats;
     });
-  }, [unlockAchievement, persistState, unlocked]);
+  }, [unlockAchievement, persistState]);
 
   /**
    * Quick Load executed.
@@ -547,10 +547,10 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       }
 
       const updatedStats = { ...prev, perGameStats: perGame };
-      persistState(unlocked, updatedStats);
+      persistState(unlockedRef.current, updatedStats);
       return updatedStats;
     });
-  }, [unlockAchievement, persistState, unlocked]);
+  }, [unlockAchievement, persistState]);
 
   /**
    * Auto Resume triggered.
@@ -570,10 +570,10 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       }
 
       const updatedStats = { ...prev, perGameStats: perGame };
-      persistState(unlocked, updatedStats);
+      persistState(unlockedRef.current, updatedStats);
       return updatedStats;
     });
-  }, [unlockAchievement, persistState, unlocked]);
+  }, [unlockAchievement, persistState]);
 
   /**
    * Authentic Battery SRAM Export (.sav).
@@ -641,10 +641,10 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
         unlockAchievement('audiophile');
       }
       const updatedStats = { ...prev, bgmTracksListened: tracks };
-      persistState(unlocked, updatedStats);
+      persistState(unlockedRef.current, updatedStats);
       return updatedStats;
     });
-  }, [unlockAchievement, persistState, unlocked]);
+  }, [unlockAchievement, persistState]);
 
   /**
    * Avatar customized in Multiavatar studio.
@@ -653,10 +653,10 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
     setStats(prev => {
       const nextCount = (prev.avatarChangeCount || 0) + 1;
       const updatedStats = { ...prev, avatarChangeCount: nextCount };
-      persistState(unlocked, updatedStats);
+      persistState(unlockedRef.current, updatedStats);
       return updatedStats;
     });
-  }, [persistState, unlocked]);
+  }, [persistState]);
 
   /**
    * Dark/Light mode theme switched.
@@ -668,10 +668,10 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
         unlockAchievement('chameleon');
       }
       const updatedStats = { ...prev, themeToggleCount: nextCount };
-      persistState(unlocked, updatedStats);
+      persistState(unlockedRef.current, updatedStats);
       return updatedStats;
     });
-  }, [unlockAchievement, persistState, unlocked]);
+  }, [unlockAchievement, persistState]);
 
   /**
    * Database JSON snapshot backup exported.
@@ -953,20 +953,22 @@ export function useAchievements({ activeProfileId = 'default', sfx, mountedGames
       // Exclude per-cartridge / Pokemon milestones from Gamerscore
       if (key.startsWith('poke_') || u?.category === 'pokemon') return acc;
       
-      const manifestItem = ACHIEVEMENTS_MANIFEST.find(m => m.id === key);
+      const manifestItem = ACHIEVEMENTS_MANIFEST.find(m => m.id === key || m.id === u?.id);
       if (!manifestItem) return acc;
 
       const tierStr = manifestItem.tier || 'bronze';
       const tierKey = String(tierStr).toUpperCase();
       const tierObj = ACHIEVEMENT_TIERS[tierKey] || ACHIEVEMENT_TIERS.BRONZE;
-      return acc + (tierObj.points || 10);
+      return acc + (tierObj.points || 5);
     }, 0);
   }, [unlocked]);
 
   const completionPercentage = useMemo(() => {
     const totalCount = ACHIEVEMENTS_MANIFEST.length;
     if (totalCount === 0) return 0;
-    const universalUnlockedCount = ACHIEVEMENTS_MANIFEST.filter(item => !!unlocked[item.id]).length;
+    const universalUnlockedCount = ACHIEVEMENTS_MANIFEST.filter(item => {
+      return Object.entries(unlocked).some(([k, u]) => k === item.id || k.startsWith(`${item.id}__`) || u?.id === item.id);
+    }).length;
     return Math.min(100, Math.round((universalUnlockedCount / totalCount) * 100));
   }, [unlocked]);
 

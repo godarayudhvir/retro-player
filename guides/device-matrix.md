@@ -37,7 +37,7 @@ Dedicated mobile experience powered by `MobileAppView.jsx` and `MobileOnboarding
 
 Desktop engine scaled down with **4-Card Grid ONLY** (2 preview screenshot frames hidden):
 * **UI Structure**: Full-width 2x2 grid of value pillars (Native WASM, Universal Saves, Achievements, Universal Controls).
-* **CSS Boundary**: `@media (max-width: 1024px), (max-width: 1280px) and (max-height: 850px)`
+* **CSS Boundary**: `@media (max-width: 1024px), (max-width: 1440px) and (max-height: 900px), (max-height: 850px)`
 
 | Device Tier | Reference Devices | Portrait Viewport | Landscape Viewport | Aspect Ratio |
 | :--- | :--- | :--- | :--- | :--- |
@@ -55,7 +55,7 @@ Desktop engine scaled down with **4-Card Grid ONLY** (2 preview screenshot frame
 
 ### Responsive Rules for Tablets & Handhelds
 * **Portrait Mode (`810 x 1080`, `768 x 1024`)**: Cards stretch vertically to fill the tall viewport naturally; Card 4 keyboard keycaps and D-pad labels remain unclipped.
-* **Landscape Handhelds (`1080 x 810`, `1280 x 800`)**: Compact card padding (`0.55rem 0.75rem`), save buttons (`28px`), and pill heights (`48px`) guarantee **zero vertical scroll** and **zero cutoff** above the bottom action bar.
+* **Landscape Handhelds (`1080 x 810`, `1280 x 800`)**: Compact card padding (`0.4rem 0.65rem`), save tiles (`20px`), status pill heights (`32px–34px`), and touch/keyboard demo surfaces (`34px–36px`) guarantee **zero vertical scroll** and **zero cutoff** above the bottom action bar.
 
 ---
 

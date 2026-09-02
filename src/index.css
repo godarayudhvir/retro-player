@@ -271,8 +271,6 @@ body {
   background: rgba(15, 23, 42, 0.94);
   border: 1.5px solid rgba(245, 158, 11, 0.5);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 18px rgba(245, 158, 11, 0.25);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   padding: 0.65rem 1rem;
   border-radius: 14px;
   max-width: 92vw;
@@ -386,8 +384,6 @@ body {
   position: fixed;
   inset: 0;
   background: rgba(10, 15, 29, 0.75);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
   z-index: 25000;
   display: flex;
   align-items: center;
@@ -938,7 +934,6 @@ body {
   position: fixed;
   inset: 0;
   background: var(--bg-console-backdrop, rgba(235, 240, 248, 0.96));
-  backdrop-filter: blur(28px);
   z-index: 1800;
   display: flex;
   flex-direction: column;
@@ -2320,8 +2315,6 @@ body {
   position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0.5);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
   z-index: 30000;
   display: flex;
   align-items: center;
@@ -2493,8 +2486,6 @@ body {
   position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
   z-index: 35000;
   display: flex;
   align-items: center;
@@ -2505,8 +2496,6 @@ body {
 
 .guide-hub-modal {
   background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
   border: 3px solid #ffffff;
   border-radius: 30px;
   box-shadow: 0 28px 75px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(226, 232, 240, 0.9);
@@ -3001,7 +2990,6 @@ body {
   align-items: center;
   gap: 0.5rem;
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(16px);
   border: 2px solid #ffffff;
   box-shadow: 0 4px 14px rgba(160, 175, 205, 0.2), inset 0 2px 4px rgba(255, 255, 255, 0.8);
   border-radius: 40px;
@@ -3410,7 +3398,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
 .console-viewport {
   background: transparent !important;
-  backdrop-filter: none !important;
   border: none !important;
   box-shadow: none !important;
   border-radius: 0 !important;
@@ -3440,7 +3427,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   justify-content: space-between;
   padding: 0.4rem 1.25rem;
   background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 18px;
   box-shadow: 
@@ -4407,7 +4393,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   align-items: center;
   padding: 2px 4px;
   z-index: 5;
-  backdrop-filter: blur(2px);
 }
 
 /* Gold Official Seal */
@@ -6462,7 +6447,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   border: 2px solid var(--border-subtle, #e2e8f0);
   border-radius: 28px;
   box-shadow: 0 12px 36px rgba(15, 23, 42, 0.08);
-  backdrop-filter: blur(16px);
   animation: emptyCardFadeIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
@@ -6678,8 +6662,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   align-items: center;
   justify-content: space-between;
   background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   gap: 0.75rem;
   z-index: 100020;
@@ -6738,8 +6720,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   align-items: center;
   gap: 0.35rem;
   background: rgba(15, 23, 42, 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 9999px;
   padding: 4px 12px;
@@ -6987,8 +6967,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   left: 0;
   right: 0;
   background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   display: flex;
   align-items: center;
@@ -7497,7 +7475,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
 .emulator-stage.filter-smooth iframe {
   image-rendering: auto;
-  filter: blur(0.3px);
 }
 
 .emulator-stage.filter-vibrant iframe {
@@ -7559,8 +7536,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   border: 1.5px solid rgba(59, 130, 246, 0.4);
   border-radius: 14px;
   padding: 0.65rem 1.15rem;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 24px rgba(59, 130, 246, 0.2);
   animation: elhFadeIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
   width: 100%;
@@ -7661,8 +7636,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   right: 0;
   bottom: 0;
   background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -7672,8 +7645,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
 .info-modal-content {
   background: var(--panel-bg, #ffffff);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 2px solid var(--panel-border, #cbd5e1);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 16px 36px rgba(0, 0, 0, 0.25);
   border-radius: 8px;
@@ -8090,7 +8061,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   width: 100vw;
   height: 100vh;
   background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(12px);
   z-index: 99999;
   display: flex;
   align-items: center;
@@ -8199,8 +8169,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   width: 100vw;
   height: 100vh;
   background: rgba(15, 23, 42, 0.78);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
   z-index: 100000;
   display: flex;
   align-items: center;
@@ -8662,8 +8630,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
 .load-rom-modal-content {
   background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 4px solid #ffffff;
   box-shadow: 0 24px 60px rgba(59, 130, 246, 0.2), 0 0 0 1px rgba(226, 232, 240, 0.8);
   border-radius: 32px;
@@ -9208,7 +9174,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   top: 12px;
   left: 12px;
   background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(8px);
   border: 1px solid rgba(251, 191, 36, 0.5);
   color: #fbbf24;
   padding: 0.3rem 0.65rem;
@@ -9640,8 +9605,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
     align-items: flex-end !important;
     justify-content: center !important;
     background: rgba(0, 0, 0, 0.55) !important;
-    backdrop-filter: blur(4px) !important;
-    -webkit-backdrop-filter: blur(4px) !important;
   }
 
   /* Profile Select Modal Full-Screen Mobile View */
@@ -10356,8 +10319,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   background: var(--panel-bg, #f8fafc);
   border-bottom: 2px solid var(--panel-border, #94a3b8);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 3px 8px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   box-sizing: border-box;
 }
 
@@ -10553,8 +10514,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   inset: 0;
   z-index: 999;
   background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -10706,8 +10665,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
     height: calc(58px + env(safe-area-inset-bottom, 0px));
     padding-bottom: env(safe-area-inset-bottom, 0px);
     background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
     border-top: 1.5px solid var(--panel-border, #cbd5e1);
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
     display: flex;
@@ -13616,8 +13573,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 .demo-modal-backdrop {
   z-index: 99999;
   background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14060,8 +14015,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   padding: 0.9rem 1.25rem;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.4);
   border-left: 5px solid #f59e0b;
   color: #1e293b;
@@ -15288,17 +15241,36 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   display: block;
 }
 
-/* Tablets & Handhelds (641px - 1024px, plus iPad landscape 1080x810 and Steam Deck 1280x800):
+/* Tablets & Handhelds (641px - 1024px, plus iPad landscape 1080x810, Steam Deck 1280x800, and laptops with <=900px height):
    Strictly display the 4-card grid across full width; hide the 2 screenshot preview frames */
-@media (max-width: 1024px), (max-width: 1280px) and (max-height: 850px) {
+@media (max-width: 1024px), (max-width: 1440px) and (max-height: 900px), (max-height: 850px) {
+  .onboarding-topbar {
+    padding: 0.5rem 1.25rem;
+  }
+
+  .onboarding-footer {
+    padding: 0.5rem 1.25rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .onboarding-back-btn,
+  .onboarding-primary-btn {
+    padding: 0.45rem 1.15rem;
+    font-size: 0.85rem;
+  }
+
+  .onboarding-body-viewport {
+    padding: 0.35rem 1.15rem;
+  }
+
   .onboarding-slide.onboarding-hero-layout {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     width: 100%;
     max-width: 100%;
-    gap: 0.65rem;
+    gap: 0.45rem;
     height: 100%;
+    min-height: 0;
   }
 
   .onboarding-hero-right {
@@ -15308,237 +15280,426 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   .onboarding-hero-left {
     width: 100%;
     height: 100%;
-    gap: 0.65rem;
+    gap: 0.45rem;
     justify-content: flex-start;
+    min-height: 0;
   }
 
   .onboarding-hero-left .onboarding-header-card {
     flex-shrink: 0;
+    padding: 0.4rem 0.85rem;
+    gap: 0.15rem;
+  }
+
+  .onboarding-slide-title {
+    font-size: 1.15rem;
+    line-height: 1.15;
+    margin: 0;
+  }
+
+  .onboarding-slide-desc {
+    font-size: 0.76rem;
+    line-height: 1.3;
+    margin: 0;
   }
 
   .onboarding-hero-left .onboarding-pillars-grid {
     grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, minmax(0, 1fr));
     width: 100%;
-    gap: 0.65rem;
+    gap: 0.45rem;
     flex: 1;
     min-height: 0;
   }
-}
-
-/* iPad & Tablets in Portrait Mode (e.g. 810 x 1080) */
-@media (max-width: 900px) and (min-height: 900px) {
-  .onboarding-hero-left .onboarding-pillars-grid {
-    gap: 0.85rem;
-  }
 
   .onboarding-pillar-card {
-    padding: 0.85rem 0.95rem;
-  }
-
-  .desktop-controls-pills-row {
-    gap: 0.3rem;
-  }
-
-  .desktop-controls-pills-row .status-pill {
-    padding: 0 0.35rem;
-    font-size: 0.76rem;
-    height: 56px;
-  }
-
-  .desktop-controller-square-badge {
-    height: 56px;
-  }
-
-  .desktop-controller-square-badge .ctrl-square-svg {
-    width: 44px;
-    height: 44px;
-  }
-
-  .desktop-controls-dual-grid {
-    gap: 0.45rem;
-  }
-
-  .desktop-touch-pad-showcase,
-  .desktop-controls-keyboard-card {
-    padding: 0.45rem 0.55rem;
-  }
-
-  .desktop-kc-label {
-    font-size: 0.62rem;
-  }
-
-  .kc-keycap {
-    min-width: 19px;
-    height: 20px;
-    font-size: 0.64rem;
-    padding: 0 3px;
-  }
-}
-
-/* Handhelds & Tablets in Landscape Mode (Steam Deck 1280x800, iPad Landscape 1080x810) */
-@media (max-width: 1280px) and (max-height: 850px) {
-  .onboarding-header-card {
-    padding: 0.55rem 1rem;
-  }
-
-  .onboarding-slide-title {
-    font-size: 1.25rem;
-    margin-bottom: 0.15rem;
-  }
-
-  .onboarding-slide-desc {
-    font-size: 0.82rem;
-    line-height: 1.35;
-  }
-
-  .onboarding-pillar-card {
-    padding: 0.45rem 0.65rem;
+    padding: 0.4rem 0.65rem;
+    gap: 0.25rem;
+    min-height: 0;
+    overflow: hidden;
   }
 
   .pillar-header-row {
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.15rem;
+    gap: 0.45rem;
   }
 
   .pillar-icon-wrap {
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
+    border-radius: 5px;
   }
 
   .pillar-icon-wrap svg {
-    width: 15px;
-    height: 15px;
-  }
-
-  .pillar-card-title {
-    font-size: 0.92rem;
-  }
-
-  .pillar-text p {
-    font-size: 0.74rem;
-    line-height: 1.25;
-    margin-bottom: 0.25rem;
-  }
-
-  .pillar-console-card-item {
-    padding: 0.2rem 0.35rem;
-  }
-
-  .pillar-console-svg-large {
-    width: 15px;
-    height: 15px;
-  }
-
-  .pillar-console-label {
-    font-size: 0.7rem;
-  }
-
-  .desktop-pillar-saves-stack {
-    gap: 0.2rem;
-  }
-
-  .desktop-save-action-btn {
-    padding: 0.2rem 0.5rem;
-    font-size: 0.68rem;
-    height: 24px;
-  }
-
-  .desktop-pillar-resume-banner {
-    padding: 0.25rem 0.55rem;
-  }
-
-  .desktop-pillar-resume-banner .erp-title {
-    font-size: 0.74rem;
-  }
-
-  .desktop-pillar-resume-banner .erp-sub {
-    font-size: 0.64rem;
-  }
-
-  .desktop-pillar-resume-banner .erp-btn.is-resume {
-    padding: 0.2rem 0.5rem;
-    font-size: 0.68rem;
-  }
-
-  .desktop-pillar-hof-card {
-    padding: 0.3rem 0.55rem;
-  }
-
-  .pillar-ux-trophy-card {
-    padding: 0.3rem 0.55rem;
-  }
-
-  .pillar-gym-badge-box {
-    width: 22px;
-    height: 22px;
-  }
-
-  .pillar-gym-badge-img {
     width: 14px;
     height: 14px;
   }
 
-  .desktop-controls-pills-row {
+  .pillar-card-title {
+    font-size: 0.86rem;
+    line-height: 1.15;
+  }
+
+  .pillar-text p {
+    font-size: 0.7rem;
+    line-height: 1.25;
+    margin-bottom: 0.15rem;
+  }
+
+  .pillar-visual-graphic-wrap {
+    margin: 0.15rem 0 0;
     gap: 0.25rem;
+    min-height: 0;
+  }
+
+  /* Card 1: 12 Consoles 4x3 Grid */
+  .pillar-system-icons-grid-4x3 {
+    gap: 0.2rem;
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .pillar-console-card-item {
+    padding: 0.18rem 0.3rem;
+    font-size: 0.64rem;
+    gap: 0.25rem;
+    border-radius: 4px;
+  }
+
+  .pillar-console-svg-large {
+    width: 13px;
+    height: 13px;
+  }
+
+  .pillar-console-label {
+    font-size: 0.64rem;
+  }
+
+  /* Card 2: Save Studio Grid & Resume Banner */
+  .desktop-pillar-save-grid {
+    gap: 0.2rem;
+  }
+
+  .desktop-pillar-save-tile {
+    padding: 0.2rem 0.45rem;
+    gap: 0.4rem;
+    border-radius: 4px;
+  }
+
+  .desktop-pillar-save-tile .save-tile-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+  }
+
+  .desktop-pillar-save-tile .save-tile-icon svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  .desktop-pillar-save-tile .save-tile-title {
+    font-size: 0.66rem;
+    line-height: 1.15;
+  }
+
+  .desktop-pillar-save-tile .save-tile-sub {
+    font-size: 0.56rem;
+    line-height: 1.15;
+  }
+
+  .desktop-pillar-resume-banner {
+    padding: 0.2rem 0.45rem;
+    gap: 0.35rem;
+    border-radius: 4px;
+  }
+
+  .desktop-pillar-resume-banner .erp-icon-wrap {
+    width: 18px;
+    height: 18px;
+  }
+
+  .desktop-pillar-resume-banner .erp-icon-wrap svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  .desktop-pillar-resume-banner .erp-title {
+    font-size: 0.66rem;
+    line-height: 1.15;
+  }
+
+  .desktop-pillar-resume-banner .erp-sub {
+    font-size: 0.56rem;
+    line-height: 1.15;
+  }
+
+  .desktop-pillar-resume-banner .erp-btn.is-resume {
+    padding: 0.18rem 0.4rem;
+    font-size: 0.6rem;
+    gap: 0.2rem;
+  }
+
+  .desktop-pillar-resume-banner .erp-btn.is-resume svg {
+    width: 10px;
+    height: 10px;
+  }
+
+  /* Card 3: Hall of Fame Profile, Trophy Card & Kanto Badges */
+  .desktop-pillar-hof-card {
+    padding: 0.25rem 0.45rem;
+  }
+
+  .desktop-pillar-hof-profile {
+    gap: 0.45rem;
+    padding: 0;
+  }
+
+  .trophy-avatar-frame {
+    width: 24px;
+    height: 24px;
+  }
+
+  .trophy-avatar-frame .multiavatar-wrapper {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+  }
+
+  .trophy-level-pill {
+    font-size: 0.52rem;
+    padding: 0 3px;
+    bottom: -3px;
+  }
+
+  .desktop-pillar-hof-name {
+    font-size: 0.68rem;
+  }
+
+  .trophy-rank-badge {
+    font-size: 0.56rem;
+    padding: 1px 4px;
+  }
+
+  .trophy-meter-track {
+    height: 3.5px;
+  }
+
+  .trophy-meter-labels {
+    font-size: 0.56rem;
+  }
+
+  .trophy-points-tag {
+    font-size: 0.56rem;
+  }
+
+  .pillar-ux-trophy-card {
+    padding: 0.2rem 0.45rem;
+    gap: 0.35rem;
+    border-radius: 4px;
+  }
+
+  .trophy-mini-icon-box {
+    width: 18px;
+    height: 18px;
+  }
+
+  .trophy-mini-icon-box svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  .trophy-mini-title {
+    font-size: 0.66rem;
+  }
+
+  .trophy-mini-pts {
+    font-size: 0.56rem;
+    padding: 1px 3px;
+  }
+
+  .trophy-mini-sub {
+    font-size: 0.56rem;
+  }
+
+  .pillar-badges-showcase-row {
+    padding: 0.2rem 0.35rem;
+    gap: 0.2rem;
+    border-radius: 4px;
+  }
+
+  .pillar-gym-badge-box {
+    width: 100%;
+    min-height: 18px;
+    height: 18px;
+    border-radius: 3px;
+  }
+
+  .pillar-gym-badge-img {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* Card 4: Top Row 3 Status Pills + Controller Tile & Dual Controls Grid */
+  .desktop-controls-pills-row {
+    gap: 0.2rem;
   }
 
   .desktop-controls-pills-row .status-pill {
-    height: 38px;
-    padding: 0 0.25rem;
-    font-size: 0.7rem;
+    height: 32px !important;
+    padding: 0 0.2rem;
+    font-size: 0.62rem;
+    border-radius: 5px;
+    gap: 0.2rem;
+  }
+
+  .desktop-controls-pills-row .status-pill svg {
+    width: 12px;
+    height: 12px;
+    transform: scale(0.9);
+  }
+
+  .desktop-controls-pills-row .battery-badge {
+    padding: 1px 3px;
+    font-size: 0.58rem;
+    gap: 2px;
   }
 
   .desktop-controller-square-badge {
-    height: 38px;
+    height: 32px !important;
+    border-radius: 5px;
+    padding: 2px;
   }
 
   .desktop-controller-square-badge .ctrl-square-svg {
-    width: 30px;
-    height: 30px;
+    width: 22px;
+    height: 22px;
+  }
+
+  .desktop-controls-dual-grid {
+    gap: 0.25rem;
   }
 
   .desktop-touch-pad-showcase,
   .desktop-controls-keyboard-card {
-    padding: 0.3rem 0.4rem;
-  }
-
-  .desktop-touch-pad-showcase .touch-pad-demo-surface {
-    min-height: 42px;
-  }
-
-  .desktop-keyboard-keys-surface {
-    padding: 0.2rem 0.3rem;
+    padding: 0.2rem 0.35rem;
     gap: 0.15rem;
+    border-radius: 5px;
   }
 
-  .desktop-keyboard-keys-surface .kc-keycap {
-    min-width: 16px;
-    height: 16px;
-    font-size: 0.56rem;
-    padding: 0 2px;
-  }
-
+  .touch-pad-title,
   .desktop-kc-label {
     font-size: 0.54rem;
   }
 
+  .touch-pad-sub {
+    font-size: 0.48rem;
+  }
+
+  .desktop-touch-pad-showcase .touch-pad-demo-surface {
+    min-height: 34px !important;
+    height: 34px;
+    padding: 0 0.4rem;
+  }
+
+  .touch-v-dpad {
+    grid-template-columns: repeat(3, 9px);
+    grid-template-rows: repeat(3, 9px);
+  }
+
+  .v-dpad-btn {
+    width: 9px;
+    height: 9px;
+    font-size: 5.5px;
+    border-radius: 1.5px;
+  }
+
+  .v-dpad-center {
+    width: 7px;
+    height: 7px;
+  }
+
+  .touch-v-meta .v-meta-btn {
+    font-size: 5.5px;
+    padding: 1px 3px;
+  }
+
+  .touch-v-actions .v-action-btn {
+    width: 14px;
+    height: 14px;
+    font-size: 6.5px;
+  }
+
+  .desktop-keyboard-keys-surface {
+    padding: 0.15rem 0.3rem;
+    gap: 0.1rem;
+    min-height: 34px !important;
+    justify-content: space-around;
+  }
+
+  .desktop-keyboard-keys-surface .kc-keycap {
+    min-width: 13px;
+    height: 14px;
+    font-size: 0.5rem;
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+
   /* Slide 1 & 2 Compact Scaling for Handhelds (Steam Deck / ROG Ally / iPad Landscape) */
+  .onboarding-slide.slide-character {
+    height: 100%;
+    max-height: 100%;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
   .character-studio-container {
     padding: 0.65rem 0.95rem;
     gap: 0.85rem;
-    grid-template-columns: 260px 1fr;
+    grid-template-columns: 240px 1fr;
+    height: 100%;
     max-height: 100%;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .character-studio-hero {
+    height: 100%;
+    min-height: 0;
   }
 
   .character-passport-card {
     padding: 0.75rem 0.85rem;
+    height: 100%;
+    box-sizing: border-box;
+    justify-content: space-between;
   }
 
   .character-passport-meta .character-passport-name {
     font-size: 1.05rem;
   }
 
+  .character-studio-controls {
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .character-tab-content {
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
   .character-studio-tabs {
     margin-bottom: 0.45rem;
+    flex-shrink: 0;
   }
 
   .character-studio-tab {
@@ -15549,7 +15710,11 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   .archetype-grid-scrollable {
     grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
     gap: 0.5rem;
-    max-height: 280px;
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow-y: auto;
   }
 
   .archetype-card-chip {
@@ -15557,8 +15722,8 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   }
 
   .diagram-tester-card {
-    padding: 0.35rem 0.75rem;
-    gap: 0.25rem;
+    padding: 0.45rem 0.85rem;
+    gap: 0.35rem;
   }
 
   .diagram-topbar {
@@ -15567,6 +15732,30 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
   .diagram-device-name {
     font-size: 0.76rem;
+  }
+
+  .diagram-detail-card {
+    padding: 0.9rem 1.35rem;
+    border-left-width: 6px;
+    border-radius: 10px;
+  }
+
+  .detail-header {
+    gap: 0.75rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .detail-pill {
+    font-size: 1.25rem;
+  }
+
+  .detail-action {
+    font-size: 1.22rem;
+  }
+
+  .detail-desc {
+    font-size: 1.05rem;
+    line-height: 1.45;
   }
 }
 
@@ -16095,9 +16284,11 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   stroke: #94a3b8;
 }
 
-.ctrl-touchpad.is-pressed {
-  stroke: #3b82f6;
-  stroke-width: 2.5;
+.ctrl-touchpad.is-pressed,
+.ctrl-touchpad.is-active {
+  stroke: #06b6d4 !important;
+  fill: rgba(6, 182, 212, 0.16) !important;
+  stroke-width: 2.5 !important;
 }
 
 .ctrl-meta-btn {
@@ -16131,8 +16322,9 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
 .ctrl-dpad-arm.is-pressed,
 .ctrl-dpad-arm.is-active {
-  fill: #3b82f6;
-  stroke: #93c5fd;
+  fill: #3b82f6 !important;
+  stroke: #93c5fd !important;
+  stroke-width: 2 !important;
 }
 
 .ctrl-dpad-center {
@@ -16141,6 +16333,11 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
 [data-color-mode="light"] .ctrl-dpad-center {
   fill: #e2e8f0;
+}
+
+.ctrl-dpad-center.is-pressed,
+.ctrl-dpad-center.is-active {
+  fill: #2563eb !important;
 }
 
 /* Action Face Buttons */
@@ -16214,8 +16411,9 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   fill: #475569;
 }
 
-.ctrl-dpad-arm.is-pressed .dpad-arrow-glyph {
-  fill: #ffffff;
+.ctrl-dpad-arm.is-pressed .dpad-arrow-glyph,
+.ctrl-dpad-arm.is-active .dpad-arrow-glyph {
+  fill: #ffffff !important;
 }
 
 /* Analog Sticks */
@@ -16309,37 +16507,44 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   width: 100%;
   background: #141922;
   border: 1.5px solid #232936;
-  border-left: 4px solid var(--detail-accent, #3b82f6);
-  border-radius: 8px;
-  padding: 0.55rem 0.95rem;
+  border-left: 7px solid var(--detail-accent, #3b82f6);
+  border-radius: 12px;
+  padding: 1.15rem 1.65rem;
   box-sizing: border-box;
   text-align: left;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
 }
 
 [data-color-mode="light"] .diagram-detail-card {
   background: #f8fafc;
   border-color: #cbd5e1;
   border-left-color: var(--detail-accent, #3b82f6);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .detail-header {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.15rem;
+  gap: 0.85rem;
+  margin-bottom: 0.4rem;
+  flex-wrap: wrap;
 }
 
 .detail-pill {
-  font-size: 0.8rem;
+  font-size: 1.42rem;
   font-weight: 900;
   color: var(--detail-accent, #3b82f6);
   letter-spacing: 0.02em;
+  line-height: 1.2;
 }
 
 .detail-action {
-  font-size: 0.82rem;
+  font-size: 1.38rem;
   font-weight: 800;
   color: #f8fafc;
+  line-height: 1.2;
 }
 
 [data-color-mode="light"] .detail-action {
@@ -16347,10 +16552,10 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 }
 
 .detail-desc {
-  font-size: 0.76rem;
+  font-size: 1.18rem;
   color: #94a3b8;
   margin: 0;
-  line-height: 1.35;
+  line-height: 1.55;
   font-weight: 600;
 }
 
@@ -16947,14 +17152,23 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   color: #94a3b8;
 }
 
-/* Modal Custom Studio Specifics */
+/* Modal Custom Studio Specifics — Responsive 2K / 4K / Laptop Scaling */
 .custom-studio-modal {
-  max-width: 900px !important;
+  width: 92vw !important;
+  max-width: 1060px !important;
+  max-height: min(760px, 88vh) !important;
+  height: min(720px, 86vh) !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 .custom-studio-body {
-  display: block !important;
-  padding: 0.5rem 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  padding: 1.15rem 1.5rem !important;
+  overflow: hidden !important;
 }
 
 .custom-studio-body .character-studio-container {
@@ -16962,6 +17176,94 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   border: none !important;
   padding: 0 !important;
   box-shadow: none !important;
+  display: grid !important;
+  grid-template-columns: 260px 1fr !important;
+  gap: 1.25rem !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+  flex: 1 !important;
+}
+
+.custom-studio-body .character-studio-hero {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+.custom-studio-body .character-passport-card {
+  height: 100% !important;
+  max-height: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  padding: 1.5rem 1.25rem !important;
+  box-sizing: border-box !important;
+}
+
+.custom-studio-body .character-passport-body {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex: 1 !important;
+  width: 100% !important;
+  margin-top: 0.75rem !important;
+}
+
+.custom-studio-body .character-studio-controls,
+.custom-studio-body .character-tab-content {
+  flex: 1 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.custom-studio-body .archetype-grid-scrollable {
+  grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)) !important;
+  gap: 0.65rem !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow-y: auto !important;
+  padding: 2px 4px !important;
+}
+
+.custom-studio-body .archetype-card-chip {
+  padding: 0.65rem 0.45rem !important;
+  aspect-ratio: 1 / 1 !important;
+  gap: 0.35rem !important;
+}
+
+@media (max-width: 860px) {
+  .custom-studio-modal {
+    width: 96vw !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 90vh !important;
+  }
+
+  .custom-studio-body {
+    padding: 0.85rem 1rem !important;
+    overflow-y: auto !important;
+  }
+
+  .custom-studio-body .character-studio-container {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    gap: 0.75rem !important;
+  }
+
+  .custom-studio-body .archetype-grid-scrollable {
+    grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)) !important;
+    height: auto !important;
+    max-height: 340px !important;
+  }
 }
 
 /* Onboarding Footer — DS Touch Bottom Bar */
@@ -17474,55 +17776,66 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   }
 
   .desktop-controls-pills-row {
-    gap: 0.35rem;
+    gap: 0.25rem;
   }
 
   .desktop-controls-pills-row .status-pill {
-    padding: 0 0.45rem;
-    font-size: 0.76rem;
-    height: 56px;
+    padding: 0 0.25rem;
+    font-size: 0.65rem;
+    height: 34px !important;
+    border-radius: 6px;
+  }
+
+  .desktop-controls-pills-row .status-pill svg {
+    width: 12px;
+    height: 12px;
   }
 
   .desktop-controller-square-badge {
     width: 100%;
-    height: 56px;
-    border-radius: 10px;
-    padding: 3px;
+    height: 34px !important;
+    border-radius: 6px;
+    padding: 2px;
   }
 
   .desktop-controller-square-badge .ctrl-square-svg {
-    width: 44px;
-    height: 44px;
+    width: 24px;
+    height: 24px;
   }
 
   .desktop-controls-dual-grid {
-    gap: 0.45rem;
+    gap: 0.35rem;
   }
 
   .desktop-touch-pad-showcase,
   .desktop-controls-keyboard-card {
-    padding: 0.45rem 0.55rem;
+    padding: 0.25rem 0.4rem;
+    gap: 0.2rem;
+    border-radius: 6px;
   }
 
   .desktop-touch-pad-showcase .touch-pad-demo-surface {
-    min-height: 60px;
-    padding: 0 0.5rem;
+    min-height: 36px !important;
+    height: 36px;
+    padding: 0 0.45rem;
   }
 
   .desktop-keyboard-keys-surface {
-    padding: 0.35rem 0.45rem;
-    gap: 0.25rem;
+    padding: 0.2rem 0.35rem;
+    gap: 0.15rem;
+    min-height: 36px !important;
   }
 
   .desktop-keyboard-keys-surface .kc-keycap {
-    min-width: 20px;
-    height: 20px;
-    font-size: 0.64rem;
-    padding: 0 4px;
+    min-width: 14px;
+    height: 15px;
+    font-size: 0.52rem;
+    padding: 0 2px;
+    border-radius: 2px;
   }
 
   .desktop-kc-label {
-    font-size: 0.58rem;
+    font-size: 0.54rem;
   }
 
   .onboarding-hero-right {
@@ -17530,7 +17843,7 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   }
 
   .onboarding-footer {
-    padding: 0.5rem 1.25rem;
+    padding: 0.45rem 1.25rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
   }
 }
 
@@ -17575,8 +17888,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -17968,8 +18279,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   right: 0;
   bottom: 0;
   background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
   z-index: 99999;
   display: flex;
   align-items: center;
@@ -17980,8 +18289,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
 .theme-switcher-modal-content {
   background: var(--panel-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 2px solid var(--panel-border);
   box-shadow: var(--panel-shadow), 0 25px 50px -12px rgba(0, 0, 0, 0.35);
   border-radius: 24px;
@@ -20969,8 +21276,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
 .backup-modal-content {
   background: var(--panel-bg, #ffffff) !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 2px solid var(--panel-border, #cbd5e1) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 16px 36px rgba(0, 0, 0, 0.25) !important;
   border-radius: 8px !important;
@@ -21613,8 +21918,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   inset: 0;
   z-index: 999999;
   background: rgba(15, 23, 42, 0.72);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22321,8 +22624,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 /* --- Nintendo DS Trophy Cabinet Modal --- */
 .trophy-modal-backdrop {
   background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
 }
 
 .mobile-bottom-nav-bar {
@@ -22945,8 +23246,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
     align-items: stretch !important;
     justify-content: stretch !important;
     background: rgba(10, 15, 29, 0.98) !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
   }
 
   .desktop-only-header {
@@ -24393,8 +24692,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
 .mobile-ob-skip-btn.pill {
   background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   border: 1.5px solid #cbd5e1;
   color: #334155;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
@@ -24480,8 +24777,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
     rgba(248, 250, 252, 0.9) 65%,
     #f8fafc 96%
   );
-  backdrop-filter: blur(1.5px);
-  -webkit-backdrop-filter: blur(1.5px);
 }
 
 [data-color-mode="dark"] .mobile-ob-poster-overlay {
@@ -24510,8 +24805,6 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   width: 100%;
   max-width: 390px;
   background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 2px solid rgba(203, 213, 225, 0.8);
   border-radius: 20px;
   padding: 1.5rem 1.25rem 1.25rem;
@@ -25373,35 +25666,35 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 .desktop-controls-pills-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.55rem;
+  gap: 0.45rem;
   width: 100%;
   align-items: stretch;
 }
 
 .desktop-controls-pills-row .status-pill {
-  font-size: 0.84rem;
+  font-size: 0.76rem;
   font-weight: 800;
-  padding: 0 0.45rem;
-  border-radius: 10px;
-  height: 72px;
+  padding: 0 0.35rem;
+  border-radius: 8px;
+  height: 46px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
   box-sizing: border-box;
 }
 
 .desktop-controls-pills-row .status-pill svg {
-  transform: scale(1.15);
+  transform: scale(1);
   flex-shrink: 0;
 }
 
 .desktop-controls-pills-row .battery-badge {
   margin-left: 0;
-  padding: 3px 6px;
-  font-size: 0.8rem;
-  gap: 3px;
+  padding: 2px 5px;
+  font-size: 0.72rem;
+  gap: 2.5px;
   flex-shrink: 0;
   white-space: nowrap;
 }
@@ -25409,8 +25702,8 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 /* Square / Tile Controller Icon Matching Height & Column Styling */
 .desktop-controller-square-badge {
   width: 100%;
-  height: 72px;
-  border-radius: 10px;
+  height: 46px;
+  border-radius: 8px;
   background: #ffffff;
   border: 1.5px solid #cbd5e1;
   display: flex;
@@ -25418,7 +25711,7 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   justify-content: center;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   box-sizing: border-box;
-  padding: 4px;
+  padding: 3px;
 }
 
 [data-color-mode="dark"] .desktop-controller-square-badge {
@@ -25428,8 +25721,8 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 }
 
 .ctrl-square-svg {
-  width: 58px;
-  height: 58px;
+  width: 36px;
+  height: 36px;
   display: block;
 }
 
@@ -25464,7 +25757,7 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 .desktop-controls-dual-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.65rem;
+  gap: 0.45rem;
   width: 100%;
   align-items: stretch;
 }
@@ -25476,11 +25769,11 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.35rem;
   background: #ffffff;
   border: 1.5px solid #cbd5e1;
   border-radius: 8px;
-  padding: 0.6rem 0.75rem;
+  padding: 0.45rem 0.6rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   box-sizing: border-box;
 }
@@ -25501,7 +25794,7 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 }
 
 .touch-pad-title {
-  font-size: 0.66rem;
+  font-size: 0.64rem;
   font-weight: 900;
   letter-spacing: 0.05em;
   color: #0f172a;
@@ -25512,7 +25805,7 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 }
 
 .touch-pad-sub {
-  font-size: 0.58rem;
+  font-size: 0.55rem;
   font-weight: 700;
   color: #64748b;
 }
@@ -25524,13 +25817,13 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 .touch-pad-demo-surface {
   width: 100%;
   flex: 1;
-  min-height: 70px;
+  min-height: 48px;
   background: radial-gradient(circle at center, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.98));
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 0.85rem;
+  padding: 0 0.65rem;
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
@@ -25540,21 +25833,21 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 /* Virtual D-Pad */
 .touch-v-dpad {
   display: grid;
-  grid-template-columns: repeat(3, 17px);
-  grid-template-rows: repeat(3, 17px);
+  grid-template-columns: repeat(3, 13px);
+  grid-template-rows: repeat(3, 13px);
   gap: 1px;
   align-items: center;
   justify-items: center;
 }
 
 .v-dpad-btn {
-  width: 17px;
-  height: 17px;
+  width: 13px;
+  height: 13px;
   background: rgba(255, 255, 255, 0.16);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 3px;
+  border-radius: 2px;
   color: #f8fafc;
-  font-size: 9px;
+  font-size: 7.5px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -25563,7 +25856,7 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 
 .v-dpad-btn.up { grid-column: 2; grid-row: 1; }
 .v-dpad-btn.left { grid-column: 1; grid-row: 2; }
-.v-dpad-center { grid-column: 2; grid-row: 2; width: 15px; height: 15px; background: rgba(255, 255, 255, 0.08); border-radius: 2px; }
+.v-dpad-center { grid-column: 2; grid-row: 2; width: 11px; height: 11px; background: rgba(255, 255, 255, 0.08); border-radius: 2px; }
 .v-dpad-btn.right { grid-column: 3; grid-row: 2; }
 .v-dpad-btn.down { grid-column: 2; grid-row: 3; }
 
@@ -25571,18 +25864,18 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 .touch-v-meta {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
 }
 
 .v-meta-btn {
-  font-size: 8px;
+  font-size: 7px;
   font-weight: 800;
   letter-spacing: 0.04em;
   color: rgba(255, 255, 255, 0.7);
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.22);
-  padding: 2px 6px;
-  border-radius: 10px;
+  padding: 1.5px 5px;
+  border-radius: 8px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
@@ -25590,32 +25883,32 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
 .touch-v-actions {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.35rem;
 }
 
 .v-action-btn {
-  width: 25px;
-  height: 25px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  font-size: 10.5px;
+  font-size: 9px;
   font-weight: 900;
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4);
 }
 
 .v-action-btn.b {
   background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
   border: 1.5px solid #f87171;
-  transform: translateY(3px);
+  transform: translateY(2px);
 }
 
 .v-action-btn.a {
   background: linear-gradient(135deg, #10b981 0%, #047857 100%);
   border: 1.5px solid #34d399;
-  transform: translateY(-3px);
+  transform: translateY(-2px);
 }
 
 /* Desktop Keyboard Surface Inside Column 2 */
@@ -25625,11 +25918,11 @@ button.status-pill.status-autoresume.is-enabled .status-autoresume-label {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 0.35rem;
+  gap: 0.25rem;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
-  padding: 0.45rem 0.6rem;
+  padding: 0.35rem 0.5rem;
   box-sizing: border-box;
 }
 
