@@ -67,10 +67,15 @@ Full **2-Column Showcase**:
 
 | Resolution Tier | Common Displays & Hardware | Viewport Resolution | Notes |
 | :--- | :--- | :--- | :--- |
-| **768p / 900p Laptops** | Budget laptops, older MacBook Air | **`1366 x 768`**<br>**`1440 x 900`** | Compact height scaling, no card overflow |
+| **768p / 900p Laptops** | Budget laptops, older MacBook Air | **`1366 x 768`**<br>**`1440 x 900`** | Compact height scaling, no card overflow; topbar hides verbose text labels (`<= 1350px`) |
 | **1080p Full HD** | Standard PC monitors, gaming laptops, FHD iMac | **`1920 x 1080`** | Golden reference desktop layout (`1.25fr 1fr; gap: 1.25rem`) |
 | **1440p / 2K / QHD** | 27" QHD gaming displays, Studio Display scaled | **`2560 x 1440`** | Expanded typography (`1.85rem` title), `26px` console SVGs, `78px` status pills |
 | **1600p Retina** | MacBook Pro 14" / 16" (native retina viewports) | **`1728 x 1117`** (16" Pro)<br>**`1512 x 982`** (14" Pro) | Crisp high-DPI font smoothing, centered 2-column showcase |
+
+### Topbar Responsive Compression Rules
+* **Adaptive Search Field**: `width: clamp(70px, 7.5vw, 120px)` with focus expansion to `clamp(95px, 11vw, 150px)`.
+* **Label Compression (`<= 1350px`)**: Scraper (`"SCRAPER"`) and Auto-Resume (`"AUTO-RESUME"`) labels gracefully hide to render compact `36px` circular action pills, ensuring zero cutoff of the clock widget or rightmost controls.
+* **Fluid Container Padding**: `padding: 0.75rem clamp(0.75rem, 1.4vw, 1.5rem) 1rem` eliminates horizontal clipping on narrow/split-screen desktop viewports.
 
 ---
 
