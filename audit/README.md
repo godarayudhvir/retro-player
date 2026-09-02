@@ -10,7 +10,7 @@
 
 | Date | Title | Focus Areas | Findings | Status | Directory |
 | :---: | :--- | :--- | :---: | :---: | :---: |
-| **`2026-09-02`** | **Comprehensive Full-System Audit** | Security, Performance, PWA, SEO, AGO/AEO, Documentation | 12 Pending (14 Completed) | 🟡 In Progress | **[2026-09-02 Audit Hub](2026-09-02/README.md)** |
+| — | *No active audits in backlog* | All systems healthy & verified | 0 Pending | 🟢 Clean | — |
 
 ---
 
@@ -19,7 +19,7 @@
 Just like the **[`mirai/`](../mirai/README.md)** directory maintains future roadmap blueprints and feature designs, the **`audit/`** directory maintains point-in-time system health assessments and actionable remediation specifications.
 
 ### How to Tackle an Audit Batch
-1. **Open the Date-Based Hub**: Navigate to the dated folder (e.g. [`audit/2026-09-02/README.md`](2026-09-02/README.md)) to view the master scorecard, severity matrix, and remediation order.
+1. **Open the Date-Based Hub**: Navigate to the dated folder (e.g. `audit/<YYYY-MM-DD>/README.md`) to view the master scorecard, severity matrix, and remediation order.
 2. **Tackle Specifications in Priority Order**:
    - 🚨 **Priority 1 — Security Hardening**: Eliminate path traversal, arbitrary file writes/deletions, SSRF, and root container risks.
    - 🟠 **Priority 2 — Performance Optimization**: Eliminate render-blocking font waterfalls, enable bundle code-splitting, and optimize frame loops.

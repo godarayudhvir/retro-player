@@ -1,0 +1,175 @@
+# Retro Player — Unabridged Technical Specification & LLM Reference (v1.1.1)
+
+> **Repository**: https://github.com/godarayudhvir/retro-player  
+> **Live Web Demo**: https://godarayudhvir.github.io/retro-player/  
+> **Target Audience**: AI agents, LLM search engines (Perplexity, ChatGPT, Claude), developers, and retro gaming enthusiasts.
+
+---
+
+## 1. System Overview & Architectural Model
+
+**Retro Player** is a high-performance, zero-overhead web emulation station that transforms modern web browsers into a console-grade retro gaming machine. It operates under a **client-side WebAssembly execution model**, ensuring the host server incurs near-zero CPU and memory usage during gameplay.
+
+### Core Architectural Principles
+1. **Edge WebAssembly Execution**: Game ROMs execute 100% inside client browser sandbox threads using compiled WebAssembly cores (`EmulatorJS`).
+2. **Tri-Environment Universal Compatibility**:
+   - **Local Development**: `http://localhost:3000` via Vite dev server (`vite.config.js`).
+   - **Self-Hosted Production / Docker**: `http://<server-ip>:3000` via multi-stage Express container (`server.js`).
+   - **Static Hosting / GitHub Pages**: `https://<user>.github.io/retro-player/` with relative subpath routing (`./`).
+3. **Zero-Lag Spatial Navigation**: Full 2D controller and keyboard spatial navigation across all components, modals, and virtual keyboards.
+4. **Permanent Dual-Layer Persistence**: Automatic synchronization between local browser IndexedDB (`RetroPlayerDB`) and optional host filesystem (`data/retroplayer_db.json`).
+
+---
+
+## 2. Supported Platforms, File Extensions & Cores
+
+Retro Player supports 12 classic gaming platforms:
+
+| Platform | Canonical Key | Core Engine | Extensions Supported | Category |
+| :--- | :--- | :--- | :--- | :--- |
+| **Nintendo Entertainment System** | `nes` | FCEUmm / QuickNES | `.nes`, `.zip` | Home Console |
+| **Super Nintendo Entertainment System** | `snes` | Snes9x | `.sfc`, `.smc`, `.snes`, `.zip` | Home Console |
+| **Game Boy Advance** | `gba` | mGBA / VBA-M | `.gba`, `.zip` | Handheld |
+| **Game Boy Color** | `gbc` | Gambatte | `.gbc`, `.zip` | Handheld |
+| **Game Boy** | `gb` | Gambatte | `.gb`, `.zip` | Handheld |
+| **Nintendo 64** | `n64` | Mupen64Plus | `.z64`, `.n64`, `.v64`, `.zip` | Home Console |
+| **Nintendo DS** | `nds` | DeSmuME / melonDS | `.nds`, `.zip` | Dual-Screen Handheld |
+| **Sega Genesis / Mega Drive** | `genesis` | Genesis Plus GX | `.md`, `.smd`, `.gen`, `.zip` | Home Console |
+| **Sega Game Gear** | `gamegear` | Genesis Plus GX | `.gg`, `.zip` | Handheld |
+| **Atari 2600** | `atari2600` | Stella | `.a26`, `.bin`, `.zip` | Home Console |
+| **Sony PlayStation 1** | `psx` | PCSX ReARMed | `.iso`, `.cue`, `.chd`, `.pbp` | 32-Bit CD Console |
+| **Arcade / MAME** | `arcade` | FB Alpha / MAME2003 | `.zip` | Coin-Op Arcade |
+
+---
+
+## 3. Controls & Spatial Navigation
+
+The entire application is 100% controllable via physical gamepads (Xbox, DualShock/DualSense, Nintendo Switch Pro, 8BitDo) and desktop keyboards.
+
+### Gamepad Button Layout (Standard XInput / W3C Standard Gamepad)
+- **D-Pad / Left Stick**: 2D Spatial Grid Navigation & Carousel Selection
+- **A / South Button**: Confirm / Launch Selected Game / Select Character Tile
+- **B / East Button**: Back / Dismiss Modal / Return to Library
+- **X / West Button**: Toggle Favorite Status / Virtual Space Bar (in OSK)
+- **Y / North Button**: Open On-Screen Virtual Keyboard Search
+- **L1 / Left Bumper**: Previous System Category / Cycle Left
+- **R1 / Right Bumper**: Next System Category / Cycle Right
+- **L3 / Left Stick Click**: Toggle Cartridge Grid Density (Compact / Cozy / Large)
+- **R3 / Right Stick Click**: Toggle Panoramic Wide Grid Mode
+- **L3 + R3 (Simultaneous)**: Force Exit Active Game back to Library
+- **Start / Menu**: Open Console Settings & Management Drawer
+- **Select / Back**: Focus Search Bar / Toggle Active Sub-toolbar
+
+### Keyboard Shortcuts
+- **Arrow Keys**: Spatial Tile Navigation
+- **Enter**: Confirm / Launch Game / Submit
+- **Escape**: Close Modal / Back
+- **F**: Toggle Favorite Status
+- **/**: Focus Search Input / Open Virtual Keyboard
+- **Tab / Shift+Tab**: Switch System Category Tabs
+- **1, 2, 3**: Switch Grid Density Sizes
+
+---
+
+## 4. Save States & Cartridge Battery Architecture
+
+Retro Player decouples snapshot quick saves from authentic in-game battery saves:
+
+1. **Battery SRAM (`.sav` / `.srm` / `.mcr`)**:
+   - Emulates battery-backed RAM on physical cartridges.
+   - Automatically flushed on in-game save events and on game exit.
+   - Saved into IndexedDB `game_saves` store and synchronized to `data/retroplayer_db.json`.
+2. **Snapshot Save States (`.state`)**:
+   - Captures entire CPU/RAM/VRAM memory state for instant resume.
+   - Saved into IndexedDB `save_states` store.
+3. **Backup & Migration Studio**:
+   - 1-Click JSON export of all saves, profiles, playtime, and settings (`data/retroplayer_db.json`).
+   - Drag-and-drop JSON restore to migrate libraries across browsers or devices.
+
+---
+
+## 5. Pokémon Save Inspector Specifications
+
+Retro Player includes an in-memory binary parser for Pokémon save files across Generations 1 through 5:
+
+- **Generation 1 (Red / Blue / Yellow)**:
+  - Validates checksum algorithm across offsets `0x2598` to `0x3523`.
+  - Reads 8 Kanto Gym Badges from bitfield byte `0x2602`.
+  - Unlocks Hall of Fame champion milestone upon detecting League victory flag.
+- **Generation 2 (Gold / Silver / Crystal)**:
+  - Reads 8 Johto Gym Badges from `0x23E4` and 8 Kanto Badges from `0x23E5` (16 total badges).
+  - Unlocks Mt. Silver and Red Defeated milestones.
+- **Generation 3 (Ruby / Sapphire / Emerald / FireRed / LeafGreen)**:
+  - Parses 4KB cyclic save chunks and 14-block sections with 32-bit save counters.
+  - Verifies section checksums and parses Hoenn / Kanto badges and National Pokédex flags.
+- **Generation 4 & 5 (Diamond / Pearl / Platinum / HeartGold / SoulSilver / Black / White)**:
+  - Parses `.dsv` footer structures, Desmume metadata blocks, and Unova Gym Badges.
+
+---
+
+## 6. Universal Organic Achievements Engine
+
+Retro Player features a master registry of **24 universal organic achievements** (300G Gamerscore) across 6 categories:
+1. **First Boot**: Complete onboarding and launch your first retro title (10G).
+2. **Marathon Gamer**: Log over 30 continuous minutes in a single game session (15G).
+3. **Retro Polyglot**: Play games across 5 distinct console platforms (20G).
+4. **Physical Tactility**: Connect and play using a hardware USB or Bluetooth controller (15G).
+5. **Collector's Vault**: Ingest or manage a library of 25+ retro games (25G).
+6. **Save Custodian**: Perform an authentic in-game cartridge battery save (15G).
+7. **Pokémon Milestones**: Defeat Gym Leaders, obtain Badges, and enter the Hall of Fame (up to 50G).
+
+Session achievements buffer in memory during gameplay to prevent distracting overlays, flushing with authentic Web Audio chiptune fanfares upon game exit.
+
+---
+
+## 7. Dual Server & Docker Deployment
+
+### Multi-Stage Container Setup
+Retro Player runs via a hardened, non-root multi-stage Docker container:
+
+```yaml
+version: '3.8'
+services:
+  retro-player:
+    image: ghcr.io/godarayudhvir/retro-player:latest
+    container_name: retro-player
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+      - ./roms:/app/public/roms
+      - ./bgm:/app/public/bgm
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - INCLUDE_DEMO_ROMS=true
+      - INCLUDE_DEMO_BGM=true
+```
+
+### Environment Variables
+- `PORT`: Server listening port (default: `3000`)
+- `DATA_DIR`: Filesystem path for JSON database (default: `/app/data`)
+- `ROMS_DIR`: Filesystem directory for local ROM binaries (default: `/app/public/roms`)
+- `BGM_DIR`: Filesystem directory for background music tracks (default: `/app/public/bgm`)
+- `INCLUDE_DEMO_ROMS`: Enable/disable bundled open-source homebrew ROMs (`true`/`false`)
+- `INCLUDE_DEMO_BGM`: Enable/disable bundled ambient audio tracks (`true`/`false`)
+
+---
+
+## 8. REST API Reference
+
+All backend API endpoints operate with path traversal guards and origin validation:
+
+- `GET /api/roms`: Scans ROM directory and returns catalog manifest with companion sidecars and covers.
+- `GET /api/bgm`: Scans audio directories and returns available background music tracks.
+- `GET /api/db/:store`: Fetches records for a given store (`profiles`, `user_data`, `game_saves`, `app_settings`).
+- `POST /api/db/:store`: Commits or updates a record in the server database.
+- `POST /api/db/export`: Exports the full JSON database.
+- `POST /api/db/import`: Imports a full JSON database payload.
+- `POST /api/db/reset`: Soft-resets the server database.
+- `POST /api/upload-rom`: Ingests a new ROM binary into the server library.
+- `POST /api/delete-rom`: Deletes a ROM and companion sidecars from disk.
+- `POST /api/metadata/save-sidecar`: Saves or updates game metadata sidecar JSON and cover art.
+- `POST /api/metadata/delete-sidecar`: Reverts game metadata and removes companion files.
+- `POST /api/presence`: Dispatches Discord RPC and game activity state.

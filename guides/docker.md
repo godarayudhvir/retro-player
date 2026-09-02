@@ -245,6 +245,12 @@ sudo chown -R 1000:1000 ./roms ./bgm ./data
 chmod -R a+rwX ./roms ./bgm ./data
 ```
 
+### Server Security & CORS Protections
+The container and backend server enforce hardened security policies:
+- **Unprivileged Non-Root Execution**: Runs as user `node` (`UID 1000`).
+- **SSRF Upstream Allowlisting**: Scraper proxy endpoints only communicate with verified upstream metadata services (`api.thegamesdb.net`, `screenscraper.fr`, `api.rawg.io`), blocking loopback and cloud metadata addresses (`169.254.169.254`).
+- **Mutating CORS Guard**: Mutating endpoints (`POST`, `PUT`, `DELETE`) require localhost, same-origin, or trusted private network origins, blocking cross-origin CSRF and mutation requests from third-party sites.
+
 ### Clean Factory Reset
 ```bash
 docker compose down -v --remove-orphans

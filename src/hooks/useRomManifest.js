@@ -9,6 +9,7 @@ import {
   getAllCustomRomsFromLocalDb, 
   deleteCustomRomFromLocalDb 
 } from '../services/db';
+import { apiFetch } from '../utils/apiClient';
 
 /**
  * Hook to manage ROM catalog manifest, search filtering, system categories, and custom ROM uploads.
@@ -24,13 +25,12 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
 
   const fetchGames = useCallback(async () => {
     setLoading(true);
-    const apiUrl = (import.meta.env.BASE_URL || './') + 'api/roms';
-    console.log(`📡 [CLIENT FETCH] Requesting ROM manifest from ${apiUrl}...`);
+    console.log('📡 [CLIENT FETCH] Requesting ROM manifest from api/roms...');
     try {
       let loadedGames = [];
 
       try {
-        const res = await fetch(apiUrl);
+        const res = await apiFetch('/api/roms');
         if (res.ok) {
           const data = await res.json();
           loadedGames = data.games || [];
@@ -135,7 +135,7 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
         if (onProgress) onProgress({ step: 'uploading', message: `Saving "${file.name}" to server library...` });
 
         try {
-          const res = await fetch('/api/upload-rom', {
+          const res = await apiFetch('/api/upload-rom', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/octet-stream',
@@ -452,7 +452,7 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
         }
 
         if (isServer) {
-          const res = await fetch('/api/upload-rom', {
+          const res = await apiFetch('/api/upload-rom', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/octet-stream',
@@ -471,7 +471,7 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
               // If companion cover or sidecar exists, write to server disk
               if (coverDataUrl || parsedSidecar) {
                 try {
-                  await fetch('/api/metadata/save-sidecar', {
+                  await apiFetch('/api/metadata/save-sidecar', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -654,7 +654,7 @@ export function useRomManifest(onCustomRomLoaded, options = {}) {
       if (game.isCustom) {
         await deleteCustomRomFromLocalDb(game.id);
       } else {
-        await fetch('/api/delete-rom', {
+        await apiFetch('/api/delete-rom', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

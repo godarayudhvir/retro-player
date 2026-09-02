@@ -171,6 +171,48 @@ app.use((req, res, next) => {
   next();
 });
 
+// Mutating CORS Guard & Origin Validation for /api endpoints
+app.use('/api', (req, res, next) => {
+  const origin = req.headers.origin;
+  const isMutating = ['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method.toUpperCase());
+
+  if (origin) {
+    try {
+      const originUrl = new URL(origin);
+      const hostHeader = req.headers.host || '';
+      const hostName = hostHeader.split(':')[0];
+      const isAllowedOrigin =
+        originUrl.hostname === 'localhost' ||
+        originUrl.hostname === '127.0.0.1' ||
+        originUrl.hostname === '::1' ||
+        originUrl.hostname === hostName ||
+        originUrl.hostname.startsWith('192.168.') ||
+        originUrl.hostname.startsWith('10.') ||
+        originUrl.hostname.endsWith('.local');
+
+      if (isMutating && !isAllowedOrigin) {
+        console.warn(`🚨 [CORS MUTATION BLOCKED] Untrusted origin attempted mutation: ${origin} -> ${req.method} ${req.url}`);
+        return res.status(403).json({ error: 'Forbidden: Cross-origin mutating requests not permitted from this origin.' });
+      }
+
+      if (isAllowedOrigin) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Range, Authorization');
+      }
+    } catch {
+      if (isMutating) {
+        return res.status(403).json({ error: 'Forbidden: Invalid origin header' });
+      }
+    }
+  }
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
+
 // Serve raw ROM binaries with CORS & octet-stream headers (with fallback to bundled demos)
 app.use('/roms', (req, res, next) => {
   try {
@@ -1277,14 +1319,37 @@ app.post('/api/metadata/delete-sidecar', express.json(), (req, res) => {
   }
 });
 
+const ALLOWED_SCRAPER_HOSTS = new Set([
+  'api.thegamesdb.net',
+  'www.screenscraper.fr',
+  'screenscraper.fr',
+  'api.rawg.io'
+]);
+
+function validateUpstreamUrl(urlString, expectedHost) {
+  try {
+    const parsed = new URL(urlString);
+    if (parsed.protocol !== 'https:') return false;
+    if (expectedHost && parsed.hostname !== expectedHost) return false;
+    if (!ALLOWED_SCRAPER_HOSTS.has(parsed.hostname)) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Proxy for TheGamesDB.net
 app.get('/api/proxy-thegamesdb', (req, res) => {
   try {
-    const targetPath = req.query.endpoint;
-    if (!targetPath) {
-      return res.status(400).json({ error: 'Missing endpoint parameter' });
+    const rawPath = String(req.query.endpoint || '').trim().replace(/^\/+/, '');
+    if (!rawPath || rawPath.startsWith('http:') || rawPath.startsWith('https:') || rawPath.includes('://')) {
+      return res.status(403).json({ error: 'Access denied: Disallowed endpoint protocol or path' });
     }
-    const targetUrl = `https://api.thegamesdb.net/v1/${targetPath}`;
+    const targetUrl = `https://api.thegamesdb.net/v1/${rawPath}`;
+    if (!validateUpstreamUrl(targetUrl, 'api.thegamesdb.net')) {
+      return res.status(403).json({ error: 'Access denied: Upstream host not permitted' });
+    }
+
     https.get(targetUrl, {
       headers: { 'User-Agent': 'RetroPlayer/1.0 (Web; Node)' }
     }, (upstreamRes) => {
@@ -1302,8 +1367,15 @@ app.get('/api/proxy-thegamesdb', (req, res) => {
 // Proxy for ScreenScraper.fr
 app.get('/api/proxy-screenscraper', (req, res) => {
   try {
-    const query = req.query.query || '';
+    const query = String(req.query.query || '').trim();
+    if (query.startsWith('http:') || query.startsWith('https:') || query.includes('://')) {
+      return res.status(403).json({ error: 'Access denied: Disallowed query string' });
+    }
     const targetUrl = `https://www.screenscraper.fr/api2/jeuInfos.php?${query}`;
+    if (!validateUpstreamUrl(targetUrl, 'www.screenscraper.fr')) {
+      return res.status(403).json({ error: 'Access denied: Upstream host not permitted' });
+    }
+
     https.get(targetUrl, {
       headers: { 'User-Agent': 'RetroPlayer/1.0 (Web; Node)' }
     }, (upstreamRes) => {
@@ -1321,14 +1393,18 @@ app.get('/api/proxy-screenscraper', (req, res) => {
 // Proxy for Keyless Video Game Database (RAWG.io)
 app.get('/api/proxy-rawg', (req, res) => {
   try {
-    const targetPath = req.query.endpoint;
-    if (!targetPath) {
-      return res.status(400).json({ error: 'Missing endpoint parameter' });
+    const rawPath = String(req.query.endpoint || '').trim().replace(/^\/+/, '');
+    if (!rawPath || rawPath.startsWith('http:') || rawPath.startsWith('https:') || rawPath.includes('://')) {
+      return res.status(403).json({ error: 'Access denied: Disallowed endpoint protocol or path' });
     }
     const defaultKey = 'c542e67aec3a4340908f9de9e86038af';
-    const sep = targetPath.includes('?') ? '&' : '?';
-    const finalPath = targetPath.includes('key=') ? targetPath : `${targetPath}${sep}key=${defaultKey}`;
+    const sep = rawPath.includes('?') ? '&' : '?';
+    const finalPath = rawPath.includes('key=') ? rawPath : `${rawPath}${sep}key=${defaultKey}`;
     const targetUrl = `https://api.rawg.io/api/${finalPath}`;
+    if (!validateUpstreamUrl(targetUrl, 'api.rawg.io')) {
+      return res.status(403).json({ error: 'Access denied: Upstream host not permitted' });
+    }
+
     https.get(targetUrl, {
       headers: { 'User-Agent': 'RetroPlayer/2.0 (Web; VideoGameDatabaseBot)' }
     }, (upstreamRes) => {
@@ -1342,6 +1418,7 @@ app.get('/api/proxy-rawg', (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // Game Activity & Rich Presence State
 let currentPresence = {

@@ -233,4 +233,13 @@ window.__mockGamepadBattery({ level: 80, isCharging: false, id: "DualSense Wirel
 window.__mockGamepadBattery(null);
 ```
 
+---
+
+## 🔋 Power-Efficient Gamepad Lifecycle Management
+
+To prevent battery drain on laptops, tablets, and mobile devices, Retro Player's gamepad navigation engine incorporates an **event-driven polling lifecycle guard**:
+- **Zero Idle Polling**: When zero gamepads are connected, the `requestAnimationFrame` polling loop halts completely (0Hz CPU overhead).
+- **Event-Driven Wakeup**: The loop reactivates automatically via standard browser `gamepadconnected` and pointer interaction events the moment a physical controller is connected or utilized.
+
+
 

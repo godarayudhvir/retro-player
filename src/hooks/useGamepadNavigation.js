@@ -1901,12 +1901,37 @@ export function useGamepadNavigation({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [navigateSpatial, setActiveGame, setActiveSystem, setFocusedTarget, searchInputRef, sfx]);
 
-  // HTML5 Gamepad polling engine
+  // HTML5 Gamepad polling engine (Event-driven & power-efficient: pauses when 0 gamepads connected)
   useEffect(() => {
-    let animId;
+    let animId = null;
+    let isPolling = false;
     const STICK_DEADZONE = 0.45;
 
+    const hasConnectedGamepad = () => {
+      const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+      for (let i = 0; i < gamepads.length; i++) {
+        if (gamepads[i] && gamepads[i].connected) return true;
+      }
+      return false;
+    };
+
+    const startPolling = () => {
+      if (!isPolling) {
+        isPolling = true;
+        animId = requestAnimationFrame(pollGamepad);
+      }
+    };
+
+    const stopPolling = () => {
+      isPolling = false;
+      if (animId) {
+        cancelAnimationFrame(animId);
+        animId = null;
+      }
+    };
+
     const pollGamepad = (timestamp) => {
+      if (!isPolling) return;
       const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
       let gp = null;
       for (let i = 0; i < gamepads.length; i++) {
@@ -2403,13 +2428,50 @@ export function useGamepadNavigation({
           gamepadConnectedRef.current = false;
           setGamepadConnected(false);
         }
+        // Halt loop when zero gamepads are active to eliminate idle CPU drain
+        stopPolling();
+        return;
       }
 
-      animId = requestAnimationFrame(pollGamepad);
+      if (isPolling) {
+        animId = requestAnimationFrame(pollGamepad);
+      }
     };
 
-    animId = requestAnimationFrame(pollGamepad);
-    return () => cancelAnimationFrame(animId);
+    const handleGamepadConnected = () => {
+      startPolling();
+    };
+
+    const handleGamepadDisconnected = () => {
+      if (!hasConnectedGamepad()) {
+        if (gamepadConnectedRef.current) {
+          gamepadConnectedRef.current = false;
+          setGamepadConnected(false);
+        }
+        stopPolling();
+      }
+    };
+
+    const handleUserInteraction = () => {
+      if (!isPolling && hasConnectedGamepad()) {
+        startPolling();
+      }
+    };
+
+    window.addEventListener('gamepadconnected', handleGamepadConnected);
+    window.addEventListener('gamepaddisconnected', handleGamepadDisconnected);
+    window.addEventListener('pointerdown', handleUserInteraction);
+
+    if (hasConnectedGamepad()) {
+      startPolling();
+    }
+
+    return () => {
+      stopPolling();
+      window.removeEventListener('gamepadconnected', handleGamepadConnected);
+      window.removeEventListener('gamepaddisconnected', handleGamepadDisconnected);
+      window.removeEventListener('pointerdown', handleUserInteraction);
+    };
   }, [
     navigateSpatial,
     setActiveGame,

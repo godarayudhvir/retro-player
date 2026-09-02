@@ -1,4 +1,20 @@
 User-agent: *
 Allow: /
 
+# Dedicated Generative AI & Answer Engine Crawlers
+User-agent: GPTBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: ClaudeBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
 Sitemap: https://godarayudhvir.github.io/retro-player/sitemap.xml

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Save, RotateCcw, Upload, Image as ImageIcon, Sparkles, Tag, Calendar, User, Building, Film, Check, AlertCircle, BookOpen, Video } from 'lucide-react';
 import { resolveAssetPath } from '../utils/assetPath';
+import { apiFetch } from '../utils/apiClient';
 import { saveManualMetadata, deleteManualMetadata } from '../services/metadataScraper';
 import { convertRemoteImageToWebpDataUrl } from '../utils/imageConverter';
 
@@ -133,7 +134,7 @@ export default function MetadataEditModal({
 
       // Try saving directly to disk backend via /api/metadata/save-sidecar
       try {
-        const res = await fetch('/api/metadata/save-sidecar', {
+        const res = await apiFetch('/api/metadata/save-sidecar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

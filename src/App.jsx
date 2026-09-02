@@ -1,23 +1,24 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } from 'react';
 import Topbar from './components/Topbar';
 import SystemRibbon from './components/SystemRibbon';
 import CartridgeGrid from './components/CartridgeGrid';
-import LoadRomModal from './components/LoadRomModal';
-import AboutInfoModal from './components/AboutInfoModal';
 import DropzoneOverlay from './components/DropzoneOverlay';
-import OnScreenKeyboard from './components/OnScreenKeyboard';
-import EmulatorModal from './components/EmulatorModal';
-import ProfileSelectModal from './components/ProfileSelectModal';
-import ProfileCreatorModal from './components/ProfileCreatorModal';
-import DemoWelcomeModal from './components/DemoWelcomeModal';
-import OnboardingScreen from './components/OnboardingScreen';
-import ScraperModal from './components/ScraperModal';
-import MobileAppView from './components/MobileAppView';
-import MetadataEditModal from './components/MetadataEditModal';
-import BackupModal from './components/BackupModal';
-import KeyboardControlsModal from './components/KeyboardControlsModal';
 import AchievementToast from './components/AchievementToast';
-import TrophyCabinetModal from './components/TrophyCabinetModal';
+
+// Code-split secondary modals via React.lazy for on-demand chunk loading
+const LoadRomModal = lazy(() => import('./components/LoadRomModal'));
+const AboutInfoModal = lazy(() => import('./components/AboutInfoModal'));
+const OnScreenKeyboard = lazy(() => import('./components/OnScreenKeyboard'));
+const EmulatorModal = lazy(() => import('./components/EmulatorModal'));
+const ProfileSelectModal = lazy(() => import('./components/ProfileSelectModal'));
+const ProfileCreatorModal = lazy(() => import('./components/ProfileCreatorModal'));
+const OnboardingScreen = lazy(() => import('./components/OnboardingScreen'));
+const ScraperModal = lazy(() => import('./components/ScraperModal'));
+const MobileAppView = lazy(() => import('./components/MobileAppView'));
+const MetadataEditModal = lazy(() => import('./components/MetadataEditModal'));
+const BackupModal = lazy(() => import('./components/BackupModal'));
+const KeyboardControlsModal = lazy(() => import('./components/KeyboardControlsModal'));
+const TrophyCabinetModal = lazy(() => import('./components/TrophyCabinetModal'));
 
 import { useAchievements } from './hooks/useAchievements';
 import { isPokemonRom } from './services/pokemonSaveParser';
@@ -569,7 +570,8 @@ export default function App() {
 
       {/* MOBILE-SPECIFIC DEDICATED NETFLIX-STYLE VIEW (Zero side-effects on Desktop/PC/TV) */}
       {isMobile ? (
-        <MobileAppView
+        <Suspense fallback={null}>
+          <MobileAppView
           games={games}
           systems={systems}
           activeProfile={activeProfile}
@@ -651,6 +653,7 @@ export default function App() {
           getBatterySaveBuffer={getBatterySaveBuffer}
           achievementsEngine={achievementsEngine}
         />
+        </Suspense>
       ) : (
         <>
           {/* Top Console Status Bar */}
@@ -758,8 +761,10 @@ export default function App() {
         </>
       )}
 
-      {/* Load Custom ROM In-App Modal Dialog */}
-      <LoadRomModal
+      {/* Secondary Modals Wrapped in Suspense for Asynchronous Chunk Streaming */}
+      <Suspense fallback={null}>
+        {/* Load Custom ROM In-App Modal Dialog */}
+        <LoadRomModal
         isOpen={showLoadRomModal}
         initialFile={loadRomInitialFile}
         initialDroppedData={loadRomInitialDroppedData}
@@ -1174,6 +1179,7 @@ export default function App() {
         achievementsEngine={achievementsEngine}
         sfx={sfx}
       />
+      </Suspense>
     </div>
   );
 }

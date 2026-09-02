@@ -1327,16 +1327,44 @@ function multiConsoleScannerPlugin() {
       });
 
       // Proxy for TheGamesDB.net (Bypasses Browser CORS restrictions)
+      const ALLOWED_SCRAPER_HOSTS = new Set([
+        'api.thegamesdb.net',
+        'www.screenscraper.fr',
+        'screenscraper.fr',
+        'api.rawg.io'
+      ]);
+
+      function validateUpstreamUrl(urlString, expectedHost) {
+        try {
+          const parsed = new URL(urlString);
+          if (parsed.protocol !== 'https:') return false;
+          if (expectedHost && parsed.hostname !== expectedHost) return false;
+          if (!ALLOWED_SCRAPER_HOSTS.has(parsed.hostname)) return false;
+          return true;
+        } catch {
+          return false;
+        }
+      }
+
+      // Proxy for TheGamesDB.net
       server.middlewares.use('/api/proxy-thegamesdb', (req, res) => {
         try {
           const urlObj = new URL(req.url, 'http://localhost');
-          const targetPath = urlObj.searchParams.get('endpoint');
-          if (!targetPath) {
-            res.statusCode = 400;
-            res.end(JSON.stringify({ error: 'Missing endpoint parameter' }));
+          const rawPath = String(urlObj.searchParams.get('endpoint') || '').trim().replace(/^\/+/, '');
+          if (!rawPath || rawPath.startsWith('http:') || rawPath.startsWith('https:') || rawPath.includes('://')) {
+            res.statusCode = 403;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'Access denied: Disallowed endpoint protocol or path' }));
             return;
           }
-          const targetUrl = `https://api.thegamesdb.net/v1/${targetPath}`;
+          const targetUrl = `https://api.thegamesdb.net/v1/${rawPath}`;
+          if (!validateUpstreamUrl(targetUrl, 'api.thegamesdb.net')) {
+            res.statusCode = 403;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'Access denied: Upstream host not permitted' }));
+            return;
+          }
+
           https.get(targetUrl, {
             headers: { 'User-Agent': 'RetroPlayer/1.0 (Web; Node)' }
           }, (upstreamRes) => {
@@ -1357,8 +1385,21 @@ function multiConsoleScannerPlugin() {
       server.middlewares.use('/api/proxy-screenscraper', (req, res) => {
         try {
           const urlObj = new URL(req.url, 'http://localhost');
-          const query = urlObj.searchParams.get('query') || '';
+          const query = String(urlObj.searchParams.get('query') || '').trim();
+          if (query.startsWith('http:') || query.startsWith('https:') || query.includes('://')) {
+            res.statusCode = 403;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'Access denied: Disallowed query string' }));
+            return;
+          }
           const targetUrl = `https://www.screenscraper.fr/api2/jeuInfos.php?${query}`;
+          if (!validateUpstreamUrl(targetUrl, 'www.screenscraper.fr')) {
+            res.statusCode = 403;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'Access denied: Upstream host not permitted' }));
+            return;
+          }
+
           https.get(targetUrl, {
             headers: { 'User-Agent': 'RetroPlayer/1.0 (Web; Node)' }
           }, (upstreamRes) => {
@@ -1379,16 +1420,24 @@ function multiConsoleScannerPlugin() {
       server.middlewares.use('/api/proxy-rawg', (req, res) => {
         try {
           const urlObj = new URL(req.url, 'http://localhost');
-          const targetPath = urlObj.searchParams.get('endpoint');
-          if (!targetPath) {
-            res.statusCode = 400;
-            res.end(JSON.stringify({ error: 'Missing endpoint parameter' }));
+          const rawPath = String(urlObj.searchParams.get('endpoint') || '').trim().replace(/^\/+/, '');
+          if (!rawPath || rawPath.startsWith('http:') || rawPath.startsWith('https:') || rawPath.includes('://')) {
+            res.statusCode = 403;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'Access denied: Disallowed endpoint protocol or path' }));
             return;
           }
           const defaultKey = 'c542e67aec3a4340908f9de9e86038af';
-          const sep = targetPath.includes('?') ? '&' : '?';
-          const finalPath = targetPath.includes('key=') ? targetPath : `${targetPath}${sep}key=${defaultKey}`;
+          const sep = rawPath.includes('?') ? '&' : '?';
+          const finalPath = rawPath.includes('key=') ? rawPath : `${rawPath}${sep}key=${defaultKey}`;
           const targetUrl = `https://api.rawg.io/api/${finalPath}`;
+          if (!validateUpstreamUrl(targetUrl, 'api.rawg.io')) {
+            res.statusCode = 403;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'Access denied: Upstream host not permitted' }));
+            return;
+          }
+
           https.get(targetUrl, {
             headers: { 'User-Agent': 'RetroPlayer/2.0 (Web; VideoGameDatabaseBot)' }
           }, (upstreamRes) => {
@@ -1484,5 +1533,17 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true
+  },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-icons': ['lucide-react'],
+          'vendor-multiavatar': ['@multiavatar/multiavatar']
+        }
+      }
+    }
   }
 });

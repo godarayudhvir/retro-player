@@ -6,6 +6,7 @@
  */
 
 import { convertRemoteImageToWebpDataUrl } from '../utils/imageConverter.js';
+import { apiFetch, getApiUrl } from '../utils/apiClient.js';
 
 const DB_NAME = 'RetroPlayerMetadataDB';
 const DB_VERSION = 3; // Bumped to 3 to invalidate old null cover cache
@@ -186,7 +187,7 @@ let isServerDbAvailable = typeof window !== 'undefined' && !window.location.host
 async function fetchServerMetadata() {
   if (!isServerDbAvailable) return null;
   try {
-    const res = await fetch('/api/db/game_metadata');
+    const res = await apiFetch('/api/db/game_metadata');
     if (res.ok) {
       const data = await res.json();
       if (data && data.success && data.data) {
@@ -230,7 +231,7 @@ async function getCachedMetadata(id) {
     // 2. Fallback to server DB
     if (isServerDbAvailable) {
       try {
-        const res = await fetch(`/api/db/game_metadata/${encodeURIComponent(id)}`);
+        const res = await apiFetch(`/api/db/game_metadata/${encodeURIComponent(id)}`);
         if (res.ok) {
           const json = await res.json();
           if (json && json.data) {
@@ -332,7 +333,7 @@ export async function saveCachedMetadata(id, data) {
     // 3. Persistent Server Database (/api/db/game_metadata) if available
     if (isServerDbAvailable) {
       try {
-        fetch('/api/db/game_metadata', {
+        apiFetch('/api/db/game_metadata', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ key: id, value: record })
@@ -383,7 +384,7 @@ export async function deleteManualMetadata(id) {
     } catch (_) {}
     if (isServerDbAvailable) {
       try {
-        fetch(`/api/db/game_metadata/${encodeURIComponent(id)}`, { method: 'DELETE' }).catch(() => {});
+        apiFetch(`/api/db/game_metadata/${encodeURIComponent(id)}`, { method: 'DELETE' }).catch(() => {});
       } catch (_) {}
     }
     addScraperLog(`🔄 Reverted custom metadata for game ID "${id}"`, 'info', { gameId: id });
@@ -606,7 +607,7 @@ async function scrapeTheGamesDB(game) {
     if (platformId) endpoint += `&filter%5Bplatform%5D=${platformId}`;
 
     // Route through local proxy to bypass browser CORS headers
-    const proxyUrl = `/api/proxy-thegamesdb?endpoint=${encodeURIComponent(endpoint)}`;
+    const proxyUrl = getApiUrl(`/api/proxy-thegamesdb?endpoint=${encodeURIComponent(endpoint)}`);
     const res = await fetch(proxyUrl);
     if (!res.ok) {
       addScraperLog(`⚠️ TheGamesDB API returned HTTP ${res.status}`, 'warning', { gameId: game.id, title: game.title, systemKey: game.systemKey });
@@ -650,7 +651,7 @@ async function scrapeTheGamesDB(game) {
     // Fetch images if gameId found
     if (gameEntry.id) {
       const imgEndpoint = `Games/Images?apikey=${encodeURIComponent(apiKey)}&games_id=${gameEntry.id}`;
-      const imgProxyUrl = `/api/proxy-thegamesdb?endpoint=${encodeURIComponent(imgEndpoint)}`;
+      const imgProxyUrl = getApiUrl(`/api/proxy-thegamesdb?endpoint=${encodeURIComponent(imgEndpoint)}`);
       const imgRes = await fetch(imgProxyUrl);
       if (imgRes.ok) {
         const imgData = await imgRes.json();
@@ -696,7 +697,7 @@ async function scrapeScreenScraper(game) {
     addScraperLog(`🇫🇷 Querying ScreenScraper for "${cleanTitle}"...`, 'scan', { gameId: game.id, title: game.title, systemKey: game.systemKey });
 
     const queryParams = `devid=retroplayer&devpassword=retroplayer&softname=RetroPlayerWeb&ssid=${encodeURIComponent(ssid)}&sspassword=${encodeURIComponent(sspassword)}&output=json&systemeid=${systemId}&romnom=${encodeURIComponent(game.title)}`;
-    const proxyUrl = `/api/proxy-screenscraper?query=${encodeURIComponent(queryParams)}`;
+    const proxyUrl = getApiUrl(`/api/proxy-screenscraper?query=${encodeURIComponent(queryParams)}`);
 
     const res = await fetch(proxyUrl);
     if (!res.ok) {
@@ -851,7 +852,7 @@ async function scrapeRawg(game) {
     const searchEndpoint = `games?search=${encodeURIComponent(cleanTitle)}&page_size=6`;
     const searchUrl = isNode
       ? `https://api.rawg.io/api/${searchEndpoint}&key=${defaultKey}`
-      : `/api/proxy-rawg?endpoint=${encodeURIComponent(searchEndpoint)}`;
+      : getApiUrl(`/api/proxy-rawg?endpoint=${encodeURIComponent(searchEndpoint)}`);
 
     const res = await fetch(searchUrl);
     if (!res.ok) {
@@ -882,7 +883,7 @@ async function scrapeRawg(game) {
     const detailEndpoint = `games/${bestMatch.id}`;
     const detailUrl = isNode
       ? `https://api.rawg.io/api/${detailEndpoint}?key=${defaultKey}`
-      : `/api/proxy-rawg?endpoint=${encodeURIComponent(detailEndpoint)}`;
+      : getApiUrl(`/api/proxy-rawg?endpoint=${encodeURIComponent(detailEndpoint)}`);
 
     const detailRes = await fetch(detailUrl);
     const details = detailRes.ok ? await detailRes.json() : bestMatch;
@@ -1059,7 +1060,7 @@ export async function scrapeGame(game, force = false) {
   // If backend disk storage is available (/api/metadata/save-sidecar), sync sidecar & cover to host disk
   if (scrapedDetails || (finalCoverUrl && !hasLocalCoverFile)) {
     try {
-      const res = await fetch('/api/metadata/save-sidecar', {
+      const res = await apiFetch('/api/metadata/save-sidecar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

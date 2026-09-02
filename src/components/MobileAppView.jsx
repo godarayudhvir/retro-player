@@ -76,6 +76,7 @@ import QRCode from 'qrcode';
 import MultiAvatar from './MultiAvatar';
 import ConfirmModal from './ConfirmModal';
 import { resolveAssetPath } from '../utils/assetPath';
+import { apiFetch } from '../utils/apiClient';
 import { getReleaseDate, getGameDescription } from '../gameDescriptions';
 import { saveCachedMetadata } from '../services/metadataScraper';
 import { ACHIEVEMENT_TIERS } from '../data/achievementsManifest';
@@ -482,7 +483,7 @@ export default function MobileAppView({
 
       // Try saving directly to disk backend via /api/metadata/save-sidecar
       try {
-        const res = await fetch('/api/metadata/save-sidecar', {
+        const res = await apiFetch('/api/metadata/save-sidecar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -642,7 +643,7 @@ export default function MobileAppView({
 
       // 2. Persist directly to host disk sidecar
       try {
-        const res = await fetch('/api/metadata/save-sidecar', {
+        const res = await apiFetch('/api/metadata/save-sidecar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -715,7 +716,7 @@ export default function MobileAppView({
     };
 
     try {
-      await fetch('/api/metadata/save-sidecar', {
+      await apiFetch('/api/metadata/save-sidecar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -752,7 +753,7 @@ export default function MobileAppView({
 
     // 2. Delete sidecar on backend disk
     try {
-      await fetch('/api/metadata/delete-sidecar', {
+      await apiFetch('/api/metadata/delete-sidecar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

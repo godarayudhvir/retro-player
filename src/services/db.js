@@ -4,6 +4,8 @@
  * Playtime Analytics, Recents, and Settings.
  */
 
+import { apiFetch } from '../utils/apiClient';
+
 const DB_NAME = 'RetroPlayerDB';
 const DB_VERSION = 4;
 
@@ -176,7 +178,7 @@ export async function dbGet(storeName, key) {
   // 1. Attempt to fetch authoritative record from Server DB API if available
   if (isServerDbAvailable) {
     try {
-      const res = await fetch(`/api/db/${encodeURIComponent(storeName)}/${encodeURIComponent(key)}`);
+      const res = await apiFetch(`/api/db/${encodeURIComponent(storeName)}/${encodeURIComponent(key)}`);
       if (res.ok) {
         const json = await res.json();
         if (json.success && json.data !== null && json.data !== undefined) {
@@ -229,7 +231,7 @@ export async function dbSet(storeName, key, value) {
   // 1. Commit to Server DB API if available
   if (isServerDbAvailable) {
     try {
-      fetch(`/api/db/${encodeURIComponent(storeName)}`, {
+      apiFetch(`/api/db/${encodeURIComponent(storeName)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key, id: key, value })
@@ -272,7 +274,7 @@ export async function dbDelete(storeName, key) {
   // 1. Delete on Server DB API if available
   if (isServerDbAvailable) {
     try {
-      fetch(`/api/db/${encodeURIComponent(storeName)}/${encodeURIComponent(key)}`, {
+      apiFetch(`/api/db/${encodeURIComponent(storeName)}/${encodeURIComponent(key)}`, {
         method: 'DELETE'
       }).catch(() => {
         isServerDbAvailable = false;
@@ -310,7 +312,7 @@ export async function dbBatchDelete(deletions) {
   // 1. Commit batch delete to Server DB API in 1 single HTTP request
   if (isServerDbAvailable) {
     try {
-      fetch('/api/db/batch-delete', {
+      apiFetch('/api/db/batch-delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ deletions })
@@ -360,7 +362,7 @@ export async function dbGetAll(storeName) {
   // 1. Attempt to fetch complete collection from Server DB API if available
   if (isServerDbAvailable) {
     try {
-      const res = await fetch(`/api/db/${encodeURIComponent(storeName)}`);
+      const res = await apiFetch(`/api/db/${encodeURIComponent(storeName)}`);
       if (res.ok) {
         const json = await res.json();
         if (json.success && json.data) {
@@ -445,7 +447,7 @@ export async function syncAllStoresFromBackend() {
   if (!isServerDbAvailable) return false;
 
   try {
-    const res = await fetch('/api/db/export');
+    const res = await apiFetch('/api/db/export');
     if (!res.ok) return false;
     const json = await res.json();
     if (!json.success || !json.database) return false;
@@ -498,7 +500,7 @@ export async function exportFullDatabase() {
   // 1. Try server DB endpoint first
   if (isServerDbAvailable) {
     try {
-      const res = await fetch('/api/db/export');
+      const res = await apiFetch('/api/db/export');
       if (res.ok) {
         const json = await res.json();
         if (json.success && json.database) {
@@ -585,7 +587,7 @@ export async function importFullDatabase(backupPayload) {
   let serverImportSuccess = false;
   if (isServerDbAvailable) {
     try {
-      const res = await fetch('/api/db/import', {
+      const res = await apiFetch('/api/db/import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(backupPayload)

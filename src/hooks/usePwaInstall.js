@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
  * Custom React Hook for PWA installation lifecycle and Service Worker state management.
@@ -10,6 +10,8 @@ export function usePwaInstall() {
   const [isInstalled, setIsInstalled] = useState(false);
   const [swRegistered, setSwRegistered] = useState(false);
   const [cacheStatus, setCacheStatus] = useState('idle'); // 'idle' | 'updating' | 'updated' | 'error'
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const waitingWorkerRef = useRef(null);
 
   // Detect standalone display mode and register service worker
   useEffect(() => {
@@ -83,6 +85,26 @@ export function usePwaInstall() {
           .then((registration) => {
             setSwRegistered(true);
             console.log('⚡ [PWA] ServiceWorker registered successfully with scope:', registration.scope);
+
+            // Check if there is already a waiting worker
+            if (registration.waiting) {
+              waitingWorkerRef.current = registration.waiting;
+              setUpdateAvailable(true);
+            }
+
+            // Listen for newly installed updates
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              if (!newWorker) return;
+
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  waitingWorkerRef.current = newWorker;
+                  setUpdateAvailable(true);
+                  console.log('🚀 [PWA] New version ready for activation');
+                }
+              });
+            });
           })
           .catch((err) => {
             console.warn('⚠️ [PWA] ServiceWorker registration failed:', err);
@@ -150,12 +172,33 @@ export function usePwaInstall() {
     }
   }, []);
 
+  // Apply update immediately by activating waiting worker and reloading
+  const applyUpdate = useCallback(() => {
+    if (waitingWorkerRef.current) {
+      waitingWorkerRef.current.postMessage({ type: 'SKIP_WAITING' });
+    }
+    let refreshing = false;
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      });
+    }
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
+  }, []);
+
   return {
     canInstall: Boolean(deferredPrompt && !isStandalone),
     isStandalone,
     isInstalled,
     swRegistered,
     cacheStatus,
+    updateAvailable,
+    applyUpdate,
     promptInstall,
     refreshCache
   };

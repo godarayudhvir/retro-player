@@ -19,9 +19,7 @@ const PRECACHE_ASSETS = [
   './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
   './icons/favicon-32x32.png',
-  './icons/favicon-16x16.png',
-  './docs-screenshots/wide-grid-large.webp',
-  './docs-screenshots/mobile-game-grid.webp'
+  './icons/favicon-16x16.png'
 ];
 
 // File extensions identifying ROM binaries that must only be fetched on-demand
@@ -102,7 +100,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Strategy 1: Dynamic REST API endpoints (/api/*) -> Network First with cache fallback
-  if (url.pathname.startsWith('/api/')) {
+  if (url.pathname.includes('/api/')) {
     event.respondWith(
       fetch(request)
         .then((networkResponse) => {
@@ -126,8 +124,8 @@ self.addEventListener('fetch', (event) => {
 
   // Strategy 2: EmulatorJS Assets, WebAssembly cores, fonts, and static assets -> Cache First, fallback to network
   if (
-    url.pathname.startsWith('/emulatorjs/') ||
-    url.pathname.startsWith('/assets/') ||
+    url.pathname.includes('/emulatorjs/') ||
+    url.pathname.includes('/assets/') ||
     url.hostname.includes('fonts.googleapis.com') ||
     url.hostname.includes('fonts.gstatic.com') ||
     url.hostname.includes('cdn.emulatorjs.org') ||
@@ -173,5 +171,12 @@ self.addEventListener('fetch', (event) => {
         })
     );
     return;
+  }
+});
+
+// Message Event: Allow web clients to trigger immediate activation of waiting worker
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
   }
 });

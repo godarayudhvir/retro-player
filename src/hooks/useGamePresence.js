@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { apiFetch } from '../utils/apiClient';
 
 /**
  * Creates a valid, in-memory 2-second silent PCM WAV Blob URL.
@@ -129,7 +130,7 @@ export function useGamePresence(activeGame) {
       // 3. Notify server / Discord RPC of IDLE state only if we were playing previously
       if (lastDispatchedGameKeyRef.current) {
         lastDispatchedGameKeyRef.current = null;
-        fetch('/api/presence', {
+        apiFetch('/api/presence', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'IDLE' })
@@ -285,7 +286,7 @@ export function useGamePresence(activeGame) {
     }, 10000);
 
     // 3. Dispatch to Server for Discord RPC & Webhooks / OBS Widget
-    fetch('/api/presence', {
+    apiFetch('/api/presence', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

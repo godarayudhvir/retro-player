@@ -1,4 +1,5 @@
 import { clearAllIndexedDbStores, clearUserDataStoresPreserveRoms, closeDB } from '../services/db.js';
+import { apiFetch } from './apiClient.js';
 
 /**
  * Soft Reset Utility for Retro Player.
@@ -9,7 +10,7 @@ export async function resetUserDataPreserveRoms() {
   console.log('🧹 [APP RESET] Initiating soft data reset (preserving custom ROMs)...');
 
   // 1. Fire-and-forget backend server DB purge
-  fetch('/api/db/reset', { method: 'POST' }).catch(() => {});
+  apiFetch('/api/db/reset', { method: 'POST' }).catch(() => {});
 
   // 2. Clear LocalStorage and SessionStorage immediately (synchronous)
   try {
@@ -47,7 +48,7 @@ export async function resetEntireApp() {
   console.log('🧹 [APP RESET] Initiating full client-side factory reset & cache purge...');
 
   // 1. Fire-and-forget backend server DB reset
-  fetch('/api/db/reset', { method: 'POST' }).catch(() => {});
+  apiFetch('/api/db/reset', { method: 'POST' }).catch(() => {});
 
   // 2. Clear LocalStorage and SessionStorage immediately (synchronous)
   try {

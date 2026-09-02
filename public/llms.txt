@@ -6,6 +6,7 @@
 ## Live Demo & Source
 - [Live Web Demo](https://godarayudhvir.github.io/retro-player/): Play classic retro games directly in your browser with zero installation.
 - [GitHub Repository](https://github.com/godarayudhvir/retro-player): Source code, issues, Docker images, and community discussions.
+- [Full Technical LLM Context](https://godarayudhvir.github.io/retro-player/llms-full.txt): Unabridged technical specification, architecture, emulator cores, and save state binary formats.
 
 ## Core Features & Highlights
 - **12 Emulated Consoles & Handhelds**: Game Boy Advance (GBA), Game Boy Color (GBC), Game Boy (GB), Sega Game Gear, Nintendo DS (NDS), Super Nintendo (SNES), NES, Nintendo 64 (N64), Sega Genesis, Atari 2600, PlayStation 1 (PS1), and Arcade (MAME).

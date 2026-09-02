@@ -650,7 +650,7 @@ export default function EmulatorModal({
       if (isCancelled || !stageRef.current) return;
 
       const cdnDataPath = 'https://cdn.emulatorjs.org/stable/data/';
-      const localDataPath = '/emulatorjs/data/';
+      const localDataPath = resolveAssetPath('emulatorjs/data/');
       const isOffline = !navigator.onLine;
       const initialDataPath = isOffline ? localDataPath : cdnDataPath;
       setIsLocalOffline(isOffline);
@@ -1902,10 +1902,10 @@ export default function EmulatorModal({
             }, 10000);
 
             function handleLoaderFallback() {
-              console.warn('⚠️ [EMULATOR LOADER FALLBACK] Primary path failed. Attempting local /emulatorjs/data/loader.js fallback...');
-              window.EJS_pathtodata = '/emulatorjs/data/';
+              console.warn('⚠️ [EMULATOR LOADER FALLBACK] Primary path failed. Attempting local loader.js fallback...');
+              window.EJS_pathtodata = ${JSON.stringify(resolveAssetPath('emulatorjs/data/'))};
               const fallbackScript = document.createElement('script');
-              fallbackScript.src = '/emulatorjs/data/loader.js';
+              fallbackScript.src = ${JSON.stringify(resolveAssetPath('emulatorjs/data/loader.js'))};
               fallbackScript.onerror = function() {
                 console.error('🚨 [EMULATOR FATAL ERROR] Both online and local EmulatorJS loader failed to load.');
               };
